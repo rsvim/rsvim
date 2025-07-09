@@ -2,7 +2,8 @@
 
 use super::command_line_ex::*;
 
-use crate::buf::opt::BufferLocalOptionsBuilder;
+use crate::buf::opt::FileFormatOption;
+use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::buf::text::Text;
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
@@ -49,6 +50,32 @@ pub fn make_tree(
   (tree, state, bufs, buf, contents)
 }
 
+pub fn make_tree_with_cmdline_and_buffer_options(
+  terminal_size: U16Size,
+  buffer_local_opts: BufferLocalOptions,
+  window_local_opts: WindowLocalOptions,
+  lines: Vec<&str>,
+) -> (
+  TreeArc,
+  StateArc,
+  BuffersManagerArc,
+  BufferArc,
+  TextContentsArc,
+) {
+  let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
+  let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
+  let contents = TextContents::to_arc(TextContents::new(terminal_size));
+  let tree = make_tree_with_buffers_cmdline(
+    terminal_size,
+    window_local_opts,
+    bufs.clone(),
+    contents.clone(),
+  );
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+  (tree, state, bufs, buf, contents)
+}
+
 pub fn make_tree_with_cmdline(
   terminal_size: U16Size,
   window_local_opts: WindowLocalOptions,
@@ -61,18 +88,7 @@ pub fn make_tree_with_cmdline(
   TextContentsArc,
 ) {
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-  let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-  let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
-  let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  let tree = make_tree_with_buffers_cmdline(
-    terminal_size,
-    window_local_opts,
-    bufs.clone(),
-    contents.clone(),
-  );
-  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-  (tree, state, bufs, buf, contents)
+  make_tree_with_cmdline_and_buffer_options(terminal_size, buf_opts, window_local_opts, lines)
 }
 
 pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -409,7 +425,166 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
+
+  #[test]
+  fn nowrap1_crlf_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(11, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, _buf, contents) =
+      make_tree_with_cmdline_and_buffer_options(terminal_size, buf_opts, window_options, lines);
+
+    let prev_cursor_viewport = lock!(tree.clone())
+      .current_window()
+      .unwrap()
+      .cursor_viewport();
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    // Prepare
+    {
+      stateful.goto_command_line_ex_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = lock!(tree.clone())
+        .command_line()
+        .unwrap()
+        .cursor_viewport();
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":          ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = CommandLineExStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+
+      let tree = data_access.tree.clone();
+      let actual1 = lock!(tree.clone())
+        .command_line()
+        .unwrap()
+        .cursor_viewport();
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 3);
+
+      let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
+      let expect = vec!["Bye\n"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye       ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Goto Normal-2
+    {
+      stateful.goto_normal_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = lock!(tree.clone())
+        .command_line()
+        .unwrap()
+        .cursor_viewport();
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
 }
+
 #[cfg(test)]
 mod tests_confirm_ex_command_and_goto_normal_mode {
   use super::*;
