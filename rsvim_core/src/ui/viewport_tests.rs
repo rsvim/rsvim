@@ -4729,7 +4729,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -4785,7 +4785,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "t\tinside.\n", ""];
+      let expect = vec!["", "", "", "t\tinside.\r\n", ""];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 130, 0, 113);
 
@@ -4831,7 +4831,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-4
     {
-      let expect = vec!["", "", "inside.\n", "", "options\ta"];
+      let expect = vec!["", "", "inside.\r\n", "", "options\ta"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 5, 80, 1, 120);
 
@@ -4939,7 +4939,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -4995,7 +4995,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "t\tinside.\n", ""];
+      let expect = vec!["", "", "", "t\tinside.\r", ""];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 130, 0, 113);
 
@@ -5041,7 +5041,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-4
     {
-      let expect = vec!["", "", "inside.\n", "", "options\ta"];
+      let expect = vec!["", "", "inside.\r", "", "options\ta"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 5, 80, 1, 120);
 
@@ -5116,7 +5116,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   }
 
   #[test]
-  fn new4_cflf_win() {
+  fn new4_crlf_win() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
@@ -5149,7 +5149,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "But still it cont",
         "1. When the line ",
@@ -5174,7 +5174,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Search-1
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "But still it cont",
         "1. When the line ",
@@ -5227,7 +5227,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     {
       let expect = vec![
         "",
-        "mall test lines.\n",
+        "mall test lines.\r\n",
         "l things we want ",
         "ough to completel",
       ];
@@ -5251,7 +5251,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-4
     {
-      let expect = vec!["", "t lines.\n", " we want to test:", "completely put in"];
+      let expect = vec!["", "t lines.\r\n", " we want to test:", "completely put in"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 52, 0, 36);
 
@@ -5272,7 +5272,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-5
     {
-      let expect = vec!["", " lines.\n", "we want to test:\n", "ompletely put ins"];
+      let expect = vec!["", " lines.\r\n", "we want to test:\r\n", "ompletely put ins"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
 
@@ -5293,7 +5293,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-6
     {
-      let expect = vec!["", "s.\n", "nt to test:\n", "tely put inside.\n"];
+      let expect = vec!["", "s.\r\n", "nt to test:\r\n", "tely put inside.\r\n"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 60, 0, 42);
 
@@ -5315,10 +5315,10 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Search-7
     {
       let expect = vec![
-        " lines.\n",
-        "we want to test:\n",
+        " lines.\r\n",
+        "we want to test:\r\n",
         "ompletely put ins",
-        ":\n",
+        ":\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 37);
@@ -5373,7 +5373,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "But still it cont",
         "1. When the line ",
@@ -5398,7 +5398,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Search-1
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "But still it cont",
         "1. When the line ",
@@ -5451,7 +5451,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     {
       let expect = vec![
         "",
-        "mall test lines.\n",
+        "mall test lines.\r",
         "l things we want ",
         "ough to completel",
       ];
@@ -5475,7 +5475,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-4
     {
-      let expect = vec!["", "t lines.\n", " we want to test:", "completely put in"];
+      let expect = vec!["", "t lines.\r", " we want to test:", "completely put in"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 52, 0, 36);
 
@@ -5496,7 +5496,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-5
     {
-      let expect = vec!["", " lines.\n", "we want to test:\n", "ompletely put ins"];
+      let expect = vec!["", " lines.\r", "we want to test:\r", "ompletely put ins"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
 
@@ -5517,7 +5517,7 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-6
     {
-      let expect = vec!["", "s.\n", "nt to test:\n", "tely put inside.\n"];
+      let expect = vec!["", "s.\r", "nt to test:\r", "tely put inside.\r"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 60, 0, 42);
 
@@ -5539,10 +5539,10 @@ mod tests_search_anchor_downward_nowrap_eol {
     // Search-7
     {
       let expect = vec![
-        " lines.\n",
-        "we want to test:\n",
+        " lines.\r",
+        "we want to test:\r",
         "ompletely put ins",
-        ":\n",
+        ":\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 37);
