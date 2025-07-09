@@ -14059,10 +14059,10 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "imple and small t",
-        "est lines.\n",
+        "est lines.\r\n",
         "But still it cont",
       ];
 
@@ -14402,10 +14402,10 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "imple and small t",
-        "est lines.\n",
+        "est lines.\r",
         "But still it cont",
       ];
 
@@ -14745,10 +14745,10 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "imple and small t",
-        "est lines.\n",
+        "est lines.\r\n",
         "But still it cont",
       ];
 
@@ -14993,10 +14993,10 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "imple and small t",
-        "est lines.\n",
+        "est lines.\r",
         "But still it cont",
       ];
 
@@ -15289,7 +15289,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "en\tthe lin",
         "e is\tsmall",
         " enough to comple",
-        "tely put inside.\n",
+        "tely put inside.\r\n",
       ];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 0, 58, 0, 5);
@@ -15333,7 +15333,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-3.1
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 1, 85, 1, 72);
 
@@ -15352,7 +15352,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-4
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 1, 90, 1, 72);
 
@@ -15399,7 +15399,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         " rows in the wind",
         "ow, thus it may c",
         "ontains less line",
-        "s in the buffer.\n",
+        "s in the buffer.\r\n",
       ];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 2, 300, 2, 310);
@@ -15438,7 +15438,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-7.1
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 85, 3, 72);
 
@@ -15457,7 +15457,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-7.2
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 96, 3, 72);
 
@@ -15480,7 +15480,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "en\tthe lin",
         "e is\tsmall",
         " enough to comple",
-        "tely put inside.\n",
+        "tely put inside.\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 96, 4, 5);
@@ -15605,7 +15605,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "en\tthe lin",
         "e is\tsmall",
         " enough to comple",
-        "tely put inside.\n",
+        "tely put inside.\r",
       ];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 0, 58, 0, 5);
@@ -15649,7 +15649,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-3.1
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 1, 85, 1, 72);
 
@@ -15668,7 +15668,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-4
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 1, 90, 1, 72);
 
@@ -15715,7 +15715,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         " rows in the wind",
         "ow, thus it may c",
         "ontains less line",
-        "s in the buffer.\n",
+        "s in the buffer.\r",
       ];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 2, 300, 2, 310);
@@ -15754,7 +15754,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-7.1
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 85, 3, 72);
 
@@ -15773,7 +15773,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
 
     // Search-7.2
     {
-      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 96, 3, 72);
 
@@ -15796,7 +15796,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "en\tthe lin",
         "e is\tsmall",
         " enough to comple",
-        "tely put inside.\n",
+        "tely put inside.\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 96, 4, 5);
