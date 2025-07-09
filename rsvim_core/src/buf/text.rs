@@ -497,6 +497,42 @@ impl Text {
     (line_idx_after_inserted, char_idx_after_inserted)
   }
 
+  fn _n_chars_to_left(&self, absolute_char_idx: usize, n: isize) -> usize {
+    debug_assert!(n < 0);
+    let mut i = absolute_char_idx as isize;
+    let mut acc = 0;
+
+    while acc < n && i >= 0 {
+      if i - 1 >= 0
+        && self._is_eol_on_whole_text(i as usize)
+        && self._is_eol_on_whole_text((i - 1) as usize)
+      {
+        i -= 2;
+      } else {
+        i -= 1;
+      }
+      acc += 1;
+    }
+    std::cmp::max(i, 0) as usize
+  }
+
+  fn _n_chars_to_right(&self, absolute_char_idx: usize, n: isize) -> usize {
+    debug_assert!(n > 0);
+    let len_chars = self.rope.len_chars();
+    let mut i = absolute_char_idx;
+    let mut acc = 0;
+
+    while acc < n && i <= len_chars {
+      if self._is_eol_on_whole_text(i) && self._is_eol_on_whole_text(i + 1) {
+        i += 2;
+      } else {
+        i += 1;
+      }
+      acc += 1;
+    }
+    i
+  }
+
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
   ///
   /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
@@ -522,19 +558,16 @@ impl Text {
 
     dbg_print_textline(self, line_idx, char_idx, "Before delete");
 
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      cursor_char_absolute_pos_before_delete
-        ..(std::cmp::min(
-          cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope.len_chars(),
-        ))
+      let upper = self._n_chars_to_right(cursor_char_absolute_pos_before_delete, n);
+      debug_assert!(upper <= self.rope.len_chars());
+      cursor_char_absolute_pos_before_delete..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      (std::cmp::max(
-        0_usize,
-        cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
-      ))..cursor_char_absolute_pos_before_delete
+      let lower = self._n_chars_to_left(cursor_char_absolute_pos_before_delete, n);
+      lower..cursor_char_absolute_pos_before_delete
     };
 
     if to_be_deleted_range.is_empty() {
