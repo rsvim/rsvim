@@ -588,13 +588,10 @@ impl Text {
       return None;
     }
 
-    self.rope_mut().remove(to_be_deleted_range);
+    self.rope_mut().remove(to_be_deleted_range.clone());
 
-    let cursor_char_absolute_pos_after_deleted = if n > 0 {
-      cursor_char_absolute_pos_before_delete
-    } else {
-      cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
-    };
+    let cursor_char_absolute_pos_after_deleted = to_be_deleted_range.start;
+
     let cursor_char_absolute_pos_after_deleted = std::cmp::min(
       cursor_char_absolute_pos_after_deleted,
       self.rope.len_chars(),
