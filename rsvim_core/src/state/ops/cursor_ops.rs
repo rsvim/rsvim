@@ -136,7 +136,7 @@ pub fn normalize_to_cursor_move_to_include_eol(
     y = y.saturating_sub(1);
   }
   let x = match text.last_char_on_line_no_eol(y) {
-    Some(last_char) => std::cmp::min(x, last_char + 1),
+    Some(last_char) => std::cmp::min(x, last_char + 1), // For include eol, allow extra 1 eol char.
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))
