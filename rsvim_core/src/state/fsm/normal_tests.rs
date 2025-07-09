@@ -4342,8 +4342,9 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
+      buf_opts,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
