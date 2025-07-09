@@ -2,7 +2,7 @@
 
 use super::normal::*;
 
-use crate::buf::opt::BufferLocalOptionsBuilder;
+use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
@@ -26,6 +26,27 @@ use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tracing::info;
 
+pub fn make_tree_with_buffer_opts(
+  terminal_size: U16Size,
+  buffer_local_opts: BufferLocalOptions,
+  window_local_opts: WindowLocalOptions,
+  lines: Vec<&str>,
+) -> (
+  TreeArc,
+  StateArc,
+  BuffersManagerArc,
+  BufferArc,
+  TextContentsArc,
+) {
+  let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
+  let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
+  let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+  let contents = TextContents::to_arc(TextContents::new(terminal_size));
+  (tree, state, bufs, buf, contents)
+}
+
 pub fn make_tree(
   terminal_size: U16Size,
   window_local_opts: WindowLocalOptions,
@@ -38,13 +59,7 @@ pub fn make_tree(
   TextContentsArc,
 ) {
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-  let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-  let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
-  let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-  let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  (tree, state, bufs, buf, contents)
+  make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
 }
 
 pub fn make_tree_with_cmdline(
@@ -6074,7 +6089,7 @@ mod tests_cursor_move {
   }
 
   #[test]
-  fn wrap_nolinebreak4_wineol_crlf() {
+  fn wrap_nolinebreak4_crlf_unix() {
     test_log_init();
 
     let lines = vec![
@@ -6083,8 +6098,8 @@ mod tests_cursor_move {
       "But still it contains several:\r\n",
       "1. The line is very small.\r\n",
       "2. The line is very long\r\n",
-      "  * The extra parts are been truncated.\n",
-      "  * The extra parts are split into next row.\n",
+      "  * The extra parts are been truncated.\r\n",
+      "  * The extra parts are split into next row.\r\n",
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(15, 7),
