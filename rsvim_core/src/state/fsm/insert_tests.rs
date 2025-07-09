@@ -50,7 +50,6 @@ pub fn make_tree_with_buffer_opts(
   (tree, state, bufs, buf, contents)
 }
 
-
 pub fn make_tree(
   terminal_size: U16Size,
   window_local_opts: WindowLocalOptions,
@@ -269,10 +268,10 @@ mod tests_cursor_move {
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
+  use crate::buf::opt::FileFormatOption;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
   use tracing::info;
-  use crate::buf::opt::FileFormatOption;
 
   #[test]
   fn nowrap1() {
@@ -407,14 +406,17 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Dos).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(false)
-          .build()
-          .unwrap(),
+        .wrap(false)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -466,8 +468,8 @@ mod tests_cursor_move {
         (6, 0),
         (7, 0),
       ]
-          .into_iter()
-          .collect();
+      .into_iter()
+      .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -502,8 +504,8 @@ mod tests_cursor_move {
         (6, 0),
         (7, 0),
       ]
-          .into_iter()
-          .collect();
+      .into_iter()
+      .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -529,14 +531,17 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Mac).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(false)
-          .build()
-          .unwrap(),
+        .wrap(false)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -588,8 +593,8 @@ mod tests_cursor_move {
         (6, 0),
         (7, 0),
       ]
-          .into_iter()
-          .collect();
+      .into_iter()
+      .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -624,8 +629,8 @@ mod tests_cursor_move {
         (6, 0),
         (7, 0),
       ]
-          .into_iter()
-          .collect();
+      .into_iter()
+      .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -906,15 +911,18 @@ mod tests_cursor_move {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Dos).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -956,9 +964,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -990,9 +998,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1024,9 +1032,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1058,8 +1066,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1091,8 +1099,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1124,8 +1132,8 @@ mod tests_cursor_move {
         "8th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1157,15 +1165,18 @@ mod tests_cursor_move {
       "11th.\r",
       "12th.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Mac).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -1207,9 +1218,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1241,9 +1252,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1275,9 +1286,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1309,8 +1320,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1342,8 +1353,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1375,8 +1386,8 @@ mod tests_cursor_move {
         "8th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1657,15 +1668,18 @@ mod tests_cursor_move {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Dos).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -1707,9 +1721,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1741,9 +1755,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1775,9 +1789,9 @@ mod tests_cursor_move {
         "5th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1809,8 +1823,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1842,8 +1856,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1875,8 +1889,8 @@ mod tests_cursor_move {
         "8th.\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1908,15 +1922,18 @@ mod tests_cursor_move {
       "11th.\r",
       "12th.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Mac).build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
       WindowLocalOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
       lines,
     );
 
@@ -1958,9 +1975,9 @@ mod tests_cursor_move {
         "5th.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1992,9 +2009,9 @@ mod tests_cursor_move {
         "5th.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2026,9 +2043,9 @@ mod tests_cursor_move {
         "5th.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-              .into_iter()
-              .collect();
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2060,8 +2077,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2093,8 +2110,8 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2126,8 +2143,8 @@ mod tests_cursor_move {
         "8th.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
