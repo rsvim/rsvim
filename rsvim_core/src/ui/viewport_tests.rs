@@ -6898,7 +6898,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Initialize
     {
-      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
+      let expect = vec!["1st.\r\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r\n", "4th.\r\n"];
 
       let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
@@ -6918,7 +6918,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-1
     {
-      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
+      let expect = vec!["1st.\r\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r\n", "4th.\r\n"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 1, 20, 0, 0);
 
@@ -6969,7 +6969,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Initialize
     {
-      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
+      let expect = vec!["1st.\r", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r", "4th.\r"];
 
       let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
@@ -6989,7 +6989,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-1
     {
-      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
+      let expect = vec!["1st.\r", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r", "4th.\r"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 1, 20, 0, 0);
 
@@ -11133,7 +11133,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -11390,7 +11390,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-10
     {
-      let expect = vec!["", "", "test:\n", "\tsmall", "long\tt"];
+      let expect = vec!["", "", "test:\r\n", "\tsmall", "long\tt"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 48);
 
@@ -11413,7 +11413,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-11, Center
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 19, 0, 47);
 
@@ -11436,7 +11436,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-12
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 47);
 
@@ -11459,7 +11459,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-13
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 47);
 
@@ -11515,7 +11515,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -11772,7 +11772,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-10
     {
-      let expect = vec!["", "", "test:\n", "\tsmall", "long\tt"];
+      let expect = vec!["", "", "test:\r", "\tsmall", "long\tt"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 48);
 
@@ -11795,7 +11795,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-11, Center
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 19, 0, 47);
 
@@ -11818,7 +11818,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-12
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 47);
 
@@ -11841,7 +11841,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-13
     {
-      let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
+      let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 47);
 
@@ -11897,7 +11897,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r\n",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -11926,7 +11926,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     {
       let expect = vec![
         "",
-        "l test lines.\n",
+        "l test lines.\r\n",
         "hings we want to ",
         "line\tis",
         "\ttoo",
@@ -11953,7 +11953,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-12
     {
-      let expect = vec!["", "ines.\n", " want to test:\n", "is\t", "too\tlong"];
+      let expect = vec!["", "ines.\r\n", " want to test:\r\n", "is\t", "too\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 20, 0, 39);
 
@@ -11976,7 +11976,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-13
     {
-      let expect = vec!["", ".\n", "t to test:\n", "is\tsmal", "o\tlong"];
+      let expect = vec!["", ".\r\n", "t to test:\r\n", "is\tsmal", "o\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 43);
 
@@ -11999,7 +11999,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-14
     {
-      let expect = vec!["", "\n", " to test:\n", "is\tsmall", "\tlong"];
+      let expect = vec!["", "\r\n", " to test:\r\n", "is\tsmall", "\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 25, 0, 44);
 
@@ -12022,7 +12022,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-15
     {
-      let expect = vec!["", "", ":\n", "small\t", "long\tto"];
+      let expect = vec!["", "", ":\r\n", "small\t", "long\tto"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 26, 0, 52);
 
@@ -12045,7 +12045,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-16
     {
-      let expect = vec!["", "", "\n", "small\te", "ong\tto"];
+      let expect = vec!["", "", "\r\n", "small\te", "ong\tto"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 27, 0, 53);
 
@@ -12285,7 +12285,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
+        "Hello, RSVIM!\r",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
@@ -12314,7 +12314,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     {
       let expect = vec![
         "",
-        "l test lines.\n",
+        "l test lines.\r",
         "hings we want to ",
         "line\tis",
         "\ttoo",
@@ -12341,7 +12341,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-12
     {
-      let expect = vec!["", "ines.\n", " want to test:\n", "is\t", "too\tlong"];
+      let expect = vec!["", "ines.\r", " want to test:\r", "is\t", "too\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 20, 0, 39);
 
@@ -12364,7 +12364,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-13
     {
-      let expect = vec!["", ".\n", "t to test:\n", "is\tsmal", "o\tlong"];
+      let expect = vec!["", ".\r", "t to test:\r", "is\tsmal", "o\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 43);
 
@@ -12387,7 +12387,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-14
     {
-      let expect = vec!["", "\n", " to test:\n", "is\tsmall", "\tlong"];
+      let expect = vec!["", "\r", " to test:\r", "is\tsmall", "\tlong"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 25, 0, 44);
 
@@ -12410,7 +12410,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-15
     {
-      let expect = vec!["", "", ":\n", "small\t", "long\tto"];
+      let expect = vec!["", "", ":\r", "small\t", "long\tto"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 26, 0, 52);
 
@@ -12433,7 +12433,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
 
     // Search-16
     {
-      let expect = vec!["", "", "\n", "small\te", "ong\tto"];
+      let expect = vec!["", "", "\r", "small\te", "ong\tto"];
 
       let actual = search_right_viewport(window.clone(), buf.clone(), 3, 27, 0, 53);
 
