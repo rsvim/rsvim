@@ -497,15 +497,25 @@ impl Text {
     (line_idx_after_inserted, char_idx_after_inserted)
   }
 
-  fn _n_chars_to_left(&self, absolute_char_idx: usize, n: isize) -> usize {
-    debug_assert!(n < 0);
+  fn _n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
+    use crate::defaults::ascii::end_of_line as ascii_eol;
+
+    debug_assert!(n > 0);
     let mut i = absolute_char_idx as isize;
     let mut acc = 0;
+    // trace!("i:{i}({:?}),n:{n}", self.rope.get_char(i as usize));
 
     while acc < n && i >= 0 {
-      if i - 1 >= 0
-        && self._is_eol_on_whole_text(i as usize)
-        && self._is_eol_on_whole_text((i - 1) as usize)
+      // trace!("i:{i}({:?}),i-1:{}({:?})", self.rope.get_char(i as usize), i-1, if i-1 >=0 { self.rope.get_char((i-1) as usize) } else { None });
+      let c1 = self.rope.get_char(i as usize);
+      let c2 = if i - 1 >= 0 {
+        self.rope.get_char((i - 1) as usize)
+      } else {
+        None
+      };
+      if c1.is_some()
+        && c2.is_some()
+        && format!("{}{}", c2.unwrap(), c1.unwrap()) == ascii_eol::CRLF
       {
         i -= 2;
       } else {
@@ -516,14 +526,20 @@ impl Text {
     std::cmp::max(i, 0) as usize
   }
 
-  fn _n_chars_to_right(&self, absolute_char_idx: usize, n: isize) -> usize {
+  fn _n_chars_to_right(&self, absolute_char_idx: usize, n: usize) -> usize {
     debug_assert!(n > 0);
+
     let len_chars = self.rope.len_chars();
     let mut i = absolute_char_idx;
     let mut acc = 0;
 
     while acc < n && i <= len_chars {
-      if self._is_eol_on_whole_text(i) && self._is_eol_on_whole_text(i + 1) {
+      let c1 = self.rope.get_char(i);
+      let c2 = self.rope.get_char(i + 1);
+      if c1.is_some()
+        && c2.is_some()
+        && format!("{}{}", c1.unwrap(), c2.unwrap()) == crate::defaults::ascii::end_of_line::CRLF
+      {
         i += 2;
       } else {
         i += 1;
@@ -561,12 +577,12 @@ impl Text {
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self._n_chars_to_right(cursor_char_absolute_pos_before_delete, n);
+      let upper = self._n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
       debug_assert!(upper <= self.rope.len_chars());
       cursor_char_absolute_pos_before_delete..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self._n_chars_to_left(cursor_char_absolute_pos_before_delete, n);
+      let lower = self._n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
       lower..cursor_char_absolute_pos_before_delete
     };
 

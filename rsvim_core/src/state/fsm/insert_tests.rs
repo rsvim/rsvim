@@ -6431,7 +6431,7 @@ mod tests_delete_text {
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
-      "* The extra.\n",
+      "* The extra.\r\n",
     ];
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
 
@@ -6702,7 +6702,7 @@ mod tests_delete_text {
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 7);
       assert_eq!(actual3.row_idx(), 2);
-      assert_eq!(actual3.column_idx(), 6);
+      assert_eq!(actual3.column_idx(), 7);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
