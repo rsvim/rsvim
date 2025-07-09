@@ -86,7 +86,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap_or(0_usize) + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -223,7 +223,11 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char
+            > text
+              .last_char_on_line_no_eol(current_line)
+              .unwrap_or(0_usize)
+          {
             break;
           }
 
@@ -538,7 +542,11 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char
+            > text
+              .last_char_on_line_no_eol(current_line)
+              .unwrap_or(0_usize)
+          {
             break;
           }
 

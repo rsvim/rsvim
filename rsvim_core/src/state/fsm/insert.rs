@@ -44,6 +44,7 @@ impl InsertStateful {
                 buffer.options().end_of_line()
               };
               let eol = format!("{eol}");
+              trace!("Insert eol:{eol:?}");
               Some(Operation::CursorInsert(eol.to_compact_string()))
             }
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),

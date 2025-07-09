@@ -2886,7 +2886,7 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 6)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3161,7 +3161,7 @@ mod tests_insert_text {
     // Move-4
     {
       // let buf_eol = lock!(buf).options().end_of_line();
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 6)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3466,7 +3466,7 @@ mod tests_insert_text {
     // Move-4
     {
       // let buf_eol = lock!(buf).options().end_of_line();
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 6)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3777,7 +3777,7 @@ mod tests_insert_text {
     // Move-4
     {
       // let buf_eol = lock!(buf).options().end_of_line();
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 6)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 5)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3961,6 +3961,149 @@ mod tests_insert_text {
 
       let expect_canvas = vec![
         "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  fn nowrap5() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 5);
+    let window_option = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![""];
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = InsertStateful::default();
+
+    // Insert-1
+    {
+      let buf_eol = lock!(buf).options().end_of_line();
+      let line1 = format!("Hi{buf_eol}");
+
+      stateful.cursor_insert(&data_access, line1.to_compact_string());
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 1);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 1);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![line1.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  fn nowrap5_crlf_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let window_option = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) =
+      make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = InsertStateful::default();
+
+    // Insert-1
+    {
+      let buf_eol = lock!(buf).options().end_of_line();
+      let buf_eol = format!("{buf_eol}");
+
+      stateful.cursor_insert(&data_access, buf_eol.to_compact_string());
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 1);
+      assert_eq!(actual2.char_idx(), 0);
+      assert_eq!(actual2.row_idx(), 1);
+      assert_eq!(actual2.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![buf_eol.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "          ",
         "          ",
         "          ",
         "          ",
@@ -6258,7 +6401,7 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 10)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -6903,7 +7046,7 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 10)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -7548,7 +7691,7 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 10)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 3)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
