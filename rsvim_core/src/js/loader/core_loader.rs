@@ -14,6 +14,7 @@ impl ModuleLoader for CoreModuleLoader {
     assert!(CORE_MODULES().contains_key(specifier));
     Ok(specifier.to_string())
   }
+
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Since any errors will be caught at the resolve stage, we can
     // go ahead an unwrap the value with no worries.
