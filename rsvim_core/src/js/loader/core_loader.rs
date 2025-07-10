@@ -1,24 +1,10 @@
 //! Core module loader.
 
-use crate::js::constant::WINDOWS_REGEX;
+use crate::js::loader::ModuleLoader;
 use crate::js::module::CORE_MODULES;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
-// use crate::js::transpiler::Jsx;
-use crate::js::transpiler::TypeScript;
-// use crate::js::transpiler::Wasm;
 use crate::prelude::*;
-
-use anyhow::bail;
-// use regex::Regex;
-// use sha::sha1::Sha1;
-// use sha::utils::Digest;
-// use sha::utils::DigestExt;
-use path_absolutize::Absolutize;
-use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
-// use url::Url;
 
 #[derive(Default)]
 pub struct CoreModuleLoader {}
