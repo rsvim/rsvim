@@ -11,6 +11,12 @@ use std::sync::OnceLock;
 use tracing::trace;
 // use url::Url;
 
+/// Module path on local file system.
+pub type ModulePath = String;
+
+/// Module source code.
+pub type ModuleSource = String;
+
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
@@ -63,12 +69,6 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
     HashMap::from_iter(modules)
   })
 }
-
-/// Module path on local file system.
-pub type ModulePath = String;
-
-/// Module source code.
-pub type ModuleSource = String;
 
 #[derive(Debug, Clone)]
 /// Import kind.

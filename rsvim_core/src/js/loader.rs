@@ -29,7 +29,7 @@ pub trait ModuleLoader {
 }
 
 #[derive(Default)]
-pub struct FsModuleLoader;
+pub struct FsModuleLoader {}
 
 impl FsModuleLoader {
   /// Transforms PathBuf into String.
