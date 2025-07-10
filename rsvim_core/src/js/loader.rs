@@ -102,7 +102,7 @@ impl ModuleLoader for FsModuleLoader {
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
-      return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
+      return Ok(self.transform(Path::new(specifier).canonicalize()?));
     }
 
     // Resolve relative import.
@@ -112,7 +112,7 @@ impl ModuleLoader for FsModuleLoader {
     let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
 
     if specifier.starts_with("./") || specifier.starts_with("../") {
-      return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
+      return Ok(self.transform(base.join(specifier).canonicalize()?));
     }
 
     bail!(format!("Module not found \"{specifier}\""));
