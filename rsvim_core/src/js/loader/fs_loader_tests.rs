@@ -1,5 +1,7 @@
 use super::fs_loader::*;
 
+use crate::js::loader::ModuleLoader;
+
 use assert_fs::prelude::*;
 use path_absolutize::Absolutize;
 use std::fs;
