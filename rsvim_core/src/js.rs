@@ -38,6 +38,8 @@ pub mod msg;
 pub mod transpiler;
 
 #[cfg(test)]
+mod loader_tests;
+#[cfg(test)]
 mod transpiler_tests;
 
 pub fn v8_version() -> &'static str {
