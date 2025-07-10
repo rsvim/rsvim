@@ -37,9 +37,6 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
-#[cfg(test)]
-mod transpiler_tests;
-
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
 }
