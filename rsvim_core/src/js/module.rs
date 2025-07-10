@@ -11,29 +11,11 @@ use std::sync::OnceLock;
 use tracing::trace;
 // use url::Url;
 
-/// Creates v8 script origins.
-pub fn create_origin<'s>(
-  scope: &mut v8::HandleScope<'s, ()>,
-  name: &str,
-  is_module: bool,
-) -> v8::ScriptOrigin<'s> {
-  let name = v8::String::new(scope, name).unwrap();
-  let source_map = v8::undefined(scope);
+/// Module path on local file system.
+pub type ModulePath = String;
 
-  v8::ScriptOrigin::new(
-    scope,
-    name.into(),
-    0,
-    0,
-    false,
-    0,
-    Some(source_map.into()),
-    false,
-    false,
-    is_module,
-    None,
-  )
-}
+/// Module source code.
+pub type ModuleSource = String;
 
 #[allow(non_snake_case)]
 pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
@@ -64,11 +46,29 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   })
 }
 
-/// Module path on local file system.
-pub type ModulePath = String;
+/// Creates v8 script origins.
+pub fn create_origin<'s>(
+  scope: &mut v8::HandleScope<'s, ()>,
+  name: &str,
+  is_module: bool,
+) -> v8::ScriptOrigin<'s> {
+  let name = v8::String::new(scope, name).unwrap();
+  let source_map = v8::undefined(scope);
 
-/// Module source code.
-pub type ModuleSource = String;
+  v8::ScriptOrigin::new(
+    scope,
+    name.into(),
+    0,
+    0,
+    false,
+    0,
+    Some(source_map.into()),
+    false,
+    false,
+    is_module,
+    None,
+  )
+}
 
 #[derive(Debug, Clone)]
 /// Import kind.
