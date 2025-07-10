@@ -1,6 +1,7 @@
 //! Fs based module loader.
 
 use crate::js::constant::WINDOWS_REGEX;
+use crate::js::loader::ModuleLoader;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 // use crate::js::transpiler::Jsx;
@@ -18,6 +19,8 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
+
+static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
 pub struct FsModuleLoader {}

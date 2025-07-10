@@ -17,12 +17,10 @@ pub use fs_loader::FsModuleLoader;
 
 pub mod core_loader;
 pub mod fs_loader;
-pub mod url_loader;
+// pub mod url_loader;
 
 #[cfg(test)]
 mod fs_loader_tests;
-
-static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
