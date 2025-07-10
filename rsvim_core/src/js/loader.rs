@@ -24,8 +24,11 @@ static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "
 
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
+  /// Resolve the module's path by its specifier.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
+
+  /// Load the module path by its specifier.
+  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
 
 #[derive(Default)]
