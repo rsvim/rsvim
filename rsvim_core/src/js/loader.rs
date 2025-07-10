@@ -106,7 +106,7 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // Resolve relative import.
-    // FIXME: Here we should not use current working directory as a parent path to resolve modules.
+    // FIXME: Here we should always disable CWD as a parent path to resolve modules.
     // Because for rsvim editor, the modules are stored in user config directories, not CWD.
     // CWD is mostly for general runtimes such as node/deno project.
     let cwd = &std::env::current_dir().unwrap();
