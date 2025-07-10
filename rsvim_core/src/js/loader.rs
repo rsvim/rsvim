@@ -6,6 +6,10 @@ use crate::js::module::ModuleSource;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
+// Re-export
+pub use core_loader::CoreModuleLoader;
+pub use fs_loader::FsModuleLoader;
+
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
