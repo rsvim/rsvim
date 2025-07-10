@@ -20,13 +20,13 @@ use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
 
+static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
+
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 }
-
-static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
 pub struct FsModuleLoader;
