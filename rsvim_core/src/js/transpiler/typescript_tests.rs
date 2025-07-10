@@ -1,4 +1,4 @@
-use super::transpiler::*;
+use super::typescript::*;
 
 use crate::test::log::init as test_log_init;
 
