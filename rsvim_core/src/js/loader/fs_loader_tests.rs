@@ -1,4 +1,4 @@
-use super::loader::*;
+use super::fs_loader::*;
 
 use assert_fs::prelude::*;
 use path_absolutize::Absolutize;
