@@ -26,7 +26,7 @@ pub trait ModuleLoader {
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 }
 
-static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "wasm"];
+static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
 pub struct FsModuleLoader;
