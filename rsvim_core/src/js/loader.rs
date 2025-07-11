@@ -81,7 +81,6 @@ pub fn resolve_import(
 ) -> AnyResult<ModulePath> {
   // Use import-maps if available.
   // FIXME: This is not supported now.
-  debug_assert!(import_map.is_none());
   let specifier = match import_map {
     Some(map) => map.lookup(specifier).unwrap_or_else(|| specifier.into()),
     None => specifier.into(),
