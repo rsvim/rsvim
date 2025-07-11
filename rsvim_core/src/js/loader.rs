@@ -63,8 +63,8 @@ pub trait ModuleLoader {
 /// Resolves module path by its specifier.
 ///
 /// The `base` parameter is current module's local filesystem path, all its dependent modules'
-/// filesystem path should be relatively based on the root module's (i.e. current module)
-/// directory.
+/// filesystem path should be relatively based on the same directory that contains the root module,
+/// i.e. current module.
 ///
 /// The `import_map` is an optional user provided map that overwrite default module loader, see
 /// [`ImportMap`].
