@@ -23,7 +23,6 @@ use crate::prelude::*;
 pub type ImportMapEntry = (String, String);
 
 /// Key-Value entries representing WICG import-maps.
-/// See: <https://github.com/WICG/import-maps>.
 ///
 /// NOTE: This is just a mock-up which is actually not supported.
 #[derive(Debug, Clone)]
