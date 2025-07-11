@@ -56,13 +56,13 @@ impl ModuleGraph {
   // Initializes a new graph resolving a static import.
   pub fn static_import(path: &str) -> ModuleGraph {
     // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: false,
-    }));
+    let module = Rc::new(RefCell::new(EsModule::new(
+      path.into(),
+      ModuleStatus::Fetching,
+      vec![],
+      Rc::new(RefCell::new(None)),
+      false,
+    )));
 
     Self {
       kind: ImportKind::Static,
@@ -74,13 +74,13 @@ impl ModuleGraph {
   // Initializes a new graph resolving a dynamic import.
   pub fn dynamic_import(path: &str, promise: v8::Global<v8::PromiseResolver>) -> ModuleGraph {
     // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: true,
-    }));
+    let module = Rc::new(RefCell::new(EsModule::new(
+      path.into(),
+      ModuleStatus::Fetching,
+      vec![],
+      Rc::new(RefCell::new(None)),
+      true,
+    )));
 
     Self {
       kind: ImportKind::Dynamic(promise),

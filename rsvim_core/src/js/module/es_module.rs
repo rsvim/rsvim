@@ -24,6 +24,44 @@ pub struct EsModule {
 rc_refcell_ptr!(EsModule);
 
 impl EsModule {
+  pub fn new(
+    path: ModulePath,
+    status: ModuleStatus,
+    dependencies: Vec<EsModuleRc>,
+    exception: Rc<RefCell<Option<String>>>,
+    is_dynamic_import: bool,
+  ) -> Self {
+    Self {
+      path,
+      status,
+      dependencies,
+      exception,
+      is_dynamic_import,
+    }
+  }
+
+  pub fn path(&self) -> &ModulePath {
+    &self.path
+  }
+
+  pub fn status(&self) -> ModuleStatus {
+    self.status
+  }
+
+  pub fn dependencies(&self) -> &Vec<EsModuleRc> {
+    &self.dependencies
+  }
+
+  pub fn exception(&self) -> &Rc<RefCell<Option<String>>> {
+    &self.exception
+  }
+
+  pub fn is_dynamic_import(&self) -> bool {
+    self.is_dynamic_import
+  }
+}
+
+impl EsModule {
   // Traverses the dependency tree to check if the module is ready.
   // A module is only ready when all of its dependencies are ready, and itself is ready.
   pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
