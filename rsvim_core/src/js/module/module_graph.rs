@@ -60,7 +60,7 @@ impl ModuleGraph {
       path.into(),
       ModuleStatus::Fetching,
       vec![],
-      Rc::new(RefCell::new(None)),
+      None,
       false,
     )));
 
@@ -78,7 +78,7 @@ impl ModuleGraph {
       path.into(),
       ModuleStatus::Fetching,
       vec![],
-      Rc::new(RefCell::new(None)),
+      None,
       true,
     )));
 
