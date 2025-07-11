@@ -10,15 +10,15 @@ use std::rc::Rc;
 /// ECMAScript module, i.e. the `import` module.
 pub struct EsModule {
   /// Module path on local file system.
-  pub path: ModulePath,
+  path: ModulePath,
   /// Module import status.
-  pub status: ModuleStatus,
+  status: ModuleStatus,
   /// Maps the module itself to all its dependencies.
-  pub dependencies: Vec<EsModuleRc>,
+  dependencies: Vec<EsModuleRc>,
   /// Exceptions when import.
-  pub exception: Rc<RefCell<Option<String>>>,
+  exception: Option<String>,
   /// Whether this module is dynamically import.
-  pub is_dynamic_import: bool,
+  is_dynamic_import: bool,
 }
 
 rc_refcell_ptr!(EsModule);
@@ -48,12 +48,24 @@ impl EsModule {
     self.status
   }
 
+  pub fn set_status(&mut self, status: ModuleStatus) {
+    self.status = status;
+  }
+
   pub fn dependencies(&self) -> &Vec<EsModuleRc> {
     &self.dependencies
   }
 
-  pub fn exception(&self) -> &Rc<RefCell<Option<String>>> {
+  pub fn dependencies_mut(&mut self) -> &mut Vec<EsModuleRc> {
+    &mut self.dependencies
+  }
+
+  pub fn exception(&self) -> &Option<String> {
     &self.exception
+  }
+
+  pub fn set_exception(&mut self, exception: Option<String>) {
+    self.exception = exception;
   }
 
   pub fn is_dynamic_import(&self) -> bool {
