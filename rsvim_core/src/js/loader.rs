@@ -30,8 +30,18 @@ pub trait ModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
 
-/// Resolves an import using the appropriate loader.
-/// Returns full path on local file system.
+/// Resolves module path by its specifier.
+///
+/// The `base` parameter is current module's local filesystem path, all its dependent modules'
+/// filesystem path should be relatively based on the same directory that contains the root module,
+/// i.e. current module.
+///
+/// The `import_map` is an optional user provided map that overwrite default module loader, see
+/// [`ImportMap`].
+///
+/// # Returns
+///
+/// It returns full path on local filesystem.
 pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
