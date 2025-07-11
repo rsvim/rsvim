@@ -1,4 +1,21 @@
-//! Import map.
+//! Import map, it is passed by users to customize the import specifiers, it is actually key-Value
+//! entries representing WICG import-maps.
+//!
+//! For example, if user provide such a import map:
+//!
+//! ```javascript
+//! const importMap = {'lodash': 'react'};
+//! ```
+//!
+//! Pass the `importMap` to javascript runtime, then when user writes such javacsripts:
+//!
+//! ```javascript
+//! const _ = import "lodash";
+//! ```
+//!
+//! The javascript runtime will actually load the `react` module instead of the `lodash`.
+//!
+//! See: <https://github.com/WICG/import-maps>.
 
 use crate::prelude::*;
 
