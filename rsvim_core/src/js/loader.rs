@@ -62,8 +62,13 @@ pub trait ModuleLoader {
 
 /// Resolves module specifier (when js engine request a module).
 ///
-/// The `import_map` is an optional user provided map that overwrite default module loader, see
-/// [`ImportMap`].
+/// NOTE:
+/// 1. The `base` parameter is the base directory where js runtime searches a module. For Rsvim
+///    editor, the modules will be stored in `~/.rsvim` or `$XDG_CONFIG_HOME/rsvim` directory, or
+///    other directories in Rsvim's `runtime` variable. Thus the `base` should be a list of
+///    filesystem paths.
+/// 2. The `import_map` is an optional user provided map that overwrite default module loader, see
+///    [`ImportMap`].
 ///
 /// # Returns
 ///
