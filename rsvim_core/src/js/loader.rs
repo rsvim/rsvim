@@ -30,6 +30,9 @@ pub trait ModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
 
+const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
+const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
+
 /// Resolves module path by its specifier.
 ///
 /// The `base` parameter is current module's local filesystem path, all its dependent modules'
@@ -56,11 +59,13 @@ pub fn resolve_import(
 
   // Look the params and choose a loader, then resolve module.
   let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
-  if is_core_module_import && !ignore_core_modules {
-    CoreModuleLoader {}.resolve(base, &specifier)
+  let resolver: &dyn ModuleLoader = if is_core_module_import && !ignore_core_modules {
+    &CORE_MODULE_LOADER
   } else {
-    FsModuleLoader {}.resolve(base, &specifier)
-  }
+    &FS_MODULE_LOADER
+  };
+
+  resolver.resolve(base, &specifier)
 }
 
 /// Loads module source by its specifier.
@@ -80,15 +85,15 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // // Load module.
   // loader.load(specifier)
 
+  // We don't actually have core modules
   let is_core_module_import = CORE_MODULES().contains_key(specifier);
-  if is_core_module_import {
-    CoreModuleLoader {}.load(specifier)
+  let loader: &dyn ModuleLoader = if is_core_module_import {
+    &CORE_MODULE_LOADER
   } else {
-    FsModuleLoader {}.load(specifier)
-  }
+    &FS_MODULE_LOADER
+  };
 
-  // // We don't actually have core modules
-  // FsModuleLoader {}.load(specifier)
+  loader.load(specifier)
 }
 
 /// FIXME: Not supported yet.
