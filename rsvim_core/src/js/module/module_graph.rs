@@ -1,6 +1,4 @@
-//! Module graph.
-//!
-//! Module graph maintains the relationships between a module and its dependencies tree.
+//! Module graph, it maintains the relationships between a module and its dependencies tree.
 //!
 //! The dependency is created by the `require` or `import` keyword. And there're two kinds of
 //! import: static and dynamic. For example:
