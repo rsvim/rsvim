@@ -8,13 +8,13 @@ use std::sync::OnceLock;
 use tracing::trace;
 
 // Re-export
+pub use es_module::*;
 pub use import_map::*;
-pub use module::*;
 pub use module_graph::*;
 pub use module_map::*;
 
+pub mod es_module;
 pub mod import_map;
-pub mod module;
 pub mod module_graph;
 pub mod module_map;
 
