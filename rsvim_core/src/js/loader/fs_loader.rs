@@ -73,7 +73,7 @@ impl FsModuleLoader {
     }
 
     // 3. Bail out with an error.
-    bail!(format!("Module not found \"{}\"", path.display()));
+    bail!(format!("Module not found {path:?}"));
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
@@ -84,7 +84,7 @@ impl FsModuleLoader {
         return self.load_source(path);
       }
     }
-    bail!(format!("Module not found \"{}\"", path.display()));
+    bail!(format!("Module not found {path:?}"));
   }
 }
 
