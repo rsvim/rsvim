@@ -17,7 +17,6 @@ use crate::ui::tree::TreeArc;
 
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
-use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -122,6 +121,8 @@ pub struct JsRuntimeStateForSnapshot {
   pub context: Option<v8::Global<v8::Context>>,
 }
 
+rc_refcell_ptr!(JsRuntimeStateForSnapshot);
+
 /// The js runtime for snapshot.
 ///
 /// WARNING: When creating snapshot, do remember that the `__InternalRsvimGlobalObject` bindings
@@ -139,7 +140,7 @@ pub struct JsRuntimeForSnapshot {
   pub isolate: Option<v8::OwnedIsolate>,
 
   /// State.
-  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
+  pub state: JsRuntimeStateForSnapshotRc,
 }
 
 impl Drop for JsRuntimeForSnapshot {
@@ -170,9 +171,9 @@ impl JsRuntimeForSnapshot {
       }
     }
 
-    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
+    let state = JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
       context: Some(global_context),
-    }));
+    });
 
     scope.set_slot(state.clone());
 
@@ -301,14 +302,14 @@ impl JsRuntimeForSnapshot {
     self.get_state().borrow().context.as_ref().unwrap().clone()
   }
 
-  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+  pub fn state(isolate: &v8::Isolate) -> JsRuntimeStateForSnapshotRc {
     isolate
-      .get_slot::<Rc<RefCell<JsRuntimeStateForSnapshot>>>()
+      .get_slot::<JsRuntimeStateForSnapshotRc>()
       .unwrap()
       .clone()
   }
 
-  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+  pub fn get_state(&self) -> JsRuntimeStateForSnapshotRc {
     Self::state(self.isolate.as_ref().unwrap())
   }
 
@@ -380,6 +381,8 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM }
 }
 
+rc_refcell_ptr!(JsRuntimeState);
+
 /// Snapshot data for startup.
 pub struct SnapshotData {
   pub value: &'static [u8],
@@ -398,7 +401,7 @@ pub struct JsRuntime {
 
   /// The state of the runtime.
   #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeState>>,
+  pub state: JsRuntimeStateRc,
 }
 
 impl std::fmt::Debug for JsRuntime {
@@ -503,7 +506,7 @@ impl JsRuntime {
 
     // Store state inside the v8 isolate slot.
     // https://v8docs.nodesource.com/node-4.8/d5/dda/classv8_1_1_isolate.html#a7acadfe7965997e9c386a05f098fbe36
-    let state = Rc::new(RefCell::new(JsRuntimeState {
+    let state = JsRuntimeState::to_rc(JsRuntimeState {
       context,
       module_map: ModuleMap::new(),
       timeout_handles: HashSet::new(),
@@ -524,7 +527,7 @@ impl JsRuntime {
       buffers,
       contents,
       editing_state,
-    }));
+    });
 
     isolate.set_slot(state.clone());
 
@@ -898,15 +901,12 @@ impl JsRuntime {
 // https://github.com/lmt-swallow/puppy-browser/blob/main/src/javascript/runtime.rs
 impl JsRuntime {
   /// Returns the runtime state stored in the given isolate.
-  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeState>> {
-    isolate
-      .get_slot::<Rc<RefCell<JsRuntimeState>>>()
-      .unwrap()
-      .clone()
+  pub fn state(isolate: &v8::Isolate) -> JsRuntimeStateRc {
+    isolate.get_slot::<JsRuntimeStateRc>().unwrap().clone()
   }
 
   /// Returns the runtime's state.
-  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
+  pub fn get_state(&self) -> JsRuntimeStateRc {
     Self::state(&self.isolate)
   }
 

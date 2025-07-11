@@ -1,7 +1,7 @@
 //! Js module.
 
 use crate::js::JsRuntime;
-use crate::js::loader::resolve_import;
+use crate::js::loader::{load_import, resolve_import};
 use crate::prelude::*;
 
 use std::cell::RefCell;
