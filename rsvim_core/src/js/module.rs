@@ -12,9 +12,11 @@ use tracing::trace;
 // use url::Url;
 
 // Re-export
-pub use es_module::EsModule;
+pub use es_module::*;
+pub use module_graph::*;
 
 pub mod es_module;
+pub mod module_graph;
 
 /// Module path on local file system.
 pub type ModulePath = String;
@@ -90,63 +92,6 @@ pub fn create_origin<'s>(
     is_module,
     None,
   )
-}
-
-#[derive(Debug, Clone)]
-/// Import kind.
-pub enum ImportKind {
-  // Loading static imports.
-  Static,
-  // Loading a dynamic import.
-  Dynamic(v8::Global<v8::PromiseResolver>),
-}
-
-#[derive(Debug)]
-/// Module graph.
-///
-/// A module's tree dependency graph.
-pub struct ModuleGraph {
-  pub kind: ImportKind,
-  pub root_rc: Rc<RefCell<EsModule>>,
-  pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
-}
-
-impl ModuleGraph {
-  // Initializes a new graph resolving a static import.
-  pub fn static_import(path: &str) -> ModuleGraph {
-    // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: false,
-    }));
-
-    Self {
-      kind: ImportKind::Static,
-      root_rc: module,
-      same_origin: LinkedList::new(),
-    }
-  }
-
-  // Initializes a new graph resolving a dynamic import.
-  pub fn dynamic_import(path: &str, promise: v8::Global<v8::PromiseResolver>) -> ModuleGraph {
-    // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: true,
-    }));
-
-    Self {
-      kind: ImportKind::Dynamic(promise),
-      root_rc: module,
-      same_origin: LinkedList::new(),
-    }
-  }
 }
 
 /// Module map.
