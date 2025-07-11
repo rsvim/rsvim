@@ -147,6 +147,7 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // FsModuleLoader {}.load(specifier)
 }
 
+/// NOTE: Not support for now.
 pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
