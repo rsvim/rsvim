@@ -4,12 +4,15 @@ use crate::js::JsRuntime;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
-use std::cell::RefCell;
 use std::collections::LinkedList;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use tracing::trace;
 // use url::Url;
+
+// Re-export
+pub use es_module::*;
+
+pub mod es_module;
 
 /// Module path on local file system.
 pub type ModulePath = String;
@@ -97,70 +100,6 @@ pub enum ModuleStatus {
 }
 
 #[derive(Debug)]
-/// ECMAScript module, i.e. the `import` module.
-pub struct EsModule {
-  /// Module path on local file system.
-  pub path: ModulePath,
-  /// Module import status.
-  pub status: ModuleStatus,
-  /// Maps the module itself to all its dependencies.
-  pub dependencies: Vec<EsModuleRc>,
-  /// Exceptions when import.
-  pub exception: Rc<RefCell<Option<String>>>,
-  /// Whether this module is dynamically import.
-  pub is_dynamic_import: bool,
-}
-
-rc_refcell_ptr!(EsModule);
-
-impl EsModule {
-  // Traverses the dependency tree to check if the module is ready.
-  pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
-    // If the module is ready, no need to check the sub-tree.
-    if self.status == ModuleStatus::Ready {
-      return;
-    }
-
-    // If it's a duplicate module we need to check the module status cache.
-    if self.status == ModuleStatus::Duplicate {
-      let status_ref = seen_modules.get(&self.path).unwrap();
-      if status_ref == &ModuleStatus::Ready {
-        self.status = ModuleStatus::Ready;
-      }
-      return;
-    }
-
-    // Fast-forward all dependencies.
-    self
-      .dependencies
-      .iter_mut()
-      .for_each(|dep| dep.borrow_mut().fast_forward(seen_modules));
-
-    // The module is compiled and has 0 dependencies.
-    if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
-      self.status = ModuleStatus::Ready;
-      seen_modules.insert(self.path.clone(), self.status);
-      return;
-    }
-
-    // At this point, the module is still being fetched...
-    if self.dependencies.is_empty() {
-      return;
-    }
-
-    if !self
-      .dependencies
-      .iter_mut()
-      .map(|m| m.borrow().status)
-      .any(|status| status != ModuleStatus::Ready)
-    {
-      self.status = ModuleStatus::Ready;
-      seen_modules.insert(self.path.clone(), self.status);
-    }
-  }
-}
-
-#[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
   pub kind: ImportKind,
@@ -174,13 +113,13 @@ impl ModuleGraph {
   // Initializes a new graph resolving a static import.
   pub fn static_import(path: &str) -> ModuleGraph {
     // Create an ES module instance.
-    let module = EsModule::to_rc(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: false,
-    });
+    let module = EsModule::to_rc(EsModule::new(
+      path.into(),
+      ModuleStatus::Fetching,
+      vec![],
+      None,
+      false,
+    ));
 
     Self {
       kind: ImportKind::Static,
@@ -192,13 +131,13 @@ impl ModuleGraph {
   // Initializes a new graph resolving a dynamic import.
   pub fn dynamic_import(path: &str, promise: v8::Global<v8::PromiseResolver>) -> ModuleGraph {
     // Create an ES module instance.
-    let module = EsModule::to_rc(EsModule {
-      path: path.into(),
-      status: ModuleStatus::Fetching,
-      dependencies: vec![],
-      exception: Rc::new(RefCell::new(None)),
-      is_dynamic_import: true,
-    });
+    let module = EsModule::to_rc(EsModule::new(
+      path.into(),
+      ModuleStatus::Fetching,
+      vec![],
+      None,
+      true,
+    ));
 
     Self {
       kind: ImportKind::Dynamic(promise),
