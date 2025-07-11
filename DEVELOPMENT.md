@@ -9,7 +9,6 @@ Please setup your development environment with:
   - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, install [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Version management tool [mise](https://github.com/jdx/mise), then run `mise i`.
-- (Optional) Linker [lld](https://lld.llvm.org/) (for MacOS/Windows) or [mold](https://github.com/rui314/mold) (for Linux) to speed up compile/build time.
 
 ## Rust
 
