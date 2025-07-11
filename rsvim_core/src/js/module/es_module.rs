@@ -14,12 +14,14 @@ pub struct EsModule {
   /// Module import status.
   pub status: ModuleStatus,
   /// Maps the module itself to all its dependencies.
-  pub dependencies: Vec<Rc<RefCell<EsModule>>>,
+  pub dependencies: Vec<EsModuleRc>,
   /// Exceptions when import.
   pub exception: Rc<RefCell<Option<String>>>,
   /// Whether this module is dynamically import.
   pub is_dynamic_import: bool,
 }
+
+rc_refcell_ptr!(EsModule);
 
 impl EsModule {
   // Traverses the dependency tree to check if the module is ready.
