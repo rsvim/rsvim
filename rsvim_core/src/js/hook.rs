@@ -2,7 +2,7 @@
 
 use crate::js::JsRuntime;
 use crate::js::binding::throw_type_error;
-use crate::js::loader::resolve_import;
+use crate::js::module::resolve_import;
 
 /// Called during Module::instantiate_module.
 /// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
