@@ -60,7 +60,7 @@ pub trait ModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
 
-/// Resolves module specifier (when js engine request a module).
+/// Resolves module path by its specifier.
 ///
 /// NOTE:
 /// 1. The `base` parameter is the base directory where js runtime searches a module. For Rsvim
@@ -95,7 +95,7 @@ pub fn resolve_import(
   }
 }
 
-/// Loads an import using the appropriate loader.
+/// Loads module source by its specifier.
 pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
@@ -123,7 +123,7 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // FsModuleLoader {}.load(specifier)
 }
 
-/// NOTE: Not support for now.
+/// FIXME: Not support for now.
 pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
