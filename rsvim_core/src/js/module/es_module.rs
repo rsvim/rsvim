@@ -3,9 +3,6 @@
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
 #[derive(Debug)]
 /// ECMAScript module, i.e. the `import` module.
 pub struct EsModule {
