@@ -60,17 +60,9 @@ pub trait ModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
 
-/// Resolves import specifier. A specifier is the resource name used in `import`/`require`
-/// keywords. For example:
+/// Resolves module specifier (when js engine request a module).
 ///
-/// ```javascript
-/// const _ = import "lodash";
-/// ```
-///
-/// The `"lodash"` is the module specifier.
-///
-///
-/// Returns full path on local file system.
+/// It returns full path on local filesystem.
 pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
