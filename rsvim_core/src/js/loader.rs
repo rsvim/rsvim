@@ -31,6 +31,11 @@
 //!  |- indexOf.js
 //!  ...
 //! ```
+//!
+//! ## Module Source
+//!
+//! A module source is the source code of the module, such as javascript source code. But in
+//! ECMAScript standards, there are also many other kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::module::{CORE_MODULES, ImportMap, ModulePath, ModuleSource};
 use crate::prelude::*;
