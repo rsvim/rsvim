@@ -34,8 +34,8 @@ impl EsModule {
 
     // If it's a duplicate module we need to check the module status cache.
     if self.status == ModuleStatus::Duplicate {
-      let status_ref = seen_modules.get(&self.path).unwrap();
-      if status_ref == &ModuleStatus::Ready {
+      let status = seen_modules.get(&self.path).unwrap();
+      if status == &ModuleStatus::Ready {
         self.status = ModuleStatus::Ready;
       }
       return;
