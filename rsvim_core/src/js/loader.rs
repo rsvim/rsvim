@@ -62,13 +62,12 @@ pub trait ModuleLoader {
 
 /// Resolves module path by its specifier.
 ///
-/// NOTE:
-/// 1. The `base` parameter is the base directory where js runtime searches a module. For Rsvim
-///    editor, the modules will be stored in `~/.rsvim` or `$XDG_CONFIG_HOME/rsvim` directory, or
-///    other directories in Rsvim's `runtime` variable. Thus the `base` should be a list of
-///    filesystem paths.
-/// 2. The `import_map` is an optional user provided map that overwrite default module loader, see
-///    [`ImportMap`].
+/// The `base` parameter is current module's local filesystem path, all its dependent modules'
+/// filesystem path should be relatively based on the root module's (i.e. current module)
+/// directory.
+///
+/// The `import_map` is an optional user provided map that overwrite default module loader, see
+/// [`ImportMap`].
 ///
 /// # Returns
 ///

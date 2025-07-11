@@ -31,6 +31,11 @@ fn test_resolve_fs_imports() {
       "/dev/core/tests/006_more_imports.js",
       "/dev/core/tests/006_more_imports.js",
     ),
+    (
+      Some("/dev/core/tests/005_more_imports.js"),
+      "/dev/core/tests/006_more_imports.js",
+      "/dev/core/tests/006_more_imports.js",
+    ),
   ];
 
   // Run tests.
