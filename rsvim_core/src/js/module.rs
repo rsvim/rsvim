@@ -1,4 +1,42 @@
 //! Js module.
+//!
+//! # Terms
+//!
+//! ## Module Specifier
+//!
+//! A module specifier is the module name used in `import`/`require` keywords. For example:
+//!
+//! ```javascript
+//! const _ = import "lodash";
+//! ```
+//!
+//! The `"lodash"` is the module specifier.
+//!
+//! ## Module Path
+//!
+//! A module path is the local file path where the module stores. For example in a node/npm
+//! project, the `lodash` library can be installed with `npm i lodash`, and the local filesystem
+//! looks like:
+//!
+//! ```text
+//! ./node_modules/lodash/
+//!  ...
+//!  |- has.js
+//!  |- hasIn.js
+//!  |- head.js
+//!  |- identity.js
+//!  |- inRange.js
+//!  |- includes.js
+//!  |- index.js     -> This is the `lodash` library entry for npm package
+//!  |- indexOf.js
+//!  ...
+//! ```
+//!
+//! ## Module Source
+//!
+//! A module source is the source code of the module, such as javascript source code, and the
+//! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
+//! kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::JsRuntime;
 use crate::js::loader::{load_import, resolve_import};
