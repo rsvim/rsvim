@@ -6,9 +6,9 @@ use crate::content::TextContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
+use crate::js::loader::{load_import, resolve_import};
 use crate::js::module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin, fetch_module_tree, load_import,
-  resolve_import,
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin, fetch_module_tree,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::prelude::*;
