@@ -160,6 +160,8 @@ impl EsModule {
 
 #[derive(Debug)]
 /// Module graph.
+///
+/// A module's tree dependency graph.
 pub struct ModuleGraph {
   pub kind: ImportKind,
   pub root_rc: Rc<RefCell<EsModule>>,
@@ -273,7 +275,7 @@ type ImportMapEntry = (String, String);
 /// Key-Value entries representing WICG import-maps.
 /// See: <https://github.com/WICG/import-maps>.
 ///
-/// NOTE: This is just a mock-up which is actually not supported.
+/// FIXME: This is just a mock-up which is actually not supported.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct ImportMap {
