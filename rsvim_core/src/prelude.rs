@@ -8,7 +8,7 @@ pub use crate::coord::*;
 pub use crate::results::*;
 
 // Re-export `lock`.
-pub use crate::{arc_mutex_ptr, arc_ptr, lock, rc_ptr, rc_refcell_ptr};
+pub use crate::{arc_mutex_ptr, arc_ptr, lock};
 pub use paste::paste;
 
 // Re-export `ahash`;
