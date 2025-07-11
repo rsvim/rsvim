@@ -1,12 +1,16 @@
 //! Module map and module graph.
 //!
 //! # Terms
+//!
 //! - Module graph: it maintains the relationships between a module and its dependencies tree.
 //! - Module map: it maintains all the dependencies loaded into the js rutime, i.e. the rsvim
 //! editor.
 //!
-//! The dependency is created by the `require` or `import` keyword. And there're two kinds of
-//! import: static and dynamic. For example:
+//! # Module
+//!
+//! In the most popular js runtime [node.js](https://nodejs.org), a module is loaded by the keyword
+//! `require` (Common JS) or `import` (ECMAScript Module). And there're two kinds of imports:
+//! static and dynamic. For example:
 //!
 //! Case-1: Static Import
 //!
