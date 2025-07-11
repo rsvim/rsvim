@@ -4,7 +4,7 @@
 //!
 //! - Module graph: it maintains the relationships between a module and its dependencies tree.
 //! - Module map: it maintains all the dependencies loaded into the js rutime, i.e. the rsvim
-//! editor.
+//!   editor.
 //!
 //! # Module
 //!
