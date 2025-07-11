@@ -33,6 +33,15 @@ pub trait ModuleLoader {
 const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
 const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
 
+fn choose(specifier: &str) -> &dyn ModuleLoader {
+  let is_core_module_import = CORE_MODULES().contains_key(specifier);
+  if is_core_module_import {
+    &CORE_MODULE_LOADER
+  } else {
+    &FS_MODULE_LOADER
+  }
+}
+
 /// Resolves module path by its specifier.
 ///
 /// The `base` parameter is current module's local filesystem path, all its dependent modules'
@@ -48,7 +57,6 @@ const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
 pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
-  ignore_core_modules: bool,
   import_map: Option<ImportMap>,
 ) -> AnyResult<ModulePath> {
   // Use import-maps if available.
@@ -58,12 +66,7 @@ pub fn resolve_import(
   };
 
   // Look the params and choose a loader, then resolve module.
-  let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
-  let resolver: &dyn ModuleLoader = if is_core_module_import && !ignore_core_modules {
-    &CORE_MODULE_LOADER
-  } else {
-    &FS_MODULE_LOADER
-  };
+  let resolver: &dyn ModuleLoader = choose(specifier.as_str());
 
   resolver.resolve(base, &specifier)
 }
