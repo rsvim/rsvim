@@ -780,7 +780,7 @@ impl JsRuntime {
       let mut graph_root = graph.root_rc.borrow_mut();
 
       // Check for exceptions in the graph (dynamic imports).
-      if let Some(message) = graph_root.exception.borrow_mut().take() {
+      if let Some(message) = graph_root.exception_mut().take() {
         // Create a v8 exception.
         let exception = v8::String::new(scope, &message).unwrap();
         let exception = v8::Exception::error(scope, exception);

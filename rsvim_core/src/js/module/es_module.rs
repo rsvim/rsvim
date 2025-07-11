@@ -28,7 +28,7 @@ impl EsModule {
     path: ModulePath,
     status: ModuleStatus,
     dependencies: Vec<EsModuleRc>,
-    exception: Rc<RefCell<Option<String>>>,
+    exception: Option<String>,
     is_dynamic_import: bool,
   ) -> Self {
     Self {
@@ -64,8 +64,8 @@ impl EsModule {
     &self.exception
   }
 
-  pub fn set_exception(&mut self, exception: Option<String>) {
-    self.exception = exception;
+  pub fn exception_mut(&mut self) -> &mut Option<String> {
+    &mut self.exception
   }
 
   pub fn is_dynamic_import(&self) -> bool {
