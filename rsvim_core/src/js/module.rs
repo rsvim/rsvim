@@ -4,19 +4,19 @@ use crate::js::JsRuntime;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
-use std::cell::RefCell;
-use std::collections::LinkedList;
-use std::rc::Rc;
 use std::sync::OnceLock;
 use tracing::trace;
-// use url::Url;
 
 // Re-export
+pub use import_map::*;
 pub use module::*;
 pub use module_graph::*;
+pub use module_map::*;
 
+pub mod import_map;
 pub mod module;
 pub mod module_graph;
+pub mod module_map;
 
 /// Module path on local file system.
 pub type ModulePath = String;
@@ -92,143 +92,6 @@ pub fn create_origin<'s>(
     is_module,
     None,
   )
-}
-
-/// Module map.
-///
-/// It maintains all the modules inside js runtime, including already resolved, loaded and pending
-/// fetching. A module will be only loaded for only once and been cached, thus avoid duplicated
-/// loading if it is used in multiple places.
-pub struct ModuleMap {
-  pub main: Option<ModulePath>,
-  pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<Rc<RefCell<ModuleGraph>>>,
-}
-
-impl ModuleMap {
-  // Creates a new module-map instance.
-  pub fn new() -> ModuleMap {
-    Self {
-      main: None,
-      index: HashMap::new(),
-      seen: HashMap::new(),
-      pending: vec![],
-    }
-  }
-
-  // Inserts a compiled ES module to the map.
-  pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
-    // No main module has been set, so let's update the value.
-    if self.main.is_none() && std::fs::metadata(path).is_ok() {
-      self.main = Some(path.into());
-    }
-    self.index.insert(path.into(), module);
-  }
-
-  // Returns if there are still pending imports to be loaded.
-  pub fn has_pending_imports(&self) -> bool {
-    !self.pending.is_empty()
-  }
-
-  // Returns a v8 module reference from me module-map.
-  pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
-    self.index.get(key).cloned()
-  }
-
-  // Returns a specifier by a v8 module.
-  pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
-    self
-      .index
-      .iter()
-      .find(|(_, m)| **m == module)
-      .map(|(p, _)| p.clone())
-  }
-
-  // Returns the main entry point.
-  pub fn main(&self) -> Option<ModulePath> {
-    self.main.clone()
-  }
-}
-
-impl Default for ModuleMap {
-  fn default() -> Self {
-    ModuleMap::new()
-  }
-}
-
-/// A single import mapping (specifier, target).
-type ImportMapEntry = (String, String);
-
-/// Key-Value entries representing WICG import-maps.
-/// See: <https://github.com/WICG/import-maps>.
-///
-/// FIXME: This is just a mock-up which is actually not supported.
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
-pub struct ImportMap {
-  map: Vec<ImportMapEntry>,
-}
-
-impl ImportMap {
-  pub fn parse_from_json(_text: &str) -> AnyResult<ImportMap> {
-    Ok(ImportMap { map: Vec::new() })
-  }
-
-  pub fn lookup(&self, _specifier: &str) -> Option<String> {
-    None
-  }
-
-  // /// Creates an ImportMap from JSON text.
-  // pub fn parse_from_json(text: &str) -> AnyResult<ImportMap> {
-  //   // Parse JSON string into serde value.
-  //   let json: serde_json::Value = serde_json::from_str(text)?;
-  //   let imports = json["imports"].to_owned();
-  //
-  //   if imports.is_null() || !imports.is_object() {
-  //     return Err(anyhow::anyhow!("Import map's 'imports' must be an object"));
-  //   }
-  //
-  //   let map: HashMap<String, String> = serde_json::from_value(imports)?;
-  //   let mut map: Vec<ImportMapEntry> = Vec::from_iter(map);
-  //
-  //   // Note: We're sorting the imports because we need to support "Packages"
-  //   // via trailing slashes, so the lengthier mapping should always be selected.
-  //   //
-  //   // https://github.com/WICG/import-maps#packages-via-trailing-slashes
-  //
-  //   map.sort_by(|a, b| b.0.cmp(&a.0));
-  //
-  //   Ok(ImportMap { map })
-  // }
-  //
-  // /// Tries to match a specifier against an import-map entry.
-  // pub fn lookup(&self, specifier: &str) -> Option<String> {
-  //   // Find a mapping if exists.
-  //   let (base, mut target) = match self.map.iter().find(|(k, _)| specifier.starts_with(k)) {
-  //     Some(mapping) => mapping.to_owned(),
-  //     None => return None,
-  //   };
-  //
-  //   // The following code treats "./" as an alias for the CWD.
-  //   if target.starts_with("./") {
-  //     let cwd = env::current_dir().unwrap().to_string_lossy().to_string();
-  //     target = target.replacen('.', &cwd, 1);
-  //   }
-  //
-  //   // Note: The reason we need this additional check below with the specifier's
-  //   // extension (if exists) is to be able to support extension-less imports.
-  //   //
-  //   // https://github.com/WICG/import-maps#extension-less-imports
-  //
-  //   match Path::new(specifier).extension() {
-  //     Some(ext) => match Path::new(specifier) == Path::new(&base).with_extension(ext) {
-  //       false => Some(specifier.replacen(&base, &target, 1)),
-  //       _ => None,
-  //     },
-  //     None => Some(specifier.replacen(&base, &target, 1)),
-  //   }
-  // }
 }
 
 /// Resolves an import using the appropriate loader.

@@ -1,16 +1,10 @@
 //! Js module.
 
-// use crate::js::JsRuntime;
-// use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
-// use std::collections::LinkedList;
 use std::rc::Rc;
-// use std::sync::OnceLock;
-// use tracing::trace;
-// use url::Url;
 
 #[derive(Debug)]
 /// ECMAScript module, i.e. the `import` module.

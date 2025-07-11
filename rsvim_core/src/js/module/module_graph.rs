@@ -32,7 +32,6 @@ use crate::js::module::{EsModule, ModuleStatus};
 use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::Rc;
-// use url::Url;
 
 #[derive(Debug, Clone)]
 /// Import kind.
