@@ -25,6 +25,8 @@ rc_refcell_ptr!(EsModule);
 
 impl EsModule {
   // Traverses the dependency tree to check if the module is ready.
+  //
+  // A module is only ready when all of its dependencies are ready, and itself is ready.
   pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
