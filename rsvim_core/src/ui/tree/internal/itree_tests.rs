@@ -5,7 +5,7 @@ use tracing::info;
 
 use crate::prelude::*;
 use crate::test::log::init as test_log_init;
-use crate::ui::tree::internal::{InodeBase, Inodeable};
+use crate::ui::tree::internal::{InodeBase, Inodeable, TreeNodeId};
 
 #[derive(Copy, Clone, Debug)]
 struct TestValue {
