@@ -26,6 +26,8 @@
 //!   .then((_) => {})
 //!   .catch((err) => {});
 //! ```
+//!
+//! Static import runs synchronizely, dynamic import runs asynchronizely.
 
 use crate::js::module::{EsModule, ModuleStatus};
 
