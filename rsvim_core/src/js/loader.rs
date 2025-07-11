@@ -89,12 +89,7 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // loader.load(specifier)
 
   // We don't actually have core modules
-  let is_core_module_import = CORE_MODULES().contains_key(specifier);
-  let loader: &dyn ModuleLoader = if is_core_module_import {
-    &CORE_MODULE_LOADER
-  } else {
-    &FS_MODULE_LOADER
-  };
+  let loader: &dyn ModuleLoader = choose(specifier);
 
   loader.load(specifier)
 }
