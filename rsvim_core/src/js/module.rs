@@ -11,11 +11,33 @@ use std::sync::OnceLock;
 use tracing::trace;
 // use url::Url;
 
+// Re-export
+pub use es_module::EsModule;
+
+pub mod es_module;
+
 /// Module path on local file system.
 pub type ModulePath = String;
 
 /// Module source code.
 pub type ModuleSource = String;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Module import status.
+///
+/// NOTE: All modules (plugins/packages) will be local files on user's operating system, no
+/// network/http modules will be fetching. The only one use case of `Resolving` status should be
+/// dynamically import and its `Promise`.
+pub enum ModuleStatus {
+  // Indicates the module **itself** is being fetched.
+  Fetching,
+  // Indicates the module dependencies are being fetched.
+  Resolving,
+  // Indicates the module has ben seen before.
+  Duplicate,
+  // Indicates the module (include its dependencies) is resolved.
+  Ready,
+}
 
 #[allow(non_snake_case)]
 pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
@@ -77,85 +99,6 @@ pub enum ImportKind {
   Static,
   // Loading a dynamic import.
   Dynamic(v8::Global<v8::PromiseResolver>),
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-/// Module import status.
-///
-/// NOTE: All modules (plugins/packages) will be local files on user's operating system, no
-/// network/http modules will be fetching. The only one use case of `Resolving` status should be
-/// dynamically import and its `Promise`.
-pub enum ModuleStatus {
-  // Indicates the module **itself** is being fetched.
-  Fetching,
-  // Indicates the module dependencies are being fetched.
-  Resolving,
-  // Indicates the module has ben seen before.
-  Duplicate,
-  // Indicates the module (include its dependencies) is resolved.
-  Ready,
-}
-
-#[derive(Debug)]
-/// ECMAScript module, i.e. the `import` module.
-pub struct EsModule {
-  /// Module path on local file system.
-  pub path: ModulePath,
-  /// Module import status.
-  pub status: ModuleStatus,
-  /// Maps the module itself to all its dependencies.
-  pub dependencies: Vec<Rc<RefCell<EsModule>>>,
-  /// Exceptions when import.
-  pub exception: Rc<RefCell<Option<String>>>,
-  /// Whether this module is dynamically import.
-  pub is_dynamic_import: bool,
-}
-
-impl EsModule {
-  // Traverses the dependency tree to check if the module is ready.
-  pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
-    // If the module is ready, no need to check the sub-tree.
-    if self.status == ModuleStatus::Ready {
-      return;
-    }
-
-    // If it's a duplicate module we need to check the module status cache.
-    if self.status == ModuleStatus::Duplicate {
-      let status_ref = seen_modules.get(&self.path).unwrap();
-      if status_ref == &ModuleStatus::Ready {
-        self.status = ModuleStatus::Ready;
-      }
-      return;
-    }
-
-    // Fast-forward all dependencies.
-    self
-      .dependencies
-      .iter_mut()
-      .for_each(|dep| dep.borrow_mut().fast_forward(seen_modules));
-
-    // The module is compiled and has 0 dependencies.
-    if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
-      self.status = ModuleStatus::Ready;
-      seen_modules.insert(self.path.clone(), self.status);
-      return;
-    }
-
-    // At this point, the module is still being fetched...
-    if self.dependencies.is_empty() {
-      return;
-    }
-
-    if !self
-      .dependencies
-      .iter_mut()
-      .map(|m| m.borrow().status)
-      .any(|status| status != ModuleStatus::Ready)
-    {
-      self.status = ModuleStatus::Ready;
-      seen_modules.insert(self.path.clone(), self.status);
-    }
-  }
 }
 
 #[derive(Debug)]
@@ -352,6 +295,8 @@ pub fn resolve_import(
   import_map: Option<ImportMap>,
 ) -> AnyResult<ModulePath> {
   // Use import-maps if available.
+  // FIXME: This is not supported now.
+  debug_assert!(import_map.is_none());
   let specifier = match import_map {
     Some(map) => map.lookup(specifier).unwrap_or_else(|| specifier.into()),
     None => specifier.into(),
