@@ -59,11 +59,11 @@ impl EsModule {
       return;
     }
 
-    if self
+    if !self
       .dependencies
       .iter_mut()
       .map(|m| m.borrow().status)
-      .all(|status| status == ModuleStatus::Ready)
+      .any(|status| status != ModuleStatus::Ready)
     {
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
