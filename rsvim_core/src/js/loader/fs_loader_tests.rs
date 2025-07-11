@@ -54,10 +54,10 @@ fn test_load_fs_imports() {
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
   const SRC: &str = r"
-            export function sayHello() {
-                console.log('Hello, World!');
-            }
-        ";
+      export function sayHello() {
+          console.log('Hello, World!');
+      }
+  ";
 
   let source_files = [
     "./core/tests/005_more_imports.js",
@@ -91,38 +91,3 @@ fn test_load_fs_imports() {
     assert_eq!(source.unwrap(), SRC);
   }
 }
-
-// #[test]
-// fn test_resolve_url_imports() {
-//   // Group of tests to be run.
-//   let tests = vec![
-//     (
-//       None,
-//       "http://github.com/x/core/tests/006_url_imports.js",
-//       "http://github.com/x/core/tests/006_url_imports.js",
-//     ),
-//     (
-//       Some("http://github.com/x/core/tests/006_url_imports.js"),
-//       "./005_more_imports.js",
-//       "http://github.com/x/core/tests/005_more_imports.js",
-//     ),
-//     (
-//       Some("http://github.com/x/core/tests/006_url_imports.js"),
-//       "../005_more_imports.js",
-//       "http://github.com/x/core/005_more_imports.js",
-//     ),
-//     (
-//       Some("http://github.com/x/core/tests/006_url_imports.js"),
-//       "http://github.com/x/core/tests/005_more_imports.js",
-//       "http://github.com/x/core/tests/005_more_imports.js",
-//     ),
-//   ];
-//
-//   // Run tests.
-//   let loader = UrlModuleLoader::default();
-//
-//   for (base, specifier, expected) in tests {
-//     let url = loader.resolve(base, specifier).unwrap();
-//     assert_eq!(url, expected);
-//   }
-// }

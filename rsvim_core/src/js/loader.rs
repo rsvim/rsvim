@@ -1,7 +1,6 @@
 //! Js module loader.
 
-use crate::js::module::ModulePath;
-use crate::js::module::ModuleSource;
+use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Jsx;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;

@@ -339,12 +339,33 @@ impl ImportMap {
   // }
 }
 
-/// Resolves an import using the appropriate loader.
-/// Returns full path on local file system.
+const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
+const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
+
+fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
+  let is_core_module_import = CORE_MODULES().contains_key(specifier);
+  if is_core_module_import {
+    &CORE_MODULE_LOADER
+  } else {
+    &FS_MODULE_LOADER
+  }
+}
+
+/// Resolves module path by its specifier.
+///
+/// The `base` parameter is current module's local filesystem path, all its dependent modules'
+/// filesystem path should be relatively based on the same directory that contains the root module,
+/// i.e. current module.
+///
+/// The `import_map` is an optional user provided map that overwrite default module loader, see
+/// [`ImportMap`].
+///
+/// # Returns
+///
+/// It returns full path on local filesystem.
 pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
-  ignore_core_modules: bool,
   import_map: Option<ImportMap>,
 ) -> AnyResult<ModulePath> {
   // Use import-maps if available.
@@ -354,15 +375,12 @@ pub fn resolve_import(
   };
 
   // Look the params and choose a loader, then resolve module.
-  let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
-  if is_core_module_import && !ignore_core_modules {
-    CoreModuleLoader {}.resolve(base, &specifier)
-  } else {
-    FsModuleLoader {}.resolve(base, &specifier)
-  }
+  let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
+
+  resolver.resolve(base, &specifier)
 }
 
-/// Loads an import using the appropriate loader.
+/// Loads module source by its specifier.
 pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
@@ -379,17 +397,13 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // // Load module.
   // loader.load(specifier)
 
-  let is_core_module_import = CORE_MODULES().contains_key(specifier);
-  if is_core_module_import {
-    CoreModuleLoader {}.load(specifier)
-  } else {
-    FsModuleLoader {}.load(specifier)
-  }
+  // We don't actually have core modules
+  let loader: &dyn ModuleLoader = _choose_module_loader(specifier);
 
-  // // We don't actually have core modules
-  // FsModuleLoader {}.load(specifier)
+  loader.load(specifier)
 }
 
+/// FIXME: Not supported yet.
 pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
@@ -438,7 +452,7 @@ pub fn fetch_module_tree<'a>(
 
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
-    let specifier = resolve_import(Some(filename), &specifier, false, None).unwrap();
+    let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
     trace!(
       "Resolved dependency js module base: {:?}, specifier: {:?}",
       filename,

@@ -18,20 +18,6 @@ LINUX = not WINDOWS and not MACOS
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
-NO_LINKER = False
-
-LLD_NAME = None
-if WINDOWS:
-    LLD_NAME = "lld-link"
-elif MACOS:
-    LLD_NAME = "ld64.lld"
-else:
-    LLD_NAME = "ld.lld"
-LLD_FULLPATH = shutil.which(LLD_NAME)
-
-MOLD_NAME = "mold"
-MOLD_FULLPATH = shutil.which(MOLD_NAME)
-
 RUSTFLAGS = []
 
 
@@ -51,18 +37,6 @@ def set_env(command, name, value, is_string=False):
 def append_rustflags(opt):
     global RUSTFLAGS
     RUSTFLAGS.append(opt)
-
-
-def append_linker_rustflags():
-    if NO_LINKER:
-        return
-
-    if LINUX and MOLD_FULLPATH is not None:
-        append_rustflags("-Clink-arg=-fuse-ld=mold")
-    elif LLD_FULLPATH is not None:
-        append_rustflags("-Clink-arg=-fuse-ld=lld")
-    else:
-        logging.warning(f"Both 'lld' ({LLD_NAME}) and 'mold' not found!")
 
 
 def set_rustflags(command):
@@ -89,7 +63,6 @@ def set_sccache(command):
 
 def clippy():
     append_rustflags("-Dwarnings")
-    append_linker_rustflags()
 
     command = set_rustflags("")
     command = set_sccache(command)
@@ -101,8 +74,6 @@ def clippy():
 
 
 def test(name, miri, jobs):
-    append_linker_rustflags()
-
     if len(name) == 0:
         name = None
         logging.info("Run 'cargo test' for all tests")
@@ -141,8 +112,6 @@ def test(name, miri, jobs):
 
 
 def list_test():
-    append_linker_rustflags()
-
     command = set_sccache("")
     command = set_rustflags(command)
 
@@ -154,8 +123,6 @@ def list_test():
 
 
 def build(release, features, all_features):
-    append_linker_rustflags()
-
     command = set_sccache("")
     command = set_rustflags(command)
 
@@ -250,13 +217,6 @@ if __name__ == "__main__":
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
-    )
-    parser.add_argument(
-        "-l",
-        "--no-linker",
-        dest="no_linker",
-        action="store_true",
-        help="Build without external `lld`/`mold` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -361,8 +321,6 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.no_linker:
-        NO_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy()

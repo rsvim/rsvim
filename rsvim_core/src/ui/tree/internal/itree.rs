@@ -5,14 +5,14 @@ use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
 use geo::point;
+use std::cell::RefCell;
 use std::fmt::Debug;
+use std::rc::Rc;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
-struct Relationships {
+pub struct Relationships {
   // Root id.
   root_id: TreeNodeId,
 
@@ -271,10 +271,10 @@ where
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
     nodes.insert(root_id, root_node);
-    let relationships = Relationships::new(root_id);
+    let relationships = Rc::new(RefCell::new(Relationships::new(root_id)));
     Itree {
       nodes,
-      relationships: Rc::new(RefCell::new(relationships)),
+      relationships,
     }
   }
 

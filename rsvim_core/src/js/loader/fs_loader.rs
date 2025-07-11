@@ -2,8 +2,7 @@
 
 use crate::js::constant::WINDOWS_REGEX;
 use crate::js::loader::ModuleLoader;
-use crate::js::module::ModulePath;
-use crate::js::module::ModuleSource;
+use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
@@ -23,7 +22,7 @@ use std::path::PathBuf;
 static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
-pub struct FsModuleLoader {}
+pub struct FsModuleLoader;
 
 impl FsModuleLoader {
   // Transforms `PathBuf` into `String`.

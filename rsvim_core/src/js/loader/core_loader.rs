@@ -1,13 +1,11 @@
 //! Core module loader.
 
 use crate::js::loader::ModuleLoader;
-use crate::js::module::CORE_MODULES;
-use crate::js::module::ModulePath;
-use crate::js::module::ModuleSource;
+use crate::js::module::{CORE_MODULES, ModulePath, ModuleSource};
 use crate::prelude::*;
 
 #[derive(Default)]
-pub struct CoreModuleLoader {}
+pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
   fn resolve(&self, _: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
