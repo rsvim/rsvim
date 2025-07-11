@@ -61,7 +61,7 @@ impl EsModule {
 
     if !self
       .dependencies
-      .iter_mut()
+      .iter()
       .map(|m| m.borrow().status)
       .any(|status| status != ModuleStatus::Ready)
     {
