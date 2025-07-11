@@ -5,9 +5,7 @@ use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
 use geo::point;
-use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
 
@@ -22,6 +20,8 @@ pub struct Relationships {
   // Maps node id => all its children node ids.
   children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>>,
 }
+
+rc_refcell_ptr!(Relationships);
 
 impl Relationships {
   pub fn new(root_id: TreeNodeId) -> Self {
@@ -212,7 +212,7 @@ where
   // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
   // from lower to higher, for those children share the same Z-index, the child how owns the lower
   // edge weight will be rendered first.
-  relationships: Rc<RefCell<Relationships>>,
+  relationships: RelationshipsRc,
 }
 
 #[derive(Debug)]
@@ -271,7 +271,7 @@ where
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
     nodes.insert(root_id, root_node);
-    let relationships = Rc::new(RefCell::new(Relationships::new(root_id)));
+    let relationships = Relationships::to_rc(Relationships::new(root_id));
     Itree {
       nodes,
       relationships,
