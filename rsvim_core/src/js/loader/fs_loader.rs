@@ -34,7 +34,7 @@ impl FsModuleLoader {
   /// Checks if path is a JSON file.
   fn is_json_import(&self, path: &Path) -> bool {
     match path.extension() {
-      Some(value) => value == "json",
+      Some(value) => value == "json" || value == "json5",
       None => false,
     }
   }
