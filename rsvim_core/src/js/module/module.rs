@@ -1,4 +1,4 @@
-//! Single javascript module, without dependency.
+//! Js module.
 
 // use crate::js::JsRuntime;
 // use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};

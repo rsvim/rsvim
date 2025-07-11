@@ -12,10 +12,10 @@ use tracing::trace;
 // use url::Url;
 
 // Re-export
-pub use es_module::*;
+pub use module::*;
 pub use module_graph::*;
 
-pub mod es_module;
+pub mod module;
 pub mod module_graph;
 
 /// Module path on local file system.
