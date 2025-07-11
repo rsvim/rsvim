@@ -46,7 +46,7 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   })
 }
 
-/// Creates v8 script origin.
+/// Create v8 script origin.
 pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
