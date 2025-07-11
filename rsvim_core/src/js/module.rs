@@ -205,8 +205,10 @@ impl ModuleGraph {
 }
 
 /// Module map.
-/// It maintains all the modules inside js runtime, including already resolved and pending
-/// fetching.
+///
+/// It maintains all the modules inside js runtime, including already resolved, loaded and pending
+/// fetching. A module will be only loaded for only once and been cached, thus avoid duplicated
+/// loading if it is used in multiple places.
 pub struct ModuleMap {
   pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
