@@ -23,7 +23,7 @@ pub fn module_resolve_cb<'a>(
   let dependant = state.module_map.get_path(referrer);
 
   let specifier = specifier.to_rust_string_lossy(scope);
-  let specifier = resolve_import(dependant.as_deref(), &specifier, false, import_map).unwrap();
+  let specifier = resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();
