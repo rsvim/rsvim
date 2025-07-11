@@ -104,12 +104,14 @@ pub struct EsModule {
   /// Module import status.
   pub status: ModuleStatus,
   /// Maps the module itself to all its dependencies.
-  pub dependencies: Vec<Rc<RefCell<EsModule>>>,
+  pub dependencies: Vec<EsModuleRc>,
   /// Exceptions when import.
   pub exception: Rc<RefCell<Option<String>>>,
   /// Whether this module is dynamically import.
   pub is_dynamic_import: bool,
 }
+
+rc_refcell_ptr!(EsModule);
 
 impl EsModule {
   // Traverses the dependency tree to check if the module is ready.
@@ -162,21 +164,23 @@ impl EsModule {
 /// Module graph.
 pub struct ModuleGraph {
   pub kind: ImportKind,
-  pub root_rc: Rc<RefCell<EsModule>>,
+  pub root_rc: EsModuleRc,
   pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
 }
+
+rc_refcell_ptr!(ModuleGraph);
 
 impl ModuleGraph {
   // Initializes a new graph resolving a static import.
   pub fn static_import(path: &str) -> ModuleGraph {
     // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
+    let module = EsModule::to_rc(EsModule {
       path: path.into(),
       status: ModuleStatus::Fetching,
       dependencies: vec![],
       exception: Rc::new(RefCell::new(None)),
       is_dynamic_import: false,
-    }));
+    });
 
     Self {
       kind: ImportKind::Static,
@@ -188,13 +192,13 @@ impl ModuleGraph {
   // Initializes a new graph resolving a dynamic import.
   pub fn dynamic_import(path: &str, promise: v8::Global<v8::PromiseResolver>) -> ModuleGraph {
     // Create an ES module instance.
-    let module = Rc::new(RefCell::new(EsModule {
+    let module = EsModule::to_rc(EsModule {
       path: path.into(),
       status: ModuleStatus::Fetching,
       dependencies: vec![],
       exception: Rc::new(RefCell::new(None)),
       is_dynamic_import: true,
-    }));
+    });
 
     Self {
       kind: ImportKind::Dynamic(promise),
@@ -211,7 +215,7 @@ pub struct ModuleMap {
   pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
   pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<Rc<RefCell<ModuleGraph>>>,
+  pub pending: Vec<ModuleGraphRc>,
 }
 
 impl ModuleMap {
