@@ -54,10 +54,10 @@ fn test_load_fs_imports() {
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
   const SRC: &str = r"
-            export function sayHello() {
-                console.log('Hello, World!');
-            }
-        ";
+     export function sayHello() {
+         console.log('Hello, World!');
+     }
+  ";
 
   let source_files = [
     "./core/tests/005_more_imports.js",
