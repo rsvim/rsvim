@@ -54,16 +54,16 @@ impl EsModule {
       return;
     }
 
-    // At this point, the module is still being fetched...
+    // At this point, the module is still fetching...
     if self.dependencies.is_empty() {
       return;
     }
 
-    if !self
+    if self
       .dependencies
       .iter_mut()
       .map(|m| m.borrow().status)
-      .any(|status| status != ModuleStatus::Ready)
+      .all(|status| status == ModuleStatus::Ready)
     {
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
