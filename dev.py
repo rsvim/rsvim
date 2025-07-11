@@ -20,15 +20,6 @@ RECACHE_SCCACHE = False
 
 NO_LINKER = False
 
-LLD_NAME = None
-if WINDOWS:
-    LLD_NAME = "lld-link"
-elif MACOS:
-    LLD_NAME = "ld64.lld"
-else:
-    LLD_NAME = "ld.lld"
-LLD_FULLPATH = shutil.which(LLD_NAME)
-
 MOLD_NAME = "mold"
 MOLD_FULLPATH = shutil.which(MOLD_NAME)
 
@@ -59,10 +50,8 @@ def append_linker_rustflags():
 
     if LINUX and MOLD_FULLPATH is not None:
         append_rustflags("-Clink-arg=-fuse-ld=mold")
-    elif LLD_FULLPATH is not None:
-        append_rustflags("-Clink-arg=-fuse-ld=lld")
     else:
-        logging.warning(f"Both 'lld' ({LLD_NAME}) and 'mold' not found!")
+        logging.warning("'mold' linker not found!")
 
 
 def set_rustflags(command):
