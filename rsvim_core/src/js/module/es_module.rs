@@ -1,10 +1,10 @@
-//! ES Module, i.e. ECMAScript module.
+//! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 #[derive(Debug)]
-/// ECMAScript module, i.e. the `import` module.
+/// ES Module.
 pub struct EsModule {
   /// Module path on local file system.
   path: ModulePath,
