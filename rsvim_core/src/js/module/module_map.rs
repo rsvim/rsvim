@@ -1,4 +1,36 @@
-//! Module map.
+//! Module map and module graph.
+//!
+//! # Terms
+//! - Module graph: it maintains the relationships between a module and its dependencies tree.
+//! - Module map: it maintains all the dependencies loaded into the js rutime, i.e. the rsvim
+//! editor.
+//!
+//! The dependency is created by the `require` or `import` keyword. And there're two kinds of
+//! import: static and dynamic. For example:
+//!
+//! Case-1: Static Import
+//!
+//! ```javascript
+//! // ES Module
+//! const _ = import "lodash";
+//!
+//! // Common JS
+//! const _ = require("lodash");
+//! ```
+//!
+//! // Case-2: Dynamic Import
+//!
+//! ```javascript
+//! // Wait for import complete.
+//! const _ = await import("lodash");
+//!
+//! // Trigger callbacks on import complete.
+//! import("lodash")
+//!   .then((_) => {})
+//!   .catch((err) => {});
+//! ```
+//!
+//! Static import runs synchronizely, dynamic import runs asynchronizely.
 
 use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
