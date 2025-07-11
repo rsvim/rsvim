@@ -1,7 +1,7 @@
 //! Js module.
 
 use crate::js::JsRuntime;
-use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
+use crate::js::loader::{load_import, resolve_import};
 use crate::prelude::*;
 
 use std::sync::OnceLock;
@@ -92,64 +92,6 @@ pub fn create_origin<'s>(
     is_module,
     None,
   )
-}
-
-/// Resolves an import using the appropriate loader.
-/// Returns full path on local file system.
-pub fn resolve_import(
-  base: Option<&str>,
-  specifier: &str,
-  ignore_core_modules: bool,
-  import_map: Option<ImportMap>,
-) -> AnyResult<ModulePath> {
-  // Use import-maps if available.
-  // FIXME: This is not supported now.
-  debug_assert!(import_map.is_none());
-  let specifier = match import_map {
-    Some(map) => map.lookup(specifier).unwrap_or_else(|| specifier.into()),
-    None => specifier.into(),
-  };
-
-  // Look the params and choose a loader, then resolve module.
-  let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
-  if is_core_module_import && !ignore_core_modules {
-    CoreModuleLoader {}.resolve(base, &specifier)
-  } else {
-    FsModuleLoader {}.resolve(base, &specifier)
-  }
-}
-
-/// Loads an import using the appropriate loader.
-pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
-  // // Look the params and choose a loader.
-  // let loader: Box<dyn ModuleLoader> = match (
-  //   CORE_MODULES().contains_key(specifier),
-  //   WINDOWS_REGEX().is_match(specifier),
-  //   Url::parse(specifier).is_ok(),
-  // ) {
-  //   (true, _, _) => Box::new(CoreModuleLoader),
-  //   (_, true, _) => Box::new(FsModuleLoader),
-  //   (_, _, true) => Box::new(UrlModuleLoader { skip_cache }),
-  //   _ => Box::new(FsModuleLoader),
-  // };
-  //
-  // // Load module.
-  // loader.load(specifier)
-
-  let is_core_module_import = CORE_MODULES().contains_key(specifier);
-  if is_core_module_import {
-    CoreModuleLoader {}.load(specifier)
-  } else {
-    FsModuleLoader {}.load(specifier)
-  }
-
-  // // We don't actually have core modules
-  // FsModuleLoader {}.load(specifier)
-}
-
-/// NOTE: Not support for now.
-pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
-  load_import(specifier, skip_cache)
 }
 
 /// Resolves static import, synchronously.
