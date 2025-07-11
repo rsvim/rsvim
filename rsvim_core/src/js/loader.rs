@@ -62,6 +62,11 @@ pub trait ModuleLoader {
 
 /// Resolves module specifier (when js engine request a module).
 ///
+/// The `import_map` is an optional user provided map that overwrite default module loader, see
+/// [`ImportMap`].
+///
+/// # Returns
+///
 /// It returns full path on local filesystem.
 pub fn resolve_import(
   base: Option<&str>,
