@@ -107,7 +107,7 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
-    bail!(format!("Module not found \"{specifier}\""));
+    bail!(format!("Module not found {specifier:?}"));
   }
 
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
@@ -125,7 +125,7 @@ impl ModuleLoader for FsModuleLoader {
 
     let source = match maybe_source {
       Ok(source) => source,
-      Err(_) => bail!(format!("Module not found \"{}\"", path.display())),
+      Err(_) => bail!(format!("Module not found {path:?}")),
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
