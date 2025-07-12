@@ -14,6 +14,27 @@
 //!
 //! ## Module Path
 //!
+//! Module path is a [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier). it indicates
+//! a unique (text file) resource, here are some most widely cases:
+//!
+//! ### Local FileSystem
+//!
+//! A full path on local filesystem, for example: `/home/linrongbin/github/rsvim/rsvim/README.md`.
+//!
+//! ### [File URI Scheme](https://en.wikipedia.org/wiki/File_URI_scheme)
+//!
+//! File URI can either map a remote filesystem with format: `file://host/path`, or map a local
+//! filesystem with format: `file:///path`.
+//!
+//! ### Network URL
+//!
+//! [Http protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`), for example:
+//! `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`.
+//!
+//! [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol) (`ftp`,
+//! `sftp`), for example:
+//! `ftp://user:password@196.128.7.1/shared/folder`
+//!
 //! A module path is the local file path where the module stores. For example in a node/npm
 //! project, the `lodash` library can be installed with `npm i lodash`, and the local filesystem
 //! looks like:
