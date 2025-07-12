@@ -59,7 +59,7 @@ pub mod module_map;
 ///
 /// URI path indicates a unique file resource, here are some most widely used kinds:
 ///
-/// ## Local Filesystem
+/// ## Local FileSystem
 ///
 /// A full path on local filesystem, for example: `/home/linrongbin/github/rsvim/rsvim/README.md`.
 ///
