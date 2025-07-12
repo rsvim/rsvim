@@ -26,7 +26,7 @@
 //! File URI can either map a remote filesystem with format: `file://host/path`, or map a local
 //! filesystem with format: `file:///path`.
 //!
-//! ### Network URL
+//! ### Network URI
 //!
 //! [Http protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`), for example:
 //! `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`.
