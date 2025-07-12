@@ -36,7 +36,7 @@
 //!
 //! # Module Source
 //!
-//! A module source is the source code of the module, such as javascript source code, and the
+//! A module source is the text content of the module, such as javascript source code, and the
 //! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
