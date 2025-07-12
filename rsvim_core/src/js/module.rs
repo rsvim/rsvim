@@ -57,11 +57,33 @@ pub mod module_map;
 
 /// Module path, or say, [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier).
 ///
-/// URI path indicates a unique file resource:
-/// - Local file-system path, for example: `/home/linrongbin/github/rsvim/rsvim/README.md`.
-/// - Http URL path, for example: `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`.
-///   NOTE: The http url is usually a npm/jsr packages, with a tagged version, provided by CDN
-///   network. But there may exists other types of http urls.
+/// URI path indicates a unique file resource, here are some most widely used kinds:
+///
+/// ## Local Filesystem
+///
+/// A full path on local filesystem, for example: `/home/linrongbin/github/rsvim/rsvim/README.md`.
+///
+/// ## [File URI Scheme](https://en.wikipedia.org/wiki/File_URI_scheme)
+///
+/// File URI can either map a remote filesystem with format:
+///
+/// ```
+/// file://host/path
+/// ```
+///
+/// Or map a local filesystem with format:
+///
+/// ```
+/// file:///path
+/// ```
+///
+/// ## Network URL
+///
+/// All kinds of network protocols are allowed, for example:
+/// - [Http protocol](https://en.wikipedia.org/wiki/HTTP): `http`, `https`
+/// - [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol): `ftp`,
+///   `sftp`.
+/// - And other protocols.
 pub type ModulePath = String;
 
 /// Module source code.
