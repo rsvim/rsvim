@@ -1,8 +1,6 @@
 //! Js module.
 //!
-//! # Terms
-//!
-//! ## Module Specifier
+//! # Module Specifier
 //!
 //! A module specifier is the module name used in `import`/`require` keywords. For example:
 //!
@@ -12,22 +10,22 @@
 //!
 //! The `"lodash"` is the module specifier.
 //!
-//! ## Module Path
+//! # Module Path
 //!
 //! Module path is a [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier). it indicates
 //! a unique (text file) resource, here are some most widely cases:
 //!
-//! ### Local FileSystem
+//! ## Local FileSystem
 //!
 //! A full path on local filesystem, for example in a node/npm project, the `lodash` library in
 //! local filesystem is: `/home/linrongbin/project/node_modules/lodash/index.js`.
 //!
-//! ### [File URI Scheme](https://en.wikipedia.org/wiki/File_URI_scheme)
+//! ## File URI
 //!
-//! File URI can either map a remote filesystem with format: `file://host/path`, or map a local
-//! filesystem with format: `file:///path`.
+//! [File URI](https://en.wikipedia.org/wiki/File_URI_scheme) can map to a remote filesystem with
+//! format: `file://host/path`, or map to a local filesystem with format: `file:///path`.
 //!
-//! ### Network URI Scheme
+//! ## Network URI
 //!
 //! [Http protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`), for example:
 //! `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`. NOTE: Most npm packages are
@@ -36,7 +34,7 @@
 //! [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol) (`ftp`,
 //! `sftp`), for example: `ftp://user:password@196.128.7.1/shared/folder`.
 //!
-//! ## Module Source
+//! # Module Source
 //!
 //! A module source is the source code of the module, such as javascript source code, and the
 //! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
