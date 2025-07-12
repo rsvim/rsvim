@@ -20,21 +20,7 @@
 //! ### Local FileSystem
 //!
 //! A full path on local filesystem, for example in a node/npm project, the `lodash` library in
-//! local filesystem looks like:
-//!
-//! ```
-//! ./node_modules/lodash/
-//!  ...
-//!  |- has.js
-//!  |- hasIn.js
-//!  |- head.js
-//!  |- identity.js
-//!  |- inRange.js
-//!  |- includes.js
-//!  |- index.js     -> This is the `lodash` library entry for npm package
-//!  |- indexOf.js
-//!  ...
-//! ```
+//! local filesystem is: `/home/linrongbin/project/node_modules/lodash/index.js`.
 //!
 //! ### [File URI Scheme](https://en.wikipedia.org/wiki/File_URI_scheme)
 //!
