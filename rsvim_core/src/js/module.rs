@@ -79,11 +79,12 @@ pub mod module_map;
 ///
 /// ## Network URL
 ///
-/// All kinds of network protocols are allowed, for example:
-/// - [Http protocol](https://en.wikipedia.org/wiki/HTTP): `http`, `https`
-/// - [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol): `ftp`,
-///   `sftp`.
-/// - And other protocols.
+/// [Http protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`), for example:
+/// `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`.
+///
+/// [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol) (`ftp`,
+/// `sftp`), for example:
+/// `ftp://user:password@196.128.7.1/shared/folder`
 pub type ModulePath = String;
 
 /// Module source code.
