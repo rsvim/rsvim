@@ -1,7 +1,5 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
-use std::any::Any;
-
 use crate::js::JsRuntime;
 use crate::js::binding::throw_type_error;
 use crate::js::module::resolve_import;
