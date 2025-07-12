@@ -23,7 +23,7 @@ mod fs_loader_tests;
 
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
-  /// Resolve the module's URI by its specifier.
+  /// Resolve module path by its specifier.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 
   /// Load the module path by its specifier.
