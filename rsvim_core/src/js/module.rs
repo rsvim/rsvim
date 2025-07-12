@@ -108,6 +108,7 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
 }
 
 /// Creates v8 script origins.
+/// See: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
 pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
