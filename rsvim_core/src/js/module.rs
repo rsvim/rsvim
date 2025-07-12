@@ -13,7 +13,7 @@
 //! # Module Path
 //!
 //! Module path is a [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier). it indicates
-//! a unique (javascript source/package) resource, here are some most widely cases:
+//! a unique resource, here are some most widely cases:
 //!
 //! ## Local FileSystem
 //!
