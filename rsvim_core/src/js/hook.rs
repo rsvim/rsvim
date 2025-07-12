@@ -4,6 +4,8 @@ use crate::js::JsRuntime;
 use crate::js::binding::throw_type_error;
 use crate::js::module::resolve_import;
 
+use tracing::trace;
+
 /// Called during Module::instantiate_module.
 /// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
 pub fn module_resolve_cb<'a>(
@@ -12,6 +14,11 @@ pub fn module_resolve_cb<'a>(
   _: v8::Local<'a, v8::FixedArray>,
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
+  {
+    let referrer_scriptid = referrer.script_id();
+    trace!("module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{referrer_scriptid:?}");
+  }
+
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
   let state = JsRuntime::state(scope);
@@ -38,6 +45,11 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   module: v8::Local<v8::Module>,
   meta: v8::Local<v8::Object>,
 ) {
+  {
+    let module_scriptid = module.script_id();
+    trace!("host_initialize_import_meta_object_cb, module_scriptid:{module_scriptid:?}");
+  }
+
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
   let scope = &mut v8::HandleScope::new(scope);
@@ -75,6 +87,11 @@ fn import_meta_resolve(
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
+  {
+    let args_length = args.length();
+    trace!("import_meta_resolve, args_length:{args_length:?}");
+  }
+
   // Check for provided arguments.
   if args.length() == 0 {
     throw_type_error(scope, "Not enough arguments specified.");
@@ -95,6 +112,10 @@ fn import_meta_resolve(
 /// See: <https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html>.
 /// See: <https://v8.dev/features/promise-combinators>.
 pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
+  {
+    trace!("promise_reject_cb");
+  }
+
   // Create a v8 callback-scope.
   let scope = &mut unsafe { v8::CallbackScope::new(&message) };
   let undefined = v8::undefined(scope).into();

@@ -177,7 +177,7 @@ def fmt():
 
 
 def doc(watch):
-    command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
+    command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
     if watch:
         logging.info("Run 'cargo doc' and refresh it on file changes")
         command = f"cargo watch -s '{command}'"

@@ -1,8 +1,6 @@
 //! Js module.
 //!
-//! # Terms
-//!
-//! ## Module Specifier
+//! # Module Specifier
 //!
 //! A module specifier is the module name used in `import`/`require` keywords. For example:
 //!
@@ -12,29 +10,33 @@
 //!
 //! The `"lodash"` is the module specifier.
 //!
-//! ## Module Path
+//! # Module Path
 //!
-//! A module path is the local file path where the module stores. For example in a node/npm
-//! project, the `lodash` library can be installed with `npm i lodash`, and the local filesystem
-//! looks like:
+//! Module path is a [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier). it indicates
+//! a unique resource, here are some most widely cases:
 //!
-//! ```text
-//! ./node_modules/lodash/
-//!  ...
-//!  |- has.js
-//!  |- hasIn.js
-//!  |- head.js
-//!  |- identity.js
-//!  |- inRange.js
-//!  |- includes.js
-//!  |- index.js     -> This is the `lodash` library entry for npm package
-//!  |- indexOf.js
-//!  ...
-//! ```
+//! ## Local FileSystem
 //!
-//! ## Module Source
+//! A full path on local filesystem, for example in a node/npm project, the `lodash` library in
+//! local filesystem is: `/home/linrongbin/project/node_modules/lodash/index.js`.
 //!
-//! A module source is the source code of the module, such as javascript source code, and the
+//! ## File URI
+//!
+//! [File URI](https://en.wikipedia.org/wiki/File_URI_scheme) can map to a remote filesystem with
+//! format: `file://host/path`, or map to a local filesystem with format: `file:///path`.
+//!
+//! ## Network URI
+//!
+//! [Http protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`), for example:
+//! `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`. NOTE: Most npm packages are
+//! specified with a package name + tagged version, and host by CDN network.
+//!
+//! [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol) (`ftp`,
+//! `sftp`), for example: `ftp://user:password@196.128.7.1/shared/folder`.
+//!
+//! # Module Source
+//!
+//! A module source is the text content of the module, such as javascript source code, and the
 //! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
@@ -55,7 +57,7 @@ pub mod es_module;
 pub mod import_map;
 pub mod module_map;
 
-/// Module path on local file system.
+/// Module path ([URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)).
 pub type ModulePath = String;
 
 /// Module source code.
@@ -108,6 +110,7 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
 }
 
 /// Creates v8 script origins.
+/// See: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
 pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
@@ -134,7 +137,7 @@ pub fn create_origin<'s>(
 const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
 const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
 
-fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
+fn _choose_loader(specifier: &str) -> &dyn ModuleLoader {
   let is_core_module_import = CORE_MODULES().contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
@@ -167,7 +170,7 @@ pub fn resolve_import(
   };
 
   // Look the params and choose a loader, then resolve module.
-  let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
+  let resolver: &dyn ModuleLoader = _choose_loader(specifier.as_str());
 
   resolver.resolve(base, &specifier)
 }
@@ -190,7 +193,7 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // loader.load(specifier)
 
   // We don't actually have core modules
-  let loader: &dyn ModuleLoader = _choose_module_loader(specifier);
+  let loader: &dyn ModuleLoader = _choose_loader(specifier);
 
   loader.load(specifier)
 }
