@@ -134,7 +134,7 @@ pub fn create_origin<'s>(
 const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
 const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
 
-fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
+fn _choose_loader(specifier: &str) -> &dyn ModuleLoader {
   let is_core_module_import = CORE_MODULES().contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
@@ -167,7 +167,7 @@ pub fn resolve_import(
   };
 
   // Look the params and choose a loader, then resolve module.
-  let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
+  let resolver: &dyn ModuleLoader = _choose_loader(specifier.as_str());
 
   resolver.resolve(base, &specifier)
 }
@@ -190,7 +190,7 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
   // loader.load(specifier)
 
   // We don't actually have core modules
-  let loader: &dyn ModuleLoader = _choose_module_loader(specifier);
+  let loader: &dyn ModuleLoader = _choose_loader(specifier);
 
   loader.load(specifier)
 }
