@@ -6,16 +6,6 @@ use tracing::info;
 
 // static INIT: Once = Once::new();
 
-fn clear_config_dir() {}
-
-fn make_xdg_config_dir() {}
-
-fn make_home_config_dir() {}
-
-#[cfg(target_os = "windows")]
-#[test]
-fn make_xdg_cache_dir() {}
-
 #[cfg(not(target_os = "windows"))]
 #[test]
 fn make_xdg_cache_dir() {}
@@ -25,7 +15,7 @@ fn make_xdg_cache_dir() {}
 fn config_file_windows() {
   // INIT.call_once(test_log_init);
   let cfg = PathConfig::default();
-  match cfg.config_file().as_ref() {
+  match cfg.config_file() {
     Some(actual) => {
       info!("config_file (windows): ${:?}", actual);
       assert!(
@@ -42,7 +32,7 @@ fn config_file_windows() {
 fn config_file_unix() {
   // INIT.call_once(test_log_init);
   let cfg = PathConfig::default();
-  match cfg.config_entry().as_ref() {
+  match cfg.config_entry() {
     Some(actual) => {
       info!("config_file (unix): ${:?}", actual);
       assert!(
