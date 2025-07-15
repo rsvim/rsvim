@@ -16,7 +16,7 @@ fn xdg_config_home1() {
   unsafe {
     std::env::set_var("XDG_CONFIG_HOME", tmpdir.path().to_path_buf());
   }
-  std::fs::create_dir(tmpdir.path().join("rsvim"));
+  std::fs::create_dir(tmpdir.path().join("rsvim")).unwrap();
   let mut config_entry = std::fs::File::create("rsvim.js").unwrap();
   info!("config_entry:{config_entry:?}");
   config_entry.write_all(b"hello").unwrap();
@@ -39,7 +39,7 @@ fn xdg_config_home2() {
   unsafe {
     std::env::set_var("XDG_CONFIG_HOME", tmpdir.path().to_path_buf());
   }
-  std::fs::create_dir(tmpdir.path().join("rsvim"));
+  std::fs::create_dir(tmpdir.path().join("rsvim")).unwrap();
   let mut config_entry1 = std::fs::File::create("rsvim.js").unwrap();
   config_entry1.write_all(b"hello").unwrap();
   info!("config_entry1:{config_entry1:?}");
