@@ -1,4 +1,4 @@
-//! Environment variables.
+//! Global constants.
 
 #![allow(non_snake_case)]
 
@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
 
-use crate::envar::path_config::PathConfig;
+use path_config::PathConfig;
 
 pub mod path_config;
 
@@ -75,16 +75,16 @@ pub fn CONFIG_HOME_PATH() -> Option<PathBuf> {
     .clone()
 }
 
-/// Cache directory path, i.e. `$XDG_CACHE_HOME/rsvim`.
-pub fn CACHE_DIR_PATH() -> PathBuf {
+/// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
+pub fn CACHE_HOME_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
     .cache_home()
     .clone()
 }
 
-/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim`.
-pub fn DATA_DIR_PATH() -> PathBuf {
+/// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
+pub fn DATA_HOME_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
     .data_home()
