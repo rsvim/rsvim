@@ -17,7 +17,6 @@ use crate::ui::tree::TreeArc;
 
 use once_cell::sync::Lazy;
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
