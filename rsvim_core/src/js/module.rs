@@ -36,7 +36,7 @@
 //!
 //! NOTE: Here, modules are specially designed for Rsvim editor, all remote resources (file URI,
 //! network URI) will be downloaded and cached in local filesystem. We don't put the download step
-//! at Rsvim starting (at least for now).
+//! at Rsvim starting (at least for now). It helps simplify the architecture of Rsvim.
 //!
 //! # Module Source
 //!
