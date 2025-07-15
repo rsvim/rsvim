@@ -50,8 +50,9 @@ pub trait ModuleLoader {
   ///   caches them), then reads the local cache and returns the module source.
   ///
   /// NOTE: (To simplifies the architecture, ) all loading process are synchronize, not
-  /// asynchronize. Even network downloading process is synchronize. But in real-world, we will
-  /// provide a way to help user downloading and install the remote packages/plugins to local
-  /// machine first, before they really start Rsvim editor to avoid this issue.
+  /// asynchronize. Even network downloading process is synchronize (at least for now). But in
+  /// real-world, we need to provide a way to help user downloading and install the remote
+  /// packages/plugins to local machine first, before they really start Rsvim editor, to avoid this
+  /// issue.
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
