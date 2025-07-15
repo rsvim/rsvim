@@ -10,6 +10,9 @@ use crate::envar::path_config::PathConfig;
 
 pub mod path_config;
 
+#[cfg(test)]
+mod path_config_tests;
+
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
 /// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS` environment variable.

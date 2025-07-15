@@ -29,6 +29,12 @@ fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.home_dir.join(".rsvim")
 }
 
+#[derive(Debug, Clone)]
+struct ConfigHomeAndEntry {
+  pub config_home: PathBuf,
+  pub config_entry: PathBuf,
+}
+
 /// Find the config home directory. This method look for config entry (`rsvim.{js,ts}`) in below
 /// locations:
 /// 1. `$XDG_CONFIG_HOME/rsvim`
@@ -36,15 +42,21 @@ fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
 ///    well.
 ///
 /// It returns `(Home, Entry)`.
-fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<(PathBuf, PathBuf)> {
+fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<ConfigHomeAndEntry> {
   for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
-      return Some((config_dir.to_path_buf(), ts_config));
+      return Some(ConfigHomeAndEntry {
+        config_home: config_dir.to_path_buf(),
+        config_entry: ts_config,
+      });
     }
     let js_config = config_dir.join("rsvim.js");
     if js_config.as_path().exists() {
-      return Some((config_dir.to_path_buf(), js_config));
+      return Some(ConfigHomeAndEntry {
+        config_home: config_dir.to_path_buf(),
+        config_entry: js_config,
+      });
     }
   }
 
@@ -56,15 +68,14 @@ fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<(PathBuf, PathB
   .iter()
   {
     if config_entry.exists() {
-      return Some((cached_dirs.home_dir.clone(), config_entry.clone()));
+      return Some(ConfigHomeAndEntry {
+        config_home: cached_dirs.home_dir.clone(),
+        config_entry: config_entry.clone(),
+      });
     }
   }
 
   None
-}
-
-fn get_config_home(cached_dirs: &CachedDirs) -> Option<PathBuf> {
-  get_config_home_and_entry(cached_dirs).map(|c| c.0)
 }
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
@@ -100,8 +111,12 @@ impl PathConfig {
     };
     let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
     PathConfig {
-      config_home: config_home_and_entry.as_ref().map(|c| c.0.clone()),
-      config_entry: config_home_and_entry.as_ref().map(|c| c.1.clone()),
+      config_home: config_home_and_entry
+        .as_ref()
+        .map(|c| c.config_home.clone()),
+      config_entry: config_home_and_entry
+        .as_ref()
+        .map(|c| c.config_entry.clone()),
       cache_home: _xdg_cache_dir(&cached_dirs),
       data_home: _xdg_data_dir(&cached_dirs),
     }
@@ -131,50 +146,5 @@ impl PathConfig {
 impl Default for PathConfig {
   fn default() -> Self {
     PathConfig::new()
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-  // use crate::test::log::init as test_log_init;
-
-  // use std::sync::Once;
-  use tracing::info;
-
-  // static INIT: Once = Once::new();
-
-  #[cfg(target_os = "windows")]
-  #[test]
-  fn config_file_windows() {
-    // INIT.call_once(test_log_init);
-    let cfg = PathConfig::default();
-    match cfg.config_file().as_ref() {
-      Some(actual) => {
-        info!("config_file (windows): ${:?}", actual);
-        assert!(
-          actual.to_str().unwrap().ends_with(".rsvim.js")
-            || actual.to_str().unwrap().ends_with(".rsvim.ts")
-        );
-      }
-      None => { /* Skip */ }
-    }
-  }
-
-  #[cfg(not(target_os = "windows"))]
-  #[test]
-  fn config_file_unix() {
-    // INIT.call_once(test_log_init);
-    let cfg = PathConfig::default();
-    match cfg.config_entry().as_ref() {
-      Some(actual) => {
-        info!("config_file (unix): ${:?}", actual);
-        assert!(
-          actual.to_str().unwrap().ends_with(".rsvim.js")
-            || actual.to_str().unwrap().ends_with(".rsvim.ts")
-        );
-      }
-      None => { /* Skip */ }
-    }
   }
 }
