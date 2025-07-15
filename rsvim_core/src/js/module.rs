@@ -176,7 +176,7 @@ pub fn resolve_import(
 }
 
 /// Loads module source by its module path.
-pub fn load_import(specifier: &ModulePath, _skip_cache: bool) -> AnyResult<ModuleSource> {
+pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
   //   CORE_MODULES().contains_key(specifier),
@@ -199,10 +199,7 @@ pub fn load_import(specifier: &ModulePath, _skip_cache: bool) -> AnyResult<Modul
 }
 
 /// FIXME: Not supported yet.
-pub async fn load_import_async(
-  specifier: &ModulePath,
-  skip_cache: bool,
-) -> AnyResult<ModuleSource> {
+pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
 

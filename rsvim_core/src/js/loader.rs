@@ -53,5 +53,5 @@ pub trait ModuleLoader {
   /// asynchronize. Even network downloading process is synchronize. But in real-world, we will
   /// provide a way to help user downloading and install the remote packages/plugins to local
   /// machine first, before they really start Rsvim editor to avoid this issue.
-  fn load(&self, specifier: &ModulePath) -> AnyResult<ModuleSource>;
+  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
 }
