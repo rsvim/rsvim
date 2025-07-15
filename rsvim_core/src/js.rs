@@ -16,11 +16,8 @@ use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
 use once_cell::sync::Lazy;
-use parking_lot::Mutex;
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
@@ -373,7 +370,6 @@ pub struct JsRuntimeState {
   // Receiver: js runtime receive from master.
   pub jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
-  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
@@ -422,7 +418,6 @@ impl JsRuntime {
     jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
     jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
-    runtime_path: Arc<Mutex<Vec<PathBuf>>>,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
@@ -523,7 +518,6 @@ impl JsRuntime {
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt,
-      runtime_path,
       tree,
       buffers,
       contents,

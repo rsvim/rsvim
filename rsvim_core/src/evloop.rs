@@ -2,8 +2,8 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
+use crate::consts;
 use crate::content::{TextContents, TextContentsArc};
-use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
@@ -19,8 +19,7 @@ use crate::ui::widget::window::Window;
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
 use futures::StreamExt;
-use parking_lot::Mutex;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
@@ -55,16 +54,6 @@ pub struct EventLoop {
 
   /// Command line options.
   pub cli_opt: CliOpt,
-
-  /// Runtime path (directories). It initializes with following directories:
-  ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
-  /// 2. `$HOME/.rsvim/`
-  ///
-  /// Also see [`CONFIG_DIRS_PATH`](crate::envar::CONFIG_DIRS_PATH).
-  ///
-  /// NOTE: All the external plugins are been searched under runtime path.
-  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -142,7 +131,7 @@ impl EventLoop {
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
     // Channel: workers => master
-    let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
+    let (wkr_to_mstr, mstr_from_wkr) = channel(consts::CHANNEL_BUF_SIZE());
 
     // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
     // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
@@ -176,15 +165,11 @@ impl EventLoop {
     // trigger the event loop in `tokio::select!`.
 
     // Channel: js runtime => master
-    let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
+    let (jsrt_to_mstr, mstr_from_jsrt) = channel(consts::CHANNEL_BUF_SIZE());
     // Channel: master => js runtime
-    let (mstr_to_jsrt, jsrt_from_mstr) = channel(envar::CHANNEL_BUF_SIZE());
+    let (mstr_to_jsrt, jsrt_from_mstr) = channel(consts::CHANNEL_BUF_SIZE());
     // Channel: master => master
-    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
-
-    // Runtime Path
-    let runtime_path = envar::CONFIG_DIRS_PATH();
-    let runtime_path = Arc::new(Mutex::new(runtime_path));
+    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(consts::CHANNEL_BUF_SIZE());
 
     // Task Tracker
     let detached_tracker = TaskTracker::new();
@@ -208,7 +193,6 @@ impl EventLoop {
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt.clone(),
-      runtime_path.clone(),
       tree.clone(),
       buffers_manager.clone(),
       text_contents.clone(),
@@ -219,7 +203,6 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
-      runtime_path,
       canvas,
       tree,
       state,
@@ -242,10 +225,10 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_file) = envar::CONFIG_FILE_PATH() {
+    if let Some(config_entry) = consts::CONFIG_ENTRY_PATH() {
       self
         .js_runtime
-        .execute_module(config_file.to_str().unwrap(), None)
+        .execute_module(config_entry.to_str().unwrap(), None)
         .unwrap();
     }
     Ok(())

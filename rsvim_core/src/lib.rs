@@ -2,10 +2,10 @@
 
 pub mod buf;
 pub mod cli;
+pub mod consts;
 pub mod content;
 pub mod coord;
 pub mod defaults;
-pub mod envar;
 pub mod evloop;
 pub mod excommand;
 pub mod js;

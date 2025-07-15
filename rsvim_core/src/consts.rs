@@ -1,4 +1,4 @@
-//! Environment variables.
+//! Global constants.
 
 #![allow(non_snake_case)]
 
@@ -6,9 +6,12 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
 
-use crate::envar::path_config::PathConfig;
+use path_config::PathConfig;
 
 pub mod path_config;
+
+#[cfg(test)]
+mod path_config_tests;
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
@@ -43,7 +46,7 @@ pub fn CHANNEL_BUF_SIZE() -> usize {
 
 static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 
-/// User config file path, it is detected with following orders:
+/// User config entry path, it can be either one of following files:
 ///
 /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
 /// 2. `$HOME/.rsvim/rsvim.{ts.js}`
@@ -51,38 +54,40 @@ static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 ///
 /// NOTE:
 /// 1. Typescript file is preferred over javascript, if both exist.
-/// 2. For macOS, the `$XDG_CONFIG_HOME` also detects the `$HOME/.config` folder.
-pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
+/// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
+/// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
+///    `$HOME/.rsvim`.
+pub fn CONFIG_ENTRY_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_file()
+    .config_entry()
     .clone()
 }
 
-/// User config directory paths, it contains following directories:
+/// User config home directory, it can be either one of following directories:
 ///
 /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
 /// 2. `$HOME/.rsvim/`
-pub fn CONFIG_DIRS_PATH() -> Vec<PathBuf> {
+pub fn CONFIG_HOME_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_dirs()
+    .config_home()
     .clone()
 }
 
-/// Cache directory path, i.e. `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
-pub fn CACHE_DIR_PATH() -> PathBuf {
+/// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
+pub fn CACHE_HOME_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .cache_dir()
+    .cache_home()
     .clone()
 }
 
-/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
-pub fn DATA_DIR_PATH() -> PathBuf {
+/// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
+pub fn DATA_HOME_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .data_dir()
+    .data_home()
     .clone()
 }
 
