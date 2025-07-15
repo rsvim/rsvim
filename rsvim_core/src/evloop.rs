@@ -225,10 +225,10 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_file) = consts::CONFIG_ENTRY_PATH() {
+    if let Some(config_entry) = consts::CONFIG_ENTRY_PATH() {
       self
         .js_runtime
-        .execute_module(config_file.to_str().unwrap(), None)
+        .execute_module(config_entry.to_str().unwrap(), None)
         .unwrap();
     }
     Ok(())
