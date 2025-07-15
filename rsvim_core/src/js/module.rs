@@ -175,8 +175,8 @@ pub fn resolve_import(
   resolver.resolve(base, &specifier)
 }
 
-/// Loads module source by its specifier.
-pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
+/// Loads module source by its module path.
+pub fn load_import(specifier: &ModulePath, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
   //   CORE_MODULES().contains_key(specifier),
@@ -199,7 +199,10 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
 }
 
 /// FIXME: Not supported yet.
-pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
+pub async fn load_import_async(
+  specifier: &ModulePath,
+  skip_cache: bool,
+) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
 
@@ -207,7 +210,7 @@ pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<M
 /// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
 pub fn fetch_module_tree<'a>(
   scope: &mut v8::HandleScope<'a>,
-  filename: &str,
+  filename: &ModulePath,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Create a script origin.
