@@ -22,6 +22,7 @@ use std::path::PathBuf;
 static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
+/// (Local) FileSystem module loader.
 pub struct FsModuleLoader;
 
 impl FsModuleLoader {
@@ -89,8 +90,18 @@ impl FsModuleLoader {
 
 impl ModuleLoader for FsModuleLoader {
   /// Resolve module path by specifier, all fs modules are stored on local filesystem.
+  ///
+  /// The resolving algorithm handles 3 scenarios:
+  ///
+  /// 1. The Rsvim's config entry, i.e. there are 3 cases:
+  ///    - `$XDG_CONFIG_HOME/rsvim/rsvim.{js,ts}`, on different platform they are:
+  ///      - On Windows, the default value is: `$env:APPDATA\rsvim\rsvim.{js,ts}`
+  ///        (`$env:USERPROFILE\AppData\Roaming\rsvim\rsvim.{js,ts}`).
+  ///      - On MacOS, the default value is:
+  ///        `$HOME/Library/Application Support/rsvim/rsvim.{js,ts}`.
+  ///      - On Linux, the default value is: `$HOME/.config/rsvim/rsvim.{js,ts}`.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
-    // Resolve absolute import.
+    // Absolute path
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
