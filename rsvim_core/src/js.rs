@@ -16,11 +16,9 @@ use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
 use once_cell::sync::Lazy;
-use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
