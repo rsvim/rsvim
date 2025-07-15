@@ -29,7 +29,6 @@ macro_rules! restore_xdg {
   };
 }
 
-#[test]
 fn xdg_config_home1() {
   test_log_init();
 
@@ -53,7 +52,6 @@ fn xdg_config_home1() {
   restore_xdg!(saved_config_home, XDG_CONFIG_HOME);
 }
 
-#[test]
 fn xdg_config_home2() {
   test_log_init();
 
@@ -81,7 +79,6 @@ fn xdg_config_home2() {
 }
 
 #[cfg(target_os = "windows")]
-#[test]
 fn xdg_cache_home1() {
   test_log_init();
 
@@ -98,7 +95,6 @@ fn xdg_cache_home1() {
 }
 
 #[cfg(not(target_os = "windows"))]
-#[test]
 fn xdg_cache_home1() {
   test_log_init();
 
@@ -115,7 +111,6 @@ fn xdg_cache_home1() {
 }
 
 #[cfg(target_os = "windows")]
-#[test]
 fn xdg_data_home1() {
   test_log_init();
 
@@ -132,7 +127,6 @@ fn xdg_data_home1() {
 }
 
 #[cfg(not(target_os = "windows"))]
-#[test]
 fn xdg_data_home1() {
   test_log_init();
 
@@ -146,4 +140,12 @@ fn xdg_data_home1() {
   assert_eq!(actual1, tmpdir.path().join("rsvim"));
 
   restore_xdg!(saved_data_home, XDG_DATA_HOME);
+}
+
+#[test]
+fn test() {
+  xdg_config_home1();
+  xdg_config_home2();
+  xdg_cache_home1();
+  xdg_data_home1();
 }
