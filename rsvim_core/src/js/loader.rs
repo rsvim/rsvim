@@ -21,7 +21,13 @@ pub mod fs_loader;
 #[cfg(test)]
 mod fs_loader_tests;
 
-/// Defines the interface of a module loader.
+/// Module loader.
+///
+/// There are 3 kinds of module loaders:
+/// 1. Core module loader, provide builtin modules.
+/// 2. Fs module loader, provide modules on local filesystem.
+/// 3. URL module loader, provide remote modules on network URI and file URI (file URI can be local
+///    filesystem).
 pub trait ModuleLoader {
   /// Resolve module path by its specifier.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;

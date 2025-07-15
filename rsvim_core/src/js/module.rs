@@ -18,9 +18,10 @@
 //! 1. Local fileSystem: A full path on local filesystem, for example in a node/npm project, the
 //!    `lodash` library in local filesystem is:
 //!    `/home/linrongbin/project/node_modules/lodash/index.js`.
-//! 2. [File URI](https://en.wikipedia.org/wiki/File_URI_scheme): Maps to a remote filesystem with
-//!    format: `file://host/path`, or maps to a local filesystem with format: `file:///path`.
-//! 3. Network URI: Maps to a remote network resource, there are multiple types of URI:
+//! 2. URI: Maps to a remote network resource, there are multiple types of URI:
+//!    - [File URI](https://en.wikipedia.org/wiki/File_URI_scheme): Maps to a remote filesystem
+//!      with format: `file://host/path`, or maps to a local filesystem with format:
+//!      `file:///path`.
 //!    - [HTTP protocol](https://en.wikipedia.org/wiki/HTTP) (`http`, `https`): for example:
 //!      `https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js`. NOTE: Most npm packages are
 //!      specified with a `name+tag`, hosted by CDN network.
