@@ -4,17 +4,13 @@ use crate::test::log::init as test_log_init;
 use std::io::Write;
 use tracing::info;
 
-#[cfg(not(target_os = "windows"))]
-#[test]
-fn make_xdg_cache_dir() {}
-
 #[test]
 fn xdg_config_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
   unsafe {
-    std::env::set_var("XDG_CONFIG_HOME", tmpdir.path().to_path_buf());
+    std::env::set_var("XDG_CONFIG_HOME", tmpdir.path());
   }
   std::fs::create_dir(tmpdir.path().join("rsvim")).unwrap();
   let mut config_entry = std::fs::File::create("rsvim.js").unwrap();
@@ -37,7 +33,7 @@ fn xdg_config_home2() {
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
   unsafe {
-    std::env::set_var("XDG_CONFIG_HOME", tmpdir.path().to_path_buf());
+    std::env::set_var("XDG_CONFIG_HOME", tmpdir.path());
   }
   std::fs::create_dir(tmpdir.path().join("rsvim")).unwrap();
   let mut config_entry1 = std::fs::File::create("rsvim.js").unwrap();
