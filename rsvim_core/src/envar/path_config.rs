@@ -1,12 +1,12 @@
 //! File path configs.
 
-use std::path::PathBuf;
+use std::{intrinsics::needs_drop, path::PathBuf};
 
 #[derive(Debug, Clone)]
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
 pub struct PathConfig {
   config_file: Option<PathBuf>,
-  config_dirs: Vec<PathBuf>,
+  config_home: Option<PathBuf>,
   cache_dir: PathBuf,
   data_dir: PathBuf,
 }
@@ -19,15 +19,46 @@ struct CachedDirs {
   data_dir: PathBuf,
 }
 
-/// For windows: `$env:USERPROFILE\AppData\Roaming\rsvim`.
-/// For others: `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`.
+/// `$XDG_CONFIG_HOME/rsvim`
 fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.config_dir.join("rsvim").to_path_buf()
 }
 
-/// For all: `$HOME/.rsvim`.
+/// `$HOME/.rsvim`
 fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.home_dir.join(".rsvim")
+}
+
+/// Find the config home directory. This method look for config entry (`rsvim.{js,ts}`) in below
+/// locations:
+/// 1. `$XDG_CONFIG_HOME/rsvim`
+/// 2. `$HOME/.rsvim`, additionally, `$HOME/.rsvim.{js,ts}` will be recognized as config entry as
+///    well.
+fn get_config_home(cached_dirs: &CachedDirs) -> Option<PathBuf> {
+  for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
+    let ts_config = config_dir.join("rsvim.ts");
+    if ts_config.as_path().exists() {
+      return Some(config_dir.to_path_buf());
+    }
+    let js_config = config_dir.join("rsvim.js");
+    if js_config.as_path().exists() {
+      return Some(config_dir.to_path_buf());
+    }
+  }
+
+  // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
+  for config_entry in [
+    cached_dirs.home_dir.join(".rsvim.ts").to_path_buf(),
+    cached_dirs.home_dir.join(".rsvim.js").to_path_buf(),
+  ]
+  .iter()
+  {
+    if config_entry.exists() {
+      return Some(cached_dirs.home_dir.clone());
+    }
+  }
+
+  None
 }
 
 /// Find the config file `rsvim.ts` or `rsvim.js` in rsvim config directory. This method will look
@@ -99,7 +130,7 @@ impl PathConfig {
     };
     PathConfig {
       config_file: get_config_file(&cached_dirs),
-      config_dirs: get_config_dirs(&cached_dirs),
+      config_home: get_config_dirs(&cached_dirs),
       cache_dir: _xdg_cache_dir(&cached_dirs),
       data_dir: _xdg_data_dir(&cached_dirs),
     }
@@ -112,7 +143,7 @@ impl PathConfig {
 
   /// Get the config dirs.
   pub fn config_dirs(&self) -> &Vec<PathBuf> {
-    &self.config_dirs
+    &self.config_home
   }
 
   /// Get the cache directory.

@@ -43,7 +43,7 @@ pub fn CHANNEL_BUF_SIZE() -> usize {
 
 static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 
-/// User config file path, it is detected with following orders:
+/// User config entry path, it can be either one of following files:
 ///
 /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
 /// 2. `$HOME/.rsvim/rsvim.{ts.js}`
@@ -51,11 +51,24 @@ static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 ///
 /// NOTE:
 /// 1. Typescript file is preferred over javascript, if both exist.
-/// 2. For macOS, the `$XDG_CONFIG_HOME` also detects the `$HOME/.config` folder.
-pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
+/// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
+/// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
+///    `$HOME/.rsvim`.
+pub fn CONFIG_ENTRY_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
     .config_file()
+    .clone()
+}
+
+/// User config home directory, it can be either one of following directories:
+///
+/// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
+/// 2. `$HOME/.rsvim/`
+pub fn CONFIG_HOME_PATH() -> Vec<PathBuf> {
+  PATH_CONFIG_VALUE
+    .get_or_init(PathConfig::new)
+    .config_dirs()
     .clone()
 }
 

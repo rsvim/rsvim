@@ -56,6 +56,12 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
+  /// Config entry file path.
+  pub config_entry: Option<PathBuf>,
+
+  /// Config home directory path.
+  pub config_home: Option<PathBuf>,
+
   /// Runtime path (directories). It initializes with following directories:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
@@ -242,7 +248,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_file) = envar::CONFIG_FILE_PATH() {
+    if let Some(config_file) = envar::CONFIG_ENTRY_PATH() {
       self
         .js_runtime
         .execute_module(config_file.to_str().unwrap(), None)
