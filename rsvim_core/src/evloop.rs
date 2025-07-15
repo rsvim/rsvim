@@ -55,18 +55,6 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
-  /// Config home directory path, one of below directories:
-  ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/`
-  /// 2. `$HOME/.rsvim/`
-  pub config_home: Option<PathBuf>,
-
-  /// Config entry file path, one of below files:
-  ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}`
-  /// 2. `$HOME/.rsvim/rsvim.{ts,js}` (or `$HOME/.rsvim.{ts,js}`)
-  pub config_entry: Option<PathBuf>,
-
   /// Widget tree for UI.
   pub tree: TreeArc,
   /// Canvas for UI.
@@ -183,10 +171,6 @@ impl EventLoop {
     // Channel: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
-    // Runtime Path
-    let config_home = envar::CONFIG_HOME_PATH();
-    let config_entry = envar::CONFIG_ENTRY_PATH();
-
     // Task Tracker
     let detached_tracker = TaskTracker::new();
     let blocked_tracker = TaskTracker::new();
@@ -209,8 +193,6 @@ impl EventLoop {
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt.clone(),
-      config_home.clone(),
-      config_entry.clone(),
       tree.clone(),
       buffers_manager.clone(),
       text_contents.clone(),
@@ -221,8 +203,6 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
-      config_home,
-      config_entry,
       canvas,
       tree,
       state,
