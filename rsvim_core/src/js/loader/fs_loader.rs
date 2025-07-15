@@ -101,6 +101,7 @@ impl ModuleLoader for FsModuleLoader {
   ///        `$HOME/Library/Application Support/rsvim/rsvim.{js,ts}`.
   ///      - On Linux, the default value is: `$HOME/.config/rsvim/rsvim.{js,ts}`.
   ///    - `$HOME/.rsvim/rsvim.{js,ts}`
+  ///    - `$HOME/.rsvim.{js,ts}`
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Absolute path
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
