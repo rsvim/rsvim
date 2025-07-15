@@ -36,6 +36,9 @@ pub trait ModuleLoader {
   /// - For fs module loader, it returns the full file path on local filesystem.
   /// - For url module loader, it returns remote URI (network URI or file URI) which indicates a
   ///   network location that can download the resource.
+  ///
+  /// NOTE: (To simplifies the architecture, ) all resolving process are synchronize, not
+  /// asynchronize.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path.
@@ -45,5 +48,10 @@ pub trait ModuleLoader {
   ///   source.
   /// - For url module loader, it first downloads the remote resource to local filesystem (and
   ///   caches them), then reads the local cache and returns the module source.
+  ///
+  /// NOTE: (To simplifies the architecture, ) all loading process are synchronize, not
+  /// asynchronize. Even network downloading process is synchronize. But in real-world, we will
+  /// provide a way to help user downloading and install the remote packages/plugins to local
+  /// machine first, before they really start Rsvim editor to avoid this issue.
   fn load(&self, specifier: &ModulePath) -> AnyResult<ModuleSource>;
 }
