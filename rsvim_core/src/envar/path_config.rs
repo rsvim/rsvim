@@ -1,14 +1,14 @@
 //! File path configs.
 
-use std::{intrinsics::needs_drop, path::PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
 pub struct PathConfig {
-  config_file: Option<PathBuf>,
+  config_entry: Option<PathBuf>,
   config_home: Option<PathBuf>,
-  cache_dir: PathBuf,
-  data_dir: PathBuf,
+  cache_home: PathBuf,
+  data_home: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -34,15 +34,17 @@ fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
 /// 1. `$XDG_CONFIG_HOME/rsvim`
 /// 2. `$HOME/.rsvim`, additionally, `$HOME/.rsvim.{js,ts}` will be recognized as config entry as
 ///    well.
-fn get_config_home(cached_dirs: &CachedDirs) -> Option<PathBuf> {
+///
+/// It returns `(Home, Entry)`.
+fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<(PathBuf, PathBuf)> {
   for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
-      return Some(config_dir.to_path_buf());
+      return Some((config_dir.to_path_buf(), ts_config));
     }
     let js_config = config_dir.join("rsvim.js");
     if js_config.as_path().exists() {
-      return Some(config_dir.to_path_buf());
+      return Some((config_dir.to_path_buf(), js_config));
     }
   }
 
@@ -54,47 +56,15 @@ fn get_config_home(cached_dirs: &CachedDirs) -> Option<PathBuf> {
   .iter()
   {
     if config_entry.exists() {
-      return Some(cached_dirs.home_dir.clone());
+      return Some((cached_dirs.home_dir.clone(), config_entry.clone()));
     }
   }
 
   None
 }
 
-/// Find the config file `rsvim.ts` or `rsvim.js` in rsvim config directory. This method will look
-/// for the config file in 3 locations:
-/// 1. The `$HOME/.rsvim.ts` or `$HOME/.rsvim.js`. This is similar to vim's `$HOME/.vimrc` config
-///    file.
-/// 2. The `$HOME/.rsvim/rsvim.ts` or `$HOME/.rsvim/rsvim.js`.
-/// 3. The `$XDG_CONFIG_HOME/rsvim/rsvim.ts` or `$XDG_CONFIG_HOME/rsvim/rsvim.js`.
-///
-/// NOTE: The `ts` file always has higher priority.
-fn get_config_file(cached_dirs: &CachedDirs) -> Option<PathBuf> {
-  for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
-    let ts_config = config_dir.join("rsvim.ts");
-    if ts_config.as_path().exists() {
-      return Some(ts_config);
-    }
-    let js_config = config_dir.join("rsvim.js");
-    if js_config.as_path().exists() {
-      return Some(js_config);
-    }
-  }
-
-  // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
-  vec![
-    cached_dirs.home_dir.join(".rsvim.ts").to_path_buf(),
-    cached_dirs.home_dir.join(".rsvim.js").to_path_buf(),
-  ]
-  .into_iter()
-  .find(|p| p.exists())
-}
-
-fn get_config_dirs(cached_dirs: &CachedDirs) -> Vec<PathBuf> {
-  vec![_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)]
-    .into_iter()
-    .filter(|p| p.exists())
-    .collect()
+fn get_config_home(cached_dirs: &CachedDirs) -> Option<PathBuf> {
+  get_config_home_and_entry(cached_dirs).map(|c| c.0)
 }
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
@@ -128,32 +98,33 @@ impl PathConfig {
       cache_dir: dirs::cache_dir().unwrap(),
       data_dir: dirs::data_dir().unwrap(),
     };
+    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
     PathConfig {
-      config_file: get_config_file(&cached_dirs),
-      config_home: get_config_dirs(&cached_dirs),
-      cache_dir: _xdg_cache_dir(&cached_dirs),
-      data_dir: _xdg_data_dir(&cached_dirs),
+      config_home: config_home_and_entry.as_ref().map(|c| c.0.clone()),
+      config_entry: config_home_and_entry.as_ref().map(|c| c.1.clone()),
+      cache_home: _xdg_cache_dir(&cached_dirs),
+      data_home: _xdg_data_dir(&cached_dirs),
     }
   }
 
-  /// Get the config file.
-  pub fn config_file(&self) -> &Option<PathBuf> {
-    &self.config_file
+  /// Get the config entry file.
+  pub fn config_entry(&self) -> &Option<PathBuf> {
+    &self.config_entry
   }
 
-  /// Get the config dirs.
-  pub fn config_dirs(&self) -> &Vec<PathBuf> {
+  /// Get the config home directory.
+  pub fn config_home(&self) -> &Option<PathBuf> {
     &self.config_home
   }
 
-  /// Get the cache directory.
-  pub fn cache_dir(&self) -> &PathBuf {
-    &self.cache_dir
+  /// Get the cache home directory.
+  pub fn cache_home(&self) -> &PathBuf {
+    &self.cache_home
   }
 
-  /// Get the data directory.
-  pub fn data_dir(&self) -> &PathBuf {
-    &self.data_dir
+  /// Get the data home directory.
+  pub fn data_home(&self) -> &PathBuf {
+    &self.data_home
   }
 }
 
@@ -195,7 +166,7 @@ mod tests {
   fn config_file_unix() {
     // INIT.call_once(test_log_init);
     let cfg = PathConfig::default();
-    match cfg.config_file().as_ref() {
+    match cfg.config_entry().as_ref() {
       Some(actual) => {
         info!("config_file (unix): ${:?}", actual);
         assert!(

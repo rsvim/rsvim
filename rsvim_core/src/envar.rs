@@ -57,7 +57,7 @@ static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 pub fn CONFIG_ENTRY_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_file()
+    .config_entry()
     .clone()
 }
 
@@ -68,7 +68,7 @@ pub fn CONFIG_ENTRY_PATH() -> Option<PathBuf> {
 pub fn CONFIG_HOME_PATH() -> Vec<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_dirs()
+    .config_dir()
     .clone()
 }
 
@@ -79,7 +79,7 @@ pub fn CONFIG_HOME_PATH() -> Vec<PathBuf> {
 pub fn CONFIG_DIRS_PATH() -> Vec<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_dirs()
+    .config_dir()
     .clone()
 }
 
