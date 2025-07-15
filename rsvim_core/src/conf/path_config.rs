@@ -3,15 +3,6 @@
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
-/// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
-pub struct PathConfig {
-  config_entry: Option<PathBuf>,
-  config_home: Option<PathBuf>,
-  cache_home: PathBuf,
-  data_home: PathBuf,
-}
-
-#[derive(Debug, Clone)]
 struct CachedDirs {
   config_dir: PathBuf,
   home_dir: PathBuf,
@@ -98,6 +89,15 @@ fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
     "rsvim"
   };
   cached_dirs.data_dir.join(folder).to_path_buf()
+}
+
+#[derive(Debug, Clone)]
+/// File path related configs.
+pub struct PathConfig {
+  config_entry: Option<PathBuf>,
+  config_home: Option<PathBuf>,
+  cache_home: PathBuf,
+  data_home: PathBuf,
 }
 
 impl PathConfig {
