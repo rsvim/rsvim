@@ -56,21 +56,17 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
-  /// Config entry file path.
-  pub config_entry: Option<PathBuf>,
-
-  /// Config home directory path.
+  /// Config home directory path, one of below directories:
+  ///
+  /// 1. `$XDG_CONFIG_HOME/rsvim/`
+  /// 2. `$HOME/.rsvim/`
   pub config_home: Option<PathBuf>,
 
-  /// Runtime path (directories). It initializes with following directories:
+  /// Config entry file path, one of below files:
   ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
-  /// 2. `$HOME/.rsvim/`
-  ///
-  /// Also see [`CONFIG_DIRS_PATH`](crate::envar::CONFIG_DIRS_PATH).
-  ///
-  /// NOTE: All the external plugins are been searched under runtime path.
-  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
+  /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}`
+  /// 2. `$HOME/.rsvim/rsvim.{ts,js}` (or `$HOME/.rsvim.{ts,js}`)
+  pub config_entry: Option<PathBuf>,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -189,8 +185,8 @@ impl EventLoop {
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
-    let runtime_path = envar::CONFIG_DIRS_PATH();
-    let runtime_path = Arc::new(Mutex::new(runtime_path));
+    let config_home = envar::CONFIG_HOME_PATH();
+    let config_entry = envar::CONFIG_ENTRY_PATH();
 
     // Task Tracker
     let detached_tracker = TaskTracker::new();
@@ -214,7 +210,8 @@ impl EventLoop {
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt.clone(),
-      runtime_path.clone(),
+      config_home.clone(),
+      config_entry.clone(),
       tree.clone(),
       buffers_manager.clone(),
       text_contents.clone(),
@@ -225,7 +222,8 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
-      runtime_path,
+      config_home,
+      config_entry,
       canvas,
       tree,
       state,

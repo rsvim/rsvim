@@ -68,37 +68,26 @@ pub fn CONFIG_ENTRY_PATH() -> Option<PathBuf> {
 ///
 /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
 /// 2. `$HOME/.rsvim/`
-pub fn CONFIG_HOME_PATH() -> Vec<PathBuf> {
+pub fn CONFIG_HOME_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .config_dir()
+    .config_home()
     .clone()
 }
 
-/// User config directory paths, it contains following directories:
-///
-/// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
-/// 2. `$HOME/.rsvim/`
-pub fn CONFIG_DIRS_PATH() -> Vec<PathBuf> {
-  PATH_CONFIG_VALUE
-    .get_or_init(PathConfig::new)
-    .config_dir()
-    .clone()
-}
-
-/// Cache directory path, i.e. `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
+/// Cache directory path, i.e. `$XDG_CACHE_HOME/rsvim`.
 pub fn CACHE_DIR_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .cache_dir()
+    .cache_home()
     .clone()
 }
 
-/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
+/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim`.
 pub fn DATA_DIR_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .data_dir()
+    .data_home()
     .clone()
 }
 
