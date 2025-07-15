@@ -30,8 +30,20 @@ mod fs_loader_tests;
 ///    filesystem).
 pub trait ModuleLoader {
   /// Resolve module path by its specifier.
+  ///
+  /// - For core module loader, it still returns the core module specifier (core modules don't have
+  ///   a file path on local filesystem).
+  /// - For fs module loader, it returns the full file path on local filesystem.
+  /// - For url module loader, it returns remote URI (network URI or file URI) which indicates a
+  ///   network location that can download the resource.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 
-  /// Load the module path by its specifier.
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
+  /// Load the module source by its module path.
+  ///
+  /// - For core module loader, it returns the core module source.
+  /// - For fs module loader, it reads the file content on local filesystem and returns the module
+  ///   source.
+  /// - For url module loader, it first downloads the remote resource to local filesystem (and
+  ///   caches them), then reads the local cache and returns the module source.
+  fn load(&self, specifier: &ModulePath) -> AnyResult<ModuleSource>;
 }
