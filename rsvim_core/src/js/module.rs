@@ -1,5 +1,11 @@
 //! Js module.
 //!
+//! There are 3 terms in this section:
+//!
+//! - Module specifier.
+//! - Module path.
+//! - Module source.
+//!
 //! # Module Specifier
 //!
 //! A module specifier is the module name used in `import`/`require` keywords. For example:
