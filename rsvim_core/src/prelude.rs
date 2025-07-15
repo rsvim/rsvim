@@ -1,5 +1,8 @@
 //! Prelude.
 
+// Re-export locks
+pub use parking_lot::{Mutex, MutexGuard};
+
 // Re-export `tracing`.
 pub use tracing::{debug, error, info, trace, warn};
 

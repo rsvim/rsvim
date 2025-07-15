@@ -19,7 +19,6 @@ use crate::ui::widget::window::Window;
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
 use futures::StreamExt;
-use parking_lot::Mutex;
 use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;

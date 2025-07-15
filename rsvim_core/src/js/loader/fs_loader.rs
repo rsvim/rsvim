@@ -91,18 +91,24 @@ impl FsModuleLoader {
 impl ModuleLoader for FsModuleLoader {
   /// Resolve module path by specifier, all fs modules are stored on local filesystem.
   ///
-  /// The resolving algorithm handles 3 scenarios:
+  /// For Rsvim editor, all modules are stored in config home directory (`$XDG_CONFIG_HOME/rsvim`,
+  /// `$HOME/.rsvim`). A fs module have two layouts:
   ///
-  /// 1. The Rsvim's config entry, i.e. there are 3 cases:
-  ///    - `$XDG_CONFIG_HOME/rsvim/rsvim.{js,ts}`, on different platform they are:
-  ///      - On Windows, the default value is: `$env:APPDATA\rsvim\rsvim.{js,ts}`
-  ///        (`$env:USERPROFILE\AppData\Roaming\rsvim\rsvim.{js,ts}`).
-  ///      - On MacOS, the default value is:
-  ///        `$HOME/Library/Application Support/rsvim/rsvim.{js,ts}`.
-  ///      - On Linux, the default value is: `$HOME/.config/rsvim/rsvim.{js,ts}`.
-  ///    - `$HOME/.rsvim/rsvim.{js,ts}`
-  ///    - `$HOME/.rsvim.{js,ts}`
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
+  /// - A javascript/typescript file. For example `$HOME/.rsvim/syntaxes.js`.
+  /// - A npm package. For example `$HOME/.rsvim/syntaxes/src/index.js`.
+  ///
+  /// The `base` parameter is the **current** module's full file path on local filesystem, this is
+  /// useful when resolving the relative module (for example `import "./util/helper.js"`).
+  ///
+  /// The `runtime_paths` parameter is the Rsvim editor's runtime path, this is useful when
+  /// resolving top-level modules (for example `import "syntaxes"`).
+  ///
+  fn resolve(
+    &self,
+    base: Option<&str>,
+    runtime_paths: &Vec<PathBuf>,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
     // Absolute path
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));

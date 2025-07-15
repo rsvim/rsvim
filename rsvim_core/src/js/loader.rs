@@ -5,6 +5,8 @@ use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
+use std::path::PathBuf;
+
 // Re-export
 pub use core_loader::CoreModuleLoader;
 pub use fs_loader::FsModuleLoader;
@@ -39,7 +41,12 @@ pub trait ModuleLoader {
   ///
   /// NOTE: (To simplifies the architecture, ) all resolving process are synchronize, not
   /// asynchronize.
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
+  fn resolve(
+    &self,
+    base: Option<&str>,
+    runtime_paths: &Vec<PathBuf>,
+    specifier: &str,
+  ) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path ([`ModulePath`]).
   ///
