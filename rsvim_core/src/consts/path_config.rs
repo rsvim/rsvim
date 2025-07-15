@@ -60,7 +60,7 @@ fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<ConfigHomeAndEn
   {
     if config_entry.exists() {
       return Some(ConfigHomeAndEntry {
-        config_home: cached_dirs.home_dir.clone(),
+        config_home: _home_config_dir(cached_dirs),
         config_entry: config_entry.clone(),
       });
     }

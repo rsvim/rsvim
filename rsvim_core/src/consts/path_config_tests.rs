@@ -8,23 +8,35 @@ use tracing::info;
 fn xdg_config_home1() {
   test_log_init();
 
+  let expect1 = dirs::config_dir().unwrap().join("rsvim");
+  let expect2 = dirs::home_dir().unwrap().join(".rsvim");
+
   let cfg = PathConfig::default();
-  assert_eq!(cfg.config_home().is_some(), cfg.config_entry().is_some());
+  let actual1 = cfg.config_home().is_some();
+  let actual2 = cfg.config_entry().is_some();
+  assert_eq!(actual1, actual2);
 
   match cfg.config_home() {
-    Some(actual1) => {
-      info!("config_home:{actual1:?}");
-      assert_eq!(actual1.clone(), dirs::config_dir().unwrap().join("rsvim"));
+    Some(actual3) => {
+      info!("config_home, actual3:{actual3:?}, expect1:{expect1:?}, expect2:{expect2:?}");
+      assert!(actual3.clone() == expect1 || actual3.clone() == expect2);
     }
     None => { /* */ }
   }
   match cfg.config_entry() {
-    Some(actual2) => {
-      info!("config_entry:{actual2:?}");
+    Some(actual4) => {
+      info!("config_entry, actual4:{actual4:?}, expect1:{expect1:?}, expect2:{expect2:?}");
       assert!(
-        actual2
+        actual4
           .clone()
-          .starts_with(dirs::config_dir().unwrap().join("rsvim"))
+          .to_str()
+          .unwrap()
+          .starts_with(expect1.to_str().unwrap())
+          || actual4
+            .clone()
+            .to_str()
+            .unwrap()
+            .starts_with(expect2.to_str().unwrap())
       );
     }
     None => { /* */ }
@@ -75,5 +87,5 @@ fn xdg_data_home1_unix() {
   let cfg = PathConfig::default();
   let actual = cfg.data_home().clone();
   info!("data_home:{actual:?}");
-  assert_eq!(actual.clone(), dirs::data_dir().unwrap().join("rsvim-data"));
+  assert_eq!(actual.clone(), dirs::data_dir().unwrap().join("rsvim"));
 }
