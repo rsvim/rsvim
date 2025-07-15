@@ -106,7 +106,7 @@ impl ModuleLoader for FsModuleLoader {
   fn resolve(
     &self,
     base: Option<&str>,
-    runtime_paths: &Vec<PathBuf>,
+    config_home: &PathBuf,
     specifier: &str,
   ) -> AnyResult<ModulePath> {
     // Absolute path
@@ -114,10 +114,7 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
-    // Resolve relative import.
-    // FIXME: Here we should always disable CWD as a parent path to resolve modules.
-    // Because for rsvim editor, the modules are stored in user config directories, not CWD.
-    // CWD is mostly for general runtimes such as node/deno project.
+    // Relative path. It first try `base`, then try `runtime_paths`.
     let cwd = &std::env::current_dir().unwrap();
     let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
 
