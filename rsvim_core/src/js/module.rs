@@ -28,7 +28,7 @@
 //!      example: `ftp://user:password@196.128.7.1/shared/folder`.
 //!    - And a lot more.
 //!
-//! NOTE: In Rsvim editor, modules are specially designed for the editor, all remote resources
+//! NOTE: In Rsvim editor, modules are specifically designed for the editor, all remote resources
 //! (file URI, network URI) will be downloaded and cached in local filesystem. We don't put the
 //! download step at Rsvim starting (at least for now). It helps simplify the architecture of
 //! Rsvim.
