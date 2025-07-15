@@ -32,7 +32,7 @@ fn xdg_config_home1() {
 }
 
 #[cfg(target_os = "windows")]
-#[cfg(test)]
+#[test]
 fn xdg_cache_home1_win() {
   test_log_init();
 
@@ -46,7 +46,7 @@ fn xdg_cache_home1_win() {
 }
 
 #[cfg(not(target_os = "windows"))]
-#[cfg(test)]
+#[test]
 fn xdg_cache_home1_unix() {
   test_log_init();
 
@@ -57,7 +57,7 @@ fn xdg_cache_home1_unix() {
 }
 
 #[cfg(target_os = "windows")]
-#[cfg(test)]
+#[test]
 fn xdg_data_home1_win() {
   test_log_init();
 
@@ -68,7 +68,7 @@ fn xdg_data_home1_win() {
 }
 
 #[cfg(not(target_os = "windows"))]
-#[cfg(test)]
+#[test]
 fn xdg_data_home1_unix() {
   test_log_init();
 
