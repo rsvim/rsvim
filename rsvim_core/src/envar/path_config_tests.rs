@@ -6,6 +6,20 @@ use tracing::info;
 
 // static INIT: Once = Once::new();
 
+fn clear_config_dir() {}
+
+fn make_xdg_config_dir() {}
+
+fn make_home_config_dir() {}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn make_xdg_cache_dir() {}
+
+#[cfg(not(target_os = "windows"))]
+#[test]
+fn make_xdg_cache_dir() {}
+
 #[cfg(target_os = "windows")]
 #[test]
 fn config_file_windows() {
