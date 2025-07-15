@@ -44,7 +44,7 @@ pub trait ModuleLoader {
   fn resolve(
     &self,
     base: Option<&str>,
-    runtime_paths: &Vec<PathBuf>,
+    config_home: &PathBuf,
     specifier: &str,
   ) -> AnyResult<ModulePath>;
 
