@@ -34,6 +34,10 @@
 //! [File transfer protocol](https://en.wikipedia.org/wiki/File_Transfer_Protocol) (`ftp`,
 //! `sftp`), for example: `ftp://user:password@196.128.7.1/shared/folder`.
 //!
+//! NOTE: Here, modules are specially designed for Rsvim editor, all remote resources (file URI,
+//! network URI) will be downloaded and cached in local filesystem. We don't put the download step
+//! at Rsvim starting (at least for now).
+//!
 //! # Module Source
 //!
 //! A module source is the text content of the module, such as javascript source code, and the
