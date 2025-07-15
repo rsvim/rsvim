@@ -41,7 +41,7 @@ pub trait ModuleLoader {
   /// asynchronize.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 
-  /// Load the module source by its module path.
+  /// Load the module source by its module path ([`ModulePath`]).
   ///
   /// - For core module loader, it returns the core module source.
   /// - For fs module loader, it reads the file content on local filesystem and returns the module
