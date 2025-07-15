@@ -1,13 +1,12 @@
 use super::path_config::*;
 use crate::test::log::init as test_log_init;
 
-use std::env::VarError;
 use std::io::Write;
 use tracing::info;
 
-const XDG_CONFIG_HOME: &'static str = "XDG_CONFIG_HOME";
-const XDG_CACHE_HOME: &'static str = "XDG_CACHE_HOME";
-const XDG_DATA_HOME: &'static str = "XDG_DATA_HOME";
+const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
+const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
+const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
 macro_rules! save_xdg {
   ($name:ident, $value:expr) => {
