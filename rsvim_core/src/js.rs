@@ -25,7 +25,6 @@ use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{error, trace};
 
 pub mod binding;
-pub mod constant;
 pub mod err;
 pub mod exception;
 pub mod hook;
