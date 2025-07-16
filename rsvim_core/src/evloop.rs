@@ -2,7 +2,6 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
-use crate::consts;
 use crate::content::{TextContents, TextContentsArc};
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
