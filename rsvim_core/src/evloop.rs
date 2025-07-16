@@ -2,7 +2,6 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
-use crate::consts;
 use crate::content::{TextContents, TextContentsArc};
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
@@ -131,7 +130,7 @@ impl EventLoop {
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
     // Channel: workers => master
-    let (wkr_to_mstr, mstr_from_wkr) = channel(consts::CHANNEL_BUF_SIZE());
+    let (wkr_to_mstr, mstr_from_wkr) = channel(*CHANNEL_BUF_SIZE);
 
     // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
     // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
@@ -165,11 +164,11 @@ impl EventLoop {
     // trigger the event loop in `tokio::select!`.
 
     // Channel: js runtime => master
-    let (jsrt_to_mstr, mstr_from_jsrt) = channel(consts::CHANNEL_BUF_SIZE());
+    let (jsrt_to_mstr, mstr_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
     // Channel: master => js runtime
-    let (mstr_to_jsrt, jsrt_from_mstr) = channel(consts::CHANNEL_BUF_SIZE());
+    let (mstr_to_jsrt, jsrt_from_mstr) = channel(*CHANNEL_BUF_SIZE);
     // Channel: master => master
-    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(consts::CHANNEL_BUF_SIZE());
+    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
 
     // Task Tracker
     let detached_tracker = TaskTracker::new();
@@ -225,7 +224,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_entry) = consts::CONFIG_ENTRY_PATH() {
+    if let Some(config_entry) = &*CONFIG_ENTRY_PATH {
       self
         .js_runtime
         .execute_module(config_entry.to_str().unwrap(), None)

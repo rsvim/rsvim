@@ -21,3 +21,5 @@ pub mod test;
 
 #[cfg(test)]
 mod buf_tests;
+#[cfg(test)]
+mod consts_tests;

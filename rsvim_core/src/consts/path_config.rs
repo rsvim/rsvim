@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
-struct CachedDirs {
+pub struct CachedDirs {
   config_dir: PathBuf,
   home_dir: PathBuf,
   cache_dir: PathBuf,
@@ -110,7 +110,7 @@ impl PathConfig {
       data_dir: dirs::data_dir().unwrap(),
     };
     let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
-    PathConfig {
+    Self {
       config_home: config_home_and_entry
         .as_ref()
         .map(|c| c.config_home.clone()),

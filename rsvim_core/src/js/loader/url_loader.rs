@@ -3,7 +3,6 @@
 //! This module can be loaded in async, i.e. it can be first downloaded in local filesystem async,
 //! then loaded into js runtime sync.
 
-// use crate::js::constant::WINDOWS_REGEX;
 // use crate::js::module::CORE_MODULES;
 // use crate::js::module::ModulePath;
 // use crate::js::module::ModuleSource;

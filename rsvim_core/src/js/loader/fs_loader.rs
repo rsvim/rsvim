@@ -1,6 +1,5 @@
 //! Fs based module loader.
 
-use crate::js::constant::WINDOWS_REGEX;
 use crate::js::loader::ModuleLoader;
 use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Jsx;
@@ -91,7 +90,7 @@ impl ModuleLoader for FsModuleLoader {
   /// Resolve specifier path on local file system.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
-    if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
+    if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
