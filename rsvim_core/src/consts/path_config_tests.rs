@@ -4,31 +4,8 @@ use super::path_config::*;
 
 use crate::test::log::init as test_log_init;
 
-// const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
-// const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
-// const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
-
-// macro_rules! set_xdg {
-//   ($name:ident,$value:expr) => {
-//     unsafe {
-//       let saved = std::env::var($name);
-//       std::env::set_var($name, $value);
-//       saved
-//     }
-//   };
-// }
-//
-// macro_rules! restore_xdg {
-//   ($name:ident,$saved_value:ident) => {
-//     match $saved_value {
-//       Ok(saved) => unsafe { std::env::set_var($name, saved) },
-//       Err(_) => { /* */ }
-//     }
-//   };
-// }
-
 fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
-  std::fs::create_dir(cached_dirs.config_dir.join("rsvim")).unwrap();
+  std::fs::create_dir_all(cached_dirs.config_dir.join("rsvim")).unwrap();
   let mut config_entry =
     std::fs::File::create(cached_dirs.config_dir.join("rsvim").join("rsvim.js")).unwrap();
   config_entry.write_all(b"hello").unwrap();
@@ -47,6 +24,7 @@ fn xdg_config_home1() {
     cache_dir: tmpdir.path().join("rsvim-cache"),
     data_dir: tmpdir.path().join("rsvim-data"),
   };
+
   create_config_home_and_entry(&cached_dirs);
 
   let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
