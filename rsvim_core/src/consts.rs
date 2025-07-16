@@ -22,7 +22,7 @@ pub static MUTEX_TIMEOUT_SECS: LazyLock<u64> = LazyLock::new(|| {
 
 /// Mutex locking timeout duration, by default is [`u64::MAX`] seconds.
 pub static MUTEX_TIMEOUT: LazyLock<Duration> =
-  LazyLock::new(|| Duration::from_secs(MUTEX_TIMEOUT_SECS));
+  LazyLock::new(|| Duration::from_secs(*MUTEX_TIMEOUT_SECS));
 
 /// Buffer size for channels communication, by default is 1000.
 ///
