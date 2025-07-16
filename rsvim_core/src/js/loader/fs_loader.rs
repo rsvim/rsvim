@@ -94,7 +94,8 @@ impl ModuleLoader for FsModuleLoader {
   /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
   /// we only choose to maintain a small subset:
   ///
-  /// 1. Rsvim won't be compatible with the "Common JS" standard (at least for now).
+  /// 1. The common js standard is not implemented (at least for now).
+  /// 2. All `cjs`/`js` are recognized as ES module, not common js (at least for now).
   ///
   /// Rsvim provides 2 types of modules.
   ///
