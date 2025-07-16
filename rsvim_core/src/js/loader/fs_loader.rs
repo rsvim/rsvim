@@ -98,16 +98,54 @@ impl ModuleLoader for FsModuleLoader {
   /// 2. All `cjs`/`js` are recognized as ES module, not common js.
   /// 3. The `require` keyword is recognized as ES module, not common js.
   ///
-  /// Rsvim provides 2 types of modules.
+  /// There are several use cases in module resolving process.
   ///
-  /// # Relative file path based on config home
+  /// # Full file path with file extension
+  ///
+  /// For example:
+  ///
+  /// ```javascript
+  /// import syntaxes from "/home/usr/rsvim/.rsvim/syntaxes.js";
+  /// ```
+  ///
+  /// The specifier is the same with its module path.
+  ///
+  /// # Relative file path with file extension
+  ///
+  /// For example:
+  ///
+  /// ```javascript
+  /// import syntaxes from "./syntaxes.js";
+  /// import syntaxes from "../utils/syntaxes.js";
+  /// ```
+  ///
+  /// The module path is resolved based on **current** module's file path. For example we have
+  /// below module structure:
+  ///
+  /// ```
+  /// ~/.rsvim/
+  /// |- index.js
+  /// |- syntaxes.js  -> `syntaxes1`
+  /// |- util/
+  ///    |- syntaxes.js -> `syntaxes2`
+  /// ```
+  ///
+  /// In `index.js`:
+  ///
+  /// ```javascript
+  /// import syntaxes1 from "./syntaxes.js";
+  /// import syntaxes2 from "./util/syntaxes.js";
+  /// ```
   ///
   /// Rsvim stores all its javascript/typescript scripts in config home (`$XDG_CONFIG_HOME/rsvim`
-  /// or `$HOME/.rsvim`), when speci
+  /// or `$HOME/.rsvim`), when specify a module without a relative path beginning (`./` or `../`),
+  /// Rsvim tries to search the module in config home. For example:
   ///
-  /// 1. Single file path in config home, for example:
+  /// - `import syntaxes from "syntaxes.js"`: The specifier `"syntaxes.js"` is a file name without
+  ///   full file path (`/` or `C:\\`) or relative file path (`./` or `../`), Rsvim tries to search
+  ///   it by `${rsvim_config_home}/syntaxes.js`.
   ///
-  ///    - `import syntaxes from "syntaxes.js"`
+  /// #
   ///
   /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
   /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
