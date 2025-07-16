@@ -78,7 +78,6 @@ pub enum ModuleStatus {
   Ready,
 }
 
-#[allow(non_snake_case)]
 pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
   let modules = vec![
     // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
