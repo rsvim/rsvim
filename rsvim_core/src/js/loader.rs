@@ -35,8 +35,7 @@ pub trait ModuleLoader {
   /// Resolve module path by its specifier.
   ///
   /// - For core module loader, the module path is always same with its specifier (core modules
-  ///   don't have a file path on local filesystem). But core modules use a specific pattern to
-  ///   indicate, such as a `"rsvim:ext/"` prefix.
+  ///   don't have a file path on local filesystem).
   /// - For fs module loader, it returns the full file path on local filesystem.
   /// - For url module loader, the specifier is a url (mostly http protocol) which indicates a
   ///   remote location that can download the resource. Url module loader will first download the
