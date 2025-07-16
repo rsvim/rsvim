@@ -9,6 +9,7 @@ fn mutex_timeout1() {
 fn window_drive_test1() {
   assert!(WINDOWS_DRIVE_REGEX.is_match("C:\\\\"));
   assert!(WINDOWS_DRIVE_REGEX.is_match("d:\\"));
+  assert!(!WINDOWS_DRIVE_REGEX.is_match("//localhost:22/home/users/C:\\/bin"));
 }
 
 #[test]
