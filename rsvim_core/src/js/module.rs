@@ -19,7 +19,7 @@
 //! # Module Path
 //!
 //! A module path is the local file path where the module stores. For example
-//! `./node_modules/lodash/index.js`.
+//! `/home/users/project/node_modules/lodash/index.js`.
 //!
 //! # Module Source
 //!
