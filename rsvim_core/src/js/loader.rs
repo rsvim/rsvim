@@ -42,7 +42,7 @@ pub trait ModuleLoader {
   ///   remote location that can download the resource. Url module loader will first download the
   ///   resource to local filesystem as a local file cache, then returns the cached full file path.
   ///
-  /// NOTE: This API (and all 3 loaders) are synchronized.
+  /// NOTE: This API (and all 3 loaders) are synchronized, include url module loader's downloading.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 
   /// Load the module path by its specifier.
