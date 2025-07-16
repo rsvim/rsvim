@@ -137,15 +137,21 @@ impl ModuleLoader for FsModuleLoader {
   /// import syntaxes2 from "./util/syntaxes.js";
   /// ```
   ///
-  /// Rsvim stores all its javascript/typescript scripts in config home (`$XDG_CONFIG_HOME/rsvim`
-  /// or `$HOME/.rsvim`), when specify a module without a relative path beginning (`./` or `../`),
-  /// Rsvim tries to search the module in config home. For example:
+  /// NOTE: This also works for node/npm package.
   ///
-  /// - `import syntaxes from "syntaxes.js"`: The specifier `"syntaxes.js"` is a file name without
-  ///   full file path (`/` or `C:\\`) or relative file path (`./` or `../`), Rsvim tries to search
-  ///   it by `${rsvim_config_home}/syntaxes.js`.
+  /// # File name with file extension
   ///
-  /// #
+  /// For example:
+  ///
+  /// ```javascript
+  /// import syntaxes from "syntaxes.js";
+  /// ```
+  ///
+  /// The specifier `"syntaxes.js"` is not full file path nor relative file path. Rsvim will search
+  /// it in config home (`$XDG_CONFIG_HOME/rsvim` or `$HOME/.rsvim`), (let's say the config home is
+  /// `${rsvim_config_home}`) the module path is `${rsvim_config_home}/syntaxes.js`.
+  ///
+  /// # Node/Npm Package without file extension
   ///
   /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
   /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
