@@ -4,34 +4,34 @@ use super::path_config::*;
 
 use crate::test::log::init as test_log_init;
 
-const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
-const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
-const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
+// const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
+// const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
+// const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
-macro_rules! set_xdg {
-  ($name:ident,$value:expr) => {
-    unsafe {
-      let saved = std::env::var($name);
-      std::env::set_var($name, $value);
-      saved
-    }
-  };
-}
-
-macro_rules! restore_xdg {
-  ($name:ident,$saved_value:ident) => {
-    match $saved_value {
-      Ok(saved) => unsafe { std::env::set_var($name, saved) },
-      Err(_) => { /* */ }
-    }
-  };
-}
+// macro_rules! set_xdg {
+//   ($name:ident,$value:expr) => {
+//     unsafe {
+//       let saved = std::env::var($name);
+//       std::env::set_var($name, $value);
+//       saved
+//     }
+//   };
+// }
+//
+// macro_rules! restore_xdg {
+//   ($name:ident,$saved_value:ident) => {
+//     match $saved_value {
+//       Ok(saved) => unsafe { std::env::set_var($name, saved) },
+//       Err(_) => { /* */ }
+//     }
+//   };
+// }
 
 fn xdg_config_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  let saved_xdg = set_xdg!(XDG_CONFIG_HOME, tmpdir.path());
+  // let saved_xdg = set_xdg!(XDG_CONFIG_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -41,7 +41,7 @@ fn xdg_config_home1() {
   };
 
   {
-    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
     config_entry.write_all(b"hello").unwrap();
     config_entry.flush().unwrap();
   }
@@ -76,14 +76,14 @@ fn xdg_config_home1() {
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
 
-  restore_xdg!(XDG_CONFIG_HOME, saved_xdg);
+  // restore_xdg!(XDG_CONFIG_HOME, saved_xdg);
 }
 
 fn xdg_cache_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  let saved_xdg = set_xdg!(XDG_CACHE_HOME, tmpdir.path());
+  // let saved_xdg = set_xdg!(XDG_CACHE_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -93,7 +93,7 @@ fn xdg_cache_home1() {
   };
 
   {
-    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
     config_entry.write_all(b"hello").unwrap();
     config_entry.flush().unwrap();
   }
@@ -128,14 +128,14 @@ fn xdg_cache_home1() {
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
 
-  restore_xdg!(XDG_CACHE_HOME, saved_xdg);
+  // restore_xdg!(XDG_CACHE_HOME, saved_xdg);
 }
 
 fn xdg_data_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  let saved_xdg = set_xdg!(XDG_DATA_HOME, tmpdir.path());
+  // let saved_xdg = set_xdg!(XDG_DATA_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -145,7 +145,7 @@ fn xdg_data_home1() {
   };
 
   {
-    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
     config_entry.write_all(b"hello").unwrap();
     config_entry.flush().unwrap();
   }
@@ -180,7 +180,7 @@ fn xdg_data_home1() {
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
 
-  restore_xdg!(XDG_DATA_HOME, saved_xdg);
+  // restore_xdg!(XDG_DATA_HOME, saved_xdg);
 }
 
 #[test]
