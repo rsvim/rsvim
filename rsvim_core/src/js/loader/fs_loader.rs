@@ -1,4 +1,4 @@
-//! Fs module loader.
+//! Fs (filesystem) module loader.
 
 use crate::js::loader::ModuleLoader;
 use crate::js::module::{ModulePath, ModuleSource};
