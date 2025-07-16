@@ -88,7 +88,7 @@ impl FsModuleLoader {
 }
 
 impl ModuleLoader for FsModuleLoader {
-  /// Resolve specifier path on local file system.
+  /// Resolve module path by specifier in local filesystem.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
