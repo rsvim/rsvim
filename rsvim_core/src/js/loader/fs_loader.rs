@@ -109,6 +109,7 @@ impl ModuleLoader for FsModuleLoader {
     bail!(format!("Module not found \"{specifier}\""));
   }
 
+  /// Load module source by its module path (full file path).
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
