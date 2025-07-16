@@ -67,6 +67,6 @@ pub static DATA_HOME_PATH: LazyLock<PathBuf> = LazyLock::new(|| PATH_CONFIG.data
 pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\").unwrap());
 
-/// Http(s) url detect regex, for example url begins with `http(s)?://`.
+/// Http(s) url beginning regex, for example url begins with `http(s)?://`.
 pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
