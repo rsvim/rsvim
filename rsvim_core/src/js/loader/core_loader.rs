@@ -5,8 +5,9 @@ use crate::js::module::{CORE_MODULES, ModulePath, ModuleSource};
 use crate::prelude::*;
 
 #[derive(Default)]
-/// For core module loader, its module path is the same with module specifier. And all core modules
-/// have a special prefix 'rsvim:' to indicate them. For example:
+/// For core module loader, its module path is the same with module specifier.
+///
+/// To indicate core modules, they use a special pattern 'rsvim:ext' as its prefix. For example:
 ///
 /// ```javascript
 /// const net = import "rsvim:ext/net";
