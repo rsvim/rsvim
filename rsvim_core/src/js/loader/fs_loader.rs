@@ -90,6 +90,23 @@ impl FsModuleLoader {
 impl ModuleLoader for FsModuleLoader {
   /// Resolve module path by specifier in local filesystem.
   ///
+  /// It tries to resolve npm packages, thus we can directly use npm registry to maintain plugins.
+  /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
+  /// we only choose to maintain a small subset:
+  ///
+  /// 1. Rsvim won't be compatible with the "Common JS" standard (at least for now).
+  ///
+  /// Rsvim provides 2 types of modules.
+  ///
+  /// # Relative file path based on config home
+  ///
+  /// Rsvim stores all its javascript/typescript scripts in config home (`$XDG_CONFIG_HOME/rsvim`
+  /// or `$HOME/.rsvim`), when speci
+  ///
+  /// 1. Single file path in config home, for example:
+  ///
+  ///    - `import syntaxes from "syntaxes.js"`
+  ///
   /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
   /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
   /// quite a history, it requires a lot of effort to be fully compatible with it, here we only
@@ -97,7 +114,7 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// 1.
   ///
-  /// For node package, please see: <https://nodejs.org/api/packages.html>.
+  /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
