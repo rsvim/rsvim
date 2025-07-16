@@ -1,10 +1,8 @@
 //! Global constants.
 
-use futures::future::Lazy;
 use regex::Regex;
 use std::path::PathBuf;
 use std::sync::LazyLock;
-use std::sync::OnceLock;
 use std::time::Duration;
 
 use path_config::PathConfig;
@@ -36,7 +34,7 @@ pub static CHANNEL_BUF_SIZE: LazyLock<usize> = LazyLock::new(|| {
     .unwrap_or(1000_usize)
 });
 
-pub static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);
+static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);
 
 /// User config entry path, it can be either one of following files:
 ///

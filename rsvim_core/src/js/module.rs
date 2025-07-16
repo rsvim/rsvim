@@ -42,7 +42,7 @@ use crate::js::JsRuntime;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
-use std::sync::OnceLock;
+use std::sync::{LazyLock, OnceLock};
 use tracing::trace;
 // use url::Url;
 
@@ -79,33 +79,30 @@ pub enum ModuleStatus {
 }
 
 #[allow(non_snake_case)]
-pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
-  static VALUE: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
-  VALUE.get_or_init(|| {
-    let modules = vec![
-      // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
-      // ("console", include_str!("./js/console.js")),
-      // ("events", include_str!("./js/events.js")),
-      // ("process", include_str!("./js/process.js")),
-      // ("timers", include_str!("./js/timers.js")),
-      // ("assert", include_str!("./js/assert.js")),
-      // ("util", include_str!("./js/util.js")),
-      // ("fs", include_str!("./module/fs.js")),
-      // ("perf_hooks", include_str!("./js/perf-hooks.js")),
-      // ("colors", include_str!("./js/colors.js")),
-      // ("dns", include_str!("./js/dns.js")),
-      // ("net", include_str!("./js/net.js")),
-      // ("test", include_str!("./js/test.js")),
-      // ("stream", include_str!("./js/stream.js")),
-      // ("http", include_str!("./js/http.js")),
-      // ("@web/abort", include_str!("./js/abort-controller.js")),
-      // ("@web/text_encoding", include_str!("./js/text-encoding.js")),
-      // ("@web/clone", include_str!("./js/structured-clone.js")),
-      // ("@web/fetch", include_str!("./js/fetch.js")),
-    ];
-    HashMap::from_iter(modules)
-  })
-}
+pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
+  let modules = vec![
+    // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
+    // ("console", include_str!("./js/console.js")),
+    // ("events", include_str!("./js/events.js")),
+    // ("process", include_str!("./js/process.js")),
+    // ("timers", include_str!("./js/timers.js")),
+    // ("assert", include_str!("./js/assert.js")),
+    // ("util", include_str!("./js/util.js")),
+    // ("fs", include_str!("./module/fs.js")),
+    // ("perf_hooks", include_str!("./js/perf-hooks.js")),
+    // ("colors", include_str!("./js/colors.js")),
+    // ("dns", include_str!("./js/dns.js")),
+    // ("net", include_str!("./js/net.js")),
+    // ("test", include_str!("./js/test.js")),
+    // ("stream", include_str!("./js/stream.js")),
+    // ("http", include_str!("./js/http.js")),
+    // ("@web/abort", include_str!("./js/abort-controller.js")),
+    // ("@web/text_encoding", include_str!("./js/text-encoding.js")),
+    // ("@web/clone", include_str!("./js/structured-clone.js")),
+    // ("@web/fetch", include_str!("./js/fetch.js")),
+  ];
+  HashMap::from_iter(modules)
+});
 
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
@@ -135,7 +132,7 @@ const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
 const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
 
 fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
-  let is_core_module_import = CORE_MODULES().contains_key(specifier);
+  let is_core_module_import = CORE_MODULES.contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
   } else {
@@ -176,8 +173,8 @@ pub fn resolve_import(
 pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
-  //   CORE_MODULES().contains_key(specifier),
-  //   WINDOWS_REGEX().is_match(specifier),
+  //   CORE_MODULES.contains_key(specifier),
+  //   WINDOWS_DRIVE_REGEX.is_match(specifier),
   //   Url::parse(specifier).is_ok(),
   // ) {
   //   (true, _, _) => Box::new(CoreModuleLoader),

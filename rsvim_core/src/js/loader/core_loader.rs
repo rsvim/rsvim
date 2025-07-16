@@ -9,13 +9,13 @@ pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
   fn resolve(&self, _: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
-    assert!(CORE_MODULES().contains_key(specifier));
+    assert!(CORE_MODULES.contains_key(specifier));
     Ok(specifier.to_string())
   }
 
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Since any errors will be caught at the resolve stage, we can
     // go ahead an unwrap the value with no worries.
-    Ok(CORE_MODULES().get(specifier).unwrap().to_string())
+    Ok(CORE_MODULES.get(specifier).unwrap().to_string())
   }
 }
