@@ -151,7 +151,7 @@ impl ModuleLoader for FsModuleLoader {
   /// it in config home (`$XDG_CONFIG_HOME/rsvim` or `$HOME/.rsvim`), (let's say the config home is
   /// `${rsvim_config_home}`) the module path is `${rsvim_config_home}/syntaxes.js`.
   ///
-  /// # Node/Npm Package without file extension
+  /// # Node/npm package without file extension
   ///
   /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
   /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
