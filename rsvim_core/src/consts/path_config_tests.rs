@@ -16,7 +16,6 @@ fn xdg_config_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  // let saved_xdg = set_xdg!(XDG_CONFIG_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -56,15 +55,12 @@ fn xdg_config_home1() {
     );
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
-
-  // restore_xdg!(XDG_CONFIG_HOME, saved_xdg);
 }
 
 fn xdg_cache_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  // let saved_xdg = set_xdg!(XDG_CACHE_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -104,15 +100,12 @@ fn xdg_cache_home1() {
     );
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
-
-  // restore_xdg!(XDG_CACHE_HOME, saved_xdg);
 }
 
 fn xdg_data_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
-  // let saved_xdg = set_xdg!(XDG_DATA_HOME, tmpdir.path());
 
   let cached_dirs = CachedDirs {
     config_dir: tmpdir.path().join("rsvim-config"),
@@ -152,8 +145,6 @@ fn xdg_data_home1() {
     );
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
-
-  // restore_xdg!(XDG_DATA_HOME, saved_xdg);
 }
 
 #[test]
