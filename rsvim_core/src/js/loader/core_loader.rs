@@ -16,7 +16,7 @@ use crate::prelude::*;
 /// ```
 ///
 /// But these are just some examples (to show how core module specifiers are different from other
-/// modules). For now we don't have any core modules, or say we don't use core modules.
+/// modules). For now we don't support any core modules.
 pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
