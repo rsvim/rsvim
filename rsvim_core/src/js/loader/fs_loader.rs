@@ -122,7 +122,7 @@ impl ModuleLoader for FsModuleLoader {
   /// The module path is resolved based on **current** module's file path. For example we have
   /// below module structure:
   ///
-  /// ```bash
+  /// ```text
   /// ~/.rsvim/
   /// |- index.js
   /// |- syntaxes.js  -> `syntaxes1`
