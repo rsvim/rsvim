@@ -21,6 +21,7 @@ use std::path::PathBuf;
 static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
+/// Fs (filesystem) module loader.
 pub struct FsModuleLoader;
 
 impl FsModuleLoader {
