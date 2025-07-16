@@ -63,10 +63,10 @@ pub static CACHE_HOME_PATH: LazyLock<PathBuf> = LazyLock::new(|| PATH_CONFIG.cac
 /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
 pub static DATA_HOME_PATH: LazyLock<PathBuf> = LazyLock::new(|| PATH_CONFIG.data_home().clone());
 
-/// Windows drive's full path detect regex, for example full file path begins with `C:\\`.
-pub static WINDOWS_DRIVE_REGEX: LazyLock<Regex> =
+/// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
+pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\").unwrap());
 
 /// Http(s) url detect regex, for example url begins with `http(s)?://`.
-pub static HTTP_URL_REGEX: LazyLock<Regex> =
+pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
