@@ -92,11 +92,11 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// It tries to resolve npm packages, thus we can directly use npm registry to maintain plugins.
   /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
-  /// we only choose to maintain a small subset:
+  /// we only choose to maintain a small subset (at least for now):
   ///
-  /// 1. The "common js" standard is not implemented (at least for now).
-  /// 2. All `cjs`/`js` are recognized as ES module, not common js (at least for now).
-  /// 3. The `require` keyword is recognized as ES module, not common js (at least for now).
+  /// 1. The "common js" standard is not implemented.
+  /// 2. All `cjs`/`js` are recognized as ES module, not common js.
+  /// 3. The `require` keyword is recognized as ES module, not common js.
   ///
   /// Rsvim provides 2 types of modules.
   ///
