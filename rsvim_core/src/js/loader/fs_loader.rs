@@ -94,71 +94,9 @@ impl ModuleLoader for FsModuleLoader {
   /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
   /// we only choose to maintain a small subset (at least for now):
   ///
-  /// 1. The "common js" standard is not implemented.
+  /// 1. The "common js" standard is not supported.
   /// 2. All `cjs`/`mjs`/`js` are recognized as ES module, not common js.
   /// 3. The `require` keyword is not supported.
-  ///
-  /// There are several use cases in module resolving process.
-  ///
-  /// # Full file path with file extension
-  ///
-  /// For example:
-  ///
-  /// ```javascript
-  /// import syntaxes from "/home/usr/rsvim/.rsvim/syntaxes.js";
-  /// ```
-  ///
-  /// The specifier is the same with its module path.
-  ///
-  /// # Relative file path with file extension
-  ///
-  /// For example:
-  ///
-  /// ```javascript
-  /// import syntaxes from "./syntaxes.js";
-  /// import syntaxes from "../utils/syntaxes.js";
-  /// ```
-  ///
-  /// The module path is resolved based on **current** module's file path. For example we have
-  /// below module structure:
-  ///
-  /// ```text
-  /// ~/.rsvim/
-  /// |- index.js
-  /// |- syntaxes.js  -> `syntaxes1`
-  /// |- util/
-  ///    |- syntaxes.js -> `syntaxes2`
-  /// ```
-  ///
-  /// In `index.js`:
-  ///
-  /// ```javascript
-  /// import syntaxes1 from "./syntaxes.js";
-  /// import syntaxes2 from "./util/syntaxes.js";
-  /// ```
-  ///
-  /// NOTE: This also works for node/npm package.
-  ///
-  /// # File name with file extension
-  ///
-  /// For example:
-  ///
-  /// ```javascript
-  /// import syntaxes from "syntaxes.js";
-  /// ```
-  ///
-  /// The specifier `"syntaxes.js"` is not full file path nor relative file path. Rsvim will search
-  /// it in config home (`$XDG_CONFIG_HOME/rsvim` or `$HOME/.rsvim`), (let's say the config home is
-  /// `${rsvim_config_home}`) the module path is `${rsvim_config_home}/syntaxes.js`.
-  ///
-  /// # Node/npm package without file extension
-  ///
-  /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
-  /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
-  /// quite a history, it requires a lot of effort to be fully compatible with it, here we only
-  /// implement part of the ES modules (at least for now):
-  ///
-  /// 1.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
