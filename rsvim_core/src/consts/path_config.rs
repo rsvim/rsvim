@@ -4,10 +4,10 @@ use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct CachedDirs {
-  config_dir: PathBuf,
-  home_dir: PathBuf,
-  cache_dir: PathBuf,
-  data_dir: PathBuf,
+  pub config_dir: PathBuf,
+  pub home_dir: PathBuf,
+  pub cache_dir: PathBuf,
+  pub data_dir: PathBuf,
 }
 
 /// `$XDG_CONFIG_HOME/rsvim`

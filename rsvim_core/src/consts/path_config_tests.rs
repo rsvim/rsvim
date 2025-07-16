@@ -1,91 +1,191 @@
+use std::io::Write;
+
 use super::path_config::*;
 
 use crate::test::log::init as test_log_init;
 
-use tracing::info;
+const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
+const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
+const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
-#[test]
+macro_rules! set_xdg {
+  ($name:ident,$value:expr) => {
+    unsafe {
+      let saved = std::env::var($name);
+      std::env::set_var($name, $value);
+      saved
+    }
+  };
+}
+
+macro_rules! restore_xdg {
+  ($name:ident,$saved_value:ident) => {
+    match $saved_value {
+      Ok(saved) => unsafe { std::env::set_var($name, saved) },
+      Err(_) => { /* */ }
+    }
+  };
+}
+
 fn xdg_config_home1() {
   test_log_init();
 
-  let expect1 = dirs::config_dir().unwrap().join("rsvim");
-  let expect2 = dirs::home_dir().unwrap().join(".rsvim");
+  let tmpdir = assert_fs::TempDir::new().unwrap();
+  let saved_xdg = set_xdg!(XDG_CONFIG_HOME, tmpdir.path());
 
-  let cfg = PathConfig::default();
-  let actual1 = cfg.config_home().is_some();
-  let actual2 = cfg.config_entry().is_some();
-  assert_eq!(actual1, actual2);
+  let cached_dirs = CachedDirs {
+    config_dir: tmpdir.path().join("rsvim-config"),
+    home_dir: tmpdir.path().join("rsvim-home"),
+    cache_dir: tmpdir.path().join("rsvim-cache"),
+    data_dir: tmpdir.path().join("rsvim-data"),
+  };
 
-  match cfg.config_home() {
-    Some(actual3) => {
-      info!("config_home, actual3:{actual3:?}, expect1:{expect1:?}, expect2:{expect2:?}");
-      assert!(actual3.clone() == expect1 || actual3.clone() == expect2);
-    }
-    None => { /* */ }
+  {
+    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    config_entry.write_all(b"hello").unwrap();
+    config_entry.flush().unwrap();
   }
-  match cfg.config_entry() {
-    Some(actual4) => {
-      info!("config_entry, actual4:{actual4:?}, expect1:{expect1:?}, expect2:{expect2:?}");
-      assert!(
-        actual4
-          .clone()
-          .to_str()
-          .unwrap()
-          .starts_with(expect1.to_str().unwrap())
-          || actual4
-            .clone()
-            .to_str()
-            .unwrap()
-            .starts_with(expect2.to_str().unwrap())
-      );
-    }
-    None => { /* */ }
-  }
-}
 
-#[cfg(target_os = "windows")]
-#[test]
-fn xdg_cache_home1_win() {
-  test_log_init();
-
-  let cfg = PathConfig::default();
-  let actual = cfg.cache_home();
-  info!("cache_home:{actual:?}");
+  let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
+  assert!(cfg.config_home().is_some());
   assert_eq!(
-    actual.clone(),
-    dirs::cache_dir().unwrap().join("rsvim-cache")
+    cfg.config_home().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim")
   );
+
+  assert!(cfg.config_entry().is_some());
+  assert_eq!(
+    cfg.config_entry().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim").join("rsvim.js")
+  );
+
+  if cfg!(target_os = "windows") {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim-cache")
+    );
+    assert_eq!(
+      cfg.data_home().clone(),
+      cached_dirs.data_dir.join("rsvim-data")
+    );
+  } else {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim")
+    );
+    assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
+  }
+
+  restore_xdg!(XDG_CONFIG_HOME, saved_xdg);
 }
 
-#[cfg(not(target_os = "windows"))]
-#[test]
-fn xdg_cache_home1_unix() {
+fn xdg_cache_home1() {
   test_log_init();
 
-  let cfg = PathConfig::default();
-  let actual = cfg.cache_home();
-  info!("cache_home:{actual:?}");
-  assert_eq!(actual.clone(), dirs::cache_dir().unwrap().join("rsvim"));
+  let tmpdir = assert_fs::TempDir::new().unwrap();
+  let saved_xdg = set_xdg!(XDG_CACHE_HOME, tmpdir.path());
+
+  let cached_dirs = CachedDirs {
+    config_dir: tmpdir.path().join("rsvim-config"),
+    home_dir: tmpdir.path().join("rsvim-home"),
+    cache_dir: tmpdir.path().join("rsvim-cache"),
+    data_dir: tmpdir.path().join("rsvim-data"),
+  };
+
+  {
+    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    config_entry.write_all(b"hello").unwrap();
+    config_entry.flush().unwrap();
+  }
+
+  let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
+  assert!(cfg.config_home().is_some());
+  assert_eq!(
+    cfg.config_home().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim")
+  );
+
+  assert!(cfg.config_entry().is_some());
+  assert_eq!(
+    cfg.config_entry().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim").join("rsvim.js")
+  );
+
+  if cfg!(target_os = "windows") {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim-cache")
+    );
+    assert_eq!(
+      cfg.data_home().clone(),
+      cached_dirs.data_dir.join("rsvim-data")
+    );
+  } else {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim")
+    );
+    assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
+  }
+
+  restore_xdg!(XDG_CACHE_HOME, saved_xdg);
 }
 
-#[cfg(target_os = "windows")]
-#[test]
-fn xdg_data_home1_win() {
+fn xdg_data_home1() {
   test_log_init();
 
-  let cfg = PathConfig::default();
-  let actual = cfg.data_home().clone();
-  info!("data_home:{actual:?}");
-  assert_eq!(actual.clone(), dirs::data_dir().unwrap().join("rsvim-data"));
+  let tmpdir = assert_fs::TempDir::new().unwrap();
+  let saved_xdg = set_xdg!(XDG_DATA_HOME, tmpdir.path());
+
+  let cached_dirs = CachedDirs {
+    config_dir: tmpdir.path().join("rsvim-config"),
+    home_dir: tmpdir.path().join("rsvim-home"),
+    cache_dir: tmpdir.path().join("rsvim-cache"),
+    data_dir: tmpdir.path().join("rsvim-data"),
+  };
+
+  {
+    let mut config_entry = std::fs::File::open("rsvim.js").unwrap();
+    config_entry.write_all(b"hello").unwrap();
+    config_entry.flush().unwrap();
+  }
+
+  let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
+  assert!(cfg.config_home().is_some());
+  assert_eq!(
+    cfg.config_home().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim")
+  );
+
+  assert!(cfg.config_entry().is_some());
+  assert_eq!(
+    cfg.config_entry().clone().unwrap(),
+    cached_dirs.config_dir.join("rsvim").join("rsvim.js")
+  );
+
+  if cfg!(target_os = "windows") {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim-cache")
+    );
+    assert_eq!(
+      cfg.data_home().clone(),
+      cached_dirs.data_dir.join("rsvim-data")
+    );
+  } else {
+    assert_eq!(
+      cfg.cache_home().clone(),
+      cached_dirs.cache_dir.join("rsvim")
+    );
+    assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
+  }
+
+  restore_xdg!(XDG_DATA_HOME, saved_xdg);
 }
 
-#[cfg(not(target_os = "windows"))]
 #[test]
-fn xdg_data_home1_unix() {
-  test_log_init();
-
-  let cfg = PathConfig::default();
-  let actual = cfg.data_home().clone();
-  info!("data_home:{actual:?}");
-  assert_eq!(actual.clone(), dirs::data_dir().unwrap().join("rsvim"));
+fn test_all() {
+  xdg_config_home1();
+  xdg_cache_home1();
+  xdg_data_home1();
 }
