@@ -89,6 +89,10 @@ impl FsModuleLoader {
 
 impl ModuleLoader for FsModuleLoader {
   /// Resolve module path by specifier in local filesystem.
+  ///
+  /// There are two kinds of module for Rsvim editor:
+  /// 1. Single javascript/typescript file based on Rsvim config home (`$XDG_CONFIG_HOME/rsvim` or
+  ///    `$HOME/.rsvim`).
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
