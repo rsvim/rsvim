@@ -96,7 +96,7 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// 1. The "common js" standard is not implemented.
   /// 2. All `cjs`/`js` are recognized as ES module, not common js.
-  /// 3. The `require` keyword is recognized as ES module, not common js.
+  /// 3. The `require` keyword is not supported.
   ///
   /// There are several use cases in module resolving process.
   ///
