@@ -27,6 +27,14 @@ use crate::test::log::init as test_log_init;
 //   };
 // }
 
+fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
+  std::fs::create_dir(cached_dirs.config_dir.join("rsvim")).unwrap();
+  let mut config_entry =
+    std::fs::File::create(cached_dirs.config_dir.join("rsvim").join("rsvim.js")).unwrap();
+  config_entry.write_all(b"hello").unwrap();
+  config_entry.flush().unwrap();
+}
+
 fn xdg_config_home1() {
   test_log_init();
 
@@ -39,12 +47,7 @@ fn xdg_config_home1() {
     cache_dir: tmpdir.path().join("rsvim-cache"),
     data_dir: tmpdir.path().join("rsvim-data"),
   };
-
-  {
-    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
-    config_entry.write_all(b"hello").unwrap();
-    config_entry.flush().unwrap();
-  }
+  create_config_home_and_entry(&cached_dirs);
 
   let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
   assert!(cfg.config_home().is_some());
@@ -92,11 +95,7 @@ fn xdg_cache_home1() {
     data_dir: tmpdir.path().join("rsvim-data"),
   };
 
-  {
-    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
-    config_entry.write_all(b"hello").unwrap();
-    config_entry.flush().unwrap();
-  }
+  create_config_home_and_entry(&cached_dirs);
 
   let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
   assert!(cfg.config_home().is_some());
@@ -144,11 +143,7 @@ fn xdg_data_home1() {
     data_dir: tmpdir.path().join("rsvim-data"),
   };
 
-  {
-    let mut config_entry = std::fs::File::create(cached_dirs.config_dir.join("rsvim.js")).unwrap();
-    config_entry.write_all(b"hello").unwrap();
-    config_entry.flush().unwrap();
-  }
+  create_config_home_and_entry(&cached_dirs);
 
   let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
   assert!(cfg.config_home().is_some());
