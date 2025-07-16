@@ -91,7 +91,11 @@ impl ModuleLoader for FsModuleLoader {
   /// Resolve module path by specifier in local filesystem.
   ///
   /// Rsvim tries to resolve node packages, thus we can directly use npm's registry to publish
-  /// Rsvim plugins and even manage them with the `npm` executable.
+  /// Rsvim plugins and even manage them with the `npm` executable. But node/npm packages have
+  /// quite a history, it requires a lot of effort to be fully compatible with it, here we only
+  /// implement part of the ES modules (at least for now):
+  ///
+  /// 1.
   ///
   /// For node package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
