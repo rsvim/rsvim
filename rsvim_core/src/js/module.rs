@@ -14,23 +14,8 @@
 //!
 //! ## Module Path
 //!
-//! A module path is the local file path where the module stores. For example in a node/npm
-//! project, the `lodash` library can be installed with `npm i lodash`, and the local filesystem
-//! looks like:
-//!
-//! ```text
-//! ./node_modules/lodash/
-//!  ...
-//!  |- has.js
-//!  |- hasIn.js
-//!  |- head.js
-//!  |- identity.js
-//!  |- inRange.js
-//!  |- includes.js
-//!  |- index.js     -> This is the `lodash` library entry for npm package
-//!  |- indexOf.js
-//!  ...
-//! ```
+//! A module path is the local file path where the module stores. For example
+//! `./node_modules/lodash/index.js`.
 //!
 //! ## Module Source
 //!
@@ -42,7 +27,7 @@ use crate::js::JsRuntime;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
-use std::sync::{LazyLock, OnceLock};
+use std::sync::LazyLock;
 use tracing::trace;
 // use url::Url;
 
