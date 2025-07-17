@@ -102,7 +102,7 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
-    // Resolve absolute import.
+    // Full file path, start with '/' or 'C:\\'.
     if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
