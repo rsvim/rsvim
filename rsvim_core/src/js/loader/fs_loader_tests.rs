@@ -52,11 +52,14 @@ fn test_resolve1() {
   for (base, specifier, expect) in tests {
     let actual = loader.resolve(base, specifier).unwrap();
     info!(
-      "base:{base:?},specifier:{specifier:?},expect:{expect:?},actual:{actual:?},equal:{},ends_with:{}",
-      actual == expect,
-      actual.ends_with(expect)
+      "base:{base:?},specifier:{specifier:?},actual:{actual:?},expect:{expect:?},expect(\\):{:?}",
+      expect.replace("/", "\\")
     );
-    assert!(actual == expect || actual.ends_with(expect));
+    if cfg!(target_os = "windows") {
+      assert!(actual == expect || actual.ends_with(&expect.replace("/", "\\")));
+    } else {
+      assert!(actual == expect || actual.ends_with(expect));
+    }
   }
 }
 
