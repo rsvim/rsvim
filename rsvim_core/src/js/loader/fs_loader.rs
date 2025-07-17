@@ -145,9 +145,7 @@ impl ModuleLoader for FsModuleLoader {
         }
 
         // Otherwise we try to resolve it as node/npm package.
-        anyhow::bail!(format!(
-          "Module specifier not implement: specifier;{specifier:?}"
-        ));
+        anyhow::bail!(format!("Module specifier not implement: {specifier:?}"));
       }
       None => {
         anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
