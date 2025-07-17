@@ -91,9 +91,9 @@ fn test_load2() {
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
   const SRC: &str = r"
-      export function sayHello() {
-          console.log('Hello, World!');
-      }
+  {
+    'name': 1
+  }
   ";
 
   let source_files = [
