@@ -7,7 +7,6 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
-use anyhow::bail;
 // use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
@@ -74,7 +73,7 @@ impl FsModuleLoader {
     }
 
     // 3. Bail out with an error.
-    bail!(format!("Module not found \"{}\"", path.display()));
+    anyhow::bail!(format!("Module not found \"{}\"", path.display()));
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
@@ -85,7 +84,7 @@ impl FsModuleLoader {
         return self.load_source(path);
       }
     }
-    bail!(format!("Module not found \"{}\"", path.display()));
+    anyhow::bail!(format!("Module not found \"{}\"", path.display()));
   }
 }
 
@@ -107,18 +106,22 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
-    // Resolve relative import.
-    // FIXME: Here we should always disable CWD as a parent path to resolve modules.
-    // Because for rsvim editor, the modules are stored in user config directories, not CWD.
-    // CWD is mostly for general runtimes such as node/deno project.
-    let cwd = &std::env::current_dir().unwrap();
-    let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
+    // Resolve file path.
+    let base = match base {
+      Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
+      None => match &*CONFIG_HOME_PATH {
+        Some(config_home) => config_home.to_path_buf(),
+        None => {
+          anyhow::bail!(format!("Module not found: {specifier:?}"));
+        }
+      },
+    };
 
     if specifier.starts_with("./") || specifier.starts_with("../") {
       return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
-    bail!(format!("Module not found \"{specifier}\""));
+    anyhow::bail!(format!("Module not found \"{specifier}\""));
   }
 
   /// Load module source by its module path (full file path).
@@ -137,7 +140,7 @@ impl ModuleLoader for FsModuleLoader {
 
     let source = match maybe_source {
       Ok(source) => source,
-      Err(_) => bail!(format!("Module not found \"{}\"", path.display())),
+      Err(_) => anyhow::bail!(format!("Module not found \"{}\"", path.display())),
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
