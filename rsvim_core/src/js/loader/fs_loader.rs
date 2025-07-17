@@ -123,7 +123,7 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
-    anyhow::bail!(format!("Module not found \"{specifier}\""));
+    anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
   }
 
   /// Load module source by its module path (full file path).
