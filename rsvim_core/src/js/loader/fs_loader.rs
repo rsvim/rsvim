@@ -123,12 +123,12 @@ impl ModuleLoader for FsModuleLoader {
     match &*CONFIG_HOME_PATH {
       Some(config_home) => {
         // Single file in config home directory, for example: `${config_home}/syntaxes.js`.
-        let simple_specifier = config_home.join(specifier);
-        let simple_path = simple_specifier.absolutize()?;
+        let single_specifier = config_home.join(specifier);
+        let single_path = single_specifier.absolutize()?;
 
         // If single file exists, resolve it.
-        if simple_path.exists() {
-          return Ok(self.transform(simple_path.to_path_buf()));
+        if single_path.exists() {
+          return Ok(self.transform(single_path.to_path_buf()));
         }
 
         // Otherwise we try to resolve it as node/npm package.
