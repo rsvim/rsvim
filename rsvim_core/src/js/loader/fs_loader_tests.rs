@@ -42,7 +42,51 @@ fn test_resolve1() {
 }
 
 #[test]
-fn test_load_fs_imports() {
+fn test_load1() {
+  // Crate temp dir.
+  let temp_dir = assert_fs::TempDir::new().unwrap();
+
+  const SRC: &str = r"
+      export function sayHello() {
+          console.log('Hello, World!');
+      }
+  ";
+
+  let source_files = [
+    "./core/tests/005_more_imports.js",
+    "./core/tests/006_more_imports/index.js",
+  ];
+
+  // Create source files.
+  source_files.iter().for_each(|file| {
+    let path = Path::new(file);
+    let path = temp_dir.child(path);
+
+    path.touch().unwrap();
+    fs::write(path, SRC).unwrap();
+  });
+
+  // Group of tests to be run.
+  let tests = vec![
+    "./core/tests/005_more_imports",
+    "./core/tests/005_more_imports.js",
+    "./core/tests/006_more_imports/",
+  ];
+
+  // Run tests.
+  let loader = FsModuleLoader {};
+
+  for specifier in tests {
+    let path = format!("{}", temp_dir.child(specifier).display());
+    let source = loader.load(&path);
+
+    assert!(source.is_ok());
+    assert_eq!(source.unwrap(), SRC);
+  }
+}
+
+#[test]
+fn test_load2() {
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
