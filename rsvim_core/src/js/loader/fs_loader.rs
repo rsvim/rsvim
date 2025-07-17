@@ -15,6 +15,7 @@ use path_absolutize::Absolutize;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
+use tracing_subscriber::fmt::format;
 // use url::Url;
 
 static FILE_EXTENSIONS: &[&str] = &[
@@ -135,17 +136,30 @@ impl ModuleLoader for FsModuleLoader {
     // File name (neither full path nor relative path).
     match &*CONFIG_HOME_PATH {
       Some(config_home) => {
-        // File path in config home directory, for example: `${config_home}/syntaxes.js`.
+        // Simple file path in config home directory, for example: `${config_home}/syntaxes.js`.
         let simple_specifier = config_home.join(specifier);
-        let simple_path = simple_specifier.absolutize()?;
+        match simple_specifier.absolutize() {
+          Ok(simple_path) => {
+            if simple_path.exists() {
+              return Ok(self.transform(simple_path.to_path_buf()));
+            }
+          }
+          Err(e) => anyhow::bail!(format!("Module specifier error: {specifier:?}, {e:?}")),
+        }
 
-        // If file path exists, resolve it.
-        if simple_path.exists() {
-          return Ok(self.transform(simple_path.to_path_buf()));
+        // Npm file path in `${config_home}/node_modules`.
+        let npm_specifier = config_home.join("node_modules").join(specifier);
+        match npm_specifier.absolutize() {
+          Ok(npm_path) => {
+            if npm_path.exists() {
+              return Ok(self.transform(npm_path.to_path_buf()));
+            }
+          }
+          Err(e) => anyhow::bail!(format!("Module specifier error: {specifier:?}, {e:?}")),
         }
 
         // Otherwise we try to resolve it as node/npm package.
-        anyhow::bail!(format!("Module specifier not implement: {specifier:?}"));
+        anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
       }
       None => {
         anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
