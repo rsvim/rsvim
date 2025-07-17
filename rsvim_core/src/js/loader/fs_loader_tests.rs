@@ -120,7 +120,7 @@ fn test_load2() {
 
   let source_files = [
     "./core/tests/005_more_imports.json",
-    "./core/tests/006_more_imports/index.json5",
+    "./core/tests/006_more_imports/index.json",
   ];
 
   // Create source files.
@@ -138,6 +138,7 @@ fn test_load2() {
     "./core/tests/005_more_imports.json",
     "./core/tests/006_more_imports/",
     "./core/tests/006_more_imports",
+    "./core/tests/006_more_imports/index.js",
   ];
 
   // Run tests.

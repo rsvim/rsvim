@@ -17,7 +17,7 @@ use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
 
-static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "jsx", "ts", "tsx", "json", "json5", "wasm"];
+static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
@@ -31,10 +31,10 @@ impl FsModuleLoader {
 
   /// Checks if path is a JSON file.
   fn is_json_import(&self, path: &Path) -> bool {
-    match path.extension() {
-      Some(value) => value == "json" || value == "json5",
-      None => false,
-    }
+    path
+      .extension()
+      .map(|value| value == "json")
+      .unwrap_or(false)
   }
 
   /// Wraps JSON data into an ES module (using v8's built in objects).
