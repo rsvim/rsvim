@@ -73,7 +73,8 @@ impl FsModuleLoader {
     }
 
     // 3. Bail out with an error.
-    anyhow::bail!(format!("Module not found \"{}\"", path.display()));
+    let path_display = path.display();
+    anyhow::bail!(format!("Module path not found: {path_display:?}"));
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
@@ -84,7 +85,8 @@ impl FsModuleLoader {
         return self.load_source(path);
       }
     }
-    anyhow::bail!(format!("Module not found \"{}\"", path.display()));
+    let path_display = path.display();
+    anyhow::bail!(format!("Module path not found: {path_display:?}"));
   }
 }
 
@@ -112,7 +114,7 @@ impl ModuleLoader for FsModuleLoader {
       None => match &*CONFIG_HOME_PATH {
         Some(config_home) => config_home.to_path_buf(),
         None => {
-          anyhow::bail!(format!("Module not found: {specifier:?}"));
+          anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
         }
       },
     };
@@ -140,7 +142,7 @@ impl ModuleLoader for FsModuleLoader {
 
     let source = match maybe_source {
       Ok(source) => source,
-      Err(_) => anyhow::bail!(format!("Module not found \"{}\"", path.display())),
+      Err(_) => anyhow::bail!(format!("Module path not found \"{}\"", path.display())),
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
