@@ -152,7 +152,7 @@ impl ModuleLoader for FsModuleLoader {
     }
   }
 
-  /// Load module source by its module path (full file path).
+  /// Load module source by its module path, it can be either a file path, or a directory path.
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
