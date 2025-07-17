@@ -7,6 +7,7 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
+use compact_str::CompactStringExt;
 // use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
@@ -119,14 +120,24 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // File name (neither full path nor relative path).
-    let base = match &*CONFIG_HOME_PATH {
-      Some(config_home) => config_home.to_path_buf(),
+    match &*CONFIG_HOME_PATH {
+      Some(config_home) => {
+        // Single file in config home directory, for example: `${config_home}/syntaxes.js`.
+        let config_specifier = config_home.join(specifier);
+        let simple_config_specifier = config_specifier.absolutize()?;
+
+        // If single file exists, resolve it.
+        if simple_config_specifier.exists() {
+          return Ok(self.transform(simple_config_specifier.to_path_buf()));
+        }
+
+        // Otherwise we try to resolve it as node/npm package.
+        anyhow::bail!(format!("Module specifier not implement: {specifier:?}"));
+      }
       None => {
         anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
       }
-    };
-
-    return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
+    }
   }
 
   /// Load module source by its module path (full file path).
