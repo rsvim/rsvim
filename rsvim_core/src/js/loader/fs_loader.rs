@@ -15,7 +15,6 @@ use path_absolutize::Absolutize;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use tracing_subscriber::fmt::format;
 // use url::Url;
 
 static FILE_EXTENSIONS: &[&str] = &[
