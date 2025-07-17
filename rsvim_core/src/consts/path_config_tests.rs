@@ -36,39 +36,39 @@ fn create_config_home_and_entry(tmpdir: &Path) {
 fn xdg_variables1() {
   test_log_init();
 
-  let tmpconf = assert_fs::TempDir::new().unwrap();
-  let tmpcache = assert_fs::TempDir::new().unwrap();
-  let tmpdata = assert_fs::TempDir::new().unwrap();
+  let tmp_conf = assert_fs::TempDir::new().unwrap();
+  let tmp_cache = assert_fs::TempDir::new().unwrap();
+  let tmp_data = assert_fs::TempDir::new().unwrap();
 
-  let saved_xdg_config = set_xdg!(XDG_CONFIG_HOME, tmpconf.path());
-  let saved_xdg_cache = set_xdg!(XDG_CACHE_HOME, tmpcache.path());
-  let saved_xdg_data = set_xdg!(XDG_DATA_HOME, tmpdata.path());
+  let saved_xdg_config = set_xdg!(XDG_CONFIG_HOME, tmp_conf.path());
+  let saved_xdg_cache = set_xdg!(XDG_CACHE_HOME, tmp_cache.path());
+  let saved_xdg_data = set_xdg!(XDG_DATA_HOME, tmp_data.path());
 
-  create_config_home_and_entry(tmpconf.path());
+  create_config_home_and_entry(tmp_conf.path());
 
   let cfg = PathConfig::default();
 
   assert!(cfg.config_home().is_some());
   assert_eq!(
     cfg.config_home().clone().unwrap(),
-    tmpconf.path().join("rsvim")
+    tmp_conf.path().join("rsvim")
   );
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
     cfg.config_entry().clone().unwrap(),
-    tmpconf.path().join("rsvim").join("rsvim.js")
+    tmp_conf.path().join("rsvim").join("rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
     assert_eq!(
       cfg.cache_home().clone(),
-      tmpcache.path().join("rsvim-cache")
+      tmp_cache.path().join("rsvim-cache")
     );
-    assert_eq!(cfg.data_home().clone(), tmpdata.path().join("rsvim-data"));
+    assert_eq!(cfg.data_home().clone(), tmp_data.path().join("rsvim-data"));
   } else {
-    assert_eq!(cfg.cache_home().clone(), tmpcache.path().join("rsvim"));
-    assert_eq!(cfg.data_home().clone(), tmpdata.path().join("rsvim"));
+    assert_eq!(cfg.cache_home().clone(), tmp_cache.path().join("rsvim"));
+    assert_eq!(cfg.data_home().clone(), tmp_data.path().join("rsvim"));
   }
 
   restore_xdg!(XDG_CONFIG_HOME, saved_xdg_config);
