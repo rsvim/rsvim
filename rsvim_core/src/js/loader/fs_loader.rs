@@ -80,11 +80,6 @@ impl FsModuleLoader {
   /// Loads import as directory using the 'index.[ext]' convention.
   fn load_as_directory(&self, path: &Path) -> AnyResult<ModuleSource> {
     for ext in FILE_EXTENSIONS {
-      let path = if path.ends_with("/") {
-        path.to_path_buf()
-      } else {
-        path.join("/")
-      };
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
         return self.load_source(path);

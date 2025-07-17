@@ -42,7 +42,7 @@ fn test_resolve1() {
     (
       Some("/dev/core/tests/005_more_imports.js"),
       "./006_more_imports/",
-      "/dev/core/tests/006_more_imports/",
+      "/dev/core/tests/006_more_imports",
     ),
   ];
 
