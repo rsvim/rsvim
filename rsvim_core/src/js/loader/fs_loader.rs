@@ -78,6 +78,8 @@ impl FsModuleLoader {
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
+  ///
+  /// TODO: In the future, we may want to also support the npm package.
   fn load_as_directory(&self, path: &Path) -> AnyResult<ModuleSource> {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
