@@ -34,7 +34,7 @@ impl FsModuleLoader {
   /// Checks if path is a JSON file.
   fn is_json_import(&self, path: &Path) -> bool {
     match path.extension() {
-      Some(value) => value == "json",
+      Some(value) => value == "json" || value == "json5",
       None => false,
     }
   }
@@ -47,9 +47,10 @@ impl FsModuleLoader {
   /// Loads contents from a file.
   fn load_source(&self, path: &Path) -> AnyResult<ModuleSource> {
     let source = fs::read_to_string(path)?;
-    let source = match self.is_json_import(path) {
-      true => self.wrap_json(source.as_str()),
-      false => source,
+    let source = if self.is_json_import(path) {
+      self.wrap_json(source.as_str())
+    } else {
+      source
     };
 
     Ok(source)
@@ -57,12 +58,13 @@ impl FsModuleLoader {
 
   /// Loads import as file.
   fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
-    // 1. Check if path is already a valid file.
+    // If path is a file.
     if path.is_file() {
       return self.load_source(path);
     }
 
-    // 2. Check if we need to add an extension.
+    // If path is not a file, and it doesn't has a file extension, try to find it by adding the
+    // file extension.
     if path.extension().is_none() {
       for ext in FILE_EXTENSIONS {
         let path = &path.with_extension(ext);
