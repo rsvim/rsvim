@@ -18,7 +18,9 @@ use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
 
-static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "json5", "wasm"];
+static FILE_EXTENSIONS: &[&str] = &[
+  "js", "mjs", "cjs", "jsx", "ts", "tsx", "json", "json5", "wasm",
+];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
