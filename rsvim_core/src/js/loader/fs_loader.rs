@@ -135,7 +135,7 @@ impl ModuleLoader for FsModuleLoader {
     // File name (neither full path nor relative path).
     match &*CONFIG_HOME_PATH {
       Some(config_home) => {
-        // Simple file path in config home directory, for example: `${config_home}/syntaxes.js`.
+        // Simple file path in config home directory `${config_home}`.
         let simple_specifier = config_home.join(specifier);
         match simple_specifier.absolutize() {
           Ok(simple_path) => {
