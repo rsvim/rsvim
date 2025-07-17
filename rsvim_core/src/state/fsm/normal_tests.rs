@@ -8091,3 +8091,230 @@ mod tests_goto_command_line_ex_mode {
     assert_canvas(&actual_canvas, &expect_canvas);
   }
 }
+
+#[cfg(test)]
+mod tests_goto_insert_mode {
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::fsm::InsertStateful;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tokio::sync::mpsc::{Receiver, Sender, channel};
+  use tracing::info;
+
+  #[test]
+  fn nowrap1_go_to_normal_insert() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(30, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode\n"],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
+    let insert_result =
+      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Normal);
+    assert_eq!(
+      insert_result,
+      StatefulValue::InsertMode(InsertStateful::default())
+    );
+
+    let tree = data_access.tree.clone();
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 0);
+    assert_eq!(actual_cursor.char_idx(), 2);
+    assert_eq!(actual_cursor.row_idx(), 0);
+    assert_eq!(actual_cursor.column_idx(), 2);
+
+    let expect_canvas = vec![
+      "Should go to insert mode      ",
+      "                              ",
+      "                              ",
+    ];
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
+  }
+
+  #[test]
+  fn nowrap2_go_to_append_insert() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(30, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode\n"],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
+    let insert_result =
+      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Append);
+    assert_eq!(
+      insert_result,
+      StatefulValue::InsertMode(InsertStateful::default())
+    );
+
+    let tree = data_access.tree.clone();
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 0);
+    assert_eq!(actual_cursor.char_idx(), 3);
+    assert_eq!(actual_cursor.row_idx(), 0);
+    assert_eq!(actual_cursor.column_idx(), 3);
+
+    let expect_canvas = vec![
+      "Should go to insert mode      ",
+      "                              ",
+      "                              ",
+    ];
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
+  }
+
+  #[test]
+  fn nowrap3_go_to_append_insert_when_max_column() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(30, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode\n"],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(30));
+    let insert_result =
+      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Append);
+    assert_eq!(
+      insert_result,
+      StatefulValue::InsertMode(InsertStateful::default())
+    );
+
+    let tree = data_access.tree.clone();
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 0);
+    assert_eq!(actual_cursor.char_idx(), 24);
+    assert_eq!(actual_cursor.row_idx(), 0);
+    assert_eq!(actual_cursor.column_idx(), 24);
+
+    let expect_canvas = vec![
+      "Should go to insert mode      ",
+      "                              ",
+      "                              ",
+    ];
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
+  }
+
+  #[test]
+  fn nowrap4_go_to_new_line_insert() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(30, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode\n"],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    let insert_result =
+      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::NewLine);
+    assert_eq!(
+      insert_result,
+      StatefulValue::InsertMode(InsertStateful::default())
+    );
+
+    let tree = data_access.tree.clone();
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 1);
+    assert_eq!(actual_cursor.char_idx(), 0);
+    assert_eq!(actual_cursor.row_idx(), 1);
+    assert_eq!(actual_cursor.column_idx(), 0);
+
+    let expect_canvas = vec![
+      "Should go to insert mode      ",
+      "                              ",
+      "                              ",
+    ];
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
+  }
+}

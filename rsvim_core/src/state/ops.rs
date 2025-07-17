@@ -58,8 +58,8 @@ pub enum Operation {
   /// `(column_idx,line_idx)` based on current buffer.
   WindowScrollTo((/* column_idx */ usize, /* line_idx */ usize)),
 
-  /// Goto insert mode.
-  GotoInsertMode,
+  /// Goto insert mode. Allows to append or to go to new line.
+  GotoInsertMode(InsertMotion),
 
   /// Goto normal mode.
   GotoNormalMode,
@@ -84,4 +84,17 @@ pub enum Operation {
 
   /// Quit editor
   EditorQuit,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+/// A set of possible motions when entering insert mode.
+pub enum InsertMotion {
+  /// keeps cursor at current position
+  Normal,
+
+  /// Move cursor to next column,
+  Append,
+
+  /// Create a new line and move cursor to next line
+  NewLine,
 }
