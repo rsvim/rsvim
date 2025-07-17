@@ -66,11 +66,11 @@ fn test_load1() {
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  const SRC: &str = r"
+  const SRC: &str = r#"
       export function sayHello() {
           console.log('Hello, World!');
       }
-  ";
+  "#;
 
   let source_files = [
     "./core/tests/005_more_imports.js",
