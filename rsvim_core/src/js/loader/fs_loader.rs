@@ -7,7 +7,6 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
-use compact_str::CompactStringExt;
 // use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
