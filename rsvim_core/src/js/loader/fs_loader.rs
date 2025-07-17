@@ -122,8 +122,8 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
+    // Relative file path.
     if specifier.starts_with("./") || specifier.starts_with("../") {
-      // Relative file path.
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
         None => anyhow::bail!(format!("Module specifier not found: {specifier:?}")),
