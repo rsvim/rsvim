@@ -112,11 +112,11 @@ fn test_load2() {
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  const SRC: &str = r"
+  const SRC: &str = r#"
   {
-    'name': 1
+    "name": 1
   }
-  ";
+  "#;
 
   let source_files = [
     "./core/tests/005_more_imports.json",
@@ -138,7 +138,7 @@ fn test_load2() {
     "./core/tests/005_more_imports.json",
     "./core/tests/006_more_imports/",
     "./core/tests/006_more_imports",
-    "./core/tests/006_more_imports/index.js",
+    "./core/tests/006_more_imports/index.json",
   ];
 
   // Run tests.
