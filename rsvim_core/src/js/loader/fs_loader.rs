@@ -126,7 +126,7 @@ impl ModuleLoader for FsModuleLoader {
         let single_path = single_specifier.absolutize()?;
 
         // If single file exists, resolve it.
-        if single_path.exists() {
+        if single_path.exists() && single_path.is_file() {
           return Ok(self.transform(single_path.to_path_buf()));
         }
 
