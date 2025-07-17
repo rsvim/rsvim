@@ -1,13 +1,34 @@
-use std::io::Write;
-
 use super::path_config::*;
 
 use crate::test::log::init as test_log_init;
 
-fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
-  std::fs::create_dir_all(cached_dirs.config_dir.join("rsvim")).unwrap();
-  let mut config_entry =
-    std::fs::File::create(cached_dirs.config_dir.join("rsvim").join("rsvim.js")).unwrap();
+use std::io::Write;
+use std::path::Path;
+
+macro_rules! set_xdg {
+  ($name:ident,$value:expr) => {
+    unsafe {
+      let saved = std::env::var($name);
+      std::env::set_var($name, $value);
+      saved
+    }
+  };
+}
+
+macro_rules! restore_xdg {
+  ($name:ident,$saved_xdg:expr) => {
+    match $saved_xdg {
+      Ok(saved) => unsafe {
+        std::env::set_var($name, saved);
+      },
+      Err(_) => { /* */ }
+    }
+  };
+}
+
+fn create_config_home_and_entry(tmpdir: &Path) {
+  std::fs::create_dir_all(tmpdir.join("rsvim")).unwrap();
+  let mut config_entry = std::fs::File::create(tmpdir.join("rsvim").join("rsvim.js")).unwrap();
   config_entry.write_all(b"hello").unwrap();
   config_entry.flush().unwrap();
 }
@@ -16,27 +37,22 @@ fn xdg_config_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
+  create_config_home_and_entry(tmpdir.path());
 
-  let cached_dirs = CachedDirs {
-    config_dir: tmpdir.path().join("rsvim-config"),
-    home_dir: tmpdir.path().join("rsvim-home"),
-    cache_dir: tmpdir.path().join("rsvim-cache"),
-    data_dir: tmpdir.path().join("rsvim-data"),
-  };
+  let saved_xdg = set_xdg!(XDG_CONFIG_HOME, tmpdir.path());
 
-  create_config_home_and_entry(&cached_dirs);
+  let cfg = PathConfig::default();
 
-  let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
   assert!(cfg.config_home().is_some());
   assert_eq!(
     cfg.config_home().clone().unwrap(),
-    cached_dirs.config_dir.join("rsvim")
+    tmpdir.path().join("rsvim")
   );
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
     cfg.config_entry().clone().unwrap(),
-    cached_dirs.config_dir.join("rsvim").join("rsvim.js")
+    tmpdir.path().join("rsvim").join("rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
