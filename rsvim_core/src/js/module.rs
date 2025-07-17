@@ -1,8 +1,12 @@
 //! Js module.
 //!
-//! # Terms
+//! There are 3 terms in this section:
 //!
-//! ## Module Specifier
+//! - Module specifier.
+//! - Module path.
+//! - Module source.
+//!
+//! # Module Specifier
 //!
 //! A module specifier is the module name used in `import`/`require` keywords. For example:
 //!
@@ -12,12 +16,12 @@
 //!
 //! The `"lodash"` is the module specifier.
 //!
-//! ## Module Path
+//! # Module Path
 //!
 //! A module path is the local file path where the module stores. For example
-//! `./node_modules/lodash/index.js`.
+//! `/home/users/project/node_modules/lodash/index.js`.
 //!
-//! ## Module Source
+//! # Module Source
 //!
 //! A module source is the source code of the module, such as javascript source code, and the
 //! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
