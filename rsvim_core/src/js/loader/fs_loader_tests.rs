@@ -66,7 +66,7 @@ fn test_load1() {
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  const SRC: &str = r#"
+  let src: &str = r#"
       export function sayHello() {
           console.log('Hello, World!');
       }
@@ -83,7 +83,7 @@ fn test_load1() {
     let path = temp_dir.child(path);
 
     path.touch().unwrap();
-    fs::write(path, SRC).unwrap();
+    fs::write(path, src).unwrap();
   });
 
   // Group of tests to be run.
@@ -102,7 +102,7 @@ fn test_load1() {
     let source = loader.load(&path);
     info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
     assert!(source.is_ok());
-    assert_eq!(source.unwrap(), SRC);
+    assert_eq!(source.unwrap(), src);
   }
 }
 
@@ -112,7 +112,7 @@ fn test_load2() {
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  const SRC: &str = r#"
+  let src: &str = r#"
   {
     "name": 1
   }
@@ -129,7 +129,7 @@ fn test_load2() {
     let path = temp_dir.child(path);
 
     path.touch().unwrap();
-    fs::write(path, SRC).unwrap();
+    fs::write(path, src).unwrap();
   });
 
   // Group of tests to be run.
@@ -149,6 +149,6 @@ fn test_load2() {
     let source = loader.load(&path);
     info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
     assert!(source.is_ok());
-    assert!(source.unwrap().contains(SRC));
+    assert!(source.unwrap().contains(src));
   }
 }
