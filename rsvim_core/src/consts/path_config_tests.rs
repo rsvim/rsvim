@@ -5,15 +5,16 @@ use crate::test::log::init as test_log_init;
 use std::io::Write;
 use std::path::Path;
 
-fn create_config_home_and_entry(tmpdir: &Path) {
-  std::fs::create_dir_all(tmpdir.join("rsvim")).unwrap();
-  let mut config_entry = std::fs::File::create(tmpdir.join("rsvim").join("rsvim.js")).unwrap();
+fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
+  std::fs::create_dir_all(cached_dirs.config_dir.join("rsvim")).unwrap();
+  let mut config_entry =
+    std::fs::File::create(cached_dirs.config_dir.join("rsvim").join("rsvim.js")).unwrap();
   config_entry.write_all(b"hello").unwrap();
   config_entry.flush().unwrap();
 }
 
 #[test]
-fn test1() {
+fn xdg_config_home1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
@@ -25,7 +26,7 @@ fn test1() {
     data_dir: tmpdir.path().join("rsvim-data"),
   };
 
-  create_config_home_and_entry(tmpdir.path());
+  create_config_home_and_entry(&cached_dirs);
 
   let cfg = PathConfig::_new_with_cached_dirs(&cached_dirs);
   assert!(cfg.config_home().is_some());
