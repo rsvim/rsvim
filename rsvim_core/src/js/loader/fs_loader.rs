@@ -108,22 +108,25 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
-    // Resolve file path.
-    let base = match base {
-      Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
-      None => match &*CONFIG_HOME_PATH {
-        Some(config_home) => config_home.to_path_buf(),
-        None => {
-          anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
-        }
-      },
-    };
-
     if specifier.starts_with("./") || specifier.starts_with("../") {
+      // Relative file path.
+      let base = match base {
+        Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
+        None => anyhow::bail!(format!("Module specifier not found: {specifier:?}")),
+      };
+
       return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
-    anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
+    // File name (neither full path nor relative path).
+    let base = match &*CONFIG_HOME_PATH {
+      Some(config_home) => config_home.to_path_buf(),
+      None => {
+        anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
+      }
+    };
+
+    return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
   }
 
   /// Load module source by its module path (full file path).
