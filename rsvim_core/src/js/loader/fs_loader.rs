@@ -17,9 +17,7 @@ use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
 
-static FILE_EXTENSIONS: &[&str] = &[
-  "js", "mjs", "cjs", "jsx", "ts", "tsx", "json", "json5", "wasm",
-];
+static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "jsx", "ts", "tsx", "json", "json5", "wasm"];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
@@ -112,7 +110,7 @@ impl ModuleLoader for FsModuleLoader {
   /// we only choose to maintain a small subset (at least for now):
   ///
   /// 1. The "common js" standard is not supported.
-  /// 2. All `cjs`/`mjs`/`js` are recognized as ES module, not common js.
+  /// 2. The `cjs` file extension is not supported.
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
@@ -132,7 +130,7 @@ impl ModuleLoader for FsModuleLoader {
       return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
-    // File name (neither full path nor relative path).
+    // For other
     match &*CONFIG_HOME_PATH {
       Some(config_home) => {
         // Simple file path in config home directory `${config_home}`.
