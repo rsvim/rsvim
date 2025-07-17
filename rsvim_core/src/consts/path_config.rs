@@ -2,6 +2,60 @@
 
 use std::path::PathBuf;
 
+const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
+const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
+const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
+const HOME: &str = "XDG_DATA_HOME";
+
+fn _dirs_home_dir() -> Option<PathBuf> {
+  dirs::home_dir()
+}
+
+#[cfg(test)]
+fn _dirs_config_dir() -> Option<PathBuf> {
+  use std::path::Path;
+
+  match std::env::var(XDG_CONFIG_HOME) {
+    Ok(xdg_config_dir) => Some(Path::new(&xdg_config_dir).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_config_dir() -> Option<PathBuf> {
+  dirs::config_dir()
+}
+
+#[cfg(test)]
+fn _dirs_cache_dir() -> Option<PathBuf> {
+  use std::path::Path;
+
+  match std::env::var(XDG_CACHE_HOME) {
+    Ok(xdg_cache_dir) => Some(Path::new(&xdg_cache_dir).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_cache_dir() -> Option<PathBuf> {
+  dirs::cache_dir()
+}
+
+#[cfg(test)]
+fn _dirs_data_dir() -> Option<PathBuf> {
+  use std::path::Path;
+
+  match std::env::var(XDG_DATA_HOME) {
+    Ok(xdg_data_dir) => Some(Path::new(&xdg_data_dir).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_data_dir() -> Option<PathBuf> {
+  dirs::data_dir()
+}
+
 #[derive(Debug, Clone)]
 pub struct CachedDirs {
   pub config_dir: PathBuf,
