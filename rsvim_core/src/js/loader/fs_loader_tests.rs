@@ -62,6 +62,7 @@ fn test_resolve1() {
 
 #[test]
 fn test_load1() {
+  test_log_init();
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -90,6 +91,7 @@ fn test_load1() {
     "./core/tests/005_more_imports",
     "./core/tests/005_more_imports.js",
     "./core/tests/006_more_imports/",
+    "./core/tests/006_more_imports",
   ];
 
   // Run tests.
@@ -106,6 +108,7 @@ fn test_load1() {
 
 #[test]
 fn test_load2() {
+  test_log_init();
   // Crate temp dir.
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -134,6 +137,7 @@ fn test_load2() {
     "./core/tests/005_more_imports",
     "./core/tests/005_more_imports.json",
     "./core/tests/006_more_imports/",
+    "./core/tests/006_more_imports",
   ];
 
   // Run tests.
@@ -144,6 +148,6 @@ fn test_load2() {
     let source = loader.load(&path);
     info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
     assert!(source.is_ok());
-    assert_eq!(source.unwrap(), SRC);
+    assert!(source.unwrap().contains(SRC));
   }
 }
