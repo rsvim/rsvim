@@ -12,7 +12,8 @@ fn create_config_home_and_entry(tmpdir: &Path) {
   config_entry.flush().unwrap();
 }
 
-fn xdg_variables1() {
+#[test]
+fn test1() {
   test_log_init();
 
   let tmpdir = assert_fs::TempDir::new().unwrap();
@@ -55,9 +56,4 @@ fn xdg_variables1() {
     );
     assert_eq!(cfg.data_home().clone(), cached_dirs.data_dir.join("rsvim"));
   }
-}
-
-#[test]
-fn test_all() {
-  xdg_variables1();
 }
