@@ -5,7 +5,6 @@ use std::path::PathBuf;
 const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
 const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
-const HOME: &str = "XDG_DATA_HOME";
 
 fn _dirs_home_dir() -> Option<PathBuf> {
   dirs::home_dir()
