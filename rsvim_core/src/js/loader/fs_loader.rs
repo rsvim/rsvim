@@ -54,19 +54,6 @@ impl FsModuleLoader {
     Ok(source)
   }
 
-  fn generated_paths_by_extension(&self, path: &Path) -> Option<Vec<PathBuf>> {
-    if path.extension().is_none() {
-      Some(
-        FILE_EXTENSIONS
-          .iter()
-          .map(|ext| path.with_extension(ext))
-          .collect(),
-      )
-    } else {
-      None
-    }
-  }
-
   /// Loads import as file.
   fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
     // If path is a file.
@@ -77,7 +64,8 @@ impl FsModuleLoader {
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
     // file extension.
     if path.extension().is_none() {
-      for ext_path in self.generated_paths_by_extension(path).unwrap() {
+      for ext in FILE_EXTENSIONS {
+        let ext_path = path.with_extension(ext);
         if ext_path.is_file() {
           return self.load_source(&ext_path);
         }
