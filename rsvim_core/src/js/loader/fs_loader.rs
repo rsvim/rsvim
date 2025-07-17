@@ -56,6 +56,19 @@ impl FsModuleLoader {
     Ok(source)
   }
 
+  fn generated_paths_by_extension(&self, path: &Path) -> Option<Vec<PathBuf>> {
+    if path.extension().is_none() {
+      Some(
+        FILE_EXTENSIONS
+          .iter()
+          .map(|ext| path.with_extension(ext))
+          .collect(),
+      )
+    } else {
+      None
+    }
+  }
+
   /// Loads import as file.
   fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
     // If path is a file.
@@ -66,10 +79,9 @@ impl FsModuleLoader {
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
     // file extension.
     if path.extension().is_none() {
-      for ext in FILE_EXTENSIONS {
-        let path = &path.with_extension(ext);
-        if path.is_file() {
-          return self.load_source(path);
+      for ext_path in self.generated_paths_by_extension(path).unwrap() {
+        if ext_path.is_file() {
+          return self.load_source(&ext_path);
         }
       }
     }
@@ -123,13 +135,13 @@ impl ModuleLoader for FsModuleLoader {
     // File name (neither full path nor relative path).
     match &*CONFIG_HOME_PATH {
       Some(config_home) => {
-        // Single file in config home directory, for example: `${config_home}/syntaxes.js`.
-        let single_specifier = config_home.join(specifier);
-        let single_path = single_specifier.absolutize()?;
+        // File path in config home directory, for example: `${config_home}/syntaxes.js`.
+        let simple_specifier = config_home.join(specifier);
+        let simple_path = simple_specifier.absolutize()?;
 
-        // If single file exists, resolve it.
-        if single_path.exists() {
-          return Ok(self.transform(single_path.to_path_buf()));
+        // If file path exists, resolve it.
+        if simple_path.exists() {
+          return Ok(self.transform(simple_path.to_path_buf()));
         }
 
         // Otherwise we try to resolve it as node/npm package.
