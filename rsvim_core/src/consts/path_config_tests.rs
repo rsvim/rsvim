@@ -3,7 +3,6 @@ use super::path_config::*;
 use crate::test::log::init as test_log_init;
 
 use std::io::Write;
-use std::path::Path;
 
 fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
   std::fs::create_dir_all(cached_dirs.config_dir.join("rsvim")).unwrap();
