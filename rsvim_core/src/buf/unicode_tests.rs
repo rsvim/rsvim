@@ -5,6 +5,7 @@ use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::test::log::init as test_log_init;
 
 use ascii::AsciiChar;
+use icu_properties::{CodePointMapData, props::EastAsianWidth};
 use tracing::info;
 use unicode_width::UnicodeWidthChar;
 
@@ -53,5 +54,30 @@ fn char_width1() {
     let formatted_width = UnicodeWidthChar::width_cjk(c).unwrap();
     info!("c:{c:?},formatted:{formatted:?}({formatted_width})");
     assert_eq!(char_width(&opt, c), formatted_width);
+  }
+}
+
+#[test]
+fn special_test1() {
+  test_log_init();
+
+  let special_characters = vec![
+    '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
+    ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`', '{', '}',
+    '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è', 'ï', 'î', 'ï',
+    'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù', 'ÿ', 'Ö', 'Ü', 'ø',
+    '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ', 'ª', 'º', '¿', '®', '¬',
+    '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│', '┤', 'Á', 'Â', 'À', '©', '╣',
+    '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß', 'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ',
+    'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´', '≡', '±', '‗', '¾', '¶', '§', '÷', '¸',
+    '°', '¨', '·', '¹', '³', '²', '■',
+  ];
+
+  let code_point_map = CodePointMapData::<EastAsianWidth>::new();
+
+  for (i, c) in special_characters.iter().enumerate() {
+    let w1 = UnicodeWidthChar::width_cjk(*c);
+    let w2 = code_point_map.get(*c);
+    info!("i:{i},c:{c:?}, unicode_width:{w1:?}, icu:{w2:?}");
   }
 }

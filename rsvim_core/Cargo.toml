@@ -56,6 +56,7 @@ once_cell = { workspace = true, features = ["parking_lot"] }
 ascii = { workspace = true }
 unicode-width = { workspace = true }
 unicode-segmentation = { workspace = true }
+icu_properties = { workspace = true }
 # unicode-normalization = { workspace = true }
 # icu = { workspace = true, features = ["compiled_data"] }
 derive_builder = { workspace = true }
