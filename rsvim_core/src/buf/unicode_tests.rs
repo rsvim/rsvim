@@ -58,7 +58,32 @@ fn char_width1() {
 }
 
 #[test]
-fn special_test1() {
+fn ascii_characters_test1() {
+  test_log_init();
+
+  let ascii_characters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let code_point_map = CodePointMapData::<EastAsianWidth>::new();
+
+  for (i, c) in ascii_characters.chars().enumerate() {
+    let w1 = UnicodeWidthChar::width_cjk(c);
+    let w2 = code_point_map.get(c);
+    let w2_name = match w2 {
+      EastAsianWidth::Halfwidth => "Halfwidth",
+      EastAsianWidth::Narrow => "Narrow",
+      EastAsianWidth::Ambiguous => "Ambiguous",
+      EastAsianWidth::Fullwidth => "Fullwidth",
+      EastAsianWidth::Neutral => "Neutral",
+      EastAsianWidth::Wide => "Wide",
+      _ => "Unknown",
+    };
+    info!("i:{i},c:{c:?}, unicode_width:{w1:?}, icu:{w2:?}({w2_name})");
+  }
+}
+
+#[test]
+fn special_characters_test1() {
   test_log_init();
 
   let special_characters = vec![
@@ -76,6 +101,32 @@ fn special_test1() {
   let code_point_map = CodePointMapData::<EastAsianWidth>::new();
 
   for (i, c) in special_characters.iter().enumerate() {
+    let w1 = UnicodeWidthChar::width_cjk(*c);
+    let w2 = code_point_map.get(*c);
+    let w2_name = match w2 {
+      EastAsianWidth::Halfwidth => "Halfwidth",
+      EastAsianWidth::Narrow => "Narrow",
+      EastAsianWidth::Ambiguous => "Ambiguous",
+      EastAsianWidth::Fullwidth => "Fullwidth",
+      EastAsianWidth::Neutral => "Neutral",
+      EastAsianWidth::Wide => "Wide",
+      _ => "Unknown",
+    };
+    info!("i:{i},c:{c:?}, unicode_width:{w1:?}, icu:{w2:?}({w2_name})");
+  }
+}
+
+#[test]
+fn cjk_characters_test1() {
+  test_log_init();
+
+  let cjk_characters = vec![
+    '你', '好', 'こ', 'ん', 'に', 'ち', 'は', '안', '녕', '하', '세', '요',
+  ];
+
+  let code_point_map = CodePointMapData::<EastAsianWidth>::new();
+
+  for (i, c) in cjk_characters.iter().enumerate() {
     let w1 = UnicodeWidthChar::width_cjk(*c);
     let w2 = code_point_map.get(*c);
     let w2_name = match w2 {
