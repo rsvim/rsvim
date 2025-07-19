@@ -21,6 +21,7 @@ use crate::ui::viewport::{
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
+use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
@@ -8116,11 +8117,11 @@ mod tests_goto_insert_mode {
   use tracing::info;
 
   #[test]
-  fn nowrap1_go_to_normal_insert() {
+  fn nowrap_goto_insert1() {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -8141,29 +8142,83 @@ mod tests_goto_insert_mode {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-    let insert_result =
-      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Keep);
-    assert_eq!(
-      insert_result,
-      StatefulValue::InsertMode(InsertStateful::default())
-    );
 
-    let tree = data_access.tree.clone();
-    let actual_cursor = get_cursor_viewport(tree.clone());
-    assert_eq!(actual_cursor.line_idx(), 0);
-    assert_eq!(actual_cursor.char_idx(), 2);
-    assert_eq!(actual_cursor.row_idx(), 0);
-    assert_eq!(actual_cursor.column_idx(), 2);
+    // Goto Insert-1 (Keep)
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
+      let insert_result =
+        stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Keep);
+      assert_eq!(
+        insert_result,
+        StatefulValue::InsertMode(InsertStateful::default())
+      );
 
-    let expect_canvas = vec![
-      "Should go to insert mode      ",
-      "                              ",
-      "                              ",
-    ];
-    let actual_canvas = make_canvas(tree.clone(), terminal_size);
-    let actual_canvas = lock!(actual_canvas);
-    assert_canvas(&actual_canvas, &expect_canvas);
+      let tree = data_access.tree.clone();
+      let actual_cursor = get_cursor_viewport(tree.clone());
+      assert_eq!(actual_cursor.line_idx(), 0);
+      assert_eq!(actual_cursor.char_idx(), 2);
+      assert_eq!(actual_cursor.row_idx(), 0);
+      assert_eq!(actual_cursor.column_idx(), 2);
+
+      let expect_canvas = vec![
+        "Should go to insert mode      ",
+        "                              ",
+        "                              ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = InsertStateful::default();
+    // Insert-2
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "ShBye, ould go to insert mode ",
+        "                              ",
+        "                              ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "ShBye, ould go to insert mode ",
+        "                              ",
+        "                              ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
   }
 
   #[test]
