@@ -3,13 +3,14 @@
 use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::state::ops::{InsertMotion, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
 
+use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -32,7 +33,9 @@ impl NormalStateful {
             KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char('i') => Some(Operation::GotoInsertMode),
+            KeyCode::Char('i') => Some(Operation::GotoInsertMode(InsertMotion::Normal)),
+            KeyCode::Char('a') => Some(Operation::GotoInsertMode(InsertMotion::Append)),
+            KeyCode::Char('o') => Some(Operation::GotoInsertMode(InsertMotion::NewLine)),
             KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
@@ -63,7 +66,9 @@ impl Stateful for NormalStateful {
 
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
-      Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
+      Operation::GotoInsertMode(insert_motion) => {
+        self.goto_insert_mode(&data_access, insert_motion)
+      }
       Operation::GotoCommandLineExMode => self.goto_command_line_ex_mode(&data_access),
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
@@ -133,7 +138,22 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_insert_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+    insert_motion: InsertMotion,
+  ) -> StatefulValue {
+    match insert_motion {
+      InsertMotion::Normal => {}
+      InsertMotion::Append => {
+        self.cursor_move_include_eol(data_access, Operation::CursorMoveRightBy(1), true);
+      }
+      InsertMotion::NewLine => {
+        self.cursor_move_include_eol(data_access, Operation::CursorMoveRightBy(usize::MAX), true);
+        self.new_line(data_access);
+      }
+    };
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -146,8 +166,31 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
+  pub fn new_line(&self, data_access: &StatefulDataAccess) {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let current_window = tree.current_window_mut().unwrap();
+    let current_window_id = current_window.id();
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let mut buffer = lock!(buffer);
+    let eol = CompactString::new(format!("{}", buffer.options().end_of_line()));
+
+    cursor_ops::cursor_insert(&mut tree, current_window_id, buffer.text_mut(), eol);
+  }
+}
+
+impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   pub fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+    self.cursor_move_include_eol(data_access, op, false)
+  }
+
+  pub fn cursor_move_include_eol(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+    include_eol: bool,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -155,7 +198,7 @@ impl NormalStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
+    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, include_eol);
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
