@@ -181,11 +181,12 @@ impl NormalStateful {
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
-        self._cursor_move_impl(
+        let op = Operation::CursorMoveRightBy(1);
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
-          Operation::CursorMoveRightBy(1),
+          op,
           true,
         );
       }
@@ -194,11 +195,12 @@ impl NormalStateful {
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
-        self._cursor_move_impl(
+        let op = Operation::CursorMoveRightBy(usize::MAX);
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
-          Operation::CursorMoveRightBy(usize::MAX),
+          op,
           true,
         );
         let eol =
@@ -234,25 +236,13 @@ impl NormalStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    self._cursor_move_impl(
+    cursor_ops::cursor_move(
       &mut tree,
       current_window_id,
       buffer.text(),
       op,
       false,
-    )
-  }
-
-  fn _cursor_move_impl(
-    &self,
-    tree: &mut Tree,
-    current_window_id: TreeNodeId,
-    text: &Text,
-    op: Operation,
-    include_eol: bool,
-  ) -> StatefulValue {
-    cursor_ops::cursor_move(tree, current_window_id, text, op, include_eol);
-
+    );
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
