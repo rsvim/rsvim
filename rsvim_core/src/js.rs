@@ -7,10 +7,12 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin, fetch_module_tree, load_import,
-  resolve_import,
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin,
+  fetch_module_tree, load_import, resolve_import,
 };
-use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::msg::{
+  EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
+};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -104,12 +106,19 @@ impl BuiltinRuntimeModule {
   }
 }
 
-static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> = Lazy::new(|| {
-  vec![
-    BuiltinRuntimeModule::new("00__web.js", include_str!("./js/runtime/00__web.js")),
-    BuiltinRuntimeModule::new("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
-  ]
-});
+static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> =
+  Lazy::new(|| {
+    vec![
+      BuiltinRuntimeModule::new(
+        "00__web.js",
+        include_str!("./js/runtime/00__web.js"),
+      ),
+      BuiltinRuntimeModule::new(
+        "01__rsvim.js",
+        include_str!("./js/runtime/01__rsvim.js"),
+      ),
+    ]
+  });
 
 // Built-in modules }
 
@@ -154,7 +163,8 @@ impl JsRuntimeForSnapshot {
 
     let (mut isolate, global_context) = Self::create_isolate();
 
-    let mut context_scope = v8::HandleScope::with_context(&mut isolate, global_context.clone());
+    let mut context_scope =
+      v8::HandleScope::with_context(&mut isolate, global_context.clone());
     let scope = &mut context_scope;
     let _context = v8::Local::new(scope, global_context.clone());
 
@@ -183,7 +193,8 @@ impl JsRuntimeForSnapshot {
   }
 
   fn create_isolate() -> (v8::OwnedIsolate, v8::Global<v8::Context>) {
-    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+    let mut isolate =
+      v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
@@ -191,8 +202,9 @@ impl JsRuntimeForSnapshot {
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
-    isolate
-      .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
+    isolate.set_host_initialize_import_meta_object_callback(
+      hook::host_initialize_import_meta_object_cb,
+    );
 
     let global_context = {
       let scope = &mut v8::HandleScope::new(&mut isolate);
@@ -225,7 +237,11 @@ impl JsRuntimeForSnapshot {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module(scope: &mut v8::HandleScope<'_>, name: &str, source: &str) {
+  fn init_builtin_module(
+    scope: &mut v8::HandleScope<'_>,
+    name: &str,
+    source: &str,
+  ) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
     let module = match Self::fetch_module(tc_scope, name, Some(source)) {
@@ -234,8 +250,12 @@ impl JsRuntimeForSnapshot {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("Failed to import builtin modules: {name}, error: {exception:?}");
-        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        error!(
+          "Failed to import builtin modules: {name}, error: {exception:?}"
+        );
+        eprintln!(
+          "Failed to import builtin modules: {name}, error: {exception:?}"
+        );
         std::process::exit(1);
       }
     };
@@ -247,8 +267,12 @@ impl JsRuntimeForSnapshot {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      error!(
+        "Failed to instantiate builtin modules: {name}, error: {exception:?}"
+      );
+      eprintln!(
+        "Failed to instantiate builtin modules: {name}, error: {exception:?}"
+      );
       std::process::exit(1);
     }
 
@@ -257,8 +281,12 @@ impl JsRuntimeForSnapshot {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      error!(
+        "Failed to evaluate builtin modules: {name}, error: {exception:?}"
+      );
+      eprintln!(
+        "Failed to evaluate builtin modules: {name}, error: {exception:?}"
+      );
       std::process::exit(1);
     }
   }
@@ -437,8 +465,9 @@ impl JsRuntime {
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
-    isolate
-      .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
+    isolate.set_host_initialize_import_meta_object_callback(
+      hook::host_initialize_import_meta_object_cb,
+    );
 
     // const MIN_POOL_SIZE: usize = 1;
 
@@ -563,22 +592,25 @@ impl JsRuntime {
     let tc_scope = &mut v8::TryCatch::new(scope);
     type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, AnyErr>;
 
-    let handle_exception =
-      |scope: &mut v8::TryCatch<'_, v8::HandleScope<'_>>| -> ExecuteScriptResult {
-        // Extract the exception during compilation.
-        assert!(scope.has_caught());
-        let exception = scope.exception().unwrap();
-        let exception = v8::Global::new(scope, exception);
-        let mut state = state_rc.borrow_mut();
-        // Capture the exception internally.
-        state.exceptions.capture_exception(exception);
-        drop(state);
-        // Force an exception check.
-        if let Some(error) = check_exceptions(scope) {
-          anyhow::bail!(error)
-        }
-        Ok(None)
-      };
+    let handle_exception = |scope: &mut v8::TryCatch<
+      '_,
+      v8::HandleScope<'_>,
+    >|
+     -> ExecuteScriptResult {
+      // Extract the exception during compilation.
+      assert!(scope.has_caught());
+      let exception = scope.exception().unwrap();
+      let exception = v8::Global::new(scope, exception);
+      let mut state = state_rc.borrow_mut();
+      // Capture the exception internally.
+      state.exceptions.capture_exception(exception);
+      drop(state);
+      // Force an exception check.
+      if let Some(error) = check_exceptions(scope) {
+        anyhow::bail!(error)
+      }
+      Ok(None)
+    };
 
     let script = match v8::Script::compile(tc_scope, source, Some(&origin)) {
       Some(script) => script,
@@ -592,7 +624,11 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  pub fn execute_module(&mut self, filename: &str, source: Option<&str>) -> Result<(), AnyErr> {
+  pub fn execute_module(
+    &mut self,
+    filename: &str,
+    source: Option<&str>,
+  ) -> Result<(), AnyErr> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
@@ -634,7 +670,9 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+      let e = format!(
+        "Failed to instantiate user config module {filename:?}: {exception:?}"
+      );
       error!(e);
       eprintln!("{e}");
       anyhow::bail!(e);
@@ -654,7 +692,9 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
+      let e = format!(
+        "Failed to evaluate user config module {filename:?}: {exception:?}"
+      );
       error!(e);
       eprintln!("{e}");
       anyhow::bail!(e);
@@ -732,7 +772,10 @@ impl JsRuntime {
             trace!("Receive TimeResp:{resp:?}");
             match state.pending_futures.remove(&resp.future_id) {
               Some(timeout_cb) => futures.push(timeout_cb),
-              None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
+              None => unreachable!(
+                "Failed to get timeout future by ID {:?}",
+                resp.future_id
+              ),
             }
           }
           EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
@@ -786,7 +829,8 @@ impl JsRuntime {
         match graph.kind.clone() {
           ImportKind::Static => unreachable!(),
           ImportKind::Dynamic(main_promise) => {
-            for promise in [main_promise].iter().chain(graph.same_origin.iter()) {
+            for promise in [main_promise].iter().chain(graph.same_origin.iter())
+            {
               promise.open(scope).reject(scope, exception);
             }
           }

@@ -11,7 +11,11 @@ impl Stateful for VisualStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
     StatefulValue::VisualMode(VisualStateful::default())
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    _data_access: StatefulDataAccess,
+    _op: Operation,
+  ) -> StatefulValue {
     StatefulValue::VisualMode(VisualStateful::default())
   }
 }

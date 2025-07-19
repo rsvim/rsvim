@@ -158,37 +158,42 @@ impl Relationships {
     self._internal_check();
 
     let result = match self.parent_id.remove(&child_id) {
-      Some(removed_parent) => match self.children_ids.get_mut(&removed_parent) {
-        Some(to_be_removed_children) => {
-          let to_be_removed_child = to_be_removed_children
-            .iter()
-            .enumerate()
-            .filter(|(_idx, c)| **c == child_id)
-            .map(|(idx, c)| (idx, *c))
-            .collect::<Vec<(usize, TreeNodeId)>>();
-          if !to_be_removed_child.is_empty() {
-            debug_assert_eq!(to_be_removed_child.len(), 1);
-            let to_be_removed = to_be_removed_child[0];
-            to_be_removed_children.remove(to_be_removed.0);
+      Some(removed_parent) => {
+        match self.children_ids.get_mut(&removed_parent) {
+          Some(to_be_removed_children) => {
+            let to_be_removed_child = to_be_removed_children
+              .iter()
+              .enumerate()
+              .filter(|(_idx, c)| **c == child_id)
+              .map(|(idx, c)| (idx, *c))
+              .collect::<Vec<(usize, TreeNodeId)>>();
+            if !to_be_removed_child.is_empty() {
+              debug_assert_eq!(to_be_removed_child.len(), 1);
+              let to_be_removed = to_be_removed_child[0];
+              to_be_removed_children.remove(to_be_removed.0);
 
-            // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
-            // api.
-            let children_of_to_be_removed_exists = self.children_ids.contains_key(&to_be_removed.1);
-            let children_of_to_be_removed_is_empty = self
-              .children_ids
-              .get(&to_be_removed.1)
-              .is_none_or(|children| children.is_empty());
-            if children_of_to_be_removed_exists && children_of_to_be_removed_is_empty {
-              self.children_ids.remove(&to_be_removed.1);
+              // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
+              // api.
+              let children_of_to_be_removed_exists =
+                self.children_ids.contains_key(&to_be_removed.1);
+              let children_of_to_be_removed_is_empty = self
+                .children_ids
+                .get(&to_be_removed.1)
+                .is_none_or(|children| children.is_empty());
+              if children_of_to_be_removed_exists
+                && children_of_to_be_removed_is_empty
+              {
+                self.children_ids.remove(&to_be_removed.1);
+              }
+
+              true
+            } else {
+              false
             }
-
-            true
-          } else {
-            false
           }
+          None => false,
         }
-        None => false,
-      },
+      }
       None => false,
     };
 
@@ -297,7 +302,8 @@ where
         debug_assert!(parent.is_none());
       } else {
         debug_assert!(parent.is_some());
-        let parents_children = self.relationships.borrow().children_ids(parent.unwrap());
+        let parents_children =
+          self.relationships.borrow().children_ids(parent.unwrap());
         for c in parents_children {
           let child_parent = self.relationships.borrow().parent_id(c);
           debug_assert!(child_parent.is_some());
@@ -376,7 +382,11 @@ where
   /// 1. [`depth`](Inode::depth()): The child depth should always be the parent's depth + 1.
   /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
   ///    by parent's boundaries.
-  fn update_descendant_attributes(&mut self, start_id: TreeNodeId, start_parent_id: TreeNodeId) {
+  fn update_descendant_attributes(
+    &mut self,
+    start_id: TreeNodeId,
+    start_parent_id: TreeNodeId,
+  ) {
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
     // Tuple of (child_id, parent_id, parent_depth, parent_actual_shape)
@@ -402,7 +412,8 @@ where
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
       let cnode_depth = pnode_depth + 1;
       let cnode_shape = *cnode_ref.shape();
-      let cnode_actual_shape = shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
+      let cnode_actual_shape =
+        shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
 
       // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
@@ -449,7 +460,11 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
+  pub fn insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    mut child_node: T,
+  ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationships.borrow().contains_id(parent_id));
@@ -482,10 +497,12 @@ where
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
-    self
-      .relationships
-      .borrow_mut()
-      .add_child(parent_id, child_id, child_zindex, &self.nodes);
+    self.relationships.borrow_mut().add_child(
+      parent_id,
+      child_id,
+      child_zindex,
+      &self.nodes,
+    );
 
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {
@@ -515,7 +532,11 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
+  pub fn bounded_insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    mut child_node: T,
+  ) -> Option<T> {
     // Panics if `parent_id` not exists.
     debug_assert!(self.nodes.contains_key(&parent_id));
 
@@ -595,7 +616,12 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_by(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
@@ -624,7 +650,12 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_by(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
         let maybe_parent_actual_shape: Option<U16Rect> = self
@@ -638,14 +669,14 @@ where
               Some(node) => {
                 let current_shape = *node.shape();
                 let current_top_left_pos: IPos = current_shape.min().into();
-                let expected_top_left_pos: IPos =
-                  point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                let expected_top_left_pos: IPos = point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
                 let expected_shape = IRect::new(
                   expected_top_left_pos,
                   point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
                 );
 
-                let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
+                let final_shape =
+                  shapes::bound_shape(&expected_shape, &parent_actual_shape);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
@@ -675,7 +706,12 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_to(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
@@ -710,7 +746,12 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_to(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
         let maybe_parent_actual_shape: Option<U16Rect> = self
@@ -728,7 +769,8 @@ where
                 point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
               );
 
-              let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
+              let final_shape =
+                shapes::bound_shape(&expected_shape, &parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())

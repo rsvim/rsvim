@@ -1,6 +1,5 @@
 //! The normal mode.
 
-use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -28,15 +27,29 @@ impl NormalStateful {
         KeyEventKind::Press => {
           trace!("Event::key:{:?}", key_event);
           match key_event.code {
-            KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
-            KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
-            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
-            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Up | KeyCode::Char('k') => {
+              Some(Operation::CursorMoveUpBy(1))
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+              Some(Operation::CursorMoveDownBy(1))
+            }
+            KeyCode::Left | KeyCode::Char('h') => {
+              Some(Operation::CursorMoveLeftBy(1))
+            }
+            KeyCode::Right | KeyCode::Char('l') => {
+              Some(Operation::CursorMoveRightBy(1))
+            }
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char('i') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::Keep)),
-            KeyCode::Char('a') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::Append)),
-            KeyCode::Char('o') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::NewLine)),
+            KeyCode::Char('i') => {
+              Some(Operation::GotoInsertMode(GotoInsertModeVariant::Keep))
+            }
+            KeyCode::Char('a') => {
+              Some(Operation::GotoInsertMode(GotoInsertModeVariant::Append))
+            }
+            KeyCode::Char('o') => {
+              Some(Operation::GotoInsertMode(GotoInsertModeVariant::NewLine))
+            }
             KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
@@ -65,12 +78,18 @@ impl Stateful for NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    data_access: StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValue {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
       }
-      Operation::GotoCommandLineExMode => self.goto_command_line_ex_mode(&data_access),
+      Operation::GotoCommandLineExMode => {
+        self.goto_command_line_ex_mode(&data_access)
+      }
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
       // }
@@ -90,7 +109,10 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_command_line_ex_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -125,7 +147,9 @@ impl NormalStateful {
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    StatefulValue::CommandLineSearchForwardMode(super::CommandLineSearchForwardStateful::default())
+    StatefulValue::CommandLineSearchForwardMode(
+      super::CommandLineSearchForwardStateful::default(),
+    )
   }
 }
 
@@ -134,7 +158,9 @@ impl NormalStateful {
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    StatefulValue::CommandLineSearchBackwardMode(super::CommandLineSearchBackwardStateful::default())
+    StatefulValue::CommandLineSearchBackwardMode(
+      super::CommandLineSearchBackwardStateful::default(),
+    )
   }
 }
 
@@ -154,11 +180,12 @@ impl NormalStateful {
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
-        self._cursor_move_impl(
+        let op = Operation::CursorMoveRightBy(1);
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
-          Operation::CursorMoveRightBy(1),
+          op,
           true,
         );
       }
@@ -167,15 +194,22 @@ impl NormalStateful {
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
-        self._cursor_move_impl(
+        let op = Operation::CursorMoveRightBy(usize::MAX);
+        cursor_ops::cursor_move(
           &mut tree,
           current_window_id,
           buffer.text(),
-          Operation::CursorMoveRightBy(usize::MAX),
+          op,
           true,
         );
-        let eol = CompactString::new(format!("{}", buffer.options().end_of_line()));
-        cursor_ops::cursor_insert(&mut tree, current_window_id, buffer.text_mut(), eol);
+        let eol =
+          CompactString::new(format!("{}", buffer.options().end_of_line()));
+        cursor_ops::cursor_insert(
+          &mut tree,
+          current_window_id,
+          buffer.text_mut(),
+          eol,
+        );
       }
     };
 
@@ -189,7 +223,11 @@ impl NormalStateful {
 
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
-  pub fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  pub fn cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -197,23 +235,19 @@ impl NormalStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    self._cursor_move_impl(&mut tree, current_window_id, buffer.text(), op, false)
-  }
-
-  fn _cursor_move_impl(
-    &self,
-    tree: &mut Tree,
-    current_window_id: TreeNodeId,
-    text: &Text,
-    op: Operation,
-    include_eol: bool,
-  ) -> StatefulValue {
-    cursor_ops::cursor_move(tree, current_window_id, text, op, include_eol);
-
+    cursor_ops::cursor_move(
+      &mut tree,
+      current_window_id,
+      buffer.text(),
+      op,
+      false,
+    );
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
+#[cfg(test)]
+use crate::buf::text::Text;
 #[cfg(test)]
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
@@ -246,7 +280,11 @@ impl NormalStateful {
   }
 
   #[cfg(test)]
-  pub fn _test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
+  pub fn _test_raw_cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -275,7 +313,11 @@ impl NormalStateful {
   }
 
   #[cfg(test)]
-  pub fn _test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
+  pub fn _test_raw_window_scroll(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -300,7 +342,10 @@ impl NormalStateful {
     }
   }
 
-  pub fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn editor_quit(
+    &self,
+    _data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
     StatefulValue::QuitState(QuitStateful::default())
   }
 }

@@ -58,10 +58,12 @@ pub static CONFIG_HOME_PATH: LazyLock<Option<PathBuf>> =
   LazyLock::new(|| PATH_CONFIG.config_home().clone());
 
 /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
-pub static CACHE_HOME_PATH: LazyLock<PathBuf> = LazyLock::new(|| PATH_CONFIG.cache_home().clone());
+pub static CACHE_HOME_PATH: LazyLock<PathBuf> =
+  LazyLock::new(|| PATH_CONFIG.cache_home().clone());
 
 /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
-pub static DATA_HOME_PATH: LazyLock<PathBuf> = LazyLock::new(|| PATH_CONFIG.data_home().clone());
+pub static DATA_HOME_PATH: LazyLock<PathBuf> =
+  LazyLock::new(|| PATH_CONFIG.data_home().clone());
 
 /// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
 pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =

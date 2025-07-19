@@ -44,7 +44,9 @@ pub mod global_this;
 // }
 
 /// Populates a new JavaScript context with low-level Rust bindings.
-pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<'s, v8::Context> {
+pub fn create_new_context<'s>(
+  scope: &mut v8::HandleScope<'s, ()>,
+) -> v8::Local<'s, v8::Context> {
   // Here we need an EscapableHandleScope so V8 doesn't drop the
   // newly created HandleScope on return. (https://v8.dev/docs/embed#handles-and-garbage-collection)
   let scope = &mut v8::EscapableHandleScope::new(scope);
@@ -166,7 +168,12 @@ pub fn set_constant_to(
   value: v8::Local<v8::Value>,
 ) {
   let key = v8::String::new(scope, name).unwrap();
-  target.define_own_property(scope, key.into(), value, v8::PropertyAttribute::READ_ONLY);
+  target.define_own_property(
+    scope,
+    key.into(),
+    value,
+    v8::PropertyAttribute::READ_ONLY,
+  );
 }
 
 /// Adds a `Function` object which calls the given Rust function

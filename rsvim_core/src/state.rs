@@ -25,7 +25,9 @@ pub struct State {
 arc_mutex_ptr!(State);
 
 impl State {
-  pub fn new(jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>) -> Self {
+  pub fn new(
+    jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  ) -> Self {
     State {
       mode: Mode::Normal,
       last_mode: Mode::Normal,
@@ -61,8 +63,12 @@ impl State {
       StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
       StatefulValue::InsertMode(_) => Some(Mode::Insert),
       StatefulValue::CommandLineExMode(_) => Some(Mode::CommandLineEx),
-      StatefulValue::CommandLineSearchForwardMode(_) => Some(Mode::CommandLineSearchForward),
-      StatefulValue::CommandLineSearchBackwardMode(_) => Some(Mode::CommandLineSearchBackward),
+      StatefulValue::CommandLineSearchForwardMode(_) => {
+        Some(Mode::CommandLineSearchForward)
+      }
+      StatefulValue::CommandLineSearchBackwardMode(_) => {
+        Some(Mode::CommandLineSearchBackward)
+      }
       StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
       // Internal states.
       StatefulValue::QuitState(_) => None,
@@ -86,7 +92,9 @@ mod tests {
     let mut state = State::new(jsrt_tick_dispatcher);
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Normal);
-    state.update_state_machine(&StatefulValue::InsertMode(fsm::InsertStateful::default()));
+    state.update_state_machine(&StatefulValue::InsertMode(
+      fsm::InsertStateful::default(),
+    ));
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Insert);
   }

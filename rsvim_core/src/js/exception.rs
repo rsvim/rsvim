@@ -3,7 +3,8 @@
 use crate::js::JsRuntime;
 use crate::js::binding::set_function_to;
 
-pub type PromiseRejectionEntry = (v8::Global<v8::Promise>, v8::Global<v8::Value>);
+pub type PromiseRejectionEntry =
+  (v8::Global<v8::Promise>, v8::Global<v8::Value>);
 
 pub struct ExceptionState {
   /// Holds the current uncaught exception.
@@ -47,25 +48,37 @@ impl ExceptionState {
     !self.promise_rejections.is_empty()
   }
 
-  pub fn remove_promise_rejection(&mut self, promise: &v8::Global<v8::Promise>) {
+  pub fn remove_promise_rejection(
+    &mut self,
+    promise: &v8::Global<v8::Promise>,
+  ) {
     // Find the correct entry to remove.
     self
       .promise_rejections
       .retain(|(value, _)| value != promise);
   }
 
-  pub fn remove_promise_rejection_entry(&mut self, exception: &v8::Global<v8::Value>) {
+  pub fn remove_promise_rejection_entry(
+    &mut self,
+    exception: &v8::Global<v8::Value>,
+  ) {
     // Find the correct entry to remove.
     self
       .promise_rejections
       .retain(|(_, value)| value != exception);
   }
 
-  pub fn set_uncaught_exception_callback(&mut self, callback: Option<v8::Global<v8::Function>>) {
+  pub fn set_uncaught_exception_callback(
+    &mut self,
+    callback: Option<v8::Global<v8::Function>>,
+  ) {
     self.uncaught_exception_cb = callback;
   }
 
-  pub fn set_unhandled_rejection_callback(&mut self, callback: Option<v8::Global<v8::Function>>) {
+  pub fn set_unhandled_rejection_callback(
+    &mut self,
+    callback: Option<v8::Global<v8::Function>>,
+  ) {
     self.unhandled_rejection_cb = callback;
   }
 }

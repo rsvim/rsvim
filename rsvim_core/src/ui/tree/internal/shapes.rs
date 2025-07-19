@@ -15,15 +15,20 @@ use std::cmp::{max, min};
 /// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
 /// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
 ///    automatically bounded inside of it's parent or the terminal's shape.
-pub fn make_actual_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> U16Rect {
+pub fn make_actual_shape(
+  shape: &IRect,
+  parent_actual_shape: &U16Rect,
+) -> U16Rect {
   // trace!(
   //   "shape:{:?}, parent_actual_shape:{:?}",
   //   shape, parent_actual_shape
   // );
   let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_top_left_ipos: IPos = geo_point_as!(parent_actual_top_left_pos, isize);
+  let parent_actual_top_left_ipos: IPos =
+    geo_point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
-  let parent_actual_bottom_right_ipos: IPos = geo_point_as!(parent_actual_bottom_right_pos, isize);
+  let parent_actual_bottom_right_ipos: IPos =
+    geo_point_as!(parent_actual_bottom_right_pos, isize);
 
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
@@ -44,7 +49,8 @@ pub fn make_actual_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> U16Rec
   //   actual_top_left_ipos, actual_top_left_pos
   // );
 
-  let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_top_left_ipos;
+  let actual_bottom_right_ipos: IPos =
+    bottom_right_pos + parent_actual_top_left_ipos;
   let actual_bottom_right_x = min(
     max(
       actual_bottom_right_ipos.x(),
@@ -117,8 +123,10 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
     //   bottom_right_pos,
     //   parent_actual_shape.width()
     // );
-    let x_diff =
-      num_traits::sign::abs_sub(bottom_right_pos.x(), parent_actual_shape.width() as isize);
+    let x_diff = num_traits::sign::abs_sub(
+      bottom_right_pos.x(),
+      parent_actual_shape.width() as isize,
+    );
     let result = top_left_pos.x() - x_diff;
     // trace!("x-2, x_diff:{:?}, result:{:?}", x_diff, result);
     result
@@ -137,8 +145,10 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
     //   bottom_right_pos,
     //   parent_actual_shape.height()
     // );
-    let y_diff =
-      num_traits::sign::abs_sub(bottom_right_pos.y(), parent_actual_shape.height() as isize);
+    let y_diff = num_traits::sign::abs_sub(
+      bottom_right_pos.y(),
+      parent_actual_shape.height() as isize,
+    );
     let result = top_left_pos.y() - y_diff;
     // trace!("y-2, y_diff:{:?}, result:{:?}", y_diff, result);
     result

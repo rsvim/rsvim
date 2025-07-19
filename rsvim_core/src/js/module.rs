@@ -67,30 +67,31 @@ pub enum ModuleStatus {
   Ready,
 }
 
-pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
-  let modules = vec![
-    // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
-    // ("console", include_str!("./js/console.js")),
-    // ("events", include_str!("./js/events.js")),
-    // ("process", include_str!("./js/process.js")),
-    // ("timers", include_str!("./js/timers.js")),
-    // ("assert", include_str!("./js/assert.js")),
-    // ("util", include_str!("./js/util.js")),
-    // ("fs", include_str!("./module/fs.js")),
-    // ("perf_hooks", include_str!("./js/perf-hooks.js")),
-    // ("colors", include_str!("./js/colors.js")),
-    // ("dns", include_str!("./js/dns.js")),
-    // ("net", include_str!("./js/net.js")),
-    // ("test", include_str!("./js/test.js")),
-    // ("stream", include_str!("./js/stream.js")),
-    // ("http", include_str!("./js/http.js")),
-    // ("@web/abort", include_str!("./js/abort-controller.js")),
-    // ("@web/text_encoding", include_str!("./js/text-encoding.js")),
-    // ("@web/clone", include_str!("./js/structured-clone.js")),
-    // ("@web/fetch", include_str!("./js/fetch.js")),
-  ];
-  HashMap::from_iter(modules)
-});
+pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
+  LazyLock::new(|| {
+    let modules = vec![
+      // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
+      // ("console", include_str!("./js/console.js")),
+      // ("events", include_str!("./js/events.js")),
+      // ("process", include_str!("./js/process.js")),
+      // ("timers", include_str!("./js/timers.js")),
+      // ("assert", include_str!("./js/assert.js")),
+      // ("util", include_str!("./js/util.js")),
+      // ("fs", include_str!("./module/fs.js")),
+      // ("perf_hooks", include_str!("./js/perf-hooks.js")),
+      // ("colors", include_str!("./js/colors.js")),
+      // ("dns", include_str!("./js/dns.js")),
+      // ("net", include_str!("./js/net.js")),
+      // ("test", include_str!("./js/test.js")),
+      // ("stream", include_str!("./js/stream.js")),
+      // ("http", include_str!("./js/http.js")),
+      // ("@web/abort", include_str!("./js/abort-controller.js")),
+      // ("@web/text_encoding", include_str!("./js/text-encoding.js")),
+      // ("@web/clone", include_str!("./js/structured-clone.js")),
+      // ("@web/fetch", include_str!("./js/fetch.js")),
+    ];
+    HashMap::from_iter(modules)
+  });
 
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
@@ -158,7 +159,10 @@ pub fn resolve_import(
 }
 
 /// Loads module source by its specifier.
-pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
+pub fn load_import(
+  specifier: &str,
+  _skip_cache: bool,
+) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
   //   CORE_MODULES.contains_key(specifier),
@@ -181,7 +185,10 @@ pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource
 }
 
 /// FIXME: Not supported yet.
-pub async fn load_import_async(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
+pub async fn load_import_async(
+  specifier: &str,
+  skip_cache: bool,
+) -> AnyResult<ModuleSource> {
   load_import(specifier, skip_cache)
 }
 

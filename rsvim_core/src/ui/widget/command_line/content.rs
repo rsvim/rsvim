@@ -18,7 +18,11 @@ pub struct CommandLineContent {
 
 impl CommandLineContent {
   /// Make window content.
-  pub fn new(shape: IRect, text_contents: TextContentsWk, viewport: ViewportWk) -> Self {
+  pub fn new(
+    shape: IRect,
+    text_contents: TextContentsWk,
+    viewport: ViewportWk,
+  ) -> Self {
     let base = InodeBase::new(shape);
     CommandLineContent {
       base,

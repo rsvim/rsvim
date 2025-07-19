@@ -5,13 +5,17 @@ use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::content::CommandLineContent;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
+use crate::ui::widget::window::opt::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
 use std::sync::Arc;
@@ -78,22 +82,28 @@ impl CommandLine {
 
     let cmdline_root = CommandLineRootContainer::new(shape);
     let cmdline_root_id = cmdline_root.id();
-    let cmdline_root_node = CommandLineNode::CommandLineRootContainer(cmdline_root);
+    let cmdline_root_node =
+      CommandLineNode::CommandLineRootContainer(cmdline_root);
 
     let mut base = Itree::new(cmdline_root_node);
 
     let cmdline_indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator =
-      CommandLineIndicator::new(cmdline_indicator_shape, CommandLineIndicatorSymbol::Empty);
+    let cmdline_indicator = CommandLineIndicator::new(
+      cmdline_indicator_shape,
+      CommandLineIndicatorSymbol::Empty,
+    );
     let cmdline_indicator_id = cmdline_indicator.id();
-    let cmdline_indicator_node = CommandLineNode::CommandLineIndicator(cmdline_indicator);
+    let cmdline_indicator_node =
+      CommandLineNode::CommandLineIndicator(cmdline_indicator);
     base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
 
-    let cmdline_content_shape = IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
+    let cmdline_content_shape =
+      IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
 
     let (viewport, cursor_viewport) = {
-      let cmdline_content_actual_shape = geo_rect_as!(cmdline_content_shape, u16);
+      let cmdline_content_actual_shape =
+        geo_rect_as!(cmdline_content_shape, u16);
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let viewport = Viewport::view(
@@ -103,8 +113,10 @@ impl CommandLine {
         0,
         0,
       );
-      let cursor_viewport =
-        CursorViewport::from_top_left(&viewport, text_contents.command_line_content());
+      let cursor_viewport = CursorViewport::from_top_left(
+        &viewport,
+        text_contents.command_line_content(),
+      );
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
@@ -116,7 +128,8 @@ impl CommandLine {
       Arc::downgrade(&viewport),
     );
     let cmdline_content_id = cmdline_content.id();
-    let cmdline_content_node = CommandLineNode::CommandLineContent(cmdline_content);
+    let cmdline_content_node =
+      CommandLineNode::CommandLineContent(cmdline_content);
     base.bounded_insert(cmdline_root_id, cmdline_content_node);
 
     Self {
@@ -162,7 +175,8 @@ impl CommandLine {
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(CommandLineNode::CommandLineContent(content)) = self.base.node_mut(self.content_id)
+    if let Some(CommandLineNode::CommandLineContent(content)) =
+      self.base.node_mut(self.content_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
     }
@@ -339,7 +353,10 @@ impl CommandLine {
       Some(cursor_id) => {
         debug_assert!(self.base.node(cursor_id).is_some());
         debug_assert!(self.base.parent_id(cursor_id).is_some());
-        debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        debug_assert_eq!(
+          self.base.parent_id(cursor_id).unwrap(),
+          self.content_id
+        );
         self.cursor_id = None;
         let cursor_node = self.base.remove(cursor_id);
         debug_assert!(cursor_node.is_some());

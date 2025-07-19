@@ -16,7 +16,10 @@ use tracing::trace;
 pub struct InsertStateful {}
 
 impl InsertStateful {
-  fn get_operation(&self, data_access: &StatefulDataAccess) -> Option<Operation> {
+  fn get_operation(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> Option<Operation> {
     let event = &data_access.event;
 
     match event {
@@ -32,7 +35,9 @@ impl InsertStateful {
             KeyCode::Right => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char(c) => Some(Operation::CursorInsert(c.to_compact_string())),
+            KeyCode::Char(c) => {
+              Some(Operation::CursorInsert(c.to_compact_string()))
+            }
             KeyCode::Enter => {
               let eol = {
                 let tree = data_access.tree.clone();
@@ -72,7 +77,11 @@ impl Stateful for InsertStateful {
     StatefulValue::InsertMode(InsertStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    data_access: StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValue {
     match op {
       Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::CursorMoveBy((_, _))
@@ -89,7 +98,11 @@ impl Stateful for InsertStateful {
 }
 
 impl InsertStateful {
-  pub fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+  pub fn cursor_delete(
+    &self,
+    data_access: &StatefulDataAccess,
+    n: isize,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -97,7 +110,12 @@ impl InsertStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    cursor_ops::cursor_delete(&mut tree, current_window_id, buffer.text_mut(), n);
+    cursor_ops::cursor_delete(
+      &mut tree,
+      current_window_id,
+      buffer.text_mut(),
+      n,
+    );
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -116,14 +134,22 @@ impl InsertStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    cursor_ops::cursor_insert(&mut tree, current_window_id, buffer.text_mut(), payload);
+    cursor_ops::cursor_insert(
+      &mut tree,
+      current_window_id,
+      buffer.text_mut(),
+      payload,
+    );
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
 }
 
 impl InsertStateful {
-  pub fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_normal_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -132,7 +158,13 @@ impl InsertStateful {
     let buffer = lock!(buffer);
 
     let op = Operation::CursorMoveBy((0, 0));
-    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
+    cursor_ops::cursor_move(
+      &mut tree,
+      current_window_id,
+      buffer.text(),
+      op,
+      false,
+    );
 
     let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
@@ -147,7 +179,11 @@ impl InsertStateful {
 }
 
 impl InsertStateful {
-  pub fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  pub fn cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -155,7 +191,13 @@ impl InsertStateful {
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, true);
+    cursor_ops::cursor_move(
+      &mut tree,
+      current_window_id,
+      buffer.text(),
+      op,
+      true,
+    );
 
     StatefulValue::InsertMode(InsertStateful::default())
   }

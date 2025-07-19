@@ -6,8 +6,10 @@ use std::io::Write;
 
 fn create_config_home_and_entry(cached_dirs: &CachedDirs) {
   std::fs::create_dir_all(cached_dirs.config_dir.join("rsvim")).unwrap();
-  let mut config_entry =
-    std::fs::File::create(cached_dirs.config_dir.join("rsvim").join("rsvim.js")).unwrap();
+  let mut config_entry = std::fs::File::create(
+    cached_dirs.config_dir.join("rsvim").join("rsvim.js"),
+  )
+  .unwrap();
   config_entry.write_all(b"hello").unwrap();
   config_entry.flush().unwrap();
 }

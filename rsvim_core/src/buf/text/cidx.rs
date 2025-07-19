@@ -290,7 +290,8 @@ impl ColumnIndex {
       debug_assert!(!self.width2char.is_empty());
       debug_assert!(buf_line.len_chars() > 0);
 
-      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
+      let (last_width, _last_char_idx) =
+        self.width2char.last_key_value().unwrap();
       if width > *last_width {
         return None;
       }
@@ -340,7 +341,8 @@ impl ColumnIndex {
         }
       }
 
-      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
+      let (last_width, _last_char_idx) =
+        self.width2char.last_key_value().unwrap();
       if width > *last_width {
         return None;
       }
@@ -450,7 +452,8 @@ impl ColumnIndex {
     if self.char2width.is_empty() || self.width2char.is_empty() {
       debug_assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
     } else {
-      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
+      let (last_width, _last_char_idx) =
+        self.width2char.last_key_value().unwrap();
       if width <= *last_width {
         for w in (1..=width).rev() {
           match self.width2char.get(&w) {

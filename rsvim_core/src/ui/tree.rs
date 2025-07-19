@@ -174,7 +174,9 @@ impl Tree {
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
-      global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
+      global_local_options: WindowLocalOptionsBuilder::default()
+        .build()
+        .unwrap(),
     }
   }
 
@@ -245,7 +247,10 @@ impl Tree {
   ///
   /// NOTE: When the node ID is not `None`, it must be a valid tree node, existing in current tree,
   /// and it must be a window widget.
-  pub fn set_current_window_id(&mut self, window_id: Option<TreeNodeId>) -> Option<TreeNodeId> {
+  pub fn set_current_window_id(
+    &mut self,
+    window_id: Option<TreeNodeId>,
+  ) -> Option<TreeNodeId> {
     if cfg!(debug_assertions) {
       match window_id {
         Some(window_id) => {
@@ -379,7 +384,11 @@ impl Tree {
   }
 
   /// See [`Itree::insert`].
-  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
+  pub fn insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_node: TreeNode,
+  ) -> Option<TreeNode> {
     self.insert_guard(&child_node);
     self.base.insert(parent_id, child_node)
   }
@@ -418,13 +427,23 @@ impl Tree {
 impl Tree {
   /// Bounded move by x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_by`].
-  pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_by(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
   }
 
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_to`].
-  pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_to(
+    &mut self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
     self.base.bounded_move_to(id, x, y)
   }
 }

@@ -11,7 +11,11 @@ impl Stateful for SelectStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
     StatefulValue::SelectMode(SelectStateful::default())
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    _data_access: StatefulDataAccess,
+    _op: Operation,
+  ) -> StatefulValue {
     StatefulValue::SelectMode(SelectStateful::default())
   }
 }

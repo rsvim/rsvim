@@ -72,7 +72,10 @@ impl EsModule {
 
 impl EsModule {
   // Traverses the dependency tree to check if the module is ready.
-  pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
+  pub fn fast_forward(
+    &mut self,
+    seen_modules: &mut HashMap<ModulePath, ModuleStatus>,
+  ) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
       return;

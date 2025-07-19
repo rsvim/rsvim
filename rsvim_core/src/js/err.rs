@@ -25,11 +25,10 @@ impl JsError {
     let scope = &mut v8::HandleScope::new(scope);
     let message = v8::Exception::create_message(scope, rejection);
 
-    let mut message_value =
-      message
-        .get(scope)
-        .to_rust_string_lossy(scope)
-        .replacen("Uncaught ", "", 1);
+    let mut message_value = message
+      .get(scope)
+      .to_rust_string_lossy(scope)
+      .replacen("Uncaught ", "", 1);
 
     // Check if message needs prefixing.
     if let Some(value) = prefix {
@@ -60,7 +59,8 @@ impl JsError {
       .map(|exception| {
         let stack = v8::String::new(scope, "stack").unwrap();
         let stack = exception.get(scope, stack.into());
-        let stack: Option<v8::Local<v8::String>> = stack.and_then(|s| s.try_into().ok());
+        let stack: Option<v8::Local<v8::String>> =
+          stack.and_then(|s| s.try_into().ok());
         stack.map(|s| s.to_rust_string_lossy(scope))
       })
       .map(|stack| stack.unwrap_or_default())

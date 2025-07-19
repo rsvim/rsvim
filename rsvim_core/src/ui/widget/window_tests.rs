@@ -103,7 +103,8 @@ fn draw_after_init1() {
     .wrap(false)
     .build()
     .unwrap();
-  let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
+  let window =
+    make_window_from_size(terminal_size, buf.clone(), &window_local_options);
   let mut actual = Canvas::new(terminal_size);
   window.draw(&mut actual);
   do_test_draw(&actual, &expect);

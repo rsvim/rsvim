@@ -19,7 +19,9 @@ fn char_width1() {
     let asciifmt = AsciiControlCodeFormatter::from(asciic);
     let formatted = format!("{asciifmt}");
     let formatted_len = formatted.len();
-    info!("i:{i},c:{c:?},ascii char:{asciic:?},ascii formatted:{formatted:?}({formatted_len})");
+    info!(
+      "i:{i},c:{c:?},ascii char:{asciic:?},ascii formatted:{formatted:?}({formatted_len})"
+    );
     if asciic == AsciiChar::Tab {
       assert_eq!(char_width(&opt, c), opt.tab_stop() as usize);
     } else if asciic == AsciiChar::LineFeed {

@@ -17,7 +17,12 @@ pub struct Cursor {
 
 impl Cursor {
   /// Make new terminal cursor.
-  pub fn new(pos: U16Pos, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
+  pub fn new(
+    pos: U16Pos,
+    blinking: bool,
+    hidden: bool,
+    style: CursorStyle,
+  ) -> Self {
     Cursor {
       pos,
       blinking,

@@ -30,13 +30,20 @@ pub fn make_buffer_from_lines(
 }
 
 #[cfg(test)]
-pub fn make_empty_buffer(terminal_size: U16Size, opts: BufferLocalOptions) -> BufferArc {
-  let buf = Buffer::_new(opts, terminal_size, Rope::new(), None, None, None, None);
+pub fn make_empty_buffer(
+  terminal_size: U16Size,
+  opts: BufferLocalOptions,
+) -> BufferArc {
+  let buf =
+    Buffer::_new(opts, terminal_size, Rope::new(), None, None, None, None);
   Buffer::to_arc(buf)
 }
 
 #[cfg(test)]
-pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> BuffersManagerArc {
+pub fn make_buffers_manager(
+  opts: BufferLocalOptions,
+  bufs: Vec<BufferArc>,
+) -> BuffersManagerArc {
   let mut bm = BuffersManager::new();
   bm.set_global_local_options(&opts);
   for buf in bufs.iter() {
@@ -110,7 +117,12 @@ pub fn dbg_print_textline_with_absolute_char_idx(
 }
 
 #[cfg(test)]
-pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &str) {
+pub fn dbg_print_textline(
+  text: &Text,
+  line_idx: usize,
+  char_idx: usize,
+  msg: &str,
+) {
   trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
 
   match text.rope().get_line(line_idx) {
@@ -123,7 +135,9 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
         if w > 0 {
           builder1.push(c);
         }
-        let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
+        let s: String =
+          std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w)
+            .collect();
         builder2.push_str(s.as_str());
       }
       trace!("-{}-", builder1);
@@ -139,4 +153,10 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
 }
 
 #[cfg(not(test))]
-pub fn dbg_print_textline(_text: &Text, _line_idx: usize, _char_idx: usize, _msg: &str) {}
+pub fn dbg_print_textline(
+  _text: &Text,
+  _line_idx: usize,
+  _char_idx: usize,
+  _msg: &str,
+) {
+}

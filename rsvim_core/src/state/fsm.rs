@@ -88,7 +88,11 @@ pub trait Stateful {
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue;
+  fn handle_op(
+    &self,
+    data_access: StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValue;
 }
 
 /// Generate enum dispatcher for `Stateful`.

@@ -20,8 +20,12 @@ fn make_actual_shapes1() {
   for t in inputs.iter() {
     for p in 0..10 {
       for q in 0..10 {
-        let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-        let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
+        let input_actual_parent_shape =
+          U16Rect::new((0, 0), (p as u16, q as u16));
+        let expect = U16Rect::new(
+          (0, 0),
+          (min(t.max().x, p) as u16, min(t.max().y, q) as u16),
+        );
         let actual = make_actual_shape(t, &input_actual_parent_shape);
         info!("expect:{:?}, actual:{:?}", expect, actual);
         assert_eq!(actual, expect);

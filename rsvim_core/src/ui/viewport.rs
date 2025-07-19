@@ -139,7 +139,12 @@ arc_ptr!(CursorViewport);
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(line_idx: usize, char_idx: usize, row_idx: u16, column_idx: u16) -> Self {
+  pub fn new(
+    line_idx: usize,
+    char_idx: usize,
+    row_idx: u16,
+    column_idx: u16,
+  ) -> Self {
     Self {
       line_idx,
       char_idx,
@@ -178,7 +183,9 @@ impl CursorViewport {
     let lines = viewport.lines();
     debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
     debug_assert!(!lines.is_empty());
-    debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
+    debug_assert!(
+      lines.len() == viewport.end_line_idx() - viewport.start_line_idx()
+    );
     debug_assert!(lines.first().is_some());
     debug_assert!(lines.last().is_some());
     debug_assert!(*lines.first().unwrap().0 == viewport.start_line_idx());
@@ -212,7 +219,12 @@ impl CursorViewport {
   /// # Panics
   ///
   /// It panics if the line/char index are not shown in the window viewport.
-  pub fn from_position(viewport: &Viewport, text: &Text, line_idx: usize, char_idx: usize) -> Self {
+  pub fn from_position(
+    viewport: &Viewport,
+    text: &Text,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> Self {
     debug_assert!(viewport.lines().contains_key(&line_idx));
     let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
@@ -228,7 +240,8 @@ impl CursorViewport {
         //   line_idx,
         //   char_idx
         // );
-        row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
+        row_viewport.start_char_idx() <= char_idx
+          && row_viewport.end_char_idx() > char_idx
       })
       .collect::<Vec<_>>();
 
@@ -236,7 +249,8 @@ impl CursorViewport {
       debug_assert_eq!(cursor_row.len(), 1);
       let (row_idx, row_viewport) = cursor_row[0];
 
-      let row_start_width = text.width_before(line_idx, row_viewport.start_char_idx());
+      let row_start_width =
+        text.width_before(line_idx, row_viewport.start_char_idx());
       let char_start_width = text.width_before(line_idx, char_idx);
       let col_idx = (char_start_width - row_start_width) as u16;
       let row_idx = *row_idx;
@@ -258,11 +272,13 @@ impl CursorViewport {
         debug_assert!(viewport.lines().contains_key(&next_line_idx));
         let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
         debug_assert!(next_line_viewport.rows().first().is_some());
-        let (first_row_idx, _first_row_viewport) = next_line_viewport.rows().first().unwrap();
+        let (first_row_idx, _first_row_viewport) =
+          next_line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
       } else {
         debug_assert!(line_viewport.rows().first().is_some());
-        let (first_row_idx, _first_row_viewport) = line_viewport.rows().first().unwrap();
+        let (first_row_idx, _first_row_viewport) =
+          line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
       }
     }
@@ -538,7 +554,8 @@ impl Viewport {
     start_line: usize,
     start_column: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::sync(opts, text, shape, start_line, start_column);
+    let (line_idx_range, lines) =
+      sync::sync(opts, text, shape, start_line, start_column);
 
     debug_assert_eq!(line_idx_range.start_line_idx(), start_line);
 

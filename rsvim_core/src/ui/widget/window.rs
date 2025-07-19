@@ -4,7 +4,9 @@ use crate::buf::BufferWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
@@ -53,7 +55,11 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(opts: &WindowLocalOptions, shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(
+    opts: &WindowLocalOptions,
+    shape: IRect,
+    buffer: BufferWk,
+  ) -> Self {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
@@ -64,14 +70,17 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
-      let cursor_viewport = CursorViewport::from_top_left(&viewport, buffer.text());
+      let viewport =
+        Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
+      let cursor_viewport =
+        CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+    let window_content =
+      WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -120,7 +129,9 @@ impl Window {
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(WindowNode::WindowContent(content)) = self.base.node_mut(self.content_id) {
+    if let Some(WindowNode::WindowContent(content)) =
+      self.base.node_mut(self.content_id)
+    {
       content.set_viewport(Arc::downgrade(&viewport));
     }
   }
@@ -253,7 +264,10 @@ impl Window {
       Some(cursor_id) => {
         debug_assert!(self.base.node(cursor_id).is_some());
         debug_assert!(self.base.parent_id(cursor_id).is_some());
-        debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        debug_assert_eq!(
+          self.base.parent_id(cursor_id).unwrap(),
+          self.content_id
+        );
         self.cursor_id = None;
         let cursor_node = self.base.remove(cursor_id);
         debug_assert!(cursor_node.is_some());
