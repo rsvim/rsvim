@@ -1,6 +1,5 @@
 //! The normal mode.
 
-use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -247,6 +246,8 @@ impl NormalStateful {
   }
 }
 
+#[cfg(test)]
+use crate::buf::text::Text;
 #[cfg(test)]
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
