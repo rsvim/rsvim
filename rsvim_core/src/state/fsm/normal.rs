@@ -5,7 +5,7 @@ use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cursor_ops;
-use crate::state::ops::{InsertMotion, Operation};
+use crate::state::ops::{GotoInsertModeVariant, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
@@ -34,9 +34,9 @@ impl NormalStateful {
             KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char('i') => Some(Operation::GotoInsertMode(InsertMotion::Keep)),
-            KeyCode::Char('a') => Some(Operation::GotoInsertMode(InsertMotion::Append)),
-            KeyCode::Char('o') => Some(Operation::GotoInsertMode(InsertMotion::NewLine)),
+            KeyCode::Char('i') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::Keep)),
+            KeyCode::Char('a') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::Append)),
+            KeyCode::Char('o') => Some(Operation::GotoInsertMode(GotoInsertModeVariant::NewLine)),
             KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
@@ -142,14 +142,14 @@ impl NormalStateful {
   pub fn goto_insert_mode(
     &self,
     data_access: &StatefulDataAccess,
-    insert_motion: InsertMotion,
+    insert_motion: GotoInsertModeVariant,
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
     match insert_motion {
-      InsertMotion::Keep => {}
-      InsertMotion::Append => {
+      GotoInsertModeVariant::Keep => {}
+      GotoInsertModeVariant::Append => {
         let current_window = tree.current_window_mut().unwrap();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
@@ -162,7 +162,7 @@ impl NormalStateful {
           true,
         );
       }
-      InsertMotion::NewLine => {
+      GotoInsertModeVariant::NewLine => {
         let current_window = tree.current_window_mut().unwrap();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();

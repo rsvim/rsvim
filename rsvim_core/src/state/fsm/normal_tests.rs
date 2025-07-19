@@ -8147,7 +8147,7 @@ mod tests_goto_insert_mode {
     {
       stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
       let insert_result =
-        stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Keep);
+        stateful.goto_insert_mode(&data_access, crate::state::ops::GotoInsertModeVariant::Keep);
       assert_eq!(
         insert_result,
         StatefulValue::InsertMode(InsertStateful::default())
@@ -8236,8 +8236,10 @@ mod tests_goto_insert_mode {
     // Goto Insert-1 (Append)
     {
       stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let insert_result =
-        stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Append);
+      let insert_result = stateful.goto_insert_mode(
+        &data_access,
+        crate::state::ops::GotoInsertModeVariant::Append,
+      );
       assert_eq!(
         insert_result,
         StatefulValue::InsertMode(InsertStateful::default())
@@ -8326,8 +8328,10 @@ mod tests_goto_insert_mode {
     // Goto Insert-1 (Append)
     {
       stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(30));
-      let insert_result =
-        stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Append);
+      let insert_result = stateful.goto_insert_mode(
+        &data_access,
+        crate::state::ops::GotoInsertModeVariant::Append,
+      );
       assert_eq!(
         insert_result,
         StatefulValue::InsertMode(InsertStateful::default())
@@ -8415,8 +8419,10 @@ mod tests_goto_insert_mode {
 
     // Goto Insert-1 (NewLine)
     {
-      let insert_result =
-        stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::NewLine);
+      let insert_result = stateful.goto_insert_mode(
+        &data_access,
+        crate::state::ops::GotoInsertModeVariant::NewLine,
+      );
       assert_eq!(
         insert_result,
         StatefulValue::InsertMode(InsertStateful::default())
