@@ -9,7 +9,7 @@ use crate::state::ops::{InsertMotion, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
-use crate::ui::widget::window::{Window, WindowNode};
+use crate::ui::widget::window::WindowNode;
 
 use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -214,8 +214,6 @@ impl NormalStateful {
   }
 }
 
-#[cfg(test)]
-use crate::buf::text::Text;
 #[cfg(test)]
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
