@@ -8178,34 +8178,19 @@ mod tests_goto_insert_mode {
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.char_idx(), 7);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 5);
+      assert_eq!(actual1.column_idx(), 7);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "ShBye, ould go to insert mode ",
-        "                              ",
-        "                              ",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec!["ShBye, ould go to insert mode\n", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        2,
         &expect_fills,
         &expect_fills,
       );
