@@ -21,17 +21,9 @@ RECACHE_SCCACHE = False
 RUSTFLAGS = []
 
 
-def set_env(command, name, value, is_string=False):
-    assert isinstance(command, str)
-    if WINDOWS:
-        logging.info(f"Set env {name}={value}")
-        os.environ[name] = value
-    else:
-        if is_string is True:
-            command = f'{command} {name}="{value}"'
-        else:
-            command = f"{command} {name}={value}"
-    return command.strip()
+def set_env(name, value):
+    logging.info(f"Set env {name}={value}")
+    os.environ[name] = value
 
 
 def append_rustflags(opt):
@@ -39,38 +31,34 @@ def append_rustflags(opt):
     RUSTFLAGS.append(opt)
 
 
-def set_rustflags(command):
+def set_rustflags():
     global RUSTFLAGS
     if len(RUSTFLAGS) > 0:
         rustflags = " ".join([f for f in RUSTFLAGS])
-        command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
-        return command.strip()
-    else:
-        return command.strip()
+        set_env("RUSTFLAGS", rustflags)
 
 
-def set_sccache(command):
+def set_sccache():
     if SCCACHE_FULLPATH is None:
         logging.warning("'sccache' not found!")
-        return command
+        return
 
-    if WINDOWS:
-        logging.warning("'sccache' is disabled on Windows!")
-        return command
+    # if WINDOWS:
+    #     logging.warning("'sccache' is disabled on Windows!")
+    #     return command
 
     if RECACHE_SCCACHE:
-        command = set_env(command, "SCCACHE_RECACHE", "1")
+        set_env("SCCACHE_RECACHE", "1")
 
-    command = set_env(command, "RUSTC_WRAPPER", "sccache")
-    return command.strip()
+    set_env("RUSTC_WRAPPER", SCCACHE_FULLPATH)
 
 
 def clippy():
     append_rustflags("-Dwarnings")
+    set_rustflags()
+    set_sccache()
 
-    command = set_rustflags("")
-    command = set_sccache(command)
-    command = f"{command} cargo clippy --workspace --all-features --all-targets"
+    command = "cargo clippy --workspace --all-features --all-targets"
 
     command = command.strip()
     logging.info(command)
@@ -91,24 +79,20 @@ def test(name, miri, jobs):
         jobs = f" -j {jobs[0]}"
 
     if miri is not None:
-        command = set_env(
-            "",
+        set_env(
             "MIRIFLAGS",
             "-Zmiri-disable-isolation -Zmiri-permissive-provenance",
-            is_string=True,
         )
-        command = set_sccache(command)
-        command = set_rustflags(command)
         if name is None:
             name = ""
-        command = f"{command} cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        command = set_env("", "RSVIM_LOG", "trace")
-        command = set_sccache(command)
-        command = set_rustflags(command)
+        set_env("RSVIM_LOG", "trace")
+        set_sccache()
+        set_rustflags()
         if name is None:
             name = "--all"
-        command = f"{command} cargo nextest run{jobs} --no-capture {name}"
+        command = f"cargo nextest run{jobs} --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
@@ -116,10 +100,10 @@ def test(name, miri, jobs):
 
 
 def list_test():
-    command = set_sccache("")
-    command = set_rustflags(command)
+    set_sccache()
+    set_rustflags()
 
-    command = f"{command} cargo nextest list"
+    command = "cargo nextest list"
 
     command = command.strip()
     logging.info(command)
@@ -127,8 +111,8 @@ def list_test():
 
 
 def build(release, features, all_features):
-    command = set_sccache("")
-    command = set_rustflags(command)
+    set_sccache()
+    set_rustflags()
 
     feature_flags = ""
     if all_features:
@@ -146,12 +130,12 @@ def build(release, features, all_features):
         logging.info(
             f"Run 'cargo build --release' with features: {show_feat(feature_flags)}"
         )
-        command = f"{command} cargo build --release {feature_flags}"
+        command = f"cargo build --release {feature_flags}"
     else:
         logging.info(
             f"Run 'cargo build --debug' with features: {show_feat(feature_flags)}"
         )
-        command = f"{command} cargo build {feature_flags}"
+        command = f"cargo build {feature_flags}"
 
     command = command.strip()
     logging.info(command)
