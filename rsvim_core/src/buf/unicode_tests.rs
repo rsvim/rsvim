@@ -141,3 +141,30 @@ fn cjk_characters_test1() {
     info!("i:{i},c:{c:?}, unicode_width:{w1:?}, icu:{w2:?}({w2_name})");
   }
 }
+
+#[test]
+fn emoji_characters_test1() {
+  test_log_init();
+
+  let emoji_characters = vec![
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '🫠', '😉',
+    '😊', '😇',
+  ];
+
+  let code_point_map = CodePointMapData::<EastAsianWidth>::new();
+
+  for (i, c) in emoji_characters.iter().enumerate() {
+    let w1 = UnicodeWidthChar::width_cjk(*c);
+    let w2 = code_point_map.get(*c);
+    let w2_name = match w2 {
+      EastAsianWidth::Halfwidth => "Halfwidth",
+      EastAsianWidth::Narrow => "Narrow",
+      EastAsianWidth::Ambiguous => "Ambiguous",
+      EastAsianWidth::Fullwidth => "Fullwidth",
+      EastAsianWidth::Neutral => "Neutral",
+      EastAsianWidth::Wide => "Wide",
+      _ => "Unknown",
+    };
+    info!("i:{i},c:{c:?}, unicode_width:{w1:?}, icu:{w2:?}({w2_name})");
+  }
+}
