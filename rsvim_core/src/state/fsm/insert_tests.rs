@@ -6168,7 +6168,7 @@ mod tests_insert_text {
   }
 
   // #[test]
-  fn nowrap_special_characters2() {
+  fn _nowrap_special_characters2() {
     test_log_init();
 
     let terminal_size = U16Size::new(200, 10);
