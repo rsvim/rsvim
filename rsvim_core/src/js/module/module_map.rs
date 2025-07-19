@@ -81,7 +81,10 @@ impl ModuleGraph {
   }
 
   // Initializes a new graph resolving a dynamic import.
-  pub fn dynamic_import(path: &str, promise: v8::Global<v8::PromiseResolver>) -> ModuleGraph {
+  pub fn dynamic_import(
+    path: &str,
+    promise: v8::Global<v8::PromiseResolver>,
+  ) -> ModuleGraph {
     // Create an ES module instance.
     let module = EsModule::to_rc(EsModule::new(
       path.into(),

@@ -12,14 +12,19 @@ use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
 use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::test::log::init as test_log_init;
-use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
+use crate::test::tree::{
+  make_tree_with_buffers, make_tree_with_buffers_cmdline,
+};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::TreeArc;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -41,7 +46,8 @@ pub fn make_tree_with_buffer_opts(
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
+  let tree =
+    make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher));
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -146,7 +152,8 @@ pub fn assert_viewport_scroll(
   if actual.lines().is_empty() {
     assert!(actual.end_line_idx() <= actual.start_line_idx());
   } else {
-    let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+    let (first_line_idx, _first_line_viewport) =
+      actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
     assert_eq!(*first_line_idx, actual.start_line_idx());
     assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
@@ -273,7 +280,9 @@ mod tests_raw_cursor_move_y_by {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
@@ -299,9 +308,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful_machine = NormalStateful::default();
-    stateful_machine._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful_machine
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -341,9 +357,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful_machine = NormalStateful::default();
-    stateful_machine._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful_machine
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -383,9 +406,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
@@ -432,9 +462,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
@@ -479,9 +516,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful_machine = NormalStateful::default();
-    stateful_machine._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
+    stateful_machine
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -521,9 +565,16 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
@@ -553,7 +604,9 @@ mod tests_raw_cursor_move_x_by {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
@@ -586,9 +639,16 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -634,9 +694,16 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -683,9 +750,16 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -731,16 +805,24 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
 
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
@@ -786,9 +868,16 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -796,7 +885,8 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(actual.char_idx(), 5);
 
     for i in (0..=4).rev() {
-      stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
+      stateful
+        ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
 
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree);
@@ -820,7 +910,9 @@ mod tests_raw_cursor_move_by {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
@@ -862,9 +954,16 @@ mod tests_raw_cursor_move_by {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Step-1
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((5, 0)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((5, 0)));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
@@ -872,21 +971,24 @@ mod tests_raw_cursor_move_by {
     assert_eq!(actual1.char_idx(), 5);
 
     // Step-2
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
     // Step-3
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((-3, 0)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((-3, 0)));
     let tree = data_access.tree.clone();
     let actual3 = get_cursor_viewport(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
     // Step-4
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, -1)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, -1)));
     let tree = data_access.tree.clone();
     let actual4 = get_cursor_viewport(tree);
     assert_eq!(actual4.line_idx(), 0);
@@ -1065,7 +1167,9 @@ mod tests_raw_cursor_move_to {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
@@ -1108,8 +1212,15 @@ mod tests_raw_cursor_move_to {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Step-1
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 0)));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 0)));
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
@@ -1117,21 +1228,24 @@ mod tests_raw_cursor_move_to {
     assert_eq!(actual1.char_idx(), 5);
 
     // Step-2
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 1)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 1)));
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
     // Step-3
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 1)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 1)));
     let tree = data_access.tree.clone();
     let actual3 = get_cursor_viewport(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
     // Step-4
-    stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 0)));
+    stateful
+      ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 0)));
     let tree = data_access.tree.clone();
     let actual4 = get_cursor_viewport(tree);
     assert_eq!(actual4.line_idx(), 0);
@@ -1313,11 +1427,16 @@ mod tests_raw_window_scroll_y_by {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder, content};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder, content,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -1349,7 +1468,8 @@ mod tests_raw_window_scroll_y_by {
       assert_eq!(cursor_viewport.char_idx(), 0);
 
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1362,9 +1482,16 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -1372,7 +1499,8 @@ mod tests_raw_window_scroll_y_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1451,9 +1579,16 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -1545,9 +1680,16 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -1621,9 +1763,10 @@ mod tests_raw_window_scroll_y_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1636,9 +1779,16 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
 
@@ -1652,9 +1802,10 @@ mod tests_raw_window_scroll_y_by {
         "  3. If a ",
         "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1709,9 +1860,10 @@ mod tests_raw_window_scroll_y_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1733,7 +1885,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -1745,9 +1898,10 @@ mod tests_raw_window_scroll_y_by {
         "  3. If a ",
         "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1769,7 +1923,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -1798,7 +1953,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
     let tree = data_access.tree.clone();
     {
@@ -1827,7 +1983,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -1839,9 +1996,10 @@ mod tests_raw_window_scroll_y_by {
         "     * The",
         "  3. If a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1863,7 +2021,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
 
     let tree = data_access.tree.clone();
     {
@@ -1875,9 +2034,10 @@ mod tests_raw_window_scroll_y_by {
         "     * The",
         "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1899,7 +2059,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(3));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(3));
 
     let tree = data_access.tree.clone();
     {
@@ -1911,9 +2072,10 @@ mod tests_raw_window_scroll_y_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -1991,9 +2153,16 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
 
@@ -2017,7 +2186,8 @@ mod tests_raw_window_scroll_y_by {
         "ptions are not ",
         "set.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2102,7 +2272,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(8));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(8));
 
     let tree = data_access.tree.clone();
 
@@ -2126,7 +2297,8 @@ mod tests_raw_window_scroll_y_by {
         "nd of the row.\n",
         "     * The char",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2146,7 +2318,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2170,7 +2343,8 @@ mod tests_raw_window_scroll_y_by {
         "",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(9, 0), (10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2190,7 +2364,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(3));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(3));
 
     let tree = data_access.tree.clone();
 
@@ -2198,7 +2373,8 @@ mod tests_raw_window_scroll_y_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2218,7 +2394,8 @@ mod tests_raw_window_scroll_y_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(2));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(2));
 
     let tree = data_access.tree.clone();
 
@@ -2242,7 +2419,8 @@ mod tests_raw_window_scroll_y_by {
         "nd of the row.\n",
         "     * The char",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2268,11 +2446,16 @@ mod tests_raw_window_scroll_x_by {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -2304,7 +2487,8 @@ mod tests_raw_window_scroll_x_by {
       assert_eq!(cursor_viewport.char_idx(), 0);
 
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2317,9 +2501,16 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2327,7 +2518,8 @@ mod tests_raw_window_scroll_x_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2406,9 +2598,16 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2509,9 +2708,16 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2585,9 +2791,10 @@ mod tests_raw_window_scroll_x_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2600,9 +2807,18 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(12));
+    stateful._test_raw_window_scroll(
+      &data_access,
+      Operation::WindowScrollRightBy(12),
+    );
 
     let tree = data_access.tree.clone();
 
@@ -2616,9 +2832,10 @@ mod tests_raw_window_scroll_x_by {
         "e line is ",
         "e line is ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2673,9 +2890,10 @@ mod tests_raw_window_scroll_x_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2696,7 +2914,10 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(12));
+    stateful._test_raw_window_scroll(
+      &data_access,
+      Operation::WindowScrollRightBy(12),
+    );
 
     let tree = data_access.tree.clone();
 
@@ -2710,9 +2931,10 @@ mod tests_raw_window_scroll_x_by {
         "e line is ",
         "e line is ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2733,17 +2955,22 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(10));
+    stateful._test_raw_window_scroll(
+      &data_access,
+      Operation::WindowScrollRightBy(10),
+    );
 
     let tree = data_access.tree.clone();
 
     // Scroll-2
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", " and small", "several th", "small enou", "too long t"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["", " and small", "several th", "small enou", "too long t"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2764,7 +2991,10 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(160));
+    stateful._test_raw_window_scroll(
+      &data_access,
+      Operation::WindowScrollRightBy(160),
+    );
 
     let tree = data_access.tree.clone();
 
@@ -2772,9 +3002,10 @@ mod tests_raw_window_scroll_x_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "", "\n", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2795,7 +3026,10 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(156));
+    stateful._test_raw_window_scroll(
+      &data_access,
+      Operation::WindowScrollLeftBy(156),
+    );
 
     let tree = data_access.tree.clone();
 
@@ -2809,9 +3043,10 @@ mod tests_raw_window_scroll_x_by {
         "1. When th",
         "2. When th",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2866,9 +3101,10 @@ mod tests_raw_window_scroll_x_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2890,7 +3126,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -2902,9 +3139,10 @@ mod tests_raw_window_scroll_x_by {
         " When the ",
         " When the ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2926,7 +3164,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -2938,9 +3177,10 @@ mod tests_raw_window_scroll_x_by {
         "n the line",
         "n the line",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2962,7 +3202,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
     let tree = data_access.tree.clone();
     {
@@ -2974,9 +3215,10 @@ mod tests_raw_window_scroll_x_by {
         "en the lin",
         "en the lin",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -2998,7 +3240,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(4));
 
     let tree = data_access.tree.clone();
     {
@@ -3010,9 +3253,10 @@ mod tests_raw_window_scroll_x_by {
         ". When the",
         ". When the",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3034,7 +3278,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
     let tree = data_access.tree.clone();
     {
@@ -3046,9 +3291,10 @@ mod tests_raw_window_scroll_x_by {
         "1. When th",
         "2. When th",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3070,7 +3316,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(3));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(3));
 
     let tree = data_access.tree.clone();
     {
@@ -3082,9 +3329,10 @@ mod tests_raw_window_scroll_x_by {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3162,9 +3410,16 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
     let tree = data_access.tree.clone();
 
@@ -3274,7 +3529,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(8));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(8));
 
     let tree = data_access.tree.clone();
 
@@ -3319,7 +3575,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -3366,7 +3623,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(3));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(3));
 
     let tree = data_access.tree.clone();
 
@@ -3413,7 +3671,8 @@ mod tests_raw_window_scroll_x_by {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -3466,11 +3725,16 @@ mod tests_raw_window_scroll_to {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -3540,9 +3804,16 @@ mod tests_raw_window_scroll_to {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 1)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 1)));
 
     let tree = data_access.tree.clone();
 
@@ -3616,9 +3887,10 @@ mod tests_raw_window_scroll_to {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3640,7 +3912,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 4)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 4)));
 
     let tree = data_access.tree.clone();
     {
@@ -3652,9 +3925,10 @@ mod tests_raw_window_scroll_to {
         "  3. If a ",
         "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3676,7 +3950,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 8)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 8)));
 
     let tree = data_access.tree.clone();
     {
@@ -3705,7 +3980,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 7)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 7)));
 
     let tree = data_access.tree.clone();
     {
@@ -3734,7 +4010,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 3)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 3)));
 
     let tree = data_access.tree.clone();
     {
@@ -3746,9 +4023,10 @@ mod tests_raw_window_scroll_to {
         "     * The",
         "  3. If a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3770,7 +4048,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 2)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 2)));
 
     let tree = data_access.tree.clone();
     {
@@ -3782,9 +4061,10 @@ mod tests_raw_window_scroll_to {
         "     * The",
         "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3806,7 +4086,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -3818,9 +4099,10 @@ mod tests_raw_window_scroll_to {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3875,9 +4157,10 @@ mod tests_raw_window_scroll_to {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3899,7 +4182,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((4, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((4, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -3911,9 +4195,10 @@ mod tests_raw_window_scroll_to {
         " When the ",
         " When the ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3935,7 +4220,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((8, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((8, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -3947,9 +4233,10 @@ mod tests_raw_window_scroll_to {
         "n the line",
         "n the line",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -3971,7 +4258,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((7, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((7, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -3983,9 +4271,10 @@ mod tests_raw_window_scroll_to {
         "en the lin",
         "en the lin",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -4007,7 +4296,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((3, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((3, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4019,9 +4309,10 @@ mod tests_raw_window_scroll_to {
         ". When the",
         ". When the",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -4043,7 +4334,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((2, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((2, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4055,9 +4347,10 @@ mod tests_raw_window_scroll_to {
         "1. When th",
         "2. When th",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -4079,7 +4372,8 @@ mod tests_raw_window_scroll_to {
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
-    stateful._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollTo((0, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4091,9 +4385,10 @@ mod tests_raw_window_scroll_to {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(
         buf.clone(),
@@ -4120,11 +4415,16 @@ mod tests_cursor_move {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -4152,7 +4452,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful_machine = NormalStateful::default();
     stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
@@ -4194,7 +4500,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful_machine = NormalStateful::default();
     stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
@@ -4236,8 +4548,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4363,8 +4680,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4490,8 +4812,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4612,8 +4939,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4632,9 +4964,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4663,9 +4996,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4695,9 +5029,10 @@ mod tests_cursor_move {
         " 2. When t",
         "    * The ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4726,9 +5061,10 @@ mod tests_cursor_move {
         "hen the li",
         "hen the li",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4757,9 +5093,10 @@ mod tests_cursor_move {
         "he line is",
         "he line is",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4781,10 +5118,12 @@ mod tests_cursor_move {
       assert_eq!(actual2.char_idx(), 31);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", " and small", "several th", "small enou", "too long t"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["", " and small", "several th", "small enou", "too long t"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4807,9 +5146,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "", "t the rend", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4832,9 +5172,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4857,9 +5198,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\n", "are been s"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4909,8 +5251,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4929,9 +5276,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4960,9 +5308,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4992,9 +5341,10 @@ mod tests_cursor_move {
         " 2. When t",
         "    * The ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5023,9 +5373,10 @@ mod tests_cursor_move {
         "hen the li",
         "hen the li",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5054,9 +5405,10 @@ mod tests_cursor_move {
         "he line is",
         "he line is",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5078,10 +5430,12 @@ mod tests_cursor_move {
       assert_eq!(actual2.char_idx(), 31);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", " and small", "several th", "small enou", "too long t"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["", " and small", "several th", "small enou", "too long t"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5104,9 +5458,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "", "rendering.", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5129,9 +5484,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\r\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5154,9 +5510,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\r\n", "are been s"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5206,8 +5563,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -5226,9 +5588,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5257,9 +5620,10 @@ mod tests_cursor_move {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5289,9 +5653,10 @@ mod tests_cursor_move {
         " 2. When t",
         "    * The ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5320,9 +5685,10 @@ mod tests_cursor_move {
         "hen the li",
         "hen the li",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5351,9 +5717,10 @@ mod tests_cursor_move {
         "he line is",
         "he line is",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5375,10 +5742,12 @@ mod tests_cursor_move {
       assert_eq!(actual2.char_idx(), 31);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", " and small", "several th", "small enou", "too long t"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["", " and small", "several th", "small enou", "too long t"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5401,9 +5770,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "", "rendering.", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5426,9 +5796,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\r"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5451,9 +5822,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\r", "are been s"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5498,8 +5870,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -5523,7 +5900,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5557,7 +5935,8 @@ mod tests_cursor_move {
         "s are not ",
         "set.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5591,7 +5970,8 @@ mod tests_cursor_move {
         "wrap optio",
         "ns are bee",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(6, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5625,7 +6005,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5670,8 +6051,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -5695,7 +6081,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5729,7 +6116,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5763,7 +6151,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5797,7 +6186,8 @@ mod tests_cursor_move {
         "e line-wra",
         "p and word",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5831,7 +6221,8 @@ mod tests_cursor_move {
         "ffect the ",
         "rendering.",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5865,7 +6256,8 @@ mod tests_cursor_move {
         "ffect the ",
         "rendering.",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5899,7 +6291,8 @@ mod tests_cursor_move {
         "ffect the ",
         "rendering.",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5933,7 +6326,8 @@ mod tests_cursor_move {
         "doesn't af",
         "fect the r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5967,7 +6361,8 @@ mod tests_cursor_move {
         "content wi",
         "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6038,8 +6433,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -6060,7 +6460,8 @@ mod tests_cursor_move {
         "ut inside a row.\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6091,7 +6492,8 @@ mod tests_cursor_move {
         "ut inside a row.\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6122,7 +6524,8 @@ mod tests_cursor_move {
         "ut inside a row.\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6153,7 +6556,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both l",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6184,7 +6588,8 @@ mod tests_cursor_move {
         "t in a row of the window ",
         "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6260,8 +6665,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -6282,7 +6692,8 @@ mod tests_cursor_move {
         "ut inside a row.\r\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6313,7 +6724,8 @@ mod tests_cursor_move {
         "ut inside a row.\r\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6344,7 +6756,8 @@ mod tests_cursor_move {
         "ut inside a row.\r\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6375,7 +6788,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both l",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6406,7 +6820,8 @@ mod tests_cursor_move {
         "t in a row of the window ",
         "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6482,8 +6897,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -6504,7 +6924,8 @@ mod tests_cursor_move {
         "ut inside a row.\r",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6535,7 +6956,8 @@ mod tests_cursor_move {
         "ut inside a row.\r",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6566,7 +6988,8 @@ mod tests_cursor_move {
         "ut inside a row.\r",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6597,7 +7020,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both l",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6628,7 +7052,8 @@ mod tests_cursor_move {
         "t in a row of the window ",
         "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6699,8 +7124,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
@@ -6721,7 +7151,8 @@ mod tests_cursor_move {
         "ut inside a row.\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6752,7 +7183,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both l",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -6860,8 +7292,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
@@ -7024,8 +7461,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
@@ -7158,8 +7600,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -7183,7 +7630,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7217,7 +7665,8 @@ mod tests_cursor_move {
         "wrap ",
         "options ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7251,7 +7700,8 @@ mod tests_cursor_move {
         "or word-",
         "wrap ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(6, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7285,7 +7735,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7331,8 +7782,13 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -7356,7 +7812,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7390,7 +7847,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7424,7 +7882,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7458,7 +7917,8 @@ mod tests_cursor_move {
         "line-wrap ",
         "and word-",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7492,7 +7952,8 @@ mod tests_cursor_move {
         " rendering",
         ".\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7526,7 +7987,8 @@ mod tests_cursor_move {
         " rendering",
         ".\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7560,7 +8022,8 @@ mod tests_cursor_move {
         " rendering",
         ".\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7594,7 +8057,8 @@ mod tests_cursor_move {
         "wrap ",
         "doesn't ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7628,7 +8092,8 @@ mod tests_cursor_move {
         " window ",
         "content ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7700,8 +8165,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -7722,7 +8192,8 @@ mod tests_cursor_move {
         "completely put inside a ",
         "row.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7753,7 +8224,8 @@ mod tests_cursor_move {
         "completely put inside a ",
         "row.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7784,7 +8256,8 @@ mod tests_cursor_move {
         "completely put inside a ",
         "row.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7815,7 +8288,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7846,7 +8320,8 @@ mod tests_cursor_move {
         " long to be completely ",
         "put in a row of the ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7917,8 +8392,13 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
@@ -7939,7 +8419,8 @@ mod tests_cursor_move {
         "ut inside a row.\n",
         "  2. When the line is too",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7970,7 +8451,8 @@ mod tests_cursor_move {
         "    * The extra parts are",
         " been truncated if both l",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -8028,11 +8510,16 @@ mod tests_goto_command_line_ex_mode {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -8061,7 +8548,13 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.goto_command_line_ex_mode(&data_access);
 
@@ -8107,11 +8600,16 @@ mod tests_goto_insert_mode {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
@@ -8140,14 +8638,22 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (Keep)
     {
       stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
-      let insert_result =
-        stateful.goto_insert_mode(&data_access, crate::state::ops::GotoInsertModeVariant::Keep);
+      let insert_result = stateful.goto_insert_mode(
+        &data_access,
+        crate::state::ops::GotoInsertModeVariant::Keep,
+      );
       assert_eq!(
         insert_result,
         StatefulValue::InsertMode(InsertStateful::default())
@@ -8184,7 +8690,8 @@ mod tests_goto_insert_mode {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["ShBye, ould go to insert mode\n", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -8230,7 +8737,13 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (Append)
@@ -8276,7 +8789,8 @@ mod tests_goto_insert_mode {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["ShoBye, uld go to insert mode\n", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -8322,7 +8836,13 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (Append)
@@ -8368,7 +8888,8 @@ mod tests_goto_insert_mode {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["Should go to insert modeBye, \n", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -8414,7 +8935,13 @@ mod tests_goto_insert_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (NewLine)
@@ -8461,7 +8988,8 @@ mod tests_goto_insert_mode {
       let buf_eol = lock!(buf).options().end_of_line();
       let line1 = format!("Should go to insert mode{buf_eol}");
       let expect = vec![line1.as_str(), "Bye, \n", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,

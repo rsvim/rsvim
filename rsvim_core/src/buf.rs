@@ -152,16 +152,21 @@ pub struct BuffersManager {
 
 arc_mutex_ptr!(BuffersManager);
 
-pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+pub type BuffersManagerKeys<'a> =
+  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> =
+  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> =
+  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 impl BuffersManager {
   pub fn new() -> Self {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      global_local_options: BufferLocalOptionsBuilder::default().build().unwrap(),
+      global_local_options: BufferLocalOptionsBuilder::default()
+        .build()
+        .unwrap(),
     }
   }
 
@@ -182,7 +187,11 @@ impl BuffersManager {
   /// If the file name already exists.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_file_buffer(&mut self, canvas_size: U16Size, filename: &Path) -> IoResult<BufferId> {
+  pub fn new_file_buffer(
+    &mut self,
+    canvas_size: U16Size,
+    filename: &Path,
+  ) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -292,7 +301,9 @@ impl BuffersManager {
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
     let fencoding = self.global_local_options().file_encoding();
     match fencoding {
-      FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+      FileEncodingOption::Utf8 => {
+        String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+      }
     }
   }
 

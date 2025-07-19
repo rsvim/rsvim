@@ -10,7 +10,12 @@ use std::convert::From;
 use tracing::trace;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
-pub fn draw(viewport: &Viewport, text: &Text, actual_shape: &U16Rect, canvas: &mut Canvas) {
+pub fn draw(
+  viewport: &Viewport,
+  text: &Text,
+  actual_shape: &U16Rect,
+  canvas: &mut Canvas,
+) {
   let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -55,20 +60,23 @@ pub fn draw(viewport: &Viewport, text: &Text, actual_shape: &U16Rect, canvas: &m
 
         let mut col_idx = 0_u16;
 
-        let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_cols() > 0 {
+        let start_fills = if row_idx == first_row_idx
+          && line_viewport.start_filled_cols() > 0
+        {
           start_fills_count += 1;
           debug_assert_eq!(start_fills_count, 1);
           line_viewport.start_filled_cols() as u16
         } else {
           0_u16
         };
-        let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_cols() > 0 {
-          end_fills_count += 1;
-          debug_assert_eq!(end_fills_count, 1);
-          line_viewport.end_filled_cols() as u16
-        } else {
-          0_u16
-        };
+        let end_fills =
+          if row_idx == last_row_idx && line_viewport.end_filled_cols() > 0 {
+            end_fills_count += 1;
+            debug_assert_eq!(end_fills_count, 1);
+            line_viewport.end_filled_cols() as u16
+          } else {
+            0_u16
+          };
 
         // Render start fills.
         if start_fills > 0 {
@@ -84,13 +92,15 @@ pub fn draw(viewport: &Viewport, text: &Text, actual_shape: &U16Rect, canvas: &m
         if r_viewport.end_char_idx() > r_viewport.start_char_idx() {
           // let mut total_width = 0_usize;
           let mut char_idx = r_viewport.start_char_idx();
-          let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
+          let mut chars_iter =
+            bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
           while char_idx < r_viewport.end_char_idx() {
             let c = chars_iter.next().unwrap();
             let (unicode_symbol, unicode_width) = text.char_symbol_and_width(c);
 
             let cell = Cell::with_symbol(unicode_symbol);
-            let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            let cell_upos =
+              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cell(cell_upos, cell);
 
             col_idx += unicode_width as u16;
@@ -99,9 +109,12 @@ pub fn draw(viewport: &Viewport, text: &Text, actual_shape: &U16Rect, canvas: &m
         }
 
         // Render left empty parts.
-        let end_dcol_idx = text.width_before(line_idx, r_viewport.end_char_idx());
-        let start_dcol_idx = text.width_before(line_idx, r_viewport.start_char_idx());
-        let occupied_length = (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
+        let end_dcol_idx =
+          text.width_before(line_idx, r_viewport.end_char_idx());
+        let start_dcol_idx =
+          text.width_before(line_idx, r_viewport.start_char_idx());
+        let occupied_length =
+          (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
         if width > occupied_length {
           let left_length = width - occupied_length;

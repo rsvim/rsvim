@@ -43,7 +43,9 @@ pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> CompactString {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
-      AsciiChar::Tab => CompactString::from(" ".repeat(opt.tab_stop() as usize)),
+      AsciiChar::Tab => {
+        CompactString::from(" ".repeat(opt.tab_stop() as usize))
+      }
       AsciiChar::LineFeed => CompactString::new(""),
       AsciiChar::CarriageReturn => {
         if opt.file_format() == FileFormatOption::Unix {

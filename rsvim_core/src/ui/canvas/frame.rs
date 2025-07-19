@@ -182,7 +182,10 @@ impl Frame {
   /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
   ///
   /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_with_placeholder(&self, printable: CompactString) -> Vec<Vec<CompactString>> {
+  pub fn raw_symbols_with_placeholder(
+    &self,
+    printable: CompactString,
+  ) -> Vec<Vec<CompactString>> {
     self.iframe.raw_symbols_with_placeholder(printable)
   }
 
@@ -199,7 +202,11 @@ impl Frame {
 
   /// Try set (replace) cells at a range, non-panic version of
   /// [`set_cells_at`](Frame::set_cells_at).
-  pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
+  pub fn try_set_cells_at(
+    &mut self,
+    pos: U16Pos,
+    cells: Vec<Cell>,
+  ) -> Option<Vec<Cell>> {
     self.iframe.try_set_cells_at(pos, cells)
   }
 
@@ -214,7 +221,11 @@ impl Frame {
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Frame::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Option<Vec<Cell>> {
+  pub fn try_set_empty_cells_at(
+    &mut self,
+    pos: U16Pos,
+    n: usize,
+  ) -> Option<Vec<Cell>> {
     self.iframe.try_set_empty_cells_at(pos, n)
   }
 
@@ -453,7 +464,9 @@ mod tests {
         .collect::<Vec<_>>()
         .join("");
       let expect = expects[i as usize];
-      info!("{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}");
+      info!(
+        "{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}"
+      );
       assert_eq!(actual, expect);
 
       let idx = frame.pos2idx(pos);
@@ -533,7 +546,8 @@ mod tests {
     ];
 
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
+      let actual = frame
+        .set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert!(actual.len() == input.1.len());
     }

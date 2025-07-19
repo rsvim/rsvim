@@ -9,9 +9,17 @@ pub struct CommandLineSearchBackwardStateful {}
 
 impl Stateful for CommandLineSearchBackwardStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful::default())
+    StatefulValue::CommandLineSearchBackwardMode(
+      CommandLineSearchBackwardStateful::default(),
+    )
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful::default())
+  fn handle_op(
+    &self,
+    _data_access: StatefulDataAccess,
+    _op: Operation,
+  ) -> StatefulValue {
+    StatefulValue::CommandLineSearchBackwardMode(
+      CommandLineSearchBackwardStateful::default(),
+    )
   }
 }

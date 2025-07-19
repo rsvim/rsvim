@@ -53,11 +53,14 @@ pub fn set_timeout(
 
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
-    Ok(params) => (0..params.length()).fold(Vec::<v8::Global<v8::Value>>::new(), |mut acc, i| {
-      let param = params.get_index(scope, i).unwrap();
-      acc.push(v8::Global::new(scope, param));
-      acc
-    }),
+    Ok(params) => (0..params.length()).fold(
+      Vec::<v8::Global<v8::Value>>::new(),
+      |mut acc, i| {
+        let param = params.get_index(scope, i).unwrap();
+        acc.push(v8::Global::new(scope, param));
+        acc
+      },
+    ),
     Err(_) => vec![],
   };
 

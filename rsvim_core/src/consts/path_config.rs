@@ -33,8 +33,12 @@ struct ConfigHomeAndEntry {
 ///    well.
 ///
 /// It returns `(Home, Entry)`.
-fn get_config_home_and_entry(cached_dirs: &CachedDirs) -> Option<ConfigHomeAndEntry> {
-  for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
+fn get_config_home_and_entry(
+  cached_dirs: &CachedDirs,
+) -> Option<ConfigHomeAndEntry> {
+  for config_dir in
+    [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter()
+  {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
       return Some(ConfigHomeAndEntry {

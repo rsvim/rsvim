@@ -35,7 +35,11 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 }
 
 impl Text {
-  pub fn new(opts: BufferLocalOptions, canvas_size: U16Size, rope: Rope) -> Self {
+  pub fn new(
+    opts: BufferLocalOptions,
+    canvas_size: U16Size,
+    rope: Rope,
+  ) -> Self {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
@@ -133,7 +137,8 @@ impl Text {
     let is_crlf = len_chars >= 2
       && char_idx >= len_chars - 2
       && char_idx < len_chars
-      && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1)) == ascii_eol::CRLF;
+      && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1))
+        == ascii_eol::CRLF;
     let is_cr_or_lf = len_chars >= 1
       && char_idx == len_chars - 1
       && (format!("{}", line.char(len_chars - 1)) == ascii_eol::CR
@@ -152,7 +157,8 @@ impl Text {
     let is_crlf = len_chars >= 2
       && char_idx >= len_chars - 2
       && char_idx < len_chars
-      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1)) == ascii_eol::CRLF;
+      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1))
+        == ascii_eol::CRLF;
     let is_cr_or_lf = len_chars >= 1
       && char_idx == len_chars - 1
       && (format!("{}", r.char(len_chars - 1)) == ascii_eol::CR
@@ -316,7 +322,11 @@ impl Text {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn last_char_until(&self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn last_char_until(
+    &self,
+    line_idx: usize,
+    width: usize,
+  ) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -361,7 +371,10 @@ impl Text {
   /// Retain multiple cached lines by lambda function `f`.
   fn retain_cached_lines<F>(&self, f: F)
   where
-    F: Fn(/* line_idx */ &usize, /* column_idx */ &ColumnIndex) -> bool,
+    F: Fn(
+      /* line_idx */ &usize,
+      /* column_idx */ &ColumnIndex,
+    ) -> bool,
   {
     let mut cached_width = self.cached_lines_width.borrow_mut();
     let to_be_removed_lines: Vec<usize> = cached_width
@@ -391,7 +404,9 @@ impl Text {
 }
 // Display Width }
 
-use crate::test::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_idx};
+use crate::test::buf::{
+  dbg_print_textline, dbg_print_textline_with_absolute_char_idx,
+};
 
 // Edit {
 impl Text {
@@ -411,7 +426,9 @@ impl Text {
             .rope_mut()
             .insert(buffer_len_chars, eol.to_compact_string().as_str());
           let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
-          self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
+          self.retain_cached_lines(|line_idx, _column_idx| {
+            *line_idx < inserted_line_idx
+          });
           dbg_print_textline_with_absolute_char_idx(
             self,
             inserted_line_idx,
@@ -467,8 +484,10 @@ impl Text {
     // re-calculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx_before_insert + payload.chars().count();
-    let line_idx_after_inserted = self.rope.char_to_line(absolute_char_idx_after_inserted);
-    let absolute_line_idx_after_inserted = self.rope.line_to_char(line_idx_after_inserted);
+    let line_idx_after_inserted =
+      self.rope.char_to_line(absolute_char_idx_after_inserted);
+    let absolute_line_idx_after_inserted =
+      self.rope.line_to_char(line_idx_after_inserted);
     let char_idx_after_inserted =
       absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
 
@@ -476,12 +495,19 @@ impl Text {
       // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
       // Thus only need to truncate chars after insert position on the same line.
       debug_assert!(char_idx_after_inserted >= char_idx);
-      let min_cursor_char_idx = std::cmp::min(char_idx_after_inserted, char_idx);
-      self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx.saturating_sub(1));
+      let min_cursor_char_idx =
+        std::cmp::min(char_idx_after_inserted, char_idx);
+      self.truncate_cached_line_since_char(
+        line_idx,
+        min_cursor_char_idx.saturating_sub(1),
+      );
     } else {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+      let min_cursor_line_idx =
+        std::cmp::min(line_idx_after_inserted, line_idx);
+      self.retain_cached_lines(|line_idx, _column_idx| {
+        *line_idx < min_cursor_line_idx
+      });
     }
 
     // Append eol at file end if it doesn't exist.
@@ -536,7 +562,8 @@ impl Text {
       let c2 = self.rope.get_char(i + 1);
       if c1.is_some()
         && c2.is_some()
-        && format!("{}{}", c1.unwrap(), c2.unwrap()) == crate::defaults::ascii::end_of_line::CRLF
+        && format!("{}{}", c1.unwrap(), c2.unwrap())
+          == crate::defaults::ascii::end_of_line::CRLF
       {
         i += 2;
       } else {
@@ -568,19 +595,24 @@ impl Text {
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let cursor_char_absolute_pos_before_delete = self.rope.line_to_char(line_idx) + char_idx;
+    let cursor_char_absolute_pos_before_delete =
+      self.rope.line_to_char(line_idx) + char_idx;
 
     dbg_print_textline(self, line_idx, char_idx, "Before delete");
 
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      let upper = self._n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      let upper = self
+        ._n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
       debug_assert!(upper <= self.rope.len_chars());
       cursor_char_absolute_pos_before_delete..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      let lower = self._n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
+      let lower = self._n_chars_to_left(
+        cursor_char_absolute_pos_before_delete,
+        (-n) as usize,
+      );
       lower..cursor_char_absolute_pos_before_delete
     };
 
@@ -601,18 +633,22 @@ impl Text {
       .char_to_line(cursor_char_absolute_pos_after_deleted);
     let cursor_line_absolute_pos_after_deleted =
       self.rope.line_to_char(cursor_line_idx_after_deleted);
-    let cursor_char_idx_after_deleted =
-      cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
+    let cursor_char_idx_after_deleted = cursor_char_absolute_pos_after_deleted
+      - cursor_line_absolute_pos_after_deleted;
 
     if line_idx == cursor_line_idx_after_deleted {
       // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
       // Thus only need to truncate chars after insert position on the same line.
-      let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, char_idx);
+      let min_cursor_char_idx =
+        std::cmp::min(cursor_char_idx_after_deleted, char_idx);
       self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx);
     } else {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-      let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+      let min_cursor_line_idx =
+        std::cmp::min(cursor_line_idx_after_deleted, line_idx);
+      self.retain_cached_lines(|line_idx, _column_idx| {
+        *line_idx < min_cursor_line_idx
+      });
     }
 
     // Append eol at file end if it doesn't exist.

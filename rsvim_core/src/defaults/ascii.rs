@@ -34,7 +34,7 @@ impl fmt::Display for AsciiControlCodeFormatter {
       AsciiChar::ACK => write!(f, "^F"),
       AsciiChar::Bell => write!(f, "^G"),
       AsciiChar::BackSpace => write!(f, "^H"),
-      AsciiChar::Tab => write!(f, "\t"),        // \t
+      AsciiChar::Tab => write!(f, "\t"), // \t
       AsciiChar::LineFeed => writeln!(f, "^J"), // \n
       AsciiChar::VT => write!(f, "^K"),
       AsciiChar::FF => write!(f, "^L"),

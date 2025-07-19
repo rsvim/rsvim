@@ -12,7 +12,9 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::{Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -25,7 +27,10 @@ use tracing::info;
 mod tests_nowrap {
   use super::*;
 
-  fn make_canvas(terminal_size: U16Size, cmdline_indicator: &CommandLineIndicator) -> Canvas {
+  fn make_canvas(
+    terminal_size: U16Size,
+    cmdline_indicator: &CommandLineIndicator,
+  ) -> Canvas {
     let mut canvas = Canvas::new(terminal_size);
     cmdline_indicator.draw(&mut canvas);
     canvas

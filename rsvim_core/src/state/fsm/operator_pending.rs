@@ -11,7 +11,11 @@ impl Stateful for OperatorPendingStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
     StatefulValue::OperatorPendingMode(OperatorPendingStateful::default())
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    _data_access: StatefulDataAccess,
+    _op: Operation,
+  ) -> StatefulValue {
     StatefulValue::OperatorPendingMode(OperatorPendingStateful::default())
   }
 }

@@ -29,7 +29,8 @@ fn _shade_cursor1() {
   can._shade_done();
   assert!(actual1.is_empty());
 
-  let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+  let cursor2 =
+    Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
   let actual2 = can._shade_cursor();
   can._shade_done();
@@ -39,13 +40,14 @@ fn _shade_cursor1() {
   assert_eq!(
     actual2
       .iter()
-      .filter(
-        |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+      .filter(|sh| {
+        if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh
+        {
           *x == 3 && *y == 7
         } else {
           false
         }
-      )
+      })
       .collect::<Vec<_>>()
       .len(),
     1
@@ -56,7 +58,9 @@ fn _shade_cursor1() {
       .filter(|sh| {
         matches!(
           sh,
-          ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
+          ShaderCommand::CursorDisableBlinking(
+            crossterm::cursor::DisableBlinking
+          )
         )
       })
       .collect::<Vec<_>>()
@@ -66,7 +70,9 @@ fn _shade_cursor1() {
   assert_eq!(
     actual2
       .iter()
-      .filter(|sh| { matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide)) })
+      .filter(|sh| {
+        matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide))
+      })
       .collect::<Vec<_>>()
       .len(),
     1
@@ -77,7 +83,9 @@ fn _shade_cursor1() {
       .filter(|sh| {
         matches!(
           sh,
-          ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::BlinkingBar)
+          ShaderCommand::CursorSetCursorStyle(
+            crossterm::cursor::SetCursorStyle::BlinkingBar
+          )
         )
       })
       .collect::<Vec<_>>()
@@ -85,7 +93,8 @@ fn _shade_cursor1() {
     1
   );
 
-  let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
+  let cursor3 =
+    Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
   let actual3 = can._shade_cursor();
   can._shade_done();
@@ -94,13 +103,14 @@ fn _shade_cursor1() {
   assert_eq!(
     actual3
       .iter()
-      .filter(
-        |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+      .filter(|sh| {
+        if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh
+        {
           *x == 4 && *y == 5
         } else {
           false
         }
-      )
+      })
       .collect::<Vec<_>>()
       .len(),
     1
@@ -111,7 +121,9 @@ fn _shade_cursor1() {
       .filter(|sh| {
         matches!(
           sh,
-          ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+          ShaderCommand::CursorEnableBlinking(
+            crossterm::cursor::EnableBlinking
+          )
         )
       })
       .collect::<Vec<_>>()
@@ -124,7 +136,9 @@ fn _shade_cursor1() {
       .filter(|sh| {
         matches!(
           sh,
-          ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::SteadyUnderScore)
+          ShaderCommand::CursorSetCursorStyle(
+            crossterm::cursor::SetCursorStyle::SteadyUnderScore
+          )
         )
       })
       .collect::<Vec<_>>()
@@ -193,7 +207,9 @@ fn _next_same_cell_in_row2() {
           chars,
           can.frame().get_cell(point!(x:col, y:row)).symbol()
         );
-        assert!(chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol()));
+        assert!(
+          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+        );
       } else if row == 6 && (0..2).contains(&col) {
         assert_eq!(actual, 2);
         info!(
@@ -201,7 +217,9 @@ fn _next_same_cell_in_row2() {
           chars,
           can.frame().get_cell(point!(x:col, y:row)).symbol()
         );
-        assert!(chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol()));
+        assert!(
+          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+        );
       } else {
         assert_eq!(actual, col);
       }
@@ -279,7 +297,9 @@ fn _make_print_shader1() {
     shaders[1],
     ShaderCommand::StylePrintString(crossterm::style::Print(_))
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &shaders[1] {
+  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
+    &shaders[1]
+  {
     assert_eq!(*contents, "ABCD".to_string());
   }
 }
@@ -308,7 +328,9 @@ fn diff1() {
     actual1[1],
     ShaderCommand::StylePrintString(crossterm::style::Print(_))
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual1[1] {
+  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
+    &actual1[1]
+  {
     assert_eq!(*contents, "ABCD".to_string());
   }
   assert_eq!(actual2.len(), 2);
@@ -320,7 +342,9 @@ fn diff1() {
     actual2[1],
     ShaderCommand::StylePrintString(crossterm::style::Print(_))
   ));
-  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual2[1] {
+  if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) =
+    &actual2[1]
+  {
     assert_eq!(*contents, "ABCD".to_string());
   }
 }

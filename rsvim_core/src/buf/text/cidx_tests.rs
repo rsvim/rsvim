@@ -20,7 +20,11 @@ fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
   rb.finish()
 }
 
-fn make_text_from_rope(opts: BufferLocalOptions, terminal_size: U16Size, rp: Rope) -> Text {
+fn make_text_from_rope(
+  opts: BufferLocalOptions,
+  terminal_size: U16Size,
+  rp: Rope,
+) -> Text {
   Text::new(opts, terminal_size, rp)
 }
 
@@ -210,7 +214,8 @@ fn width1() {
 
   let mut actual = ColumnIndex::with_capacity(10);
 
-  let expect: Vec<usize> = [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
+  let expect: Vec<usize> =
+    [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
   assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
   let expect: Vec<(usize, usize)> = expect
@@ -221,7 +226,8 @@ fn width1() {
     .collect();
   assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
-  let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
+  let expect: Vec<usize> =
+    [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
   assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
   let expect: Vec<(usize, usize)> = expect
@@ -238,7 +244,9 @@ fn width2() {
   test_log_init();
 
   let options = make_default_opts();
-  let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
+  let rope = make_rope_from_lines(vec![
+    "This is a quite simple and small test lines.\n",
+  ]);
   let buffer = make_text_from_rope(options, U16Size::new(10, 10), rope.clone());
   print_text_line_details(buffer, 0, "width2");
 
@@ -277,7 +285,9 @@ fn width3() {
   test_log_init();
 
   let options = make_default_opts();
-  let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
+  let rope = make_rope_from_lines(vec![
+    "But still\tit\\包含了好几种东西we want to test:\n",
+  ]);
   let buffer = make_text_from_rope(options, U16Size::new(10, 10), rope.clone());
   print_text_line_details(buffer, 0, "width3");
 
@@ -362,7 +372,8 @@ fn width4() {
     .collect();
   assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
-  let expect: Vec<usize> = [(0..=13).collect(), vec![cr_width, cr_width, cr_width]].concat();
+  let expect: Vec<usize> =
+    [(0..=13).collect(), vec![cr_width, cr_width, cr_width]].concat();
   assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
   let expect: Vec<(usize, usize)> = expect
@@ -453,7 +464,8 @@ fn width6() {
   assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
   assert_eq!(actual.width_until(&options, &rope.line(0), 2), 17);
 
-  let expect: Vec<usize> = [vec![8, 16], (17..=129).collect(), vec![129, 129, 129, 129]].concat();
+  let expect: Vec<usize> =
+    [vec![8, 16], (17..=129).collect(), vec![129, 129, 129, 129]].concat();
 
   let expect1: Vec<(usize, usize)> = expect
     .iter()
@@ -465,7 +477,8 @@ fn width6() {
 
   assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
-  let expect: Vec<usize> = [vec![0, 8, 16], (17..=129).collect(), vec![129, 129, 129]].concat();
+  let expect: Vec<usize> =
+    [vec![0, 8, 16], (17..=129).collect(), vec![129, 129, 129]].concat();
 
   let expect1: Vec<(usize, usize)> = expect
     .iter()
@@ -533,7 +546,9 @@ fn assert_char_before(
     assert_eq!(actual, *c);
     if c.is_some() {
       let actual = widx.width_until(options, buf_line, c.unwrap());
-      info!("width_at-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+      info!(
+        "width_at-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}"
+      );
       assert!(actual < *w);
     }
   }
@@ -551,7 +566,9 @@ fn assert_char_at(
     assert_eq!(actual, *c);
     if c.is_some() {
       let actual = widx.width_until(options, buf_line, c.unwrap());
-      info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+      info!(
+        "width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}"
+      );
       assert!(actual >= *w);
     } else {
       info!("width_at-2 char:{c:?} expect width:{w:?}");
@@ -571,7 +588,9 @@ fn assert_char_after(
     assert_eq!(actual, *c);
     if c.is_some() {
       let actual = widx.width_until(options, buf_line, c.unwrap());
-      info!("width_at-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+      info!(
+        "width_at-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}"
+      );
       assert!(actual >= *w);
     }
   }
@@ -585,7 +604,9 @@ fn assert_last_char_until(
 ) {
   for (w, c) in expect_until.iter() {
     let actual = widx.last_char_until(options, buf_line, *w);
-    info!("last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+    info!(
+      "last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}"
+    );
     assert_eq!(actual, *c);
   }
 }
@@ -908,13 +929,16 @@ fn char4() {
 
     let mut widx = ColumnIndex::new();
 
-    let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_before: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-    let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_at: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-    let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_after: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
   }
 
@@ -922,30 +946,37 @@ fn char4() {
     let rope = make_rope_from_lines(vec![]);
     let mut widx = ColumnIndex::new();
 
-    let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_before: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-    let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_at: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-    let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_after: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
   }
 
   {
     let rope = make_rope_from_lines(vec![""]);
-    let buffer = make_text_from_rope(options, U16Size::new(10, 10), rope.clone());
+    let buffer =
+      make_text_from_rope(options, U16Size::new(10, 10), rope.clone());
     print_text_line_details(buffer, 0, "char3-3");
 
     let mut widx = ColumnIndex::new();
 
-    let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_before: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-    let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_at: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-    let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
+    let expect_after: Vec<(usize, Option<usize>)> =
+      (0..50).map(|i| (i, None)).collect();
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
   }
 }
@@ -966,7 +997,9 @@ fn truncate1() {
 
   for (c, w) in expect_at.iter().enumerate() {
     let actual = widx.width_until(&options, &rope.line(0), c);
-    info!("truncate1-width_at expect width:{w:?}, char:{c:}, actual width:{actual:?}");
+    info!(
+      "truncate1-width_at expect width:{w:?}, char:{c:}, actual width:{actual:?}"
+    );
     assert_eq!(actual, *w);
     widx.truncate_since_char(c);
   }
@@ -976,7 +1009,9 @@ fn truncate1() {
 
   for (c, w) in expect_before.iter().enumerate() {
     let actual = widx.width_before(&options, &rope.line(0), c);
-    info!("truncate1-width_before expect width:{w:?}, char:{c:}, actual width:{actual:?}");
+    info!(
+      "truncate1-width_before expect width:{w:?}, char:{c:}, actual width:{actual:?}"
+    );
     assert_eq!(actual, *w);
     widx.truncate_since_char(c);
   }
@@ -987,7 +1022,8 @@ fn truncate2() {
   test_log_init();
 
   let options = make_default_opts();
-  let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
+  let rope =
+    make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
   let buffer = make_text_from_rope(options, U16Size::new(10, 10), rope.clone());
   print_text_line_details(buffer, 0, "truncate2");
   let mut widx = ColumnIndex::with_capacity(10);
@@ -1046,13 +1082,17 @@ fn truncate2() {
 
   for (w, c) in expect_before.iter() {
     let actual = widx.char_before(&options, &rope.line(0), *w);
-    info!("truncate2-char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+    info!(
+      "truncate2-char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}"
+    );
     assert_eq!(actual, *c);
     widx.truncate_since_width(*w);
   }
   for (w, c) in expect_at.iter() {
     let actual = widx.char_at(&options, &rope.line(0), *w);
-    info!("truncate2-char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+    info!(
+      "truncate2-char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}"
+    );
     assert_eq!(actual, *c);
     widx.truncate_since_width(*w);
   }

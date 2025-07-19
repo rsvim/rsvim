@@ -203,7 +203,12 @@ impl Canvas {
     col_end_at
   }
 
-  pub fn _make_print_shaders(&self, row: u16, start_col: u16, end_col: u16) -> Vec<ShaderCommand> {
+  pub fn _make_print_shaders(
+    &self,
+    row: u16,
+    start_col: u16,
+    end_col: u16,
+  ) -> Vec<ShaderCommand> {
     let frame = self.frame();
     let mut shaders = Vec::new();
 
@@ -263,7 +268,8 @@ impl Canvas {
           let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let mut print_shaders = self._make_print_shaders(row, col, col_end_at);
+            let mut print_shaders =
+              self._make_print_shaders(row, col, col_end_at);
             shaders.append(&mut print_shaders);
             col = col_end_at;
           }
@@ -305,7 +311,8 @@ impl Canvas {
             let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let mut print_shaders = self._make_print_shaders(row as u16, col, col_end_at);
+              let mut print_shaders =
+                self._make_print_shaders(row as u16, col, col_end_at);
               shaders.append(&mut print_shaders);
               col = col_end_at;
             }
@@ -346,8 +353,12 @@ pub enum ShaderCommand {
   EventEnableBracketedPaste(crossterm::event::EnableBracketedPaste),
   EventEnableFocusChange(crossterm::event::EnableFocusChange),
   EventEnableMouseCapture(crossterm::event::EnableMouseCapture),
-  EventPopKeyboardEnhancementFlags(crossterm::event::PopKeyboardEnhancementFlags),
-  EventPushKeyboardEnhancementFlags(crossterm::event::PushKeyboardEnhancementFlags),
+  EventPopKeyboardEnhancementFlags(
+    crossterm::event::PopKeyboardEnhancementFlags,
+  ),
+  EventPushKeyboardEnhancementFlags(
+    crossterm::event::PushKeyboardEnhancementFlags,
+  ),
   StyleResetColor(crossterm::style::ResetColor),
   StyleSetAttribute(crossterm::style::SetAttribute),
   StyleSetAttributes(crossterm::style::SetAttributes),

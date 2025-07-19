@@ -5,7 +5,8 @@ use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  ViewportSearchDirection,
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
@@ -40,10 +41,16 @@ pub fn normalize_to_cursor_move_by(
   cursor_line_idx: usize,
 ) -> (isize, isize, CursorMoveDirection) {
   match op {
-    Operation::CursorMoveLeftBy(n) => (-(n as isize), 0, CursorMoveDirection::Left),
-    Operation::CursorMoveRightBy(n) => (n as isize, 0, CursorMoveDirection::Right),
+    Operation::CursorMoveLeftBy(n) => {
+      (-(n as isize), 0, CursorMoveDirection::Left)
+    }
+    Operation::CursorMoveRightBy(n) => {
+      (n as isize, 0, CursorMoveDirection::Right)
+    }
     Operation::CursorMoveUpBy(n) => (0, -(n as isize), CursorMoveDirection::Up),
-    Operation::CursorMoveDownBy(n) => (0, n as isize, CursorMoveDirection::Down),
+    Operation::CursorMoveDownBy(n) => {
+      (0, n as isize, CursorMoveDirection::Down)
+    }
     Operation::CursorMoveTo((x, y)) => {
       let x = (x as isize) - (cursor_char_idx as isize);
       let y = (y as isize) - (cursor_line_idx as isize);
@@ -127,7 +134,8 @@ pub fn normalize_to_cursor_move_to_exclude_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) =
+    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_on_line_no_eol(y) {
@@ -148,7 +156,8 @@ pub fn normalize_to_cursor_move_to_include_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) =
+    normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
 
   let x = match text.last_char_on_line_no_eol(y) {
@@ -245,7 +254,8 @@ pub fn raw_cursor_viewport_move_to(
     _ => unreachable!(),
   };
 
-  let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
+  let line_idx =
+    std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
   debug_assert!(line_idx < viewport.end_line_idx());
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
@@ -260,7 +270,8 @@ pub fn raw_cursor_viewport_move_to(
     debug_assert!(bufline.len_chars() > char_idx);
   }
 
-  let new_cursor_viewport = CursorViewport::from_position(viewport, text, line_idx, char_idx);
+  let new_cursor_viewport =
+    CursorViewport::from_position(viewport, text, line_idx, char_idx);
   let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
   // New cursor position
   Some(new_cursor_viewport)
@@ -309,12 +320,15 @@ pub fn raw_viewport_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let max_len_chars = _max_len_chars_since_line(text, line_idx, actual_shape.height());
+  let max_len_chars =
+    _max_len_chars_since_line(text, line_idx, actual_shape.height());
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
-  if line_idx == viewport.start_line_idx() && column_idx == viewport.start_column_idx() {
+  if line_idx == viewport.start_line_idx()
+    && column_idx == viewport.start_column_idx()
+  {
     return None;
   }
 
@@ -329,7 +343,11 @@ pub fn raw_viewport_scroll_to(
   Some(new_viewport)
 }
 
-fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_height: u16) -> usize {
+fn _max_len_chars_since_line(
+  text: &Text,
+  mut start_line_idx: usize,
+  window_height: u16,
+) -> usize {
   let buffer_len_lines = text.rope().len_lines();
 
   let mut max_len_chars = 0_usize;
@@ -344,7 +362,11 @@ fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_heig
   max_len_chars
 }
 
-pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
+pub fn _update_viewport_after_text_changed(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &Text,
+) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
   debug_assert!(matches!(
@@ -391,22 +413,31 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 
   match node {
     TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
-    TreeNode::CommandLine(cmdline) => cmdline.set_viewport(updated_viewport.clone()),
+    TreeNode::CommandLine(cmdline) => {
+      cmdline.set_viewport(updated_viewport.clone())
+    }
     _ => unreachable!(),
   }
   if let Some(updated_cursor_viewport) = raw_cursor_viewport_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
-    Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+    Operation::CursorMoveTo((
+      cursor_viewport.char_idx(),
+      cursor_viewport.line_idx(),
+    )),
   ) {
     trace!(
       "after updated_cursor_viewport:{:?}",
       updated_cursor_viewport
     );
     match node {
-      TreeNode::Window(window) => window.set_cursor_viewport(updated_cursor_viewport),
-      TreeNode::CommandLine(cmdline) => cmdline.set_cursor_viewport(updated_cursor_viewport),
+      TreeNode::Window(window) => {
+        window.set_cursor_viewport(updated_cursor_viewport)
+      }
+      TreeNode::CommandLine(cmdline) => {
+        cmdline.set_cursor_viewport(updated_cursor_viewport)
+      }
       _ => unreachable!(),
     }
   }
@@ -422,7 +453,13 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 /// # Panics
 ///
 /// It panics if the operation is not `Operation::CursorMove*`.
-pub fn cursor_move(tree: &mut Tree, id: TreeNodeId, text: &Text, op: Operation, include_eol: bool) {
+pub fn cursor_move(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &Text,
+  op: Operation,
+  include_eol: bool,
+) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
 
@@ -443,7 +480,8 @@ pub fn cursor_move(tree: &mut Tree, id: TreeNodeId, text: &Text, op: Operation, 
   };
 
   // Only move cursor when it is different from current cursor.
-  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol {
+  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
+  {
     normalize_to_cursor_move_to_include_eol(
       text,
       op,
@@ -477,7 +515,9 @@ pub fn cursor_move(tree: &mut Tree, id: TreeNodeId, text: &Text, op: Operation, 
     );
 
     // First try window scroll.
-    if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
+    if start_line != viewport.start_line_idx()
+      || start_column != viewport.start_column_idx()
+    {
       let new_viewport = raw_viewport_scroll_to(
         &viewport,
         &actual_shape,
@@ -488,7 +528,9 @@ pub fn cursor_move(tree: &mut Tree, id: TreeNodeId, text: &Text, op: Operation, 
       if let Some(new_viewport) = new_viewport.clone() {
         match node {
           TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
-          TreeNode::CommandLine(cmdline) => cmdline.set_viewport(new_viewport.clone()),
+          TreeNode::CommandLine(cmdline) => {
+            cmdline.set_viewport(new_viewport.clone())
+          }
           _ => unreachable!(),
         }
       }
@@ -564,7 +606,9 @@ pub fn cursor_insert(
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
+  debug_assert!(
+    cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars()
+  );
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
     text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
@@ -623,8 +667,11 @@ pub fn cursor_delete(
     return None;
   }
 
-  debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
-  let maybe_new_cursor_position = text.delete_at(cursor_line_idx, cursor_char_idx, n);
+  debug_assert!(
+    cursor_char_idx < text.rope().line(cursor_line_idx).len_chars()
+  );
+  let maybe_new_cursor_position =
+    text.delete_at(cursor_line_idx, cursor_char_idx, n);
 
   maybe_new_cursor_position?;
 
@@ -636,7 +683,10 @@ pub fn cursor_delete(
   trace!(
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
   );
-  let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_deleted,
+    cursor_line_idx_after_deleted,
+  ));
   cursor_move(tree, id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
@@ -653,7 +703,11 @@ pub fn cursor_delete(
 ///
 /// It returns new cursor position `(cursor_line_idx,cursor_char_idx)` after deletes all text
 /// content.
-pub fn cursor_clear(tree: &mut Tree, id: TreeNodeId, text: &mut Text) -> (usize, usize) {
+pub fn cursor_clear(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &mut Text,
+) -> (usize, usize) {
   // Clear text.
   text.clear();
 
@@ -662,7 +716,10 @@ pub fn cursor_clear(tree: &mut Tree, id: TreeNodeId, text: &mut Text) -> (usize,
 
   let cursor_line_idx_after_clear = 0_usize;
   let cursor_char_idx_after_clear = 0_usize;
-  let op = Operation::CursorMoveTo((cursor_char_idx_after_clear, cursor_line_idx_after_clear));
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_clear,
+    cursor_line_idx_after_clear,
+  ));
   cursor_move(tree, id, text, op, true);
 
   (cursor_line_idx_after_clear, cursor_char_idx_after_clear)

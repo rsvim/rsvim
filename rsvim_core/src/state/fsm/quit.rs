@@ -14,7 +14,11 @@ impl Stateful for QuitStateful {
     // unreachable!("Never handle QuitStateful");
     StatefulValue::QuitState(QuitStateful::default())
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn handle_op(
+    &self,
+    _data_access: StatefulDataAccess,
+    _op: Operation,
+  ) -> StatefulValue {
     // unreachable!("Never handle QuitStateful");
     StatefulValue::QuitState(QuitStateful::default())
   }

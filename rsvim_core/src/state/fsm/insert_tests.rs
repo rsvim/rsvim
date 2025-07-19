@@ -16,11 +16,14 @@ use crate::test::tree::make_tree_with_buffers;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  ViewportSearchDirection,
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::{self, WindowContent};
-use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -43,7 +46,8 @@ pub fn make_tree_with_buffer_opts(
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
+  let tree =
+    make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher));
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -114,7 +118,8 @@ pub fn assert_viewport_scroll(
   if actual.lines().is_empty() {
     assert!(actual.end_line_idx() <= actual.start_line_idx());
   } else {
-    let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+    let (first_line_idx, _first_line_viewport) =
+      actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
     assert_eq!(*first_line_idx, actual.start_line_idx());
     assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
@@ -220,8 +225,11 @@ pub fn make_canvas(
       terminal_size.height() as isize,
     ),
   );
-  let window_content =
-    WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+  let window_content = WindowContent::new(
+    shape,
+    Arc::downgrade(&buffer),
+    Arc::downgrade(&viewport),
+  );
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
@@ -264,12 +272,17 @@ mod tests_cursor_move {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::buf::opt::FileFormatOption;
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tracing::info;
 
@@ -811,9 +824,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -844,9 +858,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -877,9 +892,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1065,9 +1081,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1098,9 +1115,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1131,9 +1149,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1319,9 +1338,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1352,9 +1372,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1385,9 +1406,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1568,9 +1590,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1601,9 +1624,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1634,9 +1658,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1822,9 +1847,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1855,9 +1881,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1888,9 +1915,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2076,9 +2104,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2109,9 +2138,10 @@ mod tests_cursor_move {
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2142,9 +2172,10 @@ mod tests_cursor_move {
         "CCCCCCCCCC",
         "8th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2169,13 +2200,18 @@ mod tests_insert_text {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use jiff::fmt::friendly::Designator::Compact;
   use std::collections::BTreeMap;
   use tracing::info;
@@ -2198,7 +2234,8 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2274,7 +2311,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2334,7 +2372,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2394,7 +2433,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2421,8 +2461,12 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2498,7 +2542,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2558,7 +2603,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2618,7 +2664,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2645,8 +2692,12 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2722,7 +2773,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2782,7 +2834,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2842,7 +2895,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2864,7 +2918,8 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2931,7 +2986,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2982,7 +3038,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3004,7 +3061,8 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3043,9 +3101,10 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3063,7 +3122,8 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3092,9 +3152,10 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3112,7 +3173,8 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3134,9 +3196,10 @@ mod tests_insert_text {
       let viewport = get_viewport(tree.clone());
       let l2 = format!("es!{buf_eol}");
       let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3154,7 +3217,8 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3178,9 +3242,10 @@ mod tests_insert_text {
         " too long ",
         "er cases?\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3198,7 +3263,8 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3218,10 +3284,12 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\n"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3239,7 +3307,8 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3262,9 +3331,10 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3282,7 +3352,8 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3348,9 +3419,10 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3368,7 +3440,8 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3397,9 +3470,10 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3417,7 +3491,8 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3439,9 +3514,10 @@ mod tests_insert_text {
       let viewport = get_viewport(tree.clone());
       let l2 = format!("es!{buf_eol}");
       let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3459,7 +3535,8 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3483,9 +3560,10 @@ mod tests_insert_text {
         " too long ",
         "er cases?\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3503,7 +3581,8 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3530,9 +3609,10 @@ mod tests_insert_text {
         "The insert",
         "\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3550,7 +3630,8 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3573,9 +3654,10 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3593,7 +3675,8 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3659,9 +3742,10 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3679,7 +3763,8 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3708,9 +3793,10 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3728,7 +3814,8 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3750,9 +3837,10 @@ mod tests_insert_text {
       let viewport = get_viewport(tree.clone());
       let l2 = format!("es!{buf_eol}");
       let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3770,7 +3858,8 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3794,9 +3883,10 @@ mod tests_insert_text {
         " too long ",
         "er cases?\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3814,7 +3904,8 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3834,10 +3925,12 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\r"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect =
+        vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\r"];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3855,7 +3948,8 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3878,9 +3972,10 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3898,7 +3993,8 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3913,7 +4009,8 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3948,7 +4045,8 @@ mod tests_insert_text {
       let buf_eol = lock!(buf).options().end_of_line();
       let l0 = format!("Hi{buf_eol}");
       let expect = vec![l0.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3966,7 +4064,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3981,7 +4080,8 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4017,7 +4117,8 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![line1.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4035,7 +4136,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -4091,7 +4193,8 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![buf_eol.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4109,7 +4212,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -4139,7 +4243,8 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4178,9 +4283,10 @@ mod tests_insert_text {
         "3rd.\n",
         "4th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4199,7 +4305,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4222,9 +4329,10 @@ mod tests_insert_text {
         "3rd.\n",
         "4th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4243,7 +4351,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4266,9 +4375,10 @@ mod tests_insert_text {
         "3rd.\n",
         "4th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4287,7 +4397,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4330,7 +4441,8 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4353,9 +4465,10 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4374,7 +4487,8 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4417,7 +4531,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4460,7 +4575,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4483,7 +4599,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4502,7 +4619,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -4536,8 +4654,12 @@ mod tests_insert_text {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4576,9 +4698,10 @@ mod tests_insert_text {
         "3rd.\r\n",
         "4th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4597,7 +4720,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4620,9 +4744,10 @@ mod tests_insert_text {
         "3rd.\r\n",
         "4th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4641,7 +4766,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4664,9 +4790,10 @@ mod tests_insert_text {
         "3rd.\r\n",
         "4th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4685,7 +4812,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4728,7 +4856,8 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4751,9 +4880,10 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4772,7 +4902,8 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4815,7 +4946,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4858,7 +4990,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -4881,7 +5014,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD\r\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4900,7 +5034,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -4934,8 +5069,12 @@ mod tests_insert_text {
       "11th.\r",
       "12th.\r",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4974,9 +5113,10 @@ mod tests_insert_text {
         "3rd.\r",
         "4th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -4995,7 +5135,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5018,9 +5159,10 @@ mod tests_insert_text {
         "3rd.\r",
         "4th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5039,7 +5181,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5062,9 +5205,10 @@ mod tests_insert_text {
         "3rd.\r",
         "4th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5083,7 +5227,8 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5126,7 +5271,8 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5149,9 +5295,10 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5170,7 +5317,8 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5213,7 +5361,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5256,7 +5405,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5279,7 +5429,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD\r",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5298,7 +5449,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -5314,7 +5466,8 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5348,7 +5501,8 @@ mod tests_insert_text {
       let buf_eol = lock!(buf.clone()).options().end_of_line();
       let a = format!("a{buf_eol}");
       let expect = vec![a.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5367,7 +5521,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -5383,7 +5538,8 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5417,7 +5573,8 @@ mod tests_insert_text {
       let buf_eol = lock!(buf.clone()).options().end_of_line();
       let b = format!("b{buf_eol}");
       let expect = vec![b.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5436,7 +5593,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -5452,7 +5610,8 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5486,7 +5645,8 @@ mod tests_insert_text {
       let buf_eol = lock!(buf.clone()).options().end_of_line();
       let b = format!("这个{buf_eol}");
       let expect = vec![b.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5505,7 +5665,8 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -5533,7 +5694,8 @@ mod tests_insert_text {
       "9th.\n",
       "10th.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5572,7 +5734,8 @@ mod tests_insert_text {
         "could make",
         " it longer",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5591,7 +5754,8 @@ mod tests_insert_text {
         "could make",
         " it longer",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5614,7 +5778,8 @@ mod tests_insert_text {
         "!\n",
         "3rd.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5633,7 +5798,8 @@ mod tests_insert_text {
         "!         ",
         "3rd.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5656,7 +5822,8 @@ mod tests_insert_text {
         "shorter!\n",
         "3rd.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5675,13 +5842,15 @@ mod tests_insert_text {
         "shorter!  ",
         "3rd.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Let's go further!"));
+      stateful
+        .cursor_insert(&data_access, CompactString::new("Let's go further!"));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5698,7 +5867,8 @@ mod tests_insert_text {
         "hat we ",
         "must make ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5717,7 +5887,8 @@ mod tests_insert_text {
         "hat we    ",
         "must make ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5740,9 +5911,10 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5761,7 +5933,8 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5804,7 +5977,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5847,7 +6021,8 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -5870,7 +6045,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -5889,7 +6065,8 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -5906,13 +6083,18 @@ mod tests_delete_text {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use jiff::fmt::friendly::Designator::Compact;
   use std::collections::BTreeMap;
   use tracing::info;
@@ -5935,7 +6117,8 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6011,7 +6194,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6071,7 +6255,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6131,7 +6316,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6191,7 +6377,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6242,7 +6429,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6293,7 +6481,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6344,7 +6533,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6395,7 +6585,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6446,7 +6637,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6499,7 +6691,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6552,7 +6745,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -6579,8 +6773,12 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "* The extra.\r\n",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6656,7 +6854,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6716,7 +6915,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6776,7 +6976,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6836,7 +7037,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6887,7 +7089,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6938,7 +7141,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -6989,7 +7193,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7040,7 +7245,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7091,7 +7297,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7144,7 +7351,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7197,7 +7405,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -7224,8 +7433,12 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "* The extra.\r",
     ];
-    let (tree, state, bufs, buf, contents) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7301,7 +7514,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7361,7 +7575,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7421,7 +7636,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7481,7 +7697,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7532,7 +7749,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7583,7 +7801,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7634,7 +7853,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7685,7 +7905,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7736,7 +7957,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7789,7 +8011,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -7842,7 +8065,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -7857,7 +8081,8 @@ mod tests_delete_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7890,7 +8115,8 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7913,7 +8139,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -7928,7 +8155,8 @@ mod tests_delete_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7961,7 +8189,8 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -7984,7 +8213,8 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -7998,7 +8228,8 @@ mod tests_delete_text {
       .wrap(false)
       .build()
       .unwrap();
-    let lines = vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+    let lines =
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
     let (tree, state, bufs, buf, contents) =
       make_tree(terminal_size, window_options, lines.clone());
 
@@ -8023,17 +8254,22 @@ mod tests_delete_text {
     // Also Inserts ascii characters
     {
       let characters = vec![
-        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<',
-        '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`', '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â',
-        'ä', 'à', 'ç', 'ê', 'ë', 'è', 'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò',
-        'û', 'ù', 'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ', 'ª', 'º',
-        '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│', '┤', 'Á', 'Â', 'À', '©', '╣',
-        '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß', 'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù',
-        'ý', 'Ý', '¯', '´', '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
+        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.',
+        '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`',
+        '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è',
+        'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù',
+        'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ',
+        'ª', 'º', '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│',
+        '┤', 'Á', 'Â', 'À', '©', '╣', '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß',
+        'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´',
+        '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
         '■',
       ];
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
-      let text2 = CompactString::new(format!("{}\n", characters.iter().collect::<String>()));
+      let text2 = CompactString::new(format!(
+        "{}\n",
+        characters.iter().collect::<String>()
+      ));
       stateful.cursor_insert(&data_access, text2);
 
       let tree = data_access.tree.clone();
@@ -8049,7 +8285,8 @@ mod tests_delete_text {
         "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -8072,7 +8309,8 @@ mod tests_delete_text {
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }

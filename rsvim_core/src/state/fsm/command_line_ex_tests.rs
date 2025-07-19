@@ -14,14 +14,19 @@ use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
 use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::test::log::init as test_log_init;
-use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
+use crate::test::tree::{
+  make_tree_with_buffers, make_tree_with_buffers_cmdline,
+};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -43,7 +48,8 @@ pub fn make_tree(
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
-  let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
+  let tree =
+    make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher));
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -88,7 +94,12 @@ pub fn make_tree_with_cmdline(
   TextContentsArc,
 ) {
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-  make_tree_with_cmdline_and_buffer_options(terminal_size, buf_opts, window_local_opts, lines)
+  make_tree_with_cmdline_and_buffer_options(
+    terminal_size,
+    buf_opts,
+    window_local_opts,
+    lines,
+  )
 }
 
 pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -138,7 +149,8 @@ pub fn assert_viewport_scroll(
   if actual.lines().is_empty() {
     assert!(actual.end_line_idx() <= actual.start_line_idx());
   } else {
-    let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+    let (first_line_idx, _first_line_viewport) =
+      actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
     assert_eq!(*first_line_idx, actual.start_line_idx());
     assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
@@ -263,12 +275,17 @@ mod tests_goto_normal_mode {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::state::fsm::NormalStateful;
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tracing::info;
 
@@ -322,7 +339,8 @@ mod tests_goto_normal_mode {
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -368,7 +386,8 @@ mod tests_goto_normal_mode {
         .end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -407,7 +426,8 @@ mod tests_goto_normal_mode {
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -446,7 +466,12 @@ mod tests_goto_normal_mode {
       .unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
-      make_tree_with_cmdline_and_buffer_options(terminal_size, buf_opts, window_options, lines);
+      make_tree_with_cmdline_and_buffer_options(
+        terminal_size,
+        buf_opts,
+        window_options,
+        lines,
+      );
 
     let prev_cursor_viewport = lock!(tree.clone())
       .current_window()
@@ -485,7 +510,8 @@ mod tests_goto_normal_mode {
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -531,7 +557,8 @@ mod tests_goto_normal_mode {
         .end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -570,7 +597,8 @@ mod tests_goto_normal_mode {
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -608,12 +636,17 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+    ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::state::fsm::NormalStateful;
-  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+  };
   use std::collections::BTreeMap;
   use tracing::info;
 
@@ -667,7 +700,8 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,
@@ -716,7 +750,8 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         .end_of_line();
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
       let expect = vec![line0.as_str()];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
         &viewport,

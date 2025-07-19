@@ -17,7 +17,8 @@ use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
 
-static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
+static FILE_EXTENSIONS: &[&str] =
+  &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
@@ -104,20 +105,32 @@ impl ModuleLoader for FsModuleLoader {
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(
+    &self,
+    base: Option<&str>,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
     // Full file path, start with '/' or 'C:\\'.
-    if specifier.starts_with('/') || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier) {
-      return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
+    if specifier.starts_with('/')
+      || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
+    {
+      return Ok(
+        self.transform(Path::new(specifier).absolutize()?.to_path_buf()),
+      );
     }
 
     // Relative file path.
     if specifier.starts_with("./") || specifier.starts_with("../") {
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
-        None => anyhow::bail!(format!("Module specifier not found: {specifier:?}")),
+        None => {
+          anyhow::bail!(format!("Module specifier not found: {specifier:?}"))
+        }
       };
 
-      return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
+      return Ok(
+        self.transform(base.join(specifier).absolutize()?.to_path_buf()),
+      );
     }
 
     // For other
@@ -131,7 +144,9 @@ impl ModuleLoader for FsModuleLoader {
               return Ok(self.transform(simple_path.to_path_buf()));
             }
           }
-          Err(e) => anyhow::bail!(format!("Module specifier error: {specifier:?}, {e:?}")),
+          Err(e) => anyhow::bail!(format!(
+            "Module specifier error: {specifier:?}, {e:?}"
+          )),
         }
 
         // Npm file path in `${config_home}/node_modules`.
@@ -142,7 +157,9 @@ impl ModuleLoader for FsModuleLoader {
               return Ok(self.transform(npm_path.to_path_buf()));
             }
           }
-          Err(e) => anyhow::bail!(format!("Module specifier error: {specifier:?}, {e:?}")),
+          Err(e) => anyhow::bail!(format!(
+            "Module specifier error: {specifier:?}, {e:?}"
+          )),
         }
 
         // Otherwise we try to resolve it as node/npm package.
@@ -170,7 +187,9 @@ impl ModuleLoader for FsModuleLoader {
 
     let source = match maybe_source {
       Ok(source) => source,
-      Err(_) => anyhow::bail!(format!("Module path not found \"{}\"", path.display())),
+      Err(_) => {
+        anyhow::bail!(format!("Module path not found \"{}\"", path.display()))
+      }
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
@@ -179,9 +198,8 @@ impl ModuleLoader for FsModuleLoader {
     // Use a preprocessor if necessary.
     match path_extension {
       // "wasm" => Ok(Wasm::parse(&source)),
-      "ts" => {
-        TypeScript::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
-      }
+      "ts" => TypeScript::compile(fname, &source)
+        .map_err(|e| JsRuntimeErr::Message(e.to_string()).into()),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
       // }

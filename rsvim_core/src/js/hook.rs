@@ -16,7 +16,9 @@ pub fn module_resolve_cb<'a>(
 ) -> Option<v8::Local<'a, v8::Module>> {
   {
     let referrer_scriptid = referrer.script_id();
-    trace!("module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{referrer_scriptid:?}");
+    trace!(
+      "module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{referrer_scriptid:?}"
+    );
   }
 
   // Get `CallbackScope` from context.
@@ -30,7 +32,8 @@ pub fn module_resolve_cb<'a>(
   let dependant = state.module_map.get_path(referrer);
 
   let specifier = specifier.to_rust_string_lossy(scope);
-  let specifier = resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
+  let specifier =
+    resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();
@@ -47,7 +50,9 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 ) {
   {
     let module_scriptid = module.script_id();
-    trace!("host_initialize_import_meta_object_cb, module_scriptid:{module_scriptid:?}");
+    trace!(
+      "host_initialize_import_meta_object_cb, module_scriptid:{module_scriptid:?}"
+    );
   }
 
   // Get `CallbackScope` from context.
@@ -78,7 +83,8 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 
   // Setup import.resolve() method.
   let key = v8::String::new(scope, "resolve").unwrap();
-  let value = v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
+  let value =
+    v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
   meta.set(scope, key.into(), value.into());
 }
 
@@ -122,14 +128,14 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   let event = message.get_event();
 
   use v8::PromiseRejectEvent::{
-    PromiseHandlerAddedAfterReject, PromiseRejectAfterResolved, PromiseRejectWithNoHandler,
-    PromiseResolveAfterResolved,
+    PromiseHandlerAddedAfterReject, PromiseRejectAfterResolved,
+    PromiseRejectWithNoHandler, PromiseResolveAfterResolved,
   };
 
   let reason = match event {
-    PromiseHandlerAddedAfterReject | PromiseRejectAfterResolved | PromiseResolveAfterResolved => {
-      undefined
-    }
+    PromiseHandlerAddedAfterReject
+    | PromiseRejectAfterResolved
+    | PromiseResolveAfterResolved => undefined,
     PromiseRejectWithNoHandler => message.get_value().unwrap(),
   };
 

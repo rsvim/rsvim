@@ -6,7 +6,9 @@ use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::{CommandLine, CommandLineIndicatorSymbol};
+use crate::ui::widget::command_line::{
+  CommandLine, CommandLineIndicatorSymbol,
+};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 

@@ -3,7 +3,8 @@
 use crate::prelude::*;
 
 use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange,
+  EnableMouseCapture,
 };
 use crossterm::{self, execute};
 use std::io::Write;
@@ -68,7 +69,10 @@ pub fn shutdown_raw_mode_on_panic() {
     let log_path = std::path::Path::new(log_name.as_str());
     if let Ok(mut f) = std::fs::File::create(log_path) {
       if f
-        .write_all(format!("FATAL! Rsvim panics!\n{panic_hook_info:?}\n{btrace}").as_bytes())
+        .write_all(
+          format!("FATAL! Rsvim panics!\n{panic_hook_info:?}\n{btrace}")
+            .as_bytes(),
+        )
         .is_err()
       {
         eprintln!("FATAL! Failed to write rsvim coredump!");

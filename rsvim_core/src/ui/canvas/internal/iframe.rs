@@ -221,9 +221,11 @@ impl Iframe {
   ///
   /// NOTE: This method is mostly for debugging and testing.
   pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
-    let mut results: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
+    let mut results: Vec<Vec<CompactString>> =
+      Vec::with_capacity(self.size.height() as usize);
     for row in 0..self.size.height() {
-      let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
+      let mut row_symbols: Vec<CompactString> =
+        Vec::with_capacity(self.size.width() as usize);
       for col in 0..self.size.width() {
         let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
@@ -236,10 +238,15 @@ impl Iframe {
   /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
   ///
   /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_with_placeholder(&self, printable: CompactString) -> Vec<Vec<CompactString>> {
-    let mut results: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
+  pub fn raw_symbols_with_placeholder(
+    &self,
+    printable: CompactString,
+  ) -> Vec<Vec<CompactString>> {
+    let mut results: Vec<Vec<CompactString>> =
+      Vec::with_capacity(self.size.height() as usize);
     for row in 0..self.size.height() {
-      let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
+      let mut row_symbols: Vec<CompactString> =
+        Vec::with_capacity(self.size.width() as usize);
       for col in 0..self.size.width() {
         let idx = self.xy2idx(col as usize, row as usize);
         let s = self.cells[idx].symbol();
@@ -267,7 +274,11 @@ impl Iframe {
 
   /// Try set (replace) cells at a range, non-panic version of
   /// [`set_cells_at`](Iframe::set_cells_at).
-  pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
+  pub fn try_set_cells_at(
+    &mut self,
+    pos: U16Pos,
+    cells: Vec<Cell>,
+  ) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
     // trace!(
     //   "try set cells at range:{:?}, cells len:{:?}",
@@ -305,7 +316,11 @@ impl Iframe {
 
   /// Try set (replace) empty cells at a range, non-panic version of
   /// [`set_empty_cells_at`](Iframe::set_empty_cells_at).
-  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Option<Vec<Cell>> {
+  pub fn try_set_empty_cells_at(
+    &mut self,
+    pos: U16Pos,
+    n: usize,
+  ) -> Option<Vec<Cell>> {
     self.try_set_cells_at(pos, vec![Cell::empty(); n])
   }
 
@@ -550,7 +565,9 @@ mod tests {
         .collect::<Vec<_>>()
         .join("");
       let expect = expects[i as usize];
-      info!("{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}");
+      info!(
+        "{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}"
+      );
       assert_eq!(actual, expect);
 
       let idx = frame.pos2idx(pos);
@@ -630,7 +647,8 @@ mod tests {
     ];
 
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
+      let actual = frame
+        .set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert!(actual.len() == input.1.len());
     }
