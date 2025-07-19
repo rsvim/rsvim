@@ -8459,8 +8459,8 @@ mod tests_goto_insert_mode {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let line2 = format!("Bye, {buf_eol}");
-      let expect = vec!["Should go to insert mode\n", line2.as_str(), ""];
+      let line1 = format!("Should go to insert mode{buf_eol}");
+      let expect = vec![line1.as_str(), "Bye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
