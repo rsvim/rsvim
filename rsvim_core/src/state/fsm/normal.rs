@@ -150,7 +150,7 @@ impl NormalStateful {
       }
       InsertMotion::NewLine => {
         self._cursor_move_impl(data_access, Operation::CursorMoveRightBy(usize::MAX), true);
-        self.new_line(data_access);
+        self.goto_insert_mode_new_line(data_access);
       }
     };
 
@@ -166,7 +166,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn new_line(&self, data_access: &StatefulDataAccess) {
+  fn goto_insert_mode_new_line(&self, data_access: &StatefulDataAccess) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
