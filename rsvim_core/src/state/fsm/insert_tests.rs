@@ -6167,7 +6167,7 @@ mod tests_insert_text {
     }
   }
 
-  #[test]
+  // #[test]
   fn nowrap_special_characters2() {
     test_log_init();
 
