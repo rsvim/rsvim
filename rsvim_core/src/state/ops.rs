@@ -90,7 +90,7 @@ pub enum Operation {
 /// A set of possible motions when entering insert mode.
 pub enum InsertMotion {
   /// keeps cursor at current position
-  Normal,
+  Keep,
 
   /// Move cursor to next column,
   Append,

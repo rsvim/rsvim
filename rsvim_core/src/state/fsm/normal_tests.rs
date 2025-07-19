@@ -8143,7 +8143,7 @@ mod tests_goto_insert_mode {
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(2));
     let insert_result =
-      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Normal);
+      stateful.goto_insert_mode(&data_access, crate::state::ops::InsertMotion::Keep);
     assert_eq!(
       insert_result,
       StatefulValue::InsertMode(InsertStateful::default())

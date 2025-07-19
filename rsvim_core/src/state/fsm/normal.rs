@@ -33,7 +33,7 @@ impl NormalStateful {
             KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char('i') => Some(Operation::GotoInsertMode(InsertMotion::Normal)),
+            KeyCode::Char('i') => Some(Operation::GotoInsertMode(InsertMotion::Keep)),
             KeyCode::Char('a') => Some(Operation::GotoInsertMode(InsertMotion::Append)),
             KeyCode::Char('o') => Some(Operation::GotoInsertMode(InsertMotion::NewLine)),
             KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
@@ -144,7 +144,7 @@ impl NormalStateful {
     insert_motion: InsertMotion,
   ) -> StatefulValue {
     match insert_motion {
-      InsertMotion::Normal => {}
+      InsertMotion::Keep => {}
       InsertMotion::Append => {
         self.cursor_move_include_eol(data_access, Operation::CursorMoveRightBy(1), true);
       }
