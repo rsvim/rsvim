@@ -146,10 +146,10 @@ impl NormalStateful {
     match insert_motion {
       InsertMotion::Keep => {}
       InsertMotion::Append => {
-        self.cursor_move_include_eol(data_access, Operation::CursorMoveRightBy(1), true);
+        self._cursor_move_impl(data_access, Operation::CursorMoveRightBy(1), true);
       }
       InsertMotion::NewLine => {
-        self.cursor_move_include_eol(data_access, Operation::CursorMoveRightBy(usize::MAX), true);
+        self._cursor_move_impl(data_access, Operation::CursorMoveRightBy(usize::MAX), true);
         self.new_line(data_access);
       }
     };
@@ -182,10 +182,10 @@ impl NormalStateful {
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   pub fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
-    self.cursor_move_include_eol(data_access, op, false)
+    self._cursor_move_impl(data_access, op, false)
   }
 
-  pub fn cursor_move_include_eol(
+  fn _cursor_move_impl(
     &self,
     data_access: &StatefulDataAccess,
     op: Operation,
