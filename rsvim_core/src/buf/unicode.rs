@@ -6,7 +6,7 @@ use crate::defaults::ascii::AsciiControlCodeFormatter;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 //use tracing::trace;
-use unicode_width::UnicodeWidthChar;
+use icu::properties::{CodePointMapData, props::EastAsianWidth};
 
 /// Get the display width for a `char`, supports both ASCI control codes and unicode.
 ///
@@ -34,7 +34,15 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
       }
     }
   } else {
-    UnicodeWidthChar::width_cjk(c).unwrap()
+    match CodePointMapData::<EastAsianWidth>::new().get(c) {
+      EastAsianWidth::Wide => 2_usize,
+      EastAsianWidth::Fullwidth => 2_usize,
+      EastAsianWidth::Halfwidth => 1_usize,
+      EastAsianWidth::Narrow => 1_usize,
+      EastAsianWidth::Ambiguous => 1_usize,
+      EastAsianWidth::Neutral => 1_usize,
+      _ => 1_usize,
+    }
   }
 }
 
