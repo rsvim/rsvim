@@ -3062,11 +3062,11 @@ mod tests_view_wrap_linebreak {
       "small test lines.\n",
       "But still it contains several ",
       "things we want to test:\n",
-      "\t\t第一，当一行文",
-      "本内容的长度足够短，短到可以完",
-      "整的放入一个窗口（的一行）之中",
-      "，那么基于行的换行和基于单词的",
-      "换行两个选项都不会影响渲染的最",
+      "\t\t第一，当一行",
+      "文本内容的长度足够短，短到可以",
+      "完整的放入一个窗口（的一行）",
+      "之中，那么基于行的换行和基于",
+      "单词的换行两个选项都不会影响渲染的最",
     ];
 
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
