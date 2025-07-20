@@ -128,12 +128,29 @@ pub fn draw(
             // - `好` (CJK), it is 2-width. We create 2 cells, the 1st cell is
             //   the `好` char, the following 1 cell is `""` empty string.
 
-            let cell = Cell::with_symbol(unicode_symbol);
-            let cell_upos =
-              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cell(cell_upos, cell);
+            if unicode_width > 0 {
+              let cells = if unicode_width > 1 {
+                let cell = Cell::with_symbol(unicode_symbol);
+                // Unicode width > 1
+                let mut v = vec![cell];
+                v.extend(
+                  std::iter::repeat_n(Cell::empty(), unicode_width - 1)
+                    .collect::<Vec<Cell>>(),
+                );
+                v
+              } else {
+                let cell = Cell::with_symbol(unicode_symbol);
+                // Unicode width = 1
+                vec![cell]
+              };
 
-            col_idx += unicode_width as u16;
+              let cell_upos =
+                point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cells_at(cell_upos, cells);
+
+              col_idx += unicode_width as u16;
+            }
+
             char_idx += 1;
           }
         }
