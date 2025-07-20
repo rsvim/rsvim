@@ -54,7 +54,7 @@ path-absolutize = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 # zstd = { workspace = true }
 ascii = { workspace = true }
-icu = { workspace = true, features = ["compiled_data", "auto"] }
+icu = { workspace = true, features = ["compiled_data"] }
 itertools = "0.14.0"
 derive_builder = { workspace = true }
 lru = { workspace = true }
