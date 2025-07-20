@@ -98,11 +98,6 @@ pub fn draw(
             let c = chars_iter.next().unwrap();
             let (unicode_symbol, unicode_width) = text.char_symbol_and_width(c);
 
-            let cell = Cell::with_symbol(unicode_symbol);
-            let cell_upos =
-              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cell(cell_upos, cell);
-
             // FIXME: The canvas system is designed with a `M x N` cells.
             // Ideally each cell should render a 1-width char in terminal.
             // But in real-world, if a unicode char is 2-width, it will
@@ -120,6 +115,7 @@ pub fn draw(
             // - `好`, it is 2-width. We will create 2 cells, the 1st cell
             // is the `好` char, the following 1 cell is `""` empty string.
 
+            let cell = Cell::with_symbol(unicode_symbol);
             let cell_upos =
               point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cell(cell_upos, cell);
