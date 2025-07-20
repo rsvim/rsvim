@@ -98,44 +98,33 @@ pub fn draw(
             let c = chars_iter.next().unwrap();
             let (unicode_symbol, unicode_width) = text.char_symbol_and_width(c);
 
-            if unicode_width > 0 {
-              let cell = Cell::with_symbol(unicode_symbol);
+            let cell = Cell::with_symbol(unicode_symbol);
+            let cell_upos =
+              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            canvas.frame_mut().set_cell(cell_upos, cell);
 
-              let cells = if unicode_width > 1 {
-                // If the character width > 1.
+            // FIXME: The canvas system is designed with a `M x N` cells.
+            // Ideally each cell should render a 1-width char in terminal.
+            // But in real-world, if a unicode char is 2-width, it will
+            // actually uses 2 cells in terminal, but only 1 cell in our
+            // canvas.
+            // Thus we need to work around this case, by setting the
+            // following cells to empty string `""`.
+            //
+            // For example we have below 2 cases:
+            //
+            // - `\t` (Tab), (by default) it is 8-width. We will create 8
+            // cells (because in canvas, 1 cell is for 1-width display),
+            // the 1st cell is the `\t` (Tab) char, the following 7 cells
+            // are `""` empty string.
+            // - `好`, it is 2-width. We will create 2 cells, the 1st cell
+            // is the `好` char, the following 1 cell is `""` empty string.
 
-                // NOTE: The canvas system is designed with a `M x N` cells.
-                // Ideally each cell should render a 1-width char in terminal.
-                // But in real-world, if a unicode char is 2-width, it will
-                // actually uses 2 cells in terminal, but only 1 cell in our
-                // canvas.
-                // Thus we need to work around this case, by setting the
-                // following cells to empty string `""`.
-                //
-                // For below 2 cases:
-                //
-                // - `\t` (Tab), (by default) it is 8-width. We will create 8
-                // cells (because in canvas, 1 cell is for 1-width display),
-                // the 1st cell is the `\t` (Tab) char, the following 7 cells
-                // are `""` empty string.
-                // - `好`, it is 2-width. We will create 2 cells, the 1st cell
-                // is the `好` char, the following 1 cell is `""` empty string.
+            let cell_upos =
+              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            canvas.frame_mut().set_cell(cell_upos, cell);
 
-                let mut v = vec![cell];
-                v.extend(std::iter::repeat_n(Cell::empty(), unicode_width - 1));
-                v
-              } else {
-                // Otherwise the character width = 1.
-                vec![cell]
-              };
-
-              let cell_upos =
-                point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-              canvas.frame_mut().set_cells_at(cell_upos, cells);
-
-              col_idx += unicode_width as u16;
-            }
-
+            col_idx += unicode_width as u16;
             char_idx += 1;
           }
         }
