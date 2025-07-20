@@ -119,7 +119,7 @@ debug = true
 lto = true
 strip = true
 codegen-units = 1
-opt-level = 'z'   # Optimize for size
+opt-level = 'z'
 
 # NOTE: Crates size optimize keep the same with `deno` {
 
