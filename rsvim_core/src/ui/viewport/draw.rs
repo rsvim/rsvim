@@ -98,11 +98,11 @@ pub fn draw(
             let c = chars_iter.next().unwrap();
             let (unicode_symbol, unicode_width) = text.char_symbol_and_width(c);
 
-            // The canvas system is designed with a `M x N` cells in the
+            // The canvas system is designed with a `M x N` logic cells in the
             // beginning, I was thinking each cell should render a 1-width char
             // in the terminal.
             // Then I noticed that, an ASCII control code, ASCII char or a
-            // unicode char can be:
+            // unicode char can use different width (cells) in the terminal:
             //
             // - Use 0-width, for example LF/CR, but actually a widget will
             //   never render a 0-width char to canvas.
