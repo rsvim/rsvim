@@ -54,10 +54,8 @@ path-absolutize = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 # zstd = { workspace = true }
 ascii = { workspace = true }
-unicode-width = { workspace = true }
-unicode-segmentation = { workspace = true }
-# unicode-normalization = { workspace = true }
-# icu = { workspace = true, features = ["compiled_data"] }
+icu = { workspace = true, features = ["compiled_data"] }
+itertools = { workspace = true }
 derive_builder = { workspace = true }
 lru = { workspace = true }
 paste = { workspace = true }
@@ -102,4 +100,6 @@ sourcemap = { workspace = true }
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
-assert_fs = "1.1.3"
+unicode-width = { workspace = true }
+unicode-segmentation = { workspace = true }
+assert_fs = { workspace = true }

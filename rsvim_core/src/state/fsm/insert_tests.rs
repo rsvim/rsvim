@@ -6070,6 +6070,102 @@ mod tests_insert_text {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
+
+  #[test]
+  fn nowrap_special_characters1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(200, 10);
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines =
+      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
+    let (tree, state, bufs, buf, contents) =
+      make_tree(terminal_size, window_options, lines.clone());
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = InsertStateful::default();
+
+    // Also Inserts ascii characters
+    {
+      let characters = vec![
+        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.',
+        '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`',
+        '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è',
+        'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù',
+        'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ',
+        'ª', 'º', '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│',
+        '┤', 'Á', 'Â', 'À', '©', '╣', '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß',
+        'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´',
+        '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
+        '■',
+      ];
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
+      let text2 = CompactString::new(format!(
+        "{}\n",
+        characters.iter().collect::<String>()
+      ));
+      stateful.cursor_insert(&data_access, text2);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
 }
 
 #[cfg(test)]
@@ -8212,102 +8308,6 @@ mod tests_delete_text {
         "          ",
         "          ",
         "          ",
-      ];
-      let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone(), viewport);
-      assert_canvas(&actual_canvas, &expect_canvas);
-    }
-  }
-
-  #[test]
-  fn no_wrap4_ascii_characters() {
-    test_log_init();
-
-    let terminal_size = U16Size::new(200, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let lines =
-      vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
-    let (tree, state, bufs, buf, contents) =
-      make_tree(terminal_size, window_options, lines.clone());
-
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
-    assert_eq!(prev_cursor_viewport.line_idx(), 0);
-    assert_eq!(prev_cursor_viewport.char_idx(), 0);
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
-    let stateful = InsertStateful::default();
-
-    // Also Inserts ascii characters
-    {
-      let characters = vec![
-        '!', '"', '#', '$', '%', '@', '\'', '(', ')', '*', '+', ',', '-', '.',
-        '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '\\', '^', '_', '`',
-        '{', '}', '|', '~', 'Ç', 'ü', 'é', 'â', 'ä', 'à', 'ç', 'ê', 'ë', 'è',
-        'ï', 'î', 'ï', 'ì', 'Ä', 'Å', 'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù',
-        'ÿ', 'Ö', 'Ü', 'ø', '£', 'Ø', '×', 'ƒ', 'á', 'í', 'ó', 'ú', 'ñ', 'Ñ',
-        'ª', 'º', '¿', '®', '¬', '½', '¼', '¡', '«', '»', '░', '▒', '▓', '│',
-        '┤', 'Á', 'Â', 'À', '©', '╣', '║', '╗', '╝', '¢', '¥', '┐', 'Ó', 'ß',
-        'Ô', 'Ò', 'õ', 'Õ', 'µ', 'þ', 'Þ', 'Ú', 'Û', 'Ù', 'ý', 'Ý', '¯', '´',
-        '≡', '±', '‗', '¾', '¶', '§', '÷', '¸', '°', '¨', '·', '¹', '³', '²',
-        '■',
-      ];
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
-      let text2 = CompactString::new(format!(
-        "{}\n",
-        characters.iter().collect::<String>()
-      ));
-      stateful.cursor_insert(&data_access, text2);
-
-      let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 2);
-      assert_eq!(actual1.char_idx(), 0);
-      assert_eq!(actual1.row_idx(), 2);
-      assert_eq!(actual1.column_idx(), 0);
-
-      let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
-        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
-        buf.clone(),
-        &viewport,
-        &expect,
-        0,
-        3,
-        &expect_fills,
-        &expect_fills,
-      );
-
-      let expect_canvas = vec![
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
-        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                              ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
-        "                                                                                                                                                                                                        ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);

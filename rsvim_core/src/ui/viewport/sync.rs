@@ -7,11 +7,12 @@ use crate::prelude::*;
 use crate::ui::viewport::{LineViewport, RowViewport};
 use crate::ui::widget::window::WindowLocalOptions;
 
+use icu::segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
+use itertools::Itertools;
 use litemap::LiteMap;
 use ropey::RopeSlice;
 use std::ops::Range;
 use tracing::trace;
-use unicode_segmentation::UnicodeSegmentation;
 
 use super::Viewport;
 
@@ -455,7 +456,13 @@ fn proc_line_wrap_linebreak(
     );
 
     // Words.
-    let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+    let segmenter =
+      WordSegmenter::new_auto(WordBreakInvariantOptions::default());
+    let words: Vec<&str> = segmenter
+      .segment_str(&cloned_line)
+      .tuple_windows()
+      .map(|(i, j)| &cloned_line[i..j])
+      .collect();
     // Word index => its end char index (from the first char until current word).
     let words_end_char_idx = words
       .iter()
