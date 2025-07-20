@@ -7,7 +7,6 @@ pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
 
-use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
 use std::fmt::Debug;
