@@ -98,29 +98,59 @@ pub fn draw(
             let c = chars_iter.next().unwrap();
             let (unicode_symbol, unicode_width) = text.char_symbol_and_width(c);
 
-            // FIXME: The canvas system is designed with a `M x N` cells.
-            // Ideally each cell should render a 1-width char in terminal.
-            // But in real-world, if a unicode char is 2-width, it will
-            // actually uses 2 cells in terminal, but only 1 cell in our
-            // canvas.
-            // Thus we need to work around this case, by setting the
-            // following cells to empty string `""`.
+            // The canvas system is designed with a `M x N` logic cells in the
+            // beginning, I was thinking each cell should render a 1-width char
+            // in the terminal.
+            // Then I noticed that, an ASCII control code, ASCII char or a
+            // unicode char can use different width (cells) in the terminal:
             //
-            // For example we have below 2 cases:
+            // - Use 0-width, for example LF/CR, but actually a widget will
+            //   never render a 0-width char to canvas.
+            // - Use 1-width, most ASCII chars and some special characters.
+            //   This is the happy case.
+            // - Use 2-width, most CJK chars and some special unicodes.
+            // - Use more than 2-width, for example '\t' (Tab) by default uses
+            //   8-width.
             //
-            // - `\t` (Tab), (by default) it is 8-width. We will create 8
-            // cells (because in canvas, 1 cell is for 1-width display),
-            // the 1st cell is the `\t` (Tab) char, the following 7 cells
-            // are `""` empty string.
-            // - `好`, it is 2-width. We will create 2 cells, the 1st cell
-            // is the `好` char, the following 1 cell is `""` empty string.
+            // But in the canvas system, characters are managed by logic "cell"
+            // (a logic cell is a "CompactString"). If a logic cell actually
+            // displays multiple "term cells" in the terminal, then the whole
+            // row in the terminal can be overflow.
+            //
+            // Thus we need to work around this case, by setting the following
+            // cells to empty string `""`.
+            //
+            // For example now we have 2 cases:
+            //
+            // - `\t` (Tab), (by default) it is 8-width. We create 8 logic
+            //   cells, the 1st cell is the `\t` (Tab) char, the following 7
+            //   cells are `""` empty string.
+            // - `好` (CJK), it is 2-width. We create 2 cells, the 1st cell is
+            //   the `好` char, the following 1 cell is `""` empty string.
 
-            let cell = Cell::with_symbol(unicode_symbol);
-            let cell_upos =
-              point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cell(cell_upos, cell);
+            if unicode_width > 0 {
+              let cells = if unicode_width > 1 {
+                let cell = Cell::with_symbol(unicode_symbol);
+                // Unicode width > 1
+                let mut v = vec![cell];
+                v.extend(
+                  std::iter::repeat_n(Cell::empty(), unicode_width - 1)
+                    .collect::<Vec<Cell>>(),
+                );
+                v
+              } else {
+                let cell = Cell::with_symbol(unicode_symbol);
+                // Unicode width = 1
+                vec![cell]
+              };
 
-            col_idx += unicode_width as u16;
+              let cell_upos =
+                point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cells_at(cell_upos, cells);
+
+              col_idx += unicode_width as u16;
+            }
+
             char_idx += 1;
           }
         }

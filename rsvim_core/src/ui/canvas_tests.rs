@@ -273,7 +273,7 @@ fn _next_same_cell_in_row3() {
 }
 
 #[test]
-fn _make_print_shader1() {
+fn _make_printable_shader1() {
   test_log_init();
   let mut can = Canvas::new(U16Size::new(10, 10));
 
@@ -286,7 +286,7 @@ fn _make_print_shader1() {
   let col = 2;
   let row = 3;
   let col_end_at = can._next_same_cell_in_row(row, col);
-  let shaders = can._make_print_shaders(row, col, col_end_at);
+  let shaders = can._make_printable_shaders(row, col, col_end_at);
   info!("shader:{:?}", shaders);
   assert_eq!(shaders.len(), 2);
   assert!(matches!(

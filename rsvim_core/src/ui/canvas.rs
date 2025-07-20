@@ -7,7 +7,6 @@ pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
 
-use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
 use std::fmt::Debug;
@@ -203,7 +202,7 @@ impl Canvas {
     col_end_at
   }
 
-  pub fn _make_print_shaders(
+  pub fn _make_printable_shaders(
     &self,
     row: u16,
     start_col: u16,
@@ -219,13 +218,7 @@ impl Canvas {
     );
     let new_contents = new_cells
       .iter()
-      .map(|c| {
-        if c.symbol().is_empty() {
-          " ".to_compact_string()
-        } else {
-          c.symbol().clone()
-        }
-      })
+      .map(|c| c.symbol().clone())
       .collect::<Vec<_>>()
       .join("");
     shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
@@ -269,7 +262,7 @@ impl Canvas {
 
           if col_end_at > col {
             let mut print_shaders =
-              self._make_print_shaders(row, col, col_end_at);
+              self._make_printable_shaders(row, col, col_end_at);
             shaders.append(&mut print_shaders);
             col = col_end_at;
           }
@@ -312,7 +305,7 @@ impl Canvas {
 
             if col_end_at > col {
               let mut print_shaders =
-                self._make_print_shaders(row as u16, col, col_end_at);
+                self._make_printable_shaders(row as u16, col, col_end_at);
               shaders.append(&mut print_shaders);
               col = col_end_at;
             }
