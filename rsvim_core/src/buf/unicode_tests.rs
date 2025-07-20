@@ -5,7 +5,7 @@ use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::test::log::init as test_log_init;
 
 use ascii::AsciiChar;
-use icu_properties::{CodePointMapData, props::EastAsianWidth};
+use icu::properties::{CodePointMapData, props::EastAsianWidth};
 use tracing::info;
 use unicode_width::UnicodeWidthChar;
 
@@ -120,7 +120,7 @@ fn special_characters_test1() {
 fn cjk_characters_test1() {
   test_log_init();
 
-  let cjk_characters = vec![
+  let cjk_characters = [
     '你', '好', 'こ', 'ん', 'に', 'ち', 'は', '안', '녕', '하', '세', '요',
   ];
 
@@ -146,7 +146,7 @@ fn cjk_characters_test1() {
 fn emoji_characters_test1() {
   test_log_init();
 
-  let emoji_characters = vec![
+  let emoji_characters = [
     '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '🫠', '😉',
     '😊', '😇',
   ];
@@ -173,7 +173,7 @@ fn emoji_characters_test1() {
 fn nerdfont_characters_test1() {
   test_log_init();
 
-  let nerdfont_characters = vec!['', '', '', '', '', '', '', '', ''];
+  let nerdfont_characters = ['', '', '', '', '', '', '', '', ''];
 
   let code_point_map = CodePointMapData::<EastAsianWidth>::new();
 
