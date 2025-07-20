@@ -55,7 +55,7 @@ once_cell = { workspace = true, features = ["parking_lot"] }
 # zstd = { workspace = true }
 ascii = { workspace = true }
 icu = { workspace = true, features = ["compiled_data"] }
-itertools = "0.14.0"
+itertools = { workspace = true }
 derive_builder = { workspace = true }
 lru = { workspace = true }
 paste = { workspace = true }
