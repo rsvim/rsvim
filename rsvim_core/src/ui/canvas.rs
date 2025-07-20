@@ -218,13 +218,7 @@ impl Canvas {
     );
     let new_contents = new_cells
       .iter()
-      .map(|c| {
-        // if c.symbol().is_empty() {
-        //   "".to_compact_string()
-        // } else {
-        c.symbol().clone()
-        // }
-      })
+      .map(|c| c.symbol().clone())
       .collect::<Vec<_>>()
       .join("");
     shaders.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
