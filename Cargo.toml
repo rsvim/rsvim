@@ -119,5 +119,6 @@ debug = true
 [profile.release]
 lto = true
 strip = true
+incremental = true
 codegen-units = 1
 opt-level = 'z'
