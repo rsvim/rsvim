@@ -240,7 +240,7 @@ pub fn fetch_module_tree<'a>(
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
     trace!(
-      "Resolved dependency js module base: {:?}, specifier: {:?}",
+      "Resolved dependency modules, base filename: {:?}, dependency specifier: {:?}",
       filename,
       specifier.as_str(),
     );
