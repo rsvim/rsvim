@@ -16,6 +16,9 @@ use tracing::trace;
 pub mod frame;
 pub mod internal;
 
+#[cfg(test)]
+mod frame_tests;
+
 #[derive(Debug, Clone)]
 /// Logical canvas.
 ///

@@ -185,7 +185,7 @@ fn _next_same_cell_in_row2() {
     "frame:{:?}",
     can
       .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .raw_symbols()
       .iter()
       .map(|cs| cs
         .iter()
@@ -243,7 +243,7 @@ fn _next_same_cell_in_row3() {
     "frame:{:?}",
     can
       .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .raw_symbols()
       .iter()
       .map(|cs| cs
         .iter()
