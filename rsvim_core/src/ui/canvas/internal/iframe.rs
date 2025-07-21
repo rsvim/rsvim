@@ -317,10 +317,7 @@ impl Iframe {
   /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
   ///
   /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_with_placeholder(
-    &self,
-    printable: CompactString,
-  ) -> Vec<Vec<CompactString>> {
+  pub fn raw_symbols_with_placeholder(&self) -> Vec<Vec<CompactString>> {
     let mut results: Vec<Vec<CompactString>> = vec![];
     for row in 0..self.size.height() {
       let mut row_symbols: Vec<CompactString> = vec![];
@@ -328,7 +325,8 @@ impl Iframe {
         let idx = self.xy2idx(col as usize, row as usize);
         let s = self.cells[idx].symbol();
         row_symbols.push(if s.is_empty() {
-          printable.clone()
+          use compact_str::ToCompactString;
+          " ".to_compact_string()
         } else {
           s.clone()
         });

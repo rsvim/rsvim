@@ -314,7 +314,7 @@ fn set_cells_at1() {
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
     assert!(actual.len() == input.1.len());
   }
-  let actuals = frame.raw_symbols_with_placeholder(" ".to_compact_string());
+  let actuals = frame.raw_symbols_with_placeholder();
   assert_eq!(actuals.len(), expects.len());
   for (i, expect) in expects.into_iter().enumerate() {
     let actual = actuals[i].join("");

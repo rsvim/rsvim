@@ -250,10 +250,7 @@ impl Frame {
   /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
   ///
   /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_with_placeholder(
-    &self,
-    printable: CompactString,
-  ) -> Vec<Vec<CompactString>> {
-    self.iframe.raw_symbols_with_placeholder(printable)
+  pub fn raw_symbols_with_placeholder(&self) -> Vec<Vec<CompactString>> {
+    self.iframe.raw_symbols_with_placeholder()
   }
 }

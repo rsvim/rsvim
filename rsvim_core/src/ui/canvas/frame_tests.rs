@@ -3,7 +3,7 @@ use super::frame::*;
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
-// use crate::test::log::init as test_log_init;
+use crate::test::log::init as test_log_init;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
@@ -264,7 +264,7 @@ fn cells_at1() {
 
 #[test]
 fn set_cells_at1() {
-  // test_log_init();
+  test_log_init();
   let frame_size = U16Size::new(10, 10);
   let mut frame = Frame::new(frame_size, Cursor::default());
 
@@ -300,7 +300,7 @@ fn set_cells_at1() {
     info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
     assert!(actual.len() == input.1.len());
   }
-  let actuals = frame.raw_symbols_with_placeholder(" ".to_compact_string());
+  let actuals = frame.raw_symbols_with_placeholder();
   assert_eq!(actuals.len(), expects.len());
   for (i, expect) in expects.into_iter().enumerate() {
     let actual = actuals[i].join("");
