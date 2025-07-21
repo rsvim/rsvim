@@ -6264,42 +6264,43 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
+      stateful.cursor_move(&data_access, Operation::CursorMoveTo((72, 1)));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 2);
-      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.char_idx(), 72);
       assert_eq!(actual1.row_idx(), 1);
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "2nd line ",
-        "that we ",
-        "must make ",
-        "it shorter",
-        "!\n",
-        "3rd.\n",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        2,
-        4,
+        0,
+        3,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "2nd line  ",
-        "that we   ",
-        "must make ",
-        "it shorter",
-        "!         ",
-        "3rd.      ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
@@ -6308,7 +6309,7 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(&data_access, CompactString::new("你好，Rsvim！"));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -6318,32 +6319,33 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "2nd line ",
-        "tWorld!hat",
-        " we must ",
-        "make it ",
-        "shorter!\n",
-        "3rd.\n",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        2,
-        4,
+        0,
+        3,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "2nd line  ",
-        "tWorld!hat",
-        " we must  ",
-        "make it   ",
-        "shorter!  ",
-        "3rd.      ",
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
+        "                                                                                                                                                                                                        ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
