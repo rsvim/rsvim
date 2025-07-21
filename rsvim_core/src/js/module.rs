@@ -246,7 +246,7 @@ pub fn fetch_module_tree<'a>(
     );
 
     // Resolve subtree of modules.
-    if !state.borrow().module_map.index.contains_key(&specifier) {
+    if !state.borrow().module_map.index().contains_key(&specifier) {
       fetch_module_tree(scope, &specifier, None)?;
     }
   }
