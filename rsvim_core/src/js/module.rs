@@ -208,8 +208,9 @@ pub fn fetch_module_tree<'a>(
     Some(source) => source.into(),
     None => load_import(filename, true).unwrap(),
   };
+
   trace!(
-    "Loaded main js module filename: {:?}, source: {:?}",
+    "Fetching module tree, filename: {:?}, source: {:?}",
     filename,
     if source.as_str().len() > 50 {
       String::from(&source.as_str()[..50]) + "..."
@@ -217,6 +218,7 @@ pub fn fetch_module_tree<'a>(
       String::from(source.as_str())
     }
   );
+
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
