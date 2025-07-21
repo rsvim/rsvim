@@ -171,25 +171,6 @@ impl Frame {
     self.iframe.try_get_cells_at(pos, n)
   }
 
-  #[cfg(test)]
-  /// Get raw symbols of all cells.
-  ///
-  /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
-    self.iframe.raw_symbols()
-  }
-
-  #[cfg(test)]
-  /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
-  ///
-  /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_with_placeholder(
-    &self,
-    printable: CompactString,
-  ) -> Vec<Vec<CompactString>> {
-    self.iframe.raw_symbols_with_placeholder(printable)
-  }
-
   /// Set (replace) cells at a range.
   ///
   /// Returns old cells.
@@ -250,5 +231,29 @@ impl Frame {
   /// Set cursor.
   pub fn set_cursor(&mut self, cursor: Cursor) {
     self.cursor = cursor;
+  }
+}
+
+#[cfg(test)]
+use compact_str::CompactString;
+
+impl Frame {
+  #[cfg(test)]
+  /// Get raw symbols of all cells.
+  ///
+  /// NOTE: This method is mostly for debugging and testing.
+  pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
+    self.iframe.raw_symbols()
+  }
+
+  #[cfg(test)]
+  /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
+  ///
+  /// NOTE: This method is mostly for debugging and testing.
+  pub fn raw_symbols_with_placeholder(
+    &self,
+    printable: CompactString,
+  ) -> Vec<Vec<CompactString>> {
+    self.iframe.raw_symbols_with_placeholder(printable)
   }
 }
