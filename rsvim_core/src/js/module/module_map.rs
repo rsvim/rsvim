@@ -54,14 +54,26 @@ pub enum ImportKind {
 #[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
-  pub kind: ImportKind,
-  pub root_rc: EsModuleRc,
-  pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  kind: ImportKind,
+  root_rc: EsModuleRc,
+  same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
 }
 
 rc_refcell_ptr!(ModuleGraph);
 
 impl ModuleGraph {
+  pub fn kind(&self) -> &ImportKind {
+    &self.kind
+  }
+
+  pub fn root_rc(&self) -> EsModuleRc {
+    self.root_rc.clone()
+  }
+
+  pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
+    &self.same_origin
+  }
+
   // Initializes a new graph resolving a static import.
   pub fn static_import(path: &str) -> ModuleGraph {
     // Create an ES module instance.
@@ -106,10 +118,10 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
-  pub main: Option<ModulePath>,
-  pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<ModuleGraphRc>,
+  main: Option<ModulePath>,
+  index: HashMap<ModulePath, v8::Global<v8::Module>>,
+  seen: HashMap<ModulePath, ModuleStatus>,
+  pending: Vec<ModuleGraphRc>,
 }
 
 impl ModuleMap {
@@ -121,6 +133,22 @@ impl ModuleMap {
       seen: HashMap::new(),
       pending: vec![],
     }
+  }
+
+  pub fn main(&self) -> &Option<ModulePath> {
+    &self.main
+  }
+
+  pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
+    &self.index
+  }
+
+  pub fn seen(&self) -> &HashMap<ModulePath, ModuleStatus> {
+    &self.seen
+  }
+
+  pub fn pending(&self) -> &Vec<ModuleGraphRc> {
+    &self.pending
   }
 
   // Inserts a compiled ES module to the map.
@@ -149,11 +177,6 @@ impl ModuleMap {
       .iter()
       .find(|(_, m)| **m == module)
       .map(|(p, _)| p.clone())
-  }
-
-  // Returns the main entry point.
-  pub fn main(&self) -> Option<ModulePath> {
-    self.main.clone()
   }
 }
 
