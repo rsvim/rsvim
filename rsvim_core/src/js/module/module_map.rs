@@ -118,10 +118,10 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
-  main: Option<ModulePath>,
-  index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  seen: HashMap<ModulePath, ModuleStatus>,
-  pending: Vec<ModuleGraphRc>,
+  pub main: Option<ModulePath>,
+  pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
+  pub seen: HashMap<ModulePath, ModuleStatus>,
+  pub pending: Vec<ModuleGraphRc>,
 }
 
 impl ModuleMap {
@@ -133,22 +133,6 @@ impl ModuleMap {
       seen: HashMap::new(),
       pending: vec![],
     }
-  }
-
-  pub fn main(&self) -> &Option<ModulePath> {
-    &self.main
-  }
-
-  pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
-    &self.index
-  }
-
-  pub fn seen(&self) -> &HashMap<ModulePath, ModuleStatus> {
-    &self.seen
-  }
-
-  pub fn pending(&self) -> &Vec<ModuleGraphRc> {
-    &self.pending
   }
 
   // Inserts a compiled ES module to the map.
