@@ -817,7 +817,8 @@ impl JsRuntime {
     pending_graphs.retain(|graph_rc| {
       // Get a usable ref to graph's root module.
       let graph = graph_rc.borrow();
-      let mut graph_root = graph.root_rc().borrow_mut();
+      let graph_root = graph.root_rc();
+      let mut graph_root = graph_root.borrow_mut();
 
       // Check for exceptions in the graph (dynamic imports).
       if let Some(message) = graph_root.exception_mut().take() {
