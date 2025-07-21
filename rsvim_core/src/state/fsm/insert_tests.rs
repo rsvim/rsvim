@@ -6270,7 +6270,7 @@ mod tests_insert_text {
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 72);
       assert_eq!(actual1.row_idx(), 1);
-      assert_eq!(actual1.column_idx(), 1);
+      assert_eq!(actual1.column_idx(), 72);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -6312,15 +6312,15 @@ mod tests_insert_text {
       stateful.cursor_insert(&data_access, CompactString::new("你好，Rsvim！"));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 2);
-      assert_eq!(actual1.char_idx(), 16);
+      assert_eq!(actual1.line_idx(), 1);
+      assert_eq!(actual1.char_idx(), 81);
       assert_eq!(actual1.row_idx(), 1);
-      assert_eq!(actual1.column_idx(), 7);
+      assert_eq!(actual1.column_idx(), 85);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n",
-        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
@@ -6337,7 +6337,7 @@ mod tests_insert_text {
 
       let expect_canvas = vec![
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789                                                                                                                                          ",
-        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                                         ",
+        "!\"#$%@'()*+,-./:;<=>?@[]\\^_`{}|~ÇüéâäàçêëèïîïìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº你好，Rsvim！¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐ÓßÔÒõÕµþÞÚÛÙýÝ¯´≡±‗¾¶§÷¸°¨·¹³²■                                                            ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
