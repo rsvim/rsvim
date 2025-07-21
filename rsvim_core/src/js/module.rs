@@ -158,7 +158,7 @@ pub fn resolve_import(
   resolver.resolve(base, &specifier)
 }
 
-/// Loads module source by its specifier.
+/// Loads module source by its module path.
 pub fn load_import(
   specifier: &str,
   _skip_cache: bool,
@@ -211,8 +211,8 @@ pub fn fetch_module_tree<'a>(
   trace!(
     "Loaded main js module filename: {:?}, source: {:?}",
     filename,
-    if source.as_str().len() > 20 {
-      String::from(&source.as_str()[..20]) + "..."
+    if source.as_str().len() > 50 {
+      String::from(&source.as_str()[..50]) + "..."
     } else {
       String::from(source.as_str())
     }
