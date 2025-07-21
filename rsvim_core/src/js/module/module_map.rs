@@ -54,12 +54,26 @@ pub enum ImportKind {
 #[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
-  pub kind: ImportKind,
-  pub root_rc: EsModuleRc,
-  pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  kind: ImportKind,
+  root_rc: EsModuleRc,
+  same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
 }
 
 rc_refcell_ptr!(ModuleGraph);
+
+impl ModuleGraph {
+  pub fn kind(&self) -> &ImportKind {
+    &self.kind
+  }
+
+  pub fn root_rc(&self) -> EsModuleRc {
+    self.root_rc.clone()
+  }
+
+  pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
+    &self.same_origin
+  }
+}
 
 impl ModuleGraph {
   // Initializes a new graph resolving a static import.

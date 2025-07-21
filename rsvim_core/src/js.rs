@@ -817,7 +817,7 @@ impl JsRuntime {
     pending_graphs.retain(|graph_rc| {
       // Get a usable ref to graph's root module.
       let graph = graph_rc.borrow();
-      let mut graph_root = graph.root_rc.borrow_mut();
+      let mut graph_root = graph.root_rc().borrow_mut();
 
       // Check for exceptions in the graph (dynamic imports).
       if let Some(message) = graph_root.exception_mut().take() {
@@ -826,10 +826,11 @@ impl JsRuntime {
         let exception = v8::Exception::error(scope, exception);
 
         // We need to resolve all identical dynamic imports.
-        match graph.kind.clone() {
+        match graph.kind().clone() {
           ImportKind::Static => unreachable!(),
           ImportKind::Dynamic(main_promise) => {
-            for promise in [main_promise].iter().chain(graph.same_origin.iter())
+            for promise in
+              [main_promise].iter().chain(graph.same_origin().iter())
             {
               promise.open(scope).reject(scope, exception);
             }
@@ -859,7 +860,7 @@ impl JsRuntime {
       let tc_scope = &mut v8::TryCatch::new(scope);
 
       let graph = graph_rc.borrow();
-      let path = graph.root_rc.borrow().path().clone();
+      let path = graph.root_rc().borrow().path().clone();
 
       let module = state_rc.borrow().module_map.get(&path).unwrap();
       let module = v8::Local::new(tc_scope, module);
@@ -878,7 +879,7 @@ impl JsRuntime {
       }
 
       let _ = module.evaluate(tc_scope);
-      let is_root_module = !graph.root_rc.borrow().is_dynamic_import();
+      let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
       // Note: Due to the architecture, when a module errors, the `promise_reject_cb`
       // v8 hook will also trigger, resulting in the same exception being registered
@@ -901,13 +902,13 @@ impl JsRuntime {
         }
       }
 
-      if let ImportKind::Dynamic(main_promise) = graph.kind.clone() {
+      if let ImportKind::Dynamic(main_promise) = graph.kind().clone() {
         // Note: Since this is a dynamic import will resolve the promise
         // with the module's namespace object instead of it's evaluation result.
         let namespace = module.get_module_namespace();
 
         // We need to resolve all identical dynamic imports.
-        for promise in [main_promise].iter().chain(graph.same_origin.iter()) {
+        for promise in [main_promise].iter().chain(graph.same_origin().iter()) {
           promise.open(tc_scope).resolve(tc_scope, namespace);
         }
       }
