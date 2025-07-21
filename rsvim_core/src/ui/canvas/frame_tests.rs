@@ -1,9 +1,9 @@
 use super::frame::*;
 
 use crate::prelude::*;
+use crate::test::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
-use crate::test::log::init as test_log_init;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
