@@ -40,7 +40,9 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
+use std::cell::RefCell;
 use std::collections::LinkedList;
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -122,8 +124,8 @@ impl ModuleGraph {
 pub struct ModuleMap {
   main: Option<ModulePath>,
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<ModuleGraphRc>,
+  seen: Rc<RefCell<HashMap<ModulePath, ModuleStatus>>>,
+  pending: Vec<ModuleGraphRc>,
 }
 
 impl ModuleMap {
@@ -134,6 +136,18 @@ impl ModuleMap {
   pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
     &self.index
   }
+
+  pub fn seen(&self) -> Rc<RefCell<HashMap<ModulePath, ModuleStatus>>> {
+    self.seen.clone()
+  }
+
+  pub fn pending(&self) -> &Vec<ModuleGraphRc> {
+    &self.pending
+  }
+
+  pub fn pending_mut(&mut self) -> &mut Vec<ModuleGraphRc> {
+    &mut self.pending
+  }
 }
 
 impl ModuleMap {
@@ -142,7 +156,7 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      seen: HashMap::new(),
+      seen: Rc::new(RefCell::new(HashMap::new())),
       pending: vec![],
     }
   }
