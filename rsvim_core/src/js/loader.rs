@@ -45,9 +45,9 @@ pub trait ModuleLoader {
   /// downloading process.
   fn resolve(
     &self,
+    path_cfg: &PathConfig,
     base: Option<&str>,
     specifier: &str,
-    path_cfg: &PathConfig,
   ) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path.

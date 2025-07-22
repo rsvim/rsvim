@@ -108,9 +108,9 @@ impl ModuleLoader for FsModuleLoader {
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(
     &self,
+    path_cfg: &PathConfig,
     base: Option<&str>,
     specifier: &str,
-    path_cfg: &PathConfig,
   ) -> AnyResult<ModulePath> {
     // Full file path, start with '/' or 'C:\\'.
     if specifier.starts_with('/')

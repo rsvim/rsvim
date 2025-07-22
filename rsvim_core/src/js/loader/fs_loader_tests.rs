@@ -52,7 +52,7 @@ fn test_resolve1() {
 
   let path_cfg = PathConfig::new();
   for (base, specifier, expect) in tests {
-    let actual = loader.resolve(base, specifier, &path_cfg).unwrap();
+    let actual = loader.resolve(&path_cfg, base, specifier).unwrap();
     info!(
       "base:{base:?},specifier:{specifier:?},actual:{actual:?},expect:{expect:?},expect(\\):{:?}",
       expect.replace("/", "\\")

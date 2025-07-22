@@ -23,9 +23,9 @@ impl ModuleLoader for CoreModuleLoader {
   /// Resolve module path by its specifier.
   fn resolve(
     &self,
+    _path_cfg: &PathConfig,
     _base: Option<&str>,
     specifier: &str,
-    _path_cfg: &PathConfig,
   ) -> AnyResult<ModulePath> {
     assert!(CORE_MODULES.contains_key(specifier));
     Ok(specifier.to_string())
