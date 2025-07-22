@@ -808,10 +808,8 @@ impl JsRuntime {
 
     let mut ready_imports = vec![];
 
-    // Note: The following is a trick to get multiple `mut` references in the same
-    // struct called splitting borrows (https://doc.rust-lang.org/nomicon/borrow-splitting.html).
-    let pending_graphs = state.module_map.pending_mut();
     let seen_modules = state.module_map.seen();
+    let pending_graphs = state.module_map.pending_mut();
 
     pending_graphs.retain(|graph_rc| {
       // Get a usable ref to graph's root module.
