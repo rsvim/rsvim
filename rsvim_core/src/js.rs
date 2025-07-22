@@ -641,12 +641,8 @@ impl JsRuntime {
     let path = match source.is_some() {
       true => filename.to_string(),
       false => {
-        match resolve_import(
-          None,
-          filename,
-          None,
-          &lock!(state_rc.borrow().path_cfg),
-        ) {
+        match resolve_import(None, filename, None, &state_rc.borrow().path_cfg)
+        {
           Ok(specifier) => specifier,
           Err(e) => {
             // Returns the error directly.
@@ -666,7 +662,7 @@ impl JsRuntime {
         tc_scope,
         filename,
         None,
-        &lock!(state_rc.borrow().path_cfg),
+        &state_rc.borrow().path_cfg,
       ) {
         Some(module) => module,
         None => {

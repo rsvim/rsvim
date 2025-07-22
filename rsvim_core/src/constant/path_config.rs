@@ -106,7 +106,7 @@ pub struct PathConfig {
   data_home: PathBuf,
 }
 
-arc_mutex_ptr!(PathConfig);
+arc_ptr!(PathConfig);
 
 impl PathConfig {
   /// Make new path config.
