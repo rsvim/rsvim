@@ -641,7 +641,7 @@ impl JsRuntime {
     let path = match source.is_some() {
       true => filename.to_string(),
       false => {
-        match resolve_import(None, filename, None, &state_rc.borrow().path_cfg)
+        match resolve_import(&state_rc.borrow().path_cfg, None, filename, None)
         {
           Ok(specifier) => specifier,
           Err(e) => {
@@ -659,10 +659,10 @@ impl JsRuntime {
     // local file system, no network/http downloading will be involved.
     let module = {
       match fetch_module_tree(
+        &state_rc.borrow().path_cfg,
         tc_scope,
         filename,
         None,
-        &state_rc.borrow().path_cfg,
       ) {
         Some(module) => module,
         None => {
