@@ -40,9 +40,8 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::LinkedList;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -124,8 +123,8 @@ impl ModuleGraph {
 pub struct ModuleMap {
   main: Option<ModulePath>,
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  seen: Rc<RefCell<HashMap<ModulePath, ModuleStatus>>>,
-  pending: Vec<ModuleGraphRc>,
+  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
+  pending: RefCell<Vec<ModuleGraphRc>>,
 }
 
 impl ModuleMap {
@@ -137,16 +136,20 @@ impl ModuleMap {
     &self.index
   }
 
-  pub fn seen(&self) -> Rc<RefCell<HashMap<ModulePath, ModuleStatus>>> {
-    self.seen.clone()
+  pub fn seen(&self) -> Ref<'_, HashMap<ModulePath, ModuleStatus>> {
+    self.seen.borrow()
   }
 
-  pub fn pending(&self) -> &Vec<ModuleGraphRc> {
-    &self.pending
+  pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
+    self.seen.borrow_mut()
   }
 
-  pub fn pending_mut(&mut self) -> &mut Vec<ModuleGraphRc> {
-    &mut self.pending
+  pub fn pending(&self) -> Ref<'_, Vec<ModuleGraphRc>> {
+    self.pending.borrow()
+  }
+
+  pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
+    self.pending.borrow_mut()
   }
 }
 
@@ -156,8 +159,8 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      seen: Rc::new(RefCell::new(HashMap::new())),
-      pending: vec![],
+      seen: RefCell::new(HashMap::new()),
+      pending: RefCell::new(vec![]),
     }
   }
 
@@ -170,10 +173,10 @@ impl ModuleMap {
     self.index.insert(path.into(), module);
   }
 
-  // Returns if there are still pending imports to be loaded.
-  pub fn has_pending_imports(&self) -> bool {
-    !self.pending.is_empty()
-  }
+  // // Returns if there are still pending imports to be loaded.
+  // pub fn has_pending_imports(&self) -> bool {
+  //   !self.pending.is_empty()
+  // }
 
   // Returns a v8 module reference from me module-map.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
