@@ -1,5 +1,7 @@
 //! File path configs.
 
+use crate::prelude::*;
+
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
@@ -103,6 +105,8 @@ pub struct PathConfig {
   cache_home: PathBuf,
   data_home: PathBuf,
 }
+
+arc_mutex_ptr!(PathConfig);
 
 impl PathConfig {
   /// Make new path config.

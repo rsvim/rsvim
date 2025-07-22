@@ -392,6 +392,7 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
+  pub path_cfg: PathConfigArc,
   // Sender: js runtime send to master.
   pub jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
   // Receiver: js runtime receive from master.
@@ -442,6 +443,7 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
+    path_cfg: PathConfigArc,
     jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
     jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
@@ -543,6 +545,7 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
+      path_cfg,
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt,

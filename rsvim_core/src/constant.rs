@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 // Re-export
-pub use path_config::PathConfig;
+pub use path_config::*;
 
 pub mod path_config;
 
