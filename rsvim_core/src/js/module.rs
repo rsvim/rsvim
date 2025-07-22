@@ -145,7 +145,7 @@ pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
   import_map: Option<ImportMap>,
-  path_config: &PathConfig,
+  pathcfg: &PathConfig,
 ) -> AnyResult<ModulePath> {
   // Use import-maps if available.
   let specifier = match import_map {
@@ -156,7 +156,7 @@ pub fn resolve_import(
   // Look the params and choose a loader, then resolve module.
   let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
 
-  resolver.resolve(base, &specifier, path_config)
+  resolver.resolve(base, &specifier, pathcfg)
 }
 
 /// Loads module source by its module path.
@@ -199,7 +199,7 @@ pub fn fetch_module_tree<'a>(
   scope: &mut v8::HandleScope<'a>,
   filename: &str,
   source: Option<&str>,
-  path_config: &PathConfig,
+  pathcfg: &PathConfig,
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Create a script origin.
   let origin = create_origin(scope, filename, true);
@@ -241,7 +241,7 @@ pub fn fetch_module_tree<'a>(
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     let specifier =
-      resolve_import(Some(filename), &specifier, None, path_config).unwrap();
+      resolve_import(Some(filename), &specifier, None, pathcfg).unwrap();
     trace!(
       "Resolved dependency modules, filename: {:?}, specifier: {:?}",
       filename,
@@ -250,7 +250,7 @@ pub fn fetch_module_tree<'a>(
 
     // Resolve subtree of modules.
     if !state.borrow().module_map.index().contains_key(&specifier) {
-      fetch_module_tree(scope, &specifier, None, path_config)?;
+      fetch_module_tree(scope, &specifier, None, pathcfg)?;
     }
   }
 

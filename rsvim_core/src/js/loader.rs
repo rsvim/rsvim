@@ -47,7 +47,7 @@ pub trait ModuleLoader {
     &self,
     base: Option<&str>,
     specifier: &str,
-    path_config: &PathConfig,
+    pathcfg: &PathConfig,
   ) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path.
