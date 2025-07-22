@@ -158,7 +158,7 @@ pub fn resolve_import(
   resolver.resolve(base, &specifier)
 }
 
-/// Loads module source by its specifier.
+/// Loads module source by its module path.
 pub fn load_import(
   specifier: &str,
   _skip_cache: bool,
@@ -208,15 +208,17 @@ pub fn fetch_module_tree<'a>(
     Some(source) => source.into(),
     None => load_import(filename, true).unwrap(),
   };
+
   trace!(
-    "Loaded main js module filename: {:?}, source: {:?}",
+    "Fetching module tree, filename: {:?}, source: {:?}",
     filename,
-    if source.as_str().len() > 20 {
-      String::from(&source.as_str()[..20]) + "..."
+    if source.as_str().len() > 50 {
+      String::from(&source.as_str()[..50]) + "..."
     } else {
       String::from(source.as_str())
     }
   );
+
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
@@ -238,13 +240,13 @@ pub fn fetch_module_tree<'a>(
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
     trace!(
-      "Resolved dependency js module base: {:?}, specifier: {:?}",
+      "Resolved dependency modules, filename: {:?}, specifier: {:?}",
       filename,
       specifier.as_str(),
     );
 
     // Resolve subtree of modules.
-    if !state.borrow().module_map.index.contains_key(&specifier) {
+    if !state.borrow().module_map.index().contains_key(&specifier) {
       fetch_module_tree(scope, &specifier, None)?;
     }
   }

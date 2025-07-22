@@ -40,6 +40,7 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
@@ -54,12 +55,26 @@ pub enum ImportKind {
 #[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
-  pub kind: ImportKind,
-  pub root_rc: EsModuleRc,
-  pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  kind: ImportKind,
+  root_rc: EsModuleRc,
+  same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
 }
 
 rc_refcell_ptr!(ModuleGraph);
+
+impl ModuleGraph {
+  pub fn kind(&self) -> &ImportKind {
+    &self.kind
+  }
+
+  pub fn root_rc(&self) -> EsModuleRc {
+    self.root_rc.clone()
+  }
+
+  pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
+    &self.same_origin
+  }
+}
 
 impl ModuleGraph {
   // Initializes a new graph resolving a static import.
@@ -106,10 +121,36 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
-  pub main: Option<ModulePath>,
-  pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<ModuleGraphRc>,
+  main: Option<ModulePath>,
+  index: HashMap<ModulePath, v8::Global<v8::Module>>,
+  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
+  pending: RefCell<Vec<ModuleGraphRc>>,
+}
+
+impl ModuleMap {
+  pub fn main(&self) -> &Option<ModulePath> {
+    &self.main
+  }
+
+  pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
+    &self.index
+  }
+
+  pub fn seen(&self) -> Ref<'_, HashMap<ModulePath, ModuleStatus>> {
+    self.seen.borrow()
+  }
+
+  pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
+    self.seen.borrow_mut()
+  }
+
+  pub fn pending(&self) -> Ref<'_, Vec<ModuleGraphRc>> {
+    self.pending.borrow()
+  }
+
+  pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
+    self.pending.borrow_mut()
+  }
 }
 
 impl ModuleMap {
@@ -118,8 +159,8 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      seen: HashMap::new(),
-      pending: vec![],
+      seen: RefCell::new(HashMap::new()),
+      pending: RefCell::new(vec![]),
     }
   }
 
@@ -132,10 +173,10 @@ impl ModuleMap {
     self.index.insert(path.into(), module);
   }
 
-  // Returns if there are still pending imports to be loaded.
-  pub fn has_pending_imports(&self) -> bool {
-    !self.pending.is_empty()
-  }
+  // // Returns if there are still pending imports to be loaded.
+  // pub fn has_pending_imports(&self) -> bool {
+  //   !self.pending.is_empty()
+  // }
 
   // Returns a v8 module reference from me module-map.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
@@ -149,11 +190,6 @@ impl ModuleMap {
       .iter()
       .find(|(_, m)| **m == module)
       .map(|(p, _)| p.clone())
-  }
-
-  // Returns the main entry point.
-  pub fn main(&self) -> Option<ModulePath> {
-    self.main.clone()
   }
 }
 

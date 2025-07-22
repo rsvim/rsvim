@@ -804,54 +804,55 @@ impl JsRuntime {
     // Get a v8 handle-scope.
     let scope = &mut self.handle_scope();
     let state_rc = JsRuntime::state(scope);
-    let mut state = state_rc.borrow_mut();
-
     let mut ready_imports = vec![];
 
-    // Note: The following is a trick to get multiple `mut` references in the same
-    // struct called splitting borrows (https://doc.rust-lang.org/nomicon/borrow-splitting.html).
-    let state_ref = &mut *state;
-    let pending_graphs = &mut state_ref.module_map.pending;
-    let seen_modules = &mut state_ref.module_map.seen;
+    {
+      let state = state_rc.borrow();
 
-    pending_graphs.retain(|graph_rc| {
-      // Get a usable ref to graph's root module.
-      let graph = graph_rc.borrow();
-      let mut graph_root = graph.root_rc.borrow_mut();
+      let mut seen_modules = state.module_map.seen_mut();
+      let mut pending_graphs = state.module_map.pending_mut();
 
-      // Check for exceptions in the graph (dynamic imports).
-      if let Some(message) = graph_root.exception_mut().take() {
-        // Create a v8 exception.
-        let exception = v8::String::new(scope, &message).unwrap();
-        let exception = v8::Exception::error(scope, exception);
+      pending_graphs.retain(|graph_rc| {
+        // Get a usable ref to graph's root module.
+        let graph = graph_rc.borrow();
+        let graph_root = graph.root_rc();
+        let mut graph_root = graph_root.borrow_mut();
 
-        // We need to resolve all identical dynamic imports.
-        match graph.kind.clone() {
-          ImportKind::Static => unreachable!(),
-          ImportKind::Dynamic(main_promise) => {
-            for promise in [main_promise].iter().chain(graph.same_origin.iter())
-            {
-              promise.open(scope).reject(scope, exception);
+        // Check for exceptions in the graph (dynamic imports).
+        if let Some(message) = graph_root.exception_mut().take() {
+          // Create a v8 exception.
+          let exception = v8::String::new(scope, &message).unwrap();
+          let exception = v8::Exception::error(scope, exception);
+
+          // We need to resolve all identical dynamic imports.
+          match graph.kind().clone() {
+            ImportKind::Static => unreachable!(),
+            ImportKind::Dynamic(main_promise) => {
+              for promise in
+                [main_promise].iter().chain(graph.same_origin().iter())
+              {
+                promise.open(scope).reject(scope, exception);
+              }
             }
           }
+
+          return false;
         }
 
-        return false;
-      }
+        // If the graph is still loading, fast-forward the dependencies.
+        if graph_root.status() != ModuleStatus::Ready {
+          graph_root.fast_forward(&mut seen_modules);
+          return true;
+        }
 
-      // If the graph is still loading, fast-forward the dependencies.
-      if graph_root.status() != ModuleStatus::Ready {
-        graph_root.fast_forward(seen_modules);
-        return true;
-      }
+        ready_imports.push(Rc::clone(graph_rc));
+        false
+      });
 
-      ready_imports.push(Rc::clone(graph_rc));
-      false
-    });
-
-    // Note: We have to drop the sate ref here to avoid borrow panics
-    // during the module instantiation/evaluation process.
-    drop(state);
+      // Note: We have to drop the sate ref here to avoid borrow panics
+      // during the module instantiation/evaluation process.
+      // drop(state);
+    }
 
     // Execute the root module from the graph.
     for graph_rc in ready_imports {
@@ -859,7 +860,7 @@ impl JsRuntime {
       let tc_scope = &mut v8::TryCatch::new(scope);
 
       let graph = graph_rc.borrow();
-      let path = graph.root_rc.borrow().path().clone();
+      let path = graph.root_rc().borrow().path().clone();
 
       let module = state_rc.borrow().module_map.get(&path).unwrap();
       let module = v8::Local::new(tc_scope, module);
@@ -878,7 +879,7 @@ impl JsRuntime {
       }
 
       let _ = module.evaluate(tc_scope);
-      let is_root_module = !graph.root_rc.borrow().is_dynamic_import();
+      let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
       // Note: Due to the architecture, when a module errors, the `promise_reject_cb`
       // v8 hook will also trigger, resulting in the same exception being registered
@@ -901,13 +902,13 @@ impl JsRuntime {
         }
       }
 
-      if let ImportKind::Dynamic(main_promise) = graph.kind.clone() {
+      if let ImportKind::Dynamic(main_promise) = graph.kind().clone() {
         // Note: Since this is a dynamic import will resolve the promise
         // with the module's namespace object instead of it's evaluation result.
         let namespace = module.get_module_namespace();
 
         // We need to resolve all identical dynamic imports.
-        for promise in [main_promise].iter().chain(graph.same_origin.iter()) {
+        for promise in [main_promise].iter().chain(graph.same_origin().iter()) {
           promise.open(tc_scope).resolve(tc_scope, namespace);
         }
       }
@@ -926,7 +927,7 @@ impl JsRuntime {
 
   /// Returns if we have imports in pending state.
   pub fn has_pending_imports(&mut self) -> bool {
-    self.get_state().borrow().module_map.has_pending_imports()
+    !self.get_state().borrow().module_map.pending().is_empty()
   }
 
   // /// Returns if we have scheduled any next-tick callbacks.
@@ -1111,13 +1112,3 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 //   eprintln!("{:?}", e);
 //   std::process::exit(1);
 // }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn next_future_id1() {
-    assert!(next_future_id() > 0);
-  }
-}
