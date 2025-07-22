@@ -840,7 +840,7 @@ impl JsRuntime {
 
       // If the graph is still loading, fast-forward the dependencies.
       if graph_root.status() != ModuleStatus::Ready {
-        graph_root.fast_forward(&mut *seen_modules.borrow_mut());
+        graph_root.fast_forward(&mut seen_modules.borrow_mut());
         return true;
       }
 
