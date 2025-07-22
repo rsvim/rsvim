@@ -33,10 +33,10 @@ pub fn module_resolve_cb<'a>(
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier = resolve_import(
+    &state.path_cfg,
     dependant.as_deref(),
     &specifier,
     import_map,
-    &state.path_cfg,
   )
   .unwrap();
 
@@ -116,7 +116,7 @@ fn import_meta_resolve(
   let state = JsRuntime::state(scope);
   let state = state.borrow();
 
-  match resolve_import(Some(&base), &specifier, import_map, &state.path_cfg) {
+  match resolve_import(&state.path_cfg, Some(&base), &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
     Err(e) => throw_type_error(scope, &e.to_string()),
   };
