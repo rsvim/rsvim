@@ -25,7 +25,7 @@ impl ModuleLoader for CoreModuleLoader {
     &self,
     _base: Option<&str>,
     specifier: &str,
-    _pathcfg: &PathConfig,
+    _path_cfg: &PathConfig,
   ) -> AnyResult<ModulePath> {
     assert!(CORE_MODULES.contains_key(specifier));
     Ok(specifier.to_string())

@@ -50,9 +50,9 @@ fn test_resolve1() {
   // Run tests.
   let loader = FsModuleLoader {};
 
-  let pathcfg = PathConfig::new();
+  let path_cfg = PathConfig::new();
   for (base, specifier, expect) in tests {
-    let actual = loader.resolve(base, specifier, &pathcfg).unwrap();
+    let actual = loader.resolve(base, specifier, &path_cfg).unwrap();
     info!(
       "base:{base:?},specifier:{specifier:?},actual:{actual:?},expect:{expect:?},expect(\\):{:?}",
       expect.replace("/", "\\")
