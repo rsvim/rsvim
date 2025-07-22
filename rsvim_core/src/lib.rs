@@ -2,7 +2,7 @@
 
 pub mod buf;
 pub mod cli;
-pub mod consts;
+pub mod constant;
 pub mod content;
 pub mod coord;
 pub mod defaults;
@@ -22,6 +22,6 @@ pub mod test;
 #[cfg(test)]
 mod buf_tests;
 #[cfg(test)]
-mod consts_tests;
+mod constant_tests;
 #[cfg(test)]
 mod js_tests;

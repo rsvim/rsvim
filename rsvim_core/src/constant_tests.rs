@@ -1,4 +1,4 @@
-use super::consts::*;
+use super::constant::*;
 
 #[test]
 fn mutex_timeout1() {
