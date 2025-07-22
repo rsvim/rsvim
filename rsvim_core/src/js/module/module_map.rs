@@ -122,8 +122,8 @@ impl ModuleGraph {
 pub struct ModuleMap {
   main: Option<ModulePath>,
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  pub seen: HashMap<ModulePath, ModuleStatus>,
-  pub pending: Vec<ModuleGraphRc>,
+  seen: HashMap<ModulePath, ModuleStatus>,
+  pending: Vec<ModuleGraphRc>,
 }
 
 impl ModuleMap {
@@ -133,6 +133,22 @@ impl ModuleMap {
 
   pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
     &self.index
+  }
+
+  pub fn seen(&self) -> &HashMap<ModulePath, ModuleStatus> {
+    &self.seen
+  }
+
+  pub fn seen_mut(&mut self) -> &mut HashMap<ModulePath, ModuleStatus> {
+    &mut self.seen
+  }
+
+  pub fn pending(&self) -> &Vec<ModuleGraphRc> {
+    &self.pending
+  }
+
+  pub fn pending_mut(&mut self) -> &mut Vec<ModuleGraphRc> {
+    &mut self.pending
   }
 }
 
