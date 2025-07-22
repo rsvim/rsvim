@@ -641,9 +641,12 @@ impl JsRuntime {
     let path = match source.is_some() {
       true => filename.to_string(),
       false => {
-        let state = state_rc.borrow();
-        let path_cfg = lock!(state.path_cfg);
-        match resolve_import(None, filename, None, &path_cfg) {
+        match resolve_import(
+          None,
+          filename,
+          None,
+          &lock!(state_rc.borrow().path_cfg),
+        ) {
           Ok(specifier) => specifier,
           Err(e) => {
             // Returns the error directly.
@@ -659,9 +662,12 @@ impl JsRuntime {
     // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
     // local file system, no network/http downloading will be involved.
     let module = {
-      let state = state_rc.borrow();
-      let path_cfg = lock!(state.path_cfg);
-      match fetch_module_tree(tc_scope, filename, None, &path_cfg) {
+      match fetch_module_tree(
+        tc_scope,
+        filename,
+        None,
+        &lock!(state_rc.borrow().path_cfg),
+      ) {
         Some(module) => module,
         None => {
           assert!(tc_scope.has_caught());
