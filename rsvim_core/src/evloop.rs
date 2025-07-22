@@ -2,6 +2,7 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
+use crate::constant::path_config::PathConfig;
 use crate::content::{TextContents, TextContentsArc};
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{
@@ -55,6 +56,9 @@ pub struct EventLoop {
 
   /// Command line options.
   pub cli_opt: CliOpt,
+
+  /// Path configs.
+  pub path_cfg: PathConfig,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -118,6 +122,9 @@ pub struct EventLoop {
 impl EventLoop {
   /// Make new event loop.
   pub fn new(cli_opt: CliOpt, snapshot: SnapshotData) -> IoResult<Self> {
+    // Path config
+    let path_cfg = PathConfig::new();
+
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -204,6 +211,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
+      path_cfg,
       canvas,
       tree,
       state,

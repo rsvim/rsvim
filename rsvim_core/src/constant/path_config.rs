@@ -131,22 +131,35 @@ impl PathConfig {
     }
   }
 
-  /// Get the config entry file.
+  /// User config entry path, it can be either one of following files:
+  ///
+  /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
+  /// 2. `$HOME/.rsvim/rsvim.{ts.js}`
+  /// 3. `$HOME/.rsvim.{ts.js}`
+  ///
+  /// NOTE:
+  /// 1. Typescript file is preferred over javascript, if both exist.
+  /// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
+  /// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
+  ///    `$HOME/.rsvim`.
   pub fn config_entry(&self) -> &Option<PathBuf> {
     &self.config_entry
   }
 
-  /// Get the config home directory.
+  /// User config home directory, it can be either one of following directories:
+  ///
+  /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
+  /// 2. `$HOME/.rsvim/`
   pub fn config_home(&self) -> &Option<PathBuf> {
     &self.config_home
   }
 
-  /// Get the cache home directory.
+  /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
   pub fn cache_home(&self) -> &PathBuf {
     &self.cache_home
   }
 
-  /// Get the data home directory.
+  /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
   pub fn data_home(&self) -> &PathBuf {
     &self.data_home
   }

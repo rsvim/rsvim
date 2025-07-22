@@ -1,11 +1,11 @@
 //! Global constants.
 
 use regex::Regex;
-use std::path::PathBuf;
 use std::sync::LazyLock;
 use std::time::Duration;
 
-use path_config::PathConfig;
+// Re-export
+pub use path_config::PathConfig;
 
 pub mod path_config;
 
@@ -33,37 +33,6 @@ pub static CHANNEL_BUF_SIZE: LazyLock<usize> = LazyLock::new(|| {
     .map(|v| v.parse::<usize>().unwrap_or(1000_usize))
     .unwrap_or(1000_usize)
 });
-
-static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);
-
-/// User config entry path, it can be either one of following files:
-///
-/// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
-/// 2. `$HOME/.rsvim/rsvim.{ts.js}`
-/// 3. `$HOME/.rsvim.{ts.js}`
-///
-/// NOTE:
-/// 1. Typescript file is preferred over javascript, if both exist.
-/// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
-/// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
-///    `$HOME/.rsvim`.
-pub static CONFIG_ENTRY_PATH: LazyLock<Option<PathBuf>> =
-  LazyLock::new(|| PATH_CONFIG.config_entry().clone());
-
-/// User config home directory, it can be either one of following directories:
-///
-/// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
-/// 2. `$HOME/.rsvim/`
-pub static CONFIG_HOME_PATH: LazyLock<Option<PathBuf>> =
-  LazyLock::new(|| PATH_CONFIG.config_home().clone());
-
-/// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
-pub static CACHE_HOME_PATH: LazyLock<PathBuf> =
-  LazyLock::new(|| PATH_CONFIG.cache_home().clone());
-
-/// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
-pub static DATA_HOME_PATH: LazyLock<PathBuf> =
-  LazyLock::new(|| PATH_CONFIG.data_home().clone());
 
 /// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
 pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
