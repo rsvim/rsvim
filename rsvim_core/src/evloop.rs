@@ -212,7 +212,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
-      path_cfg: path_cfg,
+      path_cfg,
       canvas,
       tree,
       state,
