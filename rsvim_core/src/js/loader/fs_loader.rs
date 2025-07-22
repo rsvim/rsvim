@@ -110,7 +110,7 @@ impl ModuleLoader for FsModuleLoader {
     &self,
     base: Option<&str>,
     specifier: &str,
-    path_config: &PathConfig,
+    pathcfg: &PathConfig,
   ) -> AnyResult<ModulePath> {
     // Full file path, start with '/' or 'C:\\'.
     if specifier.starts_with('/')
@@ -136,7 +136,7 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // For other
-    match path_config.config_home() {
+    match pathcfg.config_home() {
       Some(config_home) => {
         // Simple file path in config home directory `${config_home}`.
         let simple_specifier = config_home.join(specifier);
