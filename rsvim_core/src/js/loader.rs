@@ -1,5 +1,6 @@
 //! Js module loader.
 
+use crate::constant::PathConfig;
 use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Jsx;
 // use crate::js::transpiler::Wasm;
@@ -46,6 +47,7 @@ pub trait ModuleLoader {
     &self,
     base: Option<&str>,
     specifier: &str,
+    path_config: &PathConfig,
   ) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path.
