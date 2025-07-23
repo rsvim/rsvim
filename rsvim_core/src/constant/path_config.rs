@@ -4,6 +4,66 @@ use crate::prelude::*;
 
 use std::path::PathBuf;
 
+#[cfg(test)]
+use std::path::Path;
+
+pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
+pub const HOME: &str = "HOME";
+pub const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
+pub const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
+
+#[cfg(test)]
+fn _dirs_config_dir() -> Option<PathBuf> {
+  match std::env::var(XDG_CONFIG_HOME) {
+    Ok(config_home) => Some(Path::new(&config_home).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_config_dir() -> Option<PathBuf> {
+  dirs::config_dir()
+}
+
+#[cfg(test)]
+fn _dirs_home_dir() -> Option<PathBuf> {
+  match std::env::var(HOME) {
+    Ok(home) => Some(Path::new(&home).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_home_dir() -> Option<PathBuf> {
+  dirs::home_dir()
+}
+
+#[cfg(test)]
+fn _dirs_cache_dir() -> Option<PathBuf> {
+  match std::env::var(XDG_CACHE_HOME) {
+    Ok(cache_home) => Some(Path::new(&cache_home).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_cache_dir() -> Option<PathBuf> {
+  dirs::cache_dir()
+}
+
+#[cfg(test)]
+fn _dirs_data_dir() -> Option<PathBuf> {
+  match std::env::var(XDG_DATA_HOME) {
+    Ok(data_home) => Some(Path::new(&data_home).to_path_buf()),
+    Err(_) => None,
+  }
+}
+
+#[cfg(not(test))]
+fn _dirs_data_dir() -> Option<PathBuf> {
+  dirs::data_dir()
+}
+
 #[derive(Debug, Clone)]
 pub struct CachedDirs {
   pub config_dir: PathBuf,
@@ -18,7 +78,7 @@ fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
 }
 
 /// `$HOME/.rsvim`
-fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
+fn _home_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.home_dir.join(".rsvim")
 }
 
@@ -39,7 +99,7 @@ fn get_config_home_and_entry(
   cached_dirs: &CachedDirs,
 ) -> Option<ConfigHomeAndEntry> {
   for config_dir in
-    [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter()
+    [_xdg_config_dir(cached_dirs), _home_dir(cached_dirs)].iter()
   {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
@@ -66,7 +126,7 @@ fn get_config_home_and_entry(
   {
     if config_entry.exists() {
       return Some(ConfigHomeAndEntry {
-        config_home: _home_config_dir(cached_dirs),
+        config_home: _home_dir(cached_dirs),
         config_entry: config_entry.clone(),
       });
     }
