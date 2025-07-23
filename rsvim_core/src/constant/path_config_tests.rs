@@ -6,26 +6,7 @@ use crate::test::log::init as test_log_init;
 use std::io::Write;
 use std::path::Path;
 
-macro_rules! set_xdg {
-  ($name:ident,$value:expr) => {
-    unsafe {
-      let saved = std::env::var($name);
-      std::env::set_var($name, $value);
-      saved
-    }
-  };
-}
-
-macro_rules! restore_xdg {
-  ($name:ident,$saved_value:expr) => {
-    match $saved_value {
-      Ok(saved) => unsafe {
-        std::env::set_var($name, saved);
-      },
-      Err(_) => { /* */ }
-    }
-  };
-}
+use crate::{restore_env_var, set_env_var};
 
 fn create_config_home_and_entry(config_dir: &Path) {
   std::fs::create_dir_all(config_dir.join("rsvim")).unwrap();
