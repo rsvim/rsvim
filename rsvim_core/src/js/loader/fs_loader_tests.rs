@@ -1,6 +1,5 @@
 use super::fs_loader::*;
 
-use crate::constant::PathConfig;
 use crate::js::loader::ModuleLoader;
 use crate::test::log::init as test_log_init;
 
@@ -50,9 +49,8 @@ fn test_resolve1() {
   // Run tests.
   let loader = FsModuleLoader {};
 
-  let path_cfg = PathConfig::new();
   for (base, specifier, expect) in tests {
-    let actual = loader.resolve(&path_cfg, base, specifier).unwrap();
+    let actual = loader.resolve(base, specifier).unwrap();
     info!(
       "base:{base:?},specifier:{specifier:?},actual:{actual:?},expect:{expect:?},expect(\\):{:?}",
       expect.replace("/", "\\")

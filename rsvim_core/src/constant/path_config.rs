@@ -166,16 +166,14 @@ pub struct PathConfig {
   data_home: PathBuf,
 }
 
-arc_ptr!(PathConfig);
-
 impl PathConfig {
   /// Make new path config.
   pub fn new() -> Self {
     let cached_dirs = CachedDirs {
-      config_dir: dirs::config_dir().unwrap(),
-      home_dir: dirs::home_dir().unwrap(),
-      cache_dir: dirs::cache_dir().unwrap(),
-      data_dir: dirs::data_dir().unwrap(),
+      config_dir: _dirs_config_dir().unwrap(),
+      home_dir: _dirs_home_dir().unwrap(),
+      cache_dir: _dirs_cache_dir().unwrap(),
+      data_dir: _dirs_data_dir().unwrap(),
     };
     Self::_new_with_cached_dirs(&cached_dirs)
   }

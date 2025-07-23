@@ -42,4 +42,4 @@ pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
 
 /// Global path configuration
-static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);
+pub static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);

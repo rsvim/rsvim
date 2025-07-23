@@ -142,7 +142,6 @@ fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
 ///
 /// It returns full path on local filesystem.
 pub fn resolve_import(
-  path_cfg: &PathConfig,
   base: Option<&str>,
   specifier: &str,
   import_map: Option<ImportMap>,
@@ -156,7 +155,7 @@ pub fn resolve_import(
   // Look the params and choose a loader, then resolve module.
   let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
 
-  resolver.resolve(path_cfg, base, &specifier)
+  resolver.resolve(base, &specifier)
 }
 
 /// Loads module source by its module path.
@@ -196,7 +195,6 @@ pub async fn load_import_async(
 /// Resolves module imports synchronously.
 /// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
 pub fn fetch_module_tree<'a>(
-  path_cfg: &PathConfig,
   scope: &mut v8::HandleScope<'a>,
   filename: &str,
   source: Option<&str>,
@@ -240,8 +238,7 @@ pub fn fetch_module_tree<'a>(
 
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
-    let specifier =
-      resolve_import(path_cfg, Some(filename), &specifier, None).unwrap();
+    let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
     trace!(
       "Resolved dependency modules, filename: {:?}, specifier: {:?}",
       filename,
@@ -250,7 +247,7 @@ pub fn fetch_module_tree<'a>(
 
     // Resolve subtree of modules.
     if !state.borrow().module_map.index().contains_key(&specifier) {
-      fetch_module_tree(path_cfg, scope, &specifier, None)?;
+      fetch_module_tree(scope, &specifier, None)?;
     }
   }
 

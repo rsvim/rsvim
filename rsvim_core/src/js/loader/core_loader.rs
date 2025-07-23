@@ -23,7 +23,6 @@ impl ModuleLoader for CoreModuleLoader {
   /// Resolve module path by its specifier.
   fn resolve(
     &self,
-    _path_cfg: &PathConfig,
     _base: Option<&str>,
     specifier: &str,
   ) -> AnyResult<ModulePath> {

@@ -56,9 +56,6 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
-  /// Path configs.
-  pub path_cfg: PathConfigArc,
-
   /// Widget tree for UI.
   pub tree: TreeArc,
   /// Canvas for UI.
@@ -121,9 +118,6 @@ pub struct EventLoop {
 impl EventLoop {
   /// Make new event loop.
   pub fn new(cli_opt: CliOpt, snapshot: SnapshotData) -> IoResult<Self> {
-    // Path config
-    let path_cfg = PathConfig::to_arc(PathConfig::new());
-
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -197,7 +191,6 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      path_cfg.clone(),
       jsrt_to_mstr,
       jsrt_from_mstr,
       cli_opt.clone(),
@@ -211,7 +204,6 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opt,
-      path_cfg,
       canvas,
       tree,
       state,
@@ -234,7 +226,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_entry) = self.path_cfg.config_entry() {
+    if let Some(config_entry) = PATH_CONFIG.config_entry() {
       self
         .js_runtime
         .execute_module(config_entry.to_str().unwrap(), None)

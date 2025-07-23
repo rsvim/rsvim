@@ -1,6 +1,5 @@
 //! Fs (filesystem) module loader.
 
-use crate::constant::PathConfig;
 use crate::js::loader::ModuleLoader;
 use crate::js::module::{ModulePath, ModuleSource};
 // use crate::js::transpiler::Jsx;
@@ -108,7 +107,6 @@ impl ModuleLoader for FsModuleLoader {
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(
     &self,
-    path_cfg: &PathConfig,
     base: Option<&str>,
     specifier: &str,
   ) -> AnyResult<ModulePath> {
@@ -136,7 +134,7 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // For other
-    match path_cfg.config_home() {
+    match PATH_CONFIG.config_home() {
       Some(config_home) => {
         // Simple file path in config home directory `${config_home}`.
         let simple_specifier = config_home.join(specifier);
