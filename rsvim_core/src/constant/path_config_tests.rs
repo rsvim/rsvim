@@ -36,7 +36,7 @@ fn create_config_home_and_entry(config_dir: &Path) {
 }
 
 #[test]
-fn xdg_config_home1() {
+fn test1() {
   let _guard = acquire_sequential_guard();
   test_log_init();
 
