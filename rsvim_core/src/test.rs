@@ -3,6 +3,8 @@
 //! NOTE: This module should be only used in unit tests, not some where else.
 
 pub mod buf;
-pub mod constant;
 pub mod log;
 pub mod tree;
+
+#[cfg(test)]
+pub mod constant;
