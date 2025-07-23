@@ -1,7 +1,5 @@
 //! File path configs.
 
-use crate::prelude::*;
-
 use std::path::PathBuf;
 
 #[cfg(test)]

@@ -32,13 +32,8 @@ pub fn module_resolve_cb<'a>(
   let dependant = state.module_map.get_path(referrer);
 
   let specifier = specifier.to_rust_string_lossy(scope);
-  let specifier = resolve_import(
-    &state.path_cfg,
-    dependant.as_deref(),
-    &specifier,
-    import_map,
-  )
-  .unwrap();
+  let specifier =
+    resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();
@@ -113,10 +108,7 @@ fn import_meta_resolve(
   let specifier = args.get(0).to_rust_string_lossy(scope);
   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
 
-  let state = JsRuntime::state(scope);
-  let state = state.borrow();
-
-  match resolve_import(&state.path_cfg, Some(&base), &specifier, import_map) {
+  match resolve_import(Some(&base), &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
     Err(e) => throw_type_error(scope, &e.to_string()),
   };

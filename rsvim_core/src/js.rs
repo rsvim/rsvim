@@ -631,7 +631,6 @@ impl JsRuntime {
   ) -> Result<(), AnyErr> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
-    let state_rc = JsRuntime::state(scope);
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
@@ -653,24 +652,16 @@ impl JsRuntime {
 
     // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
     // local file system, no network/http downloading will be involved.
-    let module = {
-      match fetch_module_tree(
-        &state_rc.borrow().path_cfg,
-        tc_scope,
-        filename,
-        None,
-      ) {
-        Some(module) => module,
-        None => {
-          assert!(tc_scope.has_caught());
-          let exception = tc_scope.exception().unwrap();
-          let _exception =
-            JsError::from_v8_exception(tc_scope, exception, None);
-          let e = format!("User config not found: {filename:?}");
-          error!(e);
-          eprintln!("{e}");
-          anyhow::bail!(e);
-        }
+    let module = match fetch_module_tree(tc_scope, filename, None) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let _exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let e = format!("User config not found: {filename:?}");
+        error!(e);
+        eprintln!("{e}");
+        anyhow::bail!(e);
       }
     };
 
