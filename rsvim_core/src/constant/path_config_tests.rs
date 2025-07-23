@@ -37,7 +37,7 @@ fn create_config_home_and_entry(config_dir: &Path) {
 
 #[test]
 fn xdg_config_home1() {
-  let _ = acquire_sequential_guard();
+  let _guard = acquire_sequential_guard();
   test_log_init();
 
   let tmp_config_dir = assert_fs::TempDir::new().unwrap();
