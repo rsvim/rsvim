@@ -1,12 +1,12 @@
 use super::path_config::*;
 
-use crate::test::constant::acquire_sequential_guard;
+use crate::test::constant::{
+  acquire_sequential_guard, restore_env_var, set_env_var,
+};
 use crate::test::log::init as test_log_init;
 
 use std::io::Write;
 use std::path::Path;
-
-use crate::{restore_env_var, set_env_var};
 
 fn create_config_home_and_entry(config_dir: &Path) {
   std::fs::create_dir_all(config_dir.join("rsvim")).unwrap();
@@ -25,9 +25,9 @@ fn test1() {
   let tmp_cache_dir = assert_fs::TempDir::new().unwrap();
   let tmp_data_dir = assert_fs::TempDir::new().unwrap();
 
-  let saved_conf = set_env_var!(XDG_CONFIG_HOME, tmp_config_dir.path());
-  let saved_cache = set_env_var!(XDG_CACHE_HOME, tmp_cache_dir.path());
-  let saved_data = set_env_var!(XDG_DATA_HOME, tmp_data_dir.path());
+  let saved_conf = set_env_var(XDG_CONFIG_HOME, tmp_config_dir.path());
+  let saved_cache = set_env_var(XDG_CACHE_HOME, tmp_cache_dir.path());
+  let saved_data = set_env_var(XDG_DATA_HOME, tmp_data_dir.path());
 
   create_config_home_and_entry(tmp_config_dir.path());
 
@@ -52,7 +52,7 @@ fn test1() {
     assert_eq!(cfg.data_home().clone(), tmp_data_dir.join("rsvim"));
   }
 
-  restore_env_var!(XDG_CONFIG_HOME, saved_conf);
-  restore_env_var!(XDG_CACHE_HOME, saved_cache);
-  restore_env_var!(XDG_DATA_HOME, saved_data);
+  restore_env_var(XDG_CONFIG_HOME, saved_conf);
+  restore_env_var(XDG_CACHE_HOME, saved_cache);
+  restore_env_var(XDG_DATA_HOME, saved_data);
 }
