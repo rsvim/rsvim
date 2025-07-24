@@ -186,6 +186,7 @@ impl PathConfig {
     }
   }
 
+  #[cfg(not(test))]
   /// User config entry path, it can be either one of following files:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
@@ -201,6 +202,21 @@ impl PathConfig {
     &self.config_entry
   }
 
+  #[cfg(test)]
+  pub fn config_entry(&self) -> Option<PathBuf> {
+    let cached_dirs = CachedDirs {
+      config_dir: _dirs_config_dir().unwrap(),
+      home_dir: _dirs_home_dir().unwrap(),
+      cache_dir: _dirs_cache_dir().unwrap(),
+      data_dir: _dirs_data_dir().unwrap(),
+    };
+    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
+    config_home_and_entry
+      .as_ref()
+      .map(|c| c.config_entry.clone())
+  }
+
+  #[cfg(not(test))]
   /// User config home directory, it can be either one of following directories:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
@@ -209,14 +225,52 @@ impl PathConfig {
     &self.config_home
   }
 
+  #[cfg(test)]
+  pub fn config_home(&self) -> Option<PathBuf> {
+    let cached_dirs = CachedDirs {
+      config_dir: _dirs_config_dir().unwrap(),
+      home_dir: _dirs_home_dir().unwrap(),
+      cache_dir: _dirs_cache_dir().unwrap(),
+      data_dir: _dirs_data_dir().unwrap(),
+    };
+    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
+    config_home_and_entry
+      .as_ref()
+      .map(|c| c.config_home.clone())
+  }
+
+  #[cfg(not(test))]
   /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
   pub fn cache_home(&self) -> &PathBuf {
     &self.cache_home
   }
 
+  #[cfg(test)]
+  pub fn cache_home(&self) -> PathBuf {
+    let cached_dirs = CachedDirs {
+      config_dir: _dirs_config_dir().unwrap(),
+      home_dir: _dirs_home_dir().unwrap(),
+      cache_dir: _dirs_cache_dir().unwrap(),
+      data_dir: _dirs_data_dir().unwrap(),
+    };
+    _xdg_cache_dir(&cached_dirs)
+  }
+
+  #[cfg(not(test))]
   /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
   pub fn data_home(&self) -> &PathBuf {
     &self.data_home
+  }
+
+  #[cfg(test)]
+  pub fn data_home(&self) -> PathBuf {
+    let cached_dirs = CachedDirs {
+      config_dir: _dirs_config_dir().unwrap(),
+      home_dir: _dirs_home_dir().unwrap(),
+      cache_dir: _dirs_cache_dir().unwrap(),
+      data_dir: _dirs_data_dir().unwrap(),
+    };
+    _xdg_data_dir(&cached_dirs)
   }
 }
 
