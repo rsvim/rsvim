@@ -1,9 +1,6 @@
 //! File path configs.
 
-use std::path::PathBuf;
-
-#[cfg(test)]
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
@@ -63,12 +60,12 @@ fn _dirs_data_dir() -> Option<PathBuf> {
 }
 
 /// `$XDG_CONFIG_HOME/rsvim`
-fn _xdg_config_dir(config_dir: &PathBuf) -> PathBuf {
+fn _xdg_config_dir(config_dir: &Path) -> PathBuf {
   config_dir.join("rsvim").to_path_buf()
 }
 
 /// `$HOME/.rsvim`
-fn _home_dir(home_dir: &PathBuf) -> PathBuf {
+fn _home_dir(home_dir: &Path) -> PathBuf {
   home_dir.join(".rsvim")
 }
 
@@ -80,8 +77,8 @@ fn _home_dir(home_dir: &PathBuf) -> PathBuf {
 ///
 /// It returns `(Home, Entry)`.
 fn get_config_home_and_entry(
-  config_dir: &PathBuf,
-  home_dir: &PathBuf,
+  config_dir: &Path,
+  home_dir: &Path,
 ) -> Option<(
   /* config_home */ PathBuf,
   /* config_entry */ PathBuf,
@@ -114,7 +111,7 @@ fn get_config_home_and_entry(
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
 /// For others: `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
-fn _xdg_cache_dir(cache_dir: &PathBuf) -> PathBuf {
+fn _xdg_cache_dir(cache_dir: &Path) -> PathBuf {
   let folder = if cfg!(target_os = "windows") {
     "rsvim-cache"
   } else {
@@ -125,7 +122,7 @@ fn _xdg_cache_dir(cache_dir: &PathBuf) -> PathBuf {
 
 // For windows: `$env:USERPROFILE\AppData\Roaming\rsvim-data`.
 // For others: `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
-fn _xdg_data_dir(data_dir: &PathBuf) -> PathBuf {
+fn _xdg_data_dir(data_dir: &Path) -> PathBuf {
   let folder = if cfg!(target_os = "windows") {
     "rsvim-data"
   } else {
