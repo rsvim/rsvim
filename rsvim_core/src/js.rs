@@ -634,15 +634,16 @@ impl JsRuntime {
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
-    let path = match source.is_some() {
-      true => filename.to_string(),
-      false => match resolve_import(None, filename, None) {
+    let path = if source.is_some() {
+      filename.to_string()
+    } else {
+      match resolve_import(None, filename, None) {
         Ok(specifier) => specifier,
         Err(e) => {
           // Returns the error directly.
           return Err(e);
         }
-      },
+      }
     };
     trace!("Resolved main js module (path): {:?}", path);
 
