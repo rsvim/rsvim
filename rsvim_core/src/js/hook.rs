@@ -6,8 +6,9 @@ use crate::js::module::resolve_import;
 
 use tracing::trace;
 
-/// Called during Module::instantiate_module.
-/// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
+/// Called during `Module::instantiate_module`, see:
+/// - <https://docs.rs/v8/latest/v8/struct.Module.html#method.instantiate_module>.
+/// - <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
 pub fn module_resolve_cb<'a>(
   context: v8::Local<'a, v8::Context>,
   specifier: v8::Local<'a, v8::String>,
