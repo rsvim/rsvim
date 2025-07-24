@@ -88,13 +88,13 @@ fn test2() {
   assert!(cfg.config_home().is_some());
   assert_eq!(
     cfg.config_home().clone().unwrap(),
-    tmp_config_dir.join("rsvim")
+    tmp_home_dir.join(".rsvim")
   );
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
     cfg.config_entry().clone().unwrap(),
-    tmp_config_dir.join("rsvim").join("rsvim.js")
+    tmp_home_dir.join(".rsvim").join("rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
@@ -139,13 +139,13 @@ fn test3() {
   assert!(cfg.config_home().is_some());
   assert_eq!(
     cfg.config_home().clone().unwrap(),
-    tmp_config_dir.join("rsvim")
+    tmp_home_dir.join(".rsvim")
   );
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
     cfg.config_entry().clone().unwrap(),
-    tmp_config_dir.join("rsvim").join("rsvim.js")
+    tmp_home_dir.join(".rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
