@@ -21,10 +21,12 @@ fn test1() {
   let _guard = acquire_sequential_guard();
   test_log_init();
 
+  let tmp_home_dir = assert_fs::TempDir::new().unwrap();
   let tmp_config_dir = assert_fs::TempDir::new().unwrap();
   let tmp_cache_dir = assert_fs::TempDir::new().unwrap();
   let tmp_data_dir = assert_fs::TempDir::new().unwrap();
 
+  let saved_home = set_env_var(HOME, tmp_home_dir.path());
   let saved_conf = set_env_var(XDG_CONFIG_HOME, tmp_config_dir.path());
   let saved_cache = set_env_var(XDG_CACHE_HOME, tmp_cache_dir.path());
   let saved_data = set_env_var(XDG_DATA_HOME, tmp_data_dir.path());
@@ -52,6 +54,7 @@ fn test1() {
     assert_eq!(cfg.data_home().clone(), tmp_data_dir.join("rsvim"));
   }
 
+  restore_env_var(HOME, saved_home);
   restore_env_var(XDG_CONFIG_HOME, saved_conf);
   restore_env_var(XDG_CACHE_HOME, saved_cache);
   restore_env_var(XDG_DATA_HOME, saved_data);
