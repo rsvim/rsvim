@@ -15,7 +15,6 @@ use crate::ui::widget::window::{Window, WindowLocalOptions};
 use std::sync::Arc;
 use tracing::{self};
 
-#[cfg(test)]
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
   canvas_size: U16Size,
@@ -56,7 +55,6 @@ pub fn make_tree_with_buffers(
   tree_arc.clone()
 }
 
-#[cfg(test)]
 /// Create tree with 1 window, 1 buffer, and 1 command-line, the buffer is in buffers manager, the
 /// command-line is in the text contents.
 pub fn make_tree_with_buffers_cmdline(
