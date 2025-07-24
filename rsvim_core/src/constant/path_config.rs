@@ -62,21 +62,14 @@ fn _dirs_data_dir() -> Option<PathBuf> {
   dirs::data_dir()
 }
 
-struct CachedDirs {
-  pub config_dir: PathBuf,
-  pub home_dir: PathBuf,
-  pub cache_dir: PathBuf,
-  pub data_dir: PathBuf,
-}
-
 /// `$XDG_CONFIG_HOME/rsvim`
-fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  cached_dirs.config_dir.join("rsvim").to_path_buf()
+fn _xdg_config_dir(config_dir: &PathBuf) -> PathBuf {
+  config_dir.join("rsvim").to_path_buf()
 }
 
 /// `$HOME/.rsvim`
-fn _home_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  cached_dirs.home_dir.join(".rsvim")
+fn _home_dir(home_dir: &PathBuf) -> PathBuf {
+  home_dir.join(".rsvim")
 }
 
 /// Find the config home directory. This method look for config entry (`rsvim.{js,ts}`) in below
@@ -87,14 +80,13 @@ fn _home_dir(cached_dirs: &CachedDirs) -> PathBuf {
 ///
 /// It returns `(Home, Entry)`.
 fn get_config_home_and_entry(
-  cached_dirs: &CachedDirs,
+  config_dir: &PathBuf,
+  home_dir: &PathBuf,
 ) -> Option<(
   /* config_home */ PathBuf,
   /* config_entry */ PathBuf,
 )> {
-  for config_dir in
-    [_xdg_config_dir(cached_dirs), _home_dir(cached_dirs)].iter()
-  {
+  for config_dir in [_xdg_config_dir(config_dir), _home_dir(home_dir)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
       return Some((config_dir.to_path_buf(), ts_config));
@@ -107,13 +99,13 @@ fn get_config_home_and_entry(
 
   // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
   for config_entry in [
-    cached_dirs.home_dir.join(".rsvim.ts").to_path_buf(),
-    cached_dirs.home_dir.join(".rsvim.js").to_path_buf(),
+    home_dir.join(".rsvim.ts").to_path_buf(),
+    home_dir.join(".rsvim.js").to_path_buf(),
   ]
   .iter()
   {
     if config_entry.exists() {
-      return Some((_home_dir(cached_dirs), config_entry.clone()));
+      return Some((_home_dir(home_dir), config_entry.clone()));
     }
   }
 
@@ -122,24 +114,24 @@ fn get_config_home_and_entry(
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
 /// For others: `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
-fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
+fn _xdg_cache_dir(cache_dir: &PathBuf) -> PathBuf {
   let folder = if cfg!(target_os = "windows") {
     "rsvim-cache"
   } else {
     "rsvim"
   };
-  cached_dirs.cache_dir.join(folder).to_path_buf()
+  cache_dir.join(folder).to_path_buf()
 }
 
 // For windows: `$env:USERPROFILE\AppData\Roaming\rsvim-data`.
 // For others: `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
-fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
+fn _xdg_data_dir(data_dir: &PathBuf) -> PathBuf {
   let folder = if cfg!(target_os = "windows") {
     "rsvim-data"
   } else {
     "rsvim"
   };
-  cached_dirs.data_dir.join(folder).to_path_buf()
+  data_dir.join(folder).to_path_buf()
 }
 
 #[derive(Debug, Clone)]
@@ -154,18 +146,17 @@ pub struct PathConfig {
 impl PathConfig {
   /// Make new path config.
   pub fn new() -> Self {
-    let cached_dirs = CachedDirs {
-      config_dir: _dirs_config_dir().unwrap(),
-      home_dir: _dirs_home_dir().unwrap(),
-      cache_dir: _dirs_cache_dir().unwrap(),
-      data_dir: _dirs_data_dir().unwrap(),
-    };
-    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
+    let config_dir = _dirs_config_dir().unwrap();
+    let home_dir = _dirs_home_dir().unwrap();
+    let cache_dir = _dirs_cache_dir().unwrap();
+    let data_dir = _dirs_data_dir().unwrap();
+    let config_home_and_entry =
+      get_config_home_and_entry(&config_dir, &home_dir);
     Self {
       config_home: config_home_and_entry.as_ref().map(|c| c.0.clone()),
       config_entry: config_home_and_entry.as_ref().map(|c| c.1.clone()),
-      cache_home: _xdg_cache_dir(&cached_dirs),
-      data_home: _xdg_data_dir(&cached_dirs),
+      cache_home: _xdg_cache_dir(&cache_dir),
+      data_home: _xdg_data_dir(&data_dir),
     }
   }
 
