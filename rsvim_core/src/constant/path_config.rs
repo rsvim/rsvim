@@ -155,6 +155,7 @@ fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.data_dir.join(folder).to_path_buf()
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 /// File path related configs.
 pub struct PathConfig {
