@@ -155,7 +155,6 @@ fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.data_dir.join(folder).to_path_buf()
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 /// File path related configs.
 pub struct PathConfig {
@@ -205,16 +204,7 @@ impl PathConfig {
 
   #[cfg(test)]
   pub fn config_entry(&self) -> Option<PathBuf> {
-    let cached_dirs = CachedDirs {
-      config_dir: _dirs_config_dir().unwrap(),
-      home_dir: _dirs_home_dir().unwrap(),
-      cache_dir: _dirs_cache_dir().unwrap(),
-      data_dir: _dirs_data_dir().unwrap(),
-    };
-    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
-    config_home_and_entry
-      .as_ref()
-      .map(|c| c.config_entry.clone())
+    Self::new().config_entry.clone()
   }
 
   #[cfg(not(test))]
@@ -228,16 +218,7 @@ impl PathConfig {
 
   #[cfg(test)]
   pub fn config_home(&self) -> Option<PathBuf> {
-    let cached_dirs = CachedDirs {
-      config_dir: _dirs_config_dir().unwrap(),
-      home_dir: _dirs_home_dir().unwrap(),
-      cache_dir: _dirs_cache_dir().unwrap(),
-      data_dir: _dirs_data_dir().unwrap(),
-    };
-    let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
-    config_home_and_entry
-      .as_ref()
-      .map(|c| c.config_home.clone())
+    Self::new().config_home.clone()
   }
 
   #[cfg(not(test))]
@@ -248,13 +229,7 @@ impl PathConfig {
 
   #[cfg(test)]
   pub fn cache_home(&self) -> PathBuf {
-    let cached_dirs = CachedDirs {
-      config_dir: _dirs_config_dir().unwrap(),
-      home_dir: _dirs_home_dir().unwrap(),
-      cache_dir: _dirs_cache_dir().unwrap(),
-      data_dir: _dirs_data_dir().unwrap(),
-    };
-    _xdg_cache_dir(&cached_dirs)
+    Self::new().cache_home.clone()
   }
 
   #[cfg(not(test))]
@@ -265,13 +240,7 @@ impl PathConfig {
 
   #[cfg(test)]
   pub fn data_home(&self) -> PathBuf {
-    let cached_dirs = CachedDirs {
-      config_dir: _dirs_config_dir().unwrap(),
-      home_dir: _dirs_home_dir().unwrap(),
-      cache_dir: _dirs_cache_dir().unwrap(),
-      data_dir: _dirs_data_dir().unwrap(),
-    };
-    _xdg_data_dir(&cached_dirs)
+    Self::new().data_home.clone()
   }
 }
 
