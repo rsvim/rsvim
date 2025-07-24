@@ -26,8 +26,8 @@ pub fn module_resolve_cb<'a>(
 
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
-  let state = JsRuntime::state(scope);
-  let state = state.borrow();
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
 
   let import_map = state.options.import_map.clone();
   let referrer = v8::Global::new(scope, referrer);
