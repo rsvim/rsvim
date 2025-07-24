@@ -134,7 +134,7 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // For other
-    match &*CONFIG_HOME_PATH {
+    match PATH_CONFIG.config_home() {
       Some(config_home) => {
         // Simple file path in config home directory `${config_home}`.
         let simple_specifier = config_home.join(specifier);

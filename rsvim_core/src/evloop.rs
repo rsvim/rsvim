@@ -226,7 +226,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_entry) = &*CONFIG_ENTRY_PATH {
+    if let Some(config_entry) = PATH_CONFIG.config_entry() {
       self
         .js_runtime
         .execute_module(config_entry.to_str().unwrap(), None)
