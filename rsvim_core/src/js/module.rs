@@ -211,7 +211,7 @@ pub fn fetch_module<'a>(
   };
 
   trace!(
-    "Fetching module tree, filename: {:?}, source: {:?}",
+    "Fetch module, filename: {:?}, source: {:?}",
     filename,
     if source.as_str().len() > 50 {
       String::from(&source.as_str()[..50]) + "..."
