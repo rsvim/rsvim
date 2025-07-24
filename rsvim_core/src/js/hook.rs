@@ -6,8 +6,11 @@ use crate::js::module::resolve_import;
 
 use tracing::trace;
 
-/// Called during Module::instantiate_module.
-/// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
+/// Called during `Module::instantiate_module`, see:
+/// - Rusty V8 API:
+///   - <https://docs.rs/v8/latest/v8/struct.Module.html#method.instantiate_module>.
+///   - <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
+/// - Node V8 API: <https://v8docs.nodesource.com/node-24.1/df/d74/classv8_1_1_module.html#a3313f8faa14b6dc5d37c340d45273bf1>.
 pub fn module_resolve_cb<'a>(
   context: v8::Local<'a, v8::Context>,
   specifier: v8::Local<'a, v8::String>,
@@ -23,8 +26,8 @@ pub fn module_resolve_cb<'a>(
 
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
-  let state = JsRuntime::state(scope);
-  let state = state.borrow();
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
 
   let import_map = state.options.import_map.clone();
   let referrer = v8::Global::new(scope, referrer);

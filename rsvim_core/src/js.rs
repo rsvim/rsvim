@@ -7,8 +7,8 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin,
-  fetch_module_tree, load_import, resolve_import,
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
+  fetch_module_tree, resolve_import,
 };
 use crate::js::msg::{
   EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
@@ -244,7 +244,7 @@ impl JsRuntimeForSnapshot {
   ) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    let module = match Self::fetch_module(tc_scope, name, Some(source)) {
+    let module = match fetch_module(tc_scope, name, Some(source)) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
@@ -289,36 +289,6 @@ impl JsRuntimeForSnapshot {
       );
       std::process::exit(1);
     }
-  }
-
-  fn fetch_module<'a>(
-    scope: &mut v8::HandleScope<'a>,
-    filename: &str,
-    source: Option<&str>,
-  ) -> Option<v8::Local<'a, v8::Module>> {
-    // Create a script origin.
-    let origin = create_origin(scope, filename, true);
-
-    // Find appropriate loader if source is empty.
-    let source = match source {
-      Some(source) => source.into(),
-      None => load_import(filename, true).unwrap(),
-    };
-    trace!(
-      "Fetched module filename: {:?}, source: {:?}",
-      filename,
-      if source.as_str().len() > 20 {
-        String::from(&source.as_str()[..20]) + "..."
-      } else {
-        String::from(source.as_str())
-      }
-    );
-    let source = v8::String::new(scope, &source).unwrap();
-    let mut source = v8::script_compiler::Source::new(source, Some(&origin));
-
-    let module = v8::script_compiler::compile_module(scope, &mut source)?;
-
-    Some(module)
   }
 }
 
@@ -573,55 +543,55 @@ impl JsRuntime {
     // runtime
   }
 
-  /// Executes traditional JavaScript code (traditional = not ES modules).
-  ///
-  /// NOTE: We don't use it.
-  pub fn __execute_script(
-    &mut self,
-    filename: &str,
-    source: &str,
-  ) -> Result<Option<v8::Global<v8::Value>>, AnyErr> {
-    // Get the handle-scope.
-    let scope = &mut self.handle_scope();
-    let state_rc = JsRuntime::state(scope);
-
-    let origin = create_origin(scope, filename, false);
-    let source = v8::String::new(scope, source).unwrap();
-
-    // The `TryCatch` scope allows us to catch runtime errors rather than panicking.
-    let tc_scope = &mut v8::TryCatch::new(scope);
-    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, AnyErr>;
-
-    let handle_exception = |scope: &mut v8::TryCatch<
-      '_,
-      v8::HandleScope<'_>,
-    >|
-     -> ExecuteScriptResult {
-      // Extract the exception during compilation.
-      assert!(scope.has_caught());
-      let exception = scope.exception().unwrap();
-      let exception = v8::Global::new(scope, exception);
-      let mut state = state_rc.borrow_mut();
-      // Capture the exception internally.
-      state.exceptions.capture_exception(exception);
-      drop(state);
-      // Force an exception check.
-      if let Some(error) = check_exceptions(scope) {
-        anyhow::bail!(error)
-      }
-      Ok(None)
-    };
-
-    let script = match v8::Script::compile(tc_scope, source, Some(&origin)) {
-      Some(script) => script,
-      None => return handle_exception(tc_scope),
-    };
-
-    match script.run(tc_scope) {
-      Some(value) => Ok(Some(v8::Global::new(tc_scope, value))),
-      None => handle_exception(tc_scope),
-    }
-  }
+  // /// Executes traditional JavaScript code (traditional = not ES modules).
+  // ///
+  // /// NOTE: We don't use it.
+  // pub fn __execute_script(
+  //   &mut self,
+  //   filename: &str,
+  //   source: &str,
+  // ) -> Result<Option<v8::Global<v8::Value>>, AnyErr> {
+  //   // Get the handle-scope.
+  //   let scope = &mut self.handle_scope();
+  //   let state_rc = JsRuntime::state(scope);
+  //
+  //   let origin = create_origin(scope, filename, false);
+  //   let source = v8::String::new(scope, source).unwrap();
+  //
+  //   // The `TryCatch` scope allows us to catch runtime errors rather than panicking.
+  //   let tc_scope = &mut v8::TryCatch::new(scope);
+  //   type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, AnyErr>;
+  //
+  //   let handle_exception = |scope: &mut v8::TryCatch<
+  //     '_,
+  //     v8::HandleScope<'_>,
+  //   >|
+  //    -> ExecuteScriptResult {
+  //     // Extract the exception during compilation.
+  //     assert!(scope.has_caught());
+  //     let exception = scope.exception().unwrap();
+  //     let exception = v8::Global::new(scope, exception);
+  //     let mut state = state_rc.borrow_mut();
+  //     // Capture the exception internally.
+  //     state.exceptions.capture_exception(exception);
+  //     drop(state);
+  //     // Force an exception check.
+  //     if let Some(error) = check_exceptions(scope) {
+  //       anyhow::bail!(error)
+  //     }
+  //     Ok(None)
+  //   };
+  //
+  //   let script = match v8::Script::compile(tc_scope, source, Some(&origin)) {
+  //     Some(script) => script,
+  //     None => return handle_exception(tc_scope),
+  //   };
+  //
+  //   match script.run(tc_scope) {
+  //     Some(value) => Ok(Some(v8::Global::new(tc_scope, value))),
+  //     None => handle_exception(tc_scope),
+  //   }
+  // }
 
   /// Executes JavaScript code as ES module.
   pub fn execute_module(
@@ -634,15 +604,16 @@ impl JsRuntime {
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
-    let path = match source.is_some() {
-      true => filename.to_string(),
-      false => match resolve_import(None, filename, None) {
+    let path = if source.is_some() {
+      filename.to_string()
+    } else {
+      match resolve_import(None, filename, None) {
         Ok(specifier) => specifier,
         Err(e) => {
           // Returns the error directly.
           return Err(e);
         }
-      },
+      }
     };
     trace!("Resolved main js module (path): {:?}", path);
 

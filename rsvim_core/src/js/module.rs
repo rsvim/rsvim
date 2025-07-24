@@ -93,8 +93,12 @@ pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
     HashMap::from_iter(modules)
   });
 
-/// Creates v8 script origins.
-pub fn create_origin<'s>(
+/// Creates v8 script origins, see:
+/// - Node V8 API: <https://v8docs.nodesource.com/node-24.1/db/d84/classv8_1_1_script_origin.html>
+/// - Rusty V8 API: <https://docs.rs/v8/latest/v8/struct.ScriptOrigin.html>.
+/// - MDN script: <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script>.
+/// - HTML5 origin: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
+fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
   is_module: bool,
@@ -192,16 +196,13 @@ pub async fn load_import_async(
   load_import(specifier, skip_cache)
 }
 
-/// Resolves module imports synchronously.
-/// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
-pub fn fetch_module_tree<'a>(
+pub fn fetch_module<'a>(
   scope: &mut v8::HandleScope<'a>,
   filename: &str,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Create a script origin.
   let origin = create_origin(scope, filename, true);
-  let state = JsRuntime::state(scope);
 
   // Find appropriate loader if source is empty.
   let source = match source {
@@ -210,7 +211,7 @@ pub fn fetch_module_tree<'a>(
   };
 
   trace!(
-    "Fetching module tree, filename: {:?}, source: {:?}",
+    "Fetch module, filename: {:?}, source: {:?}",
     filename,
     if source.as_str().len() > 50 {
       String::from(&source.as_str()[..50]) + "..."
@@ -223,6 +224,20 @@ pub fn fetch_module_tree<'a>(
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
   let module = v8::script_compiler::compile_module(scope, &mut source)?;
+
+  Some(module)
+}
+
+/// Resolves module imports synchronously.
+/// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
+pub fn fetch_module_tree<'a>(
+  scope: &mut v8::HandleScope<'a>,
+  filename: &str,
+  source: Option<&str>,
+) -> Option<v8::Local<'a, v8::Module>> {
+  let module = fetch_module(scope, filename, source).unwrap();
+
+  let state = JsRuntime::state(scope);
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
