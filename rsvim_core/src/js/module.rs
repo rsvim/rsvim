@@ -93,8 +93,12 @@ pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
     HashMap::from_iter(modules)
   });
 
-/// Creates v8 script origins.
-pub fn create_origin<'s>(
+/// Creates v8 script origins, see:
+/// - Node V8 API: <https://v8docs.nodesource.com/node-24.1/db/d84/classv8_1_1_script_origin.html>
+/// - Rusty V8 API: <https://docs.rs/v8/latest/v8/struct.ScriptOrigin.html>.
+/// - MDN script: <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script>.
+/// - HTML5 origin: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
+fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
   is_module: bool,
