@@ -192,16 +192,13 @@ pub async fn load_import_async(
   load_import(specifier, skip_cache)
 }
 
-/// Resolves module imports synchronously.
-/// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
-pub fn fetch_module_tree<'a>(
+pub fn fetch_module<'a>(
   scope: &mut v8::HandleScope<'a>,
   filename: &str,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Create a script origin.
   let origin = create_origin(scope, filename, true);
-  let state = JsRuntime::state(scope);
 
   // Find appropriate loader if source is empty.
   let source = match source {
@@ -223,6 +220,20 @@ pub fn fetch_module_tree<'a>(
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
   let module = v8::script_compiler::compile_module(scope, &mut source)?;
+
+  Some(module)
+}
+
+/// Resolves module imports synchronously.
+/// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
+pub fn fetch_module_tree<'a>(
+  scope: &mut v8::HandleScope<'a>,
+  filename: &str,
+  source: Option<&str>,
+) -> Option<v8::Local<'a, v8::Module>> {
+  let module = fetch_module(scope, filename, source).unwrap();
+
+  let state = JsRuntime::state(scope);
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);

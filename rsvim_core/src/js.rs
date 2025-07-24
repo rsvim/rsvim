@@ -7,8 +7,8 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin,
-  fetch_module_tree, load_import, resolve_import,
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
+  fetch_module_tree, resolve_import,
 };
 use crate::js::msg::{
   EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
@@ -244,7 +244,7 @@ impl JsRuntimeForSnapshot {
   ) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    let module = match fetch_module_tree(tc_scope, name, Some(source)) {
+    let module = match fetch_module(tc_scope, name, Some(source)) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
