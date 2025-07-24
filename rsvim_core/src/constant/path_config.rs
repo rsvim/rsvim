@@ -62,8 +62,7 @@ fn _dirs_data_dir() -> Option<PathBuf> {
   dirs::data_dir()
 }
 
-#[derive(Debug, Clone)]
-pub struct CachedDirs {
+struct CachedDirs {
   pub config_dir: PathBuf,
   pub home_dir: PathBuf,
   pub cache_dir: PathBuf,
@@ -80,12 +79,6 @@ fn _home_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.home_dir.join(".rsvim")
 }
 
-#[derive(Debug, Clone)]
-struct ConfigHomeAndEntry {
-  pub config_home: PathBuf,
-  pub config_entry: PathBuf,
-}
-
 /// Find the config home directory. This method look for config entry (`rsvim.{js,ts}`) in below
 /// locations:
 /// 1. `$XDG_CONFIG_HOME/rsvim`
@@ -95,23 +88,20 @@ struct ConfigHomeAndEntry {
 /// It returns `(Home, Entry)`.
 fn get_config_home_and_entry(
   cached_dirs: &CachedDirs,
-) -> Option<ConfigHomeAndEntry> {
+) -> Option<(
+  /* config_home */ PathBuf,
+  /* config_entry */ PathBuf,
+)> {
   for config_dir in
     [_xdg_config_dir(cached_dirs), _home_dir(cached_dirs)].iter()
   {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
-      return Some(ConfigHomeAndEntry {
-        config_home: config_dir.to_path_buf(),
-        config_entry: ts_config,
-      });
+      return Some((config_dir.to_path_buf(), ts_config));
     }
     let js_config = config_dir.join("rsvim.js");
     if js_config.as_path().exists() {
-      return Some(ConfigHomeAndEntry {
-        config_home: config_dir.to_path_buf(),
-        config_entry: js_config,
-      });
+      return Some((config_dir.to_path_buf(), js_config));
     }
   }
 
@@ -123,10 +113,7 @@ fn get_config_home_and_entry(
   .iter()
   {
     if config_entry.exists() {
-      return Some(ConfigHomeAndEntry {
-        config_home: _home_dir(cached_dirs),
-        config_entry: config_entry.clone(),
-      });
+      return Some((_home_dir(cached_dirs), config_entry.clone()));
     }
   }
 
@@ -175,12 +162,8 @@ impl PathConfig {
     };
     let config_home_and_entry = get_config_home_and_entry(&cached_dirs);
     Self {
-      config_home: config_home_and_entry
-        .as_ref()
-        .map(|c| c.config_home.clone()),
-      config_entry: config_home_and_entry
-        .as_ref()
-        .map(|c| c.config_entry.clone()),
+      config_home: config_home_and_entry.as_ref().map(|c| c.0.clone()),
+      config_entry: config_home_and_entry.as_ref().map(|c| c.1.clone()),
       cache_home: _xdg_cache_dir(&cached_dirs),
       data_home: _xdg_data_dir(&cached_dirs),
     }
