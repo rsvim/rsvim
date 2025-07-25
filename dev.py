@@ -45,7 +45,7 @@ def set_sccache():
         return
 
     if NO_SCCACHE:
-        logging.warning("'sccache' is disabled by -c/--no-cache!")
+        logging.warning("'sccache' is disabled by '-c'/'--no-cache' option!")
         return
 
     if RECACHE_SCCACHE:
