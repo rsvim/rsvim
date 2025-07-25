@@ -154,7 +154,7 @@ impl ModuleMap {
 }
 
 impl ModuleMap {
-  // Creates a new module-map instance.
+  /// Creates a new module-map instance.
   pub fn new() -> ModuleMap {
     Self {
       main: None,
@@ -164,7 +164,7 @@ impl ModuleMap {
     }
   }
 
-  // Inserts a compiled ES module to the map.
+  /// Inserts a compiled ES module to the map.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
@@ -178,14 +178,15 @@ impl ModuleMap {
   //   !self.pending.is_empty()
   // }
 
-  // Returns a v8 module reference from me module-map.
+  /// Returns a v8 module reference from me module-map.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
     self.index.get(key).cloned()
   }
 
-  // Returns a specifier by a v8 module.
-  // FIXME: This method has performance issue, make it `O(1)` instead of
-  // `O(N)`.
+  /// Returns a specifier by a v8 module.
+  ///
+  /// FIXME: This method has performance issue, make it `O(1)` instead of
+  /// `O(N)`.
   pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
     self
       .index
