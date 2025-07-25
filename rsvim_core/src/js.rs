@@ -548,11 +548,7 @@ impl JsRuntime {
     };
 
     // When without snapshot, we need to initialize builtin js modules.
-
-    {
-      let scope = &mut runtime.handle_scope();
-      init_builtin_modules(scope);
-    }
+    init_builtin_modules(&mut runtime.handle_scope());
 
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
