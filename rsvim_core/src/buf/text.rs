@@ -12,7 +12,6 @@ use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
 use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 pub mod cidx;
 
@@ -23,7 +22,7 @@ mod cidx_tests;
 /// Text content backend.
 pub struct Text {
   rope: Rope,
-  cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
+  cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   options: BufferLocalOptions,
 }
 
@@ -43,10 +42,10 @@ impl Text {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
-      cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
+      cached_lines_width: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::new(),
-      ))),
+      )),
       options: opts,
     }
   }
