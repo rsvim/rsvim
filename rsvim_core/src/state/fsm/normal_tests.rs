@@ -5839,6 +5839,144 @@ mod tests_cursor_move {
   }
 
   #[test]
+  fn nowrap5() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(29, 5);
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "\t2. When the line is too long to be completely put in a row of the window content widget, there're still multiple cases.\n",
+    ];
+    let (tree, state, bufs, buf, contents) = make_tree(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveTo((21, 3)));
+
+    // Move-1
+    {
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.char_idx(), 21);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 28);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and sm",
+        "But still it contains several",
+        "\t1. When the line is s",
+        "\t2. When the line is t",
+      ];
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSVIM!                ",
+        "This is a quite simple and sm",
+        "But still it contains several",
+        "        1. When the line is s",
+        "        2. When the line is t",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(1));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.char_idx(), 22);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 28);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "ello, RSVIM!\n",
+        "his is a quite simple and sma",
+        "ut still it contains several ",
+        "1. When the line is sm",
+        "2. When the line is to",
+      ];
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 7), (4, 7)]
+          .into_iter()
+          .collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "ello, RSVIM!                 ",
+        "his is a quite simple and sma",
+        "ut still it contains several ",
+        ">>>>>>>1. When the line is sm",
+        ">>>>>>>2. When the line is to",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
   fn wrap_nolinebreak1() {
     test_log_init();
 

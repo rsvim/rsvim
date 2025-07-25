@@ -249,8 +249,17 @@ impl CursorViewport {
       debug_assert_eq!(cursor_row.len(), 1);
       let (row_idx, row_viewport) = cursor_row[0];
 
-      let row_start_width =
+      let mut row_start_width =
         text.width_before(line_idx, row_viewport.start_char_idx());
+
+      // Subtract `start_filled_cols` if the row is the first row in the line.
+      let (first_row_idx, _first_row_viewport) =
+        line_viewport.rows.first().unwrap();
+      if first_row_idx == row_idx {
+        debug_assert!(row_start_width >= line_viewport.start_filled_cols());
+        row_start_width -= line_viewport.start_filled_cols();
+      };
+
       let char_start_width = text.width_before(line_idx, char_idx);
       let col_idx = (char_start_width - row_start_width) as u16;
       let row_idx = *row_idx;
