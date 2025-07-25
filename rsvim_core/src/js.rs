@@ -106,35 +106,6 @@ fn init_v8_isolate(isolate: &mut OwnedIsolate) {
   );
 }
 
-// Built-in modules {
-
-struct BuiltinRuntimeModule {
-  pub filename: &'static str,
-  pub source: &'static str,
-}
-
-impl BuiltinRuntimeModule {
-  pub fn new(filename: &'static str, source: &'static str) -> Self {
-    Self { filename, source }
-  }
-}
-
-static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> =
-  Lazy::new(|| {
-    vec![
-      BuiltinRuntimeModule::new(
-        "00__web.js",
-        include_str!("./js/runtime/00__web.js"),
-      ),
-      BuiltinRuntimeModule::new(
-        "01__rsvim.js",
-        include_str!("./js/runtime/01__rsvim.js"),
-      ),
-    ]
-  });
-
-// Built-in modules }
-
 fn _init_builtin_module_impl(
   scope: &mut v8::HandleScope<'_>,
   name: &str,
@@ -186,8 +157,20 @@ fn _init_builtin_module_impl(
 }
 
 fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
-  for module in BUILTIN_RUNTIME_MODULES.iter() {
-    _init_builtin_module_impl(scope, module.filename, module.source);
+  static BUILTIN_MODULES: Lazy<
+    Vec<(
+      /* filename */ &'static str,
+      /* source */ &'static str,
+    )>,
+  > = Lazy::new(|| {
+    vec![
+      ("00__web.js", include_str!("./js/runtime/00__web.js")),
+      ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+    ]
+  });
+
+  for module in BUILTIN_MODULES.iter() {
+    _init_builtin_module_impl(scope, module.0, module.1);
   }
 }
 
