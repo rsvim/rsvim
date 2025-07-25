@@ -112,45 +112,16 @@ fn _init_builtin_module_impl(
 ) {
   let tc_scope = &mut v8::TryCatch::new(scope);
 
-  let module = match fetch_module(tc_scope, name, Some(source)) {
-    Some(module) => module,
-    None => {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to import builtin modules: {name}, error: {exception:?}");
-      eprintln!(
-        "Failed to import builtin modules: {name}, error: {exception:?}"
-      );
-      std::process::exit(1);
-    }
-  };
-
-  if module
+  let module = fetch_module(tc_scope, name, Some(source)).unwrap();
+  let _ = module
     .instantiate_module(tc_scope, module_resolve_cb)
-    .is_none()
-  {
-    assert!(tc_scope.has_caught());
-    let exception = tc_scope.exception().unwrap();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    error!(
-      "Failed to instantiate builtin modules: {name}, error: {exception:?}"
-    );
-    eprintln!(
-      "Failed to instantiate builtin modules: {name}, error: {exception:?}"
-    );
-    std::process::exit(1);
-  }
-
+    .unwrap();
   let _ = module.evaluate(tc_scope);
 
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
     error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-    eprintln!(
-      "Failed to evaluate builtin modules: {name}, error: {exception:?}"
-    );
     std::process::exit(1);
   }
 }
