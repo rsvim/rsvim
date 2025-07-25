@@ -17,7 +17,6 @@ use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
-use once_cell::sync::Lazy;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Once;
@@ -106,17 +105,10 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
 }
 
 fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
-  static BUILTIN_MODULES: Lazy<
-    Vec<(
-      /* filename */ &'static str,
-      /* source */ &'static str,
-    )>,
-  > = Lazy::new(|| {
-    vec![
-      ("00__web.js", include_str!("./js/runtime/00__web.js")),
-      ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
-    ]
-  });
+  static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
+    ("00__web.js", include_str!("./js/runtime/00__web.js")),
+    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+  ];
 
   for module in BUILTIN_MODULES.iter() {
     let filename = module.0;
