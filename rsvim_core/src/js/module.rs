@@ -196,6 +196,9 @@ pub async fn load_import_async(
   load_import(specifier, skip_cache)
 }
 
+/// Resolves module imports without dependency.
+///
+/// TODO: Support dependencies resolving for custom snapshot.
 pub fn fetch_module<'a>(
   scope: &mut v8::HandleScope<'a>,
   filename: &str,

@@ -17,7 +17,6 @@ use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
-use once_cell::sync::Lazy;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Once;
@@ -93,34 +92,46 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   });
 }
 
-// Built-in modules {
-
-struct BuiltinRuntimeModule {
-  pub filename: &'static str,
-  pub source: &'static str,
+fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
+  // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
+  // See: [`run_next_tick_callbacks`].
+  isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+  isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
+  isolate.set_promise_reject_callback(hook::promise_reject_cb);
+  // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
+  isolate.set_host_initialize_import_meta_object_callback(
+    hook::host_initialize_import_meta_object_cb,
+  );
 }
 
-impl BuiltinRuntimeModule {
-  pub fn new(filename: &'static str, source: &'static str) -> Self {
-    Self { filename, source }
+fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
+  static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
+    ("00__web.js", include_str!("./js/runtime/00__web.js")),
+    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+  ];
+
+  for module in BUILTIN_MODULES.iter() {
+    let filename = module.0;
+    let source = module.1;
+
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = fetch_module(tc_scope, filename, Some(source)).unwrap();
+    let _ = module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .unwrap();
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!(
+        "Failed to evaluate builtin modules: {filename}, error: {exception:?}"
+      );
+      std::process::exit(1);
+    }
   }
 }
-
-static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> =
-  Lazy::new(|| {
-    vec![
-      BuiltinRuntimeModule::new(
-        "00__web.js",
-        include_str!("./js/runtime/00__web.js"),
-      ),
-      BuiltinRuntimeModule::new(
-        "01__rsvim.js",
-        include_str!("./js/runtime/01__rsvim.js"),
-      ),
-    ]
-  });
-
-// Built-in modules }
 
 /// The state for js runtime of snapshot.
 pub struct JsRuntimeStateForSnapshot {
@@ -168,15 +179,8 @@ impl JsRuntimeForSnapshot {
     let scope = &mut context_scope;
     let _context = v8::Local::new(scope, global_context.clone());
 
-    {
-      // Load and compile built-in modules.
-      // NOTE: Each scripts is named with an index prefix, it indicates the order of calling the
-      // `add_context_data` API.
-
-      for module in BUILTIN_RUNTIME_MODULES.iter() {
-        Self::init_builtin_module(scope, module.filename, module.source);
-      }
-    }
+    // Load, compile and evaluate all built-in modules.
+    init_builtin_modules(scope);
 
     let state = JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
       context: Some(global_context),
@@ -196,15 +200,7 @@ impl JsRuntimeForSnapshot {
     let mut isolate =
       v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
 
-    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
-    // See: [`run_next_tick_callbacks`].
-    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
-    isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
-    isolate.set_promise_reject_callback(hook::promise_reject_cb);
-    // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
-    isolate.set_host_initialize_import_meta_object_callback(
-      hook::host_initialize_import_meta_object_cb,
-    );
+    init_v8_isolate(&mut isolate);
 
     let global_context = {
       let scope = &mut v8::HandleScope::new(&mut isolate);
@@ -234,61 +230,6 @@ impl JsRuntimeForSnapshot {
     snapshot_creator
       .create_blob(v8::FunctionCodeHandling::Keep)
       .unwrap()
-  }
-
-  /// Synchronously load builtin module.
-  fn init_builtin_module(
-    scope: &mut v8::HandleScope<'_>,
-    name: &str,
-    source: &str,
-  ) {
-    let tc_scope = &mut v8::TryCatch::new(scope);
-
-    let module = match fetch_module(tc_scope, name, Some(source)) {
-      Some(module) => module,
-      None => {
-        assert!(tc_scope.has_caught());
-        let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!(
-          "Failed to import builtin modules: {name}, error: {exception:?}"
-        );
-        eprintln!(
-          "Failed to import builtin modules: {name}, error: {exception:?}"
-        );
-        std::process::exit(1);
-      }
-    };
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!(
-        "Failed to instantiate builtin modules: {name}, error: {exception:?}"
-      );
-      eprintln!(
-        "Failed to instantiate builtin modules: {name}, error: {exception:?}"
-      );
-      std::process::exit(1);
-    }
-
-    let _ = module.evaluate(tc_scope);
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!(
-        "Failed to evaluate builtin modules: {name}, error: {exception:?}"
-      );
-      eprintln!(
-        "Failed to evaluate builtin modules: {name}, error: {exception:?}"
-      );
-      std::process::exit(1);
-    }
   }
 }
 
@@ -405,7 +346,7 @@ impl std::fmt::Debug for JsRuntime {
 }
 
 impl JsRuntime {
-  /// Creates a new JsRuntime based on provided options.
+  /// Creates a new JsRuntime with snapshot.
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     options: JsRuntimeOptions,
@@ -429,15 +370,7 @@ impl JsRuntime {
       v8::Isolate::new(create_params)
     };
 
-    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
-    // See: [`run_next_tick_callbacks`].
-    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
-    isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
-    isolate.set_promise_reject_callback(hook::promise_reject_cb);
-    // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
-    isolate.set_host_initialize_import_meta_object_callback(
-      hook::host_initialize_import_meta_object_cb,
-    );
+    init_v8_isolate(&mut isolate);
 
     // const MIN_POOL_SIZE: usize = 1;
 
@@ -541,6 +474,81 @@ impl JsRuntime {
     // }
 
     // runtime
+  }
+
+  /// Creates a new JsRuntime from scratch, i.e. without snapshot, usually for
+  /// testing purpose.
+  #[allow(clippy::too_many_arguments)]
+  pub fn new_without_snapshot(
+    options: JsRuntimeOptions,
+    startup_moment: Instant,
+    time_origin: u128,
+    jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
+    cli_opt: CliOpt,
+    tree: TreeArc,
+    buffers: BuffersManagerArc,
+    contents: TextContentsArc,
+    editing_state: StateArc,
+  ) -> Self {
+    // Fire up the v8 engine.
+    init_v8_platform(false, Some(&options.v8_flags));
+
+    let mut isolate = v8::Isolate::new(v8::CreateParams::default());
+
+    init_v8_isolate(&mut isolate);
+
+    let context: v8::Global<v8::Context> = {
+      let scope = &mut v8::HandleScope::new(&mut *isolate);
+      let context = binding::create_new_context(scope);
+
+      // let module_handles = get_context_data(scope, context);
+      v8::Global::new(scope, context)
+    };
+
+    // Store state inside the v8 isolate slot.
+    // https://v8docs.nodesource.com/node-4.8/d5/dda/classv8_1_1_isolate.html#a7acadfe7965997e9c386a05f098fbe36
+    let state = JsRuntimeState::to_rc(JsRuntimeState {
+      context,
+      module_map: ModuleMap::new(),
+      timeout_handles: HashSet::new(),
+      // interrupt_handle: event_loop.interrupt_handle(),
+      pending_futures: HashMap::new(),
+      // timeout_queue: BTreeMap::new(),
+      startup_moment,
+      time_origin,
+      // next_tick_queue: Vec::new(),
+      exceptions: ExceptionState::new(),
+      options,
+      // wake_event_queued: false,
+      jsrt_to_mstr,
+      jsrt_from_mstr,
+      cli_opt,
+      tree,
+      buffers,
+      contents,
+      editing_state,
+    });
+
+    isolate.set_slot(state.clone());
+
+    let mut runtime = JsRuntime {
+      isolate,
+      // event_loop,
+      state,
+      // inspector,
+    };
+
+    // When without snapshot, we need to initialize builtin js modules.
+    init_builtin_modules(&mut runtime.handle_scope());
+
+    // // Start inspector agent is requested.
+    // if let Some(inspector) = runtime.inspector().as_mut() {
+    //   let address = address.unwrap();
+    //   inspector.borrow_mut().start_agent(address);
+    // }
+
+    runtime
   }
 
   // /// Executes traditional JavaScript code (traditional = not ES modules).
