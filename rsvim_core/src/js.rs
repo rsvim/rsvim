@@ -25,7 +25,6 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{error, trace};
-use v8::OwnedIsolate;
 
 pub mod binding;
 pub mod err;
@@ -94,7 +93,7 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   });
 }
 
-fn init_v8_isolate(isolate: &mut OwnedIsolate) {
+fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
   // See: [`run_next_tick_callbacks`].
   isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
