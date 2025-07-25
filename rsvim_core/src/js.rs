@@ -17,7 +17,6 @@ use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -336,7 +335,7 @@ pub struct JsRuntime {
 
   /// The state of the runtime.
   #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeState>>,
+  pub state: JsRuntimeStateRc,
 }
 
 impl std::fmt::Debug for JsRuntime {
