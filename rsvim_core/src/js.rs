@@ -336,7 +336,7 @@ pub struct JsRuntime {
 
   /// The state of the runtime.
   #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeState>>,
+  pub state: JsRuntimeStateRc,
 }
 
 impl std::fmt::Debug for JsRuntime {
