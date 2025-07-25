@@ -45,7 +45,7 @@ def set_sccache():
         return
 
     if SKIP_SCCACHE:
-        logging.warning("'sccache' is disabled!")
+        logging.warning("'sccache' is skipped!")
         return
 
     if RECACHE_SCCACHE:
@@ -317,7 +317,7 @@ if __name__ == "__main__":
     if parser.recache:
         RECACHE_SCCACHE = True
     if parser.skip_cache:
-        NO_SCCACHE = True
+        SKIP_SCCACHE = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy()
