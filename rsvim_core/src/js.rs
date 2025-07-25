@@ -17,7 +17,6 @@ use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
