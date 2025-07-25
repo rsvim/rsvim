@@ -43,9 +43,9 @@ def set_sccache():
         logging.warning("'sccache' not found!")
         return
 
-    # if WINDOWS:
-    #     logging.warning("'sccache' is disabled on Windows!")
-    #     return command
+    if WINDOWS:
+        logging.warning("'sccache' is disabled on Windows!")
+        return
 
     if RECACHE_SCCACHE:
         set_env("SCCACHE_RECACHE", "1")
