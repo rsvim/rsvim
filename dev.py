@@ -17,7 +17,7 @@ LINUX = not WINDOWS and not MACOS
 
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
-NO_SCCACHE = False
+SKIP_SCCACHE = False
 
 RUSTFLAGS = []
 
@@ -44,8 +44,8 @@ def set_sccache():
         logging.warning("'sccache' not found!")
         return
 
-    if NO_SCCACHE:
-        logging.warning("'sccache' is disabled!")
+    if SKIP_SCCACHE:
+        logging.warning("'sccache' is skipped!")
         return
 
     if RECACHE_SCCACHE:
@@ -208,8 +208,8 @@ if __name__ == "__main__":
         help="Rebuild all `sccache` caches",
     )
     parser.add_argument(
-        "-c",
-        "--no-cache",
+        "-s",
+        "--skip-cache",
         action="store_true",
         help="Build without `sccache`",
     )
@@ -316,8 +316,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.no_cache:
-        NO_SCCACHE = True
+    if parser.skip_cache:
+        SKIP_SCCACHE = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy()
