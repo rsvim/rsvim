@@ -517,7 +517,8 @@ impl JsRuntime {
     // runtime
   }
 
-  /// Creates a new JsRuntime without snapshot, usually for testing purpose.
+  /// Creates a new JsRuntime from scratch, i.e. without snapshot, usually for
+  /// testing purpose.
   #[allow(clippy::too_many_arguments)]
   pub fn new_without_snapshot(
     options: JsRuntimeOptions,
