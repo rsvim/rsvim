@@ -184,6 +184,8 @@ impl ModuleMap {
   }
 
   // Returns a specifier by a v8 module.
+  // FIXME: This method has performance issue, make it `O(1)` instead of
+  // `O(N)`.
   pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
     self
       .index
