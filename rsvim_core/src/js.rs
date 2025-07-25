@@ -105,27 +105,6 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   );
 }
 
-fn _init_builtin_module_impl(
-  scope: &mut v8::HandleScope<'_>,
-  name: &str,
-  source: &str,
-) {
-  let tc_scope = &mut v8::TryCatch::new(scope);
-
-  let module = fetch_module(tc_scope, name, Some(source)).unwrap();
-  let _ = module
-    .instantiate_module(tc_scope, module_resolve_cb)
-    .unwrap();
-  let _ = module.evaluate(tc_scope);
-
-  if module.get_status() == v8::ModuleStatus::Errored {
-    let exception = module.get_exception();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-    std::process::exit(1);
-  }
-}
-
 fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
   static BUILTIN_MODULES: Lazy<
     Vec<(
@@ -140,7 +119,25 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
   });
 
   for module in BUILTIN_MODULES.iter() {
-    _init_builtin_module_impl(scope, module.0, module.1);
+    let filename = module.0;
+    let source = module.1;
+
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = fetch_module(tc_scope, filename, Some(source)).unwrap();
+    let _ = module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .unwrap();
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!(
+        "Failed to evaluate builtin modules: {filename}, error: {exception:?}"
+      );
+      std::process::exit(1);
+    }
   }
 }
 
