@@ -93,10 +93,6 @@ swc_visit = { workspace = true }
 swc_visit_macros = { workspace = true }
 sourcemap = { workspace = true }
 
-# swc_bundler = { workspace = true }
-# swc_graph_analyzer = { workspace = true }
-# swc_trace_macro = { workspace = true }
-
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
