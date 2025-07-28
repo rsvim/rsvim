@@ -220,7 +220,7 @@ pub fn fetch_module<'a>(
     } else {
       String::from(source.as_str())
     };
-    trace!("Fetch module, filename: {:?}, source: {:?}", filename, src);
+    trace!("Fetch module, filename:{:?}, source:{:?}", filename, src);
   }
 
   let source = v8::String::new(scope, &source).unwrap();
