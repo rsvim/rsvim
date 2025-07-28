@@ -85,41 +85,9 @@ impl CliOpt {
   // pub fn debug(&self) -> bool {
   //   self.debug
   // }
-}
 
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn cli_opt1() {
-    let input = [
-      vec!["rsvim".to_string()],
-      vec!["rsvim".to_string(), "--version".to_string()],
-      vec!["rsvim".to_string(), "README.md".to_string()],
-    ];
-
-    let expect = [
-      CliOpt {
-        file: vec![],
-        version: false,
-      },
-      CliOpt {
-        file: vec![],
-        version: true,
-      },
-      CliOpt {
-        file: vec!["README.md".to_string()],
-        version: false,
-      },
-    ];
-
-    assert_eq!(input.len(), expect.len());
-    let n = input.len();
-    for i in 0..n {
-      let actual = CliOpt::parse_from(&input[i]);
-      assert_eq!(actual.file, expect[i].file);
-      assert_eq!(actual.version(), expect[i].version());
-    }
+  #[cfg(test)]
+  pub fn new(version: bool, file: Vec<String>) -> Self {
+    Self { version, file }
   }
 }
