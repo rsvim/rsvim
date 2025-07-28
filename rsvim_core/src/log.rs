@@ -7,8 +7,7 @@ use tracing_subscriber::{self, EnvFilter};
 /// Initialize file logging, always use file logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
-/// Defaults to `error`. The logs are written into file if log level >= `INFO`, otherwise it prints
-/// to terminal.
+/// Defaults to `error`.
 pub fn init() {
   let env_filter = EnvFilter::from_env("RSVIM_LOG");
 
