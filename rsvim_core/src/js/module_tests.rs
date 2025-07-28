@@ -1,5 +1,6 @@
 use super::module::*;
 
+use crate::prelude::*;
 use crate::test::constant::acquire_sequential_guard;
 use crate::test::js::make_js_runtime;
 use crate::test::log::init as test_log_init;
@@ -39,6 +40,11 @@ fn test_fetch1() {
     fetch_module(&mut scope, fetch1.as_os_str().to_str().unwrap(), None);
   assert!(actual1.is_some());
   let actual1 = actual1.unwrap();
+  info!(
+    "fetch1 actual1:{:?}, script_id:{:?}",
+    actual1,
+    actual1.script_id()
+  );
   assert!(actual1.script_id().is_some());
   assert!(actual1.script_id().unwrap() > 0);
 }
