@@ -9,7 +9,7 @@ use assert_fs::TempDir;
 use std::io::Write;
 
 #[test]
-fn test_fetch1() {
+fn fetch1() {
   let _guard = acquire_sequential_guard();
 
   let tmpdir = TempDir::new().unwrap();
@@ -28,9 +28,9 @@ fn test_fetch1() {
   let fetch1 = tmpdir.join("fetch1.js");
 
   {
-    let mut src1 = std::fs::File::create(&fetch1).unwrap();
-    src1.write_all(SRC1.as_bytes()).unwrap();
-    src1.flush().unwrap();
+    let mut fp = std::fs::File::create(&fetch1).unwrap();
+    fp.write_all(SRC1.as_bytes()).unwrap();
+    fp.flush().unwrap();
   }
 
   test_log_init();
@@ -47,4 +47,33 @@ fn test_fetch1() {
   );
   assert!(actual1.script_id().is_some());
   assert!(actual1.script_id().unwrap() > 0);
+}
+
+#[test]
+fn fetch2() {
+  let _guard = acquire_sequential_guard();
+
+  let tmpdir = TempDir::new().unwrap();
+
+  // Actually it's rust code...
+  const SRC2: &str = r#"
+  #[test]
+  fn fetch2() {
+  }
+  "#;
+
+  let fetch2 = tmpdir.join("fetch2.js");
+
+  {
+    let mut fp = std::fs::File::create(&fetch2).unwrap();
+    fp.write_all(SRC2.as_bytes()).unwrap();
+    fp.flush().unwrap();
+  }
+
+  test_log_init();
+  let mut jsrt = make_js_runtime();
+  let mut scope = jsrt.handle_scope();
+  let actual2 =
+    fetch_module(&mut scope, fetch2.as_os_str().to_str().unwrap(), None);
+  assert!(actual2.is_none());
 }
