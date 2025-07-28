@@ -24,7 +24,7 @@ fn test_fetch1() {
   export { World };
   "#;
 
-  let fetch1 = tmpdir.join("fetch1.rs");
+  let fetch1 = tmpdir.join("fetch1.js");
 
   {
     let mut src1 = std::fs::File::create(&fetch1).unwrap();
