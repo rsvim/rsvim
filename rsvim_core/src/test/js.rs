@@ -4,7 +4,6 @@ use crate::content::TextContents;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
 use crate::state::State;
-use crate::state::fsm::StatefulValue;
 use crate::ui::tree::Tree;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
@@ -18,7 +17,6 @@ pub fn make_js_runtime() -> JsRuntime {
 
   let cli_opt = CliOpt::new(false, vec![]);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
-  // let _stateful_machine = StatefulValue::default();
 
   let tree = Tree::to_arc(Tree::new(canvas_size));
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
