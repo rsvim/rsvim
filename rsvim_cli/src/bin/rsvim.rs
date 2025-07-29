@@ -9,10 +9,10 @@ use rsvim_core::log;
 use rsvim_core::prelude::*;
 
 use clap::Parser;
-use std::sync::LazyLock;
+use once_cell::sync::Lazy;
 use tracing::trace;
 
-static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
+static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
   static COMPRESSED_BYTES: &[u8] =
     include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
   zstd::bulk::decompress(
