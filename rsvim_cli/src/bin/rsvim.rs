@@ -4,7 +4,7 @@
 
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::SnapshotData;
+use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
@@ -23,12 +23,6 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   .into_boxed_slice()
 });
 
-static RSVIM_VERSION: LazyLock<&str> = LazyLock::new(|| {
-  static VERSION: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
-  VERSION
-});
-
 fn main() -> IoResult<()> {
   log::init();
   let cli_opt = CliOpt::parse();
@@ -36,7 +30,8 @@ fn main() -> IoResult<()> {
 
   // Print version and exit
   if cli_opt.version() {
-    println!("{}", *RSVIM_VERSION);
+    let pkg_version = env!("CARGO_PKG_VERSION");
+    println!("rsvim {} (v8 {})", pkg_version, v8_version());
     return Ok(());
   }
 
