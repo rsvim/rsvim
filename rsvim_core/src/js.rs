@@ -344,6 +344,14 @@ impl SnapshotData {
 }
 
 /// Javascript runtime.
+///
+/// There are 3 most important concepts:
+///
+/// - Isolate
+/// - Context
+/// - Handle Scope
+///
+/// For more details, please see: <https://v8.dev/docs/embed>.
 pub struct JsRuntime {
   /// V8 isolate.
   pub isolate: v8::OwnedIsolate,
