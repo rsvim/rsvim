@@ -27,7 +27,7 @@ crossterm = { workspace = true, features = ["event-stream"] }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 tracing = { workspace = true, features = [
   "max_level_trace",
-  "release_max_level_info",
+  "release_max_level_error",
 ] }
 tracing-subscriber = { workspace = true, features = [
   "env-filter",
@@ -51,7 +51,7 @@ ahash = { workspace = true }
 # url = { workspace = true }
 path-absolutize = { workspace = true }
 # toml = { workspace = true }
-once_cell = { workspace = true, features = ["parking_lot"] }
+# once_cell = { workspace = true, features = ["parking_lot"] }
 # zstd = { workspace = true }
 ascii = { workspace = true }
 icu = { workspace = true, features = ["compiled_data"] }

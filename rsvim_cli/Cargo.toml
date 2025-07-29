@@ -18,11 +18,11 @@ description = "The RSVIM text editor."
 rsvim_core = { workspace = true }
 tracing = { workspace = true, features = [
   "max_level_trace",
-  "release_max_level_info",
+  "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
-once_cell = { workspace = true, features = ["parking_lot"] }
+# once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
 [build-dependencies]
