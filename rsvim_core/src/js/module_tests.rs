@@ -11,6 +11,7 @@ use std::io::Write;
 #[test]
 fn fetch1() {
   let _guard = acquire_sequential_guard();
+  test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
 
@@ -33,7 +34,6 @@ fn fetch1() {
     fp.flush().unwrap();
   }
 
-  test_log_init();
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 =
@@ -52,6 +52,7 @@ fn fetch1() {
 #[test]
 fn fetch2() {
   let _guard = acquire_sequential_guard();
+  test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
 
@@ -71,7 +72,6 @@ fn fetch2() {
     fp.flush().unwrap();
   }
 
-  test_log_init();
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual2 =
@@ -82,6 +82,7 @@ fn fetch2() {
 #[test]
 fn fetch_tree3() {
   let _guard = acquire_sequential_guard();
+  test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
 
@@ -127,7 +128,6 @@ fn fetch_tree3() {
     fp3.flush().unwrap();
   }
 
-  test_log_init();
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 =
