@@ -1,7 +1,5 @@
 //! Js error.
 
-use std::fmt::{Debug, Display};
-
 /// Represents an exception coming from V8.
 #[derive(Eq, PartialEq, Clone, Default)]
 pub struct JsError {
@@ -12,6 +10,36 @@ pub struct JsError {
   pub start_column: Option<i64>,
   pub end_column: Option<i64>,
   pub stack: Option<String>,
+}
+
+impl JsError {
+  pub fn message(&self) -> &String {
+    &self.message
+  }
+
+  pub fn resource_name(&self) -> &String {
+    &self.resource_name
+  }
+
+  pub fn source_line(&self) -> &Option<String> {
+    &self.source_line
+  }
+
+  pub fn line_number(&self) -> &Option<i64> {
+    &self.line_number
+  }
+
+  pub fn start_column(&self) -> &Option<i64> {
+    &self.start_column
+  }
+
+  pub fn end_column(&self) -> &Option<i64> {
+    &self.end_column
+  }
+
+  pub fn stack(&self) -> &Option<String> {
+    &self.stack
+  }
 }
 
 impl JsError {
@@ -80,7 +108,7 @@ impl JsError {
 
 impl std::error::Error for JsError {}
 
-impl Display for JsError {
+impl std::fmt::Display for JsError {
   /// Displays a minified version of the error.
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     // Unwrap values.
@@ -94,7 +122,7 @@ impl Display for JsError {
   }
 }
 
-impl Debug for JsError {
+impl std::fmt::Debug for JsError {
   /// Displays a full version of the error with stack-trace.
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     // Output exception information.
