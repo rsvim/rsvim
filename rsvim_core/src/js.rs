@@ -191,7 +191,7 @@ impl JsRuntimeForSnapshot {
     let mut context_scope =
       v8::HandleScope::with_context(&mut isolate, global_context.clone());
     let scope = &mut context_scope;
-    let _context = v8::Local::new(scope, global_context.clone());
+    // let _context = v8::Local::new(scope, global_context.clone());
 
     // Load, compile and evaluate all built-in modules.
     init_builtin_modules(scope);
