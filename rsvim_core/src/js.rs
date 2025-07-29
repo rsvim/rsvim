@@ -228,7 +228,7 @@ impl JsRuntimeForSnapshot {
   pub fn create_snapshot(mut self) -> v8::StartupData {
     // Set default context
     {
-      let global_context = self.global_context();
+      let global_context = self.context();
       let mut scope = self.handle_scope();
       let local_context = v8::Local::new(&mut scope, global_context);
       scope.set_default_context(local_context);
@@ -248,7 +248,7 @@ impl JsRuntimeForSnapshot {
 }
 
 impl JsRuntimeForSnapshot {
-  pub fn global_context(&self) -> v8::Global<v8::Context> {
+  pub fn context(&self) -> v8::Global<v8::Context> {
     self.get_state().borrow().context.as_ref().unwrap().clone()
   }
 
@@ -264,7 +264,7 @@ impl JsRuntimeForSnapshot {
   }
 
   pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
-    let context = self.global_context();
+    let context = self.context();
     v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 }
