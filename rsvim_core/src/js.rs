@@ -108,8 +108,20 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
 
 fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
   static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
-    ("00__web.js", include_str!("./js/runtime/00__web.js")),
-    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+    (
+      "00__web.js",
+      include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/js/runtime/00__web.js"
+      )),
+    ),
+    (
+      "01__rsvim.js",
+      include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/js/runtime/01__rsvim.js"
+      )),
+    ),
   ];
 
   for module in BUILTIN_MODULES.iter() {
