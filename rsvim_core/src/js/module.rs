@@ -213,22 +213,20 @@ pub fn fetch_module<'a>(
     None => load_import(filename, true).unwrap(),
   };
 
-  trace!(
-    "Fetch module, filename: {:?}, source: {:?}",
-    filename,
-    if source.as_str().len() > 50 {
-      String::from(&source.as_str()[..50]) + "..."
+  if cfg!(debug_assertions) {
+    const MAX_SRC_LEN: usize = 100;
+    let src = if source.as_str().len() > MAX_SRC_LEN {
+      String::from(&source.as_str()[..MAX_SRC_LEN]) + "..."
     } else {
       String::from(source.as_str())
-    }
-  );
+    };
+    trace!("Fetch module, filename:{:?}, source:{:?}", filename, src);
+  }
 
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
-  let module = v8::script_compiler::compile_module(scope, &mut source)?;
-
-  Some(module)
+  v8::script_compiler::compile_module(scope, &mut source)
 }
 
 /// Resolves module imports synchronously.
@@ -238,7 +236,13 @@ pub fn fetch_module_tree<'a>(
   filename: &str,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
-  let module = fetch_module(scope, filename, source).unwrap();
+  let module = match fetch_module(scope, filename, source) {
+    Some(module) => module,
+    None => {
+      // Early returns `None`
+      return None;
+    }
+  };
 
   let state = JsRuntime::state(scope);
 

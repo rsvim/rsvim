@@ -40,7 +40,7 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::RefCell;
 use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
@@ -136,21 +136,21 @@ impl ModuleMap {
     &self.index
   }
 
-  pub fn seen(&self) -> Ref<'_, HashMap<ModulePath, ModuleStatus>> {
-    self.seen.borrow()
+  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
+    &self.seen
   }
 
-  pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
-    self.seen.borrow_mut()
+  // pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
+  //   self.seen.borrow_mut()
+  // }
+
+  pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
+    &self.pending
   }
 
-  pub fn pending(&self) -> Ref<'_, Vec<ModuleGraphRc>> {
-    self.pending.borrow()
-  }
-
-  pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
-    self.pending.borrow_mut()
-  }
+  // pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
+  //   self.pending.borrow_mut()
+  // }
 }
 
 impl ModuleMap {

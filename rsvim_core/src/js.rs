@@ -33,6 +33,9 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
+#[cfg(test)]
+mod module_tests;
+
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
 }
@@ -787,8 +790,8 @@ impl JsRuntime {
     {
       let state = state_rc.borrow();
 
-      let mut seen_modules = state.module_map.seen_mut();
-      let mut pending_graphs = state.module_map.pending_mut();
+      let mut seen_modules = state.module_map.seen().borrow_mut();
+      let mut pending_graphs = state.module_map.pending().borrow_mut();
 
       pending_graphs.retain(|graph_rc| {
         // Get a usable ref to graph's root module.
@@ -905,7 +908,13 @@ impl JsRuntime {
 
   /// Returns if we have imports in pending state.
   pub fn has_pending_imports(&mut self) -> bool {
-    !self.get_state().borrow().module_map.pending().is_empty()
+    !self
+      .get_state()
+      .borrow()
+      .module_map
+      .pending()
+      .borrow()
+      .is_empty()
   }
 
   // /// Returns if we have scheduled any next-tick callbacks.
