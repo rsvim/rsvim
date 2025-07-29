@@ -14,7 +14,7 @@ fn fetch1() {
 
   let tmpdir = TempDir::new().unwrap();
 
-  const SRC1: &str = r#"
+  let src1: &str = r#"
   export const PI = 3.14159;
   export function Hello(a, b) {
     return a+b;
@@ -29,7 +29,7 @@ fn fetch1() {
 
   {
     let mut fp = std::fs::File::create(&fetch1).unwrap();
-    fp.write_all(SRC1.as_bytes()).unwrap();
+    fp.write_all(src1.as_bytes()).unwrap();
     fp.flush().unwrap();
   }
 
@@ -56,9 +56,10 @@ fn fetch2() {
   let tmpdir = TempDir::new().unwrap();
 
   // Actually it's rust code...
-  const SRC2: &str = r#"
+  let src2: &str = r#"
   #[test]
   fn fetch2() {
+    println!("hello");
   }
   "#;
 
@@ -66,7 +67,7 @@ fn fetch2() {
 
   {
     let mut fp = std::fs::File::create(&fetch2).unwrap();
-    fp.write_all(SRC2.as_bytes()).unwrap();
+    fp.write_all(src2.as_bytes()).unwrap();
     fp.flush().unwrap();
   }
 
