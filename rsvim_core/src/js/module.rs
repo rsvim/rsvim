@@ -31,7 +31,7 @@ use crate::js::JsRuntime;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use tracing::trace;
 // use url::Url;
 
@@ -67,8 +67,8 @@ pub enum ModuleStatus {
   Ready,
 }
 
-pub static CORE_MODULES: Lazy<HashMap<&'static str, &'static str>> =
-  Lazy::new(|| {
+pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
+  LazyLock::new(|| {
     let modules = vec![
       // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
       // ("console", include_str!("./js/console.js")),

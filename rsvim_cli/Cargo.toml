@@ -22,7 +22,7 @@ tracing = { workspace = true, features = [
 ] }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
-once_cell = { workspace = true, features = ["parking_lot"] }
+# once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
 [build-dependencies]
