@@ -230,8 +230,8 @@ impl JsRuntimeForSnapshot {
     {
       let global_context = self.context();
       let mut scope = self.handle_scope();
-      let local_context = v8::Local::new(&mut scope, global_context);
-      scope.set_default_context(local_context);
+      let context = v8::Local::new(&mut scope, global_context);
+      scope.set_default_context(context);
     }
 
     // Drop state (and the global context inside)
