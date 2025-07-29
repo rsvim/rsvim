@@ -14,7 +14,7 @@ use tracing::trace;
 pub fn module_resolve_cb<'a>(
   context: v8::Local<'a, v8::Context>,
   specifier: v8::Local<'a, v8::String>,
-  import_attributes: v8::Local<'a, v8::FixedArray>,
+  _import_attributes: v8::Local<'a, v8::FixedArray>,
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   {
