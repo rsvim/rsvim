@@ -236,7 +236,13 @@ pub fn fetch_module_tree<'a>(
   filename: &str,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
-  let module = fetch_module(scope, filename, source).unwrap();
+  let module = match fetch_module(scope, filename, source) {
+    Some(module) => module,
+    None => {
+      // Early returns `None`
+      return None;
+    }
+  };
 
   let state = JsRuntime::state(scope);
 
