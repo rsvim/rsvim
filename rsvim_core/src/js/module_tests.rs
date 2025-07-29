@@ -1,5 +1,6 @@
 use super::module::*;
 
+use crate::js::JsRuntime;
 use crate::prelude::*;
 use crate::test::constant::acquire_sequential_guard;
 use crate::test::js::make_js_runtime;
@@ -131,14 +132,40 @@ fn fetch_tree3() {
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 =
-    fetch_module(&mut scope, fetch1.as_os_str().to_str().unwrap(), None);
+    fetch_module_tree(&mut scope, fetch3.as_os_str().to_str().unwrap(), None);
   assert!(actual1.is_some());
   let actual1 = actual1.unwrap();
   info!(
-    "fetch1 actual1:{:?}, script_id:{:?}",
+    "fetch_tree3 actual1:{:?}, script_id:{:?}",
     actual1,
     actual1.script_id()
   );
   assert!(actual1.script_id().is_some());
   assert!(actual1.script_id().unwrap() > 0);
+
+  let state = JsRuntime::state(&scope);
+  let state = state.borrow();
+
+  let path3 = resolve_import(None, fetch3.to_str().unwrap(), None);
+  assert!(path3.is_ok());
+  let path3 = path3.unwrap();
+  assert!(state.module_map.seen().borrow().contains_key(&path3));
+
+  let path1 = resolve_import(
+    Some(fetch3.to_str().unwrap()),
+    fetch1.to_str().unwrap(),
+    None,
+  );
+  assert!(path1.is_ok());
+  let path1 = path1.unwrap();
+  assert!(state.module_map.seen().borrow().contains_key(&path1));
+
+  let path2 = resolve_import(
+    Some(fetch3.to_str().unwrap()),
+    fetch2.to_str().unwrap(),
+    None,
+  );
+  assert!(path2.is_ok());
+  let path2 = path2.unwrap();
+  assert!(state.module_map.seen().borrow().contains_key(&path2));
 }
