@@ -236,8 +236,8 @@ impl JsRuntimeForSnapshot {
 
     // Drop state (and the global context inside)
     {
-      let state = self.get_state();
-      state.borrow_mut().context.take();
+      let state_rc = self.get_state();
+      state_rc.borrow_mut().context.take();
     }
 
     let snapshot_creator = self.isolate.take().unwrap();
@@ -889,13 +889,9 @@ impl JsRuntime {
 
   /// Returns if we have imports in pending state.
   pub fn has_pending_imports(&mut self) -> bool {
-    !self
-      .get_state()
-      .borrow()
-      .module_map
-      .pending()
-      .borrow()
-      .is_empty()
+    let state_rc = self.get_state();
+    let state = state_rc.borrow();
+    !state.module_map.pending().borrow().is_empty()
   }
 
   // /// Returns if we have scheduled any next-tick callbacks.
@@ -927,8 +923,8 @@ impl JsRuntime {
   /// Returns a global context created for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
   pub fn context(&mut self) -> v8::Global<v8::Context> {
-    let state = self.get_state();
-    let state = state.borrow();
+    let state_rc = self.get_state();
+    let state = state_rc.borrow();
     state.context.clone()
   }
 

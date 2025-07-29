@@ -62,8 +62,8 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
   let scope = &mut v8::HandleScope::new(scope);
 
-  let state = JsRuntime::state(scope);
-  let state = state.borrow();
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
 
   // Make the module global.
   let module = v8::Global::new(scope, module);
