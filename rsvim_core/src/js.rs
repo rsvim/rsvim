@@ -394,13 +394,6 @@ impl JsRuntime {
 
     init_v8_isolate(&mut isolate);
 
-    // const MIN_POOL_SIZE: usize = 1;
-
-    // let event_loop = match options.num_threads {
-    //   Some(n) => EventLoop::new(cmp::max(n, MIN_POOL_SIZE)),
-    //   None => EventLoop::default(),
-    // };
-
     // Initialize the v8 inspector.
     // let address = options.inspect.map(|(address, _)| (address));
     // let inspector = options.inspect.map(|(_, waiting_for_session)| {
@@ -412,38 +405,6 @@ impl JsRuntime {
     //     options.root.clone(),
     //   )
     // });
-
-    // // Get snapshotted built-in modules data from context
-    // fn get_context_data(
-    //   scope: &mut v8::HandleScope<()>,
-    //   context: v8::Local<v8::Context>,
-    // ) -> Vec<v8::Global<v8::Module>> {
-    //   fn data_error_to_panic(err: v8::DataError) -> ! {
-    //     match err {
-    //       v8::DataError::BadType { actual, expected } => {
-    //         panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
-    //       }
-    //       v8::DataError::NoData { expected } => {
-    //         panic!("No data for snapshot data: expected {expected}");
-    //       }
-    //     }
-    //   }
-    //
-    //   let mut scope = v8::ContextScope::new(scope, context);
-    //
-    //   let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
-    //   for i in 0..BUILTIN_MODULES_LEN {
-    //     match scope.get_context_data_from_snapshot_once::<v8::Module>(i) {
-    //       Ok(val) => {
-    //         let module_global = v8::Global::new(&mut scope, val);
-    //         module_handles.push(module_global);
-    //       }
-    //       Err(err) => data_error_to_panic(err),
-    //     }
-    //   }
-    //
-    //   module_handles
-    // }
 
     let context: v8::Global<v8::Context> = {
       let scope = &mut v8::HandleScope::new(&mut *isolate);
