@@ -147,25 +147,36 @@ fn fetch_tree3() {
   let state = state.borrow();
 
   let path3 = resolve_import(None, fetch3.to_str().unwrap(), None);
+  info!("fetch_tree3 path3:{:?}, fetch3:{:?}", path3, fetch3);
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
-  assert!(state.module_map.seen().borrow().contains_key(&path3));
+  assert!(state.module_map.get(&path3).is_some());
 
   let path1 = resolve_import(
     Some(fetch3.to_str().unwrap()),
     fetch1.to_str().unwrap(),
     None,
   );
+  info!("fetch_tree3 path1:{:?}, fetch1:{:?}", path1, fetch1);
   assert!(path1.is_ok());
   let path1 = path1.unwrap();
-  assert!(state.module_map.seen().borrow().contains_key(&path1));
+  assert!(state.module_map.get(&path1).is_some());
 
+  let fetch2_without_ext =
+    fetch2.parent().unwrap().join(fetch2.file_stem().unwrap());
+  info!(
+    "fetch_tree3 fetch2:{:?},fetch2.file_stem:{:?},fetch2.without_extension:{:?}",
+    fetch2,
+    fetch2.file_stem(),
+    fetch2_without_ext
+  );
   let path2 = resolve_import(
     Some(fetch3.to_str().unwrap()),
-    fetch2.to_str().unwrap(),
+    fetch2_without_ext.to_str().unwrap(),
     None,
   );
+  info!("fetch_tree3 path2:{:?}, fetch2:{:?}", path2, fetch2);
   assert!(path2.is_ok());
   let path2 = path2.unwrap();
-  assert!(state.module_map.seen().borrow().contains_key(&path2));
+  assert!(state.module_map.get(&path2).is_some());
 }
