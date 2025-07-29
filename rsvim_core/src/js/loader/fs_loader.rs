@@ -13,6 +13,7 @@ use crate::prelude::*;
 // use sha::utils::DigestExt;
 use path_absolutize::Absolutize;
 use std::fs;
+use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
@@ -56,10 +57,13 @@ impl FsModuleLoader {
   }
 
   /// Loads import as file.
-  fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
+  fn load_as_file(&self, path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
-      return self.load_source(path);
+      return match self.load_source(path) {
+        Ok(source) => Ok((path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
     }
 
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
@@ -68,7 +72,10 @@ impl FsModuleLoader {
       for ext in FILE_EXTENSIONS {
         let ext_path = path.with_extension(ext);
         if ext_path.is_file() {
-          return self.load_source(&ext_path);
+          return match self.load_source(&ext_path) {
+            Ok(source) => Ok((ext_path.to_path_buf(), source)),
+            Err(e) => Err(e),
+          };
         }
       }
     }
@@ -81,13 +88,20 @@ impl FsModuleLoader {
   /// Loads import as directory using the 'index.[ext]' convention.
   ///
   /// TODO: In the future, we may want to also support the npm package.
-  fn load_as_directory(&self, path: &Path) -> AnyResult<ModuleSource> {
+  fn load_as_directory(
+    &self,
+    path: &Path,
+  ) -> AnyResult<(PathBuf, ModuleSource)> {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
-        return self.load_source(path);
+        return match self.load_source(path) {
+          Ok(source) => Ok((path.to_path_buf(), source)),
+          Err(e) => Err(e),
+        };
       }
     }
+
     let path_display = path.display();
     anyhow::bail!(format!("Module path not found: {path_display:?}"));
   }
@@ -179,14 +193,8 @@ impl ModuleLoader for FsModuleLoader {
       .load_as_file(path)
       .or_else(|_| self.load_as_directory(path));
 
-    // Append default extension (if none specified).
-    let path = match path.extension() {
-      Some(_) => path.into(),
-      None => path.with_extension("js"),
-    };
-
-    let source = match maybe_source {
-      Ok(source) => source,
+    let (path, source) = match maybe_source {
+      Ok((path, source)) => (path, source),
       Err(_) => {
         anyhow::bail!(format!("Module path not found \"{}\"", path.display()))
       }
