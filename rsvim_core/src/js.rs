@@ -1,4 +1,14 @@
 //! JavaScript runtime.
+//!
+//! References:
+//! - Embed V8: <https://v8.dev/docs/embed>.
+//! - Roll your own JavaScript runtime: <https://deno.com/blog/roll-your-own-javascript-runtime>.
+//! - Learning V8 Tutorial: <https://github.com/danbev/learning-v8>.
+//! - A hobby runtime for javascript/typescript: <https://github.com/aalykiot/dune>.
+//! - Snapshot related PR:
+//!   - <https://github.com/denoland/deno/commit/8e84dc0139055db8c84ad28723114d343982a8f7>.
+//!   - <https://github.com/denoland/deno_core/commit/b9b65142c74d88e9245dde2230727e537256d685>.
+//! - V8 API Reference: <https://v8docs.nodesource.com/node-24.1/index.html>.
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOpt;
