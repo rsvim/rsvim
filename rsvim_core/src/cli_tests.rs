@@ -1,6 +1,7 @@
 use super::cli::*;
 
 use clap::Parser;
+use std::path::Path;
 
 #[test]
 fn cli_opt1() {
@@ -13,7 +14,7 @@ fn cli_opt1() {
   let expect = [
     CliOpt::new(false, vec![]),
     CliOpt::new(true, vec![]),
-    CliOpt::new(false, vec!["README.md".to_string()]),
+    CliOpt::new(false, vec![Path::new("README.md").to_path_buf()]),
   ];
 
   assert_eq!(input.len(), expect.len());
