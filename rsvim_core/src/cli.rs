@@ -88,7 +88,7 @@ impl CliOpt {
   // }
 
   #[cfg(test)]
-  pub fn new(version: bool, file: Vec<String>) -> Self {
+  pub fn new(version: bool, file: Vec<PathBuf>) -> Self {
     Self { version, file }
   }
 }
