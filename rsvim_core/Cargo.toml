@@ -40,7 +40,7 @@ tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive"] }
 futures = { workspace = true }
-compact_str = { workspace = true, features = ["bytes"] }
+compact_str = { workspace = true }
 ropey = { workspace = true, default-features = false }
 geo = { workspace = true }
 num-traits = { workspace = true }
