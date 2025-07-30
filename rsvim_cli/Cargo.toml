@@ -21,8 +21,7 @@ tracing = { workspace = true, features = [
   "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
-clap = { workspace = true, features = ["derive", "unicode"] }
-# once_cell = { workspace = true, features = ["parking_lot"] }
+clap = { workspace = true, features = ["derive"] }
 zstd = { workspace = true }
 
 [build-dependencies]
