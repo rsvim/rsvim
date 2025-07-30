@@ -1,6 +1,7 @@
 //! Command line.
 
 use clap::Parser;
+use std::path::PathBuf;
 
 // #[clap(
 //   value_name = "CMD",
@@ -42,12 +43,12 @@ pub struct CliOpt {
   version: bool,
 
   #[arg(help = "Edit file(s)")]
-  file: Vec<String>,
+  file: Vec<PathBuf>,
 }
 
 impl CliOpt {
   /// Input files.
-  pub fn file(&self) -> &Vec<String> {
+  pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
   }
 
