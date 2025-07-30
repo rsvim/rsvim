@@ -18,6 +18,8 @@ description = "The core library for RSVIM text editor."
 doctest = false
 
 [features]
+# NOTE: When running miri, 'simd' is disabled while 'unicode_lines' is enabled:
+# `cargo +nightly miri nextest run -p rsvim_core -F unicode_lines --no-default-features`
 default = ["simd", "unicode_lines"]
 simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
