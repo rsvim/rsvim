@@ -20,7 +20,6 @@ use crate::ui::widget::window::Window;
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
 use futures::StreamExt;
-use std::path::Path;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
@@ -290,7 +289,7 @@ impl EventLoop {
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
-          lock!(self.buffers).new_file_buffer(canvas_size, &input_file);
+          lock!(self.buffers).new_file_buffer(canvas_size, input_file);
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
