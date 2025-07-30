@@ -143,8 +143,8 @@ fn fetch_tree3() {
   assert!(actual1.script_id().is_some());
   assert!(actual1.script_id().unwrap() > 0);
 
-  let state = JsRuntime::state(&scope);
-  let state = state.borrow();
+  let state_rc = JsRuntime::state(&scope);
+  let state = state_rc.borrow();
 
   let path3 = resolve_import(None, fetch3.to_str().unwrap(), None);
   info!("fetch_tree3 path3:{:?}, fetch3:{:?}", path3, fetch3);

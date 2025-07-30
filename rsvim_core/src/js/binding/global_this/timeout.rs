@@ -32,8 +32,11 @@ impl JsFuture for TimeoutFuture {
     if tc_scope.has_caught() {
       let exception = tc_scope.exception().unwrap();
       let exception = v8::Global::new(tc_scope, exception);
-      let state = JsRuntime::state(tc_scope);
-      state.borrow_mut().exceptions.capture_exception(exception);
+      let state_rc = JsRuntime::state(tc_scope);
+      state_rc
+        .borrow_mut()
+        .exceptions
+        .capture_exception(exception);
     }
   }
 }

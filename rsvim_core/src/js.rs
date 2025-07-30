@@ -1,4 +1,14 @@
 //! JavaScript runtime.
+//!
+//! References:
+//! - Embed V8: <https://v8.dev/docs/embed>.
+//! - Roll your own JavaScript runtime: <https://deno.com/blog/roll-your-own-javascript-runtime>.
+//! - Learning V8 Tutorial: <https://github.com/danbev/learning-v8>.
+//! - A hobby runtime for javascript/typescript: <https://github.com/aalykiot/dune>.
+//! - Snapshot related PR:
+//!   - <https://github.com/denoland/deno/commit/8e84dc0139055db8c84ad28723114d343982a8f7>.
+//!   - <https://github.com/denoland/deno_core/commit/b9b65142c74d88e9245dde2230727e537256d685>.
+//! - V8 API Reference: <https://v8docs.nodesource.com/node-24.1/index.html>.
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOpt;
@@ -191,7 +201,7 @@ impl JsRuntimeForSnapshot {
     let mut context_scope =
       v8::HandleScope::with_context(&mut isolate, global_context.clone());
     let scope = &mut context_scope;
-    let _context = v8::Local::new(scope, global_context.clone());
+    // let _context = v8::Local::new(scope, global_context.clone());
 
     // Load, compile and evaluate all built-in modules.
     init_builtin_modules(scope);
@@ -228,16 +238,16 @@ impl JsRuntimeForSnapshot {
   pub fn create_snapshot(mut self) -> v8::StartupData {
     // Set default context
     {
-      let global_context = self.global_context();
+      let global_context = self.context();
       let mut scope = self.handle_scope();
-      let local_context = v8::Local::new(&mut scope, global_context);
-      scope.set_default_context(local_context);
+      let context = v8::Local::new(&mut scope, global_context);
+      scope.set_default_context(context);
     }
 
     // Drop state (and the global context inside)
     {
-      let state = self.get_state();
-      state.borrow_mut().context.take();
+      let state_rc = self.get_state();
+      state_rc.borrow_mut().context.take();
     }
 
     let snapshot_creator = self.isolate.take().unwrap();
@@ -248,7 +258,7 @@ impl JsRuntimeForSnapshot {
 }
 
 impl JsRuntimeForSnapshot {
-  pub fn global_context(&self) -> v8::Global<v8::Context> {
+  pub fn context(&self) -> v8::Global<v8::Context> {
     self.get_state().borrow().context.as_ref().unwrap().clone()
   }
 
@@ -264,7 +274,7 @@ impl JsRuntimeForSnapshot {
   }
 
   pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
-    let context = self.global_context();
+    let context = self.context();
     v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 }
@@ -344,6 +354,14 @@ impl SnapshotData {
 }
 
 /// Javascript runtime.
+///
+/// There are 3 most important concepts:
+///
+/// - Isolate
+/// - Context
+/// - Handle Scope
+///
+/// For more details, please see: <https://v8.dev/docs/embed>.
 pub struct JsRuntime {
   /// V8 isolate.
   pub isolate: v8::OwnedIsolate,
@@ -386,13 +404,6 @@ impl JsRuntime {
 
     init_v8_isolate(&mut isolate);
 
-    // const MIN_POOL_SIZE: usize = 1;
-
-    // let event_loop = match options.num_threads {
-    //   Some(n) => EventLoop::new(cmp::max(n, MIN_POOL_SIZE)),
-    //   None => EventLoop::default(),
-    // };
-
     // Initialize the v8 inspector.
     // let address = options.inspect.map(|(address, _)| (address));
     // let inspector = options.inspect.map(|(_, waiting_for_session)| {
@@ -404,38 +415,6 @@ impl JsRuntime {
     //     options.root.clone(),
     //   )
     // });
-
-    // // Get snapshotted built-in modules data from context
-    // fn get_context_data(
-    //   scope: &mut v8::HandleScope<()>,
-    //   context: v8::Local<v8::Context>,
-    // ) -> Vec<v8::Global<v8::Module>> {
-    //   fn data_error_to_panic(err: v8::DataError) -> ! {
-    //     match err {
-    //       v8::DataError::BadType { actual, expected } => {
-    //         panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
-    //       }
-    //       v8::DataError::NoData { expected } => {
-    //         panic!("No data for snapshot data: expected {expected}");
-    //       }
-    //     }
-    //   }
-    //
-    //   let mut scope = v8::ContextScope::new(scope, context);
-    //
-    //   let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
-    //   for i in 0..BUILTIN_MODULES_LEN {
-    //     match scope.get_context_data_from_snapshot_once::<v8::Module>(i) {
-    //       Ok(val) => {
-    //         let module_global = v8::Global::new(&mut scope, val);
-    //         module_handles.push(module_global);
-    //       }
-    //       Err(err) => data_error_to_panic(err),
-    //     }
-    //   }
-    //
-    //   module_handles
-    // }
 
     let context: v8::Global<v8::Context> = {
       let scope = &mut v8::HandleScope::new(&mut *isolate);
@@ -920,13 +899,9 @@ impl JsRuntime {
 
   /// Returns if we have imports in pending state.
   pub fn has_pending_imports(&mut self) -> bool {
-    !self
-      .get_state()
-      .borrow()
-      .module_map
-      .pending()
-      .borrow()
-      .is_empty()
+    let state_rc = self.get_state();
+    let state = state_rc.borrow();
+    !state.module_map.pending().borrow().is_empty()
   }
 
   // /// Returns if we have scheduled any next-tick callbacks.
@@ -958,8 +933,8 @@ impl JsRuntime {
   /// Returns a global context created for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
   pub fn context(&mut self) -> v8::Global<v8::Context> {
-    let state = self.get_state();
-    let state = state.borrow();
+    let state_rc = self.get_state();
+    let state = state_rc.borrow();
     state.context.clone()
   }
 

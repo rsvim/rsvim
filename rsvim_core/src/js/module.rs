@@ -244,11 +244,14 @@ pub fn fetch_module_tree<'a>(
     }
   };
 
-  let state = JsRuntime::state(scope);
+  let state_rc = JsRuntime::state(scope);
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
-  state.borrow_mut().module_map.insert(filename, module_ref);
+  state_rc
+    .borrow_mut()
+    .module_map
+    .insert(filename, module_ref);
 
   let requests = module.get_module_requests();
   trace!("Get {} module requests", requests.length());
@@ -269,7 +272,12 @@ pub fn fetch_module_tree<'a>(
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.
-    if !state.borrow().module_map.index().contains_key(&specifier) {
+    if !state_rc
+      .borrow()
+      .module_map
+      .index()
+      .contains_key(&specifier)
+    {
       fetch_module_tree(scope, &specifier, None)?;
     }
   }
