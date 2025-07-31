@@ -483,6 +483,9 @@ impl Tree {
     let mut canvas = lock!(canvas);
     for node in self.base.iter() {
       // trace!("Draw tree:{:?}", node);
+      if !node.visible() {
+        continue;
+      }
       node.draw(&mut canvas);
     }
   }
