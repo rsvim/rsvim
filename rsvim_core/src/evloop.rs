@@ -12,13 +12,13 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
+use crate::ui::widget::command_line::CommandLine;
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
 use std::sync::Arc;
@@ -496,7 +496,6 @@ impl EventLoop {
     );
     let cmdline =
       CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let _cmdline_id = cmdline.id();
 
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
@@ -561,6 +560,16 @@ impl EventLoop {
   ) {
     if let Some(message) = message {
       match message {
+        JsRuntimeToEventLoopMessage::EchoReq(req) => {
+          trace!("Receive req echo_req:{:?}", req.message);
+          let mut tree = lock!(self.tree);
+          debug_assert!(tree.command_line().is_some());
+          let command_line = tree.command_line_mut().unwrap();
+          command_line
+            .message_mut()
+            .set_message(Some(req.message.clone()));
+          trace!("Receive req echo_req:{:?} - done", req.message);
+        }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive req timeout_req:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();

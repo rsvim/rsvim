@@ -16,7 +16,7 @@ use crate::tests::tree::{
   make_tree_with_buffers, make_tree_with_buffers_cmdline,
 };
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::TreeArc;
+use crate::ui::tree::{Tree, TreeArc};
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
   ViewportSearchDirection,
@@ -8740,10 +8740,16 @@ mod tests_goto_insert_mode {
     WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
+  use crate::state::ops::message_ops::{
+    may_show_message, refresh_view, set_message_visible,
+  };
+  use crate::ui::widget::command_line::CommandLineNode::CommandLineMessage;
   use compact_str::ToCompactString;
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
+  use itertools::Itertools;
+  use log::__private_api::loc;
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
 
@@ -9149,6 +9155,136 @@ mod tests_goto_insert_mode {
         "Should go to insert mode      ",
         "Bye,                          ",
         "                              ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  fn nowrap_goto_insert_with_message_command_line1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(60, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode with message command line\n"],
+    );
+
+    {
+      let tree_clone = tree.clone();
+      let mut tree_lock = lock!(tree_clone);
+      let cmd_line = tree_lock.command_line_mut().unwrap();
+      refresh_view(cmd_line);
+      set_message_visible(cmd_line, true);
+      let message = cmd_line.message_mut();
+      message.set_message(Some(CompactString::new("Test echo")));
+    }
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    may_show_message(&data_access);
+    stateful.goto_insert_mode(
+      &data_access,
+      crate::state::ops::GotoInsertModeVariant::Append,
+    );
+
+    {
+      may_show_message(&data_access);
+      let insert_result = stateful.goto_insert_mode(
+        &data_access,
+        crate::state::ops::GotoInsertModeVariant::NewLine,
+      );
+      assert_eq!(
+        insert_result,
+        StatefulValue::InsertMode(InsertStateful::default())
+      );
+
+      let tree = data_access.tree.clone();
+      let expect_canvas = vec![
+        "Should go to insert mode with message command line          ",
+        "                                                            ",
+        "Test echo                                                   ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+  #[test]
+  fn nowrap_goto_command_line_ex_with_message_command_line1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(60, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec!["Should go to insert mode with message command line\n"],
+    );
+
+    {
+      let tree_clone = tree.clone();
+      let mut tree_lock = lock!(tree_clone);
+      let cmd_line = tree_lock.command_line_mut().unwrap();
+      refresh_view(cmd_line);
+      set_message_visible(cmd_line, true);
+      let message = cmd_line.message_mut();
+      message.set_message(Some(CompactString::new("Test echo")));
+    }
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char(':'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    may_show_message(&data_access);
+    stateful.goto_command_line_ex_mode(&data_access);
+
+    {
+      let tree = data_access.tree.clone();
+      let expect_canvas = vec![
+        "Should go to insert mode with message command line          ",
+        "                                                            ",
+        ":                                                           ",
       ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
