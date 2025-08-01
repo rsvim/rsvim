@@ -308,7 +308,7 @@ pub struct JsRuntimeState {
   /// Holds information about resolved ES modules.
   pub module_map: ModuleMap,
   /// Timeout handles, i.e. timer IDs.
-  pub timeout_handles: HashSet<i32>,
+  pub timeout_handles: HashSet<JsFutureId>,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
   /// Holds JS pending futures scheduled by the event-loop.
@@ -741,17 +741,24 @@ impl JsRuntime {
       while let Ok(msg) = state.jsrt_from_mstr.try_recv() {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
-            trace!("Receive TimeResp:{resp:?}");
-            match state.pending_futures.remove(&resp.future_id) {
-              Some(timeout_cb) => futures.push(timeout_cb),
-              None => unreachable!(
-                "Failed to get timeout future by ID {:?}",
-                resp.future_id
-              ),
+            trace!("Recv TimeResp:{resp:?}");
+            let timeout_id_exists =
+              state.timeout_handles.remove(&resp.future_id);
+            trace!("TimeoutId exists:{timeout_id_exists:?}");
+
+            debug_assert!(state.pending_futures.contains_key(&resp.future_id));
+            let timeout_cb =
+              state.pending_futures.remove(&resp.future_id).unwrap();
+
+            // Only execute 'timeout_cb' if timeout_id still exists,
+            // otherwise it means the 'timeout_cb' is been cleared by
+            // [`clear_timeout`](crate::js::binding::global_this::timeout::clear_timeout).
+            if timeout_id_exists {
+              futures.push(timeout_cb);
             }
           }
           EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
-            trace!("Receive ExCommandReq:{req:?}");
+            trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
           }
         }
