@@ -39,6 +39,11 @@ export interface GlobalThis {
   // Timer API {
 
   const TIMEOUT_MAX = Math.pow(2, 31) - 1;
+  // In javascript side, `nextTimerId` and `activeTimers` maps to the internal
+  // timeout ID returned from rust `global_set_timeout` api. This is mostly for
+  // being compatible with web api standard, as the standard requires the returned
+  // value need to be within the range of 1 to 2,147,483,647.
+  // See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
   let nextTimerId = 1;
   const activeTimers = new Map();
 
