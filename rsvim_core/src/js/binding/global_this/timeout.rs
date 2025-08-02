@@ -89,7 +89,7 @@ pub fn set_timeout(
   };
   state.pending_futures.insert(timer_id, Box::new(timeout_cb));
   state.timeout_handles.insert(timer_id);
-  rv.set(v8::Number::new(scope, timer_id as f64).into());
+  rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
 
