@@ -49,7 +49,6 @@ pub mod tui;
 pub struct EventLoop {
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
-
   /// Specifies the timestamp which the current process began in Unix time.
   pub startup_unix_epoch: u128,
 
@@ -58,22 +57,18 @@ pub struct EventLoop {
 
   /// Widget tree for UI.
   pub tree: TreeArc,
-
   /// Canvas for UI.
   pub canvas: CanvasArc,
-
   /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 
   /// (Global) editing state.
   pub state: StateArc,
-
   /// Finite-state machine for editing state.
   pub stateful_machine: StatefulValue,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
-
   /// Text contents (except buffers).
   pub contents: TextContentsArc,
 
