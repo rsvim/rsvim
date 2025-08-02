@@ -87,6 +87,9 @@ pub struct EventLoop {
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
 
+  /// Js runtime.
+  pub js_runtime: JsRuntime,
+
   /// Channel: "workers" => "master"
   /// NOTE: In variables naming, we use "wkr" for "workers", "mstr" for "master".
   ///
@@ -94,9 +97,6 @@ pub struct EventLoop {
   pub wkr_to_mstr: Sender<WorkerToMasterMessage>,
   /// Receiver: master receive from workers.
   pub mstr_from_wkr: Receiver<WorkerToMasterMessage>,
-
-  /// Js runtime.
-  pub js_runtime: JsRuntime,
 
   /// Channel: "master" => "js runtime"
   /// NOTE: In variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
@@ -213,9 +213,9 @@ impl EventLoop {
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
+      js_runtime,
       wkr_to_mstr,
       mstr_from_wkr,
-      js_runtime,
       mstr_from_jsrt,
       mstr_to_jsrt,
       jsrt_tick_dispatcher,
