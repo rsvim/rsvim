@@ -91,7 +91,6 @@ pub struct EventLoop {
   pub js_runtime: JsRuntime,
 
   /// Channel: "workers" => "master"
-  /// NOTE: In variables naming, we use "wkr" for "workers", "mstr" for "master".
   ///
   /// Sender: workers send to master.
   pub worker_to_master: Sender<WorkerToMasterMessage>,
@@ -99,7 +98,7 @@ pub struct EventLoop {
   pub master_from_worker: Receiver<WorkerToMasterMessage>,
 
   /// Channel: "master" => "js runtime"
-  /// NOTE: In variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
+  /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
   /// Receiver: master receive from js runtime.
   pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
