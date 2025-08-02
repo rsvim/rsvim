@@ -328,9 +328,9 @@ pub struct JsRuntimeState {
 
   // Data Access for RSVIM {
   // Sender: js runtime send to master.
-  pub jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
+  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
   // Receiver: js runtime receive from master.
-  pub jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
+  pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
@@ -385,8 +385,8 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
-    jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
+    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -439,8 +439,8 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_mstr,
-      jsrt_from_mstr,
+      jsrt_to_master,
+      jsrt_from_master,
       cli_opt,
       tree,
       buffers,
@@ -514,8 +514,8 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_mstr,
-      jsrt_from_mstr,
+      jsrt_to_master: jsrt_to_mstr,
+      jsrt_from_master: jsrt_from_mstr,
       cli_opt,
       tree,
       buffers,
@@ -738,7 +738,7 @@ impl JsRuntime {
     {
       let state_rc = Self::state(scope);
       let mut state = state_rc.borrow_mut();
-      while let Ok(msg) = state.jsrt_from_mstr.try_recv() {
+      while let Ok(msg) = state.jsrt_from_master.try_recv() {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
             trace!("Recv TimeResp:{resp:?}");
