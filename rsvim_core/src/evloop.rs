@@ -68,8 +68,12 @@ pub struct EventLoopRenderer {
 pub struct EventLoop {
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
+
   /// Specifies the timestamp which the current process began in Unix time.
   pub startup_unix_epoch: u128,
+
+  /// Command line options.
+  pub cli_opt: CliOpt,
 
   /// Base renderer for event loop.
   pub renderer: EventLoopRenderer,
