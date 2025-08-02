@@ -34,6 +34,25 @@ pub mod msg;
 pub mod task;
 pub mod tui;
 
+/// Base renderer of all `EventLoop` structs for both TUI version and non-TUI
+/// version.
+pub struct EventLoopRenderer {
+  /// Widget tree for UI.
+  pub tree: TreeArc,
+
+  /// Canvas for UI.
+  pub canvas: CanvasArc,
+
+  /// Stdout writer for UI.
+  pub writer: BufWriter<Stdout>,
+
+  /// Vim buffers.
+  pub buffers: BuffersManagerArc,
+
+  /// Text contents (except buffers).
+  pub contents: TextContentsArc,
+}
+
 #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
 /// tokio's async tasks and let them sync back data once they are done. The event loop controls all
@@ -52,15 +71,8 @@ pub struct EventLoop {
   /// Specifies the timestamp which the current process began in Unix time.
   pub startup_unix_epoch: u128,
 
-  /// Command line options.
-  pub cli_opt: CliOpt,
-
-  /// Widget tree for UI.
-  pub tree: TreeArc,
-  /// Canvas for UI.
-  pub canvas: CanvasArc,
-  /// Stdout writer for UI.
-  pub writer: BufWriter<Stdout>,
+  /// Base renderer for event loop.
+  pub renderer: EventLoopRenderer,
 
   /// (Global) editing state.
   pub state: StateArc,
