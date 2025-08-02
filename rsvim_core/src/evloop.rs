@@ -148,9 +148,9 @@ impl EventLoop {
     //
     // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
     //
-    // - Channel-1 `jsrt_to_mstr` => `mstr_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
+    // - Channel-1 `jsrt_to_master` => `master_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
     // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
-    // - Channel-3 `mstr_to_jsrt` => `jsrt_from_mstr`, on message `EventLoopToJsRuntimeMessage`.
+    // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
     //
     // ```text
     //
