@@ -64,7 +64,6 @@ pub struct EventLoop {
 
   /// (Global) editing state.
   pub state: StateArc,
-
   /// Finite-state machine for editing state.
   pub stateful_machine: StatefulValue,
 
@@ -87,24 +86,23 @@ pub struct EventLoop {
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
 
-  /// Channel: "workers" => "master"
-  /// NOTE: In variables naming, we use "wkr" for "workers", "mstr" for "master".
-  ///
-  /// Sender: workers send to master.
-  pub wkr_to_mstr: Sender<WorkerToMasterMessage>,
-  /// Receiver: master receive from workers.
-  pub mstr_from_wkr: Receiver<WorkerToMasterMessage>,
-
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
+  /// Channel: "workers" => "master"
+  ///
+  /// Sender: workers send to master.
+  pub worker_to_master: Sender<WorkerToMasterMessage>,
+  /// Receiver: master receive from workers.
+  pub master_from_worker: Receiver<WorkerToMasterMessage>,
+
   /// Channel: "master" => "js runtime"
-  /// NOTE: In variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
+  /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
   /// Receiver: master receive from js runtime.
-  pub mstr_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
+  pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
   /// Sender: master send to js runtime.
-  pub mstr_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
+  pub master_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
 
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
@@ -131,7 +129,7 @@ impl EventLoop {
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
     // Channel: workers => master
-    let (wkr_to_mstr, mstr_from_wkr) = channel(*CHANNEL_BUF_SIZE);
+    let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
 
     // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
     // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
@@ -148,9 +146,9 @@ impl EventLoop {
     //
     // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
     //
-    // - Channel-1 `jsrt_to_mstr` => `mstr_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
+    // - Channel-1 `jsrt_to_master` => `master_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
     // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
-    // - Channel-3 `mstr_to_jsrt` => `jsrt_from_mstr`, on message `EventLoopToJsRuntimeMessage`.
+    // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
     //
     // ```text
     //
@@ -165,9 +163,9 @@ impl EventLoop {
     // trigger the event loop in `tokio::select!`.
 
     // Channel: js runtime => master
-    let (jsrt_to_mstr, mstr_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
+    let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
     // Channel: master => js runtime
-    let (mstr_to_jsrt, jsrt_from_mstr) = channel(*CHANNEL_BUF_SIZE);
+    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
     // Channel: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
 
@@ -190,8 +188,8 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      jsrt_to_mstr,
-      jsrt_from_mstr,
+      jsrt_to_master,
+      jsrt_from_master,
       cli_opt.clone(),
       tree.clone(),
       buffers_manager.clone(),
@@ -213,11 +211,11 @@ impl EventLoop {
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
-      wkr_to_mstr,
-      mstr_from_wkr,
       js_runtime,
-      mstr_from_jsrt,
-      mstr_to_jsrt,
+      worker_to_master,
+      master_from_worker,
+      master_from_jsrt,
+      master_to_jsrt,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
     })
@@ -439,7 +437,7 @@ impl EventLoop {
   ) {
     if let Some(msg) = msg {
       trace!("Process resp msg:{:?}", msg);
-      let _ = self.mstr_to_jsrt.send(msg).await;
+      let _ = self.master_to_jsrt.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
   }
@@ -468,11 +466,11 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive notification from workers => master
-        worker_msg = self.mstr_from_wkr.recv() => {
+        worker_msg = self.master_from_worker.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
         // Receive notification from js runtime => master
-        js_req = self.mstr_from_jsrt.recv() => {
+        js_req = self.master_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
         js_resp = self.jsrt_tick_queue.recv() => {

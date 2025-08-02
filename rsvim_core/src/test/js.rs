@@ -12,8 +12,8 @@ use tokio::sync::mpsc::channel;
 pub fn make_js_runtime() -> JsRuntime {
   let canvas_size = U16Size::new(10, 10);
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let (jsrt_to_mstr, _mstr_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
-  let (_mstr_to_jsrt, jsrt_from_mstr) = channel(*CHANNEL_BUF_SIZE);
+  let (jsrt_to_master, _master_from_jsrt) = channel(1);
+  let (_master_to_jsrt, jsrt_from_master) = channel(1);
 
   let cli_opt = CliOpt::new(false, vec![]);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
@@ -32,8 +32,8 @@ pub fn make_js_runtime() -> JsRuntime {
     JsRuntimeOptions::default(),
     startup_moment,
     startup_unix_epoch,
-    jsrt_to_mstr,
-    jsrt_from_mstr,
+    jsrt_to_master,
+    jsrt_from_master,
     cli_opt.clone(),
     tree.clone(),
     buffers_manager.clone(),
