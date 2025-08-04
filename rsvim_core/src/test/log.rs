@@ -2,6 +2,8 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
+use crate::log::FORMATTER;
+
 use env_filter::Builder;
 use jiff::Zoned;
 
@@ -18,7 +20,7 @@ pub fn init() {
       .format(|out, message, record| {
         out.finish(format_args!(
           "[{} {} {}] {}",
-          Zoned::now(),
+          Zoned::now().strftime(FORMATTER),
           record.level(),
           record.target(),
           message

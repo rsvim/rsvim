@@ -3,6 +3,8 @@
 use env_filter::Builder;
 use jiff::Zoned;
 
+pub const FORMATTER: &str = "%Y-%m-%dT%H:%M:%S%.6f%:z";
+
 /// Initialize file logging, always use file logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
@@ -27,7 +29,7 @@ pub fn init() {
     .format(|out, message, record| {
       out.finish(format_args!(
         "[{} {} {}] {}",
-        Zoned::now(),
+        Zoned::now().strftime(FORMATTER),
         record.level(),
         record.target(),
         message
