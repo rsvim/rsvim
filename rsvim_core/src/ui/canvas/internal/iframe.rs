@@ -5,7 +5,6 @@ use crate::ui::canvas::frame::cell::Cell;
 
 use geo::point;
 use std::ops::Range;
-// use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// Internal implementation for `Iframe`.

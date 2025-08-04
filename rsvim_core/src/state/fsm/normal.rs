@@ -12,7 +12,6 @@ use crate::ui::widget::window::WindowNode;
 
 use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.

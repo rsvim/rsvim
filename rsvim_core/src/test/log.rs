@@ -2,23 +2,29 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
+use crate::log::RSVIM_LOG;
+
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
   use std::sync::Once;
 
   static INITIALIZED: Once = Once::new();
   INITIALIZED.call_once(|| {
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
-      // .with_file(true)
-      .with_line_number(true)
-      // .with_thread_ids(true)
-      // .with_thread_names(true)
-      .with_level(true)
-      .with_ansi(false)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_env("RSVIM_LOG"))
-      .with_writer(std::io::stderr)
-      .without_time()
-      .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+    let filter = env_filter::Builder::from_env(RSVIM_LOG).build();
+
+    fern::Dispatch::new()
+      .filter(move |metadata| filter.enabled(metadata))
+      .format(|out, message, record| {
+        out.finish(format_args!(
+          "{:<5} {}:{}| {}",
+          record.level(),
+          record.target(),
+          record.line().unwrap_or(0),
+          message
+        ))
+      })
+      .chain(std::io::stdout())
+      .apply()
+      .unwrap();
   });
 }

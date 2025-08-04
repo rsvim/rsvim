@@ -6,7 +6,6 @@ use ropey::RopeSlice;
 
 use smallvec::SmallVec;
 use std::collections::BTreeMap;
-// use tracing::trace;
 
 #[derive(Debug, Default, Clone)]
 /// Display width index (char-wise) for each unicode char in vim buffer. For each line, the

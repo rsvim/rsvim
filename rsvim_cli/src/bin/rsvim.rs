@@ -10,7 +10,6 @@ use rsvim_core::prelude::*;
 
 use clap::Parser;
 use std::sync::LazyLock;
-use tracing::trace;
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   static COMPRESSED_BYTES: &[u8] =

@@ -87,7 +87,8 @@ impl Default for Cursor {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use tracing::info;
+
+  use crate::prelude::*;
 
   #[test]
   fn default1() {

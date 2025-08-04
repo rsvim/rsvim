@@ -1,13 +1,12 @@
 //! Cursor widget.
 
-use std::fmt::Debug;
-use tracing::trace;
-
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::{self, Canvas, CursorStyle};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
+
+use std::fmt::Debug;
 
 #[derive(Debug, Clone, Copy)]
 /// Cursor widget.

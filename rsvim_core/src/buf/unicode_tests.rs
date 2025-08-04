@@ -2,11 +2,11 @@ use super::unicode::*;
 
 use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
 use crate::defaults::ascii::AsciiControlCodeFormatter;
+use crate::prelude::*;
 use crate::test::log::init as test_log_init;
 
 use ascii::AsciiChar;
 use icu::properties::{CodePointMapData, props::EastAsianWidth};
-use tracing::info;
 use unicode_width::UnicodeWidthChar;
 
 #[test]

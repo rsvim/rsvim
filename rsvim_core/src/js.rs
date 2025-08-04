@@ -32,7 +32,6 @@ use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
-use tracing::{error, trace};
 
 pub mod binding;
 pub mod err;
@@ -629,7 +628,7 @@ impl JsRuntime {
         let exception = tc_scope.exception().unwrap();
         let _exception = JsError::from_v8_exception(tc_scope, exception, None);
         let e = format!("User config not found: {filename:?}");
-        error!(e);
+        error!("{e}");
         eprintln!("{e}");
         anyhow::bail!(e);
       }
@@ -645,7 +644,7 @@ impl JsRuntime {
       let e = format!(
         "Failed to instantiate user config module {filename:?}: {exception:?}"
       );
-      error!(e);
+      error!("{e}");
       eprintln!("{e}");
       anyhow::bail!(e);
     }
@@ -667,7 +666,7 @@ impl JsRuntime {
       let e = format!(
         "Failed to evaluate user config module {filename:?}: {exception:?}"
       );
-      error!(e);
+      error!("{e}");
       eprintln!("{e}");
       anyhow::bail!(e);
     }

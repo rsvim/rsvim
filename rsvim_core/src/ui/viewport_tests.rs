@@ -25,7 +25,6 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::rc::Rc;
 use std::sync::{Arc, Once};
-use tracing::info;
 
 pub fn make_nowrap() -> WindowLocalOptions {
   WindowLocalOptionsBuilder::default()

@@ -8,7 +8,6 @@ use crate::ui::canvas::frame::cursor::Cursor;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use tracing::info;
 
 #[test]
 fn pos2range1() {

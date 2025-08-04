@@ -1,17 +1,16 @@
 //! Logging utils.
 
-use jiff::Zoned;
-use tracing_appender;
-use tracing_subscriber::{self, EnvFilter};
+pub const RSVIM_LOG: &str = "RSVIM_LOG";
 
 /// Initialize file logging, always use file logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
 /// Defaults to `error`.
 pub fn init() {
-  let env_filter = EnvFilter::from_env("RSVIM_LOG");
+  let formatter = "%FT%T%.3f%:z";
+  let filter = env_filter::Builder::from_env(RSVIM_LOG).build();
 
-  let now = Zoned::now();
+  let now = jiff::Zoned::now();
   let log_name = format!(
     "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
     now.date().year(),
@@ -22,14 +21,20 @@ pub fn init() {
     now.time().second(),
     now.time().millisecond(),
   );
-  tracing_subscriber::FmtSubscriber::builder()
-    .with_file(true)
-    .with_line_number(true)
-    .with_thread_ids(true)
-    .with_thread_names(true)
-    .with_level(true)
-    .with_ansi(false)
-    .with_env_filter(env_filter)
-    .with_writer(tracing_appender::rolling::never(".", log_name))
-    .init();
+
+  fern::Dispatch::new()
+    .filter(move |metadata| filter.enabled(metadata))
+    .format(|out, message, record| {
+      out.finish(format_args!(
+        "{} {:<5} {}:{}| {}",
+        jiff::Zoned::now().strftime(formatter),
+        record.level(),
+        record.target(),
+        record.line().unwrap_or(0),
+        message
+      ))
+    })
+    .chain(fern::log_file(log_name).unwrap())
+    .apply()
+    .unwrap();
 }

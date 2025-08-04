@@ -3,8 +3,6 @@
 use crate::js::JsRuntime;
 use crate::prelude::*;
 
-use tracing::trace;
-
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
 /// Also known as _line-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.

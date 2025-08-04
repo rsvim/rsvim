@@ -32,7 +32,6 @@ use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::prelude::*;
 
 use std::sync::LazyLock;
-use tracing::trace;
 // use url::Url;
 
 // Re-export

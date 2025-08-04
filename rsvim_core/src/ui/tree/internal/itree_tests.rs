@@ -1,8 +1,6 @@
 use super::itree::*;
 
 use crate::inode_impl;
-use tracing::info;
-
 use crate::prelude::*;
 use crate::test::log::init as test_log_init;
 use crate::ui::tree::internal::{InodeBase, Inodeable, TreeNodeId};

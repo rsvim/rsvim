@@ -9,7 +9,6 @@ use crate::ui::tree::*;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.

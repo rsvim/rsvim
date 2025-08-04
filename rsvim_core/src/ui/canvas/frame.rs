@@ -7,7 +7,6 @@ use crate::ui::canvas::internal::iframe::Iframe;
 
 use geo::point;
 use std::ops::Range;
-// use tracing::debug;
 
 pub mod cell;
 pub mod cursor;

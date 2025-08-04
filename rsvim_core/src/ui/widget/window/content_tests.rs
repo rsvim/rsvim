@@ -8,7 +8,6 @@ use crate::buf::opt::{
 };
 use crate::geo_size_into_rect;
 use crate::prelude::*;
-use crate::prelude::*;
 use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
 use crate::test::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
@@ -24,7 +23,6 @@ use ropey::{Rope, RopeBuilder};
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::sync::Arc;
-use tracing::info;
 
 pub fn make_viewport(
   terminal_size: U16Size,
