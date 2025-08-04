@@ -35,6 +35,21 @@ pub mod task;
 pub mod tui;
 
 #[derive(Debug)]
+pub struct EventLoopOptions {
+  pub headless_mode: bool,
+  pub interpreter_mode: bool,
+}
+
+impl Default for EventLoopOptions {
+  fn default() -> Self {
+    Self {
+      headless_mode: false,
+      interpreter_mode: false,
+    }
+  }
+}
+
+#[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
 /// tokio's async tasks and let them sync back data once they are done. The event loop controls all
 /// the tasks with [`CancellationToken`] and [`TaskTracker`].
