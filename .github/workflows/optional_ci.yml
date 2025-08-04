@@ -41,4 +41,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           install_rust: false
           tree_args: "--no-dev-dependencies"
-          bloat_args: "--release --bin rsvim --crates"
+          bloat_args: "--release --bin rsvim"
