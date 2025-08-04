@@ -28,7 +28,7 @@ pub fn init() {
     .filter(move |metadata| env_filter.enabled(metadata))
     .format(|out, message, record| {
       out.finish(format_args!(
-        "[{} {} {}:{}] {}",
+        "[{} {:>5} {}:{}] {}",
         Zoned::now().strftime(FORMATTER),
         record.level(),
         record.target(),
