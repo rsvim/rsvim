@@ -3,7 +3,7 @@
 use env_filter::Builder;
 use jiff::Zoned;
 
-pub const FORMATTER: &str = "%FT%T%.3f";
+pub const FORMATTER: &str = "%FT%T%.3f%:z";
 
 /// Initialize file logging, always use file logging.
 ///
@@ -28,10 +28,11 @@ pub fn init() {
     .filter(move |metadata| env_filter.enabled(metadata))
     .format(|out, message, record| {
       out.finish(format_args!(
-        "[{} {} {}] {}",
+        "[{} {} {}:{}] {}",
         Zoned::now().strftime(FORMATTER),
         record.level(),
         record.target(),
+        record.line().unwrap_or(0),
         message
       ))
     })

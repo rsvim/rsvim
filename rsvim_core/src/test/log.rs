@@ -19,10 +19,11 @@ pub fn init() {
       .filter(move |metadata| env_filter.enabled(metadata))
       .format(|out, message, record| {
         out.finish(format_args!(
-          "[{} {} {}] {}",
+          "[{} {} {}:{}] {}",
           Zoned::now().strftime(FORMATTER),
           record.level(),
           record.target(),
+          record.line().unwrap_or(0),
           message
         ))
       })
