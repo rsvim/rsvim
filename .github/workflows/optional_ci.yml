@@ -35,9 +35,11 @@ jobs:
           echo "show PWD=${PWD}"
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
+      - uses: taiki-e/install-action@cargo-binstall
       - name: Cargo Bloat
         shell: bash
         run: |
+          cargo binstall -y cargo-bloat
           echo "# Bloat Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
