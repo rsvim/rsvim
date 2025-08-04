@@ -33,18 +33,22 @@ pub mod msg;
 pub mod task;
 pub mod tui;
 
-#[derive(Debug)]
-pub struct EventLoopOptions {
-  pub headless_mode: bool,
-  pub script_mode: bool,
+#[derive(Debug, Clone, Copy, PartialEq, Hash)]
+pub enum EventLoopMode {
+  EDITOR,
+  HEADLESS,
+  SCRIPT,
 }
 
-#[allow(clippy::derivable_impls)]
+#[derive(Debug)]
+pub struct EventLoopOptions {
+  pub mode: EventLoopMode,
+}
+
 impl Default for EventLoopOptions {
   fn default() -> Self {
     Self {
-      headless_mode: false,
-      script_mode: false,
+      mode: EventLoopMode::EDITOR,
     }
   }
 }
