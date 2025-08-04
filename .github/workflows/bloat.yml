@@ -25,7 +25,7 @@ jobs:
           echo "## Largest functions" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          cargo bloat --release --bin rsvim_core -n 15 >> $GITHUB_STEP_SUMMARY
+          cargo bloat --release --bin rsvim -n 15 >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
