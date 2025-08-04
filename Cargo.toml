@@ -20,15 +20,12 @@ exclude = [".DS_Store"]
 rsvim_core = { version = "0.1.1-alpha.10", path = "./rsvim_core" }
 crossterm = { version = "0.29", features = ["event-stream"] }
 jiff = { version = "0.2.15", features = ["tzdb-bundle-always"] }
-tracing = { version = "0.1", features = [
+log = { version = "0.4", features = [
   "max_level_trace",
   "release_max_level_error",
 ] }
-tracing-subscriber = { version = "0.3", features = [
-  "env-filter",
-  "parking_lot",
-] }
-tracing-appender = { version = "0.2", features = ["parking_lot"] }
+env_filter = "0.1.3"
+fern = "0.7"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7.15", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
