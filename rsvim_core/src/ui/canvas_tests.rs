@@ -5,7 +5,6 @@ use crate::test::log::init as test_log_init;
 
 use compact_str::{CompactString, ToCompactString};
 use geo::point;
-use tracing::info;
 
 fn int2letter(i: u8) -> char {
   (i + 65) as char

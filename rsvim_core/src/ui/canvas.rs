@@ -11,7 +11,6 @@ use crossterm;
 use geo::point;
 use std::fmt::Debug;
 use std::slice::Iter;
-use tracing::trace;
 
 pub mod frame;
 pub mod internal;

@@ -8,7 +8,6 @@ use geo::point;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
-// use tracing::trace;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {

@@ -7,7 +7,6 @@ use crate::ui::canvas::frame::cell::Cell;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use tracing::info;
 
 #[test]
 fn new1() {

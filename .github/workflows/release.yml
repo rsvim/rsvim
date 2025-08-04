@@ -6,7 +6,7 @@ on:
     tags:
       - "*"
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: false
 env:
   CARGO_INCREMENTAL: 0

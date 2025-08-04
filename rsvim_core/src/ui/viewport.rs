@@ -7,8 +7,6 @@ use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use std::ops::Range;
-#[allow(unused_imports)]
-use tracing::trace;
 
 pub mod draw;
 pub mod sync;

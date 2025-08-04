@@ -18,7 +18,6 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::sync::Arc;
 use std::sync::Once;
-use tracing::info;
 
 fn make_window_from_size(
   terminal_size: U16Size,

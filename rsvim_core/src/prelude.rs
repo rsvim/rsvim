@@ -1,6 +1,6 @@
 //! Prelude.
 
-pub use tracing::{debug, error, info, trace, warn};
+pub use log::{debug, error, info, trace, warn};
 
 pub use crate::constant::*;
 pub use crate::coord::*;

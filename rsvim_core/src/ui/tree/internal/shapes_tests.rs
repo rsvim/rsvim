@@ -1,10 +1,9 @@
 use super::shapes::*;
 
-use std::cmp::min;
-use tracing::info;
-
 use crate::prelude::*;
 // use crate::test::log::init as test_log_init;
+
+use std::cmp::min;
 
 #[test]
 fn make_actual_shapes1() {

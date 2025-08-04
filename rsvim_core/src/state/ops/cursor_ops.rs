@@ -2,6 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::coord::U16Rect;
+use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
@@ -11,7 +12,6 @@ use crate::ui::viewport::{
 use crate::ui::widget::window::WindowLocalOptions;
 
 use compact_str::CompactString;
-use tracing::trace;
 
 #[derive(Debug, Copy, Clone)]
 /// Cursor move direction.

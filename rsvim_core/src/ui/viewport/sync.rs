@@ -12,7 +12,6 @@ use itertools::Itertools;
 use litemap::LiteMap;
 use ropey::RopeSlice;
 use std::ops::Range;
-use tracing::trace;
 
 use super::Viewport;
 

@@ -16,7 +16,7 @@ description = "The RSVIM text editor."
 
 [dependencies]
 rsvim_core = { workspace = true }
-tracing = { workspace = true, features = [
+log = { workspace = true, features = [
   "max_level_trace",
   "release_max_level_error",
 ] }

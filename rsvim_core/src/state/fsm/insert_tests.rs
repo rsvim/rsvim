@@ -30,7 +30,6 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
-use tracing::info;
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
@@ -284,7 +283,6 @@ mod tests_cursor_move {
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
   use std::collections::BTreeMap;
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -2214,7 +2212,6 @@ mod tests_insert_text {
   };
   use jiff::fmt::friendly::Designator::Compact;
   use std::collections::BTreeMap;
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -6379,7 +6376,6 @@ mod tests_delete_text {
   };
   use jiff::fmt::friendly::Designator::Compact;
   use std::collections::BTreeMap;
-  use tracing::info;
 
   #[test]
   fn nowrap1() {

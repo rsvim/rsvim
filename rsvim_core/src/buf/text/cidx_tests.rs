@@ -6,7 +6,6 @@ use crate::prelude::*;
 use crate::test::log::init as test_log_init;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
-use tracing::info;
 
 fn make_default_opts() -> BufferLocalOptions {
   BufferLocalOptionsBuilder::default().build().unwrap()
