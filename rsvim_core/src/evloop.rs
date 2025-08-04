@@ -40,6 +40,7 @@ pub struct EventLoopOptions {
   pub interpreter_mode: bool,
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for EventLoopOptions {
   fn default() -> Self {
     Self {
