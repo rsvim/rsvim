@@ -41,4 +41,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           by_function: false
           tree_args: "--no-dev-dependencies"
-          bloat_args: "--release --bin rsvim"
+          bloat_args: "--release --crates -n 15 --bin rsvim"
