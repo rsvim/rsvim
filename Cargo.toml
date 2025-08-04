@@ -30,6 +30,7 @@ tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7.15", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
 clap = { version = "4.5.41", features = ["derive"] }
+lexopt = "0.3.1"
 futures = "0.3"
 # rand = "0.8.5"
 # heed = "0.20.5"

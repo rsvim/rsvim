@@ -21,7 +21,7 @@ log = { workspace = true, features = [
   "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
-clap = { workspace = true, features = ["derive"] }
+lexopt = { workspace = true }
 zstd = { workspace = true }
 
 [build-dependencies]

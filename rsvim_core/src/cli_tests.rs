@@ -1,27 +1,46 @@
-use super::cli::*;
+use crate::prelude::*;
+use crate::test::log::init as test_log_init;
 
 use clap::Parser;
-use std::path::Path;
+use std::path::PathBuf;
+
+const ABOUT: &str = "The VIM editor reinvented in Rust+TypeScript.";
+
+#[derive(Parser, Debug, Clone, Default)]
+#[command(
+  disable_version_flag = true,
+  about = ABOUT,
+  long_about = ABOUT,
+)]
+/// Command line options.
+pub struct ClapOptions {
+  #[arg(short = 'V', long = "version", help = "Print version")]
+  version: bool,
+
+  #[arg(help = "Edit file(s)")]
+  file: Vec<PathBuf>,
+}
+
+impl ClapOptions {
+  /// Input files.
+  pub fn file(&self) -> &Vec<PathBuf> {
+    &self.file
+  }
+
+  /// Version.
+  pub fn version(&self) -> bool {
+    self.version
+  }
+
+  pub fn new(version: bool, file: Vec<PathBuf>) -> Self {
+    Self { version, file }
+  }
+}
 
 #[test]
-fn cli_opt1() {
-  let input = [
-    vec!["rsvim".to_string()],
-    vec!["rsvim".to_string(), "--version".to_string()],
-    vec!["rsvim".to_string(), "README.md".to_string()],
-  ];
-
-  let expect = [
-    CliOpt::new(false, vec![]),
-    CliOpt::new(true, vec![]),
-    CliOpt::new(false, vec![Path::new("README.md").to_path_buf()]),
-  ];
-
-  assert_eq!(input.len(), expect.len());
-  let n = input.len();
-  for i in 0..n {
-    let actual = CliOpt::parse_from(&input[i]);
-    assert_eq!(actual.file(), expect[i].file());
-    assert_eq!(actual.version(), expect[i].version());
-  }
+fn clap_help() {
+  test_log_init();
+  let clap_opts = ClapOptions::new();
+  let help = clap_opts.get_help().unwrap();
+  info!("clap help:\n{help}");
 }

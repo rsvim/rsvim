@@ -35,7 +35,6 @@ env_filter = { workspace = true }
 fern = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
-clap = { workspace = true, features = ["derive"] }
 futures = { workspace = true }
 compact_str = { workspace = true }
 ropey = { workspace = true, default-features = false }
@@ -93,6 +92,7 @@ sourcemap = { workspace = true }
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
+clap = { workspace = true, features = ["derive"] }
 unicode-width = { workspace = true }
 unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }

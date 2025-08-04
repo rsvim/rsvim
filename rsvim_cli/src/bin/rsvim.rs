@@ -8,7 +8,8 @@ use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
-use clap::Parser;
+use std::path::{Path, PathBuf};
+use std::process::exit;
 use std::sync::LazyLock;
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
@@ -22,17 +23,54 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   .into_boxed_slice()
 });
 
+static RSVIM_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+
+Usage: rsvim [FILE]...
+
+Arguments:
+  [FILE]...  Edit file(s)
+
+Options:
+  -V, --version  Print version
+  -h, --help     Print help
+"#;
+
+fn parse_cli_args() -> Result<CliOpt> {
+  use lexopt::prelude::*;
+
+  // Arguments
+  let mut file: Vec<PathBuf> = vec![];
+
+  let mut parser = lexopt::Parser::from_env();
+  while let Some(arg) = parser.next()? {
+    match arg {
+      Short('h') | Long("help") => {
+        println!("{}", RSVIM_HELP);
+        std::process::exit(0);
+      }
+      Short('V') | Long("version") => {
+        let pkg_version = env!("CARGO_PKG_VERSION");
+        println!("rsvim {} (v8 {})", pkg_version, v8_version());
+        std::process::exit(0);
+      }
+      Value(filename) => {
+        file.push(Path::new(&filename).to_path_buf());
+      }
+      _ => {
+        println!("error: {}", arg.unexpected());
+        println!("For more information, try '--help'");
+        std::process::exit(0);
+      }
+    }
+  }
+
+  Ok(CliOpt { file })
+}
+
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = CliOpt::parse();
+  let cli_opt = parse_cli_args();
   trace!("cli_opt: {:?}", cli_opt);
-
-  // Print version and exit
-  if cli_opt.version() {
-    let pkg_version = env!("CARGO_PKG_VERSION");
-    println!("rsvim {} (v8 {})", pkg_version, v8_version());
-    return Ok(());
-  }
 
   // let dir = tempfile::tempdir().unwrap();
   // trace!("tempdir:{:?}", dir);

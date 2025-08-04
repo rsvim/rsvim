@@ -282,7 +282,7 @@ impl EventLoop {
     let canvas_size = lock!(self.canvas).size();
 
     // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
-    let input_files = self.cli_opt.file().to_vec();
+    let input_files = &self.cli_opt.file;
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
