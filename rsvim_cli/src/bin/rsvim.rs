@@ -2,8 +2,8 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::CliOpt;
-use rsvim_core::evloop::EventLoop;
+use rsvim_core::cli::CliOptions;
+use rsvim_core::evloop::{EventLoop, EventLoopOptions};
 use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
@@ -25,11 +25,11 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = CliOpt::parse();
-  trace!("cli_opt: {:?}", cli_opt);
+  let cli_opts = CliOptions::parse();
+  trace!("cli_opt: {:?}", cli_opts);
 
   // Print version and exit
-  if cli_opt.version() {
+  if cli_opts.version() {
     let pkg_version = env!("CARGO_PKG_VERSION");
     println!("rsvim {} (v8 {})", pkg_version, v8_version());
     return Ok(());
@@ -48,8 +48,12 @@ fn main() -> IoResult<()> {
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
-    let mut event_loop =
-      EventLoop::new(cli_opt, SnapshotData::new(&RSVIM_SNAPSHOT))?;
+    let event_loop_opts = EventLoopOptions::default();
+    let mut event_loop = EventLoop::new(
+      event_loop_opts,
+      cli_opts,
+      SnapshotData::new(&RSVIM_SNAPSHOT),
+    )?;
 
     // Initialize user config.
     event_loop.init_config()?;

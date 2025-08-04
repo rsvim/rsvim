@@ -38,7 +38,7 @@ const ABOUT: &str = "The VIM editor reinvented in Rust+TypeScript.";
   long_about = ABOUT,
 )]
 /// Command line options.
-pub struct CliOpt {
+pub struct CliOptions {
   #[arg(short = 'V', long = "version", help = "Print version")]
   version: bool,
 
@@ -46,7 +46,7 @@ pub struct CliOpt {
   file: Vec<PathBuf>,
 }
 
-impl CliOpt {
+impl CliOptions {
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file

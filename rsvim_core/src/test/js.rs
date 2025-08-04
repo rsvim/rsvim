@@ -1,5 +1,5 @@
 use crate::buf::BuffersManager;
-use crate::cli::CliOpt;
+use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
@@ -15,7 +15,7 @@ pub fn make_js_runtime() -> JsRuntime {
   let (jsrt_to_master, _master_from_jsrt) = channel(1);
   let (_master_to_jsrt, jsrt_from_master) = channel(1);
 
-  let cli_opt = CliOpt::new(false, vec![]);
+  let cli_opts = CliOptions::new(false, vec![]);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
 
   let tree = Tree::to_arc(Tree::new(canvas_size));
@@ -34,7 +34,7 @@ pub fn make_js_runtime() -> JsRuntime {
     startup_unix_epoch,
     jsrt_to_master,
     jsrt_from_master,
-    cli_opt.clone(),
+    cli_opts.clone(),
     tree.clone(),
     buffers_manager.clone(),
     text_contents.clone(),

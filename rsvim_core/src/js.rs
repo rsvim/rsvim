@@ -11,7 +11,7 @@
 //! - V8 API Reference: <https://v8docs.nodesource.com/node-24.1/index.html>.
 
 use crate::buf::BuffersManagerArc;
-use crate::cli::CliOpt;
+use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
@@ -331,7 +331,7 @@ pub struct JsRuntimeState {
   pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
   // Receiver: js runtime receive from master.
   pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
-  pub cli_opt: CliOpt,
+  pub cli_opts: CliOptions,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
@@ -387,7 +387,7 @@ impl JsRuntime {
     time_origin: u128,
     jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
     jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
-    cli_opt: CliOpt,
+    cli_opts: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
@@ -441,7 +441,7 @@ impl JsRuntime {
       // wake_event_queued: false,
       jsrt_to_master,
       jsrt_from_master,
-      cli_opt,
+      cli_opts,
       tree,
       buffers,
       contents,
@@ -478,7 +478,7 @@ impl JsRuntime {
     time_origin: u128,
     jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
     jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
-    cli_opt: CliOpt,
+    cli_opt: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
@@ -516,7 +516,7 @@ impl JsRuntime {
       // wake_event_queued: false,
       jsrt_to_master,
       jsrt_from_master,
-      cli_opt,
+      cli_opts: cli_opt,
       tree,
       buffers,
       contents,
