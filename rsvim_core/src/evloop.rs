@@ -235,8 +235,7 @@ impl EventLoop {
     Ok(EventLoop {
       startup_moment,
       startup_unix_epoch,
-      headless_mode: opts.headless_mode,
-      script_mode: opts.script_mode,
+      mode: opts.mode,
       cli_opts,
       canvas,
       tree,
@@ -262,15 +261,21 @@ impl EventLoop {
     // Initialize user config.
     self.init_config()?;
 
-    // Finish initialize terminal.
-    self.init_tui()?;
+    if self.mode == EventLoopMode::EDITOR {
+      // Start initialize terminal.
+      self.init_tui()?;
+    }
 
-    // Initialize buffers and windows.
-    self.init_buffers()?;
-    self.init_windows()?;
+    if self.mode != EventLoopMode::SCRIPT {
+      // Initialize buffers and windows.
+      self.init_buffers()?;
+      self.init_windows()?;
+    }
 
-    // Finish initialize terminal.
-    self.init_tui_complete()?;
+    if self.mode == EventLoopMode::EDITOR {
+      // Finish initialize terminal.
+      self.init_tui_complete()?;
+    }
 
     Ok(())
   }
@@ -328,7 +333,11 @@ impl EventLoop {
   }
 
   pub fn shutdown(&self) -> IoResult<()> {
-    self.shutdown_tui()
+    if self.mode == EventLoopMode::EDITOR {
+      self.shutdown_tui()?;
+    }
+
+    Ok(())
   }
 
   /// Shutdown terminal raw mode.
