@@ -27,15 +27,6 @@ unicode_lines = ["ropey/unicode_lines"]
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
-tracing = { workspace = true, features = [
-  "max_level_trace",
-  "release_max_level_error",
-] }
-tracing-subscriber = { workspace = true, features = [
-  "env-filter",
-  "parking_lot",
-] }
-tracing-appender = { workspace = true, features = ["parking_lot"] }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive"] }
