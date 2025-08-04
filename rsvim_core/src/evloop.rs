@@ -232,6 +232,8 @@ impl EventLoop {
     Ok(EventLoop {
       startup_moment,
       startup_unix_epoch,
+      headless_mode: opts.headless_mode,
+      interpreter_mode: opts.interpreter_mode,
       cli_opts,
       canvas,
       tree,
