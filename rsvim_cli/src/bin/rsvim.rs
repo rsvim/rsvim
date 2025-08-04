@@ -9,7 +9,6 @@ use rsvim_core::log;
 use rsvim_core::prelude::*;
 
 use std::path::{Path, PathBuf};
-use std::process::exit;
 use std::sync::LazyLock;
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
@@ -35,7 +34,7 @@ Options:
   -h, --help     Print help
 "#;
 
-fn parse_cli_args() -> Result<CliOpt> {
+fn parse_cli_args() -> Result<CliOpt, lexopt::Error> {
   use lexopt::prelude::*;
 
   // Arguments
@@ -45,7 +44,7 @@ fn parse_cli_args() -> Result<CliOpt> {
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') | Long("help") => {
-        println!("{}", RSVIM_HELP);
+        println!("{RSVIM_HELP}");
         std::process::exit(0);
       }
       Short('V') | Long("version") => {
@@ -56,11 +55,7 @@ fn parse_cli_args() -> Result<CliOpt> {
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
       }
-      _ => {
-        println!("error: {}", arg.unexpected());
-        println!("For more information, try '--help'");
-        std::process::exit(0);
-      }
+      _ => return Err(arg.unexpected()),
     }
   }
 
@@ -69,7 +64,14 @@ fn parse_cli_args() -> Result<CliOpt> {
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = parse_cli_args();
+  let cli_opt = match parse_cli_args() {
+    Ok(cli_opt) => cli_opt,
+    Err(e) => {
+      println!("error: {e}");
+      println!("For more information, try '--help'");
+      std::process::exit(0);
+    }
+  };
   trace!("cli_opt: {:?}", cli_opt);
 
   // let dir = tempfile::tempdir().unwrap();
