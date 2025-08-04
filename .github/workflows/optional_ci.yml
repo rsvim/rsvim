@@ -35,10 +35,33 @@ jobs:
           echo "show PWD=${PWD}"
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
-      - name: Cargo bloat
-        uses: orf/cargo-bloat-action@v1
+      - name: Cargo Bloat
+        shell: bash
+        run: |
+          echo "# Bloat Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Largest functions" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cargo bloat --release --bin rsvim -n 15 >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "## Largest crates" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cargo bloat --release --bin rsvim --crates -n 15 >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Comment Cargo Bloat Diff
+        continue-on-error: true
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          by_function: false
-          tree_args: "--no-dev-dependencies"
-          bloat_args: "--release --crates -n 15 --bin rsvim"
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: $GITHUB_STEP_SUMMARY
+            })
