@@ -3,7 +3,7 @@
 use env_filter::Builder;
 use jiff::Zoned;
 
-pub const FORMATTER: &str = "%Y-%m-%dT%H:%M:%S%.6f%:z";
+pub const FORMATTER: &str = "%FT%T%.3f";
 
 /// Initialize file logging, always use file logging.
 ///
