@@ -67,6 +67,19 @@ pub struct EventLoop {
   /// Specifies the timestamp which the current process began in Unix time.
   pub startup_unix_epoch: u128,
 
+  /// Rsvim has 3 running modes:
+  /// 1. Editor mode: It initialize terminal raw mode, TUI for editor, and
+  ///    all the editor data structures such as buffers, windows, etc.
+  /// 2. Headless mode: It doesn't initialize terminal raw mode, i.e. the
+  ///    `stdin`, `stdout` and `stderr` are reading from/writing to command
+  ///    line. But all the editor data structures are still initialized:
+  ///    buffers, windows, etc.
+  /// 3. Interpreter mode: It doesn't initialize terminal raw mode, TUI, all
+  ///    the editor data structures. Only javascript runtime is initialized. In
+  ///    this scenario, you can use `rsvim` just like `node`/`deno` cli.
+  pub headless_mode: bool,
+  pub interpreter_mode: bool,
+
   /// Command line options.
   pub cli_opt: CliOpt,
 
