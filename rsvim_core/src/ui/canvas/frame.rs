@@ -11,6 +11,9 @@ use std::ops::Range;
 pub mod cell;
 pub mod cursor;
 
+#[cfg(test)]
+mod cursor_tests;
+
 #[derive(Debug, Clone)]
 /// Logical frame for the canvas.
 ///
