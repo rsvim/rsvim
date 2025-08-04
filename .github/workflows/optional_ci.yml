@@ -35,24 +35,10 @@ jobs:
           echo "show PWD=${PWD}"
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
-      - uses: taiki-e/install-action@cargo-binstall
-      - name: Cargo Bloat
-        shell: bash
-        run: |
-          cargo binstall -y cargo-bloat
-          echo "# Bloat Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "## Largest functions" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          cargo bloat --release --bin rsvim -n 15 >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-          echo "## Largest crates" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          cargo bloat --release --bin rsvim --crates -n 15 >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Cargo bloat
+        uses: Reloaded-Project/devops-cargo-bloat-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          install_rust: false
+          tree_args: "--no-dev-dependencies"
+          bloat_args: "--release --bin rsvim --crates"
