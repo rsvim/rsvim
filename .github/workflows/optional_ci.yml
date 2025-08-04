@@ -36,9 +36,9 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
       - name: Cargo bloat
-        uses: Reloaded-Project/devops-cargo-bloat-action@v1
+        uses: orf/cargo-bloat-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          install_rust: false
+          by_function: false
           tree_args: "--no-dev-dependencies"
           bloat_args: "--release --bin rsvim"
