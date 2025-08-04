@@ -81,8 +81,7 @@ pub struct EventLoop {
   /// 3. Script mode: It doesn't initialize terminal raw mode, TUI, all the
   ///    editor data structures. Only javascript runtime is initialized. In
   ///    this scenario, you can use `rsvim` just like `node`/`deno` cli.
-  pub headless_mode: bool,
-  pub script_mode: bool,
+  pub mode: EventLoopMode,
 
   /// Command line options.
   pub cli_opts: CliOptions,
