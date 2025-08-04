@@ -3,8 +3,7 @@
 use crate::js::JsRuntime;
 use crate::js::binding::throw_type_error;
 use crate::js::module::resolve_import;
-
-use tracing::trace;
+use crate::prelude::*;
 
 /// Called during `Module::instantiate_module`, see:
 /// - Rusty V8 API:

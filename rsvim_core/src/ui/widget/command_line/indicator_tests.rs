@@ -21,7 +21,6 @@ use ropey::{Rope, RopeBuilder};
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::sync::Arc;
-use tracing::info;
 
 #[cfg(test)]
 mod tests_nowrap {

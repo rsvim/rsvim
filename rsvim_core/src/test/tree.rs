@@ -13,7 +13,6 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 
 use std::sync::Arc;
-use tracing::{self};
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(

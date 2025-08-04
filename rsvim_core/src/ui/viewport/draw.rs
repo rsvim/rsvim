@@ -7,7 +7,6 @@ use crate::ui::viewport::Viewport;
 
 use geo::point;
 use std::convert::From;
-use tracing::trace;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
 pub fn draw(

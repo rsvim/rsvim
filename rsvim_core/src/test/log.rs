@@ -2,23 +2,30 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
+use env_filter::Builder;
+use jiff::Zoned;
+
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
   use std::sync::Once;
 
   static INITIALIZED: Once = Once::new();
   INITIALIZED.call_once(|| {
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
-      // .with_file(true)
-      .with_line_number(true)
-      // .with_thread_ids(true)
-      // .with_thread_names(true)
-      .with_level(true)
-      .with_ansi(false)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_env("RSVIM_LOG"))
-      .with_writer(std::io::stderr)
-      .without_time()
-      .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+    let env_filter = Builder::from_env("RSVIM_LOG").build();
+
+    fern::Dispatch::new()
+      .filter(move |metadata| env_filter.enabled(metadata))
+      .format(|out, message, record| {
+        out.finish(format_args!(
+          "[{} {} {}] {}",
+          Zoned::now(),
+          record.level(),
+          record.target(),
+          message
+        ))
+      })
+      .chain(std::io::stdout())
+      .apply()
+      .unwrap();
   });
 }

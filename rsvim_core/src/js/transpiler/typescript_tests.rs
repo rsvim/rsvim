@@ -1,8 +1,7 @@
 use super::typescript::*;
 
+use crate::prelude::*;
 use crate::test::log::init as test_log_init;
-
-use tracing::info;
 
 #[test]
 fn test1() {

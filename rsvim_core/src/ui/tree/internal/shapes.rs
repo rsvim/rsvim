@@ -7,7 +7,6 @@ use crate::prelude::*;
 
 use geo::point;
 use std::cmp::{max, min};
-// use tracing::trace;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///

@@ -11,8 +11,6 @@ use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
-use tracing::{self, info, trace};
-use tracing_appender::non_blocking::DEFAULT_BUFFERED_LINES_LIMIT;
 
 #[cfg(test)]
 pub fn make_buffer_from_lines(

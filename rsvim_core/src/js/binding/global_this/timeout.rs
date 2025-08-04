@@ -2,10 +2,10 @@
 
 use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
+use crate::prelude::*;
 
 use std::rc::Rc;
 use std::time::Duration;
-use tracing::trace;
 
 struct TimeoutFuture {
   future_id: JsFutureId,

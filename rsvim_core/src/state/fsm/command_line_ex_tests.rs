@@ -32,7 +32,6 @@ use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
-use tracing::info;
 
 pub fn make_tree(
   terminal_size: U16Size,
@@ -287,7 +286,6 @@ mod tests_goto_normal_mode {
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
   use std::collections::BTreeMap;
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -648,7 +646,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
   use std::collections::BTreeMap;
-  use tracing::info;
 
   #[test]
   fn nowrap1() {

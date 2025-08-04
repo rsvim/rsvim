@@ -1,15 +1,14 @@
 //! Logging utils.
 
+use env_filter::Builder;
 use jiff::Zoned;
-use tracing_appender;
-use tracing_subscriber::{self, EnvFilter};
 
 /// Initialize file logging, always use file logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
 /// Defaults to `error`.
 pub fn init() {
-  let env_filter = EnvFilter::from_env("RSVIM_LOG");
+  let env_filter = Builder::from_env("RSVIM_LOG").build();
 
   let now = Zoned::now();
   let log_name = format!(
@@ -22,14 +21,19 @@ pub fn init() {
     now.time().second(),
     now.time().millisecond(),
   );
-  tracing_subscriber::FmtSubscriber::builder()
-    .with_file(true)
-    .with_line_number(true)
-    .with_thread_ids(true)
-    .with_thread_names(true)
-    .with_level(true)
-    .with_ansi(false)
-    .with_env_filter(env_filter)
-    .with_writer(tracing_appender::rolling::never(".", log_name))
-    .init();
+
+  fern::Dispatch::new()
+    .filter(move |metadata| env_filter.enabled(metadata))
+    .format(|out, message, record| {
+      out.finish(format_args!(
+        "[{} {} {}] {}",
+        Zoned::now(),
+        record.level(),
+        record.target(),
+        message
+      ))
+    })
+    .chain(fern::log_file(log_name).unwrap())
+    .apply()
+    .unwrap();
 }

@@ -30,7 +30,6 @@ use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
-use tracing::info;
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
@@ -1439,7 +1438,6 @@ mod tests_raw_window_scroll_y_by {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -2458,7 +2456,6 @@ mod tests_raw_window_scroll_x_by {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -3737,7 +3734,6 @@ mod tests_raw_window_scroll_to {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -4427,7 +4423,6 @@ mod tests_cursor_move {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -8660,7 +8655,6 @@ mod tests_goto_command_line_ex_mode {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap1() {
@@ -8750,7 +8744,6 @@ mod tests_goto_insert_mode {
   };
   use std::collections::BTreeMap;
   use tokio::sync::mpsc::{Receiver, Sender, channel};
-  use tracing::info;
 
   #[test]
   fn nowrap_goto_insert_keep1() {

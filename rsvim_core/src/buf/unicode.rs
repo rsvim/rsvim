@@ -5,7 +5,6 @@ use crate::defaults::ascii::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
-//use tracing::trace;
 use icu::properties::{CodePointMapData, props::EastAsianWidth};
 
 /// Get the display width for a `char`, supports both ASCI control codes and

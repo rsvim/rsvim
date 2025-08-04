@@ -28,7 +28,6 @@ use std::sync::Arc;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
