@@ -55,23 +55,13 @@ fn main() -> IoResult<()> {
       SnapshotData::new(&RSVIM_SNAPSHOT),
     )?;
 
-    // Initialize user config.
-    event_loop.init_config()?;
-
-    // Finish initialize terminal.
-    event_loop.init_tui()?;
-
-    // Initialize buffers and windows.
-    event_loop.init_buffers()?;
-    event_loop.init_windows()?;
-
-    // Finish initialize terminal.
-    event_loop.init_tui_complete()?;
+    // Initialize.
+    event_loop.initialize()?;
 
     // Run loop.
     event_loop.run().await?;
 
-    // Shutdown terminal raw mode.
-    event_loop.shutdown_tui()
+    // Shutdown.
+    event_loop.shutdown()
   })
 }

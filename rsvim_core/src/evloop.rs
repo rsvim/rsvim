@@ -37,7 +37,7 @@ pub mod tui;
 #[derive(Debug)]
 pub struct EventLoopOptions {
   pub headless_mode: bool,
-  pub interpreter_mode: bool,
+  pub script_mode: bool,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -45,7 +45,7 @@ impl Default for EventLoopOptions {
   fn default() -> Self {
     Self {
       headless_mode: false,
-      interpreter_mode: false,
+      script_mode: false,
     }
   }
 }
@@ -75,11 +75,11 @@ pub struct EventLoop {
   ///    `stdin`, `stdout` and `stderr` are reading from/writing to command
   ///    line. But all the editor data structures are still initialized:
   ///    buffers, windows, etc.
-  /// 3. Interpreter mode: It doesn't initialize terminal raw mode, TUI, all
-  ///    the editor data structures. Only javascript runtime is initialized. In
+  /// 3. Script mode: It doesn't initialize terminal raw mode, TUI, all the
+  ///    editor data structures. Only javascript runtime is initialized. In
   ///    this scenario, you can use `rsvim` just like `node`/`deno` cli.
   pub headless_mode: bool,
-  pub interpreter_mode: bool,
+  pub script_mode: bool,
 
   /// Command line options.
   pub cli_opts: CliOptions,
@@ -234,7 +234,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       headless_mode: opts.headless_mode,
-      interpreter_mode: opts.interpreter_mode,
+      script_mode: opts.script_mode,
       cli_opts,
       canvas,
       tree,
@@ -256,8 +256,25 @@ impl EventLoop {
     })
   }
 
+  pub fn initialize(&mut self) -> IoResult<()> {
+    // Initialize user config.
+    self.init_config()?;
+
+    // Finish initialize terminal.
+    self.init_tui()?;
+
+    // Initialize buffers and windows.
+    self.init_buffers()?;
+    self.init_windows()?;
+
+    // Finish initialize terminal.
+    self.init_tui_complete()?;
+
+    Ok(())
+  }
+
   /// Initialize user config file.
-  pub fn init_config(&mut self) -> IoResult<()> {
+  fn init_config(&mut self) -> IoResult<()> {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
       self
         .js_runtime
@@ -268,7 +285,7 @@ impl EventLoop {
   }
 
   /// Initialize terminal raw mode.
-  pub fn init_tui(&self) -> IoResult<()> {
+  fn init_tui(&self) -> IoResult<()> {
     tui::initialize_raw_mode()?;
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
@@ -279,7 +296,7 @@ impl EventLoop {
   }
 
   /// First flush TUI to terminal.
-  pub fn init_tui_complete(&mut self) -> IoResult<()> {
+  fn init_tui_complete(&mut self) -> IoResult<()> {
     // Initialize cursor
     let cursor = {
       let canvas = lock!(self.canvas);
@@ -308,13 +325,17 @@ impl EventLoop {
     Ok(())
   }
 
+  pub fn shutdown(&self) -> IoResult<()> {
+    self.shutdown_tui()
+  }
+
   /// Shutdown terminal raw mode.
-  pub fn shutdown_tui(&self) -> IoResult<()> {
+  fn shutdown_tui(&self) -> IoResult<()> {
     tui::shutdown_raw_mode()
   }
 
   /// Initialize buffers.
-  pub fn init_buffers(&mut self) -> IoResult<()> {
+  fn init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
 
     // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
@@ -341,7 +362,7 @@ impl EventLoop {
   }
 
   /// Initialize windows.
-  pub fn init_windows(&mut self) -> IoResult<()> {
+  fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window, with default buffer.
     let (canvas_size, canvas_cursor) = {
       let canvas = lock!(self.canvas);
