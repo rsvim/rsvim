@@ -68,6 +68,7 @@ fn main() -> IoResult<()> {
     Ok(cli_opt) => cli_opt,
     Err(e) => {
       println!("error: {e}");
+      println!("");
       println!("For more information, try '--help'");
       std::process::exit(0);
     }
