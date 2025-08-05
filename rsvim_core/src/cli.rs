@@ -47,8 +47,8 @@ const VERSION: &str =
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
-  let bin_name = Path::new(parser.bin_name().unwrap()).to_path_buf();
-  let bin_name = bin_name.as_path().file_stem().unwrap().to_str().unwrap();
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
 
   // Arguments
   let mut file: Vec<PathBuf> = vec![];
