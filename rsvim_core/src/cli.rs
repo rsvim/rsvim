@@ -10,7 +10,7 @@ pub struct CliOptions {
   file: Vec<PathBuf>,
 }
 
-const HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+const SHORT_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
 
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
@@ -19,7 +19,23 @@ Arguments:
 
 Options:
   -V, --version  Print version
-  -h, --help     Print help
+  -h, --help     Print help (see more with '--help')
+"#;
+
+const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+
+RSVIM is an open source terminal based text editor, strives to be highly
+extensible by following the main features and philosophy of (Neo)VIM. It is
+built with rust, tokio and v8 javascript engine from scratch.
+
+Usage: {RSVIM_BIN_NAME} [FILE]...
+
+Arguments:
+  [FILE]...  Edit file(s)
+
+Options:
+  -V, --version  Print version
+  -h, --help     Print help (see a summary with '-h')
 "#;
 
 const VERSION: &str =
@@ -37,7 +53,11 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') | Long("help") => {
-        let help = HELP.replace("{RSVIM_BIN_NAME}", bin_name);
+        let help = match arg {
+          Short(_) => SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
+          Long(_) => LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
+          _ => unreachable!(),
+        };
         println!("{help}");
         std::process::exit(0);
       }
