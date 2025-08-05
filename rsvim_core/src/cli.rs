@@ -28,8 +28,8 @@ RSVIM is an open source terminal based text editor, strives to be highly
 extensible by following the main features and philosophy of (Neo)VIM. It is
 built with rust, tokio and v8 javascript engine from scratch.
 
-Home page: https://github.com/rsvim/rsvim
-Document page: https://rsvim.github.io/
+Project home page: https://github.com/rsvim/rsvim
+Document and user manual: https://rsvim.github.io/
 
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
