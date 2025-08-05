@@ -4,13 +4,15 @@ use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let input: [Vec<std::ffi::OsString>; 3] = [
-    vec!["rsvim".to_string().into()],
-    vec!["rsvim".to_string().into(), "--version".to_string().into()],
-    vec!["rsvim".to_string().into(), "README.md".to_string().into()],
+  let input: Vec<Vec<std::ffi::OsString>> = vec![
+    vec![],
+    vec!["README.md".to_string().into()],
+    vec!["README.md".to_string().into(), "LICENSE".to_string().into()],
   ];
 
-  let expect = [vec![], vec![], vec![Path::new("README.md").to_path_buf()]];
+  let expect = [vec![], vec![Path::new("README.md").to_path_buf()],
+    vec![Path::new("README.md").to_path_buf(), Path::new("LICENSE").to_path_buf()]
+  ];
 
   assert_eq!(input.len(), expect.len());
   let n = input.len();
