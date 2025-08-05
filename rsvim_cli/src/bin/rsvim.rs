@@ -2,13 +2,12 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::CliOpt;
+use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::{SnapshotData, v8_version};
+use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
-use clap::Parser;
 use std::sync::LazyLock;
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
@@ -24,15 +23,8 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = CliOpt::parse();
+  let cli_opt = CliOptions::from_env();
   trace!("cli_opt: {:?}", cli_opt);
-
-  // Print version and exit
-  if cli_opt.version() {
-    let pkg_version = env!("CARGO_PKG_VERSION");
-    println!("rsvim {} (v8 {})", pkg_version, v8_version());
-    return Ok(());
-  }
 
   // let dir = tempfile::tempdir().unwrap();
   // trace!("tempdir:{:?}", dir);

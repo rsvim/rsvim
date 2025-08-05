@@ -26,6 +26,7 @@ unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
+lexopt = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 log = { workspace = true, features = [
   "max_level_trace",
@@ -35,7 +36,6 @@ env_filter = { workspace = true }
 fern = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
-clap = { workspace = true, features = ["derive"] }
 futures = { workspace = true }
 compact_str = { workspace = true }
 ropey = { workspace = true, default-features = false }

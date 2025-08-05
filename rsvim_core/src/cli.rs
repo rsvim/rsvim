@@ -1,94 +1,89 @@
-//! Command line.
+//! Command line options.
 
-use clap::Parser;
-use std::path::PathBuf;
+use crate::js::v8_version;
 
-// #[clap(
-//   value_name = "CMD",
-//   long = "cmd",
-//   help = "Execute <CMD> before loading any config"
-// )]
-// cmd_before: Option<Vec<String>>,
-//
-// #[clap(
-//   value_name = "CMD",
-//   short = 'c',
-//   help = "Execute <CMD> after loading config and first file"
-// )]
-// cmd_after: Option<Vec<String>>,
-//
-// #[arg(short = 'd', long, help = "Run in diff mode")]
-// diff: bool,
-//
-// #[arg(long, help = "Run in headless mode, without a user interface")]
-// headless: bool,
-//
-// #[arg(long, help = "Run in verbose mode")]
-// verbose: bool,
-//
-// #[arg(long, help = "Run in debug mode")]
-// debug: bool,
+use std::path::{Path, PathBuf};
 
-const ABOUT: &str = "The VIM editor reinvented in Rust+TypeScript.";
-
-#[derive(Parser, Debug, Clone, Default)]
-#[command(
-  disable_version_flag = true,
-  about = ABOUT,
-  long_about = ABOUT,
-)]
+#[derive(Debug, Clone)]
 /// Command line options.
-pub struct CliOpt {
-  #[arg(short = 'V', long = "version", help = "Print version")]
-  version: bool,
-
-  #[arg(help = "Edit file(s)")]
+pub struct CliOptions {
   file: Vec<PathBuf>,
 }
 
-impl CliOpt {
+const HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+
+Usage: {RSVIM_BIN_NAME} [FILE]...
+
+Arguments:
+  [FILE]...  Edit file(s)
+
+Options:
+  -V, --version  Print version
+  -h, --help     Print help
+"#;
+
+const VERSION: &str =
+  "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
+
+fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
+  use lexopt::prelude::*;
+
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
+
+  // Arguments
+  let mut file: Vec<PathBuf> = vec![];
+
+  while let Some(arg) = parser.next()? {
+    match arg {
+      Short('h') | Long("help") => {
+        let help = HELP.replace("{RSVIM_BIN_NAME}", bin_name);
+        println!("{help}");
+        std::process::exit(0);
+      }
+      Short('V') | Long("version") => {
+        let version = VERSION
+          .replace("{RSVIM_BIN_NAME}", bin_name)
+          .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
+          .replace("{RSVIM_V8_VERSION}", v8_version());
+        println!("{version}");
+        std::process::exit(0);
+      }
+      Value(filename) => {
+        file.push(Path::new(&filename).to_path_buf());
+      }
+      _ => return Err(arg.unexpected()),
+    }
+  }
+
+  Ok(CliOptions { file })
+}
+
+impl CliOptions {
+  fn handle_error(result: Result<Self, lexopt::Error>) -> Self {
+    match result {
+      Ok(res) => res,
+      Err(e) => {
+        println!("error: {e}");
+        println!();
+        println!("For more information, try '--help'");
+        std::process::exit(0);
+      }
+    }
+  }
+
+  pub fn from_env() -> Self {
+    let result = parse(lexopt::Parser::from_env());
+    Self::handle_error(result)
+  }
+
+  pub fn from_args(args: &Vec<std::ffi::OsString>) -> Self {
+    let result = parse(lexopt::Parser::from_args(args));
+    Self::handle_error(result)
+  }
+
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
-  }
-
-  /// Version.
-  pub fn version(&self) -> bool {
-    self.version
-  }
-
-  // /// Commands should be execute before loading any config.
-  // pub fn cmd_before(&self) -> &Option<Vec<String>> {
-  //   &self.cmd_before
-  // }
-  //
-  // /// Commands should be execute after loading any config and first line.
-  // pub fn cmd_after(&self) -> &Option<Vec<String>> {
-  //   &self.cmd_after
-  // }
-  //
-  // /// Run in diff mode.
-  // pub fn diff(&self) -> bool {
-  //   self.diff
-  // }
-  //
-  // /// Run in headless mode, without TUI.
-  // pub fn headless(&self) -> bool {
-  //   self.headless
-  // }
-  //
-  // /// Run in verbose mode.
-  // pub fn verbose(&self) -> bool {
-  //   self.verbose
-  // }
-  //
-  // /// Run in debug mode.
-  // pub fn debug(&self) -> bool {
-  //   self.debug
-  // }
-
-  #[cfg(test)]
-  pub fn new(version: bool, file: Vec<PathBuf>) -> Self {
-    Self { version, file }
   }
 }

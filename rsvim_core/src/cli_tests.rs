@@ -1,27 +1,31 @@
 use super::cli::*;
 
-use clap::Parser;
 use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let input = [
-    vec!["rsvim".to_string()],
-    vec!["rsvim".to_string(), "--version".to_string()],
-    vec!["rsvim".to_string(), "README.md".to_string()],
+  let input: Vec<Vec<std::ffi::OsString>> = vec![
+    vec![],
+    vec!["README.md".to_string().into()],
+    vec!["README.md".to_string().into(), "LICENSE".to_string().into()],
   ];
 
   let expect = [
-    CliOpt::new(false, vec![]),
-    CliOpt::new(true, vec![]),
-    CliOpt::new(false, vec![Path::new("README.md").to_path_buf()]),
+    vec![],
+    vec![Path::new("README.md").to_path_buf()],
+    vec![
+      Path::new("README.md").to_path_buf(),
+      Path::new("LICENSE").to_path_buf(),
+    ],
   ];
 
   assert_eq!(input.len(), expect.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOpt::parse_from(&input[i]);
-    assert_eq!(actual.file(), expect[i].file());
-    assert_eq!(actual.version(), expect[i].version());
+    let actual = CliOptions::from_args(&input[i]);
+    assert_eq!(actual.file().len(), expect[i].len());
+    for (j, act) in actual.file().iter().enumerate() {
+      assert_eq!(act, &expect[i][j]);
+    }
   }
 }
