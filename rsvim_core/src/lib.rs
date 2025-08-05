@@ -22,6 +22,8 @@ pub mod test;
 #[cfg(test)]
 mod buf_tests;
 #[cfg(test)]
+mod cli_tests;
+#[cfg(test)]
 mod constant_tests;
 #[cfg(test)]
 mod js_tests;

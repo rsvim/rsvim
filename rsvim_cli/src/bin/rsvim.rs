@@ -2,7 +2,7 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::CliOpt;
+use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
@@ -24,7 +24,7 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = CliOpt::from_env();
+  let cli_opt = CliOptions::from_env();
   trace!("cli_opt: {:?}", cli_opt);
 
   // let dir = tempfile::tempdir().unwrap();

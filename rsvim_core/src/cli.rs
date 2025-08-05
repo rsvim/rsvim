@@ -2,14 +2,11 @@
 
 use crate::js::v8_version;
 
-use std::{
-  alloc::handle_alloc_error,
-  path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone)]
 /// Command line options.
-pub struct CliOpt {
+pub struct CliOptions {
   file: Vec<PathBuf>,
 }
 
@@ -25,7 +22,7 @@ Options:
   -h, --help     Print help
 "#;
 
-fn parse(mut parser: lexopt::Parser) -> Result<CliOpt, lexopt::Error> {
+fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
   // Arguments
@@ -49,10 +46,10 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOpt, lexopt::Error> {
     }
   }
 
-  Ok(CliOpt { file })
+  Ok(CliOptions { file })
 }
 
-impl CliOpt {
+impl CliOptions {
   fn handle_error(result: Result<Self, lexopt::Error>) -> Self {
     match result {
       Ok(res) => res,
@@ -70,7 +67,7 @@ impl CliOpt {
     Self::handle_error(result)
   }
 
-  pub fn from_args(args: Vec<std::ffi::OsString>) -> Self {
+  pub fn from_args(args: &Vec<std::ffi::OsString>) -> Self {
     let result = parse(lexopt::Parser::from_args(args));
     Self::handle_error(result)
   }

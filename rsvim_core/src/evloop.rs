@@ -1,7 +1,7 @@
 //! Event loop.
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
-use crate::cli::CliOpt;
+use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{
@@ -52,7 +52,7 @@ pub struct EventLoop {
   pub startup_unix_epoch: u128,
 
   /// Command line options.
-  pub cli_opt: CliOpt,
+  pub cli_opt: CliOptions,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -113,7 +113,7 @@ pub struct EventLoop {
 
 impl EventLoop {
   /// Make new event loop.
-  pub fn new(cli_opt: CliOpt, snapshot: SnapshotData) -> IoResult<Self> {
+  pub fn new(cli_opt: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -282,7 +282,7 @@ impl EventLoop {
     let canvas_size = lock!(self.canvas).size();
 
     // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
-    let input_files = &self.cli_opt.file;
+    let input_files = &self.cli_opt.file();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
