@@ -46,7 +46,7 @@ dirs = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 regex = { workspace = true }
-ahash = { workspace = true }
+foldhash = { workspace = true }
 # url = { workspace = true }
 path-absolutize = { workspace = true }
 # zstd = { workspace = true }

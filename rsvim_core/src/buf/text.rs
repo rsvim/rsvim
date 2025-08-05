@@ -7,7 +7,6 @@ use crate::prelude::*;
 // Re-export
 pub use cidx::ColumnIndex;
 
-use ahash::RandomState;
 use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
 use ropey::{Rope, RopeSlice};
@@ -44,7 +43,7 @@ impl Text {
       rope,
       cached_lines_width: RefCell::new(LruCache::with_hasher(
         cache_size,
-        RandomState::new(),
+        RandomState::default(),
       )),
       options: opts,
     }
