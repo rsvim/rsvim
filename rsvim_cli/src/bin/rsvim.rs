@@ -22,49 +22,10 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   .into_boxed_slice()
 });
 
-static RSVIM_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
-
-Usage: rsvim [FILE]...
-
-Arguments:
-  [FILE]...  Edit file(s)
-
-Options:
-  -V, --version  Print version
-  -h, --help     Print help
-"#;
-
-fn parse_cli_args() -> Result<CliOpt, lexopt::Error> {
-  use lexopt::prelude::*;
-
-  // Arguments
-  let mut file: Vec<PathBuf> = vec![];
-
-  let mut parser = lexopt::Parser::from_env();
-  while let Some(arg) = parser.next()? {
-    match arg {
-      Short('h') | Long("help") => {
-        println!("{RSVIM_HELP}");
-        std::process::exit(0);
-      }
-      Short('V') | Long("version") => {
-        let pkg_version = env!("CARGO_PKG_VERSION");
-        println!("rsvim {} (v8 {})", pkg_version, v8_version());
-        std::process::exit(0);
-      }
-      Value(filename) => {
-        file.push(Path::new(&filename).to_path_buf());
-      }
-      _ => return Err(arg.unexpected()),
-    }
-  }
-
-  Ok(CliOpt { file })
-}
-
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = match parse_cli_args() {
+
+  let cli_opt = match CliOpt::from_env() {
     Ok(cli_opt) => cli_opt,
     Err(e) => {
       println!("error: {e}");

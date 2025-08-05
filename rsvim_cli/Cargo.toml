@@ -16,12 +16,12 @@ description = "The RSVIM text editor."
 
 [dependencies]
 rsvim_core = { workspace = true }
+lexopt = { workspace = true }
 log = { workspace = true, features = [
   "max_level_trace",
   "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
-lexopt = { workspace = true }
 zstd = { workspace = true }
 
 [build-dependencies]

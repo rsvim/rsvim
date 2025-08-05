@@ -2390,6 +2390,7 @@ dependencies = [
  "icu",
  "itertools 0.14.0",
  "jiff",
+ "lexopt",
  "litemap 0.8.0",
  "log",
  "lru",
