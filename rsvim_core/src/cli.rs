@@ -40,7 +40,7 @@ Options:
   -V, --version  Print version
   -h, --help     Print help (see a summary with '-h')
 
-Bugs can be reported on: https://github.com/rsvim/rsvim/issues
+Bugs can be reported on GitHub: https://github.com/rsvim/rsvim/issues
 "#;
 
 const VERSION: &str =
