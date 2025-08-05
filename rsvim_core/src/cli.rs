@@ -32,7 +32,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     match arg {
       Short('h') | Long("help") => {
         let bin_name = Path::new(parser.bin_name().unwrap())
-          .file_name()
+          .file_stem()
           .unwrap()
           .to_str()
           .unwrap();
