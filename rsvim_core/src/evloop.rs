@@ -52,7 +52,7 @@ pub struct EventLoop {
   pub startup_unix_epoch: u128,
 
   /// Command line options.
-  pub cli_opt: CliOptions,
+  pub cli_opts: CliOptions,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -113,7 +113,7 @@ pub struct EventLoop {
 
 impl EventLoop {
   /// Make new event loop.
-  pub fn new(cli_opt: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -189,7 +189,7 @@ impl EventLoop {
       startup_unix_epoch,
       jsrt_to_master,
       jsrt_from_master,
-      cli_opt.clone(),
+      cli_opts.clone(),
       tree.clone(),
       buffers_manager.clone(),
       text_contents.clone(),
@@ -199,7 +199,7 @@ impl EventLoop {
     Ok(EventLoop {
       startup_moment,
       startup_unix_epoch,
-      cli_opt,
+      cli_opts,
       canvas,
       tree,
       state,
@@ -282,7 +282,7 @@ impl EventLoop {
     let canvas_size = lock!(self.canvas).size();
 
     // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
-    let input_files = &self.cli_opt.file();
+    let input_files = &self.cli_opts.file();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
