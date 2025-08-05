@@ -10,8 +10,13 @@ fn cli_opt1() {
     vec!["README.md".to_string().into(), "LICENSE".to_string().into()],
   ];
 
-  let expect = [vec![], vec![Path::new("README.md").to_path_buf()],
-    vec![Path::new("README.md").to_path_buf(), Path::new("LICENSE").to_path_buf()]
+  let expect = [
+    vec![],
+    vec![Path::new("README.md").to_path_buf()],
+    vec![
+      Path::new("README.md").to_path_buf(),
+      Path::new("LICENSE").to_path_buf(),
+    ],
   ];
 
   assert_eq!(input.len(), expect.len());
