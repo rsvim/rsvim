@@ -4,11 +4,10 @@
 
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::{SnapshotData, v8_version};
+use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
-use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
