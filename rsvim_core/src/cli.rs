@@ -31,7 +31,12 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') | Long("help") => {
-        let help = HELP.replace("{RSVIM_BIN_NAME}", parser.bin_name().unwrap());
+        let bin_name = Path::new(parser.bin_name().unwrap())
+          .file_name()
+          .unwrap()
+          .to_str()
+          .unwrap();
+        let help = HELP.replace("{RSVIM_BIN_NAME}", bin_name);
         println!("{help}");
         std::process::exit(0);
       }
