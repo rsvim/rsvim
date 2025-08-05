@@ -15,7 +15,7 @@ pub fn make_js_runtime() -> JsRuntime {
   let (jsrt_to_master, _master_from_jsrt) = channel(1);
   let (_master_to_jsrt, jsrt_from_master) = channel(1);
 
-  let cli_opt = CliOptions::empty();
+  let cli_opt = CliOptions::from_args(&vec![]);
   let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
 
   let tree = Tree::to_arc(Tree::new(canvas_size));

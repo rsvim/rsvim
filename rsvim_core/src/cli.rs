@@ -12,7 +12,7 @@ pub struct CliOptions {
 
 const HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
 
-Usage: rsvim [FILE]...
+Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...  Edit file(s)
@@ -31,7 +31,8 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') | Long("help") => {
-        println!("{HELP}");
+        let help = HELP.replace("{RSVIM_BIN_NAME}", parser.bin_name().unwrap());
+        println!("{help}");
         std::process::exit(0);
       }
       Short('V') | Long("version") => {
@@ -75,10 +76,5 @@ impl CliOptions {
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
-  }
-
-  #[cfg(test)]
-  pub fn empty() -> Self {
-    Self { file: vec![] }
   }
 }
