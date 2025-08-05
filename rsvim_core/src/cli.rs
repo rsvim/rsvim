@@ -76,4 +76,9 @@ impl CliOptions {
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
   }
+
+  #[cfg(test)]
+  pub fn empty() -> Self {
+    Self { file: vec![] }
+  }
 }
