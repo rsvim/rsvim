@@ -22,8 +22,14 @@ Options:
   -h, --help     Print help
 "#;
 
+const VERSION: &str =
+  "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
+
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
+
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
 
   // Arguments
   let mut file: Vec<PathBuf> = vec![];
@@ -31,18 +37,16 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') | Long("help") => {
-        let bin_name = Path::new(parser.bin_name().unwrap())
-          .file_stem()
-          .unwrap()
-          .to_str()
-          .unwrap();
         let help = HELP.replace("{RSVIM_BIN_NAME}", bin_name);
         println!("{help}");
         std::process::exit(0);
       }
       Short('V') | Long("version") => {
-        let pkg_version = env!("CARGO_PKG_VERSION");
-        println!("rsvim {} (v8 {})", pkg_version, v8_version());
+        let version = VERSION
+          .replace("{RSVIM_BIN_NAME}", bin_name)
+          .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
+          .replace("{RSVIM_V8_VERSION}", v8_version());
+        println!("{version}");
         std::process::exit(0);
       }
       Value(filename) => {
