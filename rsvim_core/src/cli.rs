@@ -10,9 +10,7 @@ pub struct CliOptions {
   file: Vec<PathBuf>,
 }
 
-const SHORT_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
-
-Usage: {RSVIM_BIN_NAME} [FILE]...
+const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...  Edit file(s)
