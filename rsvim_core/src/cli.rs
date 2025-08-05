@@ -8,16 +8,19 @@ use std::path::{Path, PathBuf};
 /// Command line options.
 pub struct CliOptions {
   file: Vec<PathBuf>,
+
+  headless: bool,
 }
 
-const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
+const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
 
 Arguments:
   [FILE]...  Edit file(s)
 
 Options:
-  -V, --version  Print version
+      --headless Run in headless mode without TUI
   -h, --help     Print help (see more with '--help')
+  -V, --version  Print version
 "#;
 
 const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
@@ -29,14 +32,23 @@ built with rust, tokio and v8 javascript engine from scratch.
 Project home page: https://github.com/rsvim/rsvim
 Project documentation page: https://rsvim.github.io/
 
-Usage: {RSVIM_BIN_NAME} [FILE]...
+Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
 
 Arguments:
-  [FILE]...  Edit file(s)
+  [FILE]...
+          The file(s) where the editor is going to edit.
 
 Options:
-  -V, --version  Print version
-  -h, --help     Print help (see a summary with '-h')
+      --headless
+          Run the editor in headless mode, this mode will not initialize the
+          TUI, i.e. terminal raw mode, but all the editor data structures (such
+          as buffers, windows, command-line, etc) will still be initialized.
+ 
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 
 Bugs can be reported on GitHub: https://github.com/rsvim/rsvim/issues
 "#;
@@ -52,6 +64,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
 
   // Arguments
   let mut file: Vec<PathBuf> = vec![];
+  let mut headless: bool = false;
 
   while let Some(arg) = parser.next()? {
     match arg {
@@ -72,6 +85,9 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
         println!("{version}");
         std::process::exit(0);
       }
+      Long("headless") => {
+        headless = parser.value()?.parse()?;
+      }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
       }
@@ -79,7 +95,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     }
   }
 
-  Ok(CliOptions { file })
+  Ok(CliOptions { file, headless })
 }
 
 impl CliOptions {
@@ -108,5 +124,10 @@ impl CliOptions {
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
+  }
+
+  /// Headless mode.
+  pub fn headless(&self) -> bool {
+    self.headless
   }
 }
