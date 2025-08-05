@@ -1,5 +1,7 @@
 //! Logging utils.
 
+use log::LevelFilter;
+
 pub const RSVIM_LOG: &str = "RSVIM_LOG";
 
 /// Initialize file logging, always use file logging.
@@ -22,19 +24,21 @@ pub fn init() {
     now.time().millisecond(),
   );
 
-  fern::Dispatch::new()
-    .filter(move |metadata| filter.enabled(metadata))
-    .format(|out, message, record| {
-      out.finish(format_args!(
-        "{} {:<5} {}:{}| {}",
-        jiff::Zoned::now().strftime(formatter),
-        record.level(),
-        record.target(),
-        record.line().unwrap_or(0),
-        message
-      ))
-    })
-    .chain(fern::log_file(log_name).unwrap())
-    .apply()
-    .unwrap();
+  if filter.filter() >= LevelFilter::Info {
+    fern::Dispatch::new()
+      .filter(move |metadata| filter.enabled(metadata))
+      .format(|out, message, record| {
+        out.finish(format_args!(
+          "{} {:<5} {}:{}| {}",
+          jiff::Zoned::now().strftime(formatter),
+          record.level(),
+          record.target(),
+          record.line().unwrap_or(0),
+          message
+        ))
+      })
+      .chain(fern::log_file(log_name).unwrap())
+      .apply()
+      .unwrap();
+  }
 }
