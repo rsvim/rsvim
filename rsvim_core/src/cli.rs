@@ -55,7 +55,7 @@ impl CliOptions {
       Ok(res) => res,
       Err(e) => {
         println!("error: {e}");
-        println!("");
+        println!();
         println!("For more information, try '--help'");
         std::process::exit(0);
       }
