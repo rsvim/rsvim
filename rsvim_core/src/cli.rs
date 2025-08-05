@@ -2,7 +2,10 @@
 
 use crate::js::v8_version;
 
-use std::path::{Path, PathBuf};
+use std::{
+  alloc::handle_alloc_error,
+  path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone)]
 /// Command line options.
@@ -50,14 +53,26 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOpt, lexopt::Error> {
 }
 
 impl CliOpt {
-  pub fn from_env() -> Result<Self, lexopt::Error> {
-    parse(lexopt::Parser::from_env())
+  fn handle_error(result: Result<Self, lexopt::Error>) -> Self {
+    match result {
+      Ok(res) => res,
+      Err(e) => {
+        println!("error: {e}");
+        println!("");
+        println!("For more information, try '--help'");
+        std::process::exit(0);
+      }
+    }
   }
 
-  pub fn from_args(
-    args: Vec<std::ffi::OsString>,
-  ) -> Result<Self, lexopt::Error> {
-    parse(lexopt::Parser::from_args(args))
+  pub fn from_env() -> Self {
+    let result = parse(lexopt::Parser::from_env());
+    Self::handle_error(result)
+  }
+
+  pub fn from_args(args: Vec<std::ffi::OsString>) -> Self {
+    let result = parse(lexopt::Parser::from_args(args));
+    Self::handle_error(result)
   }
 
   /// Input files.

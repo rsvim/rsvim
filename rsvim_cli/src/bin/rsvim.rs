@@ -24,16 +24,7 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 
 fn main() -> IoResult<()> {
   log::init();
-
-  let cli_opt = match CliOpt::from_env() {
-    Ok(cli_opt) => cli_opt,
-    Err(e) => {
-      println!("error: {e}");
-      println!("");
-      println!("For more information, try '--help'");
-      std::process::exit(0);
-    }
-  };
+  let cli_opt = CliOpt::from_env();
   trace!("cli_opt: {:?}", cli_opt);
 
   // let dir = tempfile::tempdir().unwrap();
