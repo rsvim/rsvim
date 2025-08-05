@@ -12,19 +12,19 @@ pub fn init() {
   let formatter = "%FT%T%.3f%:z";
   let filter = env_filter::Builder::from_env(RSVIM_LOG).build();
 
-  let now = jiff::Zoned::now();
-  let log_name = format!(
-    "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
-    now.date().year(),
-    now.date().month(),
-    now.date().day(),
-    now.time().hour(),
-    now.time().minute(),
-    now.time().second(),
-    now.time().millisecond(),
-  );
-
   if filter.filter() >= LevelFilter::Info {
+    let now = jiff::Zoned::now();
+    let log_name = format!(
+      "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
+      now.date().year(),
+      now.date().month(),
+      now.date().day(),
+      now.time().hour(),
+      now.time().minute(),
+      now.time().second(),
+      now.time().millisecond(),
+    );
+
     fern::Dispatch::new()
       .filter(move |metadata| filter.enabled(metadata))
       .format(|out, message, record| {
