@@ -24,7 +24,7 @@ pub fn init() {
     now.time().millisecond(),
   );
 
-  if filter.filter() >= LevelFilter::Info {
+  if filter.filter() >= LevelFilter::Warn {
     fern::Dispatch::new()
       .filter(move |metadata| filter.enabled(metadata))
       .format(|out, message, record| {
