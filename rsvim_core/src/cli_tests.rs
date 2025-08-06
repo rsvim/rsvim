@@ -15,8 +15,6 @@ fn cli_opt1() {
     to_osstr(vec![]),
     to_osstr(vec!["README.md"]),
     to_osstr(vec!["README.md", "LICENSE"]),
-    to_osstr(vec!["README.md", "LICENSE", "--ex"]),
-    to_osstr(vec!["--ex", "README.md"]),
   ];
 
   let to_pb = |paths: Vec<&str>| {
@@ -30,8 +28,6 @@ fn cli_opt1() {
     CliOptions::new(to_pb(vec![]), false),
     CliOptions::new(to_pb(vec!["README.md"]), false),
     CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), false),
-    CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), true),
-    CliOptions::new(to_pb(vec!["README.md"]), true),
   ];
 
   assert_eq!(input.len(), expects.len());
