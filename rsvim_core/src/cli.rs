@@ -30,8 +30,8 @@ Options:
 //     etc) and scripts/plugins will still be initialized
 const LONG_HELP: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
-rsvim is an open source terminal based text editor, strives to be highly
-extensible by following the main features and philosophy of (neo)vim. It is
+RSVIM is an open source terminal based text editor, strives to be highly
+extensible by following the main features and philosophy of (NEO)VIM. It is
 built from scratch with rust, tokio and v8 javascript engine.
 
 Project home page: https://github.com/rsvim/rsvim
