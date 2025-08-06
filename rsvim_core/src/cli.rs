@@ -35,7 +35,7 @@ Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
 
 Arguments:
   [FILE]...
-          The file(s) where the editor is going to edit.
+          Edit file(s)
 
 Options:
       --ex (experimental)
@@ -43,7 +43,7 @@ Options:
           terminal raw mode, it uses STDIN to receive javascript script, and
           uses STDOUT, STDERR to print messages instead of rendering TUI. All
           internal data structures (such as buffers, windows, command-line,
-          etc) and scripts/plugins will still be initialized.
+          etc) and scripts/plugins will still be initialized
  
   -h, --help
           Print help (see a summary with '-h')
