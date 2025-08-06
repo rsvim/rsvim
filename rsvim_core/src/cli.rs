@@ -40,7 +40,7 @@ Arguments:
 Options:
       --headless (experimental)
           Run in headless mode without TUI. In this mode, rsvim doesn't enter
-          terminal's raw mode, it uses STDIN to receive javascript script, and
+          terminal raw mode, it uses STDIN to receive javascript script, and
           uses STDOUT, STDERR to print messages instead of rendering TUI. All
           internal data structures (such as buffers, windows, command-line,
           etc) and scripts/plugins will still be initialized
