@@ -64,7 +64,6 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
 
   // Arguments
   let mut file: Vec<PathBuf> = vec![];
-  let mut headless: bool = false;
 
   while let Some(arg) = parser.next()? {
     match arg {
@@ -85,9 +84,6 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
         println!("{version}");
         std::process::exit(0);
       }
-      Long("headless") => {
-        headless = true;
-      }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
       }
@@ -95,7 +91,10 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     }
   }
 
-  Ok(CliOptions { file, headless })
+  Ok(CliOptions {
+    file,
+    headless: false,
+  })
 }
 
 impl CliOptions {
