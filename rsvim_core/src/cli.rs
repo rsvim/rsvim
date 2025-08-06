@@ -15,11 +15,11 @@ pub struct CliOptions {
 const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
-  [FILE]...  Edit file(s)
+  [FILE]...      Edit specified file(s)
 
 Options:
-  -h, --help                     Print help (see more with '--help')
-  -V, --version                  Print version
+  -h, --help     Print help (see more with '--help')
+  -V, --version  Print version
 "#;
 
 // --headless (experimental)
@@ -28,7 +28,7 @@ Options:
 //     uses STDOUT, STDERR to print messages instead of rendering TUI. All
 //     internal data structures (such as buffers, windows, command-line,
 //     etc) and scripts/plugins will still be initialized
-const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+const LONG_HELP: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
 rsvim is an open source terminal based text editor, strives to be highly
 extensible by following the main features and philosophy of (neo)vim. It is
@@ -41,7 +41,7 @@ Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...
-          Edit file(s)
+          Edit specified file(s)
 
 Options:
   -h, --help
