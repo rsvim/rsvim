@@ -11,17 +11,23 @@ pub struct CliOptions {
   headless: bool,
 }
 
-const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
+// --headless (experimental)  Run in headless mode without TUI
+const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...  Edit file(s)
 
 Options:
-      --headless (experimental)  Run in headless mode without TUI
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
 "#;
 
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
 const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
 
 rsvim is an open source terminal based text editor, strives to be highly
@@ -31,20 +37,13 @@ built from scratch with rust, tokio and v8 javascript engine.
 Project home page: https://github.com/rsvim/rsvim
 Project documentation page: https://rsvim.github.io/
 
-Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
+Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...
           Edit file(s)
 
 Options:
-      --headless (experimental)
-          Run in headless mode without TUI. In this mode, rsvim doesn't enter
-          terminal's raw mode, it uses STDIN to receive javascript script, and
-          uses STDOUT, STDERR to print messages instead of rendering TUI. All
-          internal data structures (such as buffers, windows, command-line,
-          etc) and scripts/plugins will still be initialized
- 
   -h, --help
           Print help (see a summary with '-h')
 
