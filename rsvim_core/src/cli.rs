@@ -39,11 +39,11 @@ Arguments:
 
 Options:
       --headless
-          Run in headless mode without TUI. In this mode, rsvim will not
-          initialize the terminal raw mode, i.e. STDIN, STDOUT, STDERR still go
-          through just like other normal terminal cli. But all the internal
-          data structures (such as buffers, windows, command-line, etc) will
-          still be initialized.
+          Run in headless mode without TUI. In this mode, rsvim doesn't
+          initialize the terminal raw mode, i.e. STDIO works as an arbitrary
+          terminal channel. While all internal data structures (such as
+          buffers, windows, command-line, etc) and scripts/plugins will still
+          be initialized.
  
   -h, --help
           Print help (see a summary with '-h')
