@@ -225,7 +225,7 @@ impl EventLoop {
     self._init_config()?;
 
     // Skip TUI if ex mode
-    if !self.cli_opts.ex_mode() {
+    if !self.cli_opts.headless() {
       self._init_tui()?;
     }
 
@@ -233,7 +233,7 @@ impl EventLoop {
     self._init_windows()?;
 
     // Skip TUI if ex mode
-    if !self.cli_opts.ex_mode() {
+    if !self.cli_opts.headless() {
       self._init_tui_complete()?;
     }
 
@@ -380,7 +380,7 @@ impl EventLoop {
   /// Shutdown.
   pub fn shutdown(&self) -> IoResult<()> {
     // Skip TUI if ex mode
-    if !self.cli_opts.ex_mode() {
+    if !self.cli_opts.headless() {
       self._shutdown_tui()?;
     }
 
@@ -528,7 +528,7 @@ impl EventLoop {
     let shader = lock!(self.canvas).shade();
 
     // Skip TUI if ex mode
-    if !self.cli_opts.ex_mode() {
+    if !self.cli_opts.headless() {
       self.queue_shader(shader)?;
       self.writer.flush()?;
     }

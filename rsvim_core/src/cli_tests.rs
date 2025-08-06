@@ -39,7 +39,7 @@ fn cli_opt1() {
   for i in 0..n {
     let actual = CliOptions::from_args(&input[i]);
     let expect = &expects[i];
-    assert_eq!(actual.ex_mode(), expect.ex_mode());
+    assert_eq!(actual.headless(), expect.headless());
     assert_eq!(actual.file().len(), expect.file().len());
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);

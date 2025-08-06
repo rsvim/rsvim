@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 /// Command line options.
 pub struct CliOptions {
   file: Vec<PathBuf>,
-  ex_mode: bool,
+  headless: bool,
 }
 
 const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
@@ -17,9 +17,9 @@ Arguments:
   [FILE]...  Edit file(s)
 
 Options:
-      --ex (experimental)  Run in ex mode without TUI
-  -h, --help               Print help (see more with '--help')
-  -V, --version            Print version
+      --headless (experimental)  Run in headless mode without TUI
+  -h, --help                     Print help (see more with '--help')
+  -V, --version                  Print version
 "#;
 
 const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
@@ -38,8 +38,8 @@ Arguments:
           Edit file(s)
 
 Options:
-      --ex (experimental)
-          Run in ex mode without TUI. In this mode, rsvim doesn't enter
+      --headless (experimental)
+          Run in headless mode without TUI. In this mode, rsvim doesn't enter
           terminal raw mode, it uses STDIN to receive javascript script, and
           uses STDOUT, STDERR to print messages instead of rendering TUI. All
           internal data structures (such as buffers, windows, command-line,
@@ -65,7 +65,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
 
   // Arguments
   let mut file: Vec<PathBuf> = vec![];
-  let mut ex_mode: bool = false;
+  let mut headless: bool = false;
 
   while let Some(arg) = parser.next()? {
     match arg {
@@ -86,8 +86,8 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
         println!("{version}");
         std::process::exit(0);
       }
-      Long("ex") => {
-        ex_mode = true;
+      Long("headless") => {
+        headless = true;
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -96,7 +96,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     }
   }
 
-  Ok(CliOptions { file, ex_mode })
+  Ok(CliOptions { file, headless })
 }
 
 impl CliOptions {
@@ -127,13 +127,13 @@ impl CliOptions {
     &self.file
   }
 
-  /// Ex mode.
-  pub fn ex_mode(&self) -> bool {
-    self.ex_mode
+  /// Headless mode.
+  pub fn headless(&self) -> bool {
+    self.headless
   }
 
   #[cfg(test)]
-  pub fn new(file: Vec<PathBuf>, ex_mode: bool) -> Self {
-    Self { file, ex_mode }
+  pub fn new(file: Vec<PathBuf>, headless: bool) -> Self {
+    Self { file, headless }
   }
 }
