@@ -23,8 +23,8 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = CliOptions::from_env();
-  trace!("cli_opt: {:?}", cli_opt);
+  let cli_opts = CliOptions::from_env();
+  trace!("cli_opts:{:?}", cli_opts);
 
   // let dir = tempfile::tempdir().unwrap();
   // trace!("tempdir:{:?}", dir);
@@ -40,25 +40,15 @@ fn main() -> IoResult<()> {
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
     let mut event_loop =
-      EventLoop::new(cli_opt, SnapshotData::new(&RSVIM_SNAPSHOT))?;
+      EventLoop::new(cli_opts, SnapshotData::new(&RSVIM_SNAPSHOT))?;
 
-    // Initialize user config.
-    event_loop.init_config()?;
-
-    // Finish initialize terminal.
-    event_loop.init_tui()?;
-
-    // Initialize buffers and windows.
-    event_loop.init_buffers()?;
-    event_loop.init_windows()?;
-
-    // Finish initialize terminal.
-    event_loop.init_tui_complete()?;
+    // Initialize.
+    event_loop.initialize()?;
 
     // Run loop.
     event_loop.run().await?;
 
-    // Shutdown terminal raw mode.
-    event_loop.shutdown_tui()
+    // Shutdown.
+    event_loop.shutdown()
   })
 }

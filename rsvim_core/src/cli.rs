@@ -8,23 +8,31 @@ use std::path::{Path, PathBuf};
 /// Command line options.
 pub struct CliOptions {
   file: Vec<PathBuf>,
+  headless: bool,
 }
 
+// --headless (experimental)  Run in headless mode without TUI
 const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
-  [FILE]...  Edit file(s)
+  [FILE]...      Edit specified file(s)
 
 Options:
-  -V, --version  Print version
   -h, --help     Print help (see more with '--help')
+  -V, --version  Print version
 "#;
 
-const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
+const LONG_HELP: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
-rsvim is an open source terminal based text editor, strives to be highly
-extensible by following the main features and philosophy of (neo)vim. It is
-built with rust, tokio and v8 javascript engine from scratch.
+RSVIM is an open source terminal based text editor, strives to be highly
+extensible by following the main features and philosophy of (NEO)VIM. It is
+built from scratch with rust, tokio and v8 javascript engine.
 
 Project home page: https://github.com/rsvim/rsvim
 Project documentation page: https://rsvim.github.io/
@@ -32,11 +40,15 @@ Project documentation page: https://rsvim.github.io/
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
-  [FILE]...  Edit file(s)
+  [FILE]...
+          Edit specified file(s)
 
 Options:
-  -V, --version  Print version
-  -h, --help     Print help (see a summary with '-h')
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 
 Bugs can be reported on GitHub: https://github.com/rsvim/rsvim/issues
 "#;
@@ -79,7 +91,10 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     }
   }
 
-  Ok(CliOptions { file })
+  Ok(CliOptions {
+    file,
+    headless: false,
+  })
 }
 
 impl CliOptions {
@@ -108,5 +123,15 @@ impl CliOptions {
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
+  }
+
+  /// Headless mode.
+  pub fn headless(&self) -> bool {
+    self.headless
+  }
+
+  #[cfg(test)]
+  pub fn new(file: Vec<PathBuf>, headless: bool) -> Self {
+    Self { file, headless }
   }
 }
