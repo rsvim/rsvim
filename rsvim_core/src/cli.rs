@@ -11,16 +11,24 @@ pub struct CliOptions {
   headless: bool,
 }
 
+// --headless Run in headless mode without TUI
+
 const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [OPTIONS] [FILE]...
 
 Arguments:
   [FILE]...  Edit file(s)
 
 Options:
-      --headless Run in headless mode without TUI
   -h, --help     Print help (see more with '--help')
   -V, --version  Print version
 "#;
+
+// --headless
+//     Run in headless mode without TUI. In this mode, rsvim doesn't
+//     initialize the terminal raw mode, i.e. STDIO works as an arbitrary
+//     terminal channel. While all internal data structures (such as
+//     buffers, windows, command-line, etc) and scripts/plugins will still
+//     be initialized.
 
 const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
 
@@ -38,13 +46,6 @@ Arguments:
           The file(s) where the editor is going to edit.
 
 Options:
-      --headless
-          Run in headless mode without TUI. In this mode, rsvim doesn't
-          initialize the terminal raw mode, i.e. STDIO works as an arbitrary
-          terminal channel. While all internal data structures (such as
-          buffers, windows, command-line, etc) and scripts/plugins will still
-          be initialized.
- 
   -h, --help
           Print help (see a summary with '-h')
 
