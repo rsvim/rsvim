@@ -220,8 +220,17 @@ impl EventLoop {
     })
   }
 
+  /// Initialize the editor
+  pub fn initialize(&mut self) -> IoResult<()> {
+    self._init_config()?;
+    self._init_tui()?;
+    self._init_buffers()?;
+    self._init_windows()?;
+    self._init_tui_complete()
+  }
+
   /// Initialize user config file.
-  pub fn init_config(&mut self) -> IoResult<()> {
+  fn _init_config(&mut self) -> IoResult<()> {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
       self
         .js_runtime
@@ -232,7 +241,7 @@ impl EventLoop {
   }
 
   /// Initialize terminal raw mode.
-  pub fn init_tui(&self) -> IoResult<()> {
+  fn _init_tui(&self) -> IoResult<()> {
     tui::initialize_raw_mode()?;
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
@@ -243,7 +252,7 @@ impl EventLoop {
   }
 
   /// First flush TUI to terminal.
-  pub fn init_tui_complete(&mut self) -> IoResult<()> {
+  pub fn _init_tui_complete(&mut self) -> IoResult<()> {
     // Initialize cursor
     let cursor = {
       let canvas = lock!(self.canvas);
@@ -272,13 +281,8 @@ impl EventLoop {
     Ok(())
   }
 
-  /// Shutdown terminal raw mode.
-  pub fn shutdown_tui(&self) -> IoResult<()> {
-    tui::shutdown_raw_mode()
-  }
-
   /// Initialize buffers.
-  pub fn init_buffers(&mut self) -> IoResult<()> {
+  pub fn _init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
 
     // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
@@ -305,7 +309,7 @@ impl EventLoop {
   }
 
   /// Initialize windows.
-  pub fn init_windows(&mut self) -> IoResult<()> {
+  pub fn _init_windows(&mut self) -> IoResult<()> {
     // Initialize default window, with default buffer.
     let (canvas_size, canvas_cursor) = {
       let canvas = lock!(self.canvas);
@@ -360,6 +364,16 @@ impl EventLoop {
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
+  }
+
+  /// Shutdown.
+  pub fn shutdown(&self) -> IoResult<()> {
+    self._shutdown_tui()
+  }
+
+  /// Shutdown terminal raw mode.
+  fn _shutdown_tui(&self) -> IoResult<()> {
+    tui::shutdown_raw_mode()
   }
 
   async fn process_event(&mut self, event: Option<IoResult<Event>>) {
