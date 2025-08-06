@@ -527,8 +527,11 @@ impl EventLoop {
     // Compute the commands that need to output to the terminal device.
     let shader = lock!(self.canvas).shade();
 
-    self.queue_shader(shader)?;
-    self.writer.flush()?;
+    // Skip TUI if headless mode
+    if !self.cli_opts.headless() {
+      self.queue_shader(shader)?;
+      self.writer.flush()?;
+    }
 
     Ok(())
   }
