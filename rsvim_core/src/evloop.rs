@@ -54,8 +54,6 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opts: CliOptions,
 
-  pub opts: EventLoopOptions,
-
   /// Widget tree for UI.
   pub tree: TreeArc,
   /// Canvas for UI.

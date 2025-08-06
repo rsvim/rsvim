@@ -8,7 +8,6 @@ use std::path::{Path, PathBuf};
 /// Command line options.
 pub struct CliOptions {
   file: Vec<PathBuf>,
-
   headless: bool,
 }
 
@@ -87,7 +86,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
         std::process::exit(0);
       }
       Long("headless") => {
-        headless = parser.value()?.parse()?;
+        headless = true;
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -130,5 +129,10 @@ impl CliOptions {
   /// Headless mode.
   pub fn headless(&self) -> bool {
     self.headless
+  }
+
+  #[cfg(test)]
+  pub fn new(file: Vec<PathBuf>, headless: bool) -> Self {
+    Self { file, headless }
   }
 }
