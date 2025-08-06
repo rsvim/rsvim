@@ -27,7 +27,7 @@ fn cli_opt1() {
   };
 
   let expects = [
-    CliOptions::new(vec![], false),
+    CliOptions::new(to_pb(vec![]), false),
     CliOptions::new(to_pb(vec!["README.md"]), false),
     CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), false),
     CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), true),
