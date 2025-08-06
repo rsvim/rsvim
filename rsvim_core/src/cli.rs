@@ -17,9 +17,9 @@ Arguments:
   [FILE]...  Edit file(s)
 
 Options:
-      --headless Run in headless mode without TUI
-  -h, --help     Print help (see more with '--help')
-  -V, --version  Print version
+      --headless (experimental)  Run in headless mode without TUI
+  -h, --help                     Print help (see more with '--help')
+  -V, --version                  Print version
 "#;
 
 const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
@@ -38,7 +38,7 @@ Arguments:
           The file(s) where the editor is going to edit.
 
 Options:
-      --headless
+      --headless (experimental)
           Run in headless mode without TUI. In this mode, rsvim doesn't
           initialize the terminal raw mode, i.e. STDIO works as an arbitrary
           terminal channel. While all internal data structures (such as
