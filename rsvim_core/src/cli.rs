@@ -26,7 +26,7 @@ const LONG_HELP: &str = r#"The VIM editor reinvented in Rust+TypeScript
 
 rsvim is an open source terminal based text editor, strives to be highly
 extensible by following the main features and philosophy of (neo)vim. It is
-built with rust, tokio and v8 javascript engine from scratch.
+built from scratch with rust, tokio and v8 javascript engine.
 
 Project home page: https://github.com/rsvim/rsvim
 Project documentation page: https://rsvim.github.io/
