@@ -224,18 +224,12 @@ impl EventLoop {
   pub fn initialize(&mut self) -> IoResult<()> {
     self._init_config()?;
 
-    // Skip TUI if ex mode
-    if !self.cli_opts.headless() {
-      self._init_tui()?;
-    }
+    self._init_tui()?;
 
     self._init_buffers()?;
     self._init_windows()?;
 
-    // Skip TUI if ex mode
-    if !self.cli_opts.headless() {
-      self._init_tui_complete()?;
-    }
+    self._init_tui_complete()?;
 
     Ok(())
   }
@@ -379,10 +373,7 @@ impl EventLoop {
 
   /// Shutdown.
   pub fn shutdown(&self) -> IoResult<()> {
-    // Skip TUI if ex mode
-    if !self.cli_opts.headless() {
-      self._shutdown_tui()?;
-    }
+    self._shutdown_tui()?;
 
     Ok(())
   }
@@ -527,11 +518,8 @@ impl EventLoop {
     // Compute the commands that need to output to the terminal device.
     let shader = lock!(self.canvas).shade();
 
-    // Skip TUI if ex mode
-    if !self.cli_opts.headless() {
-      self.queue_shader(shader)?;
-      self.writer.flush()?;
-    }
+    self.queue_shader(shader)?;
+    self.writer.flush()?;
 
     Ok(())
   }
