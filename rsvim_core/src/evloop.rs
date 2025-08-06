@@ -223,10 +223,21 @@ impl EventLoop {
   /// Initialize the editor
   pub fn initialize(&mut self) -> IoResult<()> {
     self._init_config()?;
-    self._init_tui()?;
+
+    // Skip TUI if running in headless mode
+    if self.cli_opts.headless() {
+      self._init_tui()?;
+    }
+
     self._init_buffers()?;
     self._init_windows()?;
-    self._init_tui_complete()
+
+    // Skip TUI if running in headless mode
+    if self.cli_opts.headless() {
+      self._init_tui_complete()?;
+    }
+
+    Ok(())
   }
 
   /// Initialize user config file.
@@ -368,7 +379,12 @@ impl EventLoop {
 
   /// Shutdown.
   pub fn shutdown(&self) -> IoResult<()> {
-    self._shutdown_tui()
+    // Skip TUI if running in headless mode
+    if self.cli_opts.headless() {
+      self._shutdown_tui()?;
+    }
+
+    Ok(())
   }
 
   /// Shutdown terminal raw mode.
