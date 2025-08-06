@@ -4,21 +4,20 @@ use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let input = vec![
-    vec![],
-    vec!["README.md"],
-    vec!["README.md", "LICENSE"],
-    vec!["README.md", "LICENSE", "--headless"],
-    vec!["--headless", "README.md"],
-  ]
-  .iter()
-  .map(|strings| {
-    strings
+  let to_os_str = |osstrs: Vec<&str>| {
+    osstrs
       .iter()
       .map(|s| std::ffi::OsString::from(s.to_string()))
       .collect::<Vec<_>>()
-  })
-  .collect::<Vec<_>>();
+  };
+
+  let input = [
+    to_os_str(vec![]),
+    to_os_str(vec!["README.md"]),
+    to_os_str(vec!["README.md", "LICENSE"]),
+    to_os_str(vec!["README.md", "LICENSE", "--headless"]),
+    to_os_str(vec!["--headless", "README.md"]),
+  ];
 
   let to_pb = |paths: Vec<&str>| {
     paths
@@ -27,7 +26,7 @@ fn cli_opt1() {
       .collect::<Vec<_>>()
   };
 
-  let expects = vec![
+  let expects = [
     CliOptions::new(vec![], false),
     CliOptions::new(to_pb(vec!["README.md"]), false),
     CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), false),
