@@ -4,7 +4,7 @@ use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let to_os_str = |osstrs: Vec<&str>| {
+  let to_osstr = |osstrs: Vec<&str>| {
     osstrs
       .iter()
       .map(|s| std::ffi::OsString::from(s.to_string()))
@@ -12,11 +12,11 @@ fn cli_opt1() {
   };
 
   let input = [
-    to_os_str(vec![]),
-    to_os_str(vec!["README.md"]),
-    to_os_str(vec!["README.md", "LICENSE"]),
-    to_os_str(vec!["README.md", "LICENSE", "--headless"]),
-    to_os_str(vec!["--headless", "README.md"]),
+    to_osstr(vec![]),
+    to_osstr(vec!["README.md"]),
+    to_osstr(vec!["README.md", "LICENSE"]),
+    to_osstr(vec!["README.md", "LICENSE", "--headless"]),
+    to_osstr(vec!["--headless", "README.md"]),
   ];
 
   let to_pb = |paths: Vec<&str>| {
