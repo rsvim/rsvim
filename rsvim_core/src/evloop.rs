@@ -224,16 +224,16 @@ impl EventLoop {
   pub fn initialize(&mut self) -> IoResult<()> {
     self._init_config()?;
 
-    // Skip TUI if running in headless mode
-    if self.cli_opts.headless() {
+    // Skip TUI if headless mode
+    if !self.cli_opts.headless() {
       self._init_tui()?;
     }
 
     self._init_buffers()?;
     self._init_windows()?;
 
-    // Skip TUI if running in headless mode
-    if self.cli_opts.headless() {
+    // Skip TUI if headless mode
+    if !self.cli_opts.headless() {
       self._init_tui_complete()?;
     }
 
@@ -379,8 +379,8 @@ impl EventLoop {
 
   /// Shutdown.
   pub fn shutdown(&self) -> IoResult<()> {
-    // Skip TUI if running in headless mode
-    if self.cli_opts.headless() {
+    // Skip TUI if headless mode
+    if !self.cli_opts.headless() {
       self._shutdown_tui()?;
     }
 
