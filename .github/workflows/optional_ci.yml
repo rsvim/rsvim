@@ -59,16 +59,6 @@ jobs:
         id: bloaty-step
         with:
           bloaty-args: ./target/release/rsvim
-      - name: Add a PR comment with the bloaty output
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n'
-            })
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
@@ -88,5 +78,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
+              body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
             })
