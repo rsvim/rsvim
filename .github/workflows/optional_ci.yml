@@ -59,6 +59,7 @@ jobs:
         id: bloaty-step
         with:
           bloaty-args: ./target/release/rsvim
+          output-to-summary: true
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
