@@ -26,14 +26,13 @@ fn main() -> IoResult<()> {
   let cli_opts = CliOptions::from_env();
   trace!("cli_opts:{:?}", cli_opts);
 
-  // let dir = tempfile::tempdir().unwrap();
-  // trace!("tempdir:{:?}", dir);
-  // let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
-  // let mut wtxn = env.write_txn().unwrap();
-  // let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
-  //   env.create_database(&mut wtxn, None).unwrap();
-  // db.put(&mut wtxn, "seven", &7).unwrap();
-  // wtxn.commit().unwrap();
+  // let help = match arg {
+  //   Short(_) => SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
+  //   Long(_) => LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
+  //   _ => unreachable!(),
+  // };
+  // println!("{help}");
+  // std::process::exit(0);
 
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
