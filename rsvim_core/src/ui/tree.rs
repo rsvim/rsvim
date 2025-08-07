@@ -23,11 +23,24 @@ pub mod internal;
 pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
-  CommandLine(CommandLine),
+  ExCommandLine(CommandLine),
+  MessageCommandLine(CommandLine),
 }
 
-inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
-widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+inode_enum_dispatcher!(
+  TreeNode,
+  RootContainer,
+  Window,
+  ExCommandLine,
+  MessageCommandLine
+);
+widget_enum_dispatcher!(
+  TreeNode,
+  RootContainer,
+  Window,
+  ExCommandLine,
+  MessageCommandLine
+);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -127,8 +140,11 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
-  command_line_id: Option<TreeNodeId>,
+  // [`ExCommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  ex_command_line_id: Option<TreeNodeId>,
+
+  // [`MessageCommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  message_command_line_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
@@ -169,7 +185,8 @@ impl Tree {
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
-      command_line_id: None,
+      ex_command_line_id: None,
+      message_command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
@@ -229,9 +246,14 @@ impl Tree {
   //   self.base.iter_mut()
   // }
 
-  /// Get command-line node ID.
-  pub fn command_line_id(&self) -> Option<TreeNodeId> {
-    self.command_line_id
+  /// Get ex-command-line node ID.
+  pub fn ex_command_line_id(&self) -> Option<TreeNodeId> {
+    self.ex_command_line_id
+  }
+
+  /// Get message-command-line node ID.
+  pub fn message_command_line_id(&self) -> Option<TreeNodeId> {
+    self.message_command_line_id
   }
 
   /// Get current window node ID.
@@ -326,15 +348,15 @@ impl Tree {
     }
   }
 
-  // Command-line widget.
-  pub fn command_line(&self) -> Option<&CommandLine> {
-    match self.command_line_id {
+  // Ex-Command-line widget.
+  pub fn ex_command_line(&self) -> Option<&CommandLine> {
+    match self.ex_command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node(cmdline_id).is_some());
         let cmdline_node = self.node(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        debug_assert!(matches!(cmdline_node, TreeNode::ExCommandLine(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => {
+          TreeNode::ExCommandLine(w) => {
             debug_assert_eq!(w.id(), cmdline_id);
             Some(w)
           }
@@ -346,14 +368,52 @@ impl Tree {
   }
 
   // Mutable command-line widget.
-  pub fn command_line_mut(&mut self) -> Option<&mut CommandLine> {
-    match self.command_line_id {
+  pub fn ex_command_line_mut(&mut self) -> Option<&mut CommandLine> {
+    match self.ex_command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node_mut(cmdline_id).is_some());
         let cmdline_node = self.node_mut(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        debug_assert!(matches!(cmdline_node, TreeNode::ExCommandLine(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => {
+          TreeNode::ExCommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  // Message-Command-line widget.
+  pub fn message_command_line(&self) -> Option<&CommandLine> {
+    match self.message_command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node(cmdline_id).is_some());
+        let cmdline_node = self.node(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::MessageCommandLine(_)));
+        match cmdline_node {
+          TreeNode::MessageCommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  // Mutable command-line widget.
+  pub fn message_command_line_mut(&mut self) -> Option<&mut CommandLine> {
+    match self.message_command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node_mut(cmdline_id).is_some());
+        let cmdline_node = self.node_mut(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::MessageCommandLine(_)));
+        match cmdline_node {
+          TreeNode::MessageCommandLine(w) => {
             debug_assert_eq!(w.id(), cmdline_id);
             Some(w)
           }
@@ -370,9 +430,13 @@ impl Tree {
 impl Tree {
   fn insert_guard(&mut self, node: &TreeNode) {
     match node {
-      TreeNode::CommandLine(command_line) => {
+      TreeNode::ExCommandLine(ex_command_line) => {
         // When insert command-line widget, update `command_line_id`.
-        self.command_line_id = Some(command_line.id());
+        self.ex_command_line_id = Some(ex_command_line.id());
+      }
+      TreeNode::MessageCommandLine(message_command_line) => {
+        // When insert command-line widget, update `command_line_id`.
+        self.message_command_line_id = Some(message_command_line.id());
       }
       TreeNode::Window(window) => {
         // When insert window widget, update `window_ids`.
@@ -403,8 +467,11 @@ impl Tree {
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {
-    if self.command_line_id == Some(id) {
-      self.command_line_id = None;
+    if self.ex_command_line_id == Some(id) {
+      self.ex_command_line_id = None;
+    }
+    if self.message_command_line_id == Some(id) {
+      self.message_command_line_id = None;
     }
     self.window_ids.remove(&id);
     if self.current_window_id == Some(id) {
@@ -483,6 +550,9 @@ impl Tree {
     let mut canvas = lock!(canvas);
     for node in self.base.iter() {
       // trace!("Draw tree:{:?}", node);
+      if !node.visible() {
+        continue;
+      }
       node.draw(&mut canvas);
     }
   }

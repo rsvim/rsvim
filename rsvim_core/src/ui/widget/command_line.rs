@@ -1,21 +1,16 @@
 //! Command-line widget.
 
 use crate::content::TextContentsWk;
-use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-};
+use crate::ui::viewport::{CursorViewportArc, ViewportArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::content::CommandLineContent;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::opt::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
 use std::sync::Arc;
@@ -23,6 +18,7 @@ use std::sync::Arc;
 // Re-export
 pub use indicator::CommandLineIndicatorSymbol;
 
+pub mod builder;
 pub mod content;
 pub mod indicator;
 pub mod root;
@@ -68,81 +64,6 @@ pub struct CommandLine {
 
   viewport: ViewportArc,
   cursor_viewport: CursorViewportArc,
-}
-
-impl CommandLine {
-  pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
-    // Force cmdline window options.
-    let options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .line_break(false)
-      .scroll_off(0_u16)
-      .build()
-      .unwrap();
-
-    let cmdline_root = CommandLineRootContainer::new(shape);
-    let cmdline_root_id = cmdline_root.id();
-    let cmdline_root_node =
-      CommandLineNode::CommandLineRootContainer(cmdline_root);
-
-    let mut base = Itree::new(cmdline_root_node);
-
-    let cmdline_indicator_shape =
-      IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator = CommandLineIndicator::new(
-      cmdline_indicator_shape,
-      CommandLineIndicatorSymbol::Empty,
-    );
-    let cmdline_indicator_id = cmdline_indicator.id();
-    let cmdline_indicator_node =
-      CommandLineNode::CommandLineIndicator(cmdline_indicator);
-    base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
-
-    let cmdline_content_shape =
-      IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
-
-    let (viewport, cursor_viewport) = {
-      let cmdline_content_actual_shape =
-        geo_rect_as!(cmdline_content_shape, u16);
-      let text_contents = text_contents.upgrade().unwrap();
-      let text_contents = lock!(text_contents);
-      let viewport = Viewport::view(
-        &options,
-        text_contents.command_line_content(),
-        &cmdline_content_actual_shape,
-        0,
-        0,
-      );
-      let cursor_viewport = CursorViewport::from_top_left(
-        &viewport,
-        text_contents.command_line_content(),
-      );
-      (viewport, cursor_viewport)
-    };
-    let viewport = Viewport::to_arc(viewport);
-    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
-
-    let cmdline_content = CommandLineContent::new(
-      cmdline_content_shape,
-      text_contents.clone(),
-      Arc::downgrade(&viewport),
-    );
-    let cmdline_content_id = cmdline_content.id();
-    let cmdline_content_node =
-      CommandLineNode::CommandLineContent(cmdline_content);
-    base.bounded_insert(cmdline_root_id, cmdline_content_node);
-
-    Self {
-      base,
-      options,
-      indicator_id: cmdline_indicator_id,
-      content_id: cmdline_content_id,
-      cursor_id: None,
-      text_contents,
-      viewport,
-      cursor_viewport,
-    }
-  }
 }
 
 inode_itree_impl!(CommandLine, base);

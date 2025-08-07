@@ -21,6 +21,7 @@ use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
 
 // Re-export
+use crate::state::fsm::command_line_message::CommandLineMessageStateful;
 pub use command_line_ex::CommandLineExStateful;
 pub use command_line_search_backward::CommandLineSearchBackwardStateful;
 pub use command_line_search_forward::CommandLineSearchForwardStateful;
@@ -33,6 +34,7 @@ pub use terminal::TerminalStateful;
 pub use visual::VisualStateful;
 
 pub mod command_line_ex;
+pub mod command_line_message;
 pub mod command_line_search_backward;
 pub mod command_line_search_forward;
 pub mod insert;
@@ -129,6 +131,7 @@ pub enum StatefulValue {
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
   CommandLineExMode(CommandLineExStateful),
+  CommandLineMessageMode(CommandLineMessageStateful),
   CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
   CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
   TerminalMode(TerminalStateful),
@@ -144,6 +147,7 @@ stateful_enum_dispatcher!(
   OperatorPendingMode,
   InsertMode,
   CommandLineExMode,
+  CommandLineMessageMode,
   CommandLineSearchForwardMode,
   CommandLineSearchBackwardMode,
   TerminalMode,

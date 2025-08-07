@@ -371,7 +371,9 @@ pub fn _update_viewport_after_text_changed(
   let node = tree.node_mut(id).unwrap();
   debug_assert!(matches!(
     node,
-    TreeNode::Window(_) | TreeNode::CommandLine(_)
+    TreeNode::Window(_)
+      | TreeNode::ExCommandLine(_)
+      | TreeNode::MessageCommandLine(_)
   ));
   let (actual_shape, local_options, viewport, cursor_viewport) = match node {
     TreeNode::Window(window) => (
@@ -380,11 +382,17 @@ pub fn _update_viewport_after_text_changed(
       window.viewport(),
       window.cursor_viewport(),
     ),
-    TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
-      *cmdline.options(),
-      cmdline.viewport(),
-      cmdline.cursor_viewport(),
+    TreeNode::ExCommandLine(ex_cmdline) => (
+      *ex_cmdline.content().actual_shape(),
+      *ex_cmdline.options(),
+      ex_cmdline.viewport(),
+      ex_cmdline.cursor_viewport(),
+    ),
+    TreeNode::MessageCommandLine(message_cmdline) => (
+      *message_cmdline.content().actual_shape(),
+      *message_cmdline.options(),
+      message_cmdline.viewport(),
+      message_cmdline.cursor_viewport(),
     ),
     _ => unreachable!(),
   };
@@ -413,8 +421,11 @@ pub fn _update_viewport_after_text_changed(
 
   match node {
     TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
-    TreeNode::CommandLine(cmdline) => {
-      cmdline.set_viewport(updated_viewport.clone())
+    TreeNode::ExCommandLine(ex_cmdline) => {
+      ex_cmdline.set_viewport(updated_viewport.clone())
+    }
+    TreeNode::MessageCommandLine(message_cmdline) => {
+      message_cmdline.set_viewport(updated_viewport.clone())
     }
     _ => unreachable!(),
   }
@@ -435,8 +446,11 @@ pub fn _update_viewport_after_text_changed(
       TreeNode::Window(window) => {
         window.set_cursor_viewport(updated_cursor_viewport)
       }
-      TreeNode::CommandLine(cmdline) => {
-        cmdline.set_cursor_viewport(updated_cursor_viewport)
+      TreeNode::ExCommandLine(ex_cmdline) => {
+        ex_cmdline.set_cursor_viewport(updated_cursor_viewport)
+      }
+      TreeNode::MessageCommandLine(message_cmdline) => {
+        message_cmdline.set_cursor_viewport(updated_cursor_viewport)
       }
       _ => unreachable!(),
     }
@@ -470,11 +484,17 @@ pub fn cursor_move(
       window.viewport(),
       window.cursor_viewport(),
     ),
-    TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
-      *cmdline.options(),
-      cmdline.viewport(),
-      cmdline.cursor_viewport(),
+    TreeNode::ExCommandLine(ex_cmdline) => (
+      *ex_cmdline.content().actual_shape(),
+      *ex_cmdline.options(),
+      ex_cmdline.viewport(),
+      ex_cmdline.cursor_viewport(),
+    ),
+    TreeNode::MessageCommandLine(message_cmdline) => (
+      *message_cmdline.content().actual_shape(),
+      *message_cmdline.options(),
+      message_cmdline.viewport(),
+      message_cmdline.cursor_viewport(),
     ),
     _ => unreachable!(),
   };
@@ -528,8 +548,11 @@ pub fn cursor_move(
       if let Some(new_viewport) = new_viewport.clone() {
         match node {
           TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
-          TreeNode::CommandLine(cmdline) => {
-            cmdline.set_viewport(new_viewport.clone())
+          TreeNode::ExCommandLine(ex_cmdline) => {
+            ex_cmdline.set_viewport(new_viewport.clone())
+          }
+          TreeNode::MessageCommandLine(message_cmdline) => {
+            message_cmdline.set_viewport(new_viewport.clone())
           }
           _ => unreachable!(),
         }
@@ -562,10 +585,19 @@ pub fn cursor_move(
             );
           }
         }
-        TreeNode::CommandLine(cmdline) => {
-          cmdline.set_cursor_viewport(new_cursor_viewport.clone());
-          if cmdline.cursor_id().is_some() {
-            cmdline.move_cursor_to(
+        TreeNode::ExCommandLine(ex_cmdline) => {
+          ex_cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          if ex_cmdline.cursor_id().is_some() {
+            ex_cmdline.move_cursor_to(
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
+        }
+        TreeNode::MessageCommandLine(message_cmdline) => {
+          message_cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          if message_cmdline.cursor_id().is_some() {
+            message_cmdline.move_cursor_to(
               new_cursor_viewport.column_idx() as isize,
               new_cursor_viewport.row_idx() as isize,
             );
@@ -598,7 +630,10 @@ pub fn cursor_insert(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+    TreeNode::ExCommandLine(ex_cmdline) => ex_cmdline.cursor_viewport(),
+    TreeNode::MessageCommandLine(message_cmdline) => {
+      message_cmdline.cursor_viewport()
+    }
     _ => unreachable!(),
   };
 
@@ -653,7 +688,10 @@ pub fn cursor_delete(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+    TreeNode::ExCommandLine(ex_cmdline) => ex_cmdline.cursor_viewport(),
+    TreeNode::MessageCommandLine(message_cmdline) => {
+      message_cmdline.cursor_viewport()
+    }
     _ => unreachable!(),
   };
 

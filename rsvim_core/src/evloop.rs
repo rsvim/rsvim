@@ -13,7 +13,6 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
@@ -22,6 +21,9 @@ use crossterm::{self, queue};
 use futures::StreamExt;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
+use crate::state::fsm::command_line_message::CommandLineMessageStateful;
+use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
+use crate::ui::widget::command_line::builder::CommandLineBuilder;
 use std::io::Write;
 use std::io::{BufWriter, Stdout};
 use std::sync::Arc;
@@ -357,16 +359,42 @@ impl EventLoop {
     tree.bounded_insert(tree_root_id, TreeNode::Window(window));
     tree.set_current_window_id(Some(window_id));
 
-    // Initialize default command-line.
-    let cmdline_shape = IRect::new(
+    // Initialize message command-line.
+    let message_cmdline_shape = IRect::new(
+      (
+        0,
+        canvas_size
+          .height()
+          .saturating_sub(canvas_size.height().saturating_div(2))
+          as isize,
+      ),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
+    );
+    let mut message_cmdline = CommandLineBuilder::default()
+      .with_shape(message_cmdline_shape)
+      .with_text_contents(Arc::downgrade(&self.contents))
+      .build();
+    let _message_cmdline_id = message_cmdline.id();
+    message_cmdline.set_visible(false);
+
+    tree.bounded_insert(
+      tree_root_id,
+      TreeNode::MessageCommandLine(message_cmdline),
+    );
+
+    // Initialize ex command-line.
+    let ex_cmdline_shape = IRect::new(
       (0, canvas_size.height().saturating_sub(1) as isize),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let cmdline =
-      CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let _cmdline_id = cmdline.id();
+    let ex_cmdline = CommandLineBuilder::default()
+      .with_shape(ex_cmdline_shape)
+      .with_text_contents(Arc::downgrade(&self.contents))
+      .with_command_line_indicator_symbol(CommandLineIndicatorSymbol::Ex)
+      .build();
+    let _ex_cmdline_id = ex_cmdline.id();
 
-    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+    tree.bounded_insert(tree_root_id, TreeNode::ExCommandLine(ex_cmdline));
 
     Ok(())
   }
@@ -434,6 +462,17 @@ impl EventLoop {
   ) {
     if let Some(msg) = msg {
       match msg {
+        JsRuntimeToEventLoopMessage::EchoReq(req) => {
+          trace!("Receive req echo_req:{:?}", req.message);
+          self.stateful_machine = StatefulValue::CommandLineMessageMode(
+            CommandLineMessageStateful::with_message(
+              req.message.clone(),
+              self.tree.clone(),
+              self.contents.clone(),
+            ),
+          );
+          trace!("Receive req echo_req:{:?} - done", req.message);
+        }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive req timeout_req:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();

@@ -63,6 +63,9 @@ impl State {
       StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
       StatefulValue::InsertMode(_) => Some(Mode::Insert),
       StatefulValue::CommandLineExMode(_) => Some(Mode::CommandLineEx),
+      StatefulValue::CommandLineMessageMode(_) => {
+        Some(Mode::CommandLineMessage)
+      }
       StatefulValue::CommandLineSearchForwardMode(_) => {
         Some(Mode::CommandLineSearchForward)
       }

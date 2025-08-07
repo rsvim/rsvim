@@ -1,5 +1,14 @@
 export class Rsvim {
+    cmd = new RsvimCmd();
     opt = new RsvimOpt();
+}
+export class RsvimCmd {
+    echo(message) {
+        if (message === undefined || message === null) {
+            throw new Error('"Rsvim.cmd.echo" message parameter cannot be undefined or null');
+        }
+        __InternalRsvimGlobalObject.cmd_echo(message);
+    }
 }
 export class RsvimOpt {
     get wrap() {

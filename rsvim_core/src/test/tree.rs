@@ -12,6 +12,7 @@ use crate::ui::widget::command_line::{
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 
+use crate::ui::widget::command_line::builder::CommandLineBuilder;
 use std::sync::Arc;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
@@ -101,10 +102,14 @@ pub fn make_tree_with_buffers_cmdline(
     (0, canvas_size.height().saturating_sub(1) as isize),
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
-  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
+  let cmdline = CommandLineBuilder::default()
+    .with_shape(cmdline_shape)
+    .with_text_contents(Arc::downgrade(&text_contents))
+    .with_command_line_indicator_symbol(CommandLineIndicatorSymbol::Ex)
+    .build();
   let _cmdline_id = cmdline.id();
 
-  tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+  tree.bounded_insert(tree_root_id, TreeNode::ExCommandLine(cmdline));
 
   tree_arc.clone()
 }

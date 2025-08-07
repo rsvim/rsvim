@@ -19,6 +19,8 @@ pub enum Mode {
   Insert,
   /// Command-line mode, ex-command variant.
   CommandLineEx,
+  /// Command-line mode, message variant.
+  CommandLineMessage,
   /// Command-line mode, search forward variant.
   CommandLineSearchForward,
   /// Command-line mode, search backward variant.
@@ -36,6 +38,7 @@ impl Display for Mode {
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
       Mode::CommandLineEx => write!(f, "Command-line (ex)"),
+      Mode::CommandLineMessage => write!(f, "Command-line (message)"),
       Mode::CommandLineSearchForward => {
         write!(f, "Command-line (search forward)")
       }
