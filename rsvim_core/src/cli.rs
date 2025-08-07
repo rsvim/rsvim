@@ -155,6 +155,11 @@ impl CliOptions {
     parse(lexopt::Parser::from_args(args))
   }
 
+  /// Special options.
+  pub fn special_opts(&self) -> &CliSpecialOptions {
+    &self.special_opts
+  }
+
   /// Input files.
   pub fn file(&self) -> &Vec<PathBuf> {
     &self.file
