@@ -3,7 +3,6 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
-use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
@@ -16,6 +15,8 @@ use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
+
+use msg::WorkerToMasterMessage;
 
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
@@ -423,17 +424,17 @@ impl EventLoop {
 
   async fn process_worker_notify(
     &mut self,
-    msg: Option<WorkerToMasterMessage>,
+    message: Option<WorkerToMasterMessage>,
   ) {
-    trace!("Received {:?} message from workers", msg);
+    trace!("Received {:?} message from workers", message);
   }
 
   async fn process_js_runtime_request(
     &mut self,
-    msg: Option<JsRuntimeToEventLoopMessage>,
+    message: Option<JsRuntimeToEventLoopMessage>,
   ) {
-    if let Some(msg) = msg {
-      match msg {
+    if let Some(message) = message {
+      match message {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive req timeout_req:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
@@ -453,11 +454,11 @@ impl EventLoop {
 
   async fn process_js_runtime_response(
     &mut self,
-    msg: Option<EventLoopToJsRuntimeMessage>,
+    message: Option<EventLoopToJsRuntimeMessage>,
   ) {
-    if let Some(msg) = msg {
-      trace!("Process resp msg:{:?}", msg);
-      let _ = self.master_to_jsrt.send(msg).await;
+    if let Some(message) = message {
+      trace!("Process resp msg:{:?}", message);
+      let _ = self.master_to_jsrt.send(message).await;
       self.js_runtime.tick_event_loop();
     }
   }
