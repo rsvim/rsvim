@@ -334,7 +334,7 @@ impl EventLoop {
 
   /// Shutdown.
   pub fn shutdown(&self) -> IoResult<()> {
-    self.writer.shutdown_tui()?;
+    self.writer.shutdown()?;
 
     Ok(())
   }
