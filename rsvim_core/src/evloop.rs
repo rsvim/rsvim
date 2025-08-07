@@ -17,7 +17,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use tui::EditorModeWriter;
+use writer::EditorModeWriter;
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
@@ -29,7 +29,7 @@ use tokio_util::task::TaskTracker;
 
 pub mod msg;
 pub mod task;
-pub mod tui;
+pub mod writer;
 
 #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
