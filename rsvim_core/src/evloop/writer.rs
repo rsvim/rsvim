@@ -12,6 +12,8 @@
 //!   prints to STDOUT, which is similar to general purpose javascript-based
 //!   runtime such as node/deno.
 
+use crate::evloop::writer::editor_writer::EditorWriter;
+use crate::evloop::writer::headless_writer::HeadlessWriter;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 
@@ -31,4 +33,42 @@ pub trait StdoutWriter {
 
   /// Write logical UI to STDOUT.
   fn write(&mut self, canvas: &mut Canvas) -> IoResult<()>;
+}
+
+#[derive(Debug)]
+/// The value holder for writer.
+pub enum StdoutWriterValue {
+  EditorWriter(EditorWriter),
+  HeadlessWriter(HeadlessWriter),
+}
+
+impl StdoutWriter for StdoutWriterValue {
+  fn init(&self) -> IoResult<()> {
+    match self {
+      StdoutWriterValue::EditorWriter(w) => w.init(),
+      StdoutWriterValue::HeadlessWriter(w) => w.init(),
+    }
+  }
+
+  fn init_complete(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+    match self {
+      StdoutWriterValue::EditorWriter(w) => w.init_complete(canvas),
+      StdoutWriterValue::HeadlessWriter(w) => w.init_complete(canvas),
+    }
+  }
+
+  fn shutdown(&self) -> IoResult<()> {
+    match self {
+      StdoutWriterValue::EditorWriter(w) => w.shutdown(),
+      StdoutWriterValue::HeadlessWriter(w) => w.shutdown(),
+    }
+  }
+
+  /// Write logical UI to STDOUT.
+  fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+    match self {
+      StdoutWriterValue::EditorWriter(w) => w.write(canvas),
+      StdoutWriterValue::HeadlessWriter(w) => w.write(canvas),
+    }
+  }
 }
