@@ -51,7 +51,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Build 'current' branch
-        run: cargo build --nightly
+        run: cargo build --profile nightly
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
       - name: Run Bloaty on 'current' branch
@@ -62,7 +62,7 @@ jobs:
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
-        run: cargo build --nightly
+        run: cargo build --profile nightly
       - name: Run Bloaty to compare both output files
         id: bloaty-comparison
         uses: carlosperate/bloaty-action@v1
