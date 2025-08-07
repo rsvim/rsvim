@@ -33,12 +33,30 @@ fn cli_opt1() {
   assert_eq!(input.len(), expects.len());
   let n = input.len();
   for i in 0..n {
-    let actual = CliOptions::from_args(&input[i]);
+    let actual = CliOptions::from_args(&input[i]).unwrap();
     let expect = &expects[i];
     assert_eq!(actual.headless(), expect.headless());
     assert_eq!(actual.file().len(), expect.file().len());
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);
     }
+  }
+}
+
+#[test]
+fn cli_opt2() {
+  let to_osstr = |osstrs: Vec<&str>| {
+    osstrs
+      .iter()
+      .map(|s| std::ffi::OsString::from(s.to_string()))
+      .collect::<Vec<_>>()
+  };
+
+  let input = [to_osstr(vec!["--ex"])];
+
+  let n = input.len();
+  for i in 0..n {
+    let actual = CliOptions::from_args(&input[i]);
+    assert!(actual.is_err());
   }
 }
