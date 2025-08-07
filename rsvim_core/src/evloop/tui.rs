@@ -85,7 +85,7 @@ pub fn shutdown_raw_mode_on_panic() {
 }
 
 #[derive(Debug)]
-/// Editor mode stdio, terminal raw mode with TUI.
+/// Editor mode writer, terminal raw mode with TUI.
 pub struct EditorModeWriter {
   /// Stdout writer for UI.
   pub out: BufWriter<Stdout>,
@@ -269,5 +269,5 @@ impl Default for EditorModeWriter {
 }
 
 #[derive(Debug)]
-/// Headless mode stdio, terminal normal mode without TUI.
-pub struct HeadlessModeStdio {}
+/// Headless mode writer, terminal normal mode without TUI.
+pub struct HeadlessModeWriter {}
