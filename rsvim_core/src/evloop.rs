@@ -228,6 +228,7 @@ impl EventLoop {
     self._init_buffers()?;
     self._init_windows()?;
 
+    lock!(self.tree).draw(self.canvas.clone());
     self.writer.init_tui_complete(&mut lock!(self.canvas))?;
 
     Ok(())
@@ -458,6 +459,7 @@ impl EventLoop {
       }
 
       // Update terminal
+      lock!(self.tree).draw(self.canvas.clone());
       self.writer.write(&mut lock!(self.canvas))?;
     }
 
