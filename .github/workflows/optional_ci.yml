@@ -54,6 +54,21 @@ jobs:
         run: cargo build --release
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
+      - name: Run Bloaty on 'current' branch
+        uses: carlosperate/bloaty-action@v1
+        id: bloaty-step
+        with:
+          bloaty-args: ./target/release/rsvim
+      - name: Add a PR comment with the bloaty output
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n'
+            })
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
