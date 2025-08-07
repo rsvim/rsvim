@@ -2,7 +2,7 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
-use crate::log::RSVIM_LOG;
+use crate::constant::RSVIM_LOG;
 
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
