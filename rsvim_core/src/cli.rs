@@ -105,7 +105,7 @@ pub static VERSION: LazyLock<String> = LazyLock::new(|| {
 
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  VERSION
+  TEXT
     .replace("{RSVIM_BIN_NAME}", bin_name)
     .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
     .replace("{RSVIM_V8_VERSION}", v8_version())
