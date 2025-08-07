@@ -11,11 +11,15 @@ pub mod path_config;
 #[cfg(test)]
 mod path_config_tests;
 
+const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
+const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
+
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
-/// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS` environment variable.
+/// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS`
+/// environment variable.
 pub static MUTEX_TIMEOUT_SECS: LazyLock<u64> = LazyLock::new(|| {
-  std::env::var("RSVIM_MUTEX_TIMEOUT_SECS")
+  std::env::var(RSVIM_MUTEX_TIMEOUT_SECS)
     .map(|v| v.parse::<u64>().unwrap_or(u64::MAX))
     .unwrap_or(u64::MAX)
 });
@@ -26,9 +30,10 @@ pub static MUTEX_TIMEOUT: LazyLock<Duration> =
 
 /// Buffer size for channels communication, by default is 1000.
 ///
-/// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE` environment variable.
+/// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE`
+/// environment variable.
 pub static CHANNEL_BUF_SIZE: LazyLock<usize> = LazyLock::new(|| {
-  std::env::var("RSVIM_CHANNEL_BUF_SIZE")
+  std::env::var(RSVIM_CHANNEL_BUF_SIZE)
     .map(|v| v.parse::<usize>().unwrap_or(1000_usize))
     .unwrap_or(1000_usize)
 });
