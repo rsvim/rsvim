@@ -54,9 +54,9 @@ jobs:
         run: cargo build --release
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
-      - name: Checkout base commit (main branch)
+      - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
-      - name: Clean the build and rebuild with the base commit
+      - name: Rebuild 'main' branch
         run: cargo build --release
       - name: Run Bloaty to compare both output files
         id: bloaty-comparison
