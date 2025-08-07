@@ -1,4 +1,4 @@
-//! All STDOUT writers for rsvim.
+//! STDOUT writers for rsvim.
 //!
 //! Rsvim has several running modes:
 //! - Editor mode: The TUI text file editor.
@@ -13,4 +13,5 @@
 //!   runtime such as node/deno.
 
 pub mod editor_mode_writer;
+pub mod headless_mode_writer;
 mod tui;
