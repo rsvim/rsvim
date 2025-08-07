@@ -45,9 +45,7 @@ pub struct CliOptions {
   headless: bool,
 }
 
-// --headless (experimental)  Run in headless mode without TUI
-pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
-  const TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
+const SHORT_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
@@ -59,19 +57,14 @@ Options:
   -V, --version  Print version
 "#;
 
+// --headless (experimental)  Run in headless mode without TUI
+pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+  SHORT_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
 });
 
-// --headless (experimental)
-//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
-//     terminal's raw mode, it uses STDIN to receive javascript script, and
-//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
-//     internal data structures (such as buffers, windows, command-line,
-//     etc) and scripts/plugins will still be initialized
-pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
-  const TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
+const LONG_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
@@ -87,18 +80,25 @@ Options:
           Print version
 "#;
 
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
+pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+  LONG_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
 });
 
-pub static VERSION: LazyLock<String> = LazyLock::new(|| {
-  const TEXT: &str =
-    "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
+const VERSION_TEXT: &str =
+  "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
 
+pub static VERSION: LazyLock<String> = LazyLock::new(|| {
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  TEXT
+  VERSION_TEXT
     .replace("{RSVIM_BIN_NAME}", bin_name)
     .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
     .replace("{RSVIM_V8_VERSION}", v8_version())
