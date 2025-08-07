@@ -88,7 +88,7 @@ pub fn shutdown_raw_mode_on_panic() {
 /// Editor mode writer, terminal raw mode with TUI.
 pub struct EditorModeWriter {
   /// Stdout writer for UI.
-  pub out: BufWriter<Stdout>,
+  out: BufWriter<Stdout>,
 }
 
 impl EditorModeWriter {
