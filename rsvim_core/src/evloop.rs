@@ -228,7 +228,7 @@ impl EventLoop {
     self._init_buffers()?;
     self._init_windows()?;
 
-    self.writer.init_tui_complete(&mut *lock!(self.canvas))?;
+    self.writer.init_tui_complete(&mut lock!(self.canvas))?;
 
     Ok(())
   }
@@ -458,7 +458,7 @@ impl EventLoop {
       }
 
       // Update terminal
-      self.writer.write(&mut *lock!(self.canvas))?;
+      self.writer.write(&mut lock!(self.canvas))?;
     }
 
     Ok(())
