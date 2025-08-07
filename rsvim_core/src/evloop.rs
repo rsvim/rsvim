@@ -228,6 +228,7 @@ impl EventLoop {
     self._init_buffers()?;
     self._init_windows()?;
 
+    // Flush logic UI to terminal, i.e. print UI to stdout
     lock!(self.tree).draw(self.canvas.clone());
     self.writer.init_tui_complete(&mut lock!(self.canvas))?;
 
@@ -458,7 +459,7 @@ impl EventLoop {
         }
       }
 
-      // Update terminal
+      // Flush logic UI to terminal, i.e. print UI to stdout
       lock!(self.tree).draw(self.canvas.clone());
       self.writer.write(&mut lock!(self.canvas))?;
     }
