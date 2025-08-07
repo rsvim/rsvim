@@ -54,9 +54,8 @@ fn cli_opt2() {
 
   let input = [to_osstr(vec!["--ex"])];
 
-  let n = input.len();
-  for i in 0..n {
-    let actual = CliOptions::from_args(&input[i]);
+  for i in input {
+    let actual = CliOptions::from_args(&i);
     assert!(actual.is_err());
   }
 }
