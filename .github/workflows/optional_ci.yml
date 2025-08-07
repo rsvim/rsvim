@@ -69,7 +69,7 @@ jobs:
         with:
           bloaty-args: ./target/release/original.elf -- ./target/release/rsvim
           output-to-summary: true
-      - name: Add a PR comment with the output of 'current' branch and diff with 'main' branch
+      - name: Add a PR comment with summary and diff
         continue-on-error: true
         uses: actions/github-script@v6
         with:
