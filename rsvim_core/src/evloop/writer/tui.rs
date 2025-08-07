@@ -6,7 +6,7 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange,
   EnableMouseCapture,
 };
-use crossterm::{self, execute};
+use crossterm::execute;
 use std::io::Write;
 
 /// Initialize terminal raw mode.
