@@ -458,7 +458,7 @@ impl EventLoop {
       }
 
       // Update terminal
-      self.render()?;
+      self.writer.write(&mut *lock!(self.canvas))?;
     }
 
     Ok(())
