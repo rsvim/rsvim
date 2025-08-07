@@ -5,7 +5,7 @@ use crate::js::v8_version;
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {
   version: bool,
   short_help: bool,
@@ -31,6 +31,15 @@ impl CliSpecialOptions {
 
   pub fn long_help(&self) -> bool {
     self.long_help
+  }
+
+  #[cfg(test)]
+  pub fn empty() -> Self {
+    Self {
+      version: false,
+      short_help: false,
+      long_help: false,
+    }
   }
 }
 
@@ -164,8 +173,11 @@ impl CliOptions {
   }
 
   #[cfg(test)]
-  pub fn new(file: Vec<PathBuf>, headless: bool) -> Self {
-    let special_opts = CliSpecialOptions::new(false, false, false);
+  pub fn new(
+    special_opts: CliSpecialOptions,
+    file: Vec<PathBuf>,
+    headless: bool,
+  ) -> Self {
     Self {
       special_opts,
       file,

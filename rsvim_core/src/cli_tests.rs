@@ -15,6 +15,8 @@ fn cli_opt1() {
     to_osstr(vec![]),
     to_osstr(vec!["README.md"]),
     to_osstr(vec!["README.md", "LICENSE"]),
+    to_osstr(vec!["README.md", "LICENSE", "--help", "--version"]),
+    to_osstr(vec!["README.md", "LICENSE", "-h", "-V"]),
   ];
 
   let to_pb = |paths: Vec<&str>| {
@@ -25,9 +27,27 @@ fn cli_opt1() {
   };
 
   let expects = [
-    CliOptions::new(to_pb(vec![]), false),
-    CliOptions::new(to_pb(vec!["README.md"]), false),
-    CliOptions::new(to_pb(vec!["README.md", "LICENSE"]), false),
+    CliOptions::new(CliSpecialOptions::empty(), to_pb(vec![]), false),
+    CliOptions::new(
+      CliSpecialOptions::empty(),
+      to_pb(vec!["README.md"]),
+      false,
+    ),
+    CliOptions::new(
+      CliSpecialOptions::empty(),
+      to_pb(vec!["README.md", "LICENSE"]),
+      false,
+    ),
+    CliOptions::new(
+      CliSpecialOptions::new(true, false, true),
+      to_pb(vec!["README.md", "LICENSE"]),
+      false,
+    ),
+    CliOptions::new(
+      CliSpecialOptions::new(true, true, false),
+      to_pb(vec!["README.md", "LICENSE"]),
+      false,
+    ),
   ];
 
   assert_eq!(input.len(), expects.len());
@@ -40,6 +60,7 @@ fn cli_opt1() {
     for (j, act) in actual.file().iter().enumerate() {
       assert_eq!(act, &expect.file()[j]);
     }
+    assert_eq!(actual.special_opts(), expect.special_opts());
   }
 }
 
@@ -52,7 +73,7 @@ fn cli_opt2() {
       .collect::<Vec<_>>()
   };
 
-  let input = [to_osstr(vec!["--ex"])];
+  let input = [to_osstr(vec!["--ex"]), to_osstr(vec!["--v"])];
 
   for i in input {
     let actual = CliOptions::from_args(&i);
