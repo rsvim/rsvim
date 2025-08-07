@@ -17,7 +17,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::EditorModeWriter;
+use writer::editor_mode_writer::EditorModeWriter;
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
