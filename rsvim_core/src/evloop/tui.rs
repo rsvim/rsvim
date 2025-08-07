@@ -1,13 +1,14 @@
 //! TUI utility.
 
 use crate::prelude::*;
+use crate::ui::canvas::{Canvas, Shader, ShaderCommand};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange,
   EnableMouseCapture,
 };
-use crossterm::{self, execute};
-use std::io::Write;
+use crossterm::{execute, queue};
+use std::io::{BufWriter, Stdout, Write};
 
 /// Initialize terminal raw mode.
 pub fn initialize_raw_mode() -> IoResult<()> {
@@ -85,7 +86,201 @@ pub fn shutdown_raw_mode_on_panic() {
 
 #[derive(Debug)]
 /// Editor mode stdio, terminal raw mode with TUI.
-pub struct EditorModeStdio {}
+pub struct EditorModeWriter {
+  /// Stdout writer for UI.
+  pub writer: BufWriter<Stdout>,
+}
+
+impl EditorModeWriter {
+  pub fn new() -> Self {
+    Self {
+      writer: BufWriter::new(std::io::stdout()),
+    }
+  }
+
+  /// Initialize TUI, i.e. enter terminal raw mode.
+  pub fn init_tui(&self) -> IoResult<()> {
+    initialize_raw_mode()?;
+
+    // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
+    // command line for users, if any exceptions been thrown.
+    shutdown_raw_mode_on_panic();
+
+    Ok(())
+  }
+
+  /// Initialize TUI completely, i.e. first flush canvas to terminal.
+  pub fn init_tui_complete(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+    // Initialize cursor
+    let cursor = canvas.frame().cursor();
+
+    if cursor.blinking() {
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
+    }
+    if cursor.hidden() {
+      queue!(self.writer, crossterm::cursor::Hide)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::Show)?;
+    }
+
+    queue!(self.writer, cursor.style())?;
+    queue!(
+      self.writer,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
+
+    self.write(canvas)?;
+
+    Ok(())
+  }
+
+  /// Shutdown TUI, i.e. exit terminal raw mode.
+  pub fn shutdown_tui(&self) -> IoResult<()> {
+    shutdown_raw_mode()
+  }
+
+  /// Write canvas to terminal through STDOUT.
+  pub fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+    // Compute the commands that need to output to the terminal device.
+    let shader = canvas.shade();
+    self.dispatch_shader(shader)?;
+    self.writer.flush()?;
+
+    Ok(())
+  }
+
+  /// Render (queue) shader.
+  fn dispatch_shader(&mut self, shader: Shader) -> IoResult<()> {
+    for shader_command in shader.iter() {
+      match shader_command {
+        ShaderCommand::CursorSetCursorStyle(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorDisableBlinking(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorEnableBlinking(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorHide(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveDown(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveLeft(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveRight(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorMoveTo(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveToColumn(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorMoveToNextLine(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorMoveToPreviousLine(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorMoveToRow(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorMoveUp(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorRestorePosition(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorSavePosition(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::CursorShow(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventDisableBracketedPaste(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventDisableFocusChange(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventDisableMouseCapture(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventEnableBracketedPaste(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventEnableFocusChange(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventEnableMouseCapture(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventPopKeyboardEnhancementFlags(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::EventPushKeyboardEnhancementFlags(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleResetColor(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleSetAttribute(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleSetAttributes(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleSetBackgroundColor(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleSetColors(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetForegroundColor(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StyleSetStyle(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetUnderlineColor(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StylePrintStyledContentString(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::StylePrintString(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalBeginSynchronizedUpdate(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalClear(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalDisableLineWrap(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalEnableLineWrap(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalEndSynchronizedUpdate(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalEnterAlternateScreen(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalLeaveAlternateScreen(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalScrollDown(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalScrollUp(command) => {
+          queue!(self.writer, command)?
+        }
+        ShaderCommand::TerminalSetSize(command) => {
+          queue!(self.writer, command)?
+        }
+      }
+    }
+
+    Ok(())
+  }
+}
+
+impl Default for EditorModeWriter {
+  fn default() -> Self {
+    Self::new()
+  }
+}
 
 #[derive(Debug)]
 /// Headless mode stdio, terminal normal mode without TUI.
