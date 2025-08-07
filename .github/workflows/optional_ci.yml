@@ -46,15 +46,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
-      - name: Check out 'main' branch
+      - name: Check out 'current' branch
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
-      - name: Build 'main' branch
+      - name: Build 'current' branch
         run: cargo build --release
-      - name: Save 'main' branch binary
+      - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ~/original.elf
-      - name: If it's a PR checkout the base commit
+      - name: Checkout base commit (main branch)
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Clean the build and rebuild with the base commit
         run: cargo build --release
