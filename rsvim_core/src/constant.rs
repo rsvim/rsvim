@@ -11,6 +11,7 @@ pub mod path_config;
 #[cfg(test)]
 mod path_config_tests;
 
+pub const RSVIM_LOG: &str = "RSVIM_LOG";
 pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
 pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
