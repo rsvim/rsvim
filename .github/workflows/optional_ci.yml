@@ -53,7 +53,7 @@ jobs:
       - name: Build 'main' branch
         run: cargo build --release
       - name: Save 'main' branch binary
-        run: mv ./target/release/rsvim ../original.elf
+        run: cp ./target/release/rsvim ~/original.elf
       - name: If it's a PR checkout the base commit
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Clean the build and rebuild with the base commit
@@ -62,7 +62,7 @@ jobs:
         id: bloaty-comparison
         uses: carlosperate/bloaty-action@v1
         with:
-          bloaty-args: ../original.elf -- ./target/release/rsvim
+          bloaty-args: ~/original.elf -- ./target/release/rsvim
           output-to-summary: true
       - name: Add a PR comment with the bloaty diff
         continue-on-error: true
