@@ -3,7 +3,6 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
-use crate::evloop::writer::StdoutWriter;
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
@@ -19,6 +18,7 @@ use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
 use writer::editor_writer::EditorWriter;
+use writer::{StdoutWriter, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
@@ -54,7 +54,7 @@ pub struct EventLoop {
   pub cli_opts: CliOptions,
 
   /// Stdout writer for editor mode TUI.
-  pub writer: EditorWriter,
+  pub writer: StdoutWriterValue,
 
   /// Widget tree for UI.
   pub tree: TreeArc,

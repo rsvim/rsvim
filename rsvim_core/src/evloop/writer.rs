@@ -72,3 +72,13 @@ impl StdoutWriter for StdoutWriterValue {
     }
   }
 }
+
+impl StdoutWriterValue {
+  pub fn editor() -> Self {
+    StdoutWriterValue::EditorWriter(EditorWriter::new())
+  }
+
+  pub fn headless() -> Self {
+    StdoutWriterValue::HeadlessWriter(HeadlessWriter::new())
+  }
+}

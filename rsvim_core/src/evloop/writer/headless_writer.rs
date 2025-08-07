@@ -8,6 +8,12 @@ use crate::ui::canvas::Canvas;
 /// Headless mode writer, it prints to terminal command line.
 pub struct HeadlessWriter {}
 
+impl HeadlessWriter {
+  pub fn new() -> Self {
+    Self {}
+  }
+}
+
 impl StdoutWriter for HeadlessWriter {
   fn init(&self) -> IoResult<()> {
     Ok(())
