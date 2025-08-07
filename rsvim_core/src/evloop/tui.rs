@@ -82,3 +82,11 @@ pub fn shutdown_raw_mode_on_panic() {
     }
   }));
 }
+
+#[derive(Debug)]
+/// Editor mode stdio, terminal raw mode with TUI.
+pub struct EditorModeStdio {}
+
+#[derive(Debug)]
+/// Headless mode stdio, terminal normal mode without TUI.
+pub struct HeadlessModeStdio {}
