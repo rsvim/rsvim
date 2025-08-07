@@ -1,5 +1,5 @@
 //! Headless mode writer.
 
 #[derive(Debug)]
-/// Headless mode writer, terminal normal mode without TUI.
+/// Headless mode writer, it prints to terminal command line.
 pub struct HeadlessWriter {}

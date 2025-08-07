@@ -9,7 +9,7 @@ use crossterm::queue;
 use std::io::{BufWriter, Stdout, Write};
 
 #[derive(Debug)]
-/// Editor mode writer, it writes the canvas to terminal.
+/// Editor mode writer, i.e. it writes the canvas to terminal.
 pub struct EditorWriter {
   out: BufWriter<Stdout>,
 }
