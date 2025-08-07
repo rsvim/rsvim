@@ -1,4 +1,4 @@
-//! Editor writer.
+//! Editor mode writer.
 
 use crate::evloop::writer::StdoutWriter;
 use crate::evloop::writer::tui;
@@ -9,9 +9,8 @@ use crossterm::queue;
 use std::io::{BufWriter, Stdout, Write};
 
 #[derive(Debug)]
-/// Editor writer, it writes the canvas to terminal.
+/// Editor mode writer, it writes the canvas to terminal.
 pub struct EditorWriter {
-  /// Stdout writer for UI.
   out: BufWriter<Stdout>,
 }
 
