@@ -3,16 +3,60 @@
 use crate::js::v8_version;
 
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CliSpecialOptions {
+  version: bool,
+  short_help: bool,
+  long_help: bool,
+}
+
+impl CliSpecialOptions {
+  pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
+    Self {
+      version,
+      short_help,
+      long_help,
+    }
+  }
+
+  pub fn version(&self) -> bool {
+    self.version
+  }
+
+  pub fn short_help(&self) -> bool {
+    self.short_help
+  }
+
+  pub fn long_help(&self) -> bool {
+    self.long_help
+  }
+
+  #[cfg(test)]
+  pub fn empty() -> Self {
+    Self {
+      version: false,
+      short_help: false,
+      long_help: false,
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 /// Command line options.
 pub struct CliOptions {
+  // Special opts
+  special_opts: CliSpecialOptions,
+
+  // Normal opts
   file: Vec<PathBuf>,
   headless: bool,
 }
 
-// --headless (experimental)  Run in headless mode without TUI
-const SHORT_HELP: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
+const SHORT_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
+
+Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...      Edit specified file(s)
@@ -22,20 +66,14 @@ Options:
   -V, --version  Print version
 "#;
 
-// --headless (experimental)
-//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
-//     terminal's raw mode, it uses STDIN to receive javascript script, and
-//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
-//     internal data structures (such as buffers, windows, command-line,
-//     etc) and scripts/plugins will still be initialized
-const LONG_HELP: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
+// --headless (experimental)  Run in headless mode without TUI
+pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
+  SHORT_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+});
 
-RSVIM is an open source terminal based text editor, strives to be highly
-extensible by following the main features and philosophy of (NEO)VIM. It is
-built from scratch with rust, tokio and v8 javascript engine.
-
-Project home page: https://github.com/rsvim/rsvim
-Project documentation page: https://rsvim.github.io/
+const LONG_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
@@ -49,40 +87,50 @@ Options:
 
   -V, --version
           Print version
-
-Bugs can be reported on GitHub: https://github.com/rsvim/rsvim/issues
 "#;
 
-const VERSION: &str =
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
+pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
+  LONG_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+});
+
+const VERSION_TEXT: &str =
   "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
+
+pub static VERSION: LazyLock<String> = LazyLock::new(|| {
+  let exe_name = std::env::current_exe().unwrap();
+  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
+  VERSION_TEXT
+    .replace("{RSVIM_BIN_NAME}", bin_name)
+    .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
+    .replace("{RSVIM_V8_VERSION}", v8_version())
+});
 
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
-  let exe_name = std::env::current_exe().unwrap();
-  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-
-  // Arguments
+  let mut version: bool = false;
+  let mut short_help: bool = false;
+  let mut long_help: bool = false;
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
     match arg {
-      Short('h') | Long("help") => {
-        let help = match arg {
-          Short(_) => SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
-          Long(_) => LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name),
-          _ => unreachable!(),
-        };
-        println!("{help}");
-        std::process::exit(0);
+      Short('h') => {
+        short_help = true;
+      }
+      Long("help") => {
+        long_help = true;
       }
       Short('V') | Long("version") => {
-        let version = VERSION
-          .replace("{RSVIM_BIN_NAME}", bin_name)
-          .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
-          .replace("{RSVIM_V8_VERSION}", v8_version());
-        println!("{version}");
-        std::process::exit(0);
+        version = true;
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -92,32 +140,26 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   }
 
   Ok(CliOptions {
+    special_opts: CliSpecialOptions::new(version, short_help, long_help),
     file,
     headless: false,
   })
 }
 
 impl CliOptions {
-  fn handle_error(result: Result<Self, lexopt::Error>) -> Self {
-    match result {
-      Ok(res) => res,
-      Err(e) => {
-        println!("error: {e}");
-        println!();
-        println!("For more information, try '--help'");
-        std::process::exit(0);
-      }
-    }
+  pub fn from_env() -> Result<Self, lexopt::Error> {
+    parse(lexopt::Parser::from_env())
   }
 
-  pub fn from_env() -> Self {
-    let result = parse(lexopt::Parser::from_env());
-    Self::handle_error(result)
+  pub fn from_args(
+    args: &Vec<std::ffi::OsString>,
+  ) -> Result<Self, lexopt::Error> {
+    parse(lexopt::Parser::from_args(args))
   }
 
-  pub fn from_args(args: &Vec<std::ffi::OsString>) -> Self {
-    let result = parse(lexopt::Parser::from_args(args));
-    Self::handle_error(result)
+  /// Special options.
+  pub fn special_opts(&self) -> &CliSpecialOptions {
+    &self.special_opts
   }
 
   /// Input files.
@@ -131,7 +173,15 @@ impl CliOptions {
   }
 
   #[cfg(test)]
-  pub fn new(file: Vec<PathBuf>, headless: bool) -> Self {
-    Self { file, headless }
+  pub fn new(
+    special_opts: CliSpecialOptions,
+    file: Vec<PathBuf>,
+    headless: bool,
+  ) -> Self {
+    Self {
+      special_opts,
+      file,
+      headless,
+    }
   }
 }
