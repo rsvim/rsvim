@@ -11,8 +11,8 @@ pub mod path_config;
 #[cfg(test)]
 mod path_config_tests;
 
-const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
-const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
+pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
+pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
