@@ -47,7 +47,9 @@ pub struct CliOptions {
 
 // --headless (experimental)  Run in headless mode without TUI
 pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
-  const TEXT: &str = r#"Usage: {RSVIM_BIN_NAME} [FILE]...
+  const TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
+
+Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
   [FILE]...      Edit specified file(s)
@@ -71,13 +73,6 @@ Options:
 pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
   const TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
 
-RSVIM is an open source terminal based text editor, strives to be highly
-extensible by following the main features and philosophy of (NEO)VIM. It is
-built from scratch with rust, tokio and v8 javascript engine.
-
-Project home page: https://github.com/rsvim/rsvim
-Project documentation page: https://rsvim.github.io/
-
 Usage: {RSVIM_BIN_NAME} [FILE]...
 
 Arguments:
@@ -90,8 +85,6 @@ Options:
 
   -V, --version
           Print version
-
-Bugs can be reported on GitHub: https://github.com/rsvim/rsvim/issues
 "#;
 
   let exe_name = std::env::current_exe().unwrap();
