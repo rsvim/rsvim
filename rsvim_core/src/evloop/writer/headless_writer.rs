@@ -31,3 +31,9 @@ impl StdoutWriter for HeadlessWriter {
     Ok(())
   }
 }
+
+impl Default for HeadlessWriter {
+  fn default() -> Self {
+    Self::new()
+  }
+}

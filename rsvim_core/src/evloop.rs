@@ -17,7 +17,6 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::editor_writer::EditorWriter;
 use writer::{StdoutWriter, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
@@ -196,6 +195,12 @@ impl EventLoop {
       state.clone(),
     );
 
+    let writer = if cli_opts.headless() {
+      StdoutWriterValue::headless()
+    } else {
+      StdoutWriterValue::editor()
+    };
+
     Ok(EventLoop {
       startup_moment,
       startup_unix_epoch,
@@ -206,7 +211,7 @@ impl EventLoop {
       stateful_machine,
       buffers: buffers_manager,
       contents: text_contents,
-      writer: EditorWriter::new(),
+      writer,
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
