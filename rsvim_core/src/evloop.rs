@@ -3,6 +3,7 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
+use crate::evloop::writer::StdoutWriter;
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
@@ -17,7 +18,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::editor_mode_writer::EditorModeWriter;
+use writer::editor_writer::EditorWriter;
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
@@ -53,7 +54,7 @@ pub struct EventLoop {
   pub cli_opts: CliOptions,
 
   /// Stdout writer for editor mode TUI.
-  pub writer: EditorModeWriter,
+  pub writer: EditorWriter,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -205,7 +206,7 @@ impl EventLoop {
       stateful_machine,
       buffers: buffers_manager,
       contents: text_contents,
-      writer: EditorModeWriter::new(),
+      writer: EditorWriter::new(),
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
@@ -223,14 +224,14 @@ impl EventLoop {
   pub fn initialize(&mut self) -> IoResult<()> {
     self._init_config()?;
 
-    self.writer.init_tui()?;
+    self.writer.init()?;
 
     self._init_buffers()?;
     self._init_windows()?;
 
     // Flush logic UI to terminal, i.e. print UI to stdout
     lock!(self.tree).draw(self.canvas.clone());
-    self.writer.init_tui_complete(&mut lock!(self.canvas))?;
+    self.writer.init_complete(&mut lock!(self.canvas))?;
 
     Ok(())
   }

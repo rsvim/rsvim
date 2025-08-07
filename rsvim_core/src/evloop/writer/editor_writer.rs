@@ -1,5 +1,6 @@
-//! Editor mode writer.
+//! Editor writer.
 
+use crate::evloop::writer::StdoutWriter;
 use crate::evloop::writer::tui;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Shader, ShaderCommand};
@@ -8,21 +9,23 @@ use crossterm::queue;
 use std::io::{BufWriter, Stdout, Write};
 
 #[derive(Debug)]
-/// Editor mode writer, it writes the canvas to terminal.
-pub struct EditorModeWriter {
+/// Editor writer, it writes the canvas to terminal.
+pub struct EditorWriter {
   /// Stdout writer for UI.
   out: BufWriter<Stdout>,
 }
 
-impl EditorModeWriter {
+impl EditorWriter {
   pub fn new() -> Self {
     Self {
       out: BufWriter::new(std::io::stdout()),
     }
   }
+}
 
+impl StdoutWriter for EditorWriter {
   /// Initialize TUI, i.e. enter terminal raw mode.
-  pub fn init_tui(&self) -> IoResult<()> {
+  fn init(&self) -> IoResult<()> {
     tui::initialize_raw_mode()?;
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
@@ -33,7 +36,7 @@ impl EditorModeWriter {
   }
 
   /// Initialize TUI completely, i.e. first flush canvas to terminal.
-  pub fn init_tui_complete(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+  fn init_complete(&mut self, canvas: &mut Canvas) -> IoResult<()> {
     // Initialize cursor
     let cursor = canvas.frame().cursor();
 
@@ -60,12 +63,12 @@ impl EditorModeWriter {
   }
 
   /// Shutdown TUI, i.e. exit terminal raw mode.
-  pub fn shutdown_tui(&self) -> IoResult<()> {
+  fn shutdown(&self) -> IoResult<()> {
     tui::shutdown_raw_mode()
   }
 
   /// Write canvas to terminal through STDOUT.
-  pub fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
+  fn write(&mut self, canvas: &mut Canvas) -> IoResult<()> {
     // Compute the commands that need to output to the terminal device.
     let shader = canvas.shade();
     self.dispatch_shader(shader)?;
@@ -73,7 +76,9 @@ impl EditorModeWriter {
 
     Ok(())
   }
+}
 
+impl EditorWriter {
   /// Render (queue) shader.
   fn dispatch_shader(&mut self, shader: Shader) -> IoResult<()> {
     for shader_command in shader.iter() {
@@ -185,7 +190,7 @@ impl EditorModeWriter {
   }
 }
 
-impl Default for EditorModeWriter {
+impl Default for EditorWriter {
   fn default() -> Self {
     Self::new()
   }

@@ -12,6 +12,20 @@
 //!   prints to STDOUT, which is similar to general purpose javascript-based
 //!   runtime such as node/deno.
 
-pub mod editor_mode_writer;
-pub mod headless_mode_writer;
+use crate::prelude::*;
+use crate::ui::canvas::Canvas;
+
+pub mod editor_writer;
+pub mod headless_writer;
 mod tui;
+
+pub trait StdoutWriter {
+  /// Initialize STDOUT.
+  fn init(&self) -> IoResult<()>;
+
+  fn init_complete(&mut self, canvas: &mut Canvas) -> IoResult<()>;
+
+  fn shutdown(&self) -> IoResult<()>;
+
+  fn write(&mut self, canvas: &mut Canvas) -> IoResult<()>;
+}
