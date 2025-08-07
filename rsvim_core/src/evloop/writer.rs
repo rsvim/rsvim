@@ -12,15 +12,5 @@
 //!   prints to STDOUT, which is similar to general purpose javascript-based
 //!   runtime such as node/deno.
 
-use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Shader, ShaderCommand};
-
-use crossterm::queue;
-use std::io::{BufWriter, Stdout, Write};
-
 pub mod editor_mode_writer;
 mod tui;
-
-#[derive(Debug)]
-/// Headless mode writer, terminal normal mode without TUI.
-pub struct HeadlessModeWriter {}
