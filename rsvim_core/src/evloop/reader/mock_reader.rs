@@ -4,6 +4,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
 use jiff::Zoned;
 use std::pin::Pin;
+use std::sync::mpsc::channel;
 use std::task::{Context, Poll};
 use std::time::Duration;
 
@@ -29,6 +30,7 @@ pub struct MockReader {
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
+    let (tx, rx) = channel();
     Self {
       idx: 0_usize,
       events: events,
