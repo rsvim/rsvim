@@ -26,6 +26,7 @@ unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
+bitflags = { workspace = true }
 lexopt = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 log = { workspace = true, features = [

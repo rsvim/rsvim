@@ -21,7 +21,11 @@ use msg::WorkerToMasterMessage;
 use reader::mock_reader::MockReader;
 use writer::{StdoutWritable, StdoutWriterValue};
 
+#[cfg(test)]
+use bitflags::bitflags_match;
 use crossterm::event::{Event, EventStream};
+#[cfg(test)]
+use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 use futures::stream::StreamExt;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -111,6 +115,28 @@ pub struct EventLoop {
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   /// Receiver: queue.
   pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
+}
+
+#[cfg(test)]
+fn is_ctrl_c(event: &Option<IoResult<Event>>) -> bool {
+  match event {
+    Some(Ok(event)) => match event {
+      Event::Key(key_event) => {
+        if key_event.code == KeyCode::Char('c')
+          && key_event.kind == KeyEventKind::Press
+        {
+          bitflags_match!(key_event.modifiers, {
+            KeyModifiers::CONTROL => true,
+            _ => false
+          })
+        } else {
+          false
+        }
+      }
+      _ => false,
+    },
+    _ => false,
+  }
 }
 
 impl EventLoop {
@@ -482,6 +508,9 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
+          if is_ctrl_c(&event) {
+            break;
+          }
           self.process_event(event).await;
         }
         // Receive notification from workers => master
