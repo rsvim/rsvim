@@ -7,6 +7,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MockEvent {
   Event(Event),
 
@@ -21,10 +22,18 @@ pub enum MockEvent {
 }
 
 #[derive(Debug)]
-pub struct MockReader {}
+pub struct MockReader {
+  idx: usize,
+  events: Vec<MockEvent>,
+}
 
 impl MockReader {
-  pub fn new() {}
+  pub fn new(events: Vec<MockEvent>) -> Self {
+    Self {
+      idx: 0_usize,
+      events: events,
+    }
+  }
 }
 
 impl Stream for MockReader {
