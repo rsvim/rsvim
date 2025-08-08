@@ -441,7 +441,8 @@ impl EventLoop {
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
-  pub async fn run(&mut self, mut reader: EventStream) -> IoResult<()> {
+  pub async fn run(&mut self) -> IoResult<()> {
+    let mut reader = EventStream::new();
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
