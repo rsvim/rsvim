@@ -17,7 +17,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::{StdoutWriter, StdoutWriterValue};
+use writer::{StdoutWritable, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;

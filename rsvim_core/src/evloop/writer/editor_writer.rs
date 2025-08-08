@@ -1,6 +1,6 @@
 //! Editor mode writer.
 
-use crate::evloop::writer::StdoutWriter;
+use crate::evloop::writer::StdoutWritable;
 use crate::evloop::writer::tui;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Shader, ShaderCommand};
@@ -22,7 +22,7 @@ impl EditorWriter {
   }
 }
 
-impl StdoutWriter for EditorWriter {
+impl StdoutWritable for EditorWriter {
   /// Initialize TUI, i.e. enter terminal raw mode.
   fn init(&self) -> IoResult<()> {
     tui::initialize_raw_mode()?;
