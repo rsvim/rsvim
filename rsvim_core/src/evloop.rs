@@ -480,7 +480,7 @@ impl EventLoop {
   pub async fn mock_run(&mut self, mut reader: MockReader) -> IoResult<()> {
     loop {
       tokio::select! {
-        // Receive keyboard/mouse events
+        // Receive mocked keyboard/mouse events
         event = reader.next() => {
           self.process_event(event).await;
         }
