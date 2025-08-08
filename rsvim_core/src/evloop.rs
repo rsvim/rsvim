@@ -22,7 +22,7 @@ use reader::mock_reader::MockReader;
 use writer::{StdoutWritable, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
-use futures::stream::StreamExt;
+// use futures::stream::StreamExt;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
