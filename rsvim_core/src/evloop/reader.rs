@@ -3,16 +3,11 @@
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 
-pub trait StdinReadable {
-  /// Initialize STDOUT.
-  fn init(&self) -> IoResult<()>;
+use crossterm::event::Event;
+use futures::stream::Stream;
 
-  /// Initialize STDOUT complete.
-  fn init_complete(&mut self, canvas: &mut Canvas) -> IoResult<()>;
+pub mod event_stream_reader;
+pub mod mock_reader;
 
-  /// Shutdown STDOUT.
-  fn shutdown(&self) -> IoResult<()>;
-
-  /// Write logical UI to STDOUT.
-  fn write(&mut self, canvas: &mut Canvas) -> IoResult<()>;
-}
+/// Async read from STDIN.
+pub trait StdinReadable: Stream {}
