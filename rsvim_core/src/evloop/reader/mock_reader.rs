@@ -1,8 +1,6 @@
 //! Mocked event reader.
 
-use crossterm::event::{
-  Event, EventStream, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
 use jiff::Zoned;
 use std::pin::Pin;
