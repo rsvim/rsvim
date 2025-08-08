@@ -17,10 +17,11 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
+#[cfg(test)]
+use reader::mock_reader::MockReader;
 use writer::{StdoutWritable, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
-use futures::StreamExt;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
@@ -439,8 +440,41 @@ impl EventLoop {
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
-  pub async fn run(&mut self) -> IoResult<()> {
-    let mut reader = EventStream::new();
+  pub async fn run(&mut self, mut reader: EventStream) -> IoResult<()> {
+    loop {
+      tokio::select! {
+        // Receive keyboard/mouse events
+        event = reader.next() => {
+          self.process_event(event).await;
+        }
+        // Receive notification from workers => master
+        worker_msg = self.master_from_worker.recv() => {
+          self.process_worker_notify(worker_msg).await;
+        }
+        // Receive notification from js runtime => master
+        js_req = self.master_from_jsrt.recv() => {
+            self.process_js_runtime_request(js_req).await;
+        }
+        js_resp = self.jsrt_tick_queue.recv() => {
+            self.process_js_runtime_response(js_resp).await;
+        }
+        // Receive cancellation notify
+        _ = self.cancellation_token.cancelled() => {
+          self.process_cancellation_notify().await;
+          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+          break;
+        }
+      }
+
+      // Flush logic UI to terminal, i.e. print UI to stdout
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))?;
+    }
+
+    Ok(())
+  }
+
+  pub async fn mock_run(&mut self, mut reader: MockReader) -> IoResult<()> {
     loop {
       tokio::select! {
         // Receive keyboard/mouse events

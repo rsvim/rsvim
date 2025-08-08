@@ -59,7 +59,8 @@ fn main() -> IoResult<()> {
     event_loop.initialize()?;
 
     // Run loop.
-    event_loop.run().await?;
+    let mut reader = crossterm::event::EventStream::new();
+    event_loop.run(reader).await?;
 
     // Shutdown.
     event_loop.shutdown()

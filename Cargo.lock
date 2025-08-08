@@ -2345,6 +2345,7 @@ dependencies = [
 name = "rsvim"
 version = "0.1.1-alpha.10"
 dependencies = [
+ "crossterm",
  "lexopt",
  "log",
  "rsvim_core",

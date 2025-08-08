@@ -13,7 +13,7 @@ impl Stream for MockReader {
 
   fn poll_next(
     self: Pin<&mut Self>,
-    _ctx: &mut Context<'_>,
+    _cx: &mut Context<'_>,
   ) -> Poll<Option<Self::Item>> {
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('a'),
