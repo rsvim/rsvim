@@ -36,6 +36,12 @@ impl MockReader {
   }
 }
 
+const CTRL_C_EVENT: Event = Event::Key(KeyEvent::new_with_kind(
+  KeyCode::Char('c'),
+  KeyModifiers::CONTROL,
+  KeyEventKind::Press,
+));
+
 impl Stream for MockReader {
   type Item = std::io::Result<Event>;
 
