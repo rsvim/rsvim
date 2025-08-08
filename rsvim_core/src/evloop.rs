@@ -28,6 +28,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 pub mod msg;
+pub mod reader;
 pub mod task;
 pub mod writer;
 
