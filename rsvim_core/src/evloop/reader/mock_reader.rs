@@ -30,6 +30,8 @@ const CTRL_C: Event = Event::Key(KeyEvent::new_with_kind(
   KeyEventKind::Press,
 ));
 
+const INTERVAL_MILLIS: Duration = Duration::from_millis(50);
+
 #[derive(Debug)]
 pub struct MockReader {
   rx: Receiver<Event>,
@@ -42,8 +44,14 @@ impl MockReader {
     thread::spawn(move || {
       for (_i, event) in events.iter().enumerate() {
         match event {
-          MockEvent::Event(e) => tx.send(e.clone()).unwrap(),
-          MockEvent::ExitEvent => tx.send(CTRL_C.clone()).unwrap(),
+          MockEvent::Event(e) => {
+            thread::sleep(INTERVAL_MILLIS);
+            tx.send(e.clone()).unwrap();
+          }
+          MockEvent::ExitEvent => {
+            thread::sleep(INTERVAL_MILLIS);
+            tx.send(CTRL_C.clone()).unwrap();
+          }
           MockEvent::SleepFor(d) => thread::sleep(*d),
           MockEvent::SleepUntil(ts) => {
             let now = Zoned::now();
