@@ -33,12 +33,12 @@ const INTERVAL_MILLIS: Duration = Duration::from_millis(50);
 
 #[derive(Debug)]
 pub struct MockReader {
-  rx: UnboundedReceiver<std::io::Result<Event>>,
+  rx: UnboundedReceiver<IoResult<Event>>,
 }
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
-    let (tx, rx) = unbounded_channel::<std::io::Result<Event>>();
+    let (tx, rx) = unbounded_channel::<IoResult<Event>>();
 
     thread::spawn(move || {
       for (i, event) in events.iter().enumerate() {
@@ -70,7 +70,7 @@ impl MockReader {
 }
 
 impl Stream for MockReader {
-  type Item = std::io::Result<Event>;
+  type Item = IoResult<Event>;
 
   fn poll_next(
     mut self: Pin<&mut Self>,
