@@ -24,7 +24,7 @@ pub enum MockEvent {
   SleepUntil(Zoned),
 }
 
-const CTRL_C_EVENT: Event = Event::Key(KeyEvent::new_with_kind(
+const CTRL_C: Event = Event::Key(KeyEvent::new_with_kind(
   KeyCode::Char('c'),
   KeyModifiers::CONTROL,
   KeyEventKind::Press,
@@ -43,7 +43,7 @@ impl MockReader {
       for (_i, event) in events.iter().enumerate() {
         match event {
           MockEvent::Event(e) => tx.send(e.clone()).unwrap(),
-          MockEvent::ExitEvent => tx.send(CTRL_C_EVENT.clone()).unwrap(),
+          MockEvent::ExitEvent => tx.send(CTRL_C.clone()).unwrap(),
           MockEvent::SleepFor(d) => thread::sleep(*d),
           MockEvent::SleepUntil(ts) => {
             let now = Zoned::now();
