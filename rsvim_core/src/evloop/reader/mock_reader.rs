@@ -6,10 +6,10 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
 use jiff::Zoned;
 use std::pin::Pin;
-use std::sync::mpsc::{Receiver, channel};
 use std::task::{Context, Poll};
 use std::thread;
 use std::time::Duration;
+use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MockEvent {
@@ -33,12 +33,12 @@ const INTERVAL_MILLIS: Duration = Duration::from_millis(50);
 
 #[derive(Debug)]
 pub struct MockReader {
-  rx: Receiver<Event>,
+  rx: UnboundedReceiver<std::io::Result<Event>>,
 }
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
-    let (tx, rx) = channel::<Event>();
+    let (tx, rx) = unbounded_channel::<std::io::Result<Event>>();
 
     thread::spawn(move || {
       for (i, event) in events.iter().enumerate() {
@@ -46,7 +46,7 @@ impl MockReader {
         match event {
           MockEvent::Event(e) => {
             thread::sleep(INTERVAL_MILLIS);
-            tx.send(e.clone()).unwrap();
+            tx.send(Ok(e.clone())).unwrap();
           }
           MockEvent::SleepFor(d) => thread::sleep(*d),
           MockEvent::SleepUntil(ts) => {
@@ -62,7 +62,7 @@ impl MockReader {
       }
 
       // No more events, send ExitEvent and close sender
-      tx.send(CTRL_C.clone()).unwrap();
+      tx.send(Ok(CTRL_C.clone())).unwrap();
     });
 
     Self { rx }
@@ -73,12 +73,9 @@ impl Stream for MockReader {
   type Item = std::io::Result<Event>;
 
   fn poll_next(
-    self: Pin<&mut Self>,
-    _cx: &mut Context<'_>,
+    mut self: Pin<&mut Self>,
+    cx: &mut Context<'_>,
   ) -> Poll<Option<Self::Item>> {
-    match self.rx.try_recv() {
-      Ok(event) => Poll::Ready(Some(Ok(event))),
-      Err(_) => Poll::Pending,
-    }
+    self.rx.poll_recv(cx)
   }
 }
