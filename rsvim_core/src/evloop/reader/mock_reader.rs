@@ -16,9 +16,6 @@ pub enum MockEvent {
   /// Normal keyboard event
   Event(Event),
 
-  /// The `CTRL-C` keyboard event, indicates exit the reader stream.
-  ExitEvent,
-
   /// Sleep for a specific amount of time.
   SleepFor(Duration),
 
@@ -51,10 +48,6 @@ impl MockReader {
             thread::sleep(INTERVAL_MILLIS);
             tx.send(e.clone()).unwrap();
           }
-          MockEvent::ExitEvent => {
-            thread::sleep(INTERVAL_MILLIS);
-            tx.send(CTRL_C.clone()).unwrap();
-          }
           MockEvent::SleepFor(d) => thread::sleep(*d),
           MockEvent::SleepUntil(ts) => {
             let now = Zoned::now();
@@ -67,6 +60,9 @@ impl MockReader {
           }
         }
       }
+
+      // No more events, send ExitEvent and close sender
+      tx.send(CTRL_C.clone()).unwrap();
     });
 
     Self { rx }
