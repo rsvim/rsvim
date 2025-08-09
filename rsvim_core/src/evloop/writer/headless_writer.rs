@@ -1,6 +1,6 @@
 //! Headless mode writer.
 
-use crate::evloop::writer::StdoutWriter;
+use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 
@@ -14,7 +14,7 @@ impl HeadlessWriter {
   }
 }
 
-impl StdoutWriter for HeadlessWriter {
+impl StdoutWritable for HeadlessWriter {
   fn init(&self) -> IoResult<()> {
     Ok(())
   }

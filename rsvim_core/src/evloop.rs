@@ -17,10 +17,16 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::{StdoutWriter, StdoutWriterValue};
+#[cfg(test)]
+use reader::mock_reader::MockReader;
+use writer::{StdoutWritable, StdoutWriterValue};
 
+#[cfg(test)]
+use bitflags::bitflags_match;
 use crossterm::event::{Event, EventStream};
-use futures::StreamExt;
+#[cfg(test)]
+use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
+use futures::stream::StreamExt;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
@@ -28,6 +34,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 pub mod msg;
+pub mod reader;
 pub mod task;
 pub mod writer;
 
@@ -108,6 +115,25 @@ pub struct EventLoop {
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   /// Receiver: queue.
   pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
+}
+
+#[cfg(test)]
+fn is_ctrl_c(event: &Option<IoResult<Event>>) -> bool {
+  match event {
+    Some(Ok(Event::Key(key_event))) => {
+      if key_event.code == KeyCode::Char('c')
+        && key_event.kind == KeyEventKind::Press
+      {
+        bitflags_match!(key_event.modifiers, {
+          KeyModifiers::CONTROL => true,
+          _ => false
+        })
+      } else {
+        false
+      }
+    }
+    _ => false,
+  }
 }
 
 impl EventLoop {
@@ -444,6 +470,44 @@ impl EventLoop {
       tokio::select! {
         // Receive keyboard/mouse events
         event = reader.next() => {
+          self.process_event(event).await;
+        }
+        // Receive notification from workers => master
+        worker_msg = self.master_from_worker.recv() => {
+          self.process_worker_notify(worker_msg).await;
+        }
+        // Receive notification from js runtime => master
+        js_req = self.master_from_jsrt.recv() => {
+            self.process_js_runtime_request(js_req).await;
+        }
+        js_resp = self.jsrt_tick_queue.recv() => {
+            self.process_js_runtime_response(js_resp).await;
+        }
+        // Receive cancellation notify
+        _ = self.cancellation_token.cancelled() => {
+          self.process_cancellation_notify().await;
+          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+          break;
+        }
+      }
+
+      // Flush logic UI to terminal, i.e. print UI to stdout
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))?;
+    }
+
+    Ok(())
+  }
+
+  #[cfg(test)]
+  pub async fn mock_run(&mut self, mut reader: MockReader) -> IoResult<()> {
+    loop {
+      tokio::select! {
+        // Receive mocked keyboard/mouse events
+        event = reader.next() => {
+          if is_ctrl_c(&event) {
+            break;
+          }
           self.process_event(event).await;
         }
         // Receive notification from workers => master

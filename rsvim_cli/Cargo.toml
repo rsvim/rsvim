@@ -16,6 +16,7 @@ description = "The RSVIM text editor."
 
 [dependencies]
 rsvim_core = { workspace = true }
+crossterm = { workspace = true, features = ["event-stream"] }
 lexopt = { workspace = true }
 log = { workspace = true, features = [
   "max_level_trace",

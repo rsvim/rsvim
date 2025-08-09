@@ -21,7 +21,7 @@ pub mod editor_writer;
 pub mod headless_writer;
 mod tui;
 
-pub trait StdoutWriter {
+pub trait StdoutWritable {
   /// Initialize STDOUT.
   fn init(&self) -> IoResult<()>;
 
@@ -42,7 +42,7 @@ pub enum StdoutWriterValue {
   HeadlessWriter(HeadlessWriter),
 }
 
-impl StdoutWriter for StdoutWriterValue {
+impl StdoutWritable for StdoutWriterValue {
   fn init(&self) -> IoResult<()> {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.init(),
