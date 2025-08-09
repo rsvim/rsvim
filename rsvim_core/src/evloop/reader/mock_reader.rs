@@ -1,5 +1,7 @@
 //! Mocked event reader.
 
+use crate::prelude::*;
+
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
 use jiff::Zoned;
@@ -42,7 +44,8 @@ impl MockReader {
     let (tx, rx) = channel::<Event>();
 
     thread::spawn(move || {
-      for (_i, event) in events.iter().enumerate() {
+      for (i, event) in events.iter().enumerate() {
+        trace!("Tick event[{i}]: {event:?}");
         match event {
           MockEvent::Event(e) => {
             thread::sleep(INTERVAL_MILLIS);
