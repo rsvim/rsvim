@@ -70,11 +70,9 @@ impl Stream for MockReader {
     self: Pin<&mut Self>,
     _cx: &mut Context<'_>,
   ) -> Poll<Option<Self::Item>> {
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    Poll::Ready(Some(Ok(Event::Key(key_event))))
+    match self.rx.try_recv() {
+      Ok(event) => Poll::Ready(Some(Ok(event))),
+      Err(_) => Poll::Pending,
+    }
   }
 }
