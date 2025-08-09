@@ -6,7 +6,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
 use jiff::{SignedDuration, Span, ToSpan, Zoned};
 use std::pin::Pin;
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{Receiver, channel};
 use std::task::{Context, Poll};
 use std::thread;
 use std::time::Duration;
@@ -32,31 +32,34 @@ const CTRL_C_EVENT: Event = Event::Key(KeyEvent::new_with_kind(
 ));
 
 #[derive(Debug)]
-pub struct MockReader {}
+pub struct MockReader {
+  rx: Receiver<Event>,
+}
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
     let (tx, rx) = channel::<Event>();
 
     thread::spawn(move || {
-      for (i, event) in events.iter().enumerate() {
+      for (_i, event) in events.iter().enumerate() {
         match event {
           MockEvent::Event(e) => tx.send(e.clone()).unwrap(),
           MockEvent::ExitEvent => tx.send(CTRL_C_EVENT.clone()).unwrap(),
           MockEvent::SleepFor(d) => thread::sleep(*d),
           MockEvent::SleepUntil(ts) => {
             let now = Zoned::now();
-            let diff = ts.duration_since(&now);
-            let diff = diff.as_millis();
-            if diff > 0 {
-              let diff = Duration::from_millis(diff as u64);
-              thread::sleep(diff)
+            let d = ts.duration_since(&now);
+            let d = d.as_millis();
+            if d > 0 {
+              let d = Duration::from_millis(d as u64);
+              thread::sleep(d)
             }
           }
         }
       }
-      Ok(())
     });
+
+    Self { rx }
   }
 }
 
