@@ -1,10 +1,8 @@
 //! Mocked event reader.
 
-use crate::prelude::*;
-
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use futures::stream::Stream;
-use jiff::{SignedDuration, Span, ToSpan, Zoned};
+use jiff::Zoned;
 use std::pin::Pin;
 use std::sync::mpsc::{Receiver, channel};
 use std::task::{Context, Poll};
@@ -13,6 +11,7 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MockEvent {
+  /// Normal keyboard event
   Event(Event),
 
   /// The `CTRL-C` keyboard event, indicates exit the reader stream.
