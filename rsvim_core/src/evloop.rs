@@ -137,6 +137,7 @@ fn is_ctrl_c(event: &Option<IoResult<Event>>) -> bool {
 }
 
 impl EventLoop {
+  #[allow(clippy::type_complexity)]
   pub fn _internal_new(
     cli_opts: &CliOptions,
   ) -> IoResult<(
