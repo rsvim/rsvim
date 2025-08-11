@@ -251,6 +251,89 @@ impl EventLoop {
     })
   }
 
+  #[cfg(test)]
+  /// Make new event loop for testing.
+  pub fn new_without_snapshot(cli_opts: CliOptions) -> IoResult<Self> {
+    // Canvas
+    let (cols, rows) = crossterm::terminal::size()?;
+    let canvas_size = U16Size::new(cols, rows);
+    let canvas = Canvas::new(canvas_size);
+    let canvas = Canvas::to_arc(canvas);
+
+    // UI Tree
+    let tree = Tree::to_arc(Tree::new(canvas_size));
+
+    // Buffers
+    let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
+    let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
+
+    // Channel: workers => master
+    let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
+
+    // Channel: js runtime => master
+    let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
+    // Channel: master => js runtime
+    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
+    // Channel: master => master
+    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
+
+    // Task Tracker
+    let detached_tracker = TaskTracker::new();
+    let blocked_tracker = TaskTracker::new();
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
+
+    // State
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
+    let stateful_machine = StatefulValue::default();
+
+    // Js Runtime
+    let js_runtime = JsRuntime::new_without_snapshot(
+      JsRuntimeOptions::default(),
+      startup_moment,
+      startup_unix_epoch,
+      jsrt_to_master,
+      jsrt_from_master,
+      cli_opts.clone(),
+      tree.clone(),
+      buffers_manager.clone(),
+      text_contents.clone(),
+      state.clone(),
+    );
+
+    let writer = if cli_opts.headless() {
+      StdoutWriterValue::headless()
+    } else {
+      StdoutWriterValue::editor()
+    };
+
+    Ok(EventLoop {
+      startup_moment,
+      startup_unix_epoch,
+      cli_opts,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers: buffers_manager,
+      contents: text_contents,
+      writer,
+      cancellation_token: CancellationToken::new(),
+      detached_tracker,
+      blocked_tracker,
+      js_runtime,
+      worker_to_master,
+      master_from_worker,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    })
+  }
+
   /// Initialize the editor
   pub fn initialize(&mut self) -> IoResult<()> {
     self._init_config()?;
