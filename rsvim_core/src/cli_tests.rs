@@ -17,6 +17,7 @@ fn cli_opt1() {
     to_osstr(vec!["README.md", "LICENSE"]),
     to_osstr(vec!["README.md", "LICENSE", "--help", "--version"]),
     to_osstr(vec!["README.md", "LICENSE", "-h", "-V"]),
+    to_osstr(vec!["README.md", "LICENSE", "--headless"]),
   ];
 
   let to_pb = |paths: Vec<&str>| {
@@ -47,6 +48,11 @@ fn cli_opt1() {
       CliSpecialOptions::new(true, true, false),
       to_pb(vec!["README.md", "LICENSE"]),
       false,
+    ),
+    CliOptions::new(
+      CliSpecialOptions::empty(),
+      to_pb(vec!["README.md", "LICENSE"]),
+      true,
     ),
   ];
 

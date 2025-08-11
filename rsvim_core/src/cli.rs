@@ -119,6 +119,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   let mut version: bool = false;
   let mut short_help: bool = false;
   let mut long_help: bool = false;
+  let mut headless: bool = false;
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
@@ -132,6 +133,9 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
       Short('V') | Long("version") => {
         version = true;
       }
+      Long("headless") => {
+        headless = true;
+      }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
       }
@@ -142,7 +146,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   Ok(CliOptions {
     special_opts: CliSpecialOptions::new(version, short_help, long_help),
     file,
-    headless: false,
+    headless,
   })
 }
 
