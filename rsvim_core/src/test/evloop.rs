@@ -9,29 +9,21 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use bitflags::bitflags_match;
+use crossterm::event::{
+  Event, EventStream, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+};
 use futures::stream::Stream;
+use futures::stream::StreamExt;
 use jiff::Zoned;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::thread;
 use std::time::Duration;
-use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
-
-use msg::WorkerToMasterMessage;
-#[cfg(test)]
-use reader::mock_reader::MockReader;
-use writer::{StdoutWritable, StdoutWriterValue};
-
-#[cfg(test)]
-use bitflags::bitflags_match;
-use crossterm::event::{Event, EventStream};
-#[cfg(test)]
-use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
-use futures::stream::StreamExt;
-use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
+use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
@@ -59,53 +51,50 @@ const CTRL_C: Event = Event::Key(KeyEvent::new_with_kind(
   KeyEventKind::Press,
 ));
 
-const INTERVAL_MILLIS: Duration = Duration::from_millis(50);
+const INTERVAL_MILLIS: Duration = Duration::from_millis(20);
 
 #[derive(Debug)]
 pub struct MockReader {
-  rx: UnboundedReceiver<IoResult<Event>>,
+  events: Vec<MockEvent>,
+  idx: usize,
 }
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
-    let (tx, rx) = unbounded_channel::<IoResult<Event>>();
+    Self { events, idx: 0 }
+  }
 
-    thread::spawn(move || {
-      for (i, event) in events.iter().enumerate() {
-        trace!("Tick event[{i}]: {event:?}");
-        match event {
-          MockEvent::Event(e) => {
-            thread::sleep(INTERVAL_MILLIS);
-            tx.send(Ok(e.clone())).unwrap();
+  pub async fn read(&mut self) -> Option<IoResult<Event>> {
+    if self.idx >= self.events.len() {
+      thread::sleep(INTERVAL_MILLIS);
+      Some(Ok(CTRL_C.clone()))
+    } else {
+      let i = self.idx;
+      let next_event = self.events[i];
+
+      trace!("Tick event[{i}]: {next_event:?}");
+      match next_event {
+        MockEvent::Event(e) => {
+          thread::sleep(INTERVAL_MILLIS);
+          Some(Ok(e.clone()))
+        }
+        MockEvent::SleepFor(d) => {
+          tokio::time::sleep(*d).await;
+          None
+        }
+        MockEvent::SleepUntil(ts) => {
+          let now = Zoned::now();
+          let d = ts.duration_since(&now);
+          let d = d.as_millis();
+          if d > 0 {
+            let d = Duration::from_millis(d as u64);
+            tokio::time::sleep(d)
           }
-          MockEvent::SleepFor(d) => thread::sleep(*d),
-          MockEvent::SleepUntil(ts) => {
-            let now = Zoned::now();
-            let d = ts.duration_since(&now);
-            let d = d.as_millis();
-            if d > 0 {
-              let d = Duration::from_millis(d as u64);
-              thread::sleep(d)
-            }
-          }
+          None
         }
       }
 
-      // No more events, send ExitEvent and close sender
-      tx.send(Ok(CTRL_C.clone())).unwrap();
-    });
-
-    Self { rx }
-  }
-}
-
-impl Stream for MockReader {
-  type Item = IoResult<Event>;
-
-  fn poll_next(
-    mut self: Pin<&mut Self>,
-    cx: &mut Context<'_>,
-  ) -> Poll<Option<Self::Item>> {
-    self.rx.poll_recv(cx)
+      self.idx += 1;
+    }
   }
 }
