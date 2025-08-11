@@ -141,7 +141,7 @@ impl EventLoop {
     cli_opts: &CliOptions,
   ) -> IoResult<(
     /* startup_moment */ Instant,
-    /* startup_unix_epoch */ SystemTime,
+    /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state */ StateArc,
@@ -216,9 +216,7 @@ impl EventLoop {
     // Channel: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
 
-    // Task Tracker
-    let detached_tracker = TaskTracker::new();
-    let blocked_tracker = TaskTracker::new();
+    // Startup time
     let startup_moment = Instant::now();
     let startup_unix_epoch = SystemTime::now()
       .duration_since(UNIX_EPOCH)
