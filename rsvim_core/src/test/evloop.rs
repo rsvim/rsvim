@@ -50,7 +50,7 @@ impl MockReader {
       Some(Ok(CTRL_C.clone()))
     } else {
       let i = self.idx;
-      let next_event = self.events[i];
+      let next_event = &self.events[i];
       self.idx += 1;
 
       trace!("Tick event[{i}]: {next_event:?}");
