@@ -4,16 +4,8 @@ use crate::prelude::*;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
-use std::pin::Pin;
-use std::sync::Arc;
-use std::task::{Context, Poll};
 use std::thread;
 use std::time::Duration;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use tokio::sync::mpsc::{Receiver, Sender, channel};
-use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
-use tokio_util::sync::CancellationToken;
-use tokio_util::task::TaskTracker;
 
 pub fn make_event_loop() -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
