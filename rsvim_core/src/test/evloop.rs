@@ -2,11 +2,7 @@ use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 
-use crossterm::event::{
-  Event, EventStream, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-};
-use futures::stream::Stream;
-use futures::stream::StreamExt;
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
 use std::pin::Pin;
 use std::sync::Arc;
