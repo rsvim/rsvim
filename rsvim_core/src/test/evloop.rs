@@ -9,7 +9,6 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
-use bitflags::bitflags_match;
 use crossterm::event::{
   Event, EventStream, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
 };
@@ -71,6 +70,7 @@ impl MockReader {
     } else {
       let i = self.idx;
       let next_event = self.events[i];
+      self.idx += 1;
 
       trace!("Tick event[{i}]: {next_event:?}");
       match next_event {
@@ -88,13 +88,11 @@ impl MockReader {
           let d = d.as_millis();
           if d > 0 {
             let d = Duration::from_millis(d as u64);
-            tokio::time::sleep(d)
+            tokio::time::sleep(d).await;
           }
           None
         }
       }
-
-      self.idx += 1;
     }
   }
 }
