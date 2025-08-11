@@ -4,13 +4,6 @@ use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let to_osstr = |osstrs: Vec<&str>| {
-    osstrs
-      .iter()
-      .map(|s| std::ffi::OsString::from(s.to_string()))
-      .collect::<Vec<_>>()
-  };
-
   let input = [
     vec![],
     vec!["README.md"],
@@ -72,14 +65,7 @@ fn cli_opt1() {
 
 #[test]
 fn cli_opt2() {
-  let to_osstr = |osstrs: Vec<&str>| {
-    osstrs
-      .iter()
-      .map(|s| std::ffi::OsString::from(s.to_string()))
-      .collect::<Vec<_>>()
-  };
-
-  let input = [to_osstr(vec!["--ex"]), to_osstr(vec!["--v"])];
+  let input = [vec!["--ex"], vec!["--v"]];
 
   for i in input {
     let actual = CliOptions::from_args(&i);
