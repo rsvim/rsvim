@@ -10,7 +10,7 @@ use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
-use crate::ui::canvas::{Canvas, CanvasArc};
+use crate::ui::canvas::{self, Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
@@ -137,8 +137,31 @@ fn is_ctrl_c(event: &Option<IoResult<Event>>) -> bool {
 }
 
 impl EventLoop {
-  /// Make new event loop.
-  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+  pub fn _internal_new(
+    cli_opts: &CliOptions,
+  ) -> IoResult<(
+    /* startup_moment */ Instant,
+    /* startup_unix_epoch */ SystemTime,
+    /* canvas */ CanvasArc,
+    /* tree */ TreeArc,
+    /* state */ StateArc,
+    /* stateful_machine */ StatefulValue,
+    /* buffers */ BuffersManagerArc,
+    /* contents */ TextContentsArc,
+    /* writer */ StdoutWriterValue,
+    /* cancellation_token */ CancellationToken,
+    /* detached_tracker */ TaskTracker,
+    /* blocked_tracker */ TaskTracker,
+    /* worker_to_master */
+    Sender<WorkerToMasterMessage>,
+    /* master_from_worker */ Receiver<WorkerToMasterMessage>,
+    /* jsrt_to_master */ Sender<JsRuntimeToEventLoopMessage>,
+    /* master_from_jsrt */ Receiver<JsRuntimeToEventLoopMessage>,
+    /* master_to_jsrt */ Sender<EventLoopToJsRuntimeMessage>,
+    /* jsrt_from_master */ Receiver<EventLoopToJsRuntimeMessage>,
+    /* jsrt_tick_dispatcher */ Sender<EventLoopToJsRuntimeMessage>,
+    /* jsrt_tick_queue */ Receiver<EventLoopToJsRuntimeMessage>,
+  )> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -206,6 +229,61 @@ impl EventLoop {
     let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
     let stateful_machine = StatefulValue::default();
 
+    let writer = if cli_opts.headless() {
+      StdoutWriterValue::headless()
+    } else {
+      StdoutWriterValue::editor()
+    };
+
+    Ok((
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers_manager,
+      text_contents,
+      writer,
+      CancellationToken::new(),
+      TaskTracker::new(),
+      TaskTracker::new(),
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ))
+  }
+
+  /// Make new event loop.
+  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+    let (
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ) = Self::_internal_new(&cli_opts)?;
+
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
@@ -216,16 +294,10 @@ impl EventLoop {
       jsrt_from_master,
       cli_opts.clone(),
       tree.clone(),
-      buffers_manager.clone(),
-      text_contents.clone(),
+      buffers.clone(),
+      contents.clone(),
       state.clone(),
     );
-
-    let writer = if cli_opts.headless() {
-      StdoutWriterValue::headless()
-    } else {
-      StdoutWriterValue::editor()
-    };
 
     Ok(EventLoop {
       startup_moment,
@@ -235,10 +307,10 @@ impl EventLoop {
       tree,
       state,
       stateful_machine,
-      buffers: buffers_manager,
-      contents: text_contents,
+      buffers,
+      contents,
       writer,
-      cancellation_token: CancellationToken::new(),
+      cancellation_token,
       detached_tracker,
       blocked_tracker,
       js_runtime,
@@ -254,41 +326,28 @@ impl EventLoop {
   #[cfg(test)]
   /// Make new event loop for testing.
   pub fn new_without_snapshot(cli_opts: CliOptions) -> IoResult<Self> {
-    // Canvas
-    let (cols, rows) = crossterm::terminal::size()?;
-    let canvas_size = U16Size::new(cols, rows);
-    let canvas = Canvas::new(canvas_size);
-    let canvas = Canvas::to_arc(canvas);
-
-    // UI Tree
-    let tree = Tree::to_arc(Tree::new(canvas_size));
-
-    // Buffers
-    let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
-
-    // Channel: workers => master
-    let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
-
-    // Channel: js runtime => master
-    let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => js runtime
-    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => master
-    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
-
-    // Task Tracker
-    let detached_tracker = TaskTracker::new();
-    let blocked_tracker = TaskTracker::new();
-    let startup_moment = Instant::now();
-    let startup_unix_epoch = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_millis();
-
-    // State
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
-    let stateful_machine = StatefulValue::default();
+    let (
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ) = Self::_internal_new(&cli_opts)?;
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(
@@ -299,16 +358,10 @@ impl EventLoop {
       jsrt_from_master,
       cli_opts.clone(),
       tree.clone(),
-      buffers_manager.clone(),
-      text_contents.clone(),
+      buffers.clone(),
+      contents.clone(),
       state.clone(),
     );
-
-    let writer = if cli_opts.headless() {
-      StdoutWriterValue::headless()
-    } else {
-      StdoutWriterValue::editor()
-    };
 
     Ok(EventLoop {
       startup_moment,
@@ -318,10 +371,10 @@ impl EventLoop {
       tree,
       state,
       stateful_machine,
-      buffers: buffers_manager,
-      contents: text_contents,
+      buffers,
+      contents,
       writer,
-      cancellation_token: CancellationToken::new(),
+      cancellation_token,
       detached_tracker,
       blocked_tracker,
       js_runtime,
