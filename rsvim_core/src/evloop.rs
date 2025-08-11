@@ -10,7 +10,7 @@ use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
-use crate::ui::canvas::{self, Canvas, CanvasArc};
+use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
