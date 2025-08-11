@@ -10,7 +10,7 @@ use std::time::Duration;
 pub fn make_event_loop() -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
 
-  EventLoop::new_without_snapshot(cli_opts)
+  EventLoop::new_without_snapshot(cli_opts).unwrap()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
