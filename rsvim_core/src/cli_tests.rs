@@ -12,12 +12,12 @@ fn cli_opt1() {
   };
 
   let input = [
-    to_osstr(vec![]),
-    to_osstr(vec!["README.md"]),
-    to_osstr(vec!["README.md", "LICENSE"]),
-    to_osstr(vec!["README.md", "LICENSE", "--help", "--version"]),
-    to_osstr(vec!["README.md", "LICENSE", "-h", "-V"]),
-    to_osstr(vec!["README.md", "LICENSE", "--headless"]),
+    vec![],
+    vec!["README.md"],
+    vec!["README.md", "LICENSE"],
+    vec!["README.md", "LICENSE", "--help", "--version"],
+    vec!["README.md", "LICENSE", "-h", "-V"],
+    vec!["README.md", "LICENSE", "--headless"],
   ];
 
   let to_pb = |paths: Vec<&str>| {

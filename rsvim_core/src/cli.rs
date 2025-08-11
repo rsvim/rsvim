@@ -2,6 +2,17 @@
 
 use crate::js::v8_version;
 
+use std::{
+  ffi::{OsStr, OsString},
+  // fmt::Display,
+  // mem::replace,
+  // str::{FromStr, Utf8Error},
+};
+
+#[cfg(unix)]
+use std::os::unix::ffi::{OsStrExt, OsStringExt};
+#[cfg(windows)]
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
@@ -155,7 +166,15 @@ impl CliOptions {
     parse(lexopt::Parser::from_env())
   }
 
-  pub fn from_args(
+  pub fn from_args<I>(args: I) -> Result<Self, lexopt::Error>
+  where
+    I: IntoIterator,
+    I::Item: Into<OsString>,
+  {
+    parse(lexopt::Parser::from_args(args))
+  }
+
+  pub fn from_string_args(
     args: &Vec<std::ffi::OsString>,
   ) -> Result<Self, lexopt::Error> {
     parse(lexopt::Parser::from_args(args))
