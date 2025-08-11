@@ -60,7 +60,7 @@ impl MockReader {
           Some(Ok(e.clone()))
         }
         MockEvent::SleepFor(d) => {
-          tokio::time::sleep(d).await;
+          tokio::time::sleep(*d).await;
           None
         }
         MockEvent::SleepUntil(ts) => {
