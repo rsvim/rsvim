@@ -82,10 +82,7 @@ impl MockReader {
         }
       }
 
-      trace!(
-        "Send final mock event[{}]: CTRL_D ({CTRL_D:?})",
-        events.len()
-      );
+      trace!("Send final mock event[{}]: CTRL+D {CTRL_D:?}", events.len());
       std::thread::sleep(INTERVAL_MILLIS);
       tx.send(Ok(CTRL_D.clone())).unwrap();
 
