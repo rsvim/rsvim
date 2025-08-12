@@ -8726,6 +8726,7 @@ mod tests_goto_insert_mode {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::fsm::InsertStateful;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -8739,6 +8740,7 @@ mod tests_goto_insert_mode {
     WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
+  use compact_str::ToCompactString;
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
@@ -8810,7 +8812,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -8909,7 +8914,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -9008,7 +9016,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -9106,7 +9117,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());

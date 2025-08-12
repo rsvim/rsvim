@@ -2729,7 +2729,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -2851,7 +2854,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
@@ -3003,7 +3009,10 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("a"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3143,7 +3152,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3194,7 +3203,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3284,7 +3293,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3324,7 +3333,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3461,7 +3473,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3512,7 +3524,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3602,7 +3614,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3647,7 +3659,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3784,7 +3799,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3835,7 +3850,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3925,7 +3940,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3965,7 +3980,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -4042,7 +4060,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, "Hi".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hi".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4116,7 +4137,10 @@ mod tests_insert_text {
       let buf_eol = lock!(buf).options().end_of_line();
       let line1 = format!("Hi{buf_eol}");
 
-      stateful.cursor_insert(&data_access, line1.to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(line1.to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4192,7 +4216,10 @@ mod tests_insert_text {
       let buf_eol = lock!(buf).options().end_of_line();
       let buf_eol = format!("{buf_eol}");
 
-      stateful.cursor_insert(&data_access, buf_eol.to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(buf_eol.to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4276,7 +4303,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -4368,7 +4398,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4414,7 +4447,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4504,7 +4540,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -4592,7 +4631,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -4691,7 +4733,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -4783,7 +4828,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4829,7 +4877,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4919,7 +4970,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5007,7 +5061,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5106,7 +5163,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5198,7 +5258,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5244,7 +5307,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5334,7 +5400,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5422,7 +5491,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5499,7 +5571,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("a"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5571,7 +5646,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("b"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("b".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5643,7 +5721,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("这个"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("这个".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
