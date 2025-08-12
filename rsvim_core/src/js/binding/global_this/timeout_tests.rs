@@ -47,7 +47,7 @@ async fn test_timeout1() -> IoResult<()> {
   event_loop.mock_run(MockReader::new(mocked_events)).await?;
   event_loop.shutdown()?;
 
-  // After 10ms, it changes to new value
+  // After timeout, it changes to new value
   {
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
