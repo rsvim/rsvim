@@ -82,6 +82,7 @@ impl MockReader {
         }
       }
 
+      trace!("Send final mock event[{}]: {event:?}", events.len());
       std::thread::sleep(INTERVAL_MILLIS);
       tx.send(Ok(CTRL_D.clone())).unwrap();
 
