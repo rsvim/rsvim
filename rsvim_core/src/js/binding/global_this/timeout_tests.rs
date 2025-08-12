@@ -103,6 +103,8 @@ async fn test_timeout2() -> IoResult<()> {
 
   // Still remains the same value
   {
+    use crate::defaults;
+
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
     assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
