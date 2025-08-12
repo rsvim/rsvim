@@ -3,13 +3,14 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
+use std::io::Write;
 use std::time::Duration;
 
 #[tokio::test]
 async fn test_timeout1() -> IoResult<()> {
   test_log_init();
 
-  let _tp = TempPathCfg::create();
+  let tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(200))];
   let src: &str = r#"
@@ -19,6 +20,16 @@ async fn test_timeout1() -> IoResult<()> {
     Rsvim.opt.lineBreak = true;
   }, 100);
 "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  {
+    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
+    let mut config_entry =
+      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
+        .unwrap();
+    config_entry.write_all(src.as_bytes()).unwrap();
+    config_entry.flush().unwrap();
+  }
 
   let mut event_loop = make_event_loop();
   event_loop.initialize()?;
