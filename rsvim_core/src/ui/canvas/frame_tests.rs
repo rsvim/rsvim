@@ -1,7 +1,7 @@
 use super::frame::*;
 
 use crate::prelude::*;
-use crate::tests::log::init as test_log_init;
+use crate::test::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
 

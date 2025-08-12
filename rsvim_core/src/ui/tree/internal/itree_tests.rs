@@ -2,7 +2,7 @@ use super::itree::*;
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::tests::log::init as test_log_init;
+use crate::test::log::init as test_log_init;
 use crate::ui::tree::internal::{InodeBase, Inodeable, TreeNodeId};
 
 #[derive(Copy, Clone, Debug)]

@@ -1,7 +1,7 @@
 use super::canvas::*;
 
 use crate::prelude::*;
-use crate::tests::log::init as test_log_init;
+use crate::test::log::init as test_log_init;
 
 use compact_str::{CompactString, ToCompactString};
 use geo::point;
