@@ -2617,7 +2617,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
