@@ -274,9 +274,9 @@ mod tests_raw_cursor_move_y_by {
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
