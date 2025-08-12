@@ -83,7 +83,7 @@ impl futures::Stream for MockReader {
     cx: &mut std::task::Context<'_>,
   ) -> Poll<Option<Self::Item>> {
     match self.rx.try_recv() {
-      Ok(event) => Poll::Ready(Some(Ok(event))),
+      Ok(event) => Poll::Ready(Some(event)),
       _ => Poll::Pending,
     }
   }
