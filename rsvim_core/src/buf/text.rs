@@ -12,11 +12,6 @@ use lru::LruCache;
 use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
 
-#[cfg(test)]
-use crate::tests::buf::{
-  dbg_print_textline, dbg_print_textline_with_absolute_char_idx,
-};
-
 pub mod cidx;
 
 #[cfg(test)]
@@ -406,6 +401,94 @@ impl Text {
   }
 }
 // Display Width }
+
+#[cfg(test)]
+fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
+  let mut builder = String::with_capacity(bufline.len_chars());
+  for c in bufline.chars() {
+    builder.push(c);
+  }
+  builder
+}
+
+#[cfg(test)]
+impl Text {
+  fn dbg_print_textline_with_absolute_char_idx(
+    self,
+    line_idx: usize,
+    absolute_char_idx: usize,
+    msg: &str,
+  ) {
+    trace!(
+      "{} text line:{},absolute_char:{}",
+      msg, line_idx, absolute_char_idx
+    );
+
+    match self.rope().get_line(line_idx) {
+      Some(line) => {
+        trace!("len_chars:{}", line.len_chars());
+        let start_char_on_line = self.rope().line_to_char(line_idx);
+
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in line.chars().enumerate() {
+          let w = self.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(
+            if i + start_char_on_line == absolute_char_idx {
+              '^'
+            } else {
+              ' '
+            },
+            w,
+          )
+          .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!("line not exist"),
+    }
+
+    trace!("{} whole text:", msg);
+    for i in 0..self.rope().len_lines() {
+      trace!("{i}:{:?}", _ropeline_to_string(&self.rope().line(i)));
+    }
+  }
+
+  fn dbg_print_textline(self, line_idx: usize, char_idx: usize, msg: &str) {
+    trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
+
+    match self.rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!("len_chars:{}", bufline.len_chars());
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = self.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String =
+            std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w)
+              .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!("line not exist"),
+    }
+
+    trace!("{}, whole buffer:", msg);
+    for i in 0..self.rope().len_lines() {
+      trace!("{i}:{:?}", _ropeline_to_string(&self.rope().line(i)));
+    }
+  }
+}
 
 // Edit {
 impl Text {
