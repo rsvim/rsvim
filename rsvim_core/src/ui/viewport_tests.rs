@@ -7,8 +7,8 @@ use crate::buf::opt::{
   BufferLocalOptions, BufferLocalOptionsBuilder, FileFormatOption,
 };
 use crate::prelude::*;
-use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
-use crate::tests::log::init as test_log_init;
+use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+use crate::test::log::init as test_log_init;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
