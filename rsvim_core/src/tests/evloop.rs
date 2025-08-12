@@ -4,6 +4,8 @@ use crate::prelude::*;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
+use std::sync::mpsc::{Receiver, channel};
+use std::task::Poll;
 use std::time::Duration;
 
 pub fn make_event_loop() -> EventLoop {
@@ -34,46 +36,55 @@ const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
 
 #[derive(Debug)]
 pub struct MockReader {
-  events: Vec<MockEvent>,
-  idx: usize,
+  rx: Receiver<IoResult<Event>>,
 }
 
 impl MockReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
-    Self { events, idx: 0 }
-  }
+    let (tx, rx) = channel();
 
-  pub async fn next(&mut self) -> Option<IoResult<Event>> {
-    if self.idx >= self.events.len() {
-      trace!("Send final mock event[{}]: CTRL_D {CTRL_D:?}", self.idx);
-      tokio::time::sleep(INTERVAL_MILLIS).await;
-      Some(Ok(CTRL_D.clone()))
-    } else {
-      let i = self.idx;
-      let next_event = &self.events[i];
-      self.idx += 1;
+    std::thread::spawn(move || {
+      for (i, event) in events.iter().enumerate() {
+        trace!("Send mock event[{i}]: {event:?}");
 
-      trace!("Send mock event[{i}]: {next_event:?}");
-      match next_event {
-        MockEvent::Event(e) => {
-          tokio::time::sleep(INTERVAL_MILLIS).await;
-          Some(Ok(e.clone()))
-        }
-        MockEvent::SleepFor(d) => {
-          tokio::time::sleep(*d).await;
-          None
-        }
-        MockEvent::SleepUntil(ts) => {
-          let now = Zoned::now();
-          let d = ts.duration_since(&now);
-          let d = d.as_millis();
-          if d > 0 {
-            let d = Duration::from_millis(d as u64);
-            tokio::time::sleep(d).await;
+        match event {
+          MockEvent::Event(e) => {
+            std::thread::sleep(INTERVAL_MILLIS);
+            tx.send(Ok(e.clone()));
           }
-          None
+          MockEvent::SleepFor(d) => {
+            std::thread::sleep(*d);
+          }
+          MockEvent::SleepUntil(ts) => {
+            let now = Zoned::now();
+            let d = ts.duration_since(&now);
+            let d = d.as_millis();
+            if d > 0 {
+              let d = Duration::from_millis(d as u64);
+              std::thread::sleep(*d);
+            }
+          }
         }
       }
+
+      std::thread::sleep(INTERVAL_MILLIS);
+      tx.send(Ok(CTRL_D.clone()));
+    });
+
+    Self { rx }
+  }
+}
+
+impl futures::Stream for MockReader {
+  type Item = IoResult<Event>;
+
+  fn poll_next(
+    self: std::pin::Pin<&mut Self>,
+    cx: &mut std::task::Context<'_>,
+  ) -> Poll<Option<Self::Item>> {
+    match self.rx.try_recv() {
+      Ok(event) => Poll::Ready(Some(Ok(event))),
+      _ => Poll::Pending,
     }
   }
 }
