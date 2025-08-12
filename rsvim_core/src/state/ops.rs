@@ -98,3 +98,14 @@ pub enum GotoInsertModeVariant {
   /// Create a new line and move cursor to next line
   NewLine,
 }
+
+#[derive(Debug, Clone)]
+pub enum CursorInsertVariant {
+  Text(CompactString),
+
+  // End-of-line
+  Eol,
+
+  // Tab
+  Tab,
+}
