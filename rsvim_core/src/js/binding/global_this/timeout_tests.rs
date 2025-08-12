@@ -1,13 +1,10 @@
 use super::timeout::*;
 
-use crate::constant::path_config::*;
-use crate::js::loader::ModuleLoader;
+use crate::prelude::*;
 use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use crate::{evloop, prelude::*};
 
-use assert_fs::prelude::*;
 use std::fs;
 use std::path::Path;
 use std::time::Duration;
