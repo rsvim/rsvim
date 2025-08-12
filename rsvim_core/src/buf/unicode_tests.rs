@@ -3,7 +3,7 @@ use super::unicode::*;
 use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
 use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::prelude::*;
-use crate::tests::log::init as test_log_init;
+use crate::test::log::init as test_log_init;
 
 use ascii::AsciiChar;
 use icu::properties::{CodePointMapData, props::EastAsianWidth};
