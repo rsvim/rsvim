@@ -25,13 +25,13 @@ pub enum MockEvent {
   SleepUntil(Zoned),
 }
 
-const CTRL_C: Event = Event::Key(KeyEvent::new_with_kind(
-  KeyCode::Char('c'),
+const CTRL_D: Event = Event::Key(KeyEvent::new_with_kind(
+  KeyCode::Char('d'),
   KeyModifiers::CONTROL,
   KeyEventKind::Press,
 ));
 
-const INTERVAL_MILLIS: Duration = Duration::from_millis(20);
+const INTERVAL_MILLIS: Duration = Duration::from_millis(10);
 
 #[derive(Debug)]
 pub struct MockReader {
@@ -46,8 +46,8 @@ impl MockReader {
 
   pub async fn read(&mut self) -> Option<IoResult<Event>> {
     if self.idx >= self.events.len() {
-      thread::sleep(INTERVAL_MILLIS);
-      Some(Ok(CTRL_C.clone()))
+      tokio::time::sleep(INTERVAL_MILLIS).await;
+      Some(Ok(CTRL_D.clone()))
     } else {
       let i = self.idx;
       let next_event = &self.events[i];
@@ -56,7 +56,7 @@ impl MockReader {
       trace!("Tick event[{i}]: {next_event:?}");
       match next_event {
         MockEvent::Event(e) => {
-          thread::sleep(INTERVAL_MILLIS);
+          tokio::time::sleep(INTERVAL_MILLIS).await;
           Some(Ok(e.clone()))
         }
         MockEvent::SleepFor(d) => {

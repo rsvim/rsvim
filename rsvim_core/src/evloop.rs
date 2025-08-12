@@ -17,15 +17,9 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-#[cfg(test)]
-use reader::mock_reader::MockReader;
 use writer::{StdoutWritable, StdoutWriterValue};
 
-#[cfg(test)]
-use bitflags::bitflags_match;
 use crossterm::event::{Event, EventStream};
-#[cfg(test)]
-use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 use futures::stream::StreamExt;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -33,8 +27,14 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
+#[cfg(test)]
+use crate::tests::evloop::MockReader;
+#[cfg(test)]
+use bitflags::bitflags_match;
+#[cfg(test)]
+use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
+
 pub mod msg;
-pub mod reader;
 pub mod task;
 pub mod writer;
 
