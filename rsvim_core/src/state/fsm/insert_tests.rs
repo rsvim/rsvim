@@ -2192,6 +2192,7 @@ mod tests_insert_text {
   use super::*;
 
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -5642,6 +5643,45 @@ mod tests_insert_text {
       let buf_eol = lock!(buf.clone()).options().end_of_line();
       let b = format!("这个{buf_eol}");
       let expect = vec![b.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 2);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 8);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let l2 = format!("\t{buf_eol}");
+      let expect = vec!["这个", l2.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
