@@ -113,7 +113,7 @@ pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
 pub fn assert_viewport(
   text: &Text,
   actual: &Viewport,
-  expect: &Vec<&str>,
+  expect_rows: &Vec<&str>,
   expect_start_line: usize,
   expect_end_line: usize,
   expect_start_fills: &BTreeMap<usize, usize>,
@@ -131,8 +131,8 @@ pub fn assert_viewport(
   for (k, v) in actual.lines().iter() {
     info!("actual line[{:?}]: {:?}", k, v);
   }
-  for (i, e) in expect.iter().enumerate() {
-    info!("expect line[{}]:{:?}", i, e);
+  for (i, e) in expect_rows.iter().enumerate() {
+    info!("expect row[{}]:{:?}", i, e);
   }
   assert_eq!(expect_start_fills.len(), expect_end_fills.len());
   for (k, start_v) in expect_start_fills.iter() {
@@ -228,9 +228,9 @@ pub fn assert_viewport(
       }
       info!(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect[*r as usize]
+        r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize]);
     }
   }
 }
