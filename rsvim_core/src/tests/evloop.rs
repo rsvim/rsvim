@@ -30,7 +30,7 @@ const CTRL_D: Event = Event::Key(KeyEvent::new_with_kind(
   KeyEventKind::Press,
 ));
 
-const INTERVAL_MILLIS: Duration = Duration::from_millis(5);
+const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
 
 #[derive(Debug)]
 pub struct MockReader {
