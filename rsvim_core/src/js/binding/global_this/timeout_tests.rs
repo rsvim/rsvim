@@ -14,7 +14,7 @@ async fn test_timeout1() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  // Set timeout for 10 milliseconds.
+  // Set timeout to update global options.
   const timerId = setTimeout(() => {
     Rsvim.opt.wrap = false;
     Rsvim.opt.lineBreak = true;
@@ -66,12 +66,13 @@ async fn test_timeout2() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  // Set timeout for 10 milliseconds.
+  // Set timeout to update global options.
   const timerId = setTimeout(() => {
     Rsvim.opt.wrap = false;
     Rsvim.opt.lineBreak = true;
   }, 100);
 
+  // Cancel the timeout immediately
   clearTimeout(timerId);
 "#;
 
