@@ -326,8 +326,8 @@ impl EventLoop {
   #[cfg(test)]
   /// Make new event loop for testing.
   pub fn new_without_snapshot(
-    cols: u16,
-    rows: u16,
+    terminal_columns: u16,
+    terminal_rows: u16,
     cli_opts: CliOptions,
   ) -> IoResult<Self> {
     let (
@@ -351,7 +351,7 @@ impl EventLoop {
       jsrt_from_master,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
-    ) = Self::_internal_new(cols, rows, &cli_opts)?;
+    ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(

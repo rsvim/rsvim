@@ -10,8 +10,8 @@ use std::time::Duration;
 async fn test_timeout1() -> IoResult<()> {
   test_log_init();
 
-  let cols = 10_u16;
-  let rows = 10_u16;
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
   let tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
@@ -33,7 +33,7 @@ async fn test_timeout1() -> IoResult<()> {
     config_entry.flush().unwrap();
   }
 
-  let mut event_loop = make_event_loop(cols, rows);
+  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
   // Before evaluating javascript configs
   {
@@ -64,8 +64,8 @@ async fn test_timeout1() -> IoResult<()> {
 async fn test_timeout2() -> IoResult<()> {
   test_log_init();
 
-  let cols = 10_u16;
-  let rows = 10_u16;
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
   let tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
@@ -90,7 +90,7 @@ async fn test_timeout2() -> IoResult<()> {
     config_entry.flush().unwrap();
   }
 
-  let mut event_loop = make_event_loop(cols, rows);
+  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
   // Before evaluating javascript configs
   {
