@@ -412,6 +412,15 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 }
 
 impl Text {
+  #[cfg(not(test))]
+  fn dbg_print_textline_with_absolute_char_idx(
+    &mut self,
+    _line_idx: usize,
+    _absolute_char_idx: usize,
+    _msg: &str,
+  ) {
+  }
+
   #[cfg(test)]
   fn dbg_print_textline_with_absolute_char_idx(
     &mut self,
@@ -457,6 +466,15 @@ impl Text {
     for i in 0..self.rope().len_lines() {
       trace!("{i}:{:?}", _ropeline_to_string(&self.rope().line(i)));
     }
+  }
+
+  #[cfg(not(test))]
+  fn dbg_print_textline(
+    &mut self,
+    _line_idx: usize,
+    _char_idx: usize,
+    _msg: &str,
+  ) {
   }
 
   #[cfg(test)]
@@ -517,13 +535,11 @@ impl Text {
           self.retain_cached_lines(|line_idx, _column_idx| {
             *line_idx < inserted_line_idx
           });
-          if cfg!(test) {
-            self.dbg_print_textline_with_absolute_char_idx(
-              inserted_line_idx,
-              buffer_len_chars,
-              "Eol appended(non-empty)",
-            );
-          }
+          self.dbg_print_textline_with_absolute_char_idx(
+            inserted_line_idx,
+            buffer_len_chars,
+            "Eol appended(non-empty)",
+          );
         }
       }
       None => {
@@ -531,13 +547,11 @@ impl Text {
           .rope_mut()
           .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
-        if cfg!(test) {
-          self.dbg_print_textline_with_absolute_char_idx(
-            0_usize,
-            buffer_len_chars,
-            "Eol appended(empty)",
-          );
-        }
+        self.dbg_print_textline_with_absolute_char_idx(
+          0_usize,
+          buffer_len_chars,
+          "Eol appended(empty)",
+        );
       }
     }
   }
@@ -564,9 +578,7 @@ impl Text {
     let absolute_line_idx = self.rope.line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
-    if cfg!(test) {
-      self.dbg_print_textline(line_idx, char_idx, "Before insert");
-    }
+    self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
     self
       .rope_mut()
@@ -605,13 +617,11 @@ impl Text {
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
-    if cfg!(test) {
-      self.dbg_print_textline(
-        line_idx_after_inserted,
-        char_idx_after_inserted,
-        "After inserted",
-      );
-    }
+    self.dbg_print_textline(
+      line_idx_after_inserted,
+      char_idx_after_inserted,
+      "After inserted",
+    );
 
     (line_idx_after_inserted, char_idx_after_inserted)
   }
@@ -691,9 +701,7 @@ impl Text {
     let cursor_char_absolute_pos_before_delete =
       self.rope.line_to_char(line_idx) + char_idx;
 
-    if cfg!(test) {
-      self.dbg_print_textline(line_idx, char_idx, "Before delete");
-    }
+    self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
@@ -749,13 +757,11 @@ impl Text {
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
-    if cfg!(test) {
-      self.dbg_print_textline(
-        cursor_line_idx_after_deleted,
-        cursor_char_idx_after_deleted,
-        "After deleted",
-      );
-    }
+    self.dbg_print_textline(
+      cursor_line_idx_after_deleted,
+      cursor_char_idx_after_deleted,
+      "After deleted",
+    );
 
     Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
   }
