@@ -153,8 +153,7 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* worker_to_master */
-    Sender<WorkerToMasterMessage>,
+    /* worker_to_master */ Sender<WorkerToMasterMessage>,
     /* master_from_worker */ Receiver<WorkerToMasterMessage>,
     /* jsrt_to_master */ Sender<JsRuntimeToEventLoopMessage>,
     /* master_from_jsrt */ Receiver<JsRuntimeToEventLoopMessage>,
