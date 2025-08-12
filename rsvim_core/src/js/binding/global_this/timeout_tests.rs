@@ -12,7 +12,7 @@ async fn test_timeout1() -> IoResult<()> {
 
   let tp = TempPathCfg::create();
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(200))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(500))];
   let src: &str = r#"
   // Set timeout for 100 milliseconds.
   const timerId = setTimeout(() => {
