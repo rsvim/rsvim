@@ -69,7 +69,7 @@ impl TempPathCfg {
       saved_xdg_config_home: Some(saved_xdg_config_home),
       saved_xdg_cache_home: Some(saved_xdg_cache_home),
       saved_xdg_data_home: Some(saved_xdg_data_home),
-      sequential_guard: GLOBAL_SEQUENTIAL_LOCK.lock(),
+      _sequential_guard: GLOBAL_SEQUENTIAL_LOCK.lock(),
     }
   }
 }
