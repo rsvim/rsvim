@@ -61,7 +61,7 @@ impl MockReader {
             let d = d.as_millis();
             if d > 0 {
               let d = Duration::from_millis(d as u64);
-              std::thread::sleep(*d);
+              std::thread::sleep(d);
             }
           }
         }
@@ -80,7 +80,7 @@ impl futures::Stream for MockReader {
 
   fn poll_next(
     self: std::pin::Pin<&mut Self>,
-    cx: &mut std::task::Context<'_>,
+    _cx: &mut std::task::Context<'_>,
   ) -> Poll<Option<Self::Item>> {
     match self.rx.try_recv() {
       Ok(event) => Poll::Ready(Some(event)),
