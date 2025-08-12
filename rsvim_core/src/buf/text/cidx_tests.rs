@@ -3,7 +3,7 @@ use super::cidx::*;
 use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::test::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
 
