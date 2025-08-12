@@ -50,7 +50,7 @@ impl MockReader {
         match event {
           MockEvent::Event(e) => {
             std::thread::sleep(INTERVAL_MILLIS);
-            tx.send(Ok(e.clone()));
+            tx.send(Ok(e.clone())).unwrap();
           }
           MockEvent::SleepFor(d) => {
             std::thread::sleep(*d);
@@ -68,7 +68,7 @@ impl MockReader {
       }
 
       std::thread::sleep(INTERVAL_MILLIS);
-      tx.send(Ok(CTRL_D.clone()));
+      tx.send(Ok(CTRL_D.clone())).unwrap();
     });
 
     Self { rx }
