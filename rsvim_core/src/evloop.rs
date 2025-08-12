@@ -638,7 +638,7 @@ impl EventLoop {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
-        event = reader.next() => {
+        event = reader.next().await => {
           if is_ctrl_d(&event) {
             break;
           }
