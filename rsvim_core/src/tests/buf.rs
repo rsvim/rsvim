@@ -12,7 +12,6 @@ use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
 
-#[cfg(test)]
 pub fn make_buffer_from_lines(
   terminal_size: U16Size,
   opts: BufferLocalOptions,
@@ -27,7 +26,6 @@ pub fn make_buffer_from_lines(
   Buffer::to_arc(buf)
 }
 
-#[cfg(test)]
 pub fn make_empty_buffer(
   terminal_size: U16Size,
   opts: BufferLocalOptions,
@@ -37,7 +35,6 @@ pub fn make_empty_buffer(
   Buffer::to_arc(buf)
 }
 
-#[cfg(test)]
 pub fn make_buffers_manager(
   opts: BufferLocalOptions,
   bufs: Vec<BufferArc>,
@@ -58,7 +55,6 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
   builder
 }
 
-#[cfg(test)]
 pub fn dbg_print_textline_with_absolute_char_idx(
   text: &Text,
   line_idx: usize,
@@ -105,16 +101,6 @@ pub fn dbg_print_textline_with_absolute_char_idx(
   }
 }
 
-#[cfg(not(test))]
-pub fn dbg_print_textline_with_absolute_char_idx(
-  _text: &Text,
-  _line_idx: usize,
-  _char_idx: usize,
-  _msg: &str,
-) {
-}
-
-#[cfg(test)]
 pub fn dbg_print_textline(
   text: &Text,
   line_idx: usize,
@@ -148,13 +134,4 @@ pub fn dbg_print_textline(
   for i in 0..text.rope().len_lines() {
     trace!("{i}:{:?}", _ropeline_to_string(&text.rope().line(i)));
   }
-}
-
-#[cfg(not(test))]
-pub fn dbg_print_textline(
-  _text: &Text,
-  _line_idx: usize,
-  _char_idx: usize,
-  _msg: &str,
-) {
 }

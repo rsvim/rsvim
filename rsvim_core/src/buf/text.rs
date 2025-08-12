@@ -12,6 +12,11 @@ use lru::LruCache;
 use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
 
+#[cfg(test)]
+use crate::tests::buf::{
+  dbg_print_textline, dbg_print_textline_with_absolute_char_idx,
+};
+
 pub mod cidx;
 
 #[cfg(test)]
@@ -401,11 +406,6 @@ impl Text {
   }
 }
 // Display Width }
-
-#[cfg(test)]
-use crate::tests::buf::{
-  dbg_print_textline, dbg_print_textline_with_absolute_char_idx,
-};
 
 // Edit {
 impl Text {
