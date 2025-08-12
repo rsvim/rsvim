@@ -411,8 +411,8 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
   builder
 }
 
-#[cfg(test)]
 impl Text {
+  #[cfg(test)]
   fn dbg_print_textline_with_absolute_char_idx(
     &mut self,
     line_idx: usize,
@@ -459,6 +459,7 @@ impl Text {
     }
   }
 
+  #[cfg(test)]
   fn dbg_print_textline(
     &mut self,
     line_idx: usize,
