@@ -29,7 +29,7 @@ async fn test_timeout1() -> IoResult<()> {
 
   let mut event_loop = make_event_loop();
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(&mocked_events)).await?;
+  event_loop.mock_run(MockReader::new(mocked_events)).await?;
   event_loop.shutdown()?;
 
   Ok(())
