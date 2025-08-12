@@ -45,6 +45,7 @@ impl MockReader {
 
   pub async fn next(&mut self) -> Option<IoResult<Event>> {
     if self.idx >= self.events.len() {
+      trace!("Tick CTRL-D {}", self.idx);
       tokio::time::sleep(INTERVAL_MILLIS).await;
       Some(Ok(CTRL_D.clone()))
     } else {
