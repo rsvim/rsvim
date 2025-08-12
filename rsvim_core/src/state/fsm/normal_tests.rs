@@ -598,9 +598,9 @@ mod tests_raw_cursor_move_x_by {
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
@@ -904,9 +904,9 @@ mod tests_raw_cursor_move_by {
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
@@ -1161,9 +1161,9 @@ mod tests_raw_cursor_move_to {
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
@@ -1421,9 +1421,9 @@ mod tests_raw_window_scroll_y_by {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -2439,9 +2439,9 @@ mod tests_raw_window_scroll_x_by {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -3717,9 +3717,9 @@ mod tests_raw_window_scroll_to {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -4406,9 +4406,9 @@ mod tests_cursor_move {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -8638,9 +8638,9 @@ mod tests_goto_command_line_ex_mode {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -8727,9 +8727,9 @@ mod tests_goto_insert_mode {
   use crate::prelude::*;
   use crate::state::fsm::InsertStateful;
   use crate::state::{State, StateArc};
-  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::tests::log::init as test_log_init;
+  use crate::tests::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
