@@ -44,7 +44,7 @@ impl MockReader {
     Self { events, idx: 0 }
   }
 
-  pub async fn read(&mut self) -> Option<IoResult<Event>> {
+  pub async fn next(&mut self) -> Option<IoResult<Event>> {
     if self.idx >= self.events.len() {
       tokio::time::sleep(INTERVAL_MILLIS).await;
       Some(Ok(CTRL_D.clone()))
