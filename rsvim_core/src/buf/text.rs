@@ -402,9 +402,117 @@ impl Text {
 }
 // Display Width }
 
-use crate::test::buf::{
-  dbg_print_textline, dbg_print_textline_with_absolute_char_idx,
-};
+#[cfg(test)]
+fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
+  let mut builder = String::with_capacity(bufline.len_chars());
+  for c in bufline.chars() {
+    builder.push(c);
+  }
+  builder
+}
+
+impl Text {
+  #[cfg(not(test))]
+  fn dbg_print_textline_absolutely(
+    &mut self,
+    _line_idx: usize,
+    _absolute_char_idx: usize,
+    _msg: &str,
+  ) {
+  }
+
+  #[cfg(test)]
+  fn dbg_print_textline_absolutely(
+    &mut self,
+    line_idx: usize,
+    absolute_char_idx: usize,
+    msg: &str,
+  ) {
+    trace!(
+      "{} text line:{},absolute_char:{}",
+      msg, line_idx, absolute_char_idx
+    );
+
+    match self.rope().get_line(line_idx) {
+      Some(line) => {
+        trace!("len_chars:{}", line.len_chars());
+        let start_char_on_line = self.rope().line_to_char(line_idx);
+
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in line.chars().enumerate() {
+          let w = self.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(
+            if i + start_char_on_line == absolute_char_idx {
+              '^'
+            } else {
+              ' '
+            },
+            w,
+          )
+          .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!("line not exist"),
+    }
+
+    trace!("{} whole text:", msg);
+    for i in 0..self.rope().len_lines() {
+      trace!("{i}:{:?}", _ropeline_to_string(&self.rope().line(i)));
+    }
+  }
+
+  #[cfg(not(test))]
+  fn dbg_print_textline(
+    &mut self,
+    _line_idx: usize,
+    _char_idx: usize,
+    _msg: &str,
+  ) {
+  }
+
+  #[cfg(test)]
+  fn dbg_print_textline(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    msg: &str,
+  ) {
+    trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
+
+    match self.rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!("len_chars:{}", bufline.len_chars());
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = self.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String =
+            std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w)
+              .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!("line not exist"),
+    }
+
+    trace!("{}, whole buffer:", msg);
+    for i in 0..self.rope().len_lines() {
+      trace!("{i}:{:?}", _ropeline_to_string(&self.rope().line(i)));
+    }
+  }
+}
 
 // Edit {
 impl Text {
@@ -427,8 +535,7 @@ impl Text {
           self.retain_cached_lines(|line_idx, _column_idx| {
             *line_idx < inserted_line_idx
           });
-          dbg_print_textline_with_absolute_char_idx(
-            self,
+          self.dbg_print_textline_absolutely(
             inserted_line_idx,
             buffer_len_chars,
             "Eol appended(non-empty)",
@@ -440,8 +547,7 @@ impl Text {
           .rope_mut()
           .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
-        dbg_print_textline_with_absolute_char_idx(
-          self,
+        self.dbg_print_textline_absolutely(
           0_usize,
           buffer_len_chars,
           "Eol appended(empty)",
@@ -472,7 +578,7 @@ impl Text {
     let absolute_line_idx = self.rope.line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
-    dbg_print_textline(self, line_idx, char_idx, "Before insert");
+    self.dbg_print_textline(line_idx, char_idx, "Before insert");
 
     self
       .rope_mut()
@@ -511,8 +617,7 @@ impl Text {
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
-    dbg_print_textline(
-      self,
+    self.dbg_print_textline(
       line_idx_after_inserted,
       char_idx_after_inserted,
       "After inserted",
@@ -596,7 +701,7 @@ impl Text {
     let cursor_char_absolute_pos_before_delete =
       self.rope.line_to_char(line_idx) + char_idx;
 
-    dbg_print_textline(self, line_idx, char_idx, "Before delete");
+    self.dbg_print_textline(line_idx, char_idx, "Before delete");
 
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
@@ -652,8 +757,7 @@ impl Text {
     // Append eol at file end if it doesn't exist.
     self.append_eol_at_end_if_not_exist();
 
-    dbg_print_textline(
-      self,
+    self.dbg_print_textline(
       cursor_line_idx_after_deleted,
       cursor_char_idx_after_deleted,
       "After deleted",

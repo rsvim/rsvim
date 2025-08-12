@@ -3,3 +3,6 @@
 //! See MDN javascript documents: <https://developer.mozilla.org/en-US/>
 
 pub mod timeout;
+
+#[cfg(test)]
+mod timeout_tests;

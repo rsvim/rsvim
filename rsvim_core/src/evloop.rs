@@ -17,7 +17,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
-use writer::{StdoutWriter, StdoutWriterValue};
+use writer::{StdoutWritable, StdoutWriterValue};
 
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
@@ -26,6 +26,13 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
+
+#[cfg(test)]
+use crate::test::evloop::MockReader;
+#[cfg(test)]
+use bitflags::bitflags_match;
+#[cfg(test)]
+use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 
 pub mod msg;
 pub mod task;
@@ -110,11 +117,54 @@ pub struct EventLoop {
   pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
+#[cfg(test)]
+fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
+  match event {
+    Some(Ok(Event::Key(key_event))) => {
+      if key_event.code == KeyCode::Char('d')
+        && key_event.kind == KeyEventKind::Press
+      {
+        bitflags_match!(key_event.modifiers, {
+          KeyModifiers::CONTROL => true,
+          _ => false
+        })
+      } else {
+        false
+      }
+    }
+    _ => false,
+  }
+}
+
 impl EventLoop {
-  /// Make new event loop.
-  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+  #[allow(clippy::type_complexity)]
+  pub fn _internal_new(
+    cols: u16,
+    rows: u16,
+    cli_opts: &CliOptions,
+  ) -> IoResult<(
+    /* startup_moment */ Instant,
+    /* startup_unix_epoch */ u128,
+    /* canvas */ CanvasArc,
+    /* tree */ TreeArc,
+    /* state */ StateArc,
+    /* stateful_machine */ StatefulValue,
+    /* buffers */ BuffersManagerArc,
+    /* contents */ TextContentsArc,
+    /* writer */ StdoutWriterValue,
+    /* cancellation_token */ CancellationToken,
+    /* detached_tracker */ TaskTracker,
+    /* blocked_tracker */ TaskTracker,
+    /* worker_to_master */ Sender<WorkerToMasterMessage>,
+    /* master_from_worker */ Receiver<WorkerToMasterMessage>,
+    /* jsrt_to_master */ Sender<JsRuntimeToEventLoopMessage>,
+    /* master_from_jsrt */ Receiver<JsRuntimeToEventLoopMessage>,
+    /* master_to_jsrt */ Sender<EventLoopToJsRuntimeMessage>,
+    /* jsrt_from_master */ Receiver<EventLoopToJsRuntimeMessage>,
+    /* jsrt_tick_dispatcher */ Sender<EventLoopToJsRuntimeMessage>,
+    /* jsrt_tick_queue */ Receiver<EventLoopToJsRuntimeMessage>,
+  )> {
     // Canvas
-    let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
     let canvas = Canvas::new(canvas_size);
     let canvas = Canvas::to_arc(canvas);
@@ -167,9 +217,7 @@ impl EventLoop {
     // Channel: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
 
-    // Task Tracker
-    let detached_tracker = TaskTracker::new();
-    let blocked_tracker = TaskTracker::new();
+    // Startup time
     let startup_moment = Instant::now();
     let startup_unix_epoch = SystemTime::now()
       .duration_since(UNIX_EPOCH)
@@ -179,6 +227,62 @@ impl EventLoop {
     // State
     let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
     let stateful_machine = StatefulValue::default();
+
+    let writer = if cli_opts.headless() {
+      StdoutWriterValue::headless()
+    } else {
+      StdoutWriterValue::editor()
+    };
+
+    Ok((
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers_manager,
+      text_contents,
+      writer,
+      CancellationToken::new(),
+      TaskTracker::new(),
+      TaskTracker::new(),
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ))
+  }
+
+  /// Make new event loop.
+  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+    let (cols, rows) = crossterm::terminal::size()?;
+    let (
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ) = Self::_internal_new(cols, rows, &cli_opts)?;
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -190,16 +294,10 @@ impl EventLoop {
       jsrt_from_master,
       cli_opts.clone(),
       tree.clone(),
-      buffers_manager.clone(),
-      text_contents.clone(),
+      buffers.clone(),
+      contents.clone(),
       state.clone(),
     );
-
-    let writer = if cli_opts.headless() {
-      StdoutWriterValue::headless()
-    } else {
-      StdoutWriterValue::editor()
-    };
 
     Ok(EventLoop {
       startup_moment,
@@ -209,10 +307,78 @@ impl EventLoop {
       tree,
       state,
       stateful_machine,
-      buffers: buffers_manager,
-      contents: text_contents,
+      buffers,
+      contents,
       writer,
-      cancellation_token: CancellationToken::new(),
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      js_runtime,
+      worker_to_master,
+      master_from_worker,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    })
+  }
+
+  #[cfg(test)]
+  /// Make new event loop for testing.
+  pub fn new_without_snapshot(
+    terminal_columns: u16,
+    terminal_rows: u16,
+    cli_opts: CliOptions,
+  ) -> IoResult<Self> {
+    let (
+      startup_moment,
+      startup_unix_epoch,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      worker_to_master,
+      master_from_worker,
+      jsrt_to_master,
+      master_from_jsrt,
+      master_to_jsrt,
+      jsrt_from_master,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
+    ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
+
+    // Js Runtime
+    let js_runtime = JsRuntime::new_without_snapshot(
+      JsRuntimeOptions::default(),
+      startup_moment,
+      startup_unix_epoch,
+      jsrt_to_master,
+      jsrt_from_master,
+      cli_opts.clone(),
+      tree.clone(),
+      buffers.clone(),
+      contents.clone(),
+      state.clone(),
+    );
+
+    Ok(EventLoop {
+      startup_moment,
+      startup_unix_epoch,
+      cli_opts,
+      canvas,
+      tree,
+      state,
+      stateful_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
       detached_tracker,
       blocked_tracker,
       js_runtime,
@@ -444,6 +610,44 @@ impl EventLoop {
       tokio::select! {
         // Receive keyboard/mouse events
         event = reader.next() => {
+          self.process_event(event).await;
+        }
+        // Receive notification from workers => master
+        worker_msg = self.master_from_worker.recv() => {
+          self.process_worker_notify(worker_msg).await;
+        }
+        // Receive notification from js runtime => master
+        js_req = self.master_from_jsrt.recv() => {
+            self.process_js_runtime_request(js_req).await;
+        }
+        js_resp = self.jsrt_tick_queue.recv() => {
+            self.process_js_runtime_response(js_resp).await;
+        }
+        // Receive cancellation notify
+        _ = self.cancellation_token.cancelled() => {
+          self.process_cancellation_notify().await;
+          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+          break;
+        }
+      }
+
+      // Flush logic UI to terminal, i.e. print UI to stdout
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))?;
+    }
+
+    Ok(())
+  }
+
+  #[cfg(test)]
+  pub async fn mock_run(&mut self, mut reader: MockReader) -> IoResult<()> {
+    loop {
+      tokio::select! {
+        // Receive mocked keyboard/mouse events
+        event = reader.next() => {
+          if is_ctrl_d(&event) {
+            break;
+          }
           self.process_event(event).await;
         }
         // Receive notification from workers => master

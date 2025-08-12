@@ -72,10 +72,10 @@ impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
-    trace!(
-      "draw, actual shape:{:?}, top-left pos:{:?}",
-      actual_shape, pos
-    );
+    // trace!(
+    //   "draw, actual shape:{:?}, top-left pos:{:?}",
+    //   actual_shape, pos
+    // );
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,

@@ -4,19 +4,13 @@ use std::path::Path;
 
 #[test]
 fn cli_opt1() {
-  let to_osstr = |osstrs: Vec<&str>| {
-    osstrs
-      .iter()
-      .map(|s| std::ffi::OsString::from(s.to_string()))
-      .collect::<Vec<_>>()
-  };
-
   let input = [
-    to_osstr(vec![]),
-    to_osstr(vec!["README.md"]),
-    to_osstr(vec!["README.md", "LICENSE"]),
-    to_osstr(vec!["README.md", "LICENSE", "--help", "--version"]),
-    to_osstr(vec!["README.md", "LICENSE", "-h", "-V"]),
+    vec![],
+    vec!["README.md"],
+    vec!["README.md", "LICENSE"],
+    vec!["README.md", "LICENSE", "--help", "--version"],
+    vec!["README.md", "LICENSE", "-h", "-V"],
+    vec!["README.md", "LICENSE", "--headless"],
   ];
 
   let to_pb = |paths: Vec<&str>| {
@@ -48,6 +42,11 @@ fn cli_opt1() {
       to_pb(vec!["README.md", "LICENSE"]),
       false,
     ),
+    CliOptions::new(
+      CliSpecialOptions::empty(),
+      to_pb(vec!["README.md", "LICENSE"]),
+      true,
+    ),
   ];
 
   assert_eq!(input.len(), expects.len());
@@ -66,14 +65,7 @@ fn cli_opt1() {
 
 #[test]
 fn cli_opt2() {
-  let to_osstr = |osstrs: Vec<&str>| {
-    osstrs
-      .iter()
-      .map(|s| std::ffi::OsString::from(s.to_string()))
-      .collect::<Vec<_>>()
-  };
-
-  let input = [to_osstr(vec!["--ex"]), to_osstr(vec!["--v"])];
+  let input = [vec!["--ex"], vec!["--v"]];
 
   for i in input {
     let actual = CliOptions::from_args(&i);

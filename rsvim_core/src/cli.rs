@@ -2,6 +2,7 @@
 
 use crate::js::v8_version;
 
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
@@ -119,6 +120,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   let mut version: bool = false;
   let mut short_help: bool = false;
   let mut long_help: bool = false;
+  let mut headless: bool = false;
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
@@ -132,6 +134,9 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
       Short('V') | Long("version") => {
         version = true;
       }
+      Long("headless") => {
+        headless = true;
+      }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
       }
@@ -142,7 +147,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   Ok(CliOptions {
     special_opts: CliSpecialOptions::new(version, short_help, long_help),
     file,
-    headless: false,
+    headless,
   })
 }
 
@@ -151,7 +156,15 @@ impl CliOptions {
     parse(lexopt::Parser::from_env())
   }
 
-  pub fn from_args(
+  pub fn from_args<I>(args: I) -> Result<Self, lexopt::Error>
+  where
+    I: IntoIterator,
+    I::Item: Into<OsString>,
+  {
+    parse(lexopt::Parser::from_args(args))
+  }
+
+  pub fn from_string_args(
     args: &Vec<std::ffi::OsString>,
   ) -> Result<Self, lexopt::Error> {
     parse(lexopt::Parser::from_args(args))
