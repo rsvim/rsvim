@@ -45,7 +45,7 @@ impl MockReader {
 
   pub async fn next(&mut self) -> Option<IoResult<Event>> {
     if self.idx >= self.events.len() {
-      trace!("Tick final event[{}]: CTRL_D {CTRL_D:?}", self.idx);
+      trace!("Send final mock event[{}]: CTRL_D {CTRL_D:?}", self.idx);
       tokio::time::sleep(INTERVAL_MILLIS).await;
       Some(Ok(CTRL_D.clone()))
     } else {
@@ -53,7 +53,7 @@ impl MockReader {
       let next_event = &self.events[i];
       self.idx += 1;
 
-      trace!("Tick event[{i}]: {next_event:?}");
+      trace!("Send mock event[{i}]: {next_event:?}");
       match next_event {
         MockEvent::Event(e) => {
           tokio::time::sleep(INTERVAL_MILLIS).await;
