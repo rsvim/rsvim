@@ -10,9 +10,9 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
-use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-use crate::tests::log::init as test_log_init;
-use crate::tests::tree::{
+use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+use crate::test::log::init as test_log_init;
+use crate::test::tree::{
   make_tree_with_buffers, make_tree_with_buffers_cmdline,
 };
 use crate::ui::canvas::{Canvas, CanvasArc};
