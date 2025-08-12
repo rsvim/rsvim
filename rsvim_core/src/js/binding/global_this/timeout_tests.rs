@@ -1,19 +1,15 @@
-use super::timeout::*;
-
 use crate::prelude::*;
 use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
-use std::fs;
-use std::path::Path;
 use std::time::Duration;
 
 #[tokio::test]
 async fn test_timeout1() -> IoResult<()> {
   test_log_init();
 
-  let tp = TempPathCfg::create();
+  let _tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(200))];
   let src: &str = r#"

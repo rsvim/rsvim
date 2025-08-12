@@ -39,7 +39,7 @@ pub struct TempPathCfg {
   saved_xdg_cache_home: Option<Result<String, VarError>>,
   saved_xdg_data_home: Option<Result<String, VarError>>,
 
-  sequential_guard: MutexGuard<'static, ()>,
+  _sequential_guard: MutexGuard<'static, ()>,
 }
 
 impl TempPathCfg {
