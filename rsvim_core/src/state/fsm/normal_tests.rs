@@ -113,10 +113,10 @@ pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn assert_viewport_scroll(
+pub fn assert_viewport(
   buffer: BufferArc,
   actual: &Viewport,
-  expect: &Vec<&str>,
+  expect_rows: &Vec<&str>,
   expect_start_line: usize,
   expect_end_line: usize,
   expect_start_fills: &BTreeMap<usize, usize>,
@@ -134,8 +134,8 @@ pub fn assert_viewport_scroll(
   for (k, v) in actual.lines().iter() {
     info!("actual line[{:?}]: {:?}", k, v);
   }
-  for (i, e) in expect.iter().enumerate() {
-    info!("expect line[{}]:{:?}", i, e);
+  for (i, e) in expect_rows.iter().enumerate() {
+    info!("expect rows[{}]:{:?}", i, e);
   }
   assert_eq!(expect_start_fills.len(), expect_end_fills.len());
   for (k, start_v) in expect_start_fills.iter() {
@@ -232,9 +232,9 @@ pub fn assert_viewport_scroll(
       }
       info!(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect[*r as usize]
+        r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize]);
     }
   }
 }
@@ -1469,7 +1469,7 @@ mod tests_raw_window_scroll_y_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1500,7 +1500,7 @@ mod tests_raw_window_scroll_y_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1566,7 +1566,7 @@ mod tests_raw_window_scroll_y_by {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1607,7 +1607,7 @@ mod tests_raw_window_scroll_y_by {
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1667,7 +1667,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1708,7 +1708,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1766,7 +1766,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1805,7 +1805,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1863,7 +1863,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1901,7 +1901,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1931,7 +1931,7 @@ mod tests_raw_window_scroll_y_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1961,7 +1961,7 @@ mod tests_raw_window_scroll_y_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1999,7 +1999,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2037,7 +2037,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2075,7 +2075,7 @@ mod tests_raw_window_scroll_y_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2140,7 +2140,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2186,7 +2186,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2251,7 +2251,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2297,7 +2297,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2343,7 +2343,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(9, 0), (10, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2373,7 +2373,7 @@ mod tests_raw_window_scroll_y_by {
       let expect = vec!["", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(10, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2419,7 +2419,7 @@ mod tests_raw_window_scroll_y_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2487,7 +2487,7 @@ mod tests_raw_window_scroll_x_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2518,7 +2518,7 @@ mod tests_raw_window_scroll_x_by {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2584,7 +2584,7 @@ mod tests_raw_window_scroll_x_by {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2634,7 +2634,7 @@ mod tests_raw_window_scroll_x_by {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2694,7 +2694,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2735,7 +2735,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2793,7 +2793,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2834,7 +2834,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2892,7 +2892,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2933,7 +2933,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2969,7 +2969,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3004,7 +3004,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3045,7 +3045,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3103,7 +3103,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3141,7 +3141,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3179,7 +3179,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3217,7 +3217,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3255,7 +3255,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3293,7 +3293,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3331,7 +3331,7 @@ mod tests_raw_window_scroll_x_by {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3396,7 +3396,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3442,7 +3442,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3507,7 +3507,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3553,7 +3553,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3601,7 +3601,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3649,7 +3649,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3697,7 +3697,7 @@ mod tests_raw_window_scroll_x_by {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3789,7 +3789,7 @@ mod tests_raw_window_scroll_to {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3830,7 +3830,7 @@ mod tests_raw_window_scroll_to {
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3888,7 +3888,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3926,7 +3926,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3956,7 +3956,7 @@ mod tests_raw_window_scroll_to {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3986,7 +3986,7 @@ mod tests_raw_window_scroll_to {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4024,7 +4024,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4062,7 +4062,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4100,7 +4100,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4158,7 +4158,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4196,7 +4196,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4234,7 +4234,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4272,7 +4272,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4310,7 +4310,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4348,7 +4348,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4386,7 +4386,7 @@ mod tests_raw_window_scroll_to {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4583,7 +4583,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4626,7 +4626,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4715,7 +4715,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4758,7 +4758,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4847,7 +4847,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4890,7 +4890,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4963,7 +4963,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4995,7 +4995,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5028,7 +5028,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5060,7 +5060,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5092,7 +5092,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5119,7 +5119,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5145,7 +5145,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5171,7 +5171,7 @@ mod tests_cursor_move {
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5197,7 +5197,7 @@ mod tests_cursor_move {
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5275,7 +5275,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5307,7 +5307,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5340,7 +5340,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5372,7 +5372,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5404,7 +5404,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5431,7 +5431,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5457,7 +5457,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5483,7 +5483,7 @@ mod tests_cursor_move {
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5509,7 +5509,7 @@ mod tests_cursor_move {
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5587,7 +5587,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5619,7 +5619,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5652,7 +5652,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5684,7 +5684,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5716,7 +5716,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5743,7 +5743,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5769,7 +5769,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5795,7 +5795,7 @@ mod tests_cursor_move {
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5821,7 +5821,7 @@ mod tests_cursor_move {
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5899,7 +5899,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5948,7 +5948,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6035,7 +6035,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6070,7 +6070,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6105,7 +6105,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6140,7 +6140,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6216,7 +6216,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6251,7 +6251,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6286,7 +6286,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6321,7 +6321,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6356,7 +6356,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6391,7 +6391,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6426,7 +6426,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6461,7 +6461,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6496,7 +6496,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6555,7 +6555,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6595,7 +6595,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6627,7 +6627,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6659,7 +6659,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6691,7 +6691,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6723,7 +6723,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6787,7 +6787,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6827,7 +6827,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6859,7 +6859,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6891,7 +6891,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6923,7 +6923,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6955,7 +6955,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7019,7 +7019,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7059,7 +7059,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7091,7 +7091,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7123,7 +7123,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7155,7 +7155,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7187,7 +7187,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7246,7 +7246,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7286,7 +7286,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7318,7 +7318,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7350,7 +7350,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7414,7 +7414,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7454,7 +7454,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7487,7 +7487,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7519,7 +7519,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7583,7 +7583,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7623,7 +7623,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7656,7 +7656,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7688,7 +7688,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7765,7 +7765,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7800,7 +7800,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7835,7 +7835,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7870,7 +7870,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7947,7 +7947,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7982,7 +7982,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8017,7 +8017,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8052,7 +8052,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8087,7 +8087,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8122,7 +8122,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8157,7 +8157,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8192,7 +8192,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8227,7 +8227,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8287,7 +8287,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8327,7 +8327,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8359,7 +8359,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8391,7 +8391,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8423,7 +8423,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8455,7 +8455,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8514,7 +8514,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8554,7 +8554,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8586,7 +8586,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8618,7 +8618,7 @@ mod tests_cursor_move {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8726,6 +8726,7 @@ mod tests_goto_insert_mode {
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::fsm::InsertStateful;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -8739,6 +8740,7 @@ mod tests_goto_insert_mode {
     WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
+  use compact_str::ToCompactString;
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
@@ -8810,7 +8812,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -8823,7 +8828,7 @@ mod tests_goto_insert_mode {
       let expect = vec!["ShBye, ould go to insert mode\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8909,7 +8914,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -8922,7 +8930,7 @@ mod tests_goto_insert_mode {
       let expect = vec!["ShoBye, uld go to insert mode\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -9008,7 +9016,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -9021,7 +9032,7 @@ mod tests_goto_insert_mode {
       let expect = vec!["Should go to insert modeBye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -9106,7 +9117,10 @@ mod tests_goto_insert_mode {
     let stateful = InsertStateful::default();
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -9121,7 +9135,7 @@ mod tests_goto_insert_mode {
       let expect = vec![line1.as_str(), "Bye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,

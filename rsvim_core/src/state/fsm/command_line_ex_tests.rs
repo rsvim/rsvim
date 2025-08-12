@@ -110,10 +110,10 @@ pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn assert_viewport_scroll(
+pub fn assert_viewport(
   text: &Text,
   actual: &Viewport,
-  expect: &Vec<&str>,
+  expect_rows: &Vec<&str>,
   expect_start_line: usize,
   expect_end_line: usize,
   expect_start_fills: &BTreeMap<usize, usize>,
@@ -131,8 +131,8 @@ pub fn assert_viewport_scroll(
   for (k, v) in actual.lines().iter() {
     info!("actual line[{:?}]: {:?}", k, v);
   }
-  for (i, e) in expect.iter().enumerate() {
-    info!("expect line[{}]:{:?}", i, e);
+  for (i, e) in expect_rows.iter().enumerate() {
+    info!("expect row[{}]:{:?}", i, e);
   }
   assert_eq!(expect_start_fills.len(), expect_end_fills.len());
   for (k, start_v) in expect_start_fills.iter() {
@@ -228,9 +228,9 @@ pub fn assert_viewport_scroll(
       }
       info!(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect[*r as usize]
+        r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize]);
     }
   }
 }
@@ -268,6 +268,7 @@ mod tests_goto_normal_mode {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{self, State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -339,7 +340,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -365,7 +366,10 @@ mod tests_goto_normal_mode {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -386,7 +390,7 @@ mod tests_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -426,7 +430,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -510,7 +514,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -536,7 +540,10 @@ mod tests_goto_normal_mode {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -557,7 +564,7 @@ mod tests_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -597,7 +604,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -628,6 +635,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{self, State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -699,7 +707,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -727,7 +735,9 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     {
       stateful.cursor_insert(
         &data_access,
-        CompactString::new("Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7"),
+        CursorInsertPayload::Text(
+          "Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7".to_compact_string(),
+        ),
       );
 
       let tree = data_access.tree.clone();
@@ -749,7 +759,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,

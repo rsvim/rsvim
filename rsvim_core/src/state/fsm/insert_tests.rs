@@ -79,10 +79,10 @@ pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn assert_viewport_scroll(
+pub fn assert_viewport(
   buffer: BufferArc,
   actual: &Viewport,
-  expect: &Vec<&str>,
+  expect_rows: &Vec<&str>,
   expect_start_line: usize,
   expect_end_line: usize,
   expect_start_fills: &BTreeMap<usize, usize>,
@@ -100,8 +100,8 @@ pub fn assert_viewport_scroll(
   for (k, v) in actual.lines().iter() {
     info!("actual line[{:?}]: {:?}", k, v);
   }
-  for (i, e) in expect.iter().enumerate() {
-    info!("expect line[{}]:{:?}", i, e);
+  for (i, e) in expect_rows.iter().enumerate() {
+    info!("expect row[{}]:{:?}", i, e);
   }
   assert_eq!(expect_start_fills.len(), expect_end_fills.len());
   for (k, start_v) in expect_start_fills.iter() {
@@ -202,9 +202,9 @@ pub fn assert_viewport_scroll(
       }
       info!(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect[*r as usize]
+        r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize]);
     }
   }
 }
@@ -356,7 +356,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -392,7 +392,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -481,7 +481,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -517,7 +517,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -606,7 +606,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -642,7 +642,7 @@ mod tests_cursor_move {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -724,7 +724,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -758,7 +758,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -792,7 +792,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -826,7 +826,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -860,7 +860,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -894,7 +894,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -981,7 +981,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1015,7 +1015,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1049,7 +1049,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1083,7 +1083,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1117,7 +1117,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1151,7 +1151,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1238,7 +1238,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1272,7 +1272,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1306,7 +1306,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1340,7 +1340,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1374,7 +1374,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1408,7 +1408,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1490,7 +1490,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1524,7 +1524,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1558,7 +1558,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1592,7 +1592,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1626,7 +1626,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1660,7 +1660,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1747,7 +1747,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1781,7 +1781,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1815,7 +1815,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1849,7 +1849,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1883,7 +1883,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -1917,7 +1917,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2004,7 +2004,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2038,7 +2038,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2072,7 +2072,7 @@ mod tests_cursor_move {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2106,7 +2106,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2140,7 +2140,7 @@ mod tests_cursor_move {
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2174,7 +2174,7 @@ mod tests_cursor_move {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2192,6 +2192,7 @@ mod tests_insert_text {
   use super::*;
 
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -2254,7 +2255,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -2286,7 +2290,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2347,7 +2351,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2376,7 +2380,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
@@ -2408,7 +2415,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2485,7 +2492,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -2517,7 +2527,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2578,7 +2588,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2607,7 +2617,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
@@ -2639,7 +2652,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2716,7 +2729,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye, ".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -2748,7 +2764,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2809,7 +2825,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2838,7 +2854,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(" Go!".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
@@ -2870,7 +2889,7 @@ mod tests_insert_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2961,7 +2980,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -2990,7 +3009,10 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      stateful.cursor_insert(&data_access, CompactString::new("a"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3013,7 +3035,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3102,7 +3124,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3130,7 +3152,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3153,7 +3175,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3181,7 +3203,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3197,7 +3219,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3243,7 +3265,7 @@ mod tests_insert_text {
         vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3271,7 +3293,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3287,7 +3309,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3311,7 +3333,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3332,7 +3357,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3420,7 +3445,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3448,7 +3473,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3471,7 +3496,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3499,7 +3524,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3515,7 +3540,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3561,7 +3586,7 @@ mod tests_insert_text {
         vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3589,7 +3614,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3610,7 +3635,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3634,7 +3659,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3655,7 +3683,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3743,7 +3771,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3771,7 +3799,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3794,7 +3822,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3822,7 +3850,7 @@ mod tests_insert_text {
       let text2 = CompactString::new(format!(
         "Insert two lines again!{buf_eol}There's no line-break"
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -3838,7 +3866,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3884,7 +3912,7 @@ mod tests_insert_text {
         vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3912,7 +3940,7 @@ mod tests_insert_text {
       let text5 = CompactString::new(format!(
         "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
-      stateful.cursor_insert(&data_access, text5);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text5));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3928,7 +3956,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -3952,7 +3980,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, "Insert 4th".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Insert 4th".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -3973,7 +4004,7 @@ mod tests_insert_text {
         vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4029,7 +4060,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, "Hi".to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hi".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4044,7 +4078,7 @@ mod tests_insert_text {
       let expect = vec![l0.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4103,7 +4137,10 @@ mod tests_insert_text {
       let buf_eol = lock!(buf).options().end_of_line();
       let line1 = format!("Hi{buf_eol}");
 
-      stateful.cursor_insert(&data_access, line1.to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(line1.to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4116,7 +4153,7 @@ mod tests_insert_text {
       let expect = vec![line1.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4179,7 +4216,10 @@ mod tests_insert_text {
       let buf_eol = lock!(buf).options().end_of_line();
       let buf_eol = format!("{buf_eol}");
 
-      stateful.cursor_insert(&data_access, buf_eol.to_compact_string());
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text(buf_eol.to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -4192,7 +4232,7 @@ mod tests_insert_text {
       let expect = vec![buf_eol.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4263,7 +4303,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -4284,7 +4327,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4330,7 +4373,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4355,7 +4398,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4376,7 +4422,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4401,7 +4447,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4420,7 +4469,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4466,7 +4515,7 @@ mod tests_insert_text {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4491,7 +4540,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -4510,7 +4562,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4554,7 +4606,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4579,7 +4631,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -4598,7 +4653,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4678,7 +4733,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -4699,7 +4757,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4745,7 +4803,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4770,7 +4828,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4791,7 +4852,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4816,7 +4877,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -4835,7 +4899,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4881,7 +4945,7 @@ mod tests_insert_text {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4906,7 +4970,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -4925,7 +4992,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4969,7 +5036,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -4994,7 +5061,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5013,7 +5083,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5093,7 +5163,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5114,7 +5187,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5160,7 +5233,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5185,7 +5258,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5206,7 +5282,7 @@ mod tests_insert_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5231,7 +5307,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Go!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Go!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5250,7 +5329,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5296,7 +5375,7 @@ mod tests_insert_text {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5321,7 +5400,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5340,7 +5422,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5384,7 +5466,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5409,7 +5491,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5428,7 +5513,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5486,7 +5571,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("a"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("a".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5500,7 +5588,7 @@ mod tests_insert_text {
       let expect = vec![a.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5558,7 +5646,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("b"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("b".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5572,7 +5663,7 @@ mod tests_insert_text {
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5630,7 +5721,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("这个"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("这个".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5644,7 +5738,46 @@ mod tests_insert_text {
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-2
+    {
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 3);
+      assert_eq!(actual1.row_idx(), 1);
+      assert_eq!(actual1.column_idx(), 8);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let l2 = format!("\t{buf_eol}");
+      let expect = vec!["这个", l2.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5714,7 +5847,10 @@ mod tests_insert_text {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Hello, "));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Hello, ".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
@@ -5733,7 +5869,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5777,7 +5913,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5802,7 +5938,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("World!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("World!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5821,7 +5960,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5846,8 +5985,10 @@ mod tests_insert_text {
 
     // Insert-4
     {
-      stateful
-        .cursor_insert(&data_access, CompactString::new("Let's go further!"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Let's go further!".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
@@ -5866,7 +6007,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5912,7 +6053,7 @@ mod tests_insert_text {
         vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -5937,7 +6078,10 @@ mod tests_insert_text {
 
     // Insert-6
     {
-      stateful.cursor_insert(&data_access, CompactString::new("DDDDDDDDDD"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("DDDDDDDDDD".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -5956,7 +6100,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6000,7 +6144,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6025,7 +6169,10 @@ mod tests_insert_text {
 
     // Insert-8
     {
-      stateful.cursor_insert(&data_access, CompactString::new("abc"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("abc".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 7);
@@ -6044,7 +6191,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6119,7 +6266,7 @@ mod tests_insert_text {
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -6136,7 +6283,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6215,7 +6362,7 @@ mod tests_insert_text {
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -6232,7 +6379,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6277,7 +6424,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6306,7 +6453,10 @@ mod tests_insert_text {
 
     // Insert-3
     {
-      stateful.cursor_insert(&data_access, CompactString::new("你好，Rsvim！"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("你好，Rsvim！".to_compact_string()),
+      );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
@@ -6322,7 +6472,7 @@ mod tests_insert_text {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6450,7 +6600,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6511,7 +6661,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6572,7 +6722,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6633,7 +6783,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6685,7 +6835,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6737,7 +6887,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6789,7 +6939,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6841,7 +6991,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6893,7 +7043,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -6947,7 +7097,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7001,7 +7151,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7110,7 +7260,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7171,7 +7321,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7232,7 +7382,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7293,7 +7443,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7345,7 +7495,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7397,7 +7547,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7449,7 +7599,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7501,7 +7651,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7553,7 +7703,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7607,7 +7757,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7661,7 +7811,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7770,7 +7920,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7831,7 +7981,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7892,7 +8042,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -7953,7 +8103,7 @@ mod tests_delete_text {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8005,7 +8155,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8057,7 +8207,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8109,7 +8259,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8161,7 +8311,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8213,7 +8363,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8267,7 +8417,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8321,7 +8471,7 @@ mod tests_delete_text {
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8395,7 +8545,7 @@ mod tests_delete_text {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
@@ -8469,7 +8619,7 @@ mod tests_delete_text {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         buf.clone(),
         &viewport,
         &expect,

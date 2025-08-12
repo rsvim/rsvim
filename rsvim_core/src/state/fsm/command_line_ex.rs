@@ -4,7 +4,7 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::{Operation, cursor_ops};
+use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::{
@@ -33,8 +33,11 @@ impl CommandLineExStateful {
             KeyCode::Right => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
-            KeyCode::Char(c) => {
-              Some(Operation::CursorInsert(c.to_compact_string()))
+            KeyCode::Char(c) => Some(Operation::CursorInsert(
+              CursorInsertPayload::Text(c.to_compact_string()),
+            )),
+            KeyCode::Tab => {
+              Some(Operation::CursorInsert(CursorInsertPayload::Tab))
             }
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
             KeyCode::Delete => Some(Operation::CursorDelete(1)),
@@ -208,7 +211,7 @@ impl CommandLineExStateful {
   pub fn cursor_insert(
     &self,
     data_access: &StatefulDataAccess,
-    payload: CompactString,
+    payload: CursorInsertPayload,
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -216,6 +219,12 @@ impl CommandLineExStateful {
     let cmdline_id = tree.command_line_id().unwrap();
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+
+    let payload = match payload {
+      CursorInsertPayload::Text(c) => c,
+      CursorInsertPayload::Tab => '\t'.to_compact_string(),
+      _ => unreachable!(),
+    };
 
     cursor_ops::cursor_insert(
       &mut tree,

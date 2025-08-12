@@ -65,7 +65,7 @@ pub enum Operation {
   GotoNormalMode,
 
   /// Insert text at cursor.
-  CursorInsert(/* text */ CompactString),
+  CursorInsert(/* text */ CursorInsertPayload),
 
   /// Delete N-chars text, to the left of cursor if negative, to the right of cursor if positive.
   CursorDelete(/* N-chars */ isize),
@@ -97,4 +97,15 @@ pub enum GotoInsertModeVariant {
 
   /// Create a new line and move cursor to next line
   NewLine,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum CursorInsertPayload {
+  Text(CompactString),
+
+  // End-of-line
+  Eol,
+
+  // Tab
+  Tab,
 }
