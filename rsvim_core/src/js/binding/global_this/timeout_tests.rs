@@ -12,13 +12,13 @@ async fn test_timeout1() -> IoResult<()> {
 
   let tp = TempPathCfg::create();
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(500))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  // Set timeout for 100 milliseconds.
+  // Set timeout for 10 milliseconds.
   const timerId = setTimeout(() => {
     Rsvim.opt.wrap = false;
     Rsvim.opt.lineBreak = true;
-  }, 100);
+  }, 10);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
