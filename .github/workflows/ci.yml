@@ -114,7 +114,7 @@ jobs:
       - name: Cargo nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
-          cargo llvm-cov nextest --all-features --workspace --ignore-filename-regex '_tests.rs|(test/*.rs)' --lcov --output-path lcov.info
+          cargo llvm-cov nextest --all-features --workspace -vv --ignore-filename-regex '_tests.rs|(test/*.rs)' --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
