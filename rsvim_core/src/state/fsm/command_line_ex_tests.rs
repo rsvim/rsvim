@@ -110,7 +110,7 @@ pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn assert_viewport_scroll(
+pub fn assert_viewport(
   text: &Text,
   actual: &Viewport,
   expect: &Vec<&str>,
@@ -339,7 +339,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -386,7 +386,7 @@ mod tests_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -426,7 +426,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -510,7 +510,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -557,7 +557,7 @@ mod tests_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -597,7 +597,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -699,7 +699,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
@@ -749,7 +749,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
+      assert_viewport(
         lock!(contents).command_line_content(),
         &viewport,
         &expect,
