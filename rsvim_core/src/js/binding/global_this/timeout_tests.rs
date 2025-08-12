@@ -32,9 +32,27 @@ async fn test_timeout1() -> IoResult<()> {
   }
 
   let mut event_loop = make_event_loop();
+
+  // Before evaluating javascript configs
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+  }
+
   event_loop.initialize()?;
   event_loop.mock_run(MockReader::new(mocked_events)).await?;
   event_loop.shutdown()?;
+
+  {
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert!(!global_local_options.wrap());
+    assert!(global_local_options.line_break());
+  }
 
   Ok(())
 }
