@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::test::constant::TempPathCfg;
-use crate::test::evloop::*;
-use crate::test::log::init as test_log_init;
+use crate::tests::constant::TempPathCfg;
+use crate::tests::evloop::*;
+use crate::tests::log::init as test_log_init;
 
 use std::io::Write;
 use std::time::Duration;

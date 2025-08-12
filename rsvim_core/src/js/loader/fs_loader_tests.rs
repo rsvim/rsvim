@@ -2,7 +2,7 @@ use super::fs_loader::*;
 
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
-use crate::test::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 
 use assert_fs::prelude::*;
 use std::fs;
