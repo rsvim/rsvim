@@ -1,7 +1,12 @@
+use parking_lot::{Mutex, MutexGuard};
 use std::env::VarError;
 use std::ffi::OsStr;
 
-use parking_lot::{Mutex, MutexGuard};
+static GLOBAL_SEQUENTIAL_LOCK: Mutex<()> = Mutex::new(());
+
+pub fn acquire_sequential_guard() -> MutexGuard<'static, ()> {
+  GLOBAL_SEQUENTIAL_LOCK.lock()
+}
 
 fn set_env_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(
   name: K,
@@ -36,8 +41,6 @@ pub struct TempPathCfg {
 
   sequential_guard: MutexGuard<'static, ()>,
 }
-
-static GLOBAL_SEQUENTIAL_LOCK: Mutex<()> = Mutex::new(());
 
 impl TempPathCfg {
   pub fn create() -> Self {
