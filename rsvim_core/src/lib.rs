@@ -26,4 +26,4 @@ mod constant_tests;
 #[cfg(test)]
 mod js_tests;
 #[cfg(test)]
-pub mod test;
+pub mod tests;
