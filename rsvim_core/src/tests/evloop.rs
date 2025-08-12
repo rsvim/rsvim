@@ -36,6 +36,7 @@ const CTRL_D: Event = Event::Key(KeyEvent::new_with_kind(
 
 const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
 
+#[derive(Debug)]
 struct SharedWaker {
   pub waker: Option<Waker>,
 }
