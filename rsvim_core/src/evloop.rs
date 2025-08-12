@@ -118,10 +118,10 @@ pub struct EventLoop {
 }
 
 #[cfg(test)]
-fn is_ctrl_c(event: &Option<IoResult<Event>>) -> bool {
+fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
     Some(Ok(Event::Key(key_event))) => {
-      if key_event.code == KeyCode::Char('c')
+      if key_event.code == KeyCode::Char('d')
         && key_event.kind == KeyEventKind::Press
       {
         bitflags_match!(key_event.modifiers, {
@@ -639,7 +639,7 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
-          if is_ctrl_c(&event) {
+          if is_ctrl_d(&event) {
             break;
           }
           self.process_event(event).await;
