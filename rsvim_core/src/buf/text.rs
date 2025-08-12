@@ -414,7 +414,7 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 #[cfg(test)]
 impl Text {
   fn dbg_print_textline_with_absolute_char_idx(
-    self,
+    &mut self,
     line_idx: usize,
     absolute_char_idx: usize,
     msg: &str,
@@ -459,7 +459,12 @@ impl Text {
     }
   }
 
-  fn dbg_print_textline(self, line_idx: usize, char_idx: usize, msg: &str) {
+  fn dbg_print_textline(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    msg: &str,
+  ) {
     trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
 
     match self.rope().get_line(line_idx) {
@@ -512,8 +517,7 @@ impl Text {
             *line_idx < inserted_line_idx
           });
           if cfg!(test) {
-            dbg_print_textline_with_absolute_char_idx(
-              self,
+            self.dbg_print_textline_with_absolute_char_idx(
               inserted_line_idx,
               buffer_len_chars,
               "Eol appended(non-empty)",
@@ -527,8 +531,7 @@ impl Text {
           .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
         if cfg!(test) {
-          dbg_print_textline_with_absolute_char_idx(
-            self,
+          self.dbg_print_textline_with_absolute_char_idx(
             0_usize,
             buffer_len_chars,
             "Eol appended(empty)",
@@ -561,7 +564,7 @@ impl Text {
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
     if cfg!(test) {
-      dbg_print_textline(self, line_idx, char_idx, "Before insert");
+      self.dbg_print_textline(line_idx, char_idx, "Before insert");
     }
 
     self
@@ -602,8 +605,7 @@ impl Text {
     self.append_eol_at_end_if_not_exist();
 
     if cfg!(test) {
-      dbg_print_textline(
-        self,
+      self.dbg_print_textline(
         line_idx_after_inserted,
         char_idx_after_inserted,
         "After inserted",
@@ -689,7 +691,7 @@ impl Text {
       self.rope.line_to_char(line_idx) + char_idx;
 
     if cfg!(test) {
-      dbg_print_textline(self, line_idx, char_idx, "Before delete");
+      self.dbg_print_textline(line_idx, char_idx, "Before delete");
     }
 
     // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
@@ -747,8 +749,7 @@ impl Text {
     self.append_eol_at_end_if_not_exist();
 
     if cfg!(test) {
-      dbg_print_textline(
-        self,
+      self.dbg_print_textline(
         cursor_line_idx_after_deleted,
         cursor_char_idx_after_deleted,
         "After deleted",
