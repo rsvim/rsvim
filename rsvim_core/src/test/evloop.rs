@@ -10,10 +10,10 @@ use std::sync::mpsc::{Receiver, channel};
 use std::task::{Poll, Waker};
 use std::time::Duration;
 
-pub fn make_event_loop() -> EventLoop {
+pub fn make_event_loop(cols: u16, rows: u16) -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
 
-  EventLoop::new_without_snapshot(cli_opts).unwrap()
+  EventLoop::new_without_snapshot(cols, rows, cli_opts).unwrap()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

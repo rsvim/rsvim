@@ -139,6 +139,8 @@ fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
 impl EventLoop {
   #[allow(clippy::type_complexity)]
   pub fn _internal_new(
+    cols: u16,
+    rows: u16
     cli_opts: &CliOptions,
   ) -> IoResult<(
     /* startup_moment */ Instant,
@@ -163,7 +165,6 @@ impl EventLoop {
     /* jsrt_tick_queue */ Receiver<EventLoopToJsRuntimeMessage>,
   )> {
     // Canvas
-    let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
     let canvas = Canvas::new(canvas_size);
     let canvas = Canvas::to_arc(canvas);
@@ -259,6 +260,7 @@ impl EventLoop {
 
   /// Make new event loop.
   pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+    let (cols, rows) = crossterm::terminal::size()?;
     let (
       startup_moment,
       startup_unix_epoch,
@@ -280,7 +282,7 @@ impl EventLoop {
       jsrt_from_master,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
-    ) = Self::_internal_new(&cli_opts)?;
+    ) = Self::_internal_new(cols, rows, &cli_opts)?;
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -323,7 +325,7 @@ impl EventLoop {
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn new_without_snapshot(cli_opts: CliOptions) -> IoResult<Self> {
+  pub fn new_without_snapshot(cols: u16, rows: u16, cli_opts: CliOptions) -> IoResult<Self> {
     let (
       startup_moment,
       startup_unix_epoch,
@@ -345,7 +347,7 @@ impl EventLoop {
       jsrt_from_master,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
-    ) = Self::_internal_new(&cli_opts)?;
+    ) = Self::_internal_new(cols, rows, &cli_opts)?;
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(
