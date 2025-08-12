@@ -4,7 +4,6 @@ use crate::prelude::*;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
-use std::thread;
 use std::time::Duration;
 
 pub fn make_event_loop() -> EventLoop {
