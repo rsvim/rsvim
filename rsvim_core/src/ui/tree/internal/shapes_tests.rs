@@ -1,13 +1,13 @@
 use super::shapes::*;
 
 use crate::prelude::*;
-use crate::test::log::init as test_log_init;
+// use crate::test::log::init as test_log_init;
 
 use std::cmp::min;
 
 #[test]
 fn make_actual_shapes1() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<IRect> = vec![
     IRect::new((0, 0), (3, 5)),
@@ -35,7 +35,7 @@ fn make_actual_shapes1() {
 
 #[test]
 fn make_actual_shapes2() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
@@ -64,7 +64,7 @@ fn make_actual_shapes2() {
 
 #[test]
 fn bound_size1() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -93,7 +93,7 @@ fn bound_size1() {
 
 #[test]
 fn bound_position1() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -125,7 +125,7 @@ fn bound_position1() {
 
 #[test]
 fn bound_shape1() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
