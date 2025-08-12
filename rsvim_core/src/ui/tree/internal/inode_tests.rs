@@ -2,7 +2,7 @@ use super::inode::*;
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::test::log::init as test_log_init;
+// use crate::test::log::init as test_log_init;
 
 use std::cell::RefCell;
 
@@ -26,7 +26,7 @@ inode_impl!(TestNode, base);
 
 #[test]
 fn new() {
-  test_log_init();
+  // test_log_init();
 
   let n1 = TestNode::new(1, IRect::new((0, 0), (0, 0)));
   let n2 = TestNode::new(2, IRect::new((1, 2), (3, 4)));
