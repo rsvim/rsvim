@@ -2,7 +2,6 @@ use super::module::*;
 
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::constant::acquire_sequential_guard;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
 
@@ -11,7 +10,6 @@ use std::io::Write;
 
 #[test]
 fn fetch1() {
-  let _guard = acquire_sequential_guard();
   test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
@@ -52,7 +50,6 @@ fn fetch1() {
 
 #[test]
 fn fetch2() {
-  let _guard = acquire_sequential_guard();
   test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
@@ -82,7 +79,6 @@ fn fetch2() {
 
 #[test]
 fn fetch_tree3() {
-  let _guard = acquire_sequential_guard();
   test_log_init();
 
   let tmpdir = TempDir::new().unwrap();
@@ -183,7 +179,6 @@ fn fetch_tree3() {
 
 #[test]
 fn fetch_tree4() {
-  let _guard = acquire_sequential_guard();
   test_log_init();
 
   let tmpdir = TempDir::new().unwrap();

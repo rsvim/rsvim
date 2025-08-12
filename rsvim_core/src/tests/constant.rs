@@ -4,9 +4,9 @@ use std::ffi::OsStr;
 
 static GLOBAL_SEQUENTIAL_LOCK: Mutex<()> = Mutex::new(());
 
-pub fn acquire_sequential_guard() -> MutexGuard<'static, ()> {
-  GLOBAL_SEQUENTIAL_LOCK.lock()
-}
+// pub fn acquire_sequential_guard() -> MutexGuard<'static, ()> {
+//   GLOBAL_SEQUENTIAL_LOCK.lock()
+// }
 
 fn set_env_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(
   name: K,
