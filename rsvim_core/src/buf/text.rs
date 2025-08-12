@@ -413,7 +413,7 @@ fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 
 impl Text {
   #[cfg(not(test))]
-  fn dbg_print_textline_with_absolute_char_idx(
+  fn dbg_print_textline_absolutely(
     &mut self,
     _line_idx: usize,
     _absolute_char_idx: usize,
@@ -422,7 +422,7 @@ impl Text {
   }
 
   #[cfg(test)]
-  fn dbg_print_textline_with_absolute_char_idx(
+  fn dbg_print_textline_absolutely(
     &mut self,
     line_idx: usize,
     absolute_char_idx: usize,
@@ -535,7 +535,7 @@ impl Text {
           self.retain_cached_lines(|line_idx, _column_idx| {
             *line_idx < inserted_line_idx
           });
-          self.dbg_print_textline_with_absolute_char_idx(
+          self.dbg_print_textline_absolutely(
             inserted_line_idx,
             buffer_len_chars,
             "Eol appended(non-empty)",
@@ -547,7 +547,7 @@ impl Text {
           .rope_mut()
           .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
-        self.dbg_print_textline_with_absolute_char_idx(
+        self.dbg_print_textline_absolutely(
           0_usize,
           buffer_len_chars,
           "Eol appended(empty)",
