@@ -99,7 +99,7 @@ pub enum GotoInsertModeVariant {
   NewLine,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CursorInsertPayload {
   Text(CompactString),
 

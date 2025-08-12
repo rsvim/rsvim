@@ -268,6 +268,7 @@ mod tests_goto_normal_mode {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{self, State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -365,7 +366,10 @@ mod tests_goto_normal_mode {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -536,7 +540,10 @@ mod tests_goto_normal_mode {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye".to_compact_string()),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -628,6 +635,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
+  use crate::state::ops::CursorInsertPayload;
   use crate::state::{self, State, StateArc};
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
@@ -727,7 +735,9 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     {
       stateful.cursor_insert(
         &data_access,
-        CompactString::new("Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7"),
+        CursorInsertPayload::Text(
+          "Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7".to_compact_string(),
+        ),
       );
 
       let tree = data_access.tree.clone();

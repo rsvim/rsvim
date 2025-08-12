@@ -7,7 +7,7 @@ use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 
-use compact_str::{CompactString, ToCompactString};
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
