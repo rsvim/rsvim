@@ -48,6 +48,8 @@ impl TempPathCfg {
       HOME, XDG_CACHE_HOME, XDG_CONFIG_HOME, XDG_DATA_HOME,
     };
 
+    let _sequential_guard = GLOBAL_SEQUENTIAL_LOCK.lock();
+
     let home_dir = assert_fs::TempDir::new().unwrap();
     let xdg_config_home = assert_fs::TempDir::new().unwrap();
     let xdg_cache_home = assert_fs::TempDir::new().unwrap();
@@ -69,7 +71,7 @@ impl TempPathCfg {
       saved_xdg_config_home: Some(saved_xdg_config_home),
       saved_xdg_cache_home: Some(saved_xdg_cache_home),
       saved_xdg_data_home: Some(saved_xdg_data_home),
-      _sequential_guard: GLOBAL_SEQUENTIAL_LOCK.lock(),
+      _sequential_guard,
     }
   }
 }
