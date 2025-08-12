@@ -140,7 +140,7 @@ impl EventLoop {
   #[allow(clippy::type_complexity)]
   pub fn _internal_new(
     cols: u16,
-    rows: u16
+    rows: u16,
     cli_opts: &CliOptions,
   ) -> IoResult<(
     /* startup_moment */ Instant,
@@ -325,7 +325,11 @@ impl EventLoop {
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn new_without_snapshot(cols: u16, rows: u16, cli_opts: CliOptions) -> IoResult<Self> {
+  pub fn new_without_snapshot(
+    cols: u16,
+    rows: u16,
+    cli_opts: CliOptions,
+  ) -> IoResult<Self> {
     let (
       startup_moment,
       startup_unix_epoch,
