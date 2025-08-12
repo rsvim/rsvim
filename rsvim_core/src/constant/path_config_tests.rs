@@ -1,9 +1,9 @@
 use super::path_config::*;
 
-use crate::test::constant::{
+use crate::tests::constant::{
   acquire_sequential_guard, restore_env_var, set_env_var,
 };
-use crate::test::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 
 use std::io::Write;
 
