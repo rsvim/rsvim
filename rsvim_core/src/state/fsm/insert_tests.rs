@@ -6348,7 +6348,7 @@ mod tests_insert_text {
         "{}\n",
         characters.iter().collect::<String>()
       ));
-      stateful.cursor_insert(&data_access, text2);
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Text(text2));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
