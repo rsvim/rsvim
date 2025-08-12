@@ -11,12 +11,14 @@ pub fn init() {
   static INITIALIZED: Once = Once::new();
   INITIALIZED.call_once(|| {
     let filter = env_filter::Builder::from_env(RSVIM_LOG).build();
+    let formatter = "%T%.3f";
 
     fern::Dispatch::new()
       .filter(move |metadata| filter.enabled(metadata))
       .format(|out, message, record| {
         out.finish(format_args!(
-          "{:<5} {}:{}| {}",
+          "{} {:<5} {}:{}| {}",
+          jiff::Zoned::now().strftime(formatter),
           record.level(),
           record.target(),
           record.line().unwrap_or(0),
