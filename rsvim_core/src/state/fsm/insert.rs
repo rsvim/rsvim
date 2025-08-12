@@ -37,6 +37,9 @@ impl InsertStateful {
             KeyCode::Char(c) => {
               Some(Operation::CursorInsert(c.to_compact_string()))
             }
+            KeyCode::Tab => {
+              Some(Operation::CursorInsert('\t'.to_compact_string()))
+            }
             KeyCode::Enter => {
               let eol = {
                 let tree = data_access.tree.clone();
