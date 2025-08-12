@@ -44,8 +44,6 @@ fn test1() {
     assert_eq!(cfg.cache_home().clone(), tp.xdg_cache_home.join("rsvim"));
     assert_eq!(cfg.data_home().clone(), tp.xdg_data_home.join("rsvim"));
   }
-
-  tp.restore();
 }
 
 #[test]
@@ -87,8 +85,6 @@ fn test2() {
     assert_eq!(cfg.cache_home().clone(), tp.xdg_cache_home.join("rsvim"));
     assert_eq!(cfg.data_home().clone(), tp.xdg_data_home.join("rsvim"));
   }
-
-  tp.restore();
 }
 
 #[test]
@@ -129,6 +125,4 @@ fn test3() {
     assert_eq!(cfg.cache_home().clone(), tp.xdg_cache_home.join("rsvim"));
     assert_eq!(cfg.data_home().clone(), tp.xdg_data_home.join("rsvim"));
   }
-
-  tp.restore();
 }

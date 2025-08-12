@@ -72,8 +72,10 @@ impl TempPathCfg {
       sequential_guard: GLOBAL_SEQUENTIAL_LOCK.lock(),
     }
   }
+}
 
-  pub fn restore(&self) {
+impl Drop for TempPathCfg {
+  fn drop(&mut self) {
     use crate::constant::path_config::{
       HOME, XDG_CACHE_HOME, XDG_CONFIG_HOME, XDG_DATA_HOME,
     };

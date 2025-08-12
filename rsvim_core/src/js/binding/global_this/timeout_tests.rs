@@ -32,7 +32,5 @@ async fn test_timeout1() -> IoResult<()> {
   event_loop.mock_run(MockReader::new(&mocked_events)).await?;
   event_loop.shutdown()?;
 
-  tp.restore();
-
   Ok(())
 }
