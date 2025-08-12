@@ -5767,7 +5767,7 @@ mod tests_insert_text {
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 2);
+      assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 1);
       assert_eq!(actual1.column_idx(), 8);
 
