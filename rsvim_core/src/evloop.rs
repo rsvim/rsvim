@@ -353,7 +353,7 @@ impl EventLoop {
       jsrt_tick_queue,
     ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
 
-    let writer = StdoutWriterValue::mock();
+    let writer = StdoutWriterValue::dev_null();
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(
