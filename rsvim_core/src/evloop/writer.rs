@@ -12,14 +12,13 @@
 //!   prints to STDOUT, which is similar to general purpose javascript-based
 //!   runtime such as node/deno.
 
-use crate::evloop::writer::editor_writer::EditorWriter;
-use crate::evloop::writer::headless_writer::HeadlessWriter;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use dev_null_writer::DevNullWriter;
+use editor_writer::EditorWriter;
+use headless_writer::HeadlessWriter;
 
-#[cfg(test)]
-use crate::tests::evloop::MockWriter;
-
+pub mod dev_null_writer;
 pub mod editor_writer;
 pub mod headless_writer;
 mod tui;
@@ -43,8 +42,7 @@ pub trait StdoutWritable {
 pub enum StdoutWriterValue {
   EditorWriter(EditorWriter),
   HeadlessWriter(HeadlessWriter),
-  #[cfg(test)]
-  MockWriter(MockWriter),
+  DevNullWriter(DevNullWriter),
 }
 
 impl StdoutWritable for StdoutWriterValue {
@@ -52,8 +50,7 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.init(),
       StdoutWriterValue::HeadlessWriter(w) => w.init(),
-      #[cfg(test)]
-      StdoutWriterValue::MockWriter(w) => w.init(),
+      StdoutWriterValue::DevNullWriter(w) => w.init(),
     }
   }
 
@@ -61,8 +58,7 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.init_complete(canvas),
       StdoutWriterValue::HeadlessWriter(w) => w.init_complete(canvas),
-      #[cfg(test)]
-      StdoutWriterValue::MockWriter(w) => w.init_complete(canvas),
+      StdoutWriterValue::DevNullWriter(w) => w.init_complete(canvas),
     }
   }
 
@@ -70,8 +66,7 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.shutdown(),
       StdoutWriterValue::HeadlessWriter(w) => w.shutdown(),
-      #[cfg(test)]
-      StdoutWriterValue::MockWriter(w) => w.shutdown(),
+      StdoutWriterValue::DevNullWriter(w) => w.shutdown(),
     }
   }
 
@@ -80,8 +75,7 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.write(canvas),
       StdoutWriterValue::HeadlessWriter(w) => w.write(canvas),
-      #[cfg(test)]
-      StdoutWriterValue::MockWriter(w) => w.write(canvas),
+      StdoutWriterValue::DevNullWriter(w) => w.write(canvas),
     }
   }
 }
@@ -95,8 +89,7 @@ impl StdoutWriterValue {
     StdoutWriterValue::HeadlessWriter(HeadlessWriter::new())
   }
 
-  #[cfg(test)]
-  pub fn mock() -> Self {
-    StdoutWriterValue::MockWriter(MockWriter::new())
+  pub fn dev_null() -> Self {
+    StdoutWriterValue::DevNullWriter(DevNullWriter::new())
   }
 }

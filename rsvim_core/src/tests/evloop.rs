@@ -115,37 +115,3 @@ impl futures::Stream for MockReader {
     }
   }
 }
-
-#[derive(Debug)]
-/// Mock Writer
-pub struct MockWriter {}
-
-impl MockWriter {
-  pub fn new() -> Self {
-    Self {}
-  }
-}
-
-impl StdoutWritable for MockWriter {
-  fn init(&self) -> IoResult<()> {
-    Ok(())
-  }
-
-  fn init_complete(&mut self, _canvas: &mut Canvas) -> IoResult<()> {
-    Ok(())
-  }
-
-  fn shutdown(&self) -> IoResult<()> {
-    Ok(())
-  }
-
-  fn write(&mut self, _canvas: &mut Canvas) -> IoResult<()> {
-    Ok(())
-  }
-}
-
-impl Default for MockWriter {
-  fn default() -> Self {
-    Self::new()
-  }
-}
