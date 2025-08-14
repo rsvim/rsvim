@@ -94,6 +94,6 @@ sourcemap = { workspace = true }
 
 [dev-dependencies]
 unicode-width = { workspace = true }
-unicode-segmentation = { workspace = true }
+# unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
