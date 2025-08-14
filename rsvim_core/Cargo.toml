@@ -88,7 +88,7 @@ swc_macros_common = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
 swc_visit_macros = { workspace = true }
-sourcemap = { workspace = true }
+# sourcemap = { workspace = true }
 
 # NOTE: Javascript dependencies }
 

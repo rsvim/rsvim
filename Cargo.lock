@@ -2383,7 +2383,6 @@ dependencies = [
  "regex",
  "ropey",
  "smallvec",
- "sourcemap",
  "swc_atoms",
  "swc_common",
  "swc_config",
@@ -2411,7 +2410,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-util",
- "unicode-segmentation",
  "unicode-width 0.2.1",
  "v8",
 ]
