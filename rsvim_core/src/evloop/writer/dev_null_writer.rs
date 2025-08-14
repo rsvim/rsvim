@@ -1,11 +1,11 @@
-//! The `/dev/null` mode writer, it eats everything.
+//! The `/dev/null` mode writer.
 
 use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 
 #[derive(Debug)]
-/// Headless mode writer, it prints to terminal command line.
+/// The `/dev/null` mode writer, it eats everything and print nothing.
 pub struct DevNullWriter {}
 
 impl DevNullWriter {
