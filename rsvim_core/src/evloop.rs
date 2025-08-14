@@ -28,7 +28,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::MockReader;
+use crate::tests::evloop::{MockReader, MockWriter};
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
@@ -325,7 +325,7 @@ impl EventLoop {
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn new_without_snapshot(
+  pub fn mock_new(
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
@@ -339,7 +339,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      writer,
+      _writer,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -352,6 +352,8 @@ impl EventLoop {
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
     ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
+
+    let writer = StdoutWriterValue::mock();
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(

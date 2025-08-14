@@ -1,6 +1,8 @@
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
+use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
+use crate::ui::canvas::Canvas;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
@@ -13,8 +15,7 @@ use std::time::Duration;
 pub fn make_event_loop(terminal_cols: u16, terminal_rows: u16) -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
 
-  EventLoop::new_without_snapshot(terminal_cols, terminal_rows, cli_opts)
-    .unwrap()
+  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -112,5 +113,39 @@ impl futures::Stream for MockReader {
       Ok(event) => Poll::Ready(Some(event)),
       _ => Poll::Pending,
     }
+  }
+}
+
+#[derive(Debug)]
+/// Mock Writer
+pub struct MockWriter {}
+
+impl MockWriter {
+  pub fn new() -> Self {
+    Self {}
+  }
+}
+
+impl StdoutWritable for MockWriter {
+  fn init(&self) -> IoResult<()> {
+    Ok(())
+  }
+
+  fn init_complete(&mut self, _canvas: &mut Canvas) -> IoResult<()> {
+    Ok(())
+  }
+
+  fn shutdown(&self) -> IoResult<()> {
+    Ok(())
+  }
+
+  fn write(&mut self, _canvas: &mut Canvas) -> IoResult<()> {
+    Ok(())
+  }
+}
+
+impl Default for MockWriter {
+  fn default() -> Self {
+    Self::new()
   }
 }

@@ -15,7 +15,12 @@
 use crate::evloop::writer::editor_writer::EditorWriter;
 use crate::evloop::writer::headless_writer::HeadlessWriter;
 use crate::prelude::*;
+#[cfg(test)]
+use crate::ui::canvas;
 use crate::ui::canvas::Canvas;
+
+#[cfg(test)]
+use crate::tests::evloop::MockWriter;
 
 pub mod editor_writer;
 pub mod headless_writer;
@@ -40,6 +45,8 @@ pub trait StdoutWritable {
 pub enum StdoutWriterValue {
   EditorWriter(EditorWriter),
   HeadlessWriter(HeadlessWriter),
+  #[cfg(test)]
+  MockWriter(MockWriter),
 }
 
 impl StdoutWritable for StdoutWriterValue {
@@ -47,6 +54,8 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.init(),
       StdoutWriterValue::HeadlessWriter(w) => w.init(),
+      #[cfg(test)]
+      StdoutWriterValue::MockWriter(w) => w.init(),
     }
   }
 
@@ -54,6 +63,8 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.init_complete(canvas),
       StdoutWriterValue::HeadlessWriter(w) => w.init_complete(canvas),
+      #[cfg(test)]
+      StdoutWriterValue::MockWriter(w) => w.init_complete(canvas),
     }
   }
 
@@ -61,6 +72,8 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.shutdown(),
       StdoutWriterValue::HeadlessWriter(w) => w.shutdown(),
+      #[cfg(test)]
+      StdoutWriterValue::MockWriter(w) => w.shutdown(),
     }
   }
 
@@ -69,6 +82,8 @@ impl StdoutWritable for StdoutWriterValue {
     match self {
       StdoutWriterValue::EditorWriter(w) => w.write(canvas),
       StdoutWriterValue::HeadlessWriter(w) => w.write(canvas),
+      #[cfg(test)]
+      StdoutWriterValue::MockWriter(w) => w.write(canvas),
     }
   }
 }
@@ -80,5 +95,10 @@ impl StdoutWriterValue {
 
   pub fn headless() -> Self {
     StdoutWriterValue::HeadlessWriter(HeadlessWriter::new())
+  }
+
+  #[cfg(test)]
+  pub fn mock() -> Self {
+    StdoutWriterValue::MockWriter(MockWriter::new())
   }
 }
