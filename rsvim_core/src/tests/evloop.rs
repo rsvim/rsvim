@@ -1,7 +1,6 @@
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
-use crate::ui::canvas::Canvas;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
