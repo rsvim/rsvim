@@ -15,8 +15,6 @@
 use crate::evloop::writer::editor_writer::EditorWriter;
 use crate::evloop::writer::headless_writer::HeadlessWriter;
 use crate::prelude::*;
-#[cfg(test)]
-use crate::ui::canvas;
 use crate::ui::canvas::Canvas;
 
 #[cfg(test)]
