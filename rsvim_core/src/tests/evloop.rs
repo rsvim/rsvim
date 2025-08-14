@@ -1,6 +1,5 @@
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
-use crate::evloop::writer::StdoutWritable;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 
