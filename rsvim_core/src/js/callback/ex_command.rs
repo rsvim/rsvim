@@ -93,14 +93,3 @@ pub fn run_command(
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
-
-/// Create a ex command.
-///
-/// NOTE: The `:js` command is builtin command, it doesn't need to create.
-pub fn create_command(
-  _scope: &mut v8::HandleScope,
-  _args: v8::FunctionCallbackArguments,
-  mut _rv: v8::ReturnValue,
-) {
-  todo!()
-}
