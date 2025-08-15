@@ -34,9 +34,9 @@ use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 pub mod binding;
+pub mod callback;
 pub mod err;
 pub mod exception;
-pub mod future;
 pub mod hook;
 pub mod loader;
 pub mod module;
