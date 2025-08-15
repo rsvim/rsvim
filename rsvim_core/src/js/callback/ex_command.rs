@@ -97,4 +97,9 @@ pub fn run_command(
 /// Create a command.
 ///
 /// NOTE: The `:js` command is builtin command, it doesn't need to create.
-pub fn create_command() {}
+pub fn create_command(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+}
