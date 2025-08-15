@@ -760,8 +760,8 @@ impl JsRuntime {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
             debug_assert!(req.source.starts_with("js"));
-            let anonymous_filename = format!("<ExCommand{}>", req.future_id);
-            self.execute_module(&anonymous_filename, Some(&req.source));
+            let _anonymous_filename = format!("<ExCommand{}>", req.future_id);
+            // self.execute_module(&anonymous_filename, Some(&req.source));
           }
         }
       }
