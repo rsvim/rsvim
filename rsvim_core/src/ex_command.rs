@@ -2,7 +2,8 @@
 //!
 //! NOTE: The word "ex command" in rsvim, it is more about the describe the
 //! product feature, i.e. when user types ":" in normal mode, then start
-//! command-line mode and input commands.
+//! command-line mode and input commands. The "ex" word is used to distinguish
+//! it from searching forward/backward in command line mode.
 
 use crate::prelude::*;
 
