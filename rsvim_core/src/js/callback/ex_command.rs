@@ -94,7 +94,7 @@ pub fn run_command(
   trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
 
-/// Create a command.
+/// Create a ex command.
 ///
 /// NOTE: The `:js` command is builtin command, it doesn't need to create.
 pub fn create_command(
