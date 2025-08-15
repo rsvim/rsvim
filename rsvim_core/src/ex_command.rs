@@ -32,7 +32,7 @@ impl ExCommand {
 
 #[derive(Debug)]
 pub struct ExCommandsManager {
-  _ex_commands: HashMap<CompactString, ExCommand>,
+  ex_commands: HashMap<CompactString, ExCommand>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
@@ -46,7 +46,7 @@ impl Default for ExCommandsManager {
 impl ExCommandsManager {
   pub fn new() -> Self {
     Self {
-      _ex_commands: HashMap::new(),
+      ex_commands: HashMap::new(),
     }
   }
 
@@ -58,7 +58,7 @@ impl ExCommandsManager {
     None
   }
 
-  pub fn get(&self, _command_line_content: CompactString) -> Option<ExCommand> {
+  pub fn get(&self, _name: CompactString) -> Option<ExCommand> {
     None
   }
 }
