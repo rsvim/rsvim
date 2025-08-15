@@ -26,7 +26,6 @@ unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
-bitflags = { workspace = true }
 lexopt = { workspace = true }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 log = { workspace = true, features = [
@@ -89,11 +88,12 @@ swc_macros_common = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
 swc_visit_macros = { workspace = true }
-sourcemap = { workspace = true }
+# sourcemap = { workspace = true }
 
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
 unicode-width = { workspace = true }
-unicode-segmentation = { workspace = true }
+# unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
+bitflags = { workspace = true }

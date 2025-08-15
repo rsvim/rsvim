@@ -15,7 +15,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("set_timeout callback:{:?}", self.future_id);
+    trace!("TimeoutFuture run:{:?}", self.future_id);
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self

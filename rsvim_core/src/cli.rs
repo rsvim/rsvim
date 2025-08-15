@@ -55,40 +55,15 @@ pub struct CliOptions {
   headless: bool,
 }
 
-const SHORT_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
-
-Usage: {RSVIM_BIN_NAME} [FILE]...
-
-Arguments:
-  [FILE]...      Edit specified file(s)
-
-Options:
-  -h, --help     Print help (see more with '--help')
-  -V, --version  Print version
-"#;
-
 // --headless (experimental)  Run in headless mode without TUI
 pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
+  const RSVIM_SHORT_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SHORT_HELP.TXT"));
+
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  SHORT_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+  RSVIM_SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
 });
-
-const LONG_HELP_TEXT: &str = r#"RSVIM - The VIM editor reinvented in Rust+TypeScript
-
-Usage: {RSVIM_BIN_NAME} [FILE]...
-
-Arguments:
-  [FILE]...
-          Edit specified file(s)
-
-Options:
-  -h, --help
-          Print help (see a summary with '-h')
-
-  -V, --version
-          Print version
-"#;
 
 // --headless (experimental)
 //     Run in headless mode without TUI. In this mode, rsvim doesn't enter
@@ -97,9 +72,12 @@ Options:
 //     internal data structures (such as buffers, windows, command-line,
 //     etc) and scripts/plugins will still be initialized
 pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
+  const RSVIM_LONG_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_LONG_HELP.TXT"));
+
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  LONG_HELP_TEXT.replace("{RSVIM_BIN_NAME}", bin_name)
+  RSVIM_LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
 });
 
 const VERSION_TEXT: &str =

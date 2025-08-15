@@ -1,0 +1,14 @@
+RSVIM - The VIM editor reinvented in Rust+TypeScript
+
+Usage: {RSVIM_BIN_NAME} [FILE]...
+
+Arguments:
+  [FILE]...
+          Edit specified file(s)
+
+Options:
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version

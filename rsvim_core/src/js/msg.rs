@@ -27,7 +27,7 @@ pub enum EventLoopToJsRuntimeMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   TimeoutResp(TimeoutResp),
 
-  /// Event loop send EX command to js runtime to run.
+  /// Event loop send ex command to js runtime to run.
   ExCommandReq(ExCommandReq),
 }
 
@@ -66,11 +66,11 @@ impl TimeoutReq {
 #[derive(Debug)]
 pub struct ExCommandReq {
   pub future_id: JsFutureId,
-  pub source: CompactString,
+  pub source: String,
 }
 
 impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, source: CompactString) -> Self {
+  pub fn new(future_id: JsFutureId, source: String) -> Self {
     ExCommandReq { future_id, source }
   }
 }
