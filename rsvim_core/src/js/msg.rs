@@ -27,7 +27,7 @@ pub enum EventLoopToJsRuntimeMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   TimeoutResp(TimeoutResp),
 
-  /// Event loop send EX command to js runtime to run.
+  /// Event loop send ex command to js runtime to run.
   ExCommandReq(ExCommandReq),
 }
 
