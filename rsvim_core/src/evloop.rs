@@ -210,12 +210,12 @@ impl EventLoop {
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
     // trigger the event loop in `tokio::select!`.
 
-    // Channel: js runtime => master
+    // Channel-1: js runtime => master
     let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => js runtime
-    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => master
+    // Channel-2: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
+    // Channel-3: master => js runtime
+    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
 
     // Startup time
     let startup_moment = Instant::now();
