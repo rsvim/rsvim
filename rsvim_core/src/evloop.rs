@@ -179,20 +179,23 @@ impl EventLoop {
     // Channel: workers => master
     let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
 
-    // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
-    // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
-    // requires Arc/Mutex (i.e. thread safe).
+    // Since there are technical limitations that we cannot use tokio APIs
+    // along with V8 engine, because V8 rust bindings are not Arc/Mutex (i.e.
+    // not thread safe), while tokio async runtime requires Arc/Mutex (i.e.
+    // thread safe).
     //
-    // We have to first send js task requests to master, let the master handles these tasks for us
-    // (in async way), then send the task results back to js runtime. These tasks are very common
-    // and low level, serve as an infrastructure layer for js world.
-    // For example:
+    // We have to first send js task requests to master, let the master handles
+    // these tasks for us (in async way), then send the task results back to js
+    // runtime. These tasks are very common and low level, serve as an
+    // infrastructure layer for js world. For example:
+    //
     // - File IO
     // - Timer
     // - Network
     // - And more...
     //
-    // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
+    // When js runtime handles `Promise` and `async` APIs, the message flow
+    // uses several channels:
     //
     // - Channel-1 `jsrt_to_master` => `master_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
     // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
@@ -206,8 +209,8 @@ impl EventLoop {
     // 4. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
     // 5. Js runtime completes all async results.
     //
-    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
-    // trigger the event loop in `tokio::select!`.
+    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
+    // they're simply for trigger the `tokio::select!` loop.
 
     // Channel-1: js runtime => master
     let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
