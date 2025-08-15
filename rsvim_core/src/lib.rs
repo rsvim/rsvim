@@ -7,7 +7,6 @@ pub mod content;
 pub mod coord;
 pub mod defaults;
 pub mod evloop;
-pub mod ex_command;
 pub mod js;
 pub mod lock;
 pub mod log;
