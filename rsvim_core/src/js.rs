@@ -36,7 +36,7 @@ use tokio::sync::mpsc::{Receiver, Sender};
 pub mod binding;
 pub mod err;
 pub mod exception;
-pub mod futures;
+pub mod future;
 pub mod hook;
 pub mod loader;
 pub mod module;

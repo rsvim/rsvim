@@ -1,4 +1,4 @@
-//! The vim command.
+//! Vim command.
 
 use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
