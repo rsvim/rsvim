@@ -204,6 +204,7 @@ impl EventLoop {
     // Step-2: Tokio event loop handles the request (read/write, timer, etc) in async way
     // Step-3: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
     // Step-4: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    // Step-5: Js runtime completes all async results.
     //
     // ```
     //
