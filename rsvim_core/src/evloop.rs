@@ -198,15 +198,13 @@ impl EventLoop {
     // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
     // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
     //
-    // ```text
+    // The dataflow follows below steps:
     //
-    // Step-1: Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
-    // Step-2: Tokio event loop handles the request (read/write, timer, etc) in async way
-    // Step-3: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
-    // Step-4: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
-    // Step-5: Js runtime completes all async results.
-    //
-    // ```
+    // 1. Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
+    // 2. Tokio event loop handles the request (read/write, timer, etc) in async way
+    // 3. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
+    // 4. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    // 5. Js runtime completes all async results.
     //
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
     // trigger the event loop in `tokio::select!`.
