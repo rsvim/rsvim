@@ -7,6 +7,7 @@ use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 
+use crate::state::ops::message_ops::may_show_message;
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
@@ -61,6 +62,7 @@ impl InsertStateful {
 
 impl Stateful for InsertStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+    may_show_message(&data_access);
     if let Some(op) = self.get_operation(&data_access) {
       return self.handle_op(data_access, op);
     }

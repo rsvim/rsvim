@@ -78,6 +78,11 @@ pub fn create_new_context<'s>(
     );
   }
 
+  // For `Rsvim.cmd`
+  {
+    set_function_to(scope, vim, "cmd_echo", global_rsvim::cmd::echo);
+  }
+
   // For `Rsvim.opt`
   {
     set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);

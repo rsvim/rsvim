@@ -31,7 +31,39 @@
  * @hideconstructor
  */
 export class Rsvim {
+  readonly cmd: RsvimCmd = new RsvimCmd();
   readonly opt: RsvimOpt = new RsvimOpt();
+}
+
+/**
+ * The `Rsvim.cmd` global object for rsvim core commands.
+ *
+ * @example
+ * ```javascript
+ * const cmd = Rsvim.cmd;
+ * ```
+ *
+ * @category Editor APIs
+ * @hideconstructor
+ */
+export class RsvimCmd {
+  /**
+   * Echo message to the command line widget.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.echo("A message to Rsvim !");
+   * ```
+   */
+  public echo(message: string) {
+    if (message === undefined || message === null) {
+      throw new Error(
+        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.cmd_echo(message);
+  }
 }
 
 /**
