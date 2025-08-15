@@ -66,11 +66,11 @@ impl TimeoutReq {
 #[derive(Debug)]
 pub struct ExCommandReq {
   pub future_id: JsFutureId,
-  pub source: CompactString,
+  pub source: String,
 }
 
 impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, source: CompactString) -> Self {
+  pub fn new(future_id: JsFutureId, source: String) -> Self {
     ExCommandReq { future_id, source }
   }
 }
