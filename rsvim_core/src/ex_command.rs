@@ -1,11 +1,11 @@
 //! Vim ex command.
 //!
-//! NOTE: The word "ex command" in rsvim, it is more about the describe the
-//! product feature, i.e. when user types ":" in normal mode, then start
-//! command-line mode and input commands. The "ex" word is used to distinguish
-//! it from searching forward/backward in command line mode.
+//! NOTE: For the word "ex command" in rsvim, it is more used to describe a
+//! product feature: When user types ":" in normal mode, starts command-line
+//! mode and input commands. The "ex" word is used to distinguish it from
+//! searching forward/backward in command line mode.
 
-use crate::js::{JsFuture, JsFutureId, JsRuntime, next_future_id};
+use crate::js::JsFutureId;
 use crate::prelude::*;
 
 use compact_str::CompactString;
@@ -22,11 +22,10 @@ pub struct ExCommand {
 }
 
 impl ExCommand {
-  pub fn new(name: CompactString) -> Self {
-    let id = next_future_id();
+  pub fn new(name: CompactString, js_callback_id: JsFutureId) -> Self {
     Self {
       name,
-      js_callback_id: id,
+      js_callback_id,
     }
   }
 }
