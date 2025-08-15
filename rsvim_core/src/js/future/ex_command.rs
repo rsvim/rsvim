@@ -1,7 +1,7 @@
 //! Vim ex command.
 
-use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
+use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::{JsFuture, JsFutureId, JsRuntime};
 use crate::prelude::*;
 
 use std::rc::Rc;
