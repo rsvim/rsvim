@@ -5,10 +5,96 @@ use crate::js::{JsFuture, JsFutureId, JsRuntime};
 use crate::prelude::*;
 
 use std::rc::Rc;
-use std::time::Duration;
 
 struct ExCommandFuture {
   future_id: JsFutureId,
   cb: Rc<v8::Global<v8::Function>>,
   params: Rc<Vec<v8::Global<v8::Value>>>,
 }
+
+impl JsFuture for ExCommandFuture {
+  fn run(&mut self, scope: &mut v8::HandleScope) {
+    trace!("ExCommandFuture run:{:?}", self.future_id);
+    let undefined = v8::undefined(scope).into();
+    let callback = v8::Local::new(scope, (*self.cb).clone());
+    let args: Vec<v8::Local<v8::Value>> = self
+      .params
+      .iter()
+      .map(|arg| v8::Local::new(scope, arg))
+      .collect();
+
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    callback.call(tc_scope, undefined, &args);
+
+    // Report if callback threw an exception.
+    if tc_scope.has_caught() {
+      let exception = tc_scope.exception().unwrap();
+      let exception = v8::Global::new(tc_scope, exception);
+      let state_rc = JsRuntime::state(tc_scope);
+      state_rc
+        .borrow_mut()
+        .exceptions
+        .capture_exception(exception);
+    }
+  }
+}
+
+/// Run a registered command.
+///
+/// NOTE: It must be registered via `create_command` API before calling it.
+pub fn run_command(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  // Get timer's callback.
+  let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
+  let callback = Rc::new(v8::Global::new(scope, callback));
+
+  // Get timer's expiration time in millis.
+  let millis = args.get(1).int32_value(scope).unwrap() as u64;
+
+  // Convert params argument (Array<Local<Value>>) to Rust vector.
+  let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
+    Ok(params) => (0..params.length()).fold(
+      Vec::<v8::Global<v8::Value>>::new(),
+      |mut acc, i| {
+        let param = params.get_index(scope, i).unwrap();
+        acc.push(v8::Global::new(scope, param));
+        acc
+      },
+    ),
+    Err(_) => vec![],
+  };
+
+  let state_rc = JsRuntime::state(scope);
+  let mut state = state_rc.borrow_mut();
+  let params = Rc::new(params);
+
+  // Return timeout's internal id.
+  let timer_id = js::next_future_id();
+  let jsrt_to_master = state.jsrt_to_master.clone();
+  let current_handle = tokio::runtime::Handle::current();
+  current_handle.spawn_blocking(move || {
+    jsrt_to_master
+      .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
+        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+      ))
+      .unwrap();
+  });
+  let timeout_cb = TimeoutFuture {
+    future_id: timer_id,
+    cb: Rc::clone(&callback),
+    params: Rc::clone(&params),
+  };
+  state.pending_futures.insert(timer_id, Box::new(timeout_cb));
+  state.timeout_handles.insert(timer_id);
+  rv.set(v8::Integer::new(scope, timer_id as i32).into());
+  trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
+}
+
+/// Create a command.
+///
+/// NOTE: The `:js` command is builtin command, it doesn't need to create.
+pub fn create_command() {}
