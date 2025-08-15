@@ -1,3 +1,3 @@
 //! Js futures.
 
-pub mod command;
+pub mod ex_command;
