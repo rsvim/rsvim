@@ -1,11 +1,9 @@
 //! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
-use std::time::Duration;
-
-use compact_str::CompactString;
-
 use crate::js::JsFutureId;
+
+use std::time::Duration;
 
 // The message JsRuntime send to EventLoop {
 
