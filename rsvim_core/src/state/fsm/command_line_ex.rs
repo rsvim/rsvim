@@ -11,7 +11,7 @@ use crate::ui::widget::command_line::{
   CommandLineIndicatorSymbol, CommandLineNode,
 };
 
-use compact_str::{CompactString, ToCompactString};
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -118,7 +118,7 @@ impl CommandLineExStateful {
   pub fn _goto_normal_mode_impl(
     &self,
     data_access: &StatefulDataAccess,
-  ) -> CompactString {
+  ) -> String {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -169,7 +169,7 @@ impl CommandLineExStateful {
       .indicator_mut()
       .set_symbol(CommandLineIndicatorSymbol::Empty);
 
-    CompactString::new(cmdline_content)
+    cmdline_content.to_string()
   }
 
   pub fn goto_normal_mode(
