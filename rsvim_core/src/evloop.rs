@@ -535,6 +535,7 @@ impl EventLoop {
           self.buffers.clone(),
           self.contents.clone(),
           self.commands.clone(),
+          self.jsrt_tick_dispatcher.clone(),
           event,
         );
 

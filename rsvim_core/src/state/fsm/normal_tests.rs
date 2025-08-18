@@ -2,16 +2,25 @@
 
 use super::normal::*;
 
+use crate::buf::opt::BufferLocalOptionsBuilder;
 use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
+use crate::buf::{BufferArc, BuffersManagerArc};
+use crate::command::{ExCommandsManager, ExCommandsManagerArc};
+use crate::content::TextContents;
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
+use crate::prelude::*;
+use crate::state::State;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
+use crate::tests::tree::make_tree_with_buffers;
 use crate::tests::tree::{
   make_tree_with_buffers, make_tree_with_buffers_cmdline,
 };
@@ -22,6 +31,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::window::WindowLocalOptionsBuilder;
 use crate::ui::widget::window::{
   WindowLocalOptions, WindowLocalOptionsBuilder,
 };
@@ -88,8 +98,7 @@ pub fn make_tree_with_cmdline(
     bufs.clone(),
     contents.clone(),
   );
-  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+  let state = State::to_arc(State::new());
   (tree, state, bufs, buf, contents)
 }
 
@@ -268,16 +277,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_raw_cursor_move_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
-
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
@@ -287,6 +286,8 @@ mod tests_raw_cursor_move_y_by {
   fn nowrap1() {
     test_log_init();
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
@@ -311,6 +312,8 @@ mod tests_raw_cursor_move_y_by {
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful_machine = NormalStateful::default();
