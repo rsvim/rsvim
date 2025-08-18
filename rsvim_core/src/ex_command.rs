@@ -61,18 +61,31 @@ impl ExCommandsManager {
     match command_line.find(char::is_whitespace) {
       Some(pos) => {
         let name = command_line.get(0..pos).unwrap().trim();
-        match self.command_ids.get(name) {
-          Some(handle_id) => {
-            let payload = command_line.get(pos..).unwrap().trim();
-            let is_js = name == JS_COMMAND_NAME;
-            Some(ExCommand {
-              name: name.to_compact_string(),
-              payload: payload.to_compact_string(),
-              is_js,
-              handle_id: *handle_id,
-            })
+        let payload = command_line.get(pos..).unwrap().trim();
+        let is_js = name == JS_COMMAND_NAME;
+        if is_js {
+          let handle_id = JS_COMMAND_HANDLE_ID;
+          debug_assert!(!self.command_ids.contains_key(name));
+          Some(ExCommand {
+            name: name.to_compact_string(),
+            payload: payload.to_compact_string(),
+            is_js,
+            handle_id,
+          })
+        } else {
+          match self.command_ids.get(name) {
+            Some(handle_id) => {
+              let handle_id = *handle_id;
+              debug_assert!(handle_id > 0);
+              Some(ExCommand {
+                name: name.to_compact_string(),
+                payload: payload.to_compact_string(),
+                is_js,
+                handle_id,
+              })
+            }
+            None => None,
           }
-          None => None,
         }
       }
       None => None,
