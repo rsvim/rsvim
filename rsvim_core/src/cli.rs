@@ -57,12 +57,12 @@ pub struct CliOptions {
 
 // --headless (experimental)  Run in headless mode without TUI
 pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
-  const RSVIM_SHORT_HELP: &str =
+  const CLI_SHORT_HELP: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
 
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  RSVIM_SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
+  CLI_SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
 });
 
 // --headless (experimental)
@@ -72,12 +72,12 @@ pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
 //     internal data structures (such as buffers, windows, command-line,
 //     etc) and scripts/plugins will still be initialized
 pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
-  const RSVIM_LONG_HELP: &str =
+  const CLI_LONG_HELP: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
 
   let exe_name = std::env::current_exe().unwrap();
   let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  RSVIM_LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
+  CLI_LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
 });
 
 const VERSION_TEXT: &str =
