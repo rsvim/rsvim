@@ -1308,8 +1308,7 @@ mod tests_raw_cursor_move_to {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -1328,11 +1327,15 @@ mod tests_raw_cursor_move_to {
         Operation::CursorMoveTo((3, 0)),
         Operation::CursorMoveTo((0, 0)),
       ];
+      let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+      let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
       let data_access = StatefulDataAccess::new(
         state.clone(),
         tree.clone(),
         bufs.clone(),
         contents.clone(),
+        cmds,
+        jsrt_tick_dispatcher,
         Event::Key(key_event),
       );
       for c in commands.iter() {
