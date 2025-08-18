@@ -22,7 +22,7 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: amannn/action-semantic-pull-request@v6
         if: ${{ github.ref != 'refs/heads/main' }}
         env:
@@ -47,7 +47,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
       - name: Check out 'current' branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: '0'
       - name: Build 'current' branch
