@@ -3,6 +3,7 @@
 
 use crate::js::JsFutureId;
 
+use compact_str::CompactString;
 use std::time::Duration;
 
 // The message JsRuntime send to EventLoop {
@@ -64,11 +65,11 @@ impl TimeoutReq {
 #[derive(Debug)]
 pub struct ExCommandReq {
   pub future_id: JsFutureId,
-  pub source: String,
+  pub source: CompactString,
 }
 
 impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, source: String) -> Self {
+  pub fn new(future_id: JsFutureId, source: CompactString) -> Self {
     ExCommandReq { future_id, source }
   }
 }
