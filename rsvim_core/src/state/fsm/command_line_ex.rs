@@ -3,7 +3,9 @@
 use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{
+  Stateful, StatefulDataAccess, StatefulValue, command_line_ex,
+};
 use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
@@ -98,17 +100,43 @@ impl CommandLineExStateful {
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
     let cmdline_content = self._goto_normal_mode_impl(data_access);
-    let state = data_access.state.clone();
-    let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
 
-    let current_handle = tokio::runtime::Handle::current();
-    current_handle.spawn_blocking(move || {
-      jsrt_tick_dispatcher
-        .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-          ExCommandReq::new(next_future_id(), cmdline_content),
-        ))
-        .unwrap();
-    });
+    let is_js_cmd = match cmdline_content.get(0..3) {
+      Some(starter) => {
+        if starter.starts_with("js") {
+          match starter.get(2..3) {
+            Some(delim) => delim.chars().all(|c| c.is_whitespace()),
+            None => false,
+          }
+        } else {
+          false
+        }
+      }
+      None => false,
+    };
+
+    if is_js_cmd {
+      match cmdline_content.get(3..) {
+        Some(payload) => {
+          if !payload.is_empty() {
+            let state = data_access.state.clone();
+            let jsrt_tick_dispatcher =
+              lock!(state).jsrt_tick_dispatcher().clone();
+
+            let payload = payload.to_compact_string();
+            let current_handle = tokio::runtime::Handle::current();
+            current_handle.spawn_blocking(move || {
+              jsrt_tick_dispatcher
+                .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+                  ExCommandReq::new(next_future_id(), payload),
+                ))
+                .unwrap();
+            });
+          }
+        }
+        None => { /* do nothing */ }
+      }
+    }
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
