@@ -330,6 +330,9 @@ mod tests_raw_cursor_move_y_by {
   fn nowrap2() {
     test_log_init();
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
+
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -363,6 +366,8 @@ mod tests_raw_cursor_move_y_by {
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful_machine = NormalStateful::default();
@@ -378,6 +383,8 @@ mod tests_raw_cursor_move_y_by {
   #[test]
   fn nowrap3() {
     test_log_init();
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
 
     let lines = vec![
       "Hello, RSVIM!\n",
@@ -412,6 +419,8 @@ mod tests_raw_cursor_move_y_by {
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -463,11 +472,15 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
