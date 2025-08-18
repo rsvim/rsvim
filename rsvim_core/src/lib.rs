@@ -2,12 +2,12 @@
 
 pub mod buf;
 pub mod cli;
+pub mod command;
 pub mod constant;
 pub mod content;
 pub mod coord;
 pub mod defaults;
 pub mod evloop;
-pub mod ex_command;
 pub mod js;
 pub mod lock;
 pub mod log;
@@ -25,5 +25,7 @@ mod cli_tests;
 mod constant_tests;
 #[cfg(test)]
 mod js_tests;
+#[cfg(test)]
+mod state_tests;
 #[cfg(test)]
 pub mod tests;

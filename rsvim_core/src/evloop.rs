@@ -2,8 +2,8 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
+use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
-use crate::ex_command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
@@ -176,6 +176,10 @@ impl EventLoop {
     // UI Tree
     let tree = Tree::to_arc(Tree::new(canvas_size));
 
+    // State
+    let state = State::to_arc(State::new());
+    let stateful_machine = StatefulValue::default();
+
     // Data backend
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
@@ -230,10 +234,6 @@ impl EventLoop {
       .duration_since(UNIX_EPOCH)
       .unwrap()
       .as_millis();
-
-    // State
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
-    let stateful_machine = StatefulValue::default();
 
     let writer = if cli_opts.headless() {
       StdoutWriterValue::headless()
@@ -534,6 +534,7 @@ impl EventLoop {
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
+          self.commands.clone(),
           event,
         );
 

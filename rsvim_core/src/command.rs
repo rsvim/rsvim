@@ -1,4 +1,4 @@
-//! Vim ex command.
+//! Ex command.
 
 use crate::js::JsHandleId;
 use crate::prelude::*;

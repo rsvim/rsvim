@@ -97,52 +97,25 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    let cmdline_content = self._goto_normal_mode_impl(data_access);
+    let ex_commands = data_access.commands.clone();
+    let ex_commands = lock!(ex_commands);
 
-    let js_cmd_payload = match cmdline_content.get(0..3) {
-      Some(starter) => {
-        if starter.starts_with("js") {
-          match starter.get(2..3) {
-            Some(delim) => {
-              if delim.chars().all(|c| c.is_whitespace()) {
-                match cmdline_content.get(3..) {
-                  Some(payload) => {}
-                  None => None,
-                }
-              } else {
-                None
-              }
-            }
-            None => None,
-          }
-        } else {
-          None
-        }
+    let cmdline_payload = self._goto_normal_mode_impl(data_access);
+    match ex_commands.parse(&cmdline_payload) {
+      Some(parsed_cmd) => {
+        let state = data_access.state.clone();
+        let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
+
+        let current_handle = tokio::runtime::Handle::current();
+        current_handle.spawn_blocking(move || {
+          jsrt_tick_dispatcher
+            .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+              ExCommandReq::new(next_handle_id(), parsed_cmd),
+            ))
+            .unwrap();
+        });
       }
-      None => None,
-    };
-
-    if js_cmd_payload {
-      match cmdline_content.get(3..) {
-        Some(payload) => {
-          if !payload.is_empty() {
-            let state = data_access.state.clone();
-            let jsrt_tick_dispatcher =
-              lock!(state).jsrt_tick_dispatcher().clone();
-
-            let payload = payload.to_compact_string();
-            let current_handle = tokio::runtime::Handle::current();
-            current_handle.spawn_blocking(move || {
-              jsrt_tick_dispatcher
-                .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-                  ExCommandReq::new(next_handle_id(), payload),
-                ))
-                .unwrap();
-            });
-          }
-        }
-        None => { /* do nothing */ }
-      }
+      None => { /* FIXME: Should print error message to command line. */ }
     }
 
     StatefulValue::NormalMode(super::NormalStateful::default())
