@@ -18,7 +18,7 @@ impl ExCommandsManager {
     }
   }
 
-  pub fn get_command_id(&self, name: &str) -> Option<&JsHandleId> {
+  pub fn get_command(&self, name: &str) -> Option<&JsHandleId> {
     self.command_ids.get(name)
   }
 
