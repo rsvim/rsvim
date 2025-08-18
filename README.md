@@ -23,11 +23,11 @@ The VIM editor reinvented in Rust+TypeScript.
 
 ## About
 
-RSVIM is an open source terminal based text editor, strives to be highly extensible by following the main features, concepts and philosophy of ([Neo](https://neovim.io/))[VIM](https://www.vim.org/), built from scratch with rust, tokio and V8 javascript engine. Meanwhile, it also tries to be:
+RSVIM is an open source terminal based text editor, strives to be highly extensible by following the main features, concepts and philosophy of ([Neo](https://neovim.io/))[VIM](https://www.vim.org/), built from scratch with [rust](https://www.rust-lang.org/), [tokio](https://tokio.rs/) and [V8](https://v8.dev/) javascript engine. Meanwhile, it also tries to be:
 
 - A fast editor that fully utilizes all CPU cores and never freezes.
 - A powerful TUI engine that provides widgets, event handlers, layouts, etc.
-- A consistent scripting runtime with built-in support for type system, async/await, plugin management, etc.
+- A consistent JavaScript-based runtime with built-in support for TypeScript.
 - An editing service that allows multiple users to access remotely and work together.
 - A text processing tool that integrates with the shell environment.
 
