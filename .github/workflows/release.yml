@@ -23,7 +23,7 @@ jobs:
     name: Release
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: Swatinem/rust-cache@v2
@@ -60,7 +60,7 @@ jobs:
             #   os: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@stable
       # - uses: taiki-e/setup-cross-toolchain-action@v1
