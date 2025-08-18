@@ -7,6 +7,7 @@ use compact_str::{CompactString, ToCompactString};
 
 pub mod parser;
 
+#[derive(Debug)]
 pub struct ExCommandsManager {
   command_ids: HashMap<CompactString, JsHandleId>,
 }
@@ -18,11 +19,11 @@ impl ExCommandsManager {
     }
   }
 
-  pub fn get_command(&self, name: &str) -> Option<&JsHandleId> {
+  pub fn get(&self, name: &str) -> Option<&JsHandleId> {
     self.command_ids.get(name)
   }
 
-  pub fn create_command(
+  pub fn insert(
     &mut self,
     name: &str,
     command_id: JsHandleId,
@@ -32,7 +33,13 @@ impl ExCommandsManager {
       .insert(name.to_compact_string(), command_id)
   }
 
-  pub fn remove_command(&mut self, name: &str) -> Option<JsHandleId> {
+  pub fn remove(&mut self, name: &str) -> Option<JsHandleId> {
     self.command_ids.remove(name)
+  }
+}
+
+impl Default for ExCommandsManager {
+  fn default() -> Self {
+    Self::new()
   }
 }
