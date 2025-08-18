@@ -3164,19 +3164,13 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -3212,13 +3206,6 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
@@ -3275,19 +3262,13 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -3323,13 +3304,6 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree,
-      bufs.clone(),
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(8));
