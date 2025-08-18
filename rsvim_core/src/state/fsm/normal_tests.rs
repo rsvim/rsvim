@@ -2,25 +2,17 @@
 
 use super::normal::*;
 
-use crate::buf::opt::BufferLocalOptionsBuilder;
 use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
-use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::command::{ExCommandsManager, ExCommandsManagerArc};
-use crate::content::TextContents;
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
-use crate::prelude::*;
-use crate::state::State;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
-use crate::tests::log::init as test_log_init;
-use crate::tests::tree::make_tree_with_buffers;
 use crate::tests::tree::{
   make_tree_with_buffers, make_tree_with_buffers_cmdline,
 };
@@ -31,7 +23,6 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::WindowLocalOptionsBuilder;
 use crate::ui::widget::window::{
   WindowLocalOptions, WindowLocalOptionsBuilder,
 };
@@ -286,8 +277,6 @@ mod tests_raw_cursor_move_y_by {
   fn nowrap1() {
     test_log_init();
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
@@ -307,6 +296,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
@@ -330,9 +321,6 @@ mod tests_raw_cursor_move_y_by {
   fn nowrap2() {
     test_log_init();
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
-
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -361,6 +349,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
@@ -383,8 +373,6 @@ mod tests_raw_cursor_move_y_by {
   #[test]
   fn nowrap3() {
     test_log_init();
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
 
     let lines = vec![
       "Hello, RSVIM!\n",
@@ -414,6 +402,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
@@ -518,8 +508,7 @@ mod tests_raw_cursor_move_y_by {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -641,8 +630,7 @@ mod tests_raw_cursor_move_x_by {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -653,11 +641,15 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -696,8 +688,7 @@ mod tests_raw_cursor_move_x_by {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -708,11 +699,15 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -752,8 +747,7 @@ mod tests_raw_cursor_move_x_by {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -764,11 +758,15 @@ mod tests_raw_cursor_move_x_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
       bufs,
       contents,
+      commands,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
