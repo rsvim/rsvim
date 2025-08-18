@@ -12,6 +12,8 @@ pub struct ExCommandsManager {
   command_ids: HashMap<CompactString, JsHandleId>,
 }
 
+arc_mutex_ptr!(ExCommandsManager);
+
 impl ExCommandsManager {
   pub fn new() -> Self {
     Self {
