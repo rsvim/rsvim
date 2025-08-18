@@ -25,6 +25,19 @@ impl ExCommandsManager {
     self.command_ids.get(name)
   }
 
+  pub fn parse(
+    &self,
+    command_line: &str,
+  ) -> Option<(&CompactString, &JsHandleId)> {
+    match command_line.find(char::is_whitespace) {
+      Some(pos) => {
+        let name = command_line.get(0..pos).unwrap().trim();
+        self.command_ids.get_key_value(name)
+      }
+      None => None,
+    }
+  }
+
   pub fn insert(
     &mut self,
     name: &str,
