@@ -59,12 +59,12 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
 
-pub type JsFutureId = i32;
+pub type JsHandleId = i32;
 
-/// Next future/task ID for js runtime.
+/// Next handle/future/task ID for js runtime.
 ///
 /// NOTE: Start form 1.
-pub fn next_future_id() -> JsFutureId {
+pub fn next_handle_id() -> JsHandleId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
@@ -307,11 +307,11 @@ pub struct JsRuntimeState {
   /// Holds information about resolved ES modules.
   pub module_map: ModuleMap,
   /// Timeout handles, i.e. timer IDs.
-  pub timeout_handles: HashSet<JsFutureId>,
+  pub timeout_handles: HashSet<JsHandleId>,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
   /// Holds JS pending futures scheduled by the event-loop.
-  pub pending_futures: HashMap<JsFutureId, Box<dyn JsFuture>>,
+  pub pending_futures: HashMap<JsHandleId, Box<dyn JsFuture>>,
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
   /// Specifies the timestamp which the current process began in Unix time.

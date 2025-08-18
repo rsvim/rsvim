@@ -1,6 +1,6 @@
 use super::js::*;
 
 #[test]
-fn next_future_id1() {
-  assert!(next_future_id() > 0);
+fn next_handle_id1() {
+  assert!(next_handle_id() > 0);
 }

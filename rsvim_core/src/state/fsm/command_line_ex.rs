@@ -1,7 +1,7 @@
 //! The command-line ex mode.
 
 use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
-use crate::js::next_future_id;
+use crate::js::next_handle_id;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
@@ -99,21 +99,30 @@ impl CommandLineExStateful {
   ) -> StatefulValue {
     let cmdline_content = self._goto_normal_mode_impl(data_access);
 
-    let is_js_cmd = match cmdline_content.get(0..3) {
+    let js_cmd_payload = match cmdline_content.get(0..3) {
       Some(starter) => {
         if starter.starts_with("js") {
           match starter.get(2..3) {
-            Some(delim) => delim.chars().all(|c| c.is_whitespace()),
-            None => false,
+            Some(delim) => {
+              if delim.chars().all(|c| c.is_whitespace()) {
+                match cmdline_content.get(3..) {
+                  Some(payload) => {}
+                  None => None,
+                }
+              } else {
+                None
+              }
+            }
+            None => None,
           }
         } else {
-          false
+          None
         }
       }
-      None => false,
+      None => None,
     };
 
-    if is_js_cmd {
+    if js_cmd_payload {
       match cmdline_content.get(3..) {
         Some(payload) => {
           if !payload.is_empty() {
@@ -126,7 +135,7 @@ impl CommandLineExStateful {
             current_handle.spawn_blocking(move || {
               jsrt_tick_dispatcher
                 .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-                  ExCommandReq::new(next_future_id(), payload),
+                  ExCommandReq::new(next_handle_id(), payload),
                 ))
                 .unwrap();
             });

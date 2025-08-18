@@ -1,14 +1,14 @@
 //! Timeout APIs.
 
 use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
+use crate::js::{self, JsFuture, JsHandleId, JsRuntime};
 use crate::prelude::*;
 
 use std::rc::Rc;
 use std::time::Duration;
 
 struct TimeoutFuture {
-  future_id: JsFutureId,
+  future_id: JsHandleId,
   cb: Rc<v8::Global<v8::Function>>,
   params: Rc<Vec<v8::Global<v8::Value>>>,
 }
@@ -72,7 +72,7 @@ pub fn set_timeout(
   let params = Rc::new(params);
 
   // Return timeout's internal id.
-  let timer_id = js::next_future_id();
+  let timer_id = js::next_handle_id();
   let jsrt_to_master = state.jsrt_to_master.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {

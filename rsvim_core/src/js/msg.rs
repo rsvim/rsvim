@@ -1,7 +1,7 @@
 //! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
-use crate::js::JsFutureId;
+use crate::js::JsHandleId;
 
 use compact_str::CompactString;
 use std::time::Duration;
@@ -34,12 +34,12 @@ pub enum EventLoopToJsRuntimeMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub future_id: JsFutureId,
+  pub future_id: JsHandleId,
   pub duration: Duration,
 }
 
 impl TimeoutResp {
-  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
+  pub fn new(future_id: JsHandleId, duration: Duration) -> Self {
     TimeoutResp {
       future_id,
       duration,
@@ -49,12 +49,12 @@ impl TimeoutResp {
 
 #[derive(Debug)]
 pub struct TimeoutReq {
-  pub future_id: JsFutureId,
+  pub future_id: JsHandleId,
   pub duration: Duration,
 }
 
 impl TimeoutReq {
-  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
+  pub fn new(future_id: JsHandleId, duration: Duration) -> Self {
     TimeoutReq {
       future_id,
       duration,
@@ -64,12 +64,12 @@ impl TimeoutReq {
 
 #[derive(Debug)]
 pub struct ExCommandReq {
-  pub future_id: JsFutureId,
+  pub future_id: JsHandleId,
   pub source: CompactString,
 }
 
 impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, source: CompactString) -> Self {
+  pub fn new(future_id: JsHandleId, source: CompactString) -> Self {
     ExCommandReq { future_id, source }
   }
 }
