@@ -315,7 +315,7 @@ mod tests_raw_cursor_move_y_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -324,27 +324,10 @@ mod tests_raw_cursor_move_y_by {
       vec![],
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      commands,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     let stateful_machine = NormalStateful::default();
     stateful_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
@@ -368,7 +351,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -421,7 +404,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -430,27 +413,10 @@ mod tests_raw_cursor_move_y_by {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      commands,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
@@ -481,7 +447,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -490,27 +456,10 @@ mod tests_raw_cursor_move_y_by {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      commands,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
@@ -534,36 +483,20 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
-      bufs.clone(),
-    );
-    let state = State::to_arc(State::new());
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful_machine = NormalStateful::default();
     stateful_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
@@ -587,7 +520,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -596,23 +529,10 @@ mod tests_raw_cursor_move_y_by {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
@@ -1067,24 +987,15 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
+
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
-      bufs.clone(),
-    );
-    let state = State::to_arc(State::new());
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let stateful = NormalStateful::default();
@@ -1099,17 +1010,6 @@ mod tests_raw_cursor_move_by {
         Operation::CursorMoveBy((0, -2)),
         Operation::CursorMoveBy((-3, 0)),
       ];
-      let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-      let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        contents.clone(),
-        cmds,
-        jsrt_tick_dispatcher,
-        Event::Key(key_event),
-      );
       for c in commands.iter() {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
@@ -1126,13 +1026,6 @@ mod tests_raw_cursor_move_by {
         Operation::CursorMoveBy((-5, 0)),
         Operation::CursorMoveBy((0, -1)),
       ];
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        contents.clone(),
-        Event::Key(key_event),
-      );
       for c in commands.iter() {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
@@ -1524,19 +1417,14 @@ mod tests_raw_window_scroll_y_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
-      vec![],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     // Before cursor scroll
@@ -1560,18 +1448,6 @@ mod tests_raw_window_scroll_y_by {
         &expect_fills,
       );
     }
-
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      cmds,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollUpBy(1));
@@ -1610,19 +1486,13 @@ mod tests_raw_window_scroll_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1662,15 +1532,6 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
@@ -1722,19 +1583,13 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 7),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1765,13 +1620,6 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(1));
@@ -1823,19 +1671,13 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1864,13 +1706,6 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
@@ -1920,7 +1755,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -7012,21 +6847,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(25, 7),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(25, 7),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(true)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7058,13 +6888,6 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -7240,19 +7063,13 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(25, 7),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -7285,13 +7102,6 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
