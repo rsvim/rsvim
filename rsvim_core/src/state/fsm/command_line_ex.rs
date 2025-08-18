@@ -169,7 +169,7 @@ impl CommandLineExStateful {
       .indicator_mut()
       .set_symbol(CommandLineIndicatorSymbol::Empty);
 
-    CompactString::new(cmdline_content)
+    cmdline_content.to_compact_string()
   }
 
   pub fn goto_normal_mode(

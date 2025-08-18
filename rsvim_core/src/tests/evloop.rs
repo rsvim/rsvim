@@ -13,8 +13,7 @@ use std::time::Duration;
 pub fn make_event_loop(terminal_cols: u16, terminal_rows: u16) -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
 
-  EventLoop::new_without_snapshot(terminal_cols, terminal_rows, cli_opts)
-    .unwrap()
+  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

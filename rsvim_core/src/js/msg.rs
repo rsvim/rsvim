@@ -1,11 +1,10 @@
 //! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
-use std::time::Duration;
+use crate::js::JsFutureId;
 
 use compact_str::CompactString;
-
-use crate::js::JsFutureId;
+use std::time::Duration;
 
 // The message JsRuntime send to EventLoop {
 
@@ -27,7 +26,7 @@ pub enum EventLoopToJsRuntimeMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   TimeoutResp(TimeoutResp),
 
-  /// Event loop send EX command to js runtime to run.
+  /// Event loop send ex command to js runtime to run.
   ExCommandReq(ExCommandReq),
 }
 

@@ -179,43 +179,45 @@ impl EventLoop {
     // Channel: workers => master
     let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
 
-    // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
-    // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
-    // requires Arc/Mutex (i.e. thread safe).
+    // Since there are technical limitations that we cannot use tokio APIs
+    // along with V8 engine, because V8 rust bindings are not Arc/Mutex (i.e.
+    // not thread safe), while tokio async runtime requires Arc/Mutex (i.e.
+    // thread safe).
     //
-    // We have to first send js task requests to master, let the master handles these tasks for us
-    // (in async way), then send the task results back to js runtime. These tasks are very common
-    // and low level, serve as an infrastructure layer for js world.
-    // For example:
+    // We have to first send js task requests to master, let the master handles
+    // these tasks for us (in async way), then send the task results back to js
+    // runtime. These tasks are very common and low level, serve as an
+    // infrastructure layer for js world. For example:
+    //
     // - File IO
     // - Timer
     // - Network
     // - And more...
     //
-    // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
+    // When js runtime handles `Promise` and `async` APIs, the message flow
+    // uses several channels:
     //
     // - Channel-1 `jsrt_to_master` => `master_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
     // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
     // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
     //
-    // ```text
+    // The dataflow follows below steps:
     //
-    // Step-1: Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
-    // Step-2: Tokio event loop handles the request (read/write, timer, etc) in async way
-    // Step-3: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
-    // Step-4: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    // 1. Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
+    // 2. Tokio event loop handles the request (read/write, timer, etc) in async way
+    // 3. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
+    // 4. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    // 5. Js runtime completes all async results.
     //
-    // ```
-    //
-    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
-    // trigger the event loop in `tokio::select!`.
+    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
+    // they're simply for trigger the `tokio::select!` loop.
 
-    // Channel: js runtime => master
+    // Channel-1: js runtime => master
     let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => js runtime
-    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
-    // Channel: master => master
+    // Channel-2: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
+    // Channel-3: master => js runtime
+    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
 
     // Startup time
     let startup_moment = Instant::now();
@@ -325,7 +327,7 @@ impl EventLoop {
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn new_without_snapshot(
+  pub fn mock_new(
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
@@ -339,7 +341,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      writer,
+      _writer,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -352,6 +354,8 @@ impl EventLoop {
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
     ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
+
+    let writer = StdoutWriterValue::dev_null();
 
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(
