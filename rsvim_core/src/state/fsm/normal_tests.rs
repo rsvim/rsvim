@@ -1764,12 +1764,6 @@ mod tests_raw_window_scroll_y_by {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     // Before cursor scroll
     {
       let viewport = get_viewport(tree.clone());
@@ -1797,13 +1791,6 @@ mod tests_raw_window_scroll_y_by {
     }
 
     // Scroll-1
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree,
-      bufs.clone(),
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
@@ -2025,19 +2012,13 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -2073,13 +2054,6 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
@@ -2136,19 +2110,13 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -2184,13 +2152,6 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree,
-      bufs.clone(),
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(8));
@@ -2383,19 +2344,13 @@ mod tests_raw_window_scroll_x_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
       vec![],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -2420,13 +2375,6 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
@@ -2465,19 +2413,13 @@ mod tests_raw_window_scroll_x_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -2517,13 +2459,6 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(1));
