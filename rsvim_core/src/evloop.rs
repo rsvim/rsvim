@@ -3,6 +3,7 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
+use crate::ex_command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
@@ -76,6 +77,8 @@ pub struct EventLoop {
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
   pub contents: TextContentsArc,
+  /// Ex commands.
+  pub commands: ExCommandsManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -151,6 +154,7 @@ impl EventLoop {
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
+    /* commands */ ExCommandsManagerArc,
     /* writer */ StdoutWriterValue,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -172,9 +176,10 @@ impl EventLoop {
     // UI Tree
     let tree = Tree::to_arc(Tree::new(canvas_size));
 
-    // Buffers
+    // Data backend
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
+    let ex_commands = ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // Channel: workers => master
     let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
@@ -245,6 +250,7 @@ impl EventLoop {
       stateful_machine,
       buffers_manager,
       text_contents,
+      ex_commands,
       writer,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -272,6 +278,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -311,6 +318,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -341,6 +349,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       _writer,
       cancellation_token,
       detached_tracker,
@@ -381,6 +390,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
