@@ -1,4 +1,4 @@
-#![allow(unused_imports)]
+#![allow(unused_imports, unused_variables)]
 
 use super::normal::*;
 
@@ -43,6 +43,7 @@ pub fn make_tree_with_buffer_opts(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
@@ -50,7 +51,24 @@ pub fn make_tree_with_buffer_opts(
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let state = State::to_arc(State::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  (tree, state, bufs, buf, contents)
+  let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
+  let sda = StatefulDataAccess::new(
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    commands,
+    jsrt_tick_dispatcher,
+    Event::Key(key_event),
+  );
+
+  (tree, state, bufs, buf, contents, sda)
 }
 
 pub fn make_tree(
@@ -63,6 +81,7 @@ pub fn make_tree(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
@@ -78,6 +97,7 @@ pub fn make_tree_with_cmdline(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
@@ -90,7 +110,25 @@ pub fn make_tree_with_cmdline(
     contents.clone(),
   );
   let state = State::to_arc(State::new());
-  (tree, state, bufs, buf, contents)
+
+  let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
+  let sda = StatefulDataAccess::new(
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    commands,
+    jsrt_tick_dispatcher,
+    Event::Key(key_event),
+  );
+
+  (tree, state, bufs, buf, contents, sda)
 }
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
@@ -1354,11 +1392,15 @@ mod tests_raw_cursor_move_to {
         Operation::CursorMoveTo((5, 1)),
         Operation::CursorMoveTo((0, 0)),
       ];
+      let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+      let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
       let data_access = StatefulDataAccess::new(
         state.clone(),
         tree.clone(),
         bufs.clone(),
         contents.clone(),
+        cmds,
+        jsrt_tick_dispatcher,
         Event::Key(key_event),
       );
       for c in commands.iter() {
@@ -1397,8 +1439,7 @@ mod tests_raw_cursor_move_to {
         .unwrap(),
       bufs.clone(),
     );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+    let state = State::to_arc(State::new());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
       KeyModifiers::empty(),
@@ -1414,11 +1455,15 @@ mod tests_raw_cursor_move_to {
     assert_eq!(first_line_len, 29);
 
     // step-1: Move to the end of line-1.
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state.clone(),
       tree.clone(),
       bufs.clone(),
       contents.clone(),
+      cmds.clone(),
+      jsrt_tick_dispatcher.clone(),
       Event::Key(key_event),
     );
     let command = Operation::CursorMoveTo((first_line_len, 0));
@@ -1435,6 +1480,8 @@ mod tests_raw_cursor_move_to {
       tree.clone(),
       bufs.clone(),
       contents.clone(),
+      cmds,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let command = Operation::CursorMoveTo((first_line_len, 1));
@@ -1514,11 +1561,15 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
       bufs,
       contents,
+      cmds,
+      jsrt_tick_dispatcher,
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -1611,6 +1662,8 @@ mod tests_raw_window_scroll_y_by {
       );
     }
 
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
     let data_access = StatefulDataAccess::new(
       state,
       tree,
@@ -4689,33 +4742,22 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(10, 10),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 10),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -4821,33 +4863,21 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(10, 10),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 10),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -5260,33 +5290,21 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(10, 5),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 5),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -5572,33 +5590,21 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(10, 5),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 5),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -6786,21 +6792,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(25, 7),
-      buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(25, 7),
+        buf_opts,
+        WindowLocalOptionsBuilder::default()
+          .wrap(true)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6832,13 +6833,6 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
