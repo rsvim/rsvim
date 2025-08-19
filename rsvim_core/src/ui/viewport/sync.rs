@@ -5,7 +5,7 @@
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::viewport::{LineViewport, RowViewport};
-use crate::ui::widget::window::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptions;
 
 use icu::segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 use itertools::Itertools;
