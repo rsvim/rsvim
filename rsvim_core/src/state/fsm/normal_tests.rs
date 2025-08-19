@@ -6,8 +6,10 @@ use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
+use crate::state::fsm::{
+  InsertStateful, Stateful, StatefulDataAccess, StatefulValue,
+};
+use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::state::ops::{cmdline_ops, cursor_ops};
 use crate::state::{State, StateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
