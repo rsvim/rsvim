@@ -4,13 +4,14 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
+use crate::state::ops::{
+  CursorInsertPayload, Operation, cursor_ops, message_ops,
+};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 
-use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
@@ -125,8 +126,11 @@ impl CommandLineExStateful {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
     let cmdline = tree.command_line_mut().unwrap();
-    set_message_visible(cmdline, true);
-    refresh_view(cmdline);
+
+    cmdline.show_message();
+
+    message_ops::refresh_view(cmdline);
+
     debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent

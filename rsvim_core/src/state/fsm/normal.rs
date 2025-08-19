@@ -3,8 +3,8 @@
 use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::cursor_ops;
 use crate::state::ops::{GotoInsertModeVariant, Operation};
+use crate::state::ops::{cursor_ops, message_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
@@ -130,8 +130,10 @@ impl NormalStateful {
     // Insert to command-line
     debug_assert!(tree.command_line_mut().is_some());
     let cmdline = tree.command_line_mut().unwrap();
-    set_message_visible(cmdline, false);
-    refresh_view(cmdline);
+
+    cmdline.show_input();
+    message_ops::refresh_view(cmdline);
+
     let _previous_cursor = cmdline.insert_cursor(cursor);
     debug_assert!(_previous_cursor.is_none());
     cmdline.move_cursor_to(0, 0);
@@ -247,7 +249,6 @@ impl NormalStateful {
 
 #[cfg(test)]
 use crate::buf::text::Text;
-use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 #[cfg(test)]
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
