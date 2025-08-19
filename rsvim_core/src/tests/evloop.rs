@@ -1,14 +1,25 @@
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
+use crate::tests::constant::TempPathCfg;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
 use parking_lot::Mutex;
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, channel};
 use std::task::{Poll, Waker};
 use std::time::Duration;
+
+pub fn make_configs(tp: &TempPathCfg, src: &str) {
+  std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
+  let mut config_entry =
+    std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
+      .unwrap();
+  config_entry.write_all(src.as_bytes()).unwrap();
+  config_entry.flush().unwrap();
+}
 
 pub fn make_event_loop(terminal_cols: u16, terminal_rows: u16) -> EventLoop {
   let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();

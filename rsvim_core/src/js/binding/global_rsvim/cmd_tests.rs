@@ -4,7 +4,6 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
-use std::io::Write;
 use std::time::Duration;
 
 #[tokio::test]
@@ -23,14 +22,7 @@ async fn test_echo1_should_panic_with_missing_param() {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
@@ -65,14 +57,7 @@ async fn test_echo2_should_panic_with_null_param() {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
@@ -108,13 +93,7 @@ async fn test_echo3() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim"))?;
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))?;
-    config_entry.write_all(src.as_bytes())?;
-    config_entry.flush()?;
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 

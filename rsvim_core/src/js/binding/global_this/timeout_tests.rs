@@ -24,14 +24,7 @@ async fn test_timeout1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
@@ -81,14 +74,7 @@ async fn test_timeout2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
