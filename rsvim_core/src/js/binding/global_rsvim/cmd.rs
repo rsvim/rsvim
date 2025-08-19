@@ -10,7 +10,7 @@ pub fn echo(
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
-  assert!(args.length() == 1);
+  debug_assert!(args.length() == 1);
   let message = args.get(0).to_rust_string_lossy(scope).to_string();
   trace!("echo: {:?}", message);
 
