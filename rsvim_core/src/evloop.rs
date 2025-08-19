@@ -177,6 +177,10 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
+    // State
+    let state = State::to_arc(State::new());
+    let stateful_machine = StatefulValue::default();
+
     // Channel: workers => master
     let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
 
@@ -226,10 +230,6 @@ impl EventLoop {
       .duration_since(UNIX_EPOCH)
       .unwrap()
       .as_millis();
-
-    // State
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
-    let stateful_machine = StatefulValue::default();
 
     let writer = if cli_opts.headless() {
       StdoutWriterValue::headless()
@@ -520,11 +520,12 @@ impl EventLoop {
         trace!("Polled terminal event ok: {:?}", event);
 
         let data_access = StatefulDataAccess::new(
+          event,
           self.state.clone(),
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
-          event,
+          self.jsrt_tick_dispatcher.clone(),
         );
 
         // Handle by state machine

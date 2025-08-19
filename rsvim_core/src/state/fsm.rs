@@ -14,11 +14,10 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
+use crate::js::msg::EventLoopToJsRuntimeMessage;
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
-
-use crossterm::event::Event;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -31,6 +30,9 @@ pub use quit::QuitStateful;
 pub use select::SelectStateful;
 pub use terminal::TerminalStateful;
 pub use visual::VisualStateful;
+
+use crossterm::event::Event;
+use tokio::sync::mpsc::Sender;
 
 pub mod command_line_ex;
 pub mod command_line_search_backward;
@@ -58,6 +60,7 @@ pub struct StatefulDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
+  pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 impl StatefulDataAccess {
@@ -67,6 +70,7 @@ impl StatefulDataAccess {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     StatefulDataAccess {
       event,
@@ -74,6 +78,7 @@ impl StatefulDataAccess {
       tree,
       buffers,
       contents,
+      jsrt_tick_dispatcher,
     }
   }
 }
