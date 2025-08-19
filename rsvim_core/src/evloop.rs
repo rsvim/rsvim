@@ -596,7 +596,7 @@ impl EventLoop {
           trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
-          cmdline_ops::set_cmdline_message(
+          cmdline_ops::cmdline_set_message(
             &mut tree,
             &mut contents,
             req.payload,

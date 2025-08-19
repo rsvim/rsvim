@@ -7,7 +7,7 @@ use crate::ui::viewport::Viewport;
 
 use compact_str::CompactString;
 
-pub fn set_cmdline_message(
+pub fn cmdline_set_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
   payload: CompactString,
@@ -28,7 +28,7 @@ pub fn set_cmdline_message(
   cmdline.set_message_viewport(new_message_viewport);
 }
 
-pub fn clear_cmdline_message(
+pub fn cmdline_clear_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
 ) {

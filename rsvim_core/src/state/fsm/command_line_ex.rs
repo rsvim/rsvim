@@ -159,7 +159,7 @@ impl CommandLineExStateful {
     let cmdline_input_content =
       contents.command_line_input().rope().to_compact_string();
 
-    cmdline_ops::clear_cmdline_message(&mut tree, &mut contents);
+    cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cursor_ops::cursor_clear(
       &mut tree,
       cmdline_id,
