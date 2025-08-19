@@ -17,10 +17,6 @@ pub fn set_cmdline_message(
   text_contents
     .command_line_message_mut()
     .insert_at(0, 0, payload.clone());
-  tree
-    .command_line_mut()
-    .unwrap()
-    .update_message_viewport_by_text(text_contents.command_line_message());
 
   let opts = *tree.command_line().unwrap().options();
   let actual_shape = *tree.command_line().unwrap().message().actual_shape();

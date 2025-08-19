@@ -271,16 +271,6 @@ impl CommandLine {
     self.input_mut().set_visible(true);
     self.message_mut().set_visible(false);
   }
-
-  pub fn update_message_viewport_by_text(&mut self, text: &Text) {
-    let opts = self.options;
-    let actual_shape = *self.message().actual_shape();
-
-    let new_message_viewport =
-      Viewport::to_arc(Viewport::view(&opts, text, &actual_shape, 0, 0));
-
-    self.set_message_viewport(new_message_viewport);
-  }
 }
 // Show/Hide switch }
 
