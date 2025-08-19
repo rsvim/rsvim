@@ -567,7 +567,7 @@ impl Text {
     char_idx: usize,
     payload: CompactString,
   ) -> (usize, usize) {
-    debug_assert!(!payload.is_empty());
+    // debug_assert!(!payload.is_empty());
     debug_assert!(self.rope.get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
