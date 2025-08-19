@@ -1001,21 +1001,11 @@ mod tests_raw_cursor_move_to {
     ];
 
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-      bufs.clone(),
-    );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let stateful = NormalStateful::default();
@@ -1027,13 +1017,6 @@ mod tests_raw_cursor_move_to {
     assert_eq!(first_line_len, 29);
 
     // step-1: Move to the end of line-1.
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree.clone(),
-      bufs.clone(),
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let command = Operation::CursorMoveTo((first_line_len, 0));
     stateful._test_raw_cursor_move(&data_access, command);
 
