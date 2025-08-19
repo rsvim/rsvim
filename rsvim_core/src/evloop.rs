@@ -9,6 +9,7 @@ use crate::js::msg::{
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::cmdline_ops;
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
@@ -27,7 +28,6 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
-use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
 #[cfg(test)]
 use crate::tests::evloop::MockReader;
 #[cfg(test)]
@@ -566,22 +566,15 @@ impl EventLoop {
     if let Some(message) = message {
       match message {
         JsRuntimeToEventLoopMessage::PrintReq(req) => {
-          trace!("Receive req echo_req:{:?}", req.message);
+          trace!("Receive req echo_req:{:?}", req.message.clone());
           let mut tree = lock!(self.tree);
-          let mut tree_clone = tree.clone();
-          debug_assert!(tree.command_line().is_some());
-          let command_line = tree_clone.command_line_mut().unwrap();
-          let command_line_message = command_line.message_mut();
-          command_line_message.set_message(req.message.clone());
-          let command_line_content =
-            command_line_message.get_text_contents().upgrade().unwrap();
-          let command_line_content = lock!(command_line_content);
-          _update_viewport_after_text_changed(
+          let mut contents = lock!(self.contents);
+          cmdline_ops::set_cmdline_message(
             &mut tree,
-            command_line.id(),
-            command_line_content.command_line_message(),
+            &mut contents,
+            req.message.clone(),
           );
-          trace!("Receive req echo_req:{:?} - done", req.message);
+          trace!("Receive req echo_req:{:?} - done", req.message.clone());
         }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive req timeout_req:{:?}", req.future_id);

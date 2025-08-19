@@ -8,7 +8,7 @@ use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
-use crate::state::ops::cursor_ops;
+use crate::state::ops::{cmdline_ops, cursor_ops};
 use crate::state::{State, StateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
@@ -8974,28 +8974,17 @@ mod tests_goto_insert_mode {
       vec!["Should go to insert mode with message command line\n"],
     );
 
+    // Prepare
     {
-      let tree_clone = tree.clone();
-      let mut tree_lock = lock!(tree_clone);
-      let cmd_line = tree_lock.command_line_mut().unwrap();
-      let message = cmd_line.message_mut();
-      message.set_message(CompactString::new("Test echo"));
-    }
-
-    {
+      let tree = tree.clone();
+      let contents = contents.clone();
       let mut tree = lock!(tree);
-      let mut tree_clone = tree.clone();
-      let cmd_line = tree_clone.command_line_mut().unwrap();
-      let cmd_line_message = cmd_line.message();
-      let message_content =
-        cmd_line_message.get_text_contents().upgrade().unwrap();
-      let message_content = lock!(message_content);
-      let message_text = message_content.command_line_message();
-      _update_viewport_after_text_changed(
+      let mut contents = lock!(contents);
+      cmdline_ops::set_cmdline_message(
         &mut tree,
-        cmd_line.id(),
-        message_text,
-      )
+        &mut contents,
+        CompactString::new("Test echo"),
+      );
     }
 
     let key_event = KeyEvent::new_with_kind(
@@ -9054,12 +9043,17 @@ mod tests_goto_insert_mode {
       vec!["Should go to insert mode with message command line\n"],
     );
 
+    // Prepare
     {
-      let tree_clone = tree.clone();
-      let mut tree_lock = lock!(tree_clone);
-      let cmd_line = tree_lock.command_line_mut().unwrap();
-      let message = cmd_line.message_mut();
-      message.set_message(CompactString::new("Test echo"));
+      let tree = tree.clone();
+      let contents = contents.clone();
+      let mut tree = lock!(tree);
+      let mut contents = lock!(contents);
+      cmdline_ops::set_cmdline_message(
+        &mut tree,
+        &mut contents,
+        CompactString::new("Test echo"),
+      );
     }
 
     let key_event = KeyEvent::new_with_kind(

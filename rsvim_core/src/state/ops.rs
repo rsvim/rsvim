@@ -2,6 +2,7 @@
 
 use compact_str::CompactString;
 
+pub mod cmdline_ops;
 pub mod cursor_ops;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
