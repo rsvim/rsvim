@@ -611,7 +611,7 @@ impl JsRuntime {
         Ok(specifier) => specifier,
         Err(e) => {
           // Returns the error directly.
-          return Err(e);
+          anyhow::bail!(e);
         }
       }
     };
@@ -624,10 +624,8 @@ impl JsRuntime {
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
-        let _exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let e = format!("User config not found: {filename:?}");
-        error!("{e}");
-        eprintln!("{e}");
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let e = format!("Module {filename:?} not fetched: {exception:?}");
         anyhow::bail!(e);
       }
     };
@@ -639,9 +637,8 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!(
-        "Failed to instantiate user config module {filename:?}: {exception:?}"
-      );
+      let e =
+        format!("Module {filename:?} failed to initialize: {exception:?}");
       error!("{e}");
       eprintln!("{e}");
       anyhow::bail!(e);

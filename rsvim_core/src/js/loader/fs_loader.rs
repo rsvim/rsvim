@@ -137,7 +137,7 @@ impl ModuleLoader for FsModuleLoader {
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
         None => {
-          anyhow::bail!(format!("Module specifier not found: {specifier:?}"))
+          anyhow::bail!(format!("Module path {specifier:?} not found"))
         }
       };
 
@@ -157,9 +157,9 @@ impl ModuleLoader for FsModuleLoader {
               return Ok(self.transform(simple_path.to_path_buf()));
             }
           }
-          Err(e) => anyhow::bail!(format!(
-            "Module specifier error: {specifier:?}, {e:?}"
-          )),
+          Err(e) => {
+            anyhow::bail!(format!("Module path {specifier:?} not found: {e:?}"))
+          }
         }
 
         // Npm file path in `${config_home}/node_modules`.
@@ -170,16 +170,16 @@ impl ModuleLoader for FsModuleLoader {
               return Ok(self.transform(npm_path.to_path_buf()));
             }
           }
-          Err(e) => anyhow::bail!(format!(
-            "Module specifier error: {specifier:?}, {e:?}"
-          )),
+          Err(e) => {
+            anyhow::bail!(format!("Module path {specifier:?} not found: {e:?}"))
+          }
         }
 
         // Otherwise we try to resolve it as node/npm package.
-        anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
+        anyhow::bail!(format!("Module path {specifier:?} not found"));
       }
       None => {
-        anyhow::bail!(format!("Module specifier not found: {specifier:?}"));
+        anyhow::bail!(format!("Module path {specifier:?} not found"));
       }
     }
   }
