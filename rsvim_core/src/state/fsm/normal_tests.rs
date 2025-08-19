@@ -6366,18 +6366,13 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(15, 7),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(15, 7),
+        buf_opts,
+        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6409,13 +6404,6 @@ mod tests_cursor_move {
       );
     }
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
