@@ -3799,25 +3799,13 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) =
+    let (tree, state, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = InsertStateful::default();
 
     // Insert-1
