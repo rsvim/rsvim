@@ -24,7 +24,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -276,7 +276,6 @@ mod tests_goto_normal_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::state::fsm::NormalStateful;
   use crossterm::event::{
@@ -643,7 +642,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::state::fsm::NormalStateful;
   use crossterm::event::{
