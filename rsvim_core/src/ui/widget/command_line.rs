@@ -225,13 +225,16 @@ impl CommandLine {
     }
   }
 
-  /// Get cursor viewport.
-  pub fn cursor_viewport(&self) -> CursorViewportArc {
+  /// Get input cursor viewport.
+  pub fn input_cursor_viewport(&self) -> CursorViewportArc {
     self.input_cursor_viewport.clone()
   }
 
-  /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  /// Set input cursor viewport.
+  pub fn set_input_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) {
     self.input_cursor_viewport = cursor_viewport;
   }
 

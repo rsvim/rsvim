@@ -8522,7 +8522,7 @@ mod tests_goto_command_line_ex_mode {
     let actual_cursor = lock!(tree.clone())
       .command_line()
       .unwrap()
-      .cursor_viewport();
+      .input_cursor_viewport();
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 0);
     assert_eq!(actual_cursor.row_idx(), 0);

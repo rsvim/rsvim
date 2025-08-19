@@ -384,7 +384,7 @@ pub fn _update_viewport_after_text_changed(
       *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
-      cmdline.cursor_viewport(),
+      cmdline.input_cursor_viewport(),
     ),
     _ => unreachable!(),
   };
@@ -436,7 +436,7 @@ pub fn _update_viewport_after_text_changed(
         window.set_cursor_viewport(updated_cursor_viewport)
       }
       TreeNode::CommandLine(cmdline) => {
-        cmdline.set_cursor_viewport(updated_cursor_viewport)
+        cmdline.set_input_cursor_viewport(updated_cursor_viewport)
       }
       _ => unreachable!(),
     }
@@ -474,7 +474,7 @@ pub fn cursor_move(
       *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
-      cmdline.cursor_viewport(),
+      cmdline.input_cursor_viewport(),
     ),
     _ => unreachable!(),
   };
@@ -563,7 +563,7 @@ pub fn cursor_move(
           }
         }
         TreeNode::CommandLine(cmdline) => {
-          cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          cmdline.set_input_cursor_viewport(new_cursor_viewport.clone());
           if cmdline.cursor_id().is_some() {
             cmdline.move_cursor_to(
               new_cursor_viewport.column_idx() as isize,
@@ -598,7 +598,7 @@ pub fn cursor_insert(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+    TreeNode::CommandLine(cmdline) => cmdline.input_cursor_viewport(),
     _ => unreachable!(),
   };
 
@@ -653,7 +653,7 @@ pub fn cursor_delete(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+    TreeNode::CommandLine(cmdline) => cmdline.input_cursor_viewport(),
     _ => unreachable!(),
   };
 

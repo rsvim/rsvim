@@ -324,7 +324,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -370,7 +370,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
@@ -414,7 +414,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -497,7 +497,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -543,7 +543,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
@@ -587,7 +587,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -687,7 +687,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -735,7 +735,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 34);
       assert_eq!(actual1.row_idx(), 0);
