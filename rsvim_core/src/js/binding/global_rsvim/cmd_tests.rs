@@ -1,5 +1,3 @@
-use compact_str::ToCompactString;
-
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::constant::TempPathCfg;
@@ -99,7 +97,7 @@ async fn test_echo3() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
 
   let src: &str = r#"
