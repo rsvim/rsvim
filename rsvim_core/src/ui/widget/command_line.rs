@@ -1,7 +1,6 @@
 //! Command-line widget.
 
 use crate::content::TextContentsWk;
-use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -13,18 +12,20 @@ use crate::ui::widget::command_line::content::CommandLineContent;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::opt::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
+use crate::ui::widget::window::opt::WindowLocalOptions;
+use crate::{
+  geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
-use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
 use std::sync::Arc;
-
 // Re-export
+use crate::ui::widget::command_line::message::CommandLineMessage;
+use crate::ui::widget::window::WindowLocalOptionsBuilder;
 pub use indicator::CommandLineIndicatorSymbol;
 
 pub mod content;
 pub mod indicator;
+pub mod message;
 pub mod root;
 
 #[cfg(test)]
@@ -37,6 +38,7 @@ pub enum CommandLineNode {
   CommandLineIndicator(CommandLineIndicator),
   CommandLineContent(CommandLineContent),
   Cursor(Cursor),
+  CommandLineMessage(CommandLineMessage),
 }
 
 inode_enum_dispatcher!(
@@ -44,14 +46,16 @@ inode_enum_dispatcher!(
   CommandLineRootContainer,
   CommandLineIndicator,
   CommandLineContent,
-  Cursor
+  Cursor,
+  CommandLineMessage
 );
 widget_enum_dispatcher!(
   CommandLineNode,
   CommandLineRootContainer,
   CommandLineIndicator,
   CommandLineContent,
-  Cursor
+  Cursor,
+  CommandLineMessage
 );
 
 #[derive(Debug, Clone)]
@@ -63,11 +67,13 @@ pub struct CommandLine {
   indicator_id: TreeNodeId,
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
+  message_id: TreeNodeId,
 
   text_contents: TextContentsWk,
 
-  viewport: ViewportArc,
-  cursor_viewport: CursorViewportArc,
+  input_viewport: ViewportArc,
+  input_cursor_viewport: CursorViewportArc,
+  message_viewport: ViewportArc,
 }
 
 impl CommandLine {
@@ -94,53 +100,75 @@ impl CommandLine {
       CommandLineIndicatorSymbol::Empty,
     );
     let cmdline_indicator_id = cmdline_indicator.id();
-    let cmdline_indicator_node =
+    let mut cmdline_indicator_node =
       CommandLineNode::CommandLineIndicator(cmdline_indicator);
+    cmdline_indicator_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
 
     let cmdline_content_shape =
       IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
 
-    let (viewport, cursor_viewport) = {
+    let (input_viewport, input_cursor_viewport, message_viewport) = {
       let cmdline_content_actual_shape =
         geo_rect_as!(cmdline_content_shape, u16);
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
-      let viewport = Viewport::view(
+      let input_viewport = Viewport::view(
         &options,
         text_contents.command_line_content(),
         &cmdline_content_actual_shape,
         0,
         0,
       );
-      let cursor_viewport = CursorViewport::from_top_left(
-        &viewport,
+      let input_cursor_viewport = CursorViewport::from_top_left(
+        &input_viewport,
         text_contents.command_line_content(),
       );
-      (viewport, cursor_viewport)
+      let message_viewport = Viewport::view(
+        &options,
+        text_contents.command_line_message(),
+        &cmdline_content_actual_shape,
+        0,
+        0,
+      );
+      (input_viewport, input_cursor_viewport, message_viewport)
     };
-    let viewport = Viewport::to_arc(viewport);
-    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
+    let input_viewport = Viewport::to_arc(input_viewport);
+    let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
+    let message_viewport = Viewport::to_arc(message_viewport);
 
     let cmdline_content = CommandLineContent::new(
       cmdline_content_shape,
       text_contents.clone(),
-      Arc::downgrade(&viewport),
+      Arc::downgrade(&input_viewport),
     );
     let cmdline_content_id = cmdline_content.id();
-    let cmdline_content_node =
+    let mut cmdline_content_node =
       CommandLineNode::CommandLineContent(cmdline_content);
+    cmdline_content_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_content_node);
+
+    let cmdline_message = CommandLineMessage::new(
+      shape,
+      text_contents.clone(),
+      Arc::downgrade(&message_viewport),
+    );
+    let cmdline_message_id = cmdline_message.id();
+    let cmdline_message_node =
+      CommandLineNode::CommandLineMessage(cmdline_message);
+    base.bounded_insert(cmdline_root_id, cmdline_message_node);
 
     Self {
       base,
       options,
       indicator_id: cmdline_indicator_id,
       content_id: cmdline_content_id,
+      message_id: cmdline_message_id,
       cursor_id: None,
       text_contents,
-      viewport,
-      cursor_viewport,
+      input_viewport,
+      input_cursor_viewport,
+      message_viewport,
     }
   }
 }
@@ -151,6 +179,9 @@ impl Widgetable for CommandLine {
   fn draw(&self, canvas: &mut Canvas) {
     for node in self.base.iter() {
       // trace!("Draw window:{:?}", node);
+      if !node.visible() {
+        continue;
+      }
       node.draw(canvas);
     }
   }
@@ -167,14 +198,19 @@ impl CommandLine {
     self.options = *options;
   }
 
-  /// Get viewport.
-  pub fn viewport(&self) -> ViewportArc {
-    self.viewport.clone()
+  /// Get input viewport.
+  pub fn input_viewport(&self) -> ViewportArc {
+    self.input_viewport.clone()
   }
 
-  /// Set viewport.
-  pub fn set_viewport(&mut self, viewport: ViewportArc) {
-    self.viewport = viewport.clone();
+  /// Get message viewport.
+  pub fn message_viewport(&self) -> ViewportArc {
+    self.message_viewport.clone()
+  }
+
+  /// Set viewport for content.
+  pub fn set_content_viewport(&mut self, viewport: ViewportArc) {
+    self.input_viewport = viewport.clone();
     if let Some(CommandLineNode::CommandLineContent(content)) =
       self.base.node_mut(self.content_id)
     {
@@ -182,14 +218,24 @@ impl CommandLine {
     }
   }
 
+  /// Set viewport for message.
+  pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
+    self.message_viewport = viewport.clone();
+    if let Some(CommandLineNode::CommandLineMessage(content)) =
+      self.base.node_mut(self.message_id)
+    {
+      content.set_viewport(Arc::downgrade(&viewport));
+    }
+  }
+
   /// Get cursor viewport.
   pub fn cursor_viewport(&self) -> CursorViewportArc {
-    self.cursor_viewport.clone()
+    self.input_cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
   pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
-    self.cursor_viewport = cursor_viewport;
+    self.input_cursor_viewport = cursor_viewport;
   }
 
   /// Get binded global text contents.
@@ -210,6 +256,11 @@ impl CommandLine {
   /// Command-line content widget ID.
   pub fn content_id(&self) -> TreeNodeId {
     self.content_id
+  }
+
+  /// Command-line message widget ID.
+  pub fn message_id(&self) -> TreeNodeId {
+    self.message_id
   }
 }
 
@@ -243,6 +294,40 @@ impl CommandLine {
     match self.base.node_mut(self.content_id).unwrap() {
       CommandLineNode::CommandLineContent(w) => {
         debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  /// Command-line message widget
+  pub fn message(&self) -> &CommandLineMessage {
+    debug_assert!(self.base.node(self.message_id).is_some());
+    debug_assert!(matches!(
+      self.base.node(self.message_id).unwrap(),
+      CommandLineNode::CommandLineMessage(_)
+    ));
+
+    match self.base.node(self.message_id).unwrap() {
+      CommandLineNode::CommandLineMessage(w) => {
+        debug_assert_eq!(w.id(), self.message_id);
+        w
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  /// Mutable command-line message widget.
+  pub fn message_mut(&mut self) -> &mut CommandLineMessage {
+    debug_assert!(self.base.node_mut(self.message_id).is_some());
+    debug_assert!(matches!(
+      self.base.node_mut(self.message_id).unwrap(),
+      CommandLineNode::CommandLineMessage(_)
+    ));
+
+    match self.base.node_mut(self.message_id).unwrap() {
+      CommandLineNode::CommandLineMessage(w) => {
+        debug_assert_eq!(w.id(), self.message_id);
         w
       }
       _ => unreachable!(),

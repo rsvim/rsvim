@@ -11,6 +11,7 @@ use crate::ui::widget::command_line::{
   CommandLineIndicatorSymbol, CommandLineNode,
 };
 
+use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
@@ -125,6 +126,8 @@ impl CommandLineExStateful {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
     let cmdline = tree.command_line_mut().unwrap();
+    set_message_visible(cmdline, true);
+    refresh_view(cmdline);
     debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent

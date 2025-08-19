@@ -130,6 +130,8 @@ impl NormalStateful {
     // Insert to command-line
     debug_assert!(tree.command_line_mut().is_some());
     let cmdline = tree.command_line_mut().unwrap();
+    set_message_visible(cmdline, false);
+    refresh_view(cmdline);
     let _previous_cursor = cmdline.insert_cursor(cursor);
     debug_assert!(_previous_cursor.is_none());
     cmdline.move_cursor_to(0, 0);
@@ -247,6 +249,7 @@ impl NormalStateful {
 
 #[cfg(test)]
 use crate::buf::text::Text;
+use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 #[cfg(test)]
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
