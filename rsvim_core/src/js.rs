@@ -29,7 +29,7 @@ use crate::ui::tree::TreeArc;
 
 use std::rc::Rc;
 use std::sync::Once;
-use std::sync::atomic::{AtomicI32, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 
@@ -66,16 +66,6 @@ pub type JsFutureId = i32;
 /// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
-  VALUE.fetch_add(1, Ordering::Relaxed)
-}
-
-pub type JsHandleId = usize;
-
-/// Next handle ID for js runtime.
-///
-/// NOTE: Start form 1.
-pub fn next_handle_id() -> JsHandleId {
-  static VALUE: AtomicUsize = AtomicUsize::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
@@ -629,8 +619,6 @@ impl JsRuntime {
 
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
-    // local file system, no network/http downloading will be involved.
     let module = match fetch_module_tree(tc_scope, filename, None) {
       Some(module) => module,
       None => {
