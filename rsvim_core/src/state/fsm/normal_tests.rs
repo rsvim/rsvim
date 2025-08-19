@@ -28,7 +28,6 @@ use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree_with_buffer_opts(

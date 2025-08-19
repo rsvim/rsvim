@@ -7,7 +7,6 @@ use text::Text;
 
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
-use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};

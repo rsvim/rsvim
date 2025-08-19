@@ -2,11 +2,13 @@
 
 use super::insert::*;
 
+use crate::buf::opt::FileFormatOption;
 use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
@@ -14,6 +16,7 @@ use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::TreeArc;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
@@ -23,9 +26,8 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::Content;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
-use compact_str::ToCompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use std::collections::BTreeMap;
 use std::sync::Arc;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 
@@ -258,23 +260,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 #[cfg(test)]
 mod tests_cursor_move {
   use super::*;
-
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::buf::opt::FileFormatOption;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
 
   #[test]
   fn nowrap1() {
@@ -2173,26 +2158,6 @@ mod tests_cursor_move {
 #[cfg(test)]
 mod tests_insert_text {
   use super::*;
-
-  use crate::prelude::*;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::buf::opt::FileFormatOption;
-  use compact_str::CompactString;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use jiff::fmt::friendly::Designator::Compact;
-  use std::collections::BTreeMap;
 
   #[test]
   fn nowrap1() {
@@ -6477,8 +6442,6 @@ mod tests_delete_text {
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
-  use jiff::fmt::friendly::Designator::Compact;
-  use std::collections::BTreeMap;
 
   #[test]
   fn nowrap1() {

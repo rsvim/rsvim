@@ -14,7 +14,6 @@ use crate::ui::widget::window::opt::*;
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::sync::Arc;

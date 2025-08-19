@@ -28,7 +28,6 @@ use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree(
@@ -281,7 +280,6 @@ mod tests_goto_normal_mode {
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
-  use std::collections::BTreeMap;
 
   #[test]
   fn nowrap1() {
@@ -643,7 +641,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
   };
-  use std::collections::BTreeMap;
 
   #[test]
   fn nowrap1() {
