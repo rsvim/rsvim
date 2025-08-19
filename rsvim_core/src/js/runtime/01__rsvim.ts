@@ -53,7 +53,7 @@ export class Rsvim {
  */
 export class RsvimCmd {
   /**
-   * Echo message to the command line widget.
+   * Echo message to the command-line.
    *
    * @example
    * ```javascript
