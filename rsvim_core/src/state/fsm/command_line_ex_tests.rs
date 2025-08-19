@@ -771,10 +771,10 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Goto Normal-2
     {
-      let cmdline_content = stateful._goto_normal_mode_impl(&data_access);
-      info!("cmdline content:{cmdline_content:?}");
+      let cmdline_input_content = stateful._goto_normal_mode_impl(&data_access);
+      info!("cmdline content:{cmdline_input_content:?}");
       // After go to normal mode, content is cleared
-      assert_eq!("", cmdline_content.as_str());
+      assert_eq!("", cmdline_input_content.as_str());
     }
   }
 }

@@ -98,7 +98,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    let cmdline_content = self._goto_normal_mode_impl(data_access);
+    let cmdline_input_content = self._goto_normal_mode_impl(data_access);
     let state = data_access.state.clone();
     let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
 
@@ -106,7 +106,7 @@ impl CommandLineExStateful {
     current_handle.spawn_blocking(move || {
       jsrt_tick_dispatcher
         .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-          ExCommandReq::new(next_future_id(), cmdline_content),
+          ExCommandReq::new(next_future_id(), cmdline_input_content),
         ))
         .unwrap();
     });
@@ -156,26 +156,27 @@ impl CommandLineExStateful {
       cursor_viewport.row_idx() as isize,
     );
 
-    // Clear command-line contents.
+    // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    let cmdline_content =
+    let cmdline_input_content =
       contents.command_line_input().rope().to_compact_string();
 
+    contents.command_line_message_mut().clear();
     cursor_ops::cursor_clear(
       &mut tree,
       cmdline_id,
       contents.command_line_input_mut(),
     );
 
-    let cmdline_content = cmdline_content.trim();
+    let cmdline_input_content = cmdline_input_content.trim();
     tree
       .command_line_mut()
       .unwrap()
       .indicator_mut()
       .set_symbol(IndicatorSymbol::Empty);
 
-    cmdline_content.to_compact_string()
+    cmdline_input_content.to_compact_string()
   }
 
   pub fn goto_normal_mode(

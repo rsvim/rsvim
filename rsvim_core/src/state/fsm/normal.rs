@@ -132,7 +132,7 @@ impl NormalStateful {
     let cmdline = tree.command_line_mut().unwrap();
 
     cmdline.show_input();
-    message_ops::refresh_view(cmdline);
+    // message_ops::refresh_view(cmdline);
 
     let _previous_cursor = cmdline.insert_cursor(cursor);
     debug_assert!(_previous_cursor.is_none());
