@@ -43,9 +43,6 @@ export class Rsvim {
  * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
  * user can move cursor to command-line and input commands. Rather than referring to the
  * ["ex commands"](https://vimhelp.org/intro.txt.html#Ex-mode) in Vim editor.
- *
- * The ex command makes up for an irreplaceable function of interacting with the editor in Rsvim's
- * mouseless editing modes.
  * :::
  *
  * @example
