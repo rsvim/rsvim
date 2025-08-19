@@ -625,8 +625,7 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let e = format!("Module {filename:?} not fetched: {exception:?}");
-        anyhow::bail!(e);
+        anyhow::bail!(exception);
       }
     };
 
@@ -637,9 +636,7 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e =
-        format!("Module {filename:?} failed to initialize: {exception:?}");
-      anyhow::bail!(e);
+      anyhow::bail!(exception);
     }
 
     match module.evaluate(tc_scope) {
@@ -656,8 +653,7 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!("Module {filename:?} failed to evaluate: {exception:?}");
-      anyhow::bail!(e);
+      anyhow::bail!(exception);
     }
 
     Ok(())

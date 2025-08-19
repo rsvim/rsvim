@@ -435,7 +435,7 @@ impl EventLoop {
           let current_handle = tokio::runtime::Handle::current();
           let jsrt_to_master = self.jsrt_to_master.clone();
           let message_id = js::next_future_id();
-          let e = format!("Error! {e}").to_compact_string();
+          let e = e.to_compact_string();
           current_handle.spawn_blocking(move || {
             jsrt_to_master
               .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
