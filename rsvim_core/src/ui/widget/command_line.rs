@@ -193,6 +193,11 @@ impl CommandLine {
     self.options = *options;
   }
 
+  /// Get binded global text contents.
+  pub fn text_contents(&self) -> TextContentsWk {
+    self.text_contents.clone()
+  }
+
   /// Get input viewport.
   pub fn input_viewport(&self) -> ViewportArc {
     self.input_viewport.clone()
