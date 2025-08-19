@@ -275,7 +275,6 @@ mod tests_raw_cursor_move_y_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -581,7 +580,6 @@ mod tests_raw_cursor_move_x_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -872,7 +870,6 @@ mod tests_raw_cursor_move_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -1120,7 +1117,6 @@ mod tests_raw_cursor_move_to {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -1376,9 +1372,7 @@ mod tests_raw_window_scroll_y_by {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowOptions, WindowOptionsBuilder, content,
-  };
+  use crate::ui::widget::window::content;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -2373,7 +2367,6 @@ mod tests_raw_window_scroll_x_by {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -3625,7 +3618,6 @@ mod tests_raw_window_scroll_to {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -4303,7 +4295,6 @@ mod tests_cursor_move {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -8479,7 +8470,6 @@ mod tests_goto_command_line_ex_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -8564,7 +8554,6 @@ mod tests_goto_insert_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
   use crate::state::ops::message_ops::{refresh_view, set_message_visible};
