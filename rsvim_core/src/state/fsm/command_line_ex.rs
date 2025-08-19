@@ -8,7 +8,7 @@ use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
-use crate::ui::widget::command_line::indicator::CommandLineIndicatorSymbol;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 
 use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 use compact_str::{CompactString, ToCompactString};
@@ -169,7 +169,7 @@ impl CommandLineExStateful {
       .command_line_mut()
       .unwrap()
       .indicator_mut()
-      .set_symbol(CommandLineIndicatorSymbol::Empty);
+      .set_symbol(IndicatorSymbol::Empty);
 
     cmdline_content.to_compact_string()
   }

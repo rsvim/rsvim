@@ -7,7 +7,7 @@ use crate::state::ops::cursor_ops;
 use crate::state::ops::{GotoInsertModeVariant, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::indicator::CommandLineIndicatorSymbol;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
 
 use compact_str::CompactString;
@@ -135,9 +135,7 @@ impl NormalStateful {
     let _previous_cursor = cmdline.insert_cursor(cursor);
     debug_assert!(_previous_cursor.is_none());
     cmdline.move_cursor_to(0, 0);
-    cmdline
-      .indicator_mut()
-      .set_symbol(CommandLineIndicatorSymbol::Ex);
+    cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
   }
