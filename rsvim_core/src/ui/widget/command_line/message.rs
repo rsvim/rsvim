@@ -21,13 +21,13 @@ impl Message {
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
-    message_viewport: ViewportWk,
+    viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
     Message {
       base,
       text_contents,
-      viewport: message_viewport,
+      viewport,
     }
   }
 
