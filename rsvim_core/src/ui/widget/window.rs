@@ -53,18 +53,18 @@ pub struct Window {
 
 impl Window {
   pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let window_root = RootContainer::new(shape);
-    let window_root_id = window_root.id();
-    let window_root_node = WindowNode::RootContainer(window_root);
-    let window_root_actual_shape = window_root.actual_shape();
+    let root = RootContainer::new(shape);
+    let root_id = root.id();
+    let root_node = WindowNode::RootContainer(root);
+    let root_actual_shape = root.actual_shape();
 
-    let mut base = Itree::new(window_root_node);
+    let mut base = Itree::new(root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
+        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -72,17 +72,17 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let window_content =
+    let content =
       Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
-    let window_content_id = window_content.id();
-    let window_content_node = WindowNode::Content(window_content);
+    let content_id = content.id();
+    let content_node = WindowNode::Content(content);
 
-    base.bounded_insert(window_root_id, window_content_node);
+    base.bounded_insert(root_id, content_node);
 
     Window {
       base,
       options: *opts,
-      content_id: window_content_id,
+      content_id,
       cursor_id: None,
       buffer,
       viewport,
