@@ -774,21 +774,11 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      bufs.clone(),
-    );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let stateful = NormalStateful::default();
@@ -803,13 +793,6 @@ mod tests_raw_cursor_move_by {
         Operation::CursorMoveBy((0, -2)),
         Operation::CursorMoveBy((-3, 0)),
       ];
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        contents.clone(),
-        Event::Key(key_event),
-      );
       for c in commands.iter() {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
@@ -826,13 +809,6 @@ mod tests_raw_cursor_move_by {
         Operation::CursorMoveBy((-5, 0)),
         Operation::CursorMoveBy((0, -1)),
       ];
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        contents.clone(),
-        Event::Key(key_event),
-      );
       for c in commands.iter() {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
