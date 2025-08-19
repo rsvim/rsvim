@@ -262,6 +262,22 @@ impl CommandLine {
   }
 }
 
+// Show/Hide switch {
+impl CommandLine {
+  pub fn show_message(&mut self) {
+    self.indicator_mut().set_visible(false);
+    self.input_mut().set_visible(false);
+    self.message_mut().set_visible(true);
+  }
+
+  pub fn show_input(&mut self) {
+    self.indicator_mut().set_visible(true);
+    self.input_mut().set_visible(true);
+    self.message_mut().set_visible(false);
+  }
+}
+// Show/Hide switch }
+
 // Widgets {
 impl CommandLine {
   /// Command-line input widget.
