@@ -53,27 +53,27 @@ mod normal_tests;
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess {
+  pub event: Event,
   pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
-  pub event: Event,
 }
 
 impl StatefulDataAccess {
   pub fn new(
+    event: Event,
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    event: Event,
   ) -> Self {
     StatefulDataAccess {
+      event,
       state,
       tree,
       buffers,
       contents,
-      event,
     }
   }
 }
