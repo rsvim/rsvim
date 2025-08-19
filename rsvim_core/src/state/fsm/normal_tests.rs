@@ -14,9 +14,6 @@ use crate::state::ops::{cmdline_ops, cursor_ops};
 use crate::state::{State, StateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
-use crate::tests::tree::{
-  make_tree_with_buffers, make_tree_with_buffers_cmdline,
-};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::{Tree, TreeArc};
 use crate::ui::viewport::{
@@ -43,6 +40,8 @@ pub fn make_tree_with_buffer_opts(
   TextContentsArc,
   StatefulDataAccess,
 ) {
+  use crate::tests::tree::make_tree_with_buffers;
+
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
@@ -96,6 +95,8 @@ pub fn make_tree_with_cmdline(
   TextContentsArc,
   StatefulDataAccess,
 ) {
+  use crate::tests::tree::make_tree_with_buffers_cmdline;
+
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
