@@ -362,7 +362,7 @@ fn _max_len_chars_since_line(
   max_len_chars
 }
 
-pub fn _update_viewport_after_text_changed(
+fn _update_viewport_after_text_changed(
   tree: &mut Tree,
   id: TreeNodeId,
   text: &Text,
