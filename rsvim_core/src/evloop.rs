@@ -16,6 +16,7 @@ use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
+use compact_str::ToCompactString;
 use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
@@ -415,10 +416,19 @@ impl EventLoop {
   /// Initialize user config file.
   fn _init_config(&mut self) -> IoResult<()> {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
-      self
+      match self
         .js_runtime
         .execute_module(config_entry.to_str().unwrap(), None)
-        .unwrap();
+      {
+        Ok(_) => { /* do nothing */ }
+        Err(e) => {
+          // Print error message to command-line
+          let mut tree = lock!(self.tree);
+          let mut contents = lock!(self.contents);
+          let e = format!("Error! {e}").to_compact_string();
+          cmdline_ops::set_cmdline_message(&mut tree, &mut contents, e);
+        }
+      }
     }
     Ok(())
   }

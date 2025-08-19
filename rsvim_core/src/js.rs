@@ -656,11 +656,7 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!(
-        "Failed to evaluate user config module {filename:?}: {exception:?}"
-      );
-      error!("{e}");
-      eprintln!("{e}");
+      let e = format!("Module {filename:?} failed to evaluate: {exception:?}");
       anyhow::bail!(e);
     }
 
