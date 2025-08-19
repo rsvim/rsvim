@@ -106,10 +106,10 @@ pub struct EventLoop {
   /// Channel: "master" => "js runtime"
   /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
+  // Receiver: js runtime receive from master.
+  // pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   /// Sender: master send to js runtime.
   pub master_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
-  /// Receiver: js runtime receive from master.
-  /// pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
 
   /// Channel: "js runtime" => "master"
   ///
