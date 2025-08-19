@@ -4,9 +4,7 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::{
-  CursorInsertPayload, Operation, cursor_ops, message_ops,
-};
+use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
