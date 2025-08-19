@@ -39,7 +39,7 @@ export class Rsvim {
 /**
  * The `Rsvim.cmd` global object for ex commands.
  *
- * :::note
+ * :::tip
  * The "ex command" mostly describes the product function, when user types ":" in normal mode,
  * user can move cursor to command-line and input commands. This makes up for an irreplaceable
  * function of interacting with the editor in Vim's mouseless editing modes.
