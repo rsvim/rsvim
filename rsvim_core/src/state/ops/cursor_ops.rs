@@ -9,7 +9,7 @@ use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
   ViewportSearchDirection,
 };
-use crate::ui::widget::window::WindowLocalOptions;
+use crate::ui::widget::window::WindowOptions;
 
 use compact_str::CompactString;
 
@@ -293,7 +293,7 @@ pub fn raw_cursor_viewport_move_to(
 pub fn raw_viewport_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
-  window_options: &WindowLocalOptions,
+  window_options: &WindowOptions,
   text: &Text,
   window_scroll_to_op: Operation,
 ) -> Option<ViewportArc> {

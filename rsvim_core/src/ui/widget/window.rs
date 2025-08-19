@@ -43,7 +43,7 @@ widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowNode>,
-  options: WindowLocalOptions,
+  options: WindowOptions,
 
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
@@ -54,11 +54,7 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(
-    opts: &WindowLocalOptions,
-    shape: IRect,
-    buffer: BufferWk,
-  ) -> Self {
+  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
@@ -111,12 +107,12 @@ impl Widgetable for Window {
 // Attributes
 impl Window {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
   }
 
