@@ -7,7 +7,6 @@ use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
 use crate::{inode_impl, lock};
-use compact_str::CompactString;
 
 #[derive(Debug, Clone)]
 /// Commandline message.
