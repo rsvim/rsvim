@@ -625,7 +625,7 @@ mod tests_raw_cursor_move_x_by {
     let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      bufs.clone(),
+      lines,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -1204,16 +1204,10 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 7),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1295,16 +1289,10 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1896,16 +1884,10 @@ mod tests_raw_window_scroll_x_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
@@ -1968,16 +1950,10 @@ mod tests_raw_window_scroll_x_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     // Before cursor scroll
