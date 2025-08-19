@@ -1,6 +1,5 @@
 //! Command-line widget.
 
-use crate::buf::text::Text;
 use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
