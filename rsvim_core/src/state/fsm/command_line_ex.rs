@@ -156,7 +156,7 @@ impl CommandLineExStateful {
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     let cmdline_content =
-      contents.command_line_content().rope().to_compact_string();
+      contents.command_line_input().rope().to_compact_string();
 
     cursor_ops::cursor_clear(
       &mut tree,
@@ -200,7 +200,7 @@ impl CommandLineExStateful {
     cursor_ops::cursor_move(
       &mut tree,
       cmdline_id,
-      contents.command_line_content(),
+      contents.command_line_input(),
       op,
       true,
     );

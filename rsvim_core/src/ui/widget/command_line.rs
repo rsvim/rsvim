@@ -98,29 +98,30 @@ impl CommandLine {
     indicator_node.set_visible(false);
     base.bounded_insert(root_id, indicator_node);
 
-    let cmdline_content_shape =
+    let input_shape =
       IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let cmdline_content_actual_shape =
-        geo_rect_as!(cmdline_content_shape, u16);
+      let input_actual_shape = geo_rect_as!(input_shape, u16);
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
         &options,
-        text_contents.command_line_content(),
-        &cmdline_content_actual_shape,
+        text_contents.command_line_input(),
+        &input_actual_shape,
         0,
         0,
       );
       let input_cursor_viewport = CursorViewport::from_top_left(
         &input_viewport,
-        text_contents.command_line_content(),
+        text_contents.command_line_input(),
       );
+
+      let message_actual_shape = geo_rect_as!(shape, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
-        &cmdline_content_actual_shape,
+        &message_actual_shape,
         0,
         0,
       );
@@ -131,7 +132,7 @@ impl CommandLine {
     let message_viewport = Viewport::to_arc(message_viewport);
 
     let cmdline_content = Input::new(
-      cmdline_content_shape,
+      input_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
     );

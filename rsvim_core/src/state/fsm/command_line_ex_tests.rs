@@ -335,7 +335,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -377,16 +377,14 @@ mod tests_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -427,7 +425,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -510,7 +508,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -552,16 +550,14 @@ mod tests_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -602,7 +598,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -701,7 +697,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -745,16 +741,14 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
