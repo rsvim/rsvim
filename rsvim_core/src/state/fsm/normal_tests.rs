@@ -893,23 +893,13 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
         .unwrap(),
-      bufs.clone(),
-    );
-    let state = State::to_arc(State::new());
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let stateful = NormalStateful::default();
@@ -918,17 +908,6 @@ mod tests_raw_cursor_move_by {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // step-1: Move to the end of line-1.
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree.clone(),
-      bufs.clone(),
-      contents.clone(),
-      cmds,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     let command = Operation::CursorMoveBy((lines[0].len() as isize, 0));
     stateful._test_raw_cursor_move(&data_access, command);
 
@@ -938,13 +917,6 @@ mod tests_raw_cursor_move_by {
     assert_eq!(actual1.char_idx(), 27);
 
     // step-2: Move down to line-2.
-    let data_access = StatefulDataAccess::new(
-      state.clone(),
-      tree.clone(),
-      bufs.clone(),
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let command = Operation::CursorMoveBy((0, 1));
     stateful._test_raw_cursor_move(&data_access, command);
 
@@ -958,21 +930,6 @@ mod tests_raw_cursor_move_by {
 #[cfg(test)]
 mod tests_raw_cursor_move_to {
   use super::*;
-
-  use crate::buf::opt::BufferLocalOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap1() {
@@ -988,23 +945,13 @@ mod tests_raw_cursor_move_to {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
-      bufs.clone(),
-    );
-    let state = State::to_arc(State::new());
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let stateful = NormalStateful::default();
@@ -1013,17 +960,6 @@ mod tests_raw_cursor_move_to {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Step-1
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let cmds = ExCommandsManager::to_arc(ExCommandsManager::new());
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      cmds,
-      jsrt_tick_dispatcher,
-      Event::Key(key_event),
-    );
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 0)));
 
