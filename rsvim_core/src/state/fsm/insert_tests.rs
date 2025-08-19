@@ -12,7 +12,6 @@ use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
-use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
 use crate::ui::canvas::Canvas;
@@ -44,6 +43,8 @@ pub fn make_tree_with_buffer_opts(
   TextContentsArc,
   StatefulDataAccess,
 ) {
+  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
