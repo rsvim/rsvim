@@ -41,15 +41,31 @@ pub fn make_tree_with_buffer_opts(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+  let state = State::to_arc(State::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  (tree, state, bufs, buf, contents)
+
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let data_access = StatefulDataAccess::new(
+    Event::Key(key_event),
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    jsrt_tick_dispatcher,
+  );
+
+  (tree, state, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree(
@@ -62,6 +78,7 @@ pub fn make_tree(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
@@ -77,6 +94,7 @@ pub fn make_tree_with_cmdline(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
@@ -88,9 +106,24 @@ pub fn make_tree_with_cmdline(
     bufs.clone(),
     contents.clone(),
   );
+  let state = State::to_arc(State::new());
+
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-  (tree, state, bufs, buf, contents)
+  let data_access = StatefulDataAccess::new(
+    Event::Key(key_event),
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    jsrt_tick_dispatcher,
+  );
+
+  (tree, state, bufs, buf, contents, data_access)
 }
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
