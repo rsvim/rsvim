@@ -79,6 +79,7 @@ def test(name, miri, jobs):
     else:
         jobs = f" -j {jobs[0]}"
 
+    set_env("RUST_BACKTRACE", "full")
     if miri is not None:
         set_env(
             "MIRIFLAGS",
