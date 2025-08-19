@@ -77,7 +77,7 @@ mod tests_nowrap {
     let expect = vec![":"];
 
     let cmdline_indicator =
-      CommandLineIndicator::new(terminal_shape, CommandLineIndicatorSymbol::Ex);
+      CommandLineIndicator::new(terminal_shape, IndicatorSymbol::Ex);
     let actual = make_canvas(terminal_size, &cmdline_indicator);
     assert_canvas(&actual, &expect);
   }

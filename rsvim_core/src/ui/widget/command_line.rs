@@ -8,23 +8,23 @@ use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
 };
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::command_line::content::CommandLineContent;
-use crate::ui::widget::command_line::indicator::CommandLineIndicator;
-use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::window::WindowLocalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
 
 use std::sync::Arc;
-// Re-export
-use crate::ui::widget::command_line::message::CommandLineMessage;
-use crate::ui::widget::window::WindowLocalOptionsBuilder;
-pub use indicator::CommandLineIndicatorSymbol;
 
-pub mod content;
+// Re-export
+pub use indicator::*;
+pub use input::*;
+pub use message::*;
+pub use root::*;
+
 pub mod indicator;
+pub mod input;
 pub mod message;
 pub mod root;
 
@@ -36,9 +36,9 @@ pub mod indicator_tests;
 pub enum CommandLineNode {
   CommandLineRootContainer(CommandLineRootContainer),
   CommandLineIndicator(CommandLineIndicator),
-  CommandLineContent(CommandLineContent),
+  CommandLineContent(Input),
   Cursor(Cursor),
-  CommandLineMessage(CommandLineMessage),
+  CommandLineMessage(Message),
 }
 
 inode_enum_dispatcher!(
@@ -97,7 +97,7 @@ impl CommandLine {
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
     let cmdline_indicator = CommandLineIndicator::new(
       cmdline_indicator_shape,
-      CommandLineIndicatorSymbol::Empty,
+      IndicatorSymbol::Empty,
     );
     let cmdline_indicator_id = cmdline_indicator.id();
     let mut cmdline_indicator_node =
@@ -137,7 +137,7 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let cmdline_content = CommandLineContent::new(
+    let cmdline_content = Input::new(
       cmdline_content_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -148,7 +148,7 @@ impl CommandLine {
     cmdline_content_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_content_node);
 
-    let cmdline_message = CommandLineMessage::new(
+    let cmdline_message = Message::new(
       shape,
       text_contents.clone(),
       Arc::downgrade(&message_viewport),
@@ -267,7 +267,7 @@ impl CommandLine {
 // Widgets {
 impl CommandLine {
   /// Command-line content widget.
-  pub fn content(&self) -> &CommandLineContent {
+  pub fn content(&self) -> &Input {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -284,7 +284,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line content widget.
-  pub fn content_mut(&mut self) -> &mut CommandLineContent {
+  pub fn content_mut(&mut self) -> &mut Input {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),
@@ -301,7 +301,7 @@ impl CommandLine {
   }
 
   /// Command-line message widget
-  pub fn message(&self) -> &CommandLineMessage {
+  pub fn message(&self) -> &Message {
     debug_assert!(self.base.node(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.message_id).unwrap(),
@@ -318,7 +318,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line message widget.
-  pub fn message_mut(&mut self) -> &mut CommandLineMessage {
+  pub fn message_mut(&mut self) -> &mut Message {
     debug_assert!(self.base.node_mut(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.message_id).unwrap(),

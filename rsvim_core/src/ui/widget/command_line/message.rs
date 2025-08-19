@@ -1,4 +1,4 @@
-//! Commandline's text content widget.
+//! Commandline's message widget.
 
 use crate::content::TextContentsWk;
 use crate::prelude::*;
@@ -11,13 +11,13 @@ use compact_str::CompactString;
 
 #[derive(Debug, Clone)]
 /// Commandline message.
-pub struct CommandLineMessage {
+pub struct Message {
   base: InodeBase,
   message_contents: TextContentsWk,
   message_viewport: ViewportWk,
 }
 
-impl CommandLineMessage {
+impl Message {
   /// Make window content.
   pub fn new(
     shape: IRect,
@@ -25,7 +25,7 @@ impl CommandLineMessage {
     message_viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
-    CommandLineMessage {
+    Message {
       base,
       message_contents: text_contents,
       message_viewport,
@@ -53,9 +53,9 @@ impl CommandLineMessage {
   }
 }
 
-inode_impl!(CommandLineMessage, base);
+inode_impl!(Message, base);
 
-impl Widgetable for CommandLineMessage {
+impl Widgetable for Message {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let contents = self.message_contents.upgrade().unwrap();
