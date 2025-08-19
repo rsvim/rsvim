@@ -573,13 +573,10 @@ impl EventLoop {
           let command_line = tree_clone.command_line_mut().unwrap();
           let command_line_message = command_line.message_mut();
           command_line_message.set_message(req.message.clone());
-          let command_line_content =
-            command_line_message.get_text_contents().upgrade().unwrap();
-          let command_line_content = lock!(command_line_content);
           _update_viewport_after_text_changed(
             &mut tree,
             command_line.id(),
-            command_line_content.command_line_message(),
+            lock!(self.contents).command_line_message(),
           );
           trace!("Receive req echo_req:{:?} - done", req.message);
         }

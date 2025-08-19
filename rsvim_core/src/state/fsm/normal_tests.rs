@@ -8999,11 +8999,8 @@ mod tests_goto_insert_mode {
       let mut tree = lock!(tree);
       let mut tree_clone = tree.clone();
       let cmd_line = tree_clone.command_line_mut().unwrap();
-      let cmd_line_message = cmd_line.message();
-      let message_content =
-        cmd_line_message.get_text_contents().upgrade().unwrap();
-      let message_content = lock!(message_content);
-      let message_text = message_content.command_line_message();
+      let contents = lock!(contents);
+      let message_text = contents.command_line_message();
       _update_viewport_after_text_changed(
         &mut tree,
         cmd_line.id(),
