@@ -18,7 +18,7 @@ mod file_format_tests;
 
 #[derive(Debug, Copy, Clone, Builder)]
 /// Local buffer options.
-pub struct LocalOptions {
+pub struct BufferLocalOptions {
   #[builder(default = defaults::buf::TAB_STOP)]
   tab_stop: u16,
 
@@ -29,7 +29,7 @@ pub struct LocalOptions {
   file_format: FileFormatOption,
 }
 
-impl LocalOptions {
+impl BufferLocalOptions {
   /// Buffer 'tab-stop' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>.
