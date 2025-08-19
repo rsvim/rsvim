@@ -6,7 +6,7 @@ use derive_builder::Builder;
 
 #[derive(Debug, Copy, Clone, Builder)]
 /// Window local options.
-pub struct WindowLocalOptions {
+pub struct LocalOptions {
   #[builder(default = defaults::win::WRAP)]
   wrap: bool,
 
@@ -17,7 +17,7 @@ pub struct WindowLocalOptions {
   scroll_off: u16,
 }
 
-impl WindowLocalOptions {
+impl LocalOptions {
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
