@@ -13,24 +13,17 @@ pub fn set_cmdline_message(
   payload: CompactString,
 ) {
   debug_assert!(tree.command_line().is_some());
-  text_contents.command_line_message_mut().clear();
-  text_contents
-    .command_line_message_mut()
-    .insert_at(0, 0, payload.clone());
 
-  let opts = *tree.command_line().unwrap().options();
-  let actual_shape = *tree.command_line().unwrap().message().actual_shape();
+  let message_text = text_contents.command_line_message_mut();
+  message_text.clear();
+  message_text.insert_at(0, 0, payload);
 
-  let new_message_viewport = Viewport::to_arc(Viewport::view(
-    &opts,
-    text_contents.command_line_message(),
-    &actual_shape,
-    0,
-    0,
-  ));
+  let cmdline = tree.command_line_mut().unwrap();
+  let opts = *cmdline.options();
+  let actual_shape = *cmdline.message().actual_shape();
 
-  tree
-    .command_line_mut()
-    .unwrap()
-    .set_message_viewport(new_message_viewport);
+  let new_message_viewport =
+    Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
+
+  cmdline.set_message_viewport(new_message_viewport);
 }
