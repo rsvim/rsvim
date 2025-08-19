@@ -236,11 +236,6 @@ impl CommandLine {
     self.input_cursor_viewport = cursor_viewport;
   }
 
-  /// Get binded global text contents.
-  pub fn text_contents(&self) -> TextContentsWk {
-    self.text_contents.clone()
-  }
-
   /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
