@@ -18,7 +18,7 @@ use crate::{
 use indicator::{Indicator, IndicatorSymbol};
 use input::Input;
 use message::Message;
-use root::CommandLineRootContainer;
+use root::RootContainer;
 
 use std::sync::Arc;
 
@@ -33,28 +33,29 @@ pub mod indicator_tests;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
-  CommandLineRootContainer(CommandLineRootContainer),
-  CommandLineIndicator(Indicator),
-  CommandLineContent(Input),
+  RootContainer(RootContainer),
+  Indicator(Indicator),
+  Input(Input),
   Cursor(Cursor),
-  CommandLineMessage(Message),
+  Message(Message),
 }
 
 inode_enum_dispatcher!(
   CommandLineNode,
-  CommandLineRootContainer,
-  CommandLineIndicator,
-  CommandLineContent,
+  RootContainer,
+  Indicator,
+  Input,
   Cursor,
-  CommandLineMessage
+  Message
 );
+
 widget_enum_dispatcher!(
   CommandLineNode,
-  CommandLineRootContainer,
-  CommandLineIndicator,
-  CommandLineContent,
+  RootContainer,
+  Indicator,
+  Input,
   Cursor,
-  CommandLineMessage
+  Message
 );
 
 #[derive(Debug, Clone)]
@@ -85,10 +86,9 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let cmdline_root = CommandLineRootContainer::new(shape);
+    let cmdline_root = RootContainer::new(shape);
     let cmdline_root_id = cmdline_root.id();
-    let cmdline_root_node =
-      CommandLineNode::CommandLineRootContainer(cmdline_root);
+    let cmdline_root_node = CommandLineNode::RootContainer(cmdline_root);
 
     let mut base = Itree::new(cmdline_root_node);
 
@@ -98,7 +98,7 @@ impl CommandLine {
       Indicator::new(cmdline_indicator_shape, IndicatorSymbol::Empty);
     let cmdline_indicator_id = cmdline_indicator.id();
     let mut cmdline_indicator_node =
-      CommandLineNode::CommandLineIndicator(cmdline_indicator);
+      CommandLineNode::Indicator(cmdline_indicator);
     cmdline_indicator_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
 
@@ -140,8 +140,7 @@ impl CommandLine {
       Arc::downgrade(&input_viewport),
     );
     let cmdline_content_id = cmdline_content.id();
-    let mut cmdline_content_node =
-      CommandLineNode::CommandLineContent(cmdline_content);
+    let mut cmdline_content_node = CommandLineNode::Input(cmdline_content);
     cmdline_content_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_content_node);
 
@@ -151,8 +150,7 @@ impl CommandLine {
       Arc::downgrade(&message_viewport),
     );
     let cmdline_message_id = cmdline_message.id();
-    let cmdline_message_node =
-      CommandLineNode::CommandLineMessage(cmdline_message);
+    let cmdline_message_node = CommandLineNode::Message(cmdline_message);
     base.bounded_insert(cmdline_root_id, cmdline_message_node);
 
     Self {
@@ -208,7 +206,7 @@ impl CommandLine {
   /// Set viewport for content.
   pub fn set_content_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport.clone();
-    if let Some(CommandLineNode::CommandLineContent(content)) =
+    if let Some(CommandLineNode::Input(content)) =
       self.base.node_mut(self.content_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -218,7 +216,7 @@ impl CommandLine {
   /// Set viewport for message.
   pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
     self.message_viewport = viewport.clone();
-    if let Some(CommandLineNode::CommandLineMessage(content)) =
+    if let Some(CommandLineNode::Message(content)) =
       self.base.node_mut(self.message_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -268,11 +266,11 @@ impl CommandLine {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
-      CommandLineNode::CommandLineContent(_)
+      CommandLineNode::Input(_)
     ));
 
     match self.base.node(self.content_id).unwrap() {
-      CommandLineNode::CommandLineContent(w) => {
+      CommandLineNode::Input(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }
@@ -285,11 +283,11 @@ impl CommandLine {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),
-      CommandLineNode::CommandLineContent(_)
+      CommandLineNode::Input(_)
     ));
 
     match self.base.node_mut(self.content_id).unwrap() {
-      CommandLineNode::CommandLineContent(w) => {
+      CommandLineNode::Input(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }
@@ -302,11 +300,11 @@ impl CommandLine {
     debug_assert!(self.base.node(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.message_id).unwrap(),
-      CommandLineNode::CommandLineMessage(_)
+      CommandLineNode::Message(_)
     ));
 
     match self.base.node(self.message_id).unwrap() {
-      CommandLineNode::CommandLineMessage(w) => {
+      CommandLineNode::Message(w) => {
         debug_assert_eq!(w.id(), self.message_id);
         w
       }
@@ -319,11 +317,11 @@ impl CommandLine {
     debug_assert!(self.base.node_mut(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.message_id).unwrap(),
-      CommandLineNode::CommandLineMessage(_)
+      CommandLineNode::Message(_)
     ));
 
     match self.base.node_mut(self.message_id).unwrap() {
-      CommandLineNode::CommandLineMessage(w) => {
+      CommandLineNode::Message(w) => {
         debug_assert_eq!(w.id(), self.message_id);
         w
       }
@@ -336,11 +334,11 @@ impl CommandLine {
     debug_assert!(self.base.node(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.indicator_id).unwrap(),
-      CommandLineNode::CommandLineIndicator(_)
+      CommandLineNode::Indicator(_)
     ));
 
     match self.base.node(self.indicator_id).unwrap() {
-      CommandLineNode::CommandLineIndicator(w) => {
+      CommandLineNode::Indicator(w) => {
         debug_assert_eq!(w.id(), self.indicator_id);
         w
       }
@@ -353,11 +351,11 @@ impl CommandLine {
     debug_assert!(self.base.node_mut(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.indicator_id).unwrap(),
-      CommandLineNode::CommandLineIndicator(_)
+      CommandLineNode::Indicator(_)
     ));
 
     match self.base.node_mut(self.indicator_id).unwrap() {
-      CommandLineNode::CommandLineIndicator(w) => {
+      CommandLineNode::Indicator(w) => {
         debug_assert_eq!(w.id(), self.indicator_id);
         w
       }

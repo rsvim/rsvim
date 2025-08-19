@@ -8742,7 +8742,7 @@ mod tests_goto_insert_mode {
 
   use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
   use crate::state::ops::message_ops::{refresh_view, set_message_visible};
-  use crate::ui::widget::command_line::CommandLineNode::CommandLineMessage;
+  use crate::ui::widget::command_line::CommandLineNode::Message;
   use compact_str::ToCompactString;
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,

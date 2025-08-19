@@ -7,18 +7,18 @@ use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone, Copy)]
 /// Commandline root container.
-pub struct CommandLineRootContainer {
+pub struct RootContainer {
   base: InodeBase,
 }
 
-impl CommandLineRootContainer {
+impl RootContainer {
   pub fn new(shape: IRect) -> Self {
-    CommandLineRootContainer {
+    RootContainer {
       base: InodeBase::new(shape),
     }
   }
 }
 
-inode_impl!(CommandLineRootContainer, base);
+inode_impl!(RootContainer, base);
 
-impl Widgetable for CommandLineRootContainer {}
+impl Widgetable for RootContainer {}
