@@ -7436,7 +7436,7 @@ mod tests_goto_command_line_ex_mode {
       let contents = contents.clone();
       let mut tree = lock!(tree);
       let mut contents = lock!(contents);
-      cmdline_ops::set_cmdline_message(
+      cmdline_ops::cmdline_set_message(
         &mut tree,
         &mut contents,
         CompactString::new("Test echo"),
@@ -7832,7 +7832,7 @@ mod tests_goto_insert_mode {
       let contents = contents.clone();
       let mut tree = lock!(tree);
       let mut contents = lock!(contents);
-      cmdline_ops::set_cmdline_message(
+      cmdline_ops::cmdline_set_message(
         &mut tree,
         &mut contents,
         CompactString::new("Test echo"),

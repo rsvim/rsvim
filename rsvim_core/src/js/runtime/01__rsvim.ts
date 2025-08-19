@@ -87,6 +87,53 @@ export class RsvimCmd {
  */
 export class RsvimOpt {
   /**
+   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   *
+   * Local to Window.
+   *
+   * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
+   * It only affects the way the file is displayed, not its contents.
+   *
+   * This option is not used when the {@link wrap} option is `false`.
+   *
+   * @returns {boolean}
+   *
+   * @defaultValue `false`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'lineBreak' option.
+   * const value = Rsvim.opt.lineBreak;
+   * ```
+   */
+  get lineBreak(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
+
+  /**
+   * Set the _line-break_ option.
+   *
+   * @param {boolean} value - The _line-break_ option.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'lineBreak' option.
+   * Rsvim.opt.lineBreak = true;
+   * ```
+   */
+  set lineBreak(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
+
+  /**
    * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
@@ -136,53 +183,6 @@ export class RsvimOpt {
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
-  }
-
-  /**
-   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
-   *
-   * Local to Window.
-   *
-   * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
-   * It only affects the way the file is displayed, not its contents.
-   *
-   * This option is not used when the {@link wrap} option is `false`.
-   *
-   * @returns {boolean}
-   *
-   * @defaultValue `false`
-   *
-   * @example
-   * ```javascript
-   * // Get the 'lineBreak' option.
-   * const value = Rsvim.opt.lineBreak;
-   * ```
-   */
-  get lineBreak(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_line_break();
-  }
-
-  /**
-   * Set the _line-break_ option.
-   *
-   * @param {boolean} value - The _line-break_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
-   *
-   * @example
-   * ```javascript
-   * // Set the 'lineBreak' option.
-   * Rsvim.opt.lineBreak = true;
-   * ```
-   */
-  set lineBreak(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_line_break(value);
   }
 }
 

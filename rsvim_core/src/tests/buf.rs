@@ -1,15 +1,10 @@
 //! Buffer utils for testing.
 
-#![allow(unused_imports)]
-
 use crate::buf::opt::BufferOptions;
-use crate::buf::text::Text;
 use crate::buf::{Buffer, BufferArc, BuffersManager, BuffersManagerArc};
 use crate::prelude::*;
 
-use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::fs::File;
-use std::io::BufReader;
+use ropey::{Rope, RopeBuilder};
 
 pub fn make_buffer_from_lines(
   terminal_size: U16Size,

@@ -6,7 +6,7 @@ use crate::content::{TextContents, TextContentsArc};
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
-use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
+use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
@@ -16,6 +16,7 @@ use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
+use compact_str::ToCompactString;
 use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
@@ -105,10 +106,17 @@ pub struct EventLoop {
   /// Channel: "master" => "js runtime"
   /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
-  /// Receiver: master receive from js runtime.
-  pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
+  // Receiver: js runtime receive from master.
+  // pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   /// Sender: master send to js runtime.
   pub master_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
+
+  /// Channel: "js runtime" => "master"
+  ///
+  /// Sender: js runtime send to master.
+  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  /// Receiver: master receive from js runtime.
+  pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
 
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
@@ -293,7 +301,7 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      jsrt_to_master,
+      jsrt_to_master.clone(),
       jsrt_from_master,
       cli_opts.clone(),
       tree.clone(),
@@ -318,6 +326,7 @@ impl EventLoop {
       blocked_tracker,
       js_runtime,
       worker_to_master,
+      jsrt_to_master,
       master_from_worker,
       master_from_jsrt,
       master_to_jsrt,
@@ -363,7 +372,7 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      jsrt_to_master,
+      jsrt_to_master.clone(),
       jsrt_from_master,
       cli_opts.clone(),
       tree.clone(),
@@ -388,6 +397,7 @@ impl EventLoop {
       blocked_tracker,
       js_runtime,
       worker_to_master,
+      jsrt_to_master,
       master_from_worker,
       master_from_jsrt,
       master_to_jsrt,
@@ -415,10 +425,26 @@ impl EventLoop {
   /// Initialize user config file.
   fn _init_config(&mut self) -> IoResult<()> {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
-      self
+      match self
         .js_runtime
         .execute_module(config_entry.to_str().unwrap(), None)
-        .unwrap();
+      {
+        Ok(_) => { /* do nothing */ }
+        Err(e) => {
+          // Send error message to command-line
+          let current_handle = tokio::runtime::Handle::current();
+          let jsrt_to_master = self.jsrt_to_master.clone();
+          let message_id = js::next_future_id();
+          let e = e.to_compact_string();
+          current_handle.spawn_blocking(move || {
+            jsrt_to_master
+              .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
+                jsmsg::PrintReq::new(message_id, e),
+              ))
+              .unwrap();
+          });
+        }
+      }
     }
     Ok(())
   }
@@ -570,7 +596,7 @@ impl EventLoop {
           trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
-          cmdline_ops::set_cmdline_message(
+          cmdline_ops::cmdline_set_message(
             &mut tree,
             &mut contents,
             req.payload,

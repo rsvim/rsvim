@@ -25,7 +25,7 @@ pub fn set_wrap(
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
-  assert!(args.length() == 1);
+  debug_assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
@@ -56,7 +56,7 @@ pub fn set_line_break(
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
-  assert!(args.length() == 1);
+  debug_assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);

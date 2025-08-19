@@ -4,18 +4,18 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
-use std::io::Write;
 use std::time::Duration;
 
 #[tokio::test]
-#[should_panic(
-  expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-)]
-async fn test_echo1_should_panic_with_missing_param() {
+// #[should_panic(
+//   expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
+// )]
+async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
 
   let src: &str = r#"
@@ -23,14 +23,7 @@ async fn test_echo1_should_panic_with_missing_param() {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
@@ -46,18 +39,33 @@ async fn test_echo1_should_panic_with_missing_param() {
     );
   }
 
-  event_loop.initialize().unwrap();
+  event_loop.initialize()?;
+  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let contents = lock!(event_loop.contents);
+    let payload = contents.command_line_message().rope().to_string();
+    let payload = payload.trim();
+    assert!(payload.contains(
+      "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
+    ));
+  }
+
+  Ok(())
 }
 
 #[tokio::test]
-#[should_panic(
-  expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-)]
-async fn test_echo2_should_panic_with_null_param() {
+// #[should_panic(
+//   expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
+// )]
+async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
 
   let src: &str = r#"
@@ -65,14 +73,7 @@ async fn test_echo2_should_panic_with_null_param() {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
-        .unwrap();
-    config_entry.write_all(src.as_bytes()).unwrap();
-    config_entry.flush().unwrap();
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
@@ -88,7 +89,21 @@ async fn test_echo2_should_panic_with_null_param() {
     );
   }
 
-  event_loop.initialize().unwrap();
+  event_loop.initialize()?;
+  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let contents = lock!(event_loop.contents);
+    let payload = contents.command_line_message().rope().to_string();
+    let payload = payload.trim();
+    assert!(payload.contains(
+      "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
+    ));
+  }
+
+  Ok(())
 }
 
 #[tokio::test]
@@ -108,13 +123,7 @@ async fn test_echo3() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  {
-    std::fs::create_dir_all(tp.xdg_config_home.join("rsvim"))?;
-    let mut config_entry =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))?;
-    config_entry.write_all(src.as_bytes())?;
-    config_entry.flush()?;
-  }
+  make_configs(&tp, src);
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 

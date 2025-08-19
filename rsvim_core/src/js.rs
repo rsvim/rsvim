@@ -619,18 +619,13 @@ impl JsRuntime {
 
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
-    // local file system, no network/http downloading will be involved.
     let module = match fetch_module_tree(tc_scope, filename, None) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
-        let _exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let e = format!("User config not found: {filename:?}");
-        error!("{e}");
-        eprintln!("{e}");
-        anyhow::bail!(e);
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        anyhow::bail!(exception);
       }
     };
 
@@ -641,12 +636,7 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!(
-        "Failed to instantiate user config module {filename:?}: {exception:?}"
-      );
-      error!("{e}");
-      eprintln!("{e}");
-      anyhow::bail!(e);
+      anyhow::bail!(exception);
     }
 
     match module.evaluate(tc_scope) {
@@ -663,12 +653,7 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let e = format!(
-        "Failed to evaluate user config module {filename:?}: {exception:?}"
-      );
-      error!("{e}");
-      eprintln!("{e}");
-      anyhow::bail!(e);
+      anyhow::bail!(exception);
     }
 
     Ok(())
