@@ -2,7 +2,7 @@
 
 use super::normal::*;
 
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
