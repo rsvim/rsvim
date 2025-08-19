@@ -17,7 +17,6 @@ use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
-
 use indicator::CommandLineIndicatorSymbol;
 use message::CommandLineMessage;
 
