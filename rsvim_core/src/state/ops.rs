@@ -3,7 +3,6 @@
 use compact_str::CompactString;
 
 pub mod cursor_ops;
-pub mod message_ops;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
