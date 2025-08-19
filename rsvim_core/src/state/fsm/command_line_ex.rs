@@ -96,9 +96,8 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
+    let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
-    let state = data_access.state.clone();
-    let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
 
     let current_handle = tokio::runtime::Handle::current();
     current_handle.spawn_blocking(move || {
