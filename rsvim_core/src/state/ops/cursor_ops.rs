@@ -362,7 +362,7 @@ fn _max_len_chars_since_line(
   max_len_chars
 }
 
-pub fn _update_viewport_after_text_changed(
+fn _update_viewport_after_text_changed(
   tree: &mut Tree,
   id: TreeNodeId,
   text: &Text,
@@ -414,7 +414,6 @@ pub fn _update_viewport_after_text_changed(
   match node {
     TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
     TreeNode::CommandLine(cmdline) => {
-      cmdline.set_message_viewport(updated_viewport.clone());
       cmdline.set_input_viewport(updated_viewport.clone())
     }
     _ => unreachable!(),

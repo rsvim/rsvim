@@ -19,7 +19,8 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global editor options.
+ * - `Rsvim.opt`: Global options.
+ * - `Rsvim.cmd`: Ex commands.
  *
  * @example
  * ```javascript
@@ -36,7 +37,13 @@ export class Rsvim {
 }
 
 /**
- * The `Rsvim.cmd` global object for rsvim core commands.
+ * The `Rsvim.cmd` global object for ex commands.
+ *
+ * :::tip
+ * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
+ * user can move cursor to command-line and input commands. Rather than referring to the
+ * ["ex commands"](https://vimhelp.org/intro.txt.html#Ex-mode) in Vim editor.
+ * :::
  *
  * @example
  * ```javascript
@@ -48,7 +55,7 @@ export class Rsvim {
  */
 export class RsvimCmd {
   /**
-   * Echo message to the command line widget.
+   * Echo message to the command-line.
    *
    * @example
    * ```javascript

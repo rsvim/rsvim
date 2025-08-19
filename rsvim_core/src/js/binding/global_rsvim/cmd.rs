@@ -1,7 +1,8 @@
-use crate::js::JsRuntime;
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
+use crate::js::{self, JsRuntime};
+use crate::prelude::*;
+
 use compact_str::CompactString;
-use log::trace;
 
 /// Javascript `echo` API.
 pub fn echo(
@@ -13,6 +14,8 @@ pub fn echo(
   let message = args.get(0).to_rust_string_lossy(scope).to_string();
   trace!("echo: {:?}", message);
 
+  let message_id = js::next_future_id();
+
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let jsrt_to_mstr = state.jsrt_to_master.clone();
@@ -20,8 +23,8 @@ pub fn echo(
   current_handle.spawn_blocking(move || {
     let message = CompactString::from(message);
     jsrt_to_mstr
-      .blocking_send(JsRuntimeToEventLoopMessage::EchoReq(
-        crate::js::msg::EchoReq::new(message),
+      .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
+        jsmsg::PrintReq::new(message_id, message),
       ))
       .unwrap();
   });

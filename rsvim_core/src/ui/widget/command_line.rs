@@ -67,8 +67,6 @@ pub struct CommandLine {
   cursor_id: Option<TreeNodeId>,
   message_id: TreeNodeId,
 
-  text_contents: TextContentsWk,
-
   input_viewport: ViewportArc,
   input_cursor_viewport: CursorViewportArc,
   message_viewport: ViewportArc,
@@ -160,7 +158,6 @@ impl CommandLine {
       input_id,
       message_id,
       cursor_id: None,
-      text_contents,
       input_viewport,
       input_cursor_viewport,
       message_viewport,
@@ -236,11 +233,6 @@ impl CommandLine {
     self.input_cursor_viewport = cursor_viewport;
   }
 
-  /// Get binded global text contents.
-  pub fn text_contents(&self) -> TextContentsWk {
-    self.text_contents.clone()
-  }
-
   /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
@@ -261,6 +253,22 @@ impl CommandLine {
     self.message_id
   }
 }
+
+// Show/Hide switch {
+impl CommandLine {
+  pub fn show_message(&mut self) {
+    self.indicator_mut().set_visible(false);
+    self.input_mut().set_visible(false);
+    self.message_mut().set_visible(true);
+  }
+
+  pub fn show_input(&mut self) {
+    self.indicator_mut().set_visible(true);
+    self.input_mut().set_visible(true);
+    self.message_mut().set_visible(false);
+  }
+}
+// Show/Hide switch }
 
 // Widgets {
 impl CommandLine {
