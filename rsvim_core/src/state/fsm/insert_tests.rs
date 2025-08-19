@@ -20,7 +20,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::WindowContent;
+use crate::ui::widget::window::content::Content;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
@@ -222,11 +222,8 @@ pub fn make_canvas(
       terminal_size.height() as isize,
     ),
   );
-  let window_content = WindowContent::new(
-    shape,
-    Arc::downgrade(&buffer),
-    Arc::downgrade(&viewport),
-  );
+  let window_content =
+    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
