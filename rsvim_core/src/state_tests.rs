@@ -1,5 +1,8 @@
 use super::state::*;
 
+use crate::state::fsm::StatefulValue;
+use crate::state::mode::Mode;
+
 #[test]
 fn update_state_machine1() {
   let mut state = State::new();
