@@ -128,7 +128,6 @@ impl CommandLineExStateful {
 
     // Hide "cmdline message", show "cmdline indicator/input"
     set_message_visible(cmdline, true);
-    refresh_view(cmdline);
 
     debug_assert!(cmdline.cursor_id().is_some());
 

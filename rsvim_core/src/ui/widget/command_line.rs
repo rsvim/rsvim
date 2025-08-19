@@ -205,8 +205,8 @@ impl CommandLine {
     self.message_viewport.clone()
   }
 
-  /// Set viewport for content.
-  pub fn set_content_viewport(&mut self, viewport: ViewportArc) {
+  /// Set viewport for input.
+  pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport.clone();
     if let Some(CommandLineNode::Input(content)) =
       self.base.node_mut(self.input_id)
@@ -225,12 +225,12 @@ impl CommandLine {
     }
   }
 
-  /// Get input cursor viewport.
+  /// Get viewport for input cursor.
   pub fn input_cursor_viewport(&self) -> CursorViewportArc {
     self.input_cursor_viewport.clone()
   }
 
-  /// Set input cursor viewport.
+  /// Set viewport for input cursor.
   pub fn set_input_cursor_viewport(
     &mut self,
     cursor_viewport: CursorViewportArc,

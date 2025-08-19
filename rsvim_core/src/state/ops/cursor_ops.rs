@@ -414,7 +414,7 @@ pub fn _update_viewport_after_text_changed(
   match node {
     TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
     TreeNode::CommandLine(cmdline) => {
-      cmdline.set_content_viewport(updated_viewport.clone())
+      cmdline.set_input_viewport(updated_viewport.clone())
     }
     _ => unreachable!(),
   }
@@ -529,7 +529,7 @@ pub fn cursor_move(
         match node {
           TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
           TreeNode::CommandLine(cmdline) => {
-            cmdline.set_content_viewport(new_viewport.clone())
+            cmdline.set_input_viewport(new_viewport.clone())
           }
           _ => unreachable!(),
         }
