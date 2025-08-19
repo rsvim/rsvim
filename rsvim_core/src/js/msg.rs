@@ -50,12 +50,13 @@ impl TimeoutResp {
 
 #[derive(Debug)]
 pub struct PrintReq {
-  pub message: CompactString,
+  pub future_id: JsFutureId,
+  pub payload: CompactString,
 }
 
 impl PrintReq {
-  pub fn new(message: CompactString) -> Self {
-    PrintReq { message }
+  pub fn new(future_id: JsFutureId, payload: CompactString) -> Self {
+    PrintReq { future_id, payload }
   }
 }
 

@@ -566,15 +566,14 @@ impl EventLoop {
     if let Some(message) = message {
       match message {
         JsRuntimeToEventLoopMessage::PrintReq(req) => {
-          trace!("Receive PrintReq:{:?}", req.message.clone());
+          trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
           cmdline_ops::set_cmdline_message(
             &mut tree,
             &mut contents,
-            req.message.clone(),
+            req.payload,
           );
-          trace!("Receive PrintReq:{:?} - done", req.message.clone());
         }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
@@ -586,7 +585,6 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            trace!("Receive TimeoutReq:{:?} - done", req.future_id);
           });
         }
       }
