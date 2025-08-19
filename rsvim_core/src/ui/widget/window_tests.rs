@@ -10,6 +10,7 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::window::opt::*;
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
