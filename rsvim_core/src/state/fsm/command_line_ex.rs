@@ -253,11 +253,11 @@ impl CommandLineExStateful {
 
     let cmdline = tree.command_line_mut().unwrap();
     let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.cursor_viewport().line_idx(), 0);
+    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
     debug_assert!(
       text
         .rope()
-        .get_line(cmdline.cursor_viewport().line_idx())
+        .get_line(cmdline.input_cursor_viewport().line_idx())
         .is_some()
     );
 

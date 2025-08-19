@@ -203,33 +203,36 @@ impl CommandLine {
     self.message_viewport.clone()
   }
 
-  /// Set viewport for content.
-  pub fn set_content_viewport(&mut self, viewport: ViewportArc) {
+  /// Set viewport for input.
+  pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport.clone();
-    if let Some(CommandLineNode::Input(content)) =
+    if let Some(CommandLineNode::Input(input)) =
       self.base.node_mut(self.input_id)
     {
-      content.set_viewport(Arc::downgrade(&viewport));
+      input.set_viewport(Arc::downgrade(&viewport));
     }
   }
 
   /// Set viewport for message.
   pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
     self.message_viewport = viewport.clone();
-    if let Some(CommandLineNode::Message(content)) =
+    if let Some(CommandLineNode::Message(message)) =
       self.base.node_mut(self.message_id)
     {
-      content.set_viewport(Arc::downgrade(&viewport));
+      message.set_viewport(Arc::downgrade(&viewport));
     }
   }
 
-  /// Get cursor viewport.
-  pub fn cursor_viewport(&self) -> CursorViewportArc {
+  /// Get cursor viewport for input.
+  pub fn input_cursor_viewport(&self) -> CursorViewportArc {
     self.input_cursor_viewport.clone()
   }
 
-  /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  /// Set cursor viewport for input.
+  pub fn set_input_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) {
     self.input_cursor_viewport = cursor_viewport;
   }
 
@@ -248,8 +251,8 @@ impl CommandLine {
     self.indicator_id
   }
 
-  /// Command-line content widget ID.
-  pub fn content_id(&self) -> TreeNodeId {
+  /// Command-line input widget ID.
+  pub fn input_id(&self) -> TreeNodeId {
     self.input_id
   }
 

@@ -38,7 +38,7 @@ pub fn refresh_view(command_line: &mut CommandLine) {
   let content_viewport_arc = Viewport::to_arc(content_viewport);
   let message = text_contents.command_line_message_mut();
   message.clear();
-  command_line.set_content_viewport(content_viewport_arc.clone());
+  command_line.set_input_viewport(content_viewport_arc.clone());
   let message_viewport = Viewport::view(
     command_line.options(),
     message,
