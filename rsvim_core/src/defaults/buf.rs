@@ -1,4 +1,4 @@
-//! Vim buffer's default options.
+//! Vim buffer's options default value.
 
 use crate::buf::opt::*;
 
