@@ -7,9 +7,8 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::{
-  CommandLineIndicatorSymbol, CommandLineNode,
-};
+use crate::ui::widget::command_line::CommandLineNode;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 
 use crate::state::ops::message_ops::{refresh_view, set_message_visible};
 use compact_str::{CompactString, ToCompactString};
@@ -157,12 +156,12 @@ impl CommandLineExStateful {
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     let cmdline_content =
-      contents.command_line_content().rope().to_compact_string();
+      contents.command_line_input().rope().to_compact_string();
 
     cursor_ops::cursor_clear(
       &mut tree,
       cmdline_id,
-      contents.command_line_content_mut(),
+      contents.command_line_input_mut(),
     );
 
     let cmdline_content = cmdline_content.trim();
@@ -170,7 +169,7 @@ impl CommandLineExStateful {
       .command_line_mut()
       .unwrap()
       .indicator_mut()
-      .set_symbol(CommandLineIndicatorSymbol::Empty);
+      .set_symbol(IndicatorSymbol::Empty);
 
     cmdline_content.to_compact_string()
   }
@@ -201,7 +200,7 @@ impl CommandLineExStateful {
     cursor_ops::cursor_move(
       &mut tree,
       cmdline_id,
-      contents.command_line_content(),
+      contents.command_line_input(),
       op,
       true,
     );
@@ -232,7 +231,7 @@ impl CommandLineExStateful {
     cursor_ops::cursor_insert(
       &mut tree,
       cmdline_id,
-      contents.command_line_content_mut(),
+      contents.command_line_input_mut(),
       payload,
     );
 
@@ -250,15 +249,15 @@ impl CommandLineExStateful {
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    let text = contents.command_line_content_mut();
+    let text = contents.command_line_input_mut();
 
     let cmdline = tree.command_line_mut().unwrap();
     let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.cursor_viewport().line_idx(), 0);
+    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
     debug_assert!(
       text
         .rope()
-        .get_line(cmdline.cursor_viewport().line_idx())
+        .get_line(cmdline.input_cursor_viewport().line_idx())
         .is_some()
     );
 

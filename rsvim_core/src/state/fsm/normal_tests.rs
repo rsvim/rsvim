@@ -2,7 +2,7 @@
 
 use super::normal::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
@@ -22,9 +22,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -33,8 +31,8 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
-  buffer_local_opts: BufferLocalOptions,
-  window_local_opts: WindowLocalOptions,
+  buffer_local_opts: BufferOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -55,7 +53,7 @@ pub fn make_tree_with_buffer_opts(
 
 pub fn make_tree(
   terminal_size: U16Size,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -64,13 +62,13 @@ pub fn make_tree(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
 }
 
 pub fn make_tree_with_cmdline(
   terminal_size: U16Size,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -79,7 +77,7 @@ pub fn make_tree_with_cmdline(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -269,7 +267,7 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_raw_cursor_move_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -277,7 +275,6 @@ mod tests_raw_cursor_move_y_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -290,10 +287,7 @@ mod tests_raw_cursor_move_y_by {
 
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
     );
 
@@ -339,10 +333,7 @@ mod tests_raw_cursor_move_y_by {
     ];
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -388,10 +379,7 @@ mod tests_raw_cursor_move_y_by {
     ];
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -444,10 +432,7 @@ mod tests_raw_cursor_move_y_by {
     ];
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -491,16 +476,13 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -547,10 +529,7 @@ mod tests_raw_cursor_move_y_by {
     ];
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -593,7 +572,7 @@ mod tests_raw_cursor_move_y_by {
 mod tests_raw_cursor_move_x_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -601,7 +580,6 @@ mod tests_raw_cursor_move_x_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -614,16 +592,13 @@ mod tests_raw_cursor_move_x_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -669,16 +644,13 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -725,16 +697,13 @@ mod tests_raw_cursor_move_x_by {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -780,16 +749,13 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -843,16 +809,13 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -899,7 +862,7 @@ mod tests_raw_cursor_move_x_by {
 mod tests_raw_cursor_move_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -907,7 +870,6 @@ mod tests_raw_cursor_move_by {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -928,16 +890,13 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1008,16 +967,13 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1093,16 +1049,13 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1156,7 +1109,7 @@ mod tests_raw_cursor_move_by {
 mod tests_raw_cursor_move_to {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -1164,7 +1117,6 @@ mod tests_raw_cursor_move_to {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::tests::log::init as test_log_init;
   use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::widget::window::WindowLocalOptionsBuilder;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -1185,16 +1137,13 @@ mod tests_raw_cursor_move_to {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1265,16 +1214,13 @@ mod tests_raw_cursor_move_to {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1351,16 +1297,13 @@ mod tests_raw_cursor_move_to {
     ];
 
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       bufs.clone(),
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
@@ -1417,7 +1360,7 @@ mod tests_raw_cursor_move_to {
 mod tests_raw_window_scroll_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -1429,9 +1372,7 @@ mod tests_raw_window_scroll_y_by {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder, content,
-  };
+  use crate::ui::widget::window::content;
 
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -1445,10 +1386,7 @@ mod tests_raw_window_scroll_y_by {
 
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
     );
 
@@ -1527,10 +1465,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -1637,10 +1572,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 7),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -1738,10 +1670,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -1835,10 +1764,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -2105,10 +2031,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(15, 15),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -2216,10 +2139,7 @@ mod tests_raw_window_scroll_y_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(15, 15),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -2435,7 +2355,7 @@ mod tests_raw_window_scroll_y_by {
 mod tests_raw_window_scroll_x_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -2446,9 +2366,6 @@ mod tests_raw_window_scroll_x_by {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crossterm::event::{
@@ -2463,10 +2380,7 @@ mod tests_raw_window_scroll_x_by {
 
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
     );
 
@@ -2545,10 +2459,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -2664,10 +2575,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 7),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -2765,10 +2673,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -2864,10 +2769,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -3075,10 +2977,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -3361,10 +3260,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(15, 15),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -3472,10 +3368,7 @@ mod tests_raw_window_scroll_x_by {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(15, 15),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -3713,7 +3606,7 @@ mod tests_raw_window_scroll_x_by {
 mod tests_raw_window_scroll_to {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -3724,9 +3617,6 @@ mod tests_raw_window_scroll_to {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crossterm::event::{
@@ -3750,10 +3640,7 @@ mod tests_raw_window_scroll_to {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -3860,10 +3747,7 @@ mod tests_raw_window_scroll_to {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4130,10 +4014,7 @@ mod tests_raw_window_scroll_to {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4402,7 +4283,7 @@ mod tests_raw_window_scroll_to {
 mod tests_cursor_move {
   use super::*;
 
-  use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
+  use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -4413,9 +4294,6 @@ mod tests_cursor_move {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crossterm::event::{
@@ -4430,10 +4308,7 @@ mod tests_cursor_move {
 
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
     );
 
@@ -4478,10 +4353,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, _buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4526,10 +4398,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4651,17 +4520,14 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4783,17 +4649,14 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -4917,10 +4780,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 5),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -5222,17 +5082,14 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 5),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -5534,17 +5391,14 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 5),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -5847,10 +5701,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -5986,10 +5837,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -6167,10 +6015,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -6523,10 +6368,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(25, 7),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -6748,17 +6590,14 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(25, 7),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -6980,17 +6819,14 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(25, 7),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -7214,10 +7050,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(25, 7),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -7375,17 +7208,14 @@ mod tests_cursor_move {
       "  * The extra parts are been truncated.\r\n",
       "  * The extra parts are split into next row.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(15, 7),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -7544,17 +7374,14 @@ mod tests_cursor_move {
       "  * The extra parts are been truncated.\r",
       "  * The extra parts are split into next row.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(15, 7),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -7715,7 +7542,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -7897,7 +7724,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -8254,7 +8081,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(25, 7),
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -8482,10 +8309,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(25, 7),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
     );
 
@@ -8634,7 +8458,7 @@ mod tests_cursor_move {
 mod tests_goto_command_line_ex_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -8645,9 +8469,6 @@ mod tests_goto_command_line_ex_mode {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crossterm::event::{
@@ -8663,10 +8484,7 @@ mod tests_goto_command_line_ex_mode {
     let terminal_size = U16Size::new(10, 10);
     let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
     );
 
@@ -8694,7 +8512,7 @@ mod tests_goto_command_line_ex_mode {
     let actual_cursor = lock!(tree.clone())
       .command_line()
       .unwrap()
-      .cursor_viewport();
+      .input_cursor_viewport();
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 0);
     assert_eq!(actual_cursor.row_idx(), 0);
@@ -8722,7 +8540,7 @@ mod tests_goto_command_line_ex_mode {
 mod tests_goto_insert_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::fsm::InsertStateful;
@@ -8736,13 +8554,10 @@ mod tests_goto_insert_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
 
   use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
   use crate::state::ops::message_ops::{refresh_view, set_message_visible};
-  use crate::ui::widget::command_line::CommandLineNode::CommandLineMessage;
+  use crate::ui::widget::command_line::CommandLineNode::Message;
   use compact_str::ToCompactString;
   use crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
@@ -8759,10 +8574,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(30, 3);
     let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
     );
 
@@ -8861,10 +8673,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(30, 3);
     let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
     );
 
@@ -8963,10 +8772,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(30, 3);
     let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
     );
 
@@ -9065,10 +8871,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(30, 3);
     let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
     );
 
@@ -9168,10 +8971,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(60, 3);
     let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode with message command line\n"],
     );
 
@@ -9253,10 +9053,7 @@ mod tests_goto_insert_mode {
     let terminal_size = U16Size::new(60, 3);
     let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
       terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode with message command line\n"],
     );
 

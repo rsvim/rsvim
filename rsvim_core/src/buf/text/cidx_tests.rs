@@ -1,14 +1,14 @@
 use super::cidx::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
 
-fn make_default_opts() -> BufferLocalOptions {
-  BufferLocalOptionsBuilder::default().build().unwrap()
+fn make_default_opts() -> BufferOptions {
+  BufferOptionsBuilder::default().build().unwrap()
 }
 
 fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
@@ -20,7 +20,7 @@ fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
 }
 
 fn make_text_from_rope(
-  opts: BufferLocalOptions,
+  opts: BufferOptions,
   terminal_size: U16Size,
   rp: Rope,
 ) -> Text {
@@ -151,7 +151,7 @@ fn print_text_line_details(text: Text, line_idx: usize, msg: &str) {
 }
 
 fn assert_width_at(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   actual: &mut ColumnIndex,
   expect: &[usize],
@@ -164,7 +164,7 @@ fn assert_width_at(
 }
 
 fn assert_width_at_rev(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   actual: &mut ColumnIndex,
   expect: &[(usize, usize)],
@@ -177,7 +177,7 @@ fn assert_width_at_rev(
 }
 
 fn assert_width_before(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   actual: &mut ColumnIndex,
   expect: &[usize],
@@ -190,7 +190,7 @@ fn assert_width_before(
 }
 
 fn assert_width_before_rev(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   actual: &mut ColumnIndex,
   expect: &[(usize, usize)],
@@ -534,7 +534,7 @@ fn width7() {
 }
 
 fn assert_char_before(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   widx: &mut ColumnIndex,
   expect_before: &[(usize, Option<usize>)],
@@ -554,7 +554,7 @@ fn assert_char_before(
 }
 
 fn assert_char_at(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   widx: &mut ColumnIndex,
   expect_until: &[(usize, Option<usize>)],
@@ -576,7 +576,7 @@ fn assert_char_at(
 }
 
 fn assert_char_after(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   widx: &mut ColumnIndex,
   expect_after: &[(usize, Option<usize>)],
@@ -596,7 +596,7 @@ fn assert_char_after(
 }
 
 fn assert_last_char_until(
-  options: &BufferLocalOptions,
+  options: &BufferOptions,
   buf_line: &RopeSlice,
   widx: &mut ColumnIndex,
   expect_until: &[(usize, Option<usize>)],

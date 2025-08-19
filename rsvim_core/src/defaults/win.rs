@@ -1,6 +1,4 @@
-//! Vim window's default options.
-//!
-//! See: [`crate::ui::widget::window::WindowLocalOptions`].
+//! Vim window's options default value.
 
 pub const WRAP: bool = true;
 

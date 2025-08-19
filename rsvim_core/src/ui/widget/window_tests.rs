@@ -2,7 +2,7 @@
 
 use super::window::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{Buffer, BufferArc};
 use crate::prelude::*;
 use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -10,6 +10,7 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::window::opt::*;
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -22,7 +23,7 @@ use std::sync::Once;
 fn make_window_from_size(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &WindowLocalOptions,
+  window_options: &WindowOptions,
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
@@ -71,7 +72,7 @@ fn draw_after_init1() {
   test_log_init();
 
   let terminal_size = U16Size::new(10, 10);
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(
     terminal_size,
     buf_opts,
@@ -98,10 +99,8 @@ fn draw_after_init1() {
     "          ",
   ];
 
-  let window_local_options = WindowLocalOptionsBuilder::default()
-    .wrap(false)
-    .build()
-    .unwrap();
+  let window_local_options =
+    WindowOptionsBuilder::default().wrap(false).build().unwrap();
   let window =
     make_window_from_size(terminal_size, buf.clone(), &window_local_options);
   let mut actual = Canvas::new(terminal_size);

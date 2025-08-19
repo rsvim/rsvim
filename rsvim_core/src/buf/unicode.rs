@@ -1,6 +1,6 @@
 //! Unicode utils.
 
-use crate::buf::opt::{BufferLocalOptions, FileFormatOption};
+use crate::buf::opt::{BufferOptions, FileFormatOption};
 use crate::defaults::ascii::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
@@ -14,7 +14,7 @@ use icu::properties::{CodePointMapData, props::EastAsianWidth};
 /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/),
 /// implemented with
 /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
-pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
+pub fn char_width(opt: &BufferOptions, c: char) -> usize {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
@@ -47,7 +47,7 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
 }
 
 /// Get the printable cell symbol and its display width.
-pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> CompactString {
+pub fn char_symbol(opt: &BufferOptions, c: char) -> CompactString {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
@@ -74,12 +74,12 @@ pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> CompactString {
 }
 
 /// Get the display width for a unicode `str`.
-pub fn str_width(opt: &BufferLocalOptions, s: &str) -> usize {
+pub fn str_width(opt: &BufferOptions, s: &str) -> usize {
   s.chars().map(|c| char_width(opt, c)).sum()
 }
 
 /// Get the printable cell symbols and the display width for a unicode `str`.
-pub fn str_symbols(opt: &BufferLocalOptions, s: &str) -> CompactString {
+pub fn str_symbols(opt: &BufferOptions, s: &str) -> CompactString {
   s.chars().map(|c| char_symbol(opt, c)).fold(
     CompactString::with_capacity(s.len()),
     |mut init_symbol, mut symbol| {

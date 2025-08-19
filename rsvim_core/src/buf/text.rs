@@ -1,6 +1,6 @@
 //! Text content backend for buffer.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::BufferOptions;
 use crate::buf::unicode;
 use crate::prelude::*;
 
@@ -22,7 +22,7 @@ mod cidx_tests;
 pub struct Text {
   rope: Rope,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
-  options: BufferLocalOptions,
+  options: BufferOptions,
 }
 
 arc_mutex_ptr!(Text);
@@ -33,11 +33,7 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 }
 
 impl Text {
-  pub fn new(
-    opts: BufferLocalOptions,
-    canvas_size: U16Size,
-    rope: Rope,
-  ) -> Self {
+  pub fn new(opts: BufferOptions, canvas_size: U16Size, rope: Rope) -> Self {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
@@ -223,11 +219,11 @@ impl Text {
 
 // Options {
 impl Text {
-  pub fn options(&self) -> &BufferLocalOptions {
+  pub fn options(&self) -> &BufferOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+  pub fn set_options(&mut self, options: &BufferOptions) {
     self.options = *options;
   }
 }

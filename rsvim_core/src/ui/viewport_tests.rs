@@ -3,19 +3,16 @@
 use super::viewport::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{
-  BufferLocalOptions, BufferLocalOptionsBuilder, FileFormatOption,
-};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::prelude::*;
 use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::WindowContent;
-use crate::ui::widget::window::{
-  Window, WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::Window;
+use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -26,19 +23,16 @@ use std::io::{BufReader, BufWriter};
 use std::rc::Rc;
 use std::sync::{Arc, Once};
 
-pub fn make_nowrap() -> WindowLocalOptions {
-  WindowLocalOptionsBuilder::default()
-    .wrap(false)
-    .build()
-    .unwrap()
+pub fn make_nowrap() -> WindowOptions {
+  WindowOptionsBuilder::default().wrap(false).build().unwrap()
 }
 
-pub fn make_wrap_nolinebreak() -> WindowLocalOptions {
-  WindowLocalOptionsBuilder::default().build().unwrap()
+pub fn make_wrap_nolinebreak() -> WindowOptions {
+  WindowOptionsBuilder::default().build().unwrap()
 }
 
-pub fn make_wrap_linebreak() -> WindowLocalOptions {
-  WindowLocalOptionsBuilder::default()
+pub fn make_wrap_linebreak() -> WindowOptions {
+  WindowOptionsBuilder::default()
     .line_break(true)
     .build()
     .unwrap()
@@ -47,7 +41,7 @@ pub fn make_wrap_linebreak() -> WindowLocalOptions {
 pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &WindowLocalOptions,
+  window_options: &WindowOptions,
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
@@ -186,7 +180,7 @@ pub fn assert_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: WindowLocalOptions,
+  window_options: WindowOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
@@ -199,11 +193,8 @@ pub fn make_canvas(
       terminal_size.height() as isize,
     ),
   );
-  let window_content = WindowContent::new(
-    shape,
-    Arc::downgrade(&buffer),
-    Arc::downgrade(&viewport),
-  );
+  let window_content =
+    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
@@ -380,7 +371,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -438,7 +429,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -494,7 +485,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -540,7 +531,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
@@ -566,7 +557,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -643,7 +634,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -694,7 +685,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
@@ -720,7 +711,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
@@ -746,7 +737,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
@@ -772,7 +763,7 @@ mod tests_view_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -834,7 +825,7 @@ mod tests_view_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -879,7 +870,7 @@ mod tests_view_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(29, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -922,7 +913,7 @@ mod tests_view_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -967,7 +958,7 @@ mod tests_view_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(29, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -1014,7 +1005,7 @@ mod tests_view_nowrap_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -1072,7 +1063,7 @@ mod tests_view_nowrap_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -1130,7 +1121,7 @@ mod tests_view_nowrap_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -1188,7 +1179,7 @@ mod tests_view_nowrap_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -1246,7 +1237,7 @@ mod tests_view_nowrap_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -1299,7 +1290,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1338,7 +1329,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn new2() {
     let terminal_size = U16Size::new(27, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1397,7 +1388,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn new3() {
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1431,7 +1422,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn new4() {
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
@@ -1447,7 +1438,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn new5() {
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1487,7 +1478,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1528,7 +1519,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1569,7 +1560,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1610,7 +1601,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1652,7 +1643,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
@@ -1680,7 +1671,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_empty_buffer(terminal_size, buf_opts);
@@ -1708,7 +1699,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
@@ -1736,7 +1727,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 8);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1775,7 +1766,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1813,7 +1804,7 @@ mod tests_view_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1848,7 +1839,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn update1() {
     let terminal_size = U16Size::new(15, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -1930,7 +1921,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn update2() {
     let terminal_size = U16Size::new(15, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2012,7 +2003,7 @@ mod tests_view_wrap_nolinebreak {
   #[test]
   fn update3() {
     let terminal_size = U16Size::new(15, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2070,7 +2061,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2117,7 +2108,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2164,7 +2155,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2211,7 +2202,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2258,7 +2249,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2299,7 +2290,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2340,7 +2331,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2381,7 +2372,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2422,7 +2413,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2462,7 +2453,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2502,7 +2493,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
       .unwrap();
@@ -2542,7 +2533,7 @@ mod tests_view_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2586,7 +2577,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2627,7 +2618,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2668,7 +2659,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2714,7 +2705,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2755,7 +2746,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -2800,7 +2791,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -2851,7 +2842,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -2911,7 +2902,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -2964,7 +2955,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_empty_buffer(terminal_size, buf_opts);
@@ -2988,7 +2979,7 @@ mod tests_view_wrap_linebreak {
   #[test]
   fn new5() {
     let terminal_size = U16Size::new(31, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3039,7 +3030,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3090,7 +3081,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3142,7 +3133,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3194,7 +3185,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3245,7 +3236,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3296,7 +3287,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3370,7 +3361,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3442,7 +3433,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
@@ -3468,7 +3459,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
@@ -3494,7 +3485,7 @@ mod tests_view_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
@@ -3549,7 +3540,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3600,7 +3591,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3651,7 +3642,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3702,7 +3693,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3753,7 +3744,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3805,7 +3796,7 @@ mod tests_view_wrap_linebreak_startcol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -3848,7 +3839,7 @@ mod tests_search_anchor_downward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -4020,7 +4011,7 @@ mod tests_search_anchor_downward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -4241,7 +4232,7 @@ mod tests_search_anchor_downward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -4468,7 +4459,7 @@ mod tests_search_anchor_downward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -4698,7 +4689,7 @@ mod tests_search_anchor_downward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -4855,7 +4846,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -5085,7 +5076,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -5315,7 +5306,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -5553,7 +5544,7 @@ mod tests_search_anchor_downward_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -5790,7 +5781,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6003,7 +5994,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6216,7 +6207,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6315,7 +6306,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6567,7 +6558,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6638,7 +6629,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -6713,7 +6704,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -6968,7 +6959,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -7223,7 +7214,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -7307,7 +7298,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -7385,7 +7376,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -7587,7 +7578,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -7794,7 +7785,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -7966,7 +7957,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -8046,7 +8037,7 @@ mod tests_search_anchor_upward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -8330,7 +8321,7 @@ mod tests_search_anchor_upward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -8614,7 +8605,7 @@ mod tests_search_anchor_upward_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -8925,7 +8916,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -9186,7 +9177,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -9441,7 +9432,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(21, 7);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -9736,7 +9727,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -9991,7 +9982,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -10244,7 +10235,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(21, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -10462,7 +10453,7 @@ mod tests_search_anchor_horizontally_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -10965,7 +10956,7 @@ mod tests_search_anchor_horizontally_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -11388,7 +11379,7 @@ mod tests_search_anchor_horizontally_nowrap {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(
@@ -11821,7 +11812,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -12247,7 +12238,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -12673,7 +12664,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -13106,7 +13097,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -13542,7 +13533,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -14073,7 +14064,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -14459,7 +14450,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -14738,7 +14729,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
@@ -15093,7 +15084,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -15482,7 +15473,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -15871,7 +15862,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -16153,7 +16144,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -16435,7 +16426,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -16793,7 +16784,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -17151,7 +17142,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -17346,7 +17337,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -17681,7 +17672,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -18156,7 +18147,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
@@ -18582,7 +18573,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 4);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(

@@ -3,7 +3,7 @@
 use super::command_line_ex::*;
 
 use crate::buf::opt::FileFormatOption;
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::text::Text;
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
@@ -24,9 +24,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -35,7 +33,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree(
   terminal_size: U16Size,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -44,7 +42,7 @@ pub fn make_tree(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let tree =
@@ -57,8 +55,8 @@ pub fn make_tree(
 
 pub fn make_tree_with_cmdline_and_buffer_options(
   terminal_size: U16Size,
-  buffer_local_opts: BufferLocalOptions,
-  window_local_opts: WindowLocalOptions,
+  buffer_local_opts: BufferOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -83,7 +81,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
 
 pub fn make_tree_with_cmdline(
   terminal_size: U16Size,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -92,7 +90,7 @@ pub fn make_tree_with_cmdline(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_cmdline_and_buffer_options(
     terminal_size,
     buf_opts,
@@ -265,7 +263,7 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_goto_normal_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::ops::CursorInsertPayload;
@@ -277,9 +275,6 @@ mod tests_goto_normal_mode {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crate::state::fsm::NormalStateful;
@@ -293,10 +288,8 @@ mod tests_goto_normal_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(11, 5);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
@@ -330,7 +323,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -342,7 +335,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -376,7 +369,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
@@ -384,16 +377,14 @@ mod tests_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -422,7 +413,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -434,7 +425,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -461,14 +452,12 @@ mod tests_goto_normal_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(11, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline_and_buffer_options(
@@ -507,7 +496,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -519,7 +508,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -553,7 +542,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
@@ -561,16 +550,14 @@ mod tests_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -599,7 +586,7 @@ mod tests_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -611,7 +598,7 @@ mod tests_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -638,7 +625,7 @@ mod tests_goto_normal_mode {
 mod tests_confirm_ex_command_and_goto_normal_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::ops::CursorInsertPayload;
@@ -650,9 +637,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use crate::state::fsm::NormalStateful;
@@ -666,10 +650,8 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(11, 5);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
@@ -703,7 +685,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
@@ -715,7 +697,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
@@ -751,7 +733,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       let actual1 = lock!(tree.clone())
         .command_line()
         .unwrap()
-        .cursor_viewport();
+        .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 34);
       assert_eq!(actual1.row_idx(), 0);
@@ -759,16 +741,14 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
       let viewport =
         lock!(tree.clone()).command_line().unwrap().input_viewport();
-      let cmdline_eol = lock!(contents)
-        .command_line_content()
-        .options()
-        .end_of_line();
+      let cmdline_eol =
+        lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
       let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        lock!(contents).command_line_content(),
+        lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,

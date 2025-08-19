@@ -11,49 +11,49 @@ use geo::point;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
-pub enum CommandLineIndicatorSymbol {
+pub enum IndicatorSymbol {
   Empty,
   Ex,
   SearchForward,
   SearchBackard,
 }
 
-impl std::fmt::Display for CommandLineIndicatorSymbol {
+impl std::fmt::Display for IndicatorSymbol {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match *self {
-      CommandLineIndicatorSymbol::Empty => write!(f, " "),
-      CommandLineIndicatorSymbol::Ex => write!(f, ":"),
-      CommandLineIndicatorSymbol::SearchForward => write!(f, "/"),
-      CommandLineIndicatorSymbol::SearchBackard => write!(f, "?"),
+      IndicatorSymbol::Empty => write!(f, " "),
+      IndicatorSymbol::Ex => write!(f, ":"),
+      IndicatorSymbol::SearchForward => write!(f, "/"),
+      IndicatorSymbol::SearchBackard => write!(f, "?"),
     }
   }
 }
 
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
-pub struct CommandLineIndicator {
+pub struct Indicator {
   base: InodeBase,
-  symbol: CommandLineIndicatorSymbol,
+  symbol: IndicatorSymbol,
 }
 
-impl CommandLineIndicator {
-  pub fn new(shape: IRect, symbol: CommandLineIndicatorSymbol) -> Self {
+impl Indicator {
+  pub fn new(shape: IRect, symbol: IndicatorSymbol) -> Self {
     let base = InodeBase::new(shape);
-    CommandLineIndicator { base, symbol }
+    Indicator { base, symbol }
   }
 
-  pub fn symbol(&self) -> CommandLineIndicatorSymbol {
+  pub fn symbol(&self) -> IndicatorSymbol {
     self.symbol
   }
 
-  pub fn set_symbol(&mut self, symbol: CommandLineIndicatorSymbol) {
+  pub fn set_symbol(&mut self, symbol: IndicatorSymbol) {
     self.symbol = symbol;
   }
 }
 
-inode_impl!(CommandLineIndicator, base);
+inode_impl!(Indicator, base);
 
-impl Widgetable for CommandLineIndicator {
+impl Widgetable for Indicator {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let upos: U16Pos = actual_shape.min().into();

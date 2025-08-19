@@ -3,7 +3,7 @@
 use super::indicator::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::geo_size_as;
 use crate::prelude::*;
 use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -12,9 +12,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::{Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -28,7 +26,7 @@ mod tests_nowrap {
 
   fn make_canvas(
     terminal_size: U16Size,
-    cmdline_indicator: &CommandLineIndicator,
+    cmdline_indicator: &Indicator,
   ) -> Canvas {
     let mut canvas = Canvas::new(terminal_size);
     cmdline_indicator.draw(&mut canvas);
@@ -76,8 +74,7 @@ mod tests_nowrap {
 
     let expect = vec![":"];
 
-    let cmdline_indicator =
-      CommandLineIndicator::new(terminal_shape, CommandLineIndicatorSymbol::Ex);
+    let cmdline_indicator = Indicator::new(terminal_shape, IndicatorSymbol::Ex);
     let actual = make_canvas(terminal_size, &cmdline_indicator);
     assert_canvas(&actual, &expect);
   }

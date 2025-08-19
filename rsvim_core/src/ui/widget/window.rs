@@ -9,12 +9,10 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::content::WindowContent;
-use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
-
-// Re-export
-pub use opt::*;
+use content::Content;
+use opt::*;
+use root::RootContainer;
 
 use std::sync::Arc;
 
@@ -30,20 +28,20 @@ mod opt_tests;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  WindowRootContainer(WindowRootContainer),
-  WindowContent(WindowContent),
+  RootContainer(RootContainer),
+  Content(Content),
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
-widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
+inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowNode>,
-  options: WindowLocalOptions,
+  options: WindowOptions,
 
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
@@ -54,23 +52,19 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(
-    opts: &WindowLocalOptions,
-    shape: IRect,
-    buffer: BufferWk,
-  ) -> Self {
-    let window_root = WindowRootContainer::new(shape);
-    let window_root_id = window_root.id();
-    let window_root_node = WindowNode::WindowRootContainer(window_root);
-    let window_root_actual_shape = window_root.actual_shape();
+  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
+    let root = RootContainer::new(shape);
+    let root_id = root.id();
+    let root_node = WindowNode::RootContainer(root);
+    let root_actual_shape = root.actual_shape();
 
-    let mut base = Itree::new(window_root_node);
+    let mut base = Itree::new(root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
+        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -78,17 +72,17 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let window_content =
-      WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
-    let window_content_id = window_content.id();
-    let window_content_node = WindowNode::WindowContent(window_content);
+    let content =
+      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+    let content_id = content.id();
+    let content_node = WindowNode::Content(content);
 
-    base.bounded_insert(window_root_id, window_content_node);
+    base.bounded_insert(root_id, content_node);
 
     Window {
       base,
       options: *opts,
-      content_id: window_content_id,
+      content_id,
       cursor_id: None,
       buffer,
       viewport,
@@ -111,12 +105,12 @@ impl Widgetable for Window {
 // Attributes
 impl Window {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
   }
 
@@ -128,7 +122,7 @@ impl Window {
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(WindowNode::WindowContent(content)) =
+    if let Some(WindowNode::Content(content)) =
       self.base.node_mut(self.content_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -164,14 +158,14 @@ impl Window {
 // Viewport {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &WindowContent {
+  pub fn content(&self) -> &Content {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
-      WindowNode::WindowContent(_)
+      WindowNode::Content(_)
     ));
     match self.base.node(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => {
+      WindowNode::Content(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }
@@ -180,14 +174,14 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut WindowContent {
+  pub fn content_mut(&mut self) -> &mut Content {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),
-      WindowNode::WindowContent(_)
+      WindowNode::Content(_)
     ));
     match self.base.node_mut(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => {
+      WindowNode::Content(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }

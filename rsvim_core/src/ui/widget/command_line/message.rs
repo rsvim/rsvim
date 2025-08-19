@@ -1,4 +1,4 @@
-//! Commandline's text content widget.
+//! Commandline's message widget.
 
 use crate::content::TextContentsWk;
 use crate::prelude::*;
@@ -11,37 +11,36 @@ use compact_str::CompactString;
 
 #[derive(Debug, Clone)]
 /// Commandline message.
-pub struct CommandLineMessage {
+pub struct Message {
   base: InodeBase,
-  message_contents: TextContentsWk,
-  message_viewport: ViewportWk,
+  text_contents: TextContentsWk,
+  viewport: ViewportWk,
 }
 
-impl CommandLineMessage {
-  /// Make window content.
+impl Message {
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
-    message_viewport: ViewportWk,
+    viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
-    CommandLineMessage {
+    Message {
       base,
-      message_contents: text_contents,
-      message_viewport,
+      text_contents,
+      viewport,
     }
   }
 
   pub fn set_viewport(&mut self, viewport: ViewportWk) {
-    self.message_viewport = viewport;
+    self.viewport = viewport;
   }
 
   pub fn get_text_contents(&self) -> &TextContentsWk {
-    &self.message_contents
+    &self.text_contents
   }
 
   pub fn get_text_contents_mut(&mut self) -> &mut TextContentsWk {
-    &mut self.message_contents
+    &mut self.text_contents
   }
 
   pub fn set_message(&mut self, text: CompactString) {
@@ -53,14 +52,14 @@ impl CommandLineMessage {
   }
 }
 
-inode_impl!(CommandLineMessage, base);
+inode_impl!(Message, base);
 
-impl Widgetable for CommandLineMessage {
+impl Widgetable for Message {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
-    let contents = self.message_contents.upgrade().unwrap();
+    let contents = self.text_contents.upgrade().unwrap();
     let contents = lock!(contents);
-    let viewport = self.message_viewport.upgrade().unwrap();
+    let viewport = self.viewport.upgrade().unwrap();
 
     viewport.draw(contents.command_line_message(), actual_shape, canvas);
   }

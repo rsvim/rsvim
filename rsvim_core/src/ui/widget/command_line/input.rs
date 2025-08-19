@@ -1,4 +1,4 @@
-//! Commandline's text content widget.
+//! Commandline's input content widget.
 
 use crate::content::TextContentsWk;
 use crate::prelude::*;
@@ -9,22 +9,21 @@ use crate::ui::widget::Widgetable;
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
-/// Commandline text content.
-pub struct CommandLineContent {
+/// Commandline input content.
+pub struct Input {
   base: InodeBase,
   text_contents: TextContentsWk,
   viewport: ViewportWk,
 }
 
-impl CommandLineContent {
-  /// Make window content.
+impl Input {
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
-    CommandLineContent {
+    Input {
       base,
       text_contents,
       viewport,
@@ -36,15 +35,15 @@ impl CommandLineContent {
   }
 }
 
-inode_impl!(CommandLineContent, base);
+inode_impl!(Input, base);
 
-impl Widgetable for CommandLineContent {
+impl Widgetable for Input {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let contents = self.text_contents.upgrade().unwrap();
     let contents = lock!(contents);
     let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(contents.command_line_content(), actual_shape, canvas);
+    viewport.draw(contents.command_line_input(), actual_shape, canvas);
   }
 }

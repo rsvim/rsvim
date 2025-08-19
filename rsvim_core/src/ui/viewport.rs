@@ -3,7 +3,7 @@
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::widget::window::WindowLocalOptions;
+use crate::ui::widget::window::opt::WindowOptions;
 
 use litemap::LiteMap;
 use std::ops::Range;
@@ -555,7 +555,7 @@ impl Viewport {
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
   pub fn view(
-    opts: &WindowLocalOptions,
+    opts: &WindowOptions,
     text: &Text,
     shape: &U16Rect,
     start_line: usize,
@@ -585,7 +585,7 @@ impl Viewport {
   pub fn search_anchor(
     &self,
     direction: ViewportSearchDirection,
-    opts: &WindowLocalOptions,
+    opts: &WindowOptions,
     text: &Text,
     shape: &U16Rect,
     target_cursor_line: usize,
