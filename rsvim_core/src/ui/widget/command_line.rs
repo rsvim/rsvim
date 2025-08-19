@@ -9,7 +9,7 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
