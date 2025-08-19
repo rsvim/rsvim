@@ -6,8 +6,8 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::{
-  LocalOptions, LocalOptionsBuilder, Window, WindowGlobalOptions,
-  WindowGlobalOptionsBuilder,
+  Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
+  WindowLocalOptionsBuilder,
 };
 use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
 
@@ -147,7 +147,7 @@ pub struct Tree {
   global_options: WindowGlobalOptions,
 
   // Global-local options for windows.
-  global_local_options: LocalOptions,
+  global_local_options: WindowLocalOptions,
 }
 
 arc_mutex_ptr!(Tree);
@@ -173,7 +173,9 @@ impl Tree {
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
-      global_local_options: LocalOptionsBuilder::default().build().unwrap(),
+      global_local_options: WindowLocalOptionsBuilder::default()
+        .build()
+        .unwrap(),
     }
   }
 
@@ -460,15 +462,15 @@ impl Tree {
     self.global_options = *options;
   }
 
-  pub fn global_local_options(&self) -> &LocalOptions {
+  pub fn global_local_options(&self) -> &WindowLocalOptions {
     &self.global_local_options
   }
 
-  pub fn global_local_options_mut(&mut self) -> &mut LocalOptions {
+  pub fn global_local_options_mut(&mut self) -> &mut WindowLocalOptions {
     &mut self.global_local_options
   }
 
-  pub fn set_global_local_options(&mut self, options: &LocalOptions) {
+  pub fn set_global_local_options(&mut self, options: &WindowLocalOptions) {
     self.global_local_options = *options;
   }
 }

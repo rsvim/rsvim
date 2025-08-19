@@ -24,7 +24,9 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{LocalOptions, LocalOptionsBuilder};
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -33,7 +35,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree(
   terminal_size: U16Size,
-  window_local_opts: LocalOptions,
+  window_local_opts: WindowLocalOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -56,7 +58,7 @@ pub fn make_tree(
 pub fn make_tree_with_cmdline_and_buffer_options(
   terminal_size: U16Size,
   buffer_local_opts: BufferLocalOptions,
-  window_local_opts: LocalOptions,
+  window_local_opts: WindowLocalOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -81,7 +83,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
 
 pub fn make_tree_with_cmdline(
   terminal_size: U16Size,
-  window_local_opts: LocalOptions,
+  window_local_opts: WindowLocalOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -276,7 +278,9 @@ mod tests_goto_normal_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{LocalOptions, LocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::state::fsm::NormalStateful;
   use crossterm::event::{
@@ -289,8 +293,10 @@ mod tests_goto_normal_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(11, 5);
-    let window_options =
-      LocalOptionsBuilder::default().wrap(false).build().unwrap();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
@@ -459,8 +465,10 @@ mod tests_goto_normal_mode {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_options =
-      LocalOptionsBuilder::default().wrap(false).build().unwrap();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline_and_buffer_options(
@@ -643,7 +651,9 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{LocalOptions, LocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crate::state::fsm::NormalStateful;
   use crossterm::event::{
@@ -656,8 +666,10 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(11, 5);
-    let window_options =
-      LocalOptionsBuilder::default().wrap(false).build().unwrap();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let lines = vec![];
     let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);

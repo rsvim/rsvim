@@ -13,7 +13,9 @@ use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::Content;
-use crate::ui::widget::window::{LocalOptions, LocalOptionsBuilder, Window};
+use crate::ui::widget::window::{
+  Window, WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -24,16 +26,19 @@ use std::io::{BufReader, BufWriter};
 use std::rc::Rc;
 use std::sync::{Arc, Once};
 
-pub fn make_nowrap() -> LocalOptions {
-  LocalOptionsBuilder::default().wrap(false).build().unwrap()
+pub fn make_nowrap() -> WindowLocalOptions {
+  WindowLocalOptionsBuilder::default()
+    .wrap(false)
+    .build()
+    .unwrap()
 }
 
-pub fn make_wrap_nolinebreak() -> LocalOptions {
-  LocalOptionsBuilder::default().build().unwrap()
+pub fn make_wrap_nolinebreak() -> WindowLocalOptions {
+  WindowLocalOptionsBuilder::default().build().unwrap()
 }
 
-pub fn make_wrap_linebreak() -> LocalOptions {
-  LocalOptionsBuilder::default()
+pub fn make_wrap_linebreak() -> WindowLocalOptions {
+  WindowLocalOptionsBuilder::default()
     .line_break(true)
     .build()
     .unwrap()
@@ -42,7 +47,7 @@ pub fn make_wrap_linebreak() -> LocalOptions {
 pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &LocalOptions,
+  window_options: &WindowLocalOptions,
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
@@ -181,7 +186,7 @@ pub fn assert_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: LocalOptions,
+  window_options: WindowLocalOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {

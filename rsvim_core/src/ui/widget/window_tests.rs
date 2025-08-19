@@ -22,7 +22,7 @@ use std::sync::Once;
 fn make_window_from_size(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &LocalOptions,
+  window_options: &WindowLocalOptions,
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
@@ -98,8 +98,10 @@ fn draw_after_init1() {
     "          ",
   ];
 
-  let window_local_options =
-    LocalOptionsBuilder::default().wrap(false).build().unwrap();
+  let window_local_options = WindowLocalOptionsBuilder::default()
+    .wrap(false)
+    .build()
+    .unwrap();
   let window =
     make_window_from_size(terminal_size, buf.clone(), &window_local_options);
   let mut actual = Canvas::new(terminal_size);
