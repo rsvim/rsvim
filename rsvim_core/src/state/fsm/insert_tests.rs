@@ -20,8 +20,8 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::{self, WindowContent};
-use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::content::WindowContent;
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -272,7 +272,6 @@ mod tests_cursor_move {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use crossterm::event::{
@@ -2189,7 +2188,6 @@ mod tests_insert_text {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
@@ -6476,7 +6474,6 @@ mod tests_delete_text {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
