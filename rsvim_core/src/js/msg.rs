@@ -12,7 +12,7 @@ use std::time::Duration;
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
 /// [`JsRuntime`](crate::js::JsRuntime).
 pub enum JsRuntimeToEventLoopMessage {
-  EchoReq(EchoReq),
+  PrintReq(PrintReq),
   TimeoutReq(TimeoutReq),
 }
 
@@ -49,13 +49,13 @@ impl TimeoutResp {
 }
 
 #[derive(Debug)]
-pub struct EchoReq {
+pub struct PrintReq {
   pub message: CompactString,
 }
 
-impl EchoReq {
+impl PrintReq {
   pub fn new(message: CompactString) -> Self {
-    EchoReq { message }
+    PrintReq { message }
   }
 }
 

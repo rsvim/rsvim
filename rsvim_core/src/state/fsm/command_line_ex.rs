@@ -129,8 +129,6 @@ impl CommandLineExStateful {
 
     cmdline.show_message();
 
-    message_ops::refresh_view(cmdline);
-
     debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent

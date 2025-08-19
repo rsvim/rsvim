@@ -565,7 +565,7 @@ impl EventLoop {
   ) {
     if let Some(message) = message {
       match message {
-        JsRuntimeToEventLoopMessage::EchoReq(req) => {
+        JsRuntimeToEventLoopMessage::PrintReq(req) => {
           trace!("Receive req echo_req:{:?}", req.message);
           let mut tree = lock!(self.tree);
           let mut tree_clone = tree.clone();

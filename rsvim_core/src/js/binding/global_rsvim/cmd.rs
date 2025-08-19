@@ -20,8 +20,8 @@ pub fn echo(
   current_handle.spawn_blocking(move || {
     let message = CompactString::from(message);
     jsrt_to_mstr
-      .blocking_send(JsRuntimeToEventLoopMessage::EchoReq(
-        crate::js::msg::EchoReq::new(message),
+      .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
+        crate::js::msg::PrintReq::new(message),
       ))
       .unwrap();
   });
