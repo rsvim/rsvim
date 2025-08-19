@@ -12,16 +12,16 @@ use crate::ui::widget::command_line::content::CommandLineContent;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::window::WindowLocalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
 
+use indicator::CommandLineIndicatorSymbol;
+use message::CommandLineMessage;
+
 use std::sync::Arc;
-// Re-export
-use crate::ui::widget::command_line::message::CommandLineMessage;
-use crate::ui::widget::window::WindowLocalOptionsBuilder;
-pub use indicator::CommandLineIndicatorSymbol;
 
 pub mod content;
 pub mod indicator;
