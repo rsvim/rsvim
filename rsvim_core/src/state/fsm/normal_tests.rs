@@ -552,7 +552,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let tree = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
