@@ -611,7 +611,7 @@ impl JsRuntime {
         Ok(specifier) => specifier,
         Err(e) => {
           // Returns the error directly.
-          anyhow::bail!(e);
+          return Err(e);
         }
       }
     };
@@ -639,8 +639,6 @@ impl JsRuntime {
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
       let e =
         format!("Module {filename:?} failed to initialize: {exception:?}");
-      error!("{e}");
-      eprintln!("{e}");
       anyhow::bail!(e);
     }
 
