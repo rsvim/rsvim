@@ -59,7 +59,7 @@ export class RsvimCmd {
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.echo("A message to Rsvim !");
+   * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
   public echo(message: string) {

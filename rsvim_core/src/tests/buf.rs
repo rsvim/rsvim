@@ -8,7 +8,6 @@ use crate::buf::{Buffer, BufferArc, BuffersManager, BuffersManagerArc};
 use crate::prelude::*;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
 

@@ -14,11 +14,10 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
+use crate::js::msg::EventLoopToJsRuntimeMessage;
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
-
-use crossterm::event::Event;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -31,6 +30,9 @@ pub use quit::QuitStateful;
 pub use select::SelectStateful;
 pub use terminal::TerminalStateful;
 pub use visual::VisualStateful;
+
+use crossterm::event::Event;
+use tokio::sync::mpsc::Sender;
 
 pub mod command_line_ex;
 pub mod command_line_search_backward;
@@ -53,27 +55,30 @@ mod normal_tests;
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess {
+  pub event: Event,
   pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
-  pub event: Event,
+  pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 impl StatefulDataAccess {
   pub fn new(
+    event: Event,
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    event: Event,
+    jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     StatefulDataAccess {
+      event,
       state,
       tree,
       buffers,
       contents,
-      event,
+      jsrt_tick_dispatcher,
     }
   }
 }

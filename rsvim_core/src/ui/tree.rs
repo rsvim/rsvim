@@ -15,8 +15,6 @@ use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
 // Re-export
 pub use internal::*;
 
-use std::collections::BTreeSet;
-
 pub mod internal;
 
 #[derive(Debug, Clone)]

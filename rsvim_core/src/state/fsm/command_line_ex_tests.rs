@@ -1,14 +1,14 @@
-#![allow(unused_imports, dead_code)]
+#![allow(unused_imports, dead_code, unused_variables)]
 
 use super::command_line_ex::*;
 
-use crate::buf::opt::FileFormatOption;
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::buf::text::Text;
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
@@ -26,9 +26,9 @@ use crate::ui::viewport::{
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
+use crate::state::fsm::NormalStateful;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree(
@@ -41,16 +41,32 @@ pub fn make_tree(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
+  let state = State::to_arc(State::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  (tree, state, bufs, buf, contents)
+
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
+  let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let data_access = StatefulDataAccess::new(
+    Event::Key(key_event),
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    jsrt_tick_dispatcher,
+  );
+
+  (tree, state, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline_and_buffer_options(
@@ -64,6 +80,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
@@ -74,9 +91,24 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     bufs.clone(),
     contents.clone(),
   );
+  let state = State::to_arc(State::new());
+
+  let key_event = KeyEvent::new_with_kind(
+    KeyCode::Char('a'),
+    KeyModifiers::empty(),
+    KeyEventKind::Press,
+  );
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-  (tree, state, bufs, buf, contents)
+  let data_access = StatefulDataAccess::new(
+    Event::Key(key_event),
+    state.clone(),
+    tree.clone(),
+    bufs.clone(),
+    contents.clone(),
+    jsrt_tick_dispatcher,
+  );
+
+  (tree, state, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline(
@@ -89,6 +121,7 @@ pub fn make_tree_with_cmdline(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
+  StatefulDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_cmdline_and_buffer_options(
@@ -263,26 +296,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_goto_normal_mode {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{self, State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::state::fsm::NormalStateful;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -291,7 +304,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents) =
+    let (tree, state, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -301,18 +314,6 @@ mod tests_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Prepare
@@ -459,7 +460,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents) =
+    let (tree, state, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline_and_buffer_options(
         terminal_size,
         buf_opts,
@@ -474,18 +475,6 @@ mod tests_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Prepare
@@ -625,26 +614,6 @@ mod tests_goto_normal_mode {
 mod tests_confirm_ex_command_and_goto_normal_mode {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{self, State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::state::fsm::NormalStateful;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -653,7 +622,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents) =
+    let (tree, state, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -663,18 +632,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Prepare

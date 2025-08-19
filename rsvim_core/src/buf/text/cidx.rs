@@ -2,10 +2,10 @@
 
 use crate::buf::opt::BufferOptions;
 use crate::buf::unicode;
-use ropey::RopeSlice;
+use crate::prelude::*;
 
+use ropey::RopeSlice;
 use smallvec::SmallVec;
-use std::collections::BTreeMap;
 
 #[derive(Debug, Default, Clone)]
 /// Display width index (char-wise) for each unicode char in vim buffer. For each line, the

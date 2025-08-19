@@ -11,5 +11,6 @@ pub use paste::paste;
 
 pub use foldhash::fast::RandomState;
 pub use foldhash::{HashMap, HashMapExt, HashSet, HashSetExt};
+pub use std::collections::{BTreeMap, BTreeSet};
 
 pub use geo::{self, Point, Rect};
