@@ -11,19 +11,19 @@ pub fn set_message_visible(command_line: &mut CommandLine, visible: bool) {
   command_line.indicator_mut().set_visible(!visible);
   command_line.input_mut().set_visible(!visible);
   command_line.message_mut().set_visible(visible);
-  let message_contents = command_line
+  let text_contents = command_line
     .message_mut()
     .get_text_contents_mut()
     .upgrade()
     .unwrap();
-  let mut message_contents = lock!(message_contents);
-  message_contents.command_line_input_mut().clear();
+  let mut text_contents = lock!(text_contents);
+  text_contents.command_line_input_mut().clear();
 }
 
 /// Refresh the command line view to have no content in both content and message widgets.
 pub fn refresh_view(command_line: &mut CommandLine) {
-  let cmdline_content_shape = command_line.input_mut().shape();
-  let cmdline_content_shape = geo_rect_as!(cmdline_content_shape, u16);
+  let input_shape = command_line.input_mut().shape();
+  let cmdline_content_shape = geo_rect_as!(input_shape, u16);
   let text_contents = command_line.text_contents().upgrade().unwrap();
   let mut text_contents = lock!(text_contents);
   let content = text_contents.command_line_input_mut();
