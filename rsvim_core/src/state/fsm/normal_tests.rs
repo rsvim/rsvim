@@ -551,34 +551,17 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+
+    let tree = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      bufs.clone(),
-    );
-    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
