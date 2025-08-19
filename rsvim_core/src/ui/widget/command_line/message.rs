@@ -34,22 +34,6 @@ impl Message {
   pub fn set_viewport(&mut self, viewport: ViewportWk) {
     self.viewport = viewport;
   }
-
-  pub fn get_text_contents(&self) -> &TextContentsWk {
-    &self.text_contents
-  }
-
-  pub fn get_text_contents_mut(&mut self) -> &mut TextContentsWk {
-    &mut self.text_contents
-  }
-
-  pub fn set_message(&mut self, text: CompactString) {
-    let message_content = self.get_text_contents_mut().upgrade().unwrap();
-    let mut message_content = lock!(message_content);
-    let message_content = message_content.command_line_message_mut();
-    message_content.clear();
-    message_content.insert_at(0, 0, text);
-  }
 }
 
 inode_impl!(Message, base);
