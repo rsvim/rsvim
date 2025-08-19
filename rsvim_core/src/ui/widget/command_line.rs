@@ -263,8 +263,8 @@ impl CommandLine {
 
 // Widgets {
 impl CommandLine {
-  /// Command-line content widget.
-  pub fn content(&self) -> &Input {
+  /// Command-line input widget.
+  pub fn input(&self) -> &Input {
     debug_assert!(self.base.node(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.input_id).unwrap(),
@@ -280,8 +280,8 @@ impl CommandLine {
     }
   }
 
-  /// Mutable command-line content widget.
-  pub fn content_mut(&mut self) -> &mut Input {
+  /// Mutable command-line input widget.
+  pub fn input_mut(&mut self) -> &mut Input {
     debug_assert!(self.base.node_mut(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.input_id).unwrap(),

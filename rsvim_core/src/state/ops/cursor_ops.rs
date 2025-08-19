@@ -381,7 +381,7 @@ pub fn _update_viewport_after_text_changed(
       window.cursor_viewport(),
     ),
     TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
+      *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
       cmdline.cursor_viewport(),
@@ -472,7 +472,7 @@ pub fn cursor_move(
       window.cursor_viewport(),
     ),
     TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
+      *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
       cmdline.cursor_viewport(),

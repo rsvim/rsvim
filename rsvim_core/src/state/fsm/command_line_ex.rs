@@ -125,8 +125,11 @@ impl CommandLineExStateful {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
     let cmdline = tree.command_line_mut().unwrap();
+
+    // Hide "cmdline message", show "cmdline indicator/input"
     set_message_visible(cmdline, true);
     refresh_view(cmdline);
+
     debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent
@@ -158,6 +161,7 @@ impl CommandLineExStateful {
     let cmdline_content =
       contents.command_line_input().rope().to_compact_string();
 
+    contents.command_line_message_mut().clear();
     cursor_ops::cursor_clear(
       &mut tree,
       cmdline_id,

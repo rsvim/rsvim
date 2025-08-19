@@ -36,10 +36,6 @@ impl Message {
     self.viewport = viewport;
   }
 
-  pub fn get_text_contents(&self) -> &TextContentsWk {
-    &self.text_contents
-  }
-
   pub fn get_text_contents_mut(&mut self) -> &mut TextContentsWk {
     &mut self.text_contents
   }
