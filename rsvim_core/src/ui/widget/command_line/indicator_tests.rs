@@ -12,9 +12,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::{Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::{LocalOptions, LocalOptionsBuilder};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
