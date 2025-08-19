@@ -6516,7 +6516,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -6526,23 +6526,10 @@ mod tests_cursor_move {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
@@ -6698,7 +6685,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -6708,23 +6695,10 @@ mod tests_cursor_move {
       lines,
     );
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
