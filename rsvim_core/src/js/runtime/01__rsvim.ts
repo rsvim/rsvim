@@ -19,7 +19,8 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global editor options.
+ * - `Rsvim.opt`: Global options.
+ * - `Rsvim.cmd`: Ex commands.
  *
  * @example
  * ```javascript
@@ -38,10 +39,12 @@ export class Rsvim {
 /**
  * The `Rsvim.cmd` global object for ex commands.
  *
- * NOTE: The "ex command" mostly describes the product function, when user types ":" in normal mode,
+ * :::note
+ * The "ex command" mostly describes the product function, when user types ":" in normal mode,
  * user can move cursor to command-line and input commands. This makes up for an irreplaceable
  * function of interacting with the editor in Vim's mouseless editing modes.
  * But Rsvim actually doesn't have any "ex commands", they actually belong to Ex/Vi/Vim editors.
+ * :::
  *
  * @example
  * ```javascript
