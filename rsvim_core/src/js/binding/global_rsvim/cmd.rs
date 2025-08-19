@@ -1,4 +1,4 @@
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsRuntime};
 use crate::prelude::*;
 
@@ -24,7 +24,7 @@ pub fn echo(
     let message = CompactString::from(message);
     jsrt_to_mstr
       .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-        crate::js::msg::PrintReq::new(message_id, message),
+        jsmsg::PrintReq::new(message_id, message),
       ))
       .unwrap();
   });
