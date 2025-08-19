@@ -2,13 +2,13 @@
 
 use super::command_line_ex::*;
 
-use crate::buf::opt::FileFormatOption;
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::buf::text::Text;
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::state::{State, StateArc};
@@ -26,6 +26,7 @@ use crate::ui::viewport::{
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
+use crate::state::fsm::NormalStateful;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use tokio::sync::mpsc::{Receiver, Sender, channel};
@@ -261,25 +262,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 #[cfg(test)]
 mod tests_goto_normal_mode {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{self, State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::state::fsm::NormalStateful;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
 
   #[test]
   fn nowrap1() {
@@ -622,25 +604,6 @@ mod tests_goto_normal_mode {
 #[cfg(test)]
 mod tests_confirm_ex_command_and_goto_normal_mode {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{self, State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::state::fsm::NormalStateful;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
 
   #[test]
   fn nowrap1() {
