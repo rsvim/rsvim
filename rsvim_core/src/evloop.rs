@@ -566,7 +566,7 @@ impl EventLoop {
     if let Some(message) = message {
       match message {
         JsRuntimeToEventLoopMessage::PrintReq(req) => {
-          trace!("Receive req echo_req:{:?}", req.message.clone());
+          trace!("Receive PrintReq:{:?}", req.message.clone());
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
           cmdline_ops::set_cmdline_message(
@@ -574,10 +574,10 @@ impl EventLoop {
             &mut contents,
             req.message.clone(),
           );
-          trace!("Receive req echo_req:{:?} - done", req.message.clone());
+          trace!("Receive PrintReq:{:?} - done", req.message.clone());
         }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          trace!("Receive req timeout_req:{:?}", req.future_id);
+          trace!("Receive TimeoutReq:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
@@ -586,7 +586,7 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            trace!("Receive req timeout_req:{:?} - done", req.future_id);
+            trace!("Receive TimeoutReq:{:?} - done", req.future_id);
           });
         }
       }
