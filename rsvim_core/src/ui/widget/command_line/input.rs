@@ -1,4 +1,4 @@
-//! Commandline's text content widget.
+//! Commandline's input content widget.
 
 use crate::content::TextContentsWk;
 use crate::prelude::*;
@@ -9,7 +9,7 @@ use crate::ui::widget::Widgetable;
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
-/// Commandline text content.
+/// Commandline input content.
 pub struct Input {
   base: InodeBase,
   text_contents: TextContentsWk,
@@ -17,7 +17,6 @@ pub struct Input {
 }
 
 impl Input {
-  /// Make window content.
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,

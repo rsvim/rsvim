@@ -17,7 +17,7 @@ use crate::{
 };
 use indicator::{CommandLineIndicator, CommandLineIndicatorSymbol};
 use input::Input;
-use message::CommandLineMessage;
+use message::Message;
 use root::CommandLineRootContainer;
 
 use std::sync::Arc;
@@ -37,7 +37,7 @@ pub enum CommandLineNode {
   CommandLineIndicator(CommandLineIndicator),
   CommandLineContent(Input),
   Cursor(Cursor),
-  CommandLineMessage(CommandLineMessage),
+  CommandLineMessage(Message),
 }
 
 inode_enum_dispatcher!(
@@ -147,7 +147,7 @@ impl CommandLine {
     cmdline_content_node.set_visible(false);
     base.bounded_insert(cmdline_root_id, cmdline_content_node);
 
-    let cmdline_message = CommandLineMessage::new(
+    let cmdline_message = Message::new(
       shape,
       text_contents.clone(),
       Arc::downgrade(&message_viewport),
@@ -300,7 +300,7 @@ impl CommandLine {
   }
 
   /// Command-line message widget
-  pub fn message(&self) -> &CommandLineMessage {
+  pub fn message(&self) -> &Message {
     debug_assert!(self.base.node(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.message_id).unwrap(),
@@ -317,7 +317,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line message widget.
-  pub fn message_mut(&mut self) -> &mut CommandLineMessage {
+  pub fn message_mut(&mut self) -> &mut Message {
     debug_assert!(self.base.node_mut(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.message_id).unwrap(),
