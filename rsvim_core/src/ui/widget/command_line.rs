@@ -95,6 +95,7 @@ impl CommandLine {
     let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
     let indicator_id = indicator.id();
     let mut indicator_node = CommandLineNode::Indicator(indicator);
+    // Indicator by default is invisible
     indicator_node.set_visible(false);
     base.bounded_insert(root_id, indicator_node);
 
@@ -127,35 +128,37 @@ impl CommandLine {
       );
       (input_viewport, input_cursor_viewport, message_viewport)
     };
+
     let input_viewport = Viewport::to_arc(input_viewport);
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let cmdline_content = Input::new(
+    let input = Input::new(
       input_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
     );
-    let cmdline_content_id = cmdline_content.id();
-    let mut cmdline_content_node = CommandLineNode::Input(cmdline_content);
-    cmdline_content_node.set_visible(false);
-    base.bounded_insert(root_id, cmdline_content_node);
+    let input_id = input.id();
+    let mut input_node = CommandLineNode::Input(input);
+    // Input by default is invisible
+    input_node.set_visible(false);
+    base.bounded_insert(root_id, input_node);
 
-    let cmdline_message = Message::new(
+    let message = Message::new(
       shape,
       text_contents.clone(),
       Arc::downgrade(&message_viewport),
     );
-    let cmdline_message_id = cmdline_message.id();
-    let cmdline_message_node = CommandLineNode::Message(cmdline_message);
-    base.bounded_insert(root_id, cmdline_message_node);
+    let message_id = message.id();
+    let message_node = CommandLineNode::Message(message);
+    base.bounded_insert(root_id, message_node);
 
     Self {
       base,
       options,
       indicator_id,
-      input_id: cmdline_content_id,
-      message_id: cmdline_message_id,
+      input_id,
+      message_id,
       cursor_id: None,
       text_contents,
       input_viewport,

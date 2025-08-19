@@ -17,7 +17,7 @@ pub fn set_message_visible(command_line: &mut CommandLine, visible: bool) {
     .upgrade()
     .unwrap();
   let mut message_contents = lock!(message_contents);
-  message_contents.command_line_content_mut().clear();
+  message_contents.command_line_input_mut().clear();
 }
 
 /// Refresh the command line view to have no content in both content and message widgets.
@@ -26,7 +26,7 @@ pub fn refresh_view(command_line: &mut CommandLine) {
   let cmdline_content_shape = geo_rect_as!(cmdline_content_shape, u16);
   let text_contents = command_line.text_contents().upgrade().unwrap();
   let mut text_contents = lock!(text_contents);
-  let content = text_contents.command_line_content_mut();
+  let content = text_contents.command_line_input_mut();
   content.clear();
   let content_viewport = Viewport::view(
     command_line.options(),
