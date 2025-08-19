@@ -24,7 +24,7 @@ use crate::ui::viewport::{
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
