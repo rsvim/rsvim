@@ -17,7 +17,7 @@ pub struct Input {
 }
 
 impl Input {
-  /// Make window content.
+  /// Make command-line input.
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,

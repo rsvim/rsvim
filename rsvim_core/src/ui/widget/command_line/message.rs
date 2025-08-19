@@ -13,12 +13,12 @@ use compact_str::CompactString;
 /// Commandline message.
 pub struct Message {
   base: InodeBase,
-  message_contents: TextContentsWk,
-  message_viewport: ViewportWk,
+  text_contents: TextContentsWk,
+  viewport: ViewportWk,
 }
 
 impl Message {
-  /// Make window content.
+  /// Make command-line message.
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
@@ -27,21 +27,21 @@ impl Message {
     let base = InodeBase::new(shape);
     Message {
       base,
-      message_contents: text_contents,
-      message_viewport,
+      text_contents,
+      viewport: message_viewport,
     }
   }
 
   pub fn set_viewport(&mut self, viewport: ViewportWk) {
-    self.message_viewport = viewport;
+    self.viewport = viewport;
   }
 
   pub fn get_text_contents(&self) -> &TextContentsWk {
-    &self.message_contents
+    &self.text_contents
   }
 
   pub fn get_text_contents_mut(&mut self) -> &mut TextContentsWk {
-    &mut self.message_contents
+    &mut self.text_contents
   }
 
   pub fn set_message(&mut self, text: CompactString) {
@@ -58,9 +58,9 @@ inode_impl!(Message, base);
 impl Widgetable for Message {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
-    let contents = self.message_contents.upgrade().unwrap();
+    let contents = self.text_contents.upgrade().unwrap();
     let contents = lock!(contents);
-    let viewport = self.message_viewport.upgrade().unwrap();
+    let viewport = self.viewport.upgrade().unwrap();
 
     viewport.draw(contents.command_line_message(), actual_shape, canvas);
   }
