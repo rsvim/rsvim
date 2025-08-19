@@ -4,13 +4,14 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::{CursorInsertPayload, Operation, cursor_ops};
+use crate::state::ops::{
+  CursorInsertPayload, Operation, cursor_ops, message_ops,
+};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 
-use crate::state::ops::message_ops::set_message_visible;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
@@ -127,7 +128,7 @@ impl CommandLineExStateful {
     let cmdline = tree.command_line_mut().unwrap();
 
     // Hide "cmdline message", show "cmdline indicator/input"
-    set_message_visible(cmdline, true);
+    message_ops::set_message_visible(cmdline, true);
 
     debug_assert!(cmdline.cursor_id().is_some());
 
