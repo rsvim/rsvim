@@ -35,7 +35,7 @@ pub mod indicator_tests;
 /// The value holder for each window widget.
 pub enum CommandLineNode {
   CommandLineRootContainer(CommandLineRootContainer),
-  CommandLineIndicator(CommandLineIndicator),
+  CommandLineIndicator(Indicator),
   CommandLineContent(Input),
   Cursor(Cursor),
   CommandLineMessage(Message),
@@ -95,10 +95,8 @@ impl CommandLine {
 
     let cmdline_indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator = CommandLineIndicator::new(
-      cmdline_indicator_shape,
-      IndicatorSymbol::Empty,
-    );
+    let cmdline_indicator =
+      Indicator::new(cmdline_indicator_shape, IndicatorSymbol::Empty);
     let cmdline_indicator_id = cmdline_indicator.id();
     let mut cmdline_indicator_node =
       CommandLineNode::CommandLineIndicator(cmdline_indicator);
@@ -335,7 +333,7 @@ impl CommandLine {
   }
 
   /// Command-line indicator widget.
-  pub fn indicator(&self) -> &CommandLineIndicator {
+  pub fn indicator(&self) -> &Indicator {
     debug_assert!(self.base.node(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.indicator_id).unwrap(),
@@ -352,7 +350,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line indicator widget.
-  pub fn indicator_mut(&mut self) -> &mut CommandLineIndicator {
+  pub fn indicator_mut(&mut self) -> &mut Indicator {
     debug_assert!(self.base.node_mut(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.indicator_id).unwrap(),
