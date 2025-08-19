@@ -29,7 +29,7 @@ use crate::ui::tree::TreeArc;
 
 use std::rc::Rc;
 use std::sync::Once;
-use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::atomic::{AtomicI32, AtomicUsize, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 
@@ -66,6 +66,16 @@ pub type JsFutureId = i32;
 /// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
+pub type JsHandleId = usize;
+
+/// Next handle ID for js runtime.
+///
+/// NOTE: Start form 1.
+pub fn next_handle_id() -> JsHandleId {
+  static VALUE: AtomicUsize = AtomicUsize::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
