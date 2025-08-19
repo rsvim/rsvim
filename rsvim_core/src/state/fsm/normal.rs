@@ -7,7 +7,7 @@ use crate::state::ops::cursor_ops;
 use crate::state::ops::{GotoInsertModeVariant, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::IndicatorSymbol;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
 
 use compact_str::CompactString;

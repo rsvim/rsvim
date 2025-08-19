@@ -9,7 +9,7 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::content::WindowContent;
+use crate::ui::widget::window::content::Content;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
@@ -31,7 +31,7 @@ mod opt_tests;
 /// The value holder for each window widget.
 pub enum WindowNode {
   WindowRootContainer(WindowRootContainer),
-  WindowContent(WindowContent),
+  WindowContent(Content),
   Cursor(Cursor),
 }
 
@@ -79,7 +79,7 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let window_content =
-      WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -164,7 +164,7 @@ impl Window {
 // Viewport {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &WindowContent {
+  pub fn content(&self) -> &Content {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -180,7 +180,7 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut WindowContent {
+  pub fn content_mut(&mut self) -> &mut Content {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),

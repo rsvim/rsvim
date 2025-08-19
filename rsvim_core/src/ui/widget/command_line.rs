@@ -15,13 +15,12 @@ use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
 
-use std::sync::Arc;
+use indicator::*;
+use input::*;
+use message::*;
+use root::*;
 
-// Re-export
-pub use indicator::*;
-pub use input::*;
-pub use message::*;
-pub use root::*;
+use std::sync::Arc;
 
 pub mod indicator;
 pub mod input;
