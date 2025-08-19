@@ -14,9 +14,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::{Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
 use ropey::{Rope, RopeBuilder};
@@ -26,7 +24,7 @@ use std::sync::Arc;
 
 pub fn make_viewport(
   terminal_size: U16Size,
-  window_options: WindowLocalOptions,
+  window_options: WindowOptions,
   buffer: BufferArc,
   start_line_idx: usize,
   start_column_idx: usize,
@@ -45,7 +43,7 @@ pub fn make_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: WindowLocalOptions,
+  window_options: WindowOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
@@ -101,10 +99,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -143,10 +138,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(35, 6);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -182,10 +174,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(33, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -225,10 +214,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -278,10 +264,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
@@ -318,10 +301,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(13, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -360,10 +340,7 @@ mod tests_nowrap {
 
     let terminal_size = U16Size::new(21, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -429,10 +406,7 @@ mod tests_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -465,10 +439,7 @@ mod tests_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -501,10 +472,7 @@ mod tests_nowrap_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -543,10 +511,7 @@ mod tests_nowrap_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -587,10 +552,7 @@ mod tests_nowrap_startcol {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -629,10 +591,7 @@ mod tests_nowrap_startcol {
 
     let terminal_size = U16Size::new(35, 6);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -669,10 +628,7 @@ mod tests_nowrap_startcol {
 
     let terminal_size = U16Size::new(33, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -713,10 +669,7 @@ mod tests_nowrap_startcol {
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -766,10 +719,7 @@ mod tests_nowrap_startcol {
 
     let terminal_size = U16Size::new(21, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -832,10 +782,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -874,10 +821,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(27, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -910,10 +854,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(20, 9);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
@@ -939,10 +880,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(19, 30);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1001,10 +939,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(19, 27);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1060,7 +995,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1130,7 +1065,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1178,7 +1113,7 @@ mod tests_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1234,10 +1169,7 @@ mod tests_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1279,10 +1211,7 @@ mod tests_wrap_nolinebreak_eol {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1326,10 +1255,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1369,10 +1295,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(27, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1406,10 +1329,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(20, 9);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
@@ -1435,10 +1355,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(19, 30);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
+    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
     let buffer = make_buffer_from_lines(
       terminal_size,
@@ -1497,7 +1414,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1567,7 +1484,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1616,7 +1533,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let terminal_size = U16Size::new(19, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -1669,7 +1586,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1712,7 +1629,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(27, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1760,7 +1677,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(20, 8);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1789,7 +1706,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(13, 31);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1853,7 +1770,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1896,7 +1813,7 @@ mod tests_wrap_linebreak {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -1962,7 +1879,7 @@ mod tests_wrap_linebreak_startcol {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -2005,7 +1922,7 @@ mod tests_wrap_linebreak_startcol {
 
     let terminal_size = U16Size::new(27, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -2054,7 +1971,7 @@ mod tests_wrap_linebreak_startcol {
 
     let terminal_size = U16Size::new(20, 8);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -2083,7 +2000,7 @@ mod tests_wrap_linebreak_startcol {
 
     let terminal_size = U16Size::new(13, 31);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()

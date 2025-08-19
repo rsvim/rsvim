@@ -9,10 +9,10 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::content::Content;
-use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
+use content::Content;
+use root::RootContainer;
 // Re-export
 pub use opt::*;
 
@@ -30,7 +30,7 @@ mod opt_tests;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  WindowRootContainer(WindowRootContainer),
+  WindowRootContainer(RootContainer),
   WindowContent(Content),
   Cursor(Cursor),
 }
@@ -43,7 +43,7 @@ widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowNode>,
-  options: WindowLocalOptions,
+  options: WindowOptions,
 
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
@@ -54,12 +54,8 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(
-    opts: &WindowLocalOptions,
-    shape: IRect,
-    buffer: BufferWk,
-  ) -> Self {
-    let window_root = WindowRootContainer::new(shape);
+  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
+    let window_root = RootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = window_root.actual_shape();
@@ -111,12 +107,12 @@ impl Widgetable for Window {
 // Attributes
 impl Window {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
   }
 

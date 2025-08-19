@@ -21,9 +21,7 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::{self, Content};
-use crate::ui::widget::window::{
-  WindowLocalOptions, WindowLocalOptionsBuilder,
-};
+use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -34,7 +32,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
   buffer_local_opts: BufferLocalOptions,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -55,7 +53,7 @@ pub fn make_tree_with_buffer_opts(
 
 pub fn make_tree(
   terminal_size: U16Size,
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
   TreeArc,
@@ -211,7 +209,7 @@ pub fn assert_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: WindowLocalOptions,
+  window_options: WindowOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
@@ -271,9 +269,7 @@ mod tests_cursor_move {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use crossterm::event::{
@@ -296,10 +292,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -421,10 +414,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -546,10 +536,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 10),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
 
@@ -672,7 +659,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 6),
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(false)
         .build()
@@ -929,7 +916,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(false)
         .build()
@@ -1186,7 +1173,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(false)
         .build()
@@ -1438,7 +1425,7 @@ mod tests_cursor_move {
     ];
     let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 6),
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -1695,7 +1682,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -1952,7 +1939,7 @@ mod tests_cursor_move {
     let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(10, 6),
       buf_opts,
-      WindowLocalOptionsBuilder::default()
+      WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
         .build()
@@ -2199,9 +2186,7 @@ mod tests_insert_text {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
@@ -2216,10 +2201,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -2449,10 +2432,8 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r\n",
       "This is a quite simple and small test lines.\r\n",
@@ -2686,10 +2667,8 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r",
       "This is a quite simple and small test lines.\r",
@@ -2919,10 +2898,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -3065,10 +3042,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -3386,10 +3361,8 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r\n",
       "This is a quite simple and small test lines.\r\n",
@@ -3712,10 +3685,8 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r",
       "This is a quite simple and small test lines.\r",
@@ -4029,10 +4000,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, buf, contents) =
       make_tree(terminal_size, window_option, lines);
@@ -4103,10 +4072,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
     let (tree, state, bufs, buf, contents) =
       make_tree(terminal_size, window_option, lines);
@@ -4182,10 +4149,8 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_option = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_option =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, buf, contents) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
@@ -4257,7 +4222,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -4683,7 +4648,7 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -5113,7 +5078,7 @@ mod tests_insert_text {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -5539,7 +5504,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -5614,7 +5579,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -5689,7 +5654,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
@@ -5803,7 +5768,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let window_options = WindowLocalOptionsBuilder::default()
+    let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
       .build()
@@ -6217,10 +6182,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(200, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
     let (tree, state, bufs, buf, contents) =
@@ -6313,10 +6276,8 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(200, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
     let (tree, state, bufs, buf, contents) =
@@ -6512,9 +6473,7 @@ mod tests_delete_text {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc,
     ViewportSearchDirection,
   };
-  use crate::ui::widget::window::{
-    WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
 
   use crate::buf::opt::FileFormatOption;
   use compact_str::CompactString;
@@ -6529,10 +6488,8 @@ mod tests_delete_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -7185,10 +7142,8 @@ mod tests_delete_text {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r\n",
       "This is a quite simple and small test lines.\r\n",
@@ -7845,10 +7800,8 @@ mod tests_delete_text {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
       "Hello, RSVIM!\r",
       "This is a quite simple and small test lines.\r",
@@ -8501,10 +8454,8 @@ mod tests_delete_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, buf, contents) =
       make_tree(terminal_size, window_options, lines);
@@ -8575,10 +8526,8 @@ mod tests_delete_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
+    let window_options =
+      WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (tree, state, bufs, buf, contents) =
       make_tree(terminal_size, window_options, lines);

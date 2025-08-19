@@ -9,8 +9,8 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::WindowLocalOptionsBuilder;
-use crate::ui::widget::window::opt::WindowLocalOptions;
+use crate::ui::widget::window::WindowOptionsBuilder;
+use crate::ui::widget::window::opt::WindowOptions;
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
@@ -61,7 +61,7 @@ widget_enum_dispatcher!(
 /// The Vim command-line.
 pub struct CommandLine {
   base: Itree<CommandLineNode>,
-  options: WindowLocalOptions,
+  options: WindowOptions,
 
   indicator_id: TreeNodeId,
   content_id: TreeNodeId,
@@ -78,7 +78,7 @@ pub struct CommandLine {
 impl CommandLine {
   pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
     // Force cmdline window options.
-    let options = WindowLocalOptionsBuilder::default()
+    let options = WindowOptionsBuilder::default()
       .wrap(false)
       .line_break(false)
       .scroll_off(0_u16)
@@ -183,12 +183,12 @@ impl Widgetable for CommandLine {
 
 impl CommandLine {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
   }
 
