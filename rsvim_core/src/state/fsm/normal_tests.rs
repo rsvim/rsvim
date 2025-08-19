@@ -3780,18 +3780,13 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
-      U16Size::new(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
+    let (tree, state, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 10),
+        buf_opts,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3898,16 +3893,10 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
