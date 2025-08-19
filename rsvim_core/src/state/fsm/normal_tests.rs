@@ -8534,6 +8534,64 @@ mod tests_goto_command_line_ex_mode {
     let actual_canvas = lock!(actual_canvas);
     assert_canvas(&actual_canvas, &expect_canvas);
   }
+
+  #[test]
+  fn nowrap_with_cmdline_message1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(60, 3);
+    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      vec!["Should go to insert mode with message command line\n"],
+    );
+
+    // Prepare
+    {
+      let tree = tree.clone();
+      let contents = contents.clone();
+      let mut tree = lock!(tree);
+      let mut contents = lock!(contents);
+      cmdline_ops::set_cmdline_message(
+        &mut tree,
+        &mut contents,
+        CompactString::new("Test echo"),
+      );
+    }
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char(':'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree,
+      bufs,
+      contents,
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    stateful.goto_command_line_ex_mode(&data_access);
+
+    {
+      let tree = data_access.tree.clone();
+      let expect_canvas = vec![
+        "Should go to insert mode with message command line          ",
+        "                                                            ",
+        ":                                                           ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
 }
 
 #[cfg(test)]
@@ -8964,7 +9022,7 @@ mod tests_goto_insert_mode {
   }
 
   #[test]
-  fn nowrap_goto_insert_with_message_command_line1() {
+  fn nowrap_with_cmdline_message1() {
     test_log_init();
 
     let terminal_size = U16Size::new(60, 3);
@@ -9026,63 +9084,6 @@ mod tests_goto_insert_mode {
         "Should go to insert mode with message command line          ",
         "                                                            ",
         "Test echo                                                   ",
-      ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
-      let actual_canvas = lock!(actual_canvas);
-      assert_canvas(&actual_canvas, &expect_canvas);
-    }
-  }
-  #[test]
-  fn nowrap_goto_command_line_ex_with_message_command_line1() {
-    test_log_init();
-
-    let terminal_size = U16Size::new(60, 3);
-    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
-      terminal_size,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      vec!["Should go to insert mode with message command line\n"],
-    );
-
-    // Prepare
-    {
-      let tree = tree.clone();
-      let contents = contents.clone();
-      let mut tree = lock!(tree);
-      let mut contents = lock!(contents);
-      cmdline_ops::set_cmdline_message(
-        &mut tree,
-        &mut contents,
-        CompactString::new("Test echo"),
-      );
-    }
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char(':'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
-    assert_eq!(prev_cursor_viewport.line_idx(), 0);
-    assert_eq!(prev_cursor_viewport.char_idx(), 0);
-
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
-    let stateful = NormalStateful::default();
-
-    stateful.goto_command_line_ex_mode(&data_access);
-
-    {
-      let tree = data_access.tree.clone();
-      let expect_canvas = vec![
-        "Should go to insert mode with message command line          ",
-        "                                                            ",
-        ":                                                           ",
       ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
