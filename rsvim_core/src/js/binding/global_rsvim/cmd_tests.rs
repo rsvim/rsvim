@@ -1,8 +1,13 @@
+use compact_str::ToCompactString;
+
+use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::constant::TempPathCfg;
-use crate::tests::evloop::make_event_loop;
+use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+
 use std::io::Write;
+use std::time::Duration;
 
 #[tokio::test]
 #[should_panic(
@@ -30,6 +35,18 @@ async fn test_echo1_should_panic_with_missing_param() {
   }
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+
+  // Before running
+  {
+    let contents = lock!(event_loop.contents);
+    assert!(
+      contents
+        .command_line_message()
+        .rope()
+        .to_string()
+        .is_empty()
+    );
+  }
 
   event_loop.initialize().unwrap();
 }
@@ -61,6 +78,18 @@ async fn test_echo2_should_panic_with_null_param() {
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
+  // Before running
+  {
+    let contents = lock!(event_loop.contents);
+    assert!(
+      contents
+        .command_line_message()
+        .rope()
+        .to_string()
+        .is_empty()
+    );
+  }
+
   event_loop.initialize().unwrap();
 }
 
@@ -70,6 +99,7 @@ async fn test_echo3() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let tp = TempPathCfg::create();
 
   let src: &str = r#"
@@ -90,8 +120,27 @@ async fn test_echo3() -> IoResult<()> {
 
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
+  // Before running
+  {
+    let contents = lock!(event_loop.contents);
+    assert!(
+      contents
+        .command_line_message()
+        .rope()
+        .to_string()
+        .is_empty()
+    );
+  }
+
   event_loop.initialize()?;
+  event_loop.mock_run(MockReader::new(mocked_events)).await?;
   event_loop.shutdown()?;
+
+  // After running
+  {
+    let contents = lock!(event_loop.contents);
+    assert_eq!(contents.command_line_message().rope().to_string(), "true");
+  }
 
   Ok(())
 }

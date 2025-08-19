@@ -4,4 +4,4 @@ pub mod cmd;
 pub mod opt;
 
 #[cfg(test)]
-mod cmd_test;
+mod cmd_tests;
