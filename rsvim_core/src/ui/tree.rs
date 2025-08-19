@@ -5,8 +5,9 @@ use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::root::RootContainer;
-use crate::ui::widget::window::{
-  Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowOptions,
+use crate::ui::widget::window::Window;
+use crate::ui::widget::window::opt::{
+  WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowOptions,
   WindowOptionsBuilder,
 };
 use crate::{inode_enum_dispatcher, widget_enum_dispatcher};

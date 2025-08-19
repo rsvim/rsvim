@@ -9,7 +9,7 @@ use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
   ViewportSearchDirection,
 };
-use crate::ui::widget::window::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptions;
 
 use compact_str::CompactString;
 
