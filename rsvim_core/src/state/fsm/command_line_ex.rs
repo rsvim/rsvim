@@ -10,7 +10,7 @@ use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 
-use crate::state::ops::message_ops::{refresh_view, set_message_visible};
+use crate::state::ops::message_ops::set_message_visible;
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
