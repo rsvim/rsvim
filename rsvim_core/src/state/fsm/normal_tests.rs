@@ -267,20 +267,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_raw_cursor_move_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -572,20 +558,6 @@ mod tests_raw_cursor_move_y_by {
 mod tests_raw_cursor_move_x_by {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -862,20 +834,6 @@ mod tests_raw_cursor_move_x_by {
 mod tests_raw_cursor_move_by {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -1108,20 +1066,6 @@ mod tests_raw_cursor_move_by {
 #[cfg(test)]
 mod tests_raw_cursor_move_to {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::content::TextContents;
-  use crate::prelude::*;
-  use crate::state::State;
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap1() {
@@ -1359,26 +1303,6 @@ mod tests_raw_cursor_move_to {
 #[cfg(test)]
 mod tests_raw_window_scroll_y_by {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-  use crate::ui::widget::window::content;
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap1() {
@@ -2354,25 +2278,6 @@ mod tests_raw_window_scroll_y_by {
 #[cfg(test)]
 mod tests_raw_window_scroll_x_by {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap1() {
@@ -3606,25 +3511,6 @@ mod tests_raw_window_scroll_x_by {
 mod tests_raw_window_scroll_to {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -4282,25 +4168,6 @@ mod tests_raw_window_scroll_to {
 #[cfg(test)]
 mod tests_cursor_move {
   use super::*;
-
-  use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap1() {
@@ -8458,25 +8325,6 @@ mod tests_cursor_move {
 mod tests_goto_command_line_ex_mode {
   use super::*;
 
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
-
   #[test]
   fn nowrap1() {
     test_log_init();
@@ -8597,31 +8445,6 @@ mod tests_goto_command_line_ex_mode {
 #[cfg(test)]
 mod tests_goto_insert_mode {
   use super::*;
-
-  use crate::buf::opt::BufferOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
-  use crate::prelude::*;
-  use crate::state::fsm::InsertStateful;
-  use crate::state::ops::CursorInsertPayload;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::{Inodeable, TreeArc};
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::ui::widget::command_line::CommandLineNode::Message;
-  use compact_str::ToCompactString;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-  use itertools::Itertools;
-  use log::__private_api::loc;
-  use std::collections::BTreeMap;
-  use tokio::sync::mpsc::{Receiver, Sender, channel};
 
   #[test]
   fn nowrap_goto_insert_keep1() {
