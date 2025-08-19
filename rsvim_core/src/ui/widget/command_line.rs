@@ -67,8 +67,6 @@ pub struct CommandLine {
   cursor_id: Option<TreeNodeId>,
   message_id: TreeNodeId,
 
-  text_contents: TextContentsWk,
-
   input_viewport: ViewportArc,
   input_cursor_viewport: CursorViewportArc,
   message_viewport: ViewportArc,
@@ -160,7 +158,6 @@ impl CommandLine {
       input_id,
       message_id,
       cursor_id: None,
-      text_contents,
       input_viewport,
       input_cursor_viewport,
       message_viewport,
@@ -191,11 +188,6 @@ impl CommandLine {
   /// Set window local options.
   pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
-  }
-
-  /// Get binded global text contents.
-  pub fn text_contents(&self) -> TextContentsWk {
-    self.text_contents.clone()
   }
 
   /// Get input viewport.
