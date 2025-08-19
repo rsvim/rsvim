@@ -11,10 +11,8 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 use content::WindowContent;
+use opt::*;
 use root::WindowRootContainer;
-
-// Re-export
-pub use opt::*;
 
 use std::sync::Arc;
 

@@ -1,6 +1,6 @@
 //! Indexes mappings between character and its display width.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::BufferOptions;
 use crate::buf::unicode;
 use ropey::RopeSlice;
 
@@ -112,7 +112,7 @@ impl ColumnIndex {
   // Build cache beyond the bound by `char_idx` or `width`.
   fn _build_cache(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     char_idx_bound: Option<usize>,
     width_bound: Option<usize>,
@@ -164,7 +164,7 @@ impl ColumnIndex {
   // Build cache until `char_idx`.
   fn _build_cache_until_char(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) {
@@ -186,7 +186,7 @@ impl ColumnIndex {
   ///    length.
   pub fn width_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
@@ -225,7 +225,7 @@ impl ColumnIndex {
   ///    the line length.
   pub fn width_until(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
@@ -251,7 +251,7 @@ impl ColumnIndex {
   // Build cache until specified `width`.
   fn _build_cache_until_width(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) {
@@ -273,7 +273,7 @@ impl ColumnIndex {
   /// 2. It returns the previous char index otherwise.
   pub fn char_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -318,7 +318,7 @@ impl ColumnIndex {
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -368,7 +368,7 @@ impl ColumnIndex {
   /// 2. It returns the next char index otherwise.
   pub fn char_after(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -406,7 +406,7 @@ impl ColumnIndex {
   ///    returns the last char index.
   pub fn last_char_until(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &BufferOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {

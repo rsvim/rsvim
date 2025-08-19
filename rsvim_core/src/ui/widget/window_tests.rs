@@ -2,7 +2,7 @@
 
 use super::window::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{Buffer, BufferArc};
 use crate::prelude::*;
 use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -71,7 +71,7 @@ fn draw_after_init1() {
   test_log_init();
 
   let terminal_size = U16Size::new(10, 10);
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(
     terminal_size,
     buf_opts,

@@ -1,6 +1,6 @@
 use super::unicode::*;
 
-use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
+use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
 use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
@@ -16,7 +16,7 @@ fn char_width1() {
   for i in 0_u8..32_u8 {
     let c = i as char;
     let asciic = AsciiChar::from_ascii(c).unwrap();
-    let opt = BufferLocalOptionsBuilder::default().build().unwrap();
+    let opt = BufferOptionsBuilder::default().build().unwrap();
     let asciifmt = AsciiControlCodeFormatter::from(asciic);
     let formatted = format!("{asciifmt}");
     let formatted_len = formatted.len();
@@ -40,7 +40,7 @@ fn char_width1() {
 
   {
     let c = 'A';
-    let opt = BufferLocalOptionsBuilder::default().build().unwrap();
+    let opt = BufferOptionsBuilder::default().build().unwrap();
     let formatted = format!("{c}");
     let formatted_width = UnicodeWidthChar::width_cjk(c).unwrap();
     info!("c:{c:?},formatted:{formatted:?}({formatted_width})");
@@ -49,7 +49,7 @@ fn char_width1() {
 
   {
     let c = '好';
-    let opt = BufferLocalOptionsBuilder::default().build().unwrap();
+    let opt = BufferOptionsBuilder::default().build().unwrap();
     let formatted = format!("{c}");
     let formatted_width = UnicodeWidthChar::width_cjk(c).unwrap();
     info!("c:{c:?},formatted:{formatted:?}({formatted_width})");

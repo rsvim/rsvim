@@ -2,7 +2,7 @@
 
 use super::insert::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
@@ -31,7 +31,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
-  buffer_local_opts: BufferLocalOptions,
+  buffer_local_opts: BufferOptions,
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
@@ -62,7 +62,7 @@ pub fn make_tree(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
 }
 
@@ -410,7 +410,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -532,7 +532,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -912,7 +912,7 @@ mod tests_cursor_move {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -1169,7 +1169,7 @@ mod tests_cursor_move {
       "11th.\r",
       "12th.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -1678,7 +1678,7 @@ mod tests_cursor_move {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -1935,7 +1935,7 @@ mod tests_cursor_move {
       "11th.\r",
       "12th.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -2431,7 +2431,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -2666,7 +2666,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -3360,7 +3360,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -3684,7 +3684,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -4148,7 +4148,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 5);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -4647,7 +4647,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -5077,7 +5077,7 @@ mod tests_insert_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -7141,7 +7141,7 @@ mod tests_delete_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -7799,7 +7799,7 @@ mod tests_delete_text {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();

@@ -2,7 +2,7 @@
 
 use super::normal::*;
 
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
@@ -22,7 +22,7 @@ use crate::ui::viewport::{
   ViewportSearchDirection,
 };
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
 
 use compact_str::CompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -31,7 +31,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
-  buffer_local_opts: BufferLocalOptions,
+  buffer_local_opts: BufferOptions,
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
@@ -62,7 +62,7 @@ pub fn make_tree(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
 }
 
@@ -77,7 +77,7 @@ pub fn make_tree_with_cmdline(
   BufferArc,
   TextContentsArc,
 ) {
-  let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -267,7 +267,7 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 mod tests_raw_cursor_move_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -477,7 +477,7 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -573,7 +573,7 @@ mod tests_raw_cursor_move_y_by {
 mod tests_raw_cursor_move_x_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -594,7 +594,7 @@ mod tests_raw_cursor_move_x_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -646,7 +646,7 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -699,7 +699,7 @@ mod tests_raw_cursor_move_x_by {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -751,7 +751,7 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -811,7 +811,7 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -864,7 +864,7 @@ mod tests_raw_cursor_move_x_by {
 mod tests_raw_cursor_move_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -893,7 +893,7 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -970,7 +970,7 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -1052,7 +1052,7 @@ mod tests_raw_cursor_move_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -1112,7 +1112,7 @@ mod tests_raw_cursor_move_by {
 mod tests_raw_cursor_move_to {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
@@ -1141,7 +1141,7 @@ mod tests_raw_cursor_move_to {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -1218,7 +1218,7 @@ mod tests_raw_cursor_move_to {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = U16Size::new(10, 10);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -1301,7 +1301,7 @@ mod tests_raw_cursor_move_to {
     ];
 
     let terminal_size = U16Size::new(50, 50);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
@@ -1364,7 +1364,7 @@ mod tests_raw_cursor_move_to {
 mod tests_raw_window_scroll_y_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -2361,7 +2361,7 @@ mod tests_raw_window_scroll_y_by {
 mod tests_raw_window_scroll_x_by {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -3613,7 +3613,7 @@ mod tests_raw_window_scroll_x_by {
 mod tests_raw_window_scroll_to {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -4291,7 +4291,7 @@ mod tests_raw_window_scroll_to {
 mod tests_cursor_move {
   use super::*;
 
-  use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
+  use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -4529,7 +4529,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -4658,7 +4658,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -5091,7 +5091,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -5400,7 +5400,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -6599,7 +6599,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -6828,7 +6828,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -7217,7 +7217,7 @@ mod tests_cursor_move {
       "  * The extra parts are been truncated.\r\n",
       "  * The extra parts are split into next row.\r\n",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
@@ -7383,7 +7383,7 @@ mod tests_cursor_move {
       "  * The extra parts are been truncated.\r",
       "  * The extra parts are split into next row.\r",
     ];
-    let buf_opts = BufferLocalOptionsBuilder::default()
+    let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
@@ -8467,7 +8467,7 @@ mod tests_cursor_move {
 mod tests_goto_command_line_ex_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -8550,7 +8550,7 @@ mod tests_goto_command_line_ex_mode {
 mod tests_goto_insert_mode {
   use super::*;
 
-  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::fsm::InsertStateful;
