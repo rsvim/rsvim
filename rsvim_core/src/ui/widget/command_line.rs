@@ -63,7 +63,7 @@ pub struct CommandLine {
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
-  content_id: TreeNodeId,
+  input_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
   message_id: TreeNodeId,
 
@@ -84,21 +84,19 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let cmdline_root = RootContainer::new(shape);
-    let cmdline_root_id = cmdline_root.id();
-    let cmdline_root_node = CommandLineNode::RootContainer(cmdline_root);
+    let root = RootContainer::new(shape);
+    let root_id = root.id();
+    let root_node = CommandLineNode::RootContainer(root);
 
-    let mut base = Itree::new(cmdline_root_node);
+    let mut base = Itree::new(root_node);
 
-    let cmdline_indicator_shape =
+    let indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator =
-      Indicator::new(cmdline_indicator_shape, IndicatorSymbol::Empty);
-    let cmdline_indicator_id = cmdline_indicator.id();
-    let mut cmdline_indicator_node =
-      CommandLineNode::Indicator(cmdline_indicator);
-    cmdline_indicator_node.set_visible(false);
-    base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
+    let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
+    let indicator_id = indicator.id();
+    let mut indicator_node = CommandLineNode::Indicator(indicator);
+    indicator_node.set_visible(false);
+    base.bounded_insert(root_id, indicator_node);
 
     let cmdline_content_shape =
       IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
@@ -140,7 +138,7 @@ impl CommandLine {
     let cmdline_content_id = cmdline_content.id();
     let mut cmdline_content_node = CommandLineNode::Input(cmdline_content);
     cmdline_content_node.set_visible(false);
-    base.bounded_insert(cmdline_root_id, cmdline_content_node);
+    base.bounded_insert(root_id, cmdline_content_node);
 
     let cmdline_message = Message::new(
       shape,
@@ -149,13 +147,13 @@ impl CommandLine {
     );
     let cmdline_message_id = cmdline_message.id();
     let cmdline_message_node = CommandLineNode::Message(cmdline_message);
-    base.bounded_insert(cmdline_root_id, cmdline_message_node);
+    base.bounded_insert(root_id, cmdline_message_node);
 
     Self {
       base,
       options,
-      indicator_id: cmdline_indicator_id,
-      content_id: cmdline_content_id,
+      indicator_id,
+      input_id: cmdline_content_id,
       message_id: cmdline_message_id,
       cursor_id: None,
       text_contents,
@@ -205,7 +203,7 @@ impl CommandLine {
   pub fn set_content_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport.clone();
     if let Some(CommandLineNode::Input(content)) =
-      self.base.node_mut(self.content_id)
+      self.base.node_mut(self.input_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
     }
@@ -248,7 +246,7 @@ impl CommandLine {
 
   /// Command-line content widget ID.
   pub fn content_id(&self) -> TreeNodeId {
-    self.content_id
+    self.input_id
   }
 
   /// Command-line message widget ID.
@@ -261,15 +259,15 @@ impl CommandLine {
 impl CommandLine {
   /// Command-line content widget.
   pub fn content(&self) -> &Input {
-    debug_assert!(self.base.node(self.content_id).is_some());
+    debug_assert!(self.base.node(self.input_id).is_some());
     debug_assert!(matches!(
-      self.base.node(self.content_id).unwrap(),
+      self.base.node(self.input_id).unwrap(),
       CommandLineNode::Input(_)
     ));
 
-    match self.base.node(self.content_id).unwrap() {
+    match self.base.node(self.input_id).unwrap() {
       CommandLineNode::Input(w) => {
-        debug_assert_eq!(w.id(), self.content_id);
+        debug_assert_eq!(w.id(), self.input_id);
         w
       }
       _ => unreachable!(),
@@ -278,15 +276,15 @@ impl CommandLine {
 
   /// Mutable command-line content widget.
   pub fn content_mut(&mut self) -> &mut Input {
-    debug_assert!(self.base.node_mut(self.content_id).is_some());
+    debug_assert!(self.base.node_mut(self.input_id).is_some());
     debug_assert!(matches!(
-      self.base.node_mut(self.content_id).unwrap(),
+      self.base.node_mut(self.input_id).unwrap(),
       CommandLineNode::Input(_)
     ));
 
-    match self.base.node_mut(self.content_id).unwrap() {
+    match self.base.node_mut(self.input_id).unwrap() {
       CommandLineNode::Input(w) => {
-        debug_assert_eq!(w.id(), self.content_id);
+        debug_assert_eq!(w.id(), self.input_id);
         w
       }
       _ => unreachable!(),
@@ -418,7 +416,7 @@ impl CommandLine {
     self.cursor_id = Some(cursor.id());
     self
       .base
-      .bounded_insert(self.content_id, CommandLineNode::Cursor(cursor))
+      .bounded_insert(self.input_id, CommandLineNode::Cursor(cursor))
   }
 
   /// Disable/remove cursor widget from commandline, i.e. when user leaves command-line mode, the
@@ -433,7 +431,7 @@ impl CommandLine {
         debug_assert!(self.base.parent_id(cursor_id).is_some());
         debug_assert_eq!(
           self.base.parent_id(cursor_id).unwrap(),
-          self.content_id
+          self.input_id
         );
         self.cursor_id = None;
         let cursor_node = self.base.remove(cursor_id);
@@ -446,8 +444,8 @@ impl CommandLine {
       }
       None => {
         debug_assert!(self.cursor_id.is_none());
-        debug_assert!(self.base.node(self.content_id).is_some());
-        debug_assert!(self.base.children_ids(self.content_id).is_empty());
+        debug_assert!(self.base.node(self.input_id).is_some());
+        debug_assert!(self.base.children_ids(self.input_id).is_empty());
         None
       }
     }
