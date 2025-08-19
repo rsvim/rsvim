@@ -1,4 +1,4 @@
-#![allow(unused_imports, dead_code)]
+#![allow(unused_imports, dead_code, unused_variables)]
 
 use super::command_line_ex::*;
 
@@ -460,7 +460,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents) =
+    let (tree, state, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline_and_buffer_options(
         terminal_size,
         buf_opts,
@@ -475,18 +475,6 @@ mod tests_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Prepare
@@ -634,7 +622,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents) =
+    let (tree, state, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -644,18 +632,6 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree.clone(),
-      bufs,
-      contents.clone(),
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Prepare
