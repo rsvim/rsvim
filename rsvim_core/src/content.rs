@@ -10,6 +10,7 @@ use ropey::Rope;
 /// Temporary contents except buffers.
 pub struct TextContents {
   command_line_content: Text,
+  command_line_message: Text,
 }
 
 arc_mutex_ptr!(TextContents);
@@ -24,14 +25,31 @@ impl TextContents {
         canvas_size,
         Rope::new(),
       ),
+      command_line_message: Text::new(
+        command_line_opts,
+        canvas_size,
+        Rope::new(),
+      ),
     }
   }
 
+  /// Get "command line" input content
   pub fn command_line_content(&self) -> &Text {
     &self.command_line_content
   }
 
+  /// Get mutable "command line" input content
   pub fn command_line_content_mut(&mut self) -> &mut Text {
     &mut self.command_line_content
+  }
+
+  /// Get "command line" echo message
+  pub fn command_line_message(&self) -> &Text {
+    &self.command_line_message
+  }
+
+  /// Get mutable "command line" echo message
+  pub fn command_line_message_mut(&mut self) -> &mut Text {
+    &mut self.command_line_message
   }
 }

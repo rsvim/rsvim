@@ -13,13 +13,13 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
+use crate::ui::widget::command_line::CommandLine;
 use crossterm::event::{Event, EventStream};
 use futures::StreamExt;
 use std::sync::Arc;
@@ -28,6 +28,7 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
+use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
 #[cfg(test)]
 use crate::tests::evloop::MockReader;
 #[cfg(test)]
@@ -510,7 +511,6 @@ impl EventLoop {
     );
     let cmdline =
       CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let _cmdline_id = cmdline.id();
 
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
@@ -577,6 +577,24 @@ impl EventLoop {
   ) {
     if let Some(message) = message {
       match message {
+        JsRuntimeToEventLoopMessage::EchoReq(req) => {
+          trace!("Receive req echo_req:{:?}", req.message);
+          let mut tree = lock!(self.tree);
+          let mut tree_clone = tree.clone();
+          debug_assert!(tree.command_line().is_some());
+          let command_line = tree_clone.command_line_mut().unwrap();
+          let command_line_message = command_line.message_mut();
+          command_line_message.set_message(req.message.clone());
+          let command_line_content =
+            command_line_message.get_text_contents().upgrade().unwrap();
+          let command_line_content = lock!(command_line_content);
+          _update_viewport_after_text_changed(
+            &mut tree,
+            command_line.id(),
+            command_line_content.command_line_message(),
+          );
+          trace!("Receive req echo_req:{:?} - done", req.message);
+        }
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("Receive req timeout_req:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
