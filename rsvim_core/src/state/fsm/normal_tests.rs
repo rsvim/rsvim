@@ -463,14 +463,10 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TextContents::to_arc(TextContents::new(terminal_size));
-    let tree = make_tree_with_buffers(
+    let (tree, state, bufs, buf, contents) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      bufs.clone(),
+      lines,
     );
     let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
     let state = State::to_arc(State::new(jsrt_tick_dispatcher));
