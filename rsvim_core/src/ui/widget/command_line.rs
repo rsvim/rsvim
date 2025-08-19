@@ -15,15 +15,15 @@ use crate::ui::widget::window::{
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
-use content::CommandLineContent;
 use indicator::{CommandLineIndicator, CommandLineIndicatorSymbol};
+use input::Input;
 use message::CommandLineMessage;
 use root::CommandLineRootContainer;
 
 use std::sync::Arc;
 
-pub mod content;
 pub mod indicator;
+pub mod input;
 pub mod message;
 pub mod root;
 
@@ -35,7 +35,7 @@ pub mod indicator_tests;
 pub enum CommandLineNode {
   CommandLineRootContainer(CommandLineRootContainer),
   CommandLineIndicator(CommandLineIndicator),
-  CommandLineContent(CommandLineContent),
+  CommandLineContent(Input),
   Cursor(Cursor),
   CommandLineMessage(CommandLineMessage),
 }
@@ -136,7 +136,7 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let cmdline_content = CommandLineContent::new(
+    let cmdline_content = Input::new(
       cmdline_content_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -266,7 +266,7 @@ impl CommandLine {
 // Widgets {
 impl CommandLine {
   /// Command-line content widget.
-  pub fn content(&self) -> &CommandLineContent {
+  pub fn content(&self) -> &Input {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -283,7 +283,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line content widget.
-  pub fn content_mut(&mut self) -> &mut CommandLineContent {
+  pub fn content_mut(&mut self) -> &mut Input {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),

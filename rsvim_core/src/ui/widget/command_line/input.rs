@@ -10,13 +10,13 @@ use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
 /// Commandline text content.
-pub struct CommandLineContent {
+pub struct Input {
   base: InodeBase,
   text_contents: TextContentsWk,
   viewport: ViewportWk,
 }
 
-impl CommandLineContent {
+impl Input {
   /// Make window content.
   pub fn new(
     shape: IRect,
@@ -24,7 +24,7 @@ impl CommandLineContent {
     viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
-    CommandLineContent {
+    Input {
       base,
       text_contents,
       viewport,
@@ -36,9 +36,9 @@ impl CommandLineContent {
   }
 }
 
-inode_impl!(CommandLineContent, base);
+inode_impl!(Input, base);
 
-impl Widgetable for CommandLineContent {
+impl Widgetable for Input {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let contents = self.text_contents.upgrade().unwrap();
