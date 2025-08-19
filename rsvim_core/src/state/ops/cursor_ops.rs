@@ -381,7 +381,7 @@ pub fn _update_viewport_after_text_changed(
       window.cursor_viewport(),
     ),
     TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
+      *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
       cmdline.input_cursor_viewport(),
@@ -437,7 +437,7 @@ pub fn _update_viewport_after_text_changed(
         window.set_cursor_viewport(updated_cursor_viewport)
       }
       TreeNode::CommandLine(cmdline) => {
-        cmdline.set_cursor_viewport(updated_cursor_viewport)
+        cmdline.set_input_cursor_viewport(updated_cursor_viewport)
       }
       _ => unreachable!(),
     }
@@ -472,7 +472,7 @@ pub fn cursor_move(
       window.cursor_viewport(),
     ),
     TreeNode::CommandLine(cmdline) => (
-      *cmdline.content().actual_shape(),
+      *cmdline.input().actual_shape(),
       *cmdline.options(),
       cmdline.input_viewport(),
       cmdline.input_cursor_viewport(),
@@ -564,7 +564,7 @@ pub fn cursor_move(
           }
         }
         TreeNode::CommandLine(cmdline) => {
-          cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          cmdline.set_input_cursor_viewport(new_cursor_viewport.clone());
           if cmdline.cursor_id().is_some() {
             cmdline.move_cursor_to(
               new_cursor_viewport.column_idx() as isize,
