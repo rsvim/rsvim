@@ -8,17 +8,17 @@ use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
 };
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::command_line::content::CommandLineContent;
-use crate::ui::widget::command_line::indicator::CommandLineIndicator;
-use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::WindowLocalOptionsBuilder;
-use crate::ui::widget::window::opt::WindowLocalOptions;
+use crate::ui::widget::window::{
+  WindowLocalOptions, WindowLocalOptionsBuilder,
+};
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
-use indicator::CommandLineIndicatorSymbol;
+use content::CommandLineContent;
+use indicator::{CommandLineIndicator, CommandLineIndicatorSymbol};
 use message::CommandLineMessage;
+use root::CommandLineRootContainer;
 
 use std::sync::Arc;
 

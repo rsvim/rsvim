@@ -9,9 +9,9 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::content::WindowContent;
-use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
+use content::WindowContent;
+use root::WindowRootContainer;
 
 // Re-export
 pub use opt::*;
