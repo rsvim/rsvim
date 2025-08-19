@@ -8556,7 +8556,7 @@ mod tests_goto_insert_mode {
   };
 
   use crate::state::ops::cursor_ops::_update_viewport_after_text_changed;
-  use crate::state::ops::message_ops::{refresh_view, set_message_visible};
+  use crate::state::ops::message_ops::refresh_view;
   use crate::ui::widget::command_line::CommandLineNode::Message;
   use compact_str::ToCompactString;
   use crossterm::event::{
@@ -8980,7 +8980,6 @@ mod tests_goto_insert_mode {
       let mut tree_lock = lock!(tree_clone);
       let cmd_line = tree_lock.command_line_mut().unwrap();
       refresh_view(cmd_line);
-      set_message_visible(cmd_line, true);
       let message = cmd_line.message_mut();
       message.set_message(CompactString::new("Test echo"));
     }
@@ -9062,7 +9061,6 @@ mod tests_goto_insert_mode {
       let mut tree_lock = lock!(tree_clone);
       let cmd_line = tree_lock.command_line_mut().unwrap();
       refresh_view(cmd_line);
-      set_message_visible(cmd_line, true);
       let message = cmd_line.message_mut();
       message.set_message(CompactString::new("Test echo"));
     }
