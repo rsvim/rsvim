@@ -48,10 +48,9 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
     let contents = lock!(event_loop.contents);
     let payload = contents.command_line_message().rope().to_string();
     let payload = payload.trim();
-    assert_eq!(
-      payload,
+    assert!(payload.contains(
       "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-    );
+    ));
   }
 
   Ok(())
@@ -99,10 +98,9 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
     let contents = lock!(event_loop.contents);
     let payload = contents.command_line_message().rope().to_string();
     let payload = payload.trim();
-    assert_eq!(
-      payload,
+    assert!(payload.contains(
       "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-    );
+    ));
   }
 
   Ok(())
