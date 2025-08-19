@@ -6426,23 +6426,6 @@ mod tests_insert_text {
 mod tests_delete_text {
   use super::*;
 
-  use crate::prelude::*;
-  use crate::state::{State, StateArc};
-  use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
-  use crate::tests::log::init as test_log_init;
-  use crate::tests::tree::make_tree_with_buffers;
-  use crate::ui::tree::TreeArc;
-  use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-    ViewportSearchDirection,
-  };
-
-  use crate::buf::opt::FileFormatOption;
-  use compact_str::CompactString;
-  use crossterm::event::{
-    Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
-  };
-
   #[test]
   fn nowrap1() {
     test_log_init();
