@@ -7656,29 +7656,16 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (Append)
@@ -7755,29 +7742,16 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let (tree, state, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     // Goto Insert-1 (NewLine)
@@ -7855,11 +7829,12 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(60, 3);
-    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
-      terminal_size,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      vec!["Should go to insert mode with message command line\n"],
-    );
+    let (tree, state, bufs, _buf, contents, data_access) =
+      make_tree_with_cmdline(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        vec!["Should go to insert mode with message command line\n"],
+      );
 
     // Prepare
     {
@@ -7874,23 +7849,10 @@ mod tests_goto_insert_mode {
       );
     }
 
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(
-      state,
-      tree,
-      bufs,
-      contents,
-      Event::Key(key_event),
-    );
     let stateful = NormalStateful::default();
 
     stateful.goto_insert_mode(
