@@ -30,13 +30,13 @@ mod opt_tests;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  WindowRootContainer(RootContainer),
-  WindowContent(Content),
+  RootContainer(RootContainer),
+  Content(Content),
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
-widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
+inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -57,7 +57,7 @@ impl Window {
   pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
     let window_root = RootContainer::new(shape);
     let window_root_id = window_root.id();
-    let window_root_node = WindowNode::WindowRootContainer(window_root);
+    let window_root_node = WindowNode::RootContainer(window_root);
     let window_root_actual_shape = window_root.actual_shape();
 
     let mut base = Itree::new(window_root_node);
@@ -77,7 +77,7 @@ impl Window {
     let window_content =
       Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
-    let window_content_node = WindowNode::WindowContent(window_content);
+    let window_content_node = WindowNode::Content(window_content);
 
     base.bounded_insert(window_root_id, window_content_node);
 
@@ -124,7 +124,7 @@ impl Window {
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(WindowNode::WindowContent(content)) =
+    if let Some(WindowNode::Content(content)) =
       self.base.node_mut(self.content_id)
     {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -164,10 +164,10 @@ impl Window {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
-      WindowNode::WindowContent(_)
+      WindowNode::Content(_)
     ));
     match self.base.node(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => {
+      WindowNode::Content(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }
@@ -180,10 +180,10 @@ impl Window {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),
-      WindowNode::WindowContent(_)
+      WindowNode::Content(_)
     ));
     match self.base.node_mut(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => {
+      WindowNode::Content(w) => {
         debug_assert_eq!(w.id(), self.content_id);
         w
       }
