@@ -3,7 +3,7 @@
 use super::indicator::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::geo_size_as;
 use crate::prelude::*;
 use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};

@@ -2,7 +2,7 @@
 
 #![allow(unused_imports)]
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::BufferOptions;
 use crate::buf::text::Text;
 use crate::buf::{Buffer, BufferArc, BuffersManager, BuffersManagerArc};
 use crate::prelude::*;
@@ -14,7 +14,7 @@ use std::io::BufReader;
 
 pub fn make_buffer_from_lines(
   terminal_size: U16Size,
-  opts: BufferLocalOptions,
+  opts: BufferOptions,
   lines: Vec<&str>,
 ) -> BufferArc {
   let mut rpb: RopeBuilder = RopeBuilder::new();
@@ -28,7 +28,7 @@ pub fn make_buffer_from_lines(
 
 pub fn make_empty_buffer(
   terminal_size: U16Size,
-  opts: BufferLocalOptions,
+  opts: BufferOptions,
 ) -> BufferArc {
   let buf =
     Buffer::_new(opts, terminal_size, Rope::new(), None, None, None, None);
@@ -36,7 +36,7 @@ pub fn make_empty_buffer(
 }
 
 pub fn make_buffers_manager(
-  opts: BufferLocalOptions,
+  opts: BufferOptions,
   bufs: Vec<BufferArc>,
 ) -> BuffersManagerArc {
   let mut bm = BuffersManager::new();

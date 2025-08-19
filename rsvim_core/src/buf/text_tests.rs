@@ -1,6 +1,6 @@
 use super::text::*;
 
-use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
+use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
 use crate::coord::U16Size;
 use crate::tests::log::init as test_log_init;
 
@@ -11,7 +11,7 @@ fn last_char1_unix() {
   test_log_init();
 
   let terminal_size = U16Size::new(10, 10);
-  let opt = BufferLocalOptionsBuilder::default()
+  let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Unix)
     .build()
     .unwrap();
@@ -106,7 +106,7 @@ fn last_char1_win() {
   test_log_init();
 
   let terminal_size = U16Size::new(10, 10);
-  let opt = BufferLocalOptionsBuilder::default()
+  let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Dos)
     .build()
     .unwrap();
@@ -202,7 +202,7 @@ fn last_char1_mac() {
   test_log_init();
 
   let terminal_size = U16Size::new(10, 10);
-  let opt = BufferLocalOptionsBuilder::default()
+  let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Mac)
     .build()
     .unwrap();

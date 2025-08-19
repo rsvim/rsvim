@@ -45,6 +45,6 @@ impl Widgetable for Input {
     let contents = lock!(contents);
     let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(contents.command_line_content(), actual_shape, canvas);
+    viewport.draw(contents.command_line_input(), actual_shape, canvas);
   }
 }

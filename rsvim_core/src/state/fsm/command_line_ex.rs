@@ -156,12 +156,12 @@ impl CommandLineExStateful {
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     let cmdline_content =
-      contents.command_line_content().rope().to_compact_string();
+      contents.command_line_input().rope().to_compact_string();
 
     cursor_ops::cursor_clear(
       &mut tree,
       cmdline_id,
-      contents.command_line_content_mut(),
+      contents.command_line_input_mut(),
     );
 
     let cmdline_content = cmdline_content.trim();
@@ -200,7 +200,7 @@ impl CommandLineExStateful {
     cursor_ops::cursor_move(
       &mut tree,
       cmdline_id,
-      contents.command_line_content(),
+      contents.command_line_input(),
       op,
       true,
     );
@@ -231,7 +231,7 @@ impl CommandLineExStateful {
     cursor_ops::cursor_insert(
       &mut tree,
       cmdline_id,
-      contents.command_line_content_mut(),
+      contents.command_line_input_mut(),
       payload,
     );
 
@@ -249,7 +249,7 @@ impl CommandLineExStateful {
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    let text = contents.command_line_content_mut();
+    let text = contents.command_line_input_mut();
 
     let cmdline = tree.command_line_mut().unwrap();
     let cmdline_id = cmdline.id();

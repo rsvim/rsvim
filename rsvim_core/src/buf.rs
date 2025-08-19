@@ -62,7 +62,7 @@ impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    opts: BufferLocalOptions,
+    opts: BufferOptions,
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
@@ -93,11 +93,11 @@ impl Buffer {
     &mut self.text
   }
 
-  pub fn options(&self) -> &BufferLocalOptions {
+  pub fn options(&self) -> &BufferOptions {
     self.text.options()
   }
 
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+  pub fn set_options(&mut self, options: &BufferOptions) {
     self.text.set_options(options);
   }
 
@@ -146,7 +146,7 @@ pub struct BuffersManager {
   buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
   // Global-local options for buffers.
-  global_local_options: BufferLocalOptions,
+  global_local_options: BufferOptions,
 }
 
 arc_mutex_ptr!(BuffersManager);
@@ -163,9 +163,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      global_local_options: BufferLocalOptionsBuilder::default()
-        .build()
-        .unwrap(),
+      global_local_options: BufferOptionsBuilder::default().build().unwrap(),
     }
   }
 
@@ -411,15 +409,15 @@ impl Default for BuffersManager {
 
 // Options {
 impl BuffersManager {
-  pub fn global_local_options(&self) -> &BufferLocalOptions {
+  pub fn global_local_options(&self) -> &BufferOptions {
     &self.global_local_options
   }
 
-  pub fn global_local_options_mut(&mut self) -> &mut BufferLocalOptions {
+  pub fn global_local_options_mut(&mut self) -> &mut BufferOptions {
     &mut self.global_local_options
   }
 
-  pub fn set_global_local_options(&mut self, options: &BufferLocalOptions) {
+  pub fn set_global_local_options(&mut self, options: &BufferOptions) {
     self.global_local_options = *options;
   }
 }
