@@ -301,7 +301,7 @@ impl NormalStateful {
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
     let vnode =
-      cursor_ops::viewport_editable_tree_node_mut(&mut tree, current_window_id);
+      cursor_ops::editable_widget_tree_node_mut(&mut tree, current_window_id);
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
       vnode,
       &viewport,
@@ -338,7 +338,7 @@ impl NormalStateful {
     );
 
     let vnode =
-      cursor_ops::viewport_editable_tree_node_mut(&mut tree, current_window_id);
+      cursor_ops::editable_widget_tree_node_mut(&mut tree, current_window_id);
     cursor_ops::raw_viewport_scroll_to(
       vnode,
       &viewport,
