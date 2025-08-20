@@ -532,22 +532,13 @@ pub fn cursor_move(
 ) {
   debug_assert!(tree.node_mut(id).is_some());
 
-  let (actual_shape, local_options, viewport, cursor_viewport) =
-    match tree.node_mut(id).unwrap() {
-      TreeNode::Window(window) => (
-        *window.content().actual_shape(),
-        *window.options(),
-        window.viewport(),
-        window.cursor_viewport(),
-      ),
-      TreeNode::CommandLine(cmdline) => (
-        *cmdline.input().actual_shape(),
-        *cmdline.options(),
-        cmdline.input_viewport(),
-        cmdline.input_cursor_viewport(),
-      ),
-      _ => unreachable!(),
-    };
+  let (viewport, cursor_viewport) = match tree.node_mut(id).unwrap() {
+    TreeNode::Window(window) => (window.viewport(), window.cursor_viewport()),
+    TreeNode::CommandLine(cmdline) => {
+      (cmdline.input_viewport(), cmdline.input_cursor_viewport())
+    }
+    _ => unreachable!(),
+  };
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
@@ -575,14 +566,25 @@ pub fn cursor_move(
   };
 
   let new_viewport: Option<ViewportArc> = {
-    let (start_line, start_column) = viewport.search_anchor(
-      search_direction,
-      &local_options,
-      text,
-      &actual_shape,
-      target_cursor_line,
-      target_cursor_char,
-    );
+    let (start_line, start_column) = match tree.node_mut(id).unwrap() {
+      TreeNode::Window(window) => viewport.search_anchor(
+        search_direction,
+        window.options(),
+        text,
+        window.content().actual_shape(),
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      TreeNode::CommandLine(cmdline) => viewport.search_anchor(
+        search_direction,
+        cmdline.options(),
+        text,
+        cmdline.input().actual_shape(),
+        target_cursor_line,
+        target_cursor_char,
+      ),
+      _ => unreachable!(),
+    };
 
     // First try window scroll.
     if start_line != viewport.start_line_idx()
