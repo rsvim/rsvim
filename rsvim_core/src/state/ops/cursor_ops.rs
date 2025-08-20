@@ -228,7 +228,7 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
-pub fn update_viewport(
+pub fn _update_viewport(
   tree: &mut Tree,
   id: TreeNodeId,
   text: &Text,
@@ -267,7 +267,7 @@ pub fn update_viewport(
   }
 }
 
-pub fn update_cursor_viewport(
+pub fn _update_cursor_viewport(
   tree: &mut Tree,
   id: TreeNodeId,
   viewport: &Viewport,
@@ -338,7 +338,7 @@ pub fn raw_cursor_viewport_move_to(
   }
 
   let new_cursor_viewport =
-    update_cursor_viewport(tree, id, viewport, text, line_idx, char_idx);
+    _update_cursor_viewport(tree, id, viewport, text, line_idx, char_idx);
   trace!(
     "after updated, new_cursor_viewport:{:?}",
     new_cursor_viewport
@@ -460,7 +460,7 @@ fn _update_viewport_after_text_changed(
   );
 
   let updated_viewport =
-    update_viewport(tree, id, text, start_line, start_column);
+    _update_viewport(tree, id, text, start_line, start_column);
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   raw_cursor_viewport_move_to(
