@@ -294,16 +294,16 @@ pub fn update_cursor_viewport(
   new_cursor_viewport
 }
 
-/// Calculate new cursor viewport by `Operation::CursorMove*` operations, as if the cursor wants to
-/// move to a specific position, or by a specific distance.
+/// Calculate new cursor viewport by `Operation::CursorMove*` operations, as
+/// if the cursor wants to move to a specific position, or by a specific
+/// distance. Then update/move the cursor to the new position.
 ///
-/// This API is bounded the cursor motion by the parent widget which the cursor belongs to, the
-/// parent window/widget will not be scroll.
+/// This API is bounded the cursor motion by the parent widget which the cursor
+/// belongs to, the parent window/widget will not be scroll.
 ///
 /// # Returns
 ///
-/// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
-/// move to the position.
+/// It returns new cursor viewport.
 ///
 /// # Panics
 ///
