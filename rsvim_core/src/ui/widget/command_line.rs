@@ -5,7 +5,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportEditable,
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
@@ -190,6 +190,29 @@ impl CommandLine {
     self.options = *options;
   }
 
+  /// Cursor widget ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Command-line indicator widget ID.
+  pub fn indicator_id(&self) -> TreeNodeId {
+    self.indicator_id
+  }
+
+  /// Command-line input widget ID.
+  pub fn input_id(&self) -> TreeNodeId {
+    self.input_id
+  }
+
+  /// Command-line message widget ID.
+  pub fn message_id(&self) -> TreeNodeId {
+    self.message_id
+  }
+}
+
+// Viewport {
+impl CommandLine {
   /// Get input viewport.
   pub fn input_viewport(&self) -> ViewportArc {
     self.input_viewport.clone()
@@ -232,27 +255,35 @@ impl CommandLine {
   ) {
     self.input_cursor_viewport = cursor_viewport;
   }
+}
+// Viewport }
 
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
+// Editable Viewport {
+impl ViewportEditable for CommandLine {
+  fn editable_viewport(&self) -> ViewportArc {
+    self.input_viewport()
   }
 
-  /// Command-line indicator widget ID.
-  pub fn indicator_id(&self) -> TreeNodeId {
-    self.indicator_id
+  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
+    self.set_input_viewport(viewport);
   }
 
-  /// Command-line input widget ID.
-  pub fn input_id(&self) -> TreeNodeId {
-    self.input_id
+  fn editable_cursor_viewport(&self) -> CursorViewportArc {
+    self.input_cursor_viewport()
   }
 
-  /// Command-line message widget ID.
-  pub fn message_id(&self) -> TreeNodeId {
-    self.message_id
+  fn set_editable_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) {
+    self.set_input_cursor_viewport(cursor_viewport);
+  }
+
+  fn editable_options(&self) -> &WindowOptions {
+    self.options()
   }
 }
+// Editable Viewport }
 
 // Show/Hide switch {
 impl CommandLine {

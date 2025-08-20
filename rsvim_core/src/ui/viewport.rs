@@ -720,3 +720,22 @@ impl Viewport {
     draw::draw(self, text, actual_shape, canvas);
   }
 }
+
+pub trait ViewportEditable {
+  /// Get editable viewport.
+  fn editable_viewport(&self) -> ViewportArc;
+
+  /// Set editable viewport.
+  fn set_editable_viewport(&mut self, viewport: ViewportArc);
+
+  /// Get editable cursor viewport.
+  fn editable_cursor_viewport(&self) -> CursorViewportArc;
+
+  /// Set editable cursor viewport.
+  fn set_editable_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  );
+
+  fn editable_options(&self) -> &WindowOptions;
+}
