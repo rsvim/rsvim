@@ -296,20 +296,19 @@ impl NormalStateful {
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
-    let maybe_new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
+    let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
+      &mut tree,
+      current_window.id(),
       &viewport,
       &cursor_viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-      current_window.set_cursor_viewport(new_cursor_viewport.clone());
-      current_window.move_cursor_to(
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      );
-    }
+    current_window.move_cursor_to(
+      new_cursor_viewport.column_idx() as isize,
+      new_cursor_viewport.row_idx() as isize,
+    );
   }
 
   #[cfg(test)]
