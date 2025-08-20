@@ -51,6 +51,7 @@ pub fn make_tree_with_buffer_opts(
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let state = State::to_arc(State::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
+  let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -58,12 +59,15 @@ pub fn make_tree_with_buffer_opts(
     KeyEventKind::Press,
   );
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+  let (jsrt_to_master, _master_from_jsrt) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
     state.clone(),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
+    commands,
+    jsrt_to_master,
     jsrt_tick_dispatcher,
   );
 
