@@ -27,7 +27,7 @@ RSVIM is an open source terminal based text editor, built from scratch with [rus
 
 - A fast editor that fully utilizes all CPU cores and never freezes.
 - A powerful TUI engine that provides widgets, event handlers, layouts, etc.
-- A consistent JavaScript-based runtime with built-in support for TypeScript.
+- A consistent javascript-based runtime with built-in support for typescript.
 - An editing service that allows multiple users to access remotely and work together.
 - A text processing tool that integrates with the shell environment.
 
