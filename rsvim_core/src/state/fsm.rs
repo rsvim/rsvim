@@ -13,6 +13,7 @@
 //! * Quit state: The editor should quit on this state.
 
 use crate::buf::BuffersManagerArc;
+use crate::command::ExCommandsManagerArc;
 use crate::content::TextContentsArc;
 use crate::js::msg::EventLoopToJsRuntimeMessage;
 use crate::state::StateArc;
@@ -60,6 +61,7 @@ pub struct StatefulDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
+  pub commands: ExCommandsManagerArc,
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
@@ -70,6 +72,7 @@ impl StatefulDataAccess {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandsManagerArc,
     jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     StatefulDataAccess {
@@ -78,6 +81,7 @@ impl StatefulDataAccess {
       tree,
       buffers,
       contents,
+      commands,
       jsrt_tick_dispatcher,
     }
   }
