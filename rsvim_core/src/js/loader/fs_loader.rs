@@ -12,6 +12,7 @@ use crate::prelude::*;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
 use path_absolutize::Absolutize;
+use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -23,6 +24,20 @@ static FILE_EXTENSIONS: &[&str] =
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader;
+
+fn path_not_found<P>(path: P) -> String
+where
+  P: Into<OsString> + std::fmt::Debug,
+{
+  format!("Error: Module path {path:?} not found!")
+}
+
+fn path_not_found2<P>(path: P, e: std::io::Error) -> String
+where
+  P: Into<OsString> + std::fmt::Debug,
+{
+  format!("Error: Module path {path:?} not found: {e:?}")
+}
 
 impl FsModuleLoader {
   // Transforms `PathBuf` into `String`.
@@ -80,7 +95,7 @@ impl FsModuleLoader {
     }
 
     // 3. Bail out with an error.
-    anyhow::bail!(format!("Error: Module path {path:?} not found!"));
+    anyhow::bail!(path_not_found(path));
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
@@ -100,7 +115,7 @@ impl FsModuleLoader {
       }
     }
 
-    anyhow::bail!(format!("Error: Module path {path:?} not found!"));
+    anyhow::bail!(path_not_found(path));
   }
 }
 
@@ -135,7 +150,7 @@ impl ModuleLoader for FsModuleLoader {
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
         None => {
-          anyhow::bail!(format!("Error: Module path {specifier:?} not found!"))
+          anyhow::bail!(path_not_found(specifier))
         }
       };
 
@@ -156,9 +171,7 @@ impl ModuleLoader for FsModuleLoader {
             }
           }
           Err(e) => {
-            anyhow::bail!(format!(
-              "Error: Module path {specifier:?} not found: {e:?}"
-            ))
+            anyhow::bail!(path_not_found2(specifier, e))
           }
         }
 
@@ -171,17 +184,15 @@ impl ModuleLoader for FsModuleLoader {
             }
           }
           Err(e) => {
-            anyhow::bail!(format!(
-              "Error: Module path {specifier:?} not found: {e:?}"
-            ))
+            anyhow::bail!(path_not_found2(specifier, e))
           }
         }
 
         // Otherwise we try to resolve it as node/npm package.
-        anyhow::bail!(format!("Error: Module path {specifier:?} not found"));
+        anyhow::bail!(path_not_found(specifier));
       }
       None => {
-        anyhow::bail!(format!("Error: Module path {specifier:?} not found"));
+        anyhow::bail!(path_not_found(specifier));
       }
     }
   }
@@ -197,7 +208,7 @@ impl ModuleLoader for FsModuleLoader {
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
       Err(_) => {
-        anyhow::bail!(format!("Error: Module path {path:?} not found!"))
+        anyhow::bail!(path_not_found(path))
       }
     };
 
