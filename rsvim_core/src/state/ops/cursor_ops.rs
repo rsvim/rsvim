@@ -312,7 +312,6 @@ pub fn raw_cursor_viewport_move_to(
   tree: &mut Tree,
   id: TreeNodeId,
   viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
   text: &Text,
   cursor_move_to_op: Operation,
 ) -> CursorViewportArc {
@@ -468,7 +467,6 @@ fn _update_viewport_after_text_changed(
     tree,
     id,
     &updated_viewport,
-    &cursor_viewport,
     text,
     Operation::CursorMoveTo((
       cursor_viewport.char_idx(),
@@ -582,7 +580,6 @@ pub fn cursor_move(
       tree,
       id,
       &current_viewport,
-      &cursor_viewport,
       text,
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );

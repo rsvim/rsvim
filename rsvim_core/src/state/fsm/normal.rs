@@ -304,7 +304,6 @@ impl NormalStateful {
       &mut tree,
       current_window_id,
       &viewport,
-      &cursor_viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
