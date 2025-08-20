@@ -1,6 +1,7 @@
 //! Window.
 
 use crate::buf::BufferWk;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -114,6 +115,24 @@ impl Window {
     self.options = *options;
   }
 
+  /// Get binded buffer.
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+
+  /// Cursor widget ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Content widget ID.
+  pub fn content_id(&self) -> TreeNodeId {
+    self.content_id
+  }
+}
+
+// Viewport {
+impl Window {
   /// Get viewport.
   pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
@@ -138,24 +157,10 @@ impl Window {
   pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
-
-  /// Get binded buffer.
-  pub fn buffer(&self) -> BufferWk {
-    self.buffer.clone()
-  }
-
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
-  /// Content widget ID.
-  pub fn content_id(&self) -> TreeNodeId {
-    self.content_id
-  }
 }
+// Viewport }
 
-// Viewport {
+// Sub-Widgets {
 impl Window {
   /// Window content widget.
   pub fn content(&self) -> &Content {
@@ -230,7 +235,7 @@ impl Window {
     }
   }
 }
-// Viewport }
+// Sub-Widgets }
 
 // Cursor {
 impl Window {
