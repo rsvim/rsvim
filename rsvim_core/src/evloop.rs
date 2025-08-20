@@ -315,6 +315,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands.clone(),
       state.clone(),
     );
 
@@ -388,6 +389,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands.clone(),
       state.clone(),
     );
 
