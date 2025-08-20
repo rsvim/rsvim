@@ -353,23 +353,25 @@ pub fn raw_cursor_viewport_move_to(
   new_cursor_viewport
 }
 
-/// Calculate the new viewport by `Operation::WindowScroll*` operations, as if the cursor wants to
-/// move to a specific position, or by a specific distance.
+/// Calculate the new viewport by `Operation::WindowScroll*` operations, as if
+/// the cursor wants to move to a specific position, or by a specific distance.
+/// Then update/move the new viewport for the widget.
 ///
-/// This API only scrolls the parent window/widget where the cursor belongs to, it will not moves
-/// the cursor position.
+/// This API only scrolls the parent window/widget where the cursor belongs to,
+/// it will not moves the cursor position.
 ///
 /// # Returns
 ///
-/// It returns new viewport if the operation is valid, returns `None` if the widget doesn't move.
+/// It returns new viewport if the operation is valid, returns `None` if the
+/// widget doesn't move.
 ///
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_viewport_scroll_to(
+  tree: &mut Tree,
+  id: TreeNodeId,
   viewport: &Viewport,
-  actual_shape: &U16Rect,
-  window_options: &WindowOptions,
   text: &Text,
   window_scroll_to_op: Operation,
 ) -> Option<ViewportArc> {
@@ -396,8 +398,19 @@ pub fn raw_viewport_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let max_len_chars =
-    _max_len_chars_since_line(text, line_idx, actual_shape.height());
+  let max_len_chars = match tree.node_mut(id).unwrap() {
+    TreeNode::Window(window) => _max_len_chars_since_line(
+      text,
+      line_idx,
+      window.content().actual_shape().height(),
+    ),
+    TreeNode::CommandLine(cmdline) => _max_len_chars_since_line(
+      text,
+      line_idx,
+      cmdline.input().actual_shape().height(),
+    ),
+    _ => unreachable!(),
+  };
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
@@ -409,13 +422,32 @@ pub fn raw_viewport_scroll_to(
   }
 
   // Sync the viewport
-  let new_viewport = Viewport::to_arc(Viewport::view(
-    window_options,
-    text,
-    actual_shape,
-    line_idx,
-    column_idx,
-  ));
+  let new_viewport = match tree.node_mut(id).unwrap() {
+    TreeNode::Window(window) => {
+      let new_viewport = Viewport::to_arc(Viewport::view(
+        window.options(),
+        text,
+        window.content().actual_shape(),
+        line_idx,
+        column_idx,
+      ));
+      window.set_viewport(new_viewport.clone());
+      new_viewport
+    }
+    TreeNode::CommandLine(cmdline) => {
+      let new_viewport = Viewport::to_arc(Viewport::view(
+        cmdline.options(),
+        text,
+        cmdline.input().actual_shape(),
+        line_idx,
+        column_idx,
+      ));
+      cmdline.set_input_viewport(new_viewport.clone());
+      new_viewport
+    }
+    _ => unreachable!(),
+  };
+
   Some(new_viewport)
 }
 
@@ -556,23 +588,13 @@ pub fn cursor_move(
     if start_line != viewport.start_line_idx()
       || start_column != viewport.start_column_idx()
     {
-      let new_viewport = raw_viewport_scroll_to(
+      raw_viewport_scroll_to(
+        tree,
+        id,
         &viewport,
-        &actual_shape,
-        &local_options,
         text,
         Operation::WindowScrollTo((start_column, start_line)),
-      );
-      if let Some(new_viewport) = new_viewport.clone() {
-        match tree.node_mut(id).unwrap() {
-          TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
-          TreeNode::CommandLine(cmdline) => {
-            cmdline.set_input_viewport(new_viewport.clone())
-          }
-          _ => unreachable!(),
-        }
-      }
-      new_viewport
+      )
     } else {
       None
     }
