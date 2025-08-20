@@ -5,9 +5,10 @@ use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportEditable,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
   ViewportSearchDirection,
 };
+use crate::ui::widget::EditableWidgetable;
 
 use compact_str::CompactString;
 
@@ -229,7 +230,7 @@ pub fn normalize_to_window_scroll_to(
 pub fn viewport_editable_tree_node_mut(
   tree: &mut Tree,
   id: TreeNodeId,
-) -> &mut dyn ViewportEditable {
+) -> &mut dyn EditableWidgetable {
   debug_assert!(tree.node_mut(id).is_some());
   match tree.node_mut(id).unwrap() {
     TreeNode::Window(window) => window,
@@ -242,7 +243,7 @@ pub fn viewport_editable_tree_node_mut(
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
 fn _update_viewport(
-  vnode: &mut dyn ViewportEditable,
+  vnode: &mut dyn EditableWidgetable,
   text: &Text,
   start_line: usize,
   start_column: usize,
@@ -264,7 +265,7 @@ fn _update_viewport(
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
 fn _update_cursor_viewport(
-  vnode: &mut dyn ViewportEditable,
+  vnode: &mut dyn EditableWidgetable,
   viewport: &Viewport,
   text: &Text,
   cursor_line: usize,
@@ -295,7 +296,7 @@ fn _update_cursor_viewport(
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
 pub fn raw_cursor_viewport_move_to(
-  vnode: &mut dyn ViewportEditable,
+  vnode: &mut dyn EditableWidgetable,
   viewport: &Viewport,
   text: &Text,
   cursor_move_to_op: Operation,
@@ -348,7 +349,7 @@ pub fn raw_cursor_viewport_move_to(
 ///
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_viewport_scroll_to(
-  vnode: &mut dyn ViewportEditable,
+  vnode: &mut dyn EditableWidgetable,
   viewport: &Viewport,
   text: &Text,
   window_scroll_to_op: Operation,

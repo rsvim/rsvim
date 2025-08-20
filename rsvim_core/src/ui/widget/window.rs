@@ -5,10 +5,10 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportEditable,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
 };
-use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::{EditableWidgetable, Widgetable};
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 use content::Content;
 use opt::*;
@@ -160,7 +160,7 @@ impl Window {
 // Viewport }
 
 // Editable Viewport {
-impl ViewportEditable for Window {
+impl EditableWidgetable for Window {
   fn editable_viewport(&self) -> ViewportArc {
     self.viewport()
   }

@@ -5,11 +5,11 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportEditable,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
 };
-use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::{EditableWidgetable, Widgetable};
 use crate::{
   geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
 };
@@ -259,7 +259,7 @@ impl CommandLine {
 // Viewport }
 
 // Editable Viewport {
-impl ViewportEditable for CommandLine {
+impl EditableWidgetable for CommandLine {
   fn editable_viewport(&self) -> ViewportArc {
     self.input_viewport()
   }
