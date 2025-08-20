@@ -227,7 +227,7 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
-pub fn editable_widget_tree_node_mut(
+pub fn editable_tree_node_mut(
   tree: &mut Tree,
   id: TreeNodeId,
 ) -> &mut dyn EditableWidgetable {
@@ -429,7 +429,7 @@ fn _update_viewport_after_text_changed(
   id: TreeNodeId,
   text: &Text,
 ) {
-  let vnode = editable_widget_tree_node_mut(tree, id);
+  let vnode = editable_tree_node_mut(tree, id);
 
   let viewport = vnode.editable_viewport();
   let cursor_viewport = vnode.editable_cursor_viewport();
@@ -482,7 +482,7 @@ pub fn cursor_move(
   op: Operation,
   include_eol: bool,
 ) {
-  let vnode = editable_widget_tree_node_mut(tree, id);
+  let vnode = editable_tree_node_mut(tree, id);
   let viewport = vnode.editable_viewport();
   let cursor_viewport = vnode.editable_cursor_viewport();
 
