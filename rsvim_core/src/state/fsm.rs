@@ -13,8 +13,10 @@
 //! * Quit state: The editor should quit on this state.
 
 use crate::buf::BuffersManagerArc;
+use crate::command::ExCommandsManagerArc;
 use crate::content::TextContentsArc;
 use crate::js::msg::EventLoopToJsRuntimeMessage;
+use crate::js::msg::JsRuntimeToEventLoopMessage;
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
@@ -60,16 +62,21 @@ pub struct StatefulDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
+  pub commands: ExCommandsManagerArc,
+  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 impl StatefulDataAccess {
+  #[allow(clippy::too_many_arguments)]
   pub fn new(
     event: Event,
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandsManagerArc,
+    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
     jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     StatefulDataAccess {
@@ -78,6 +85,8 @@ impl StatefulDataAccess {
       tree,
       buffers,
       contents,
+      commands,
+      jsrt_to_master,
       jsrt_tick_dispatcher,
     }
   }

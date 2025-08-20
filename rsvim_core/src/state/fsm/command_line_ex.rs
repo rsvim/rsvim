@@ -1,7 +1,10 @@
 //! The command-line ex mode.
 
-use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
-use crate::js::next_future_id;
+use crate::js::msg::{
+  self as jsmsg, EventLoopToJsRuntimeMessage, ExCommandReq,
+  JsRuntimeToEventLoopMessage,
+};
+use crate::js::{self, next_future_id};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{
@@ -98,17 +101,38 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
+    let commands = data_access.commands.clone();
+    let commands = lock!(commands);
+
     let current_handle = tokio::runtime::Handle::current();
-    current_handle.spawn_blocking(move || {
-      jsrt_tick_dispatcher
-        .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-          ExCommandReq::new(next_future_id(), cmdline_input_content),
-        ))
-        .unwrap();
-    });
+    match commands.parse(&cmdline_input_content) {
+      Some(parsed_cmd) => {
+        let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
+        current_handle.spawn_blocking(move || {
+          jsrt_tick_dispatcher
+            .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+              ExCommandReq::new(next_future_id(), parsed_cmd),
+            ))
+            .unwrap();
+        });
+      }
+      None => {
+        // Print error message
+        let jsrt_to_master = data_access.jsrt_to_master.clone();
+        let message_id = js::next_future_id();
+        let e = format!("Error: invalid command {cmdline_input_content:?}");
+        let e = e.to_compact_string();
+        current_handle.spawn_blocking(move || {
+          jsrt_to_master
+            .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
+              jsmsg::PrintReq::new(message_id, e),
+            ))
+            .unwrap();
+        });
+      }
+    }
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }

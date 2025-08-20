@@ -2,6 +2,7 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
+use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::msg::{
   self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
@@ -78,6 +79,8 @@ pub struct EventLoop {
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
   pub contents: TextContentsArc,
+  /// Ex commands.
+  pub commands: ExCommandsManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -114,6 +117,8 @@ pub struct EventLoop {
   /// Channel: "js runtime" => "master"
   ///
   /// Sender: js runtime send to master.
+  /// NOTE: This data is stored inside `EventLoop` because it is also been used
+  /// to sending messages from master to master.
   pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
   /// Receiver: master receive from js runtime.
   pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
@@ -160,6 +165,7 @@ impl EventLoop {
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
+    /* commands */ ExCommandsManagerArc,
     /* writer */ StdoutWriterValue,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
@@ -184,6 +190,8 @@ impl EventLoop {
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
+    let ex_commands_manager =
+      ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
     let state = State::to_arc(State::new());
@@ -254,6 +262,7 @@ impl EventLoop {
       stateful_machine,
       buffers_manager,
       text_contents,
+      ex_commands_manager,
       writer,
       CancellationToken::new(),
       TaskTracker::new(),
@@ -281,6 +290,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -307,6 +317,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands.clone(),
       state.clone(),
     );
 
@@ -320,6 +331,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -351,6 +363,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       _writer,
       cancellation_token,
       detached_tracker,
@@ -378,6 +391,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands.clone(),
       state.clone(),
     );
 
@@ -391,6 +405,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -551,6 +566,8 @@ impl EventLoop {
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
+          self.commands.clone(),
+          self.jsrt_to_master.clone(),
           self.jsrt_tick_dispatcher.clone(),
         );
 

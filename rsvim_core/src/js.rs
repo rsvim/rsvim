@@ -12,6 +12,7 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
+use crate::command::{ExCommand, ExCommandsManagerArc};
 use crate::content::TextContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
@@ -65,6 +66,16 @@ pub type JsFutureId = i32;
 ///
 /// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
+  static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
+pub type JsHandleId = i32;
+
+/// Next handle ID for js runtime.
+///
+/// NOTE: Start form 1.
+pub fn next_handle_id() -> JsHandleId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
@@ -334,6 +345,7 @@ pub struct JsRuntimeState {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
+  pub commands: ExCommandsManagerArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -376,6 +388,96 @@ impl std::fmt::Debug for JsRuntime {
   }
 }
 
+fn execute_module_impl(
+  scope: &mut v8::HandleScope,
+  filename: &str,
+  source: Option<&str>,
+) -> Result<(), AnyErr> {
+  trace!("Execute module, filename:{filename:?}, source:{source:?}");
+
+  // The following code allows the runtime to execute code with no valid
+  // location passed as parameter as an ES module.
+  let path = if source.is_some() {
+    filename.to_string()
+  } else {
+    match resolve_import(None, filename, None) {
+      Ok(specifier) => specifier,
+      Err(e) => {
+        // Returns the error directly.
+        trace!("Failed to resolve module path, filename:{filename:?}");
+        return Err(e);
+      }
+    }
+  };
+  trace!("Module path resolved, filename:{filename:?}({path:?})");
+
+  let tc_scope = &mut v8::TryCatch::new(scope);
+
+  let module = match fetch_module_tree(tc_scope, filename, source) {
+    Some(module) => module,
+    None => {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      trace!(
+        "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
+      );
+      anyhow::bail!(exception);
+    }
+  };
+
+  if module
+    .instantiate_module(tc_scope, module_resolve_cb)
+    .is_none()
+  {
+    assert!(tc_scope.has_caught());
+    let exception = tc_scope.exception().unwrap();
+    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    trace!(
+      "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
+    );
+    anyhow::bail!(exception);
+  }
+
+  match module.evaluate(tc_scope) {
+    Some(result) => {
+      trace!(
+        "Module result, filename:{filename:?}({path:?}), result({:?}):{:?}",
+        result.type_repr(),
+        result.to_rust_string_lossy(tc_scope),
+      );
+    }
+    None => {
+      trace!("Module result, filename:{filename:?}({path:?}), result:None")
+    }
+  }
+
+  if module.get_status() == v8::ModuleStatus::Errored {
+    let exception = module.get_exception();
+    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    trace!(
+      "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
+    );
+    anyhow::bail!(exception);
+  }
+
+  Ok(())
+}
+
+struct BuiltinJsCommand {
+  future_id: JsFutureId,
+  command: ExCommand,
+}
+
+impl JsFuture for BuiltinJsCommand {
+  fn run(&mut self, scope: &mut v8::HandleScope) {
+    debug_assert!(self.command.is_js());
+    let filename = format!("<ExCommand{}>", self.future_id);
+    execute_module_impl(scope, &filename, Some(self.command.payload()))
+      .unwrap();
+  }
+}
+
 impl JsRuntime {
   /// Creates a new JsRuntime with snapshot.
   #[allow(clippy::too_many_arguments)]
@@ -390,6 +492,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -444,6 +547,7 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
+      commands,
       editing_state,
     });
 
@@ -481,6 +585,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -519,6 +624,7 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
+      commands,
       editing_state,
     });
 
@@ -602,61 +708,7 @@ impl JsRuntime {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
-    // The following code allows the runtime to execute code with no valid
-    // location passed as parameter as an ES module.
-    let path = if source.is_some() {
-      filename.to_string()
-    } else {
-      match resolve_import(None, filename, None) {
-        Ok(specifier) => specifier,
-        Err(e) => {
-          // Returns the error directly.
-          return Err(e);
-        }
-      }
-    };
-    trace!("Resolved main js module (path): {:?}", path);
-
-    let tc_scope = &mut v8::TryCatch::new(scope);
-
-    let module = match fetch_module_tree(tc_scope, filename, None) {
-      Some(module) => module,
-      None => {
-        assert!(tc_scope.has_caught());
-        let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        anyhow::bail!(exception);
-      }
-    };
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      anyhow::bail!(exception);
-    }
-
-    match module.evaluate(tc_scope) {
-      Some(result) => {
-        trace!(
-          "Evaluated user config module result ({:?}): {:?}",
-          result.type_repr(),
-          result.to_rust_string_lossy(tc_scope),
-        );
-      }
-      None => trace!("Evaluated user config module result: None"),
-    }
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      anyhow::bail!(exception);
-    }
-
-    Ok(())
+    execute_module_impl(scope, filename, source)
   }
 
   /// Runs a single tick of the event-loop.
@@ -744,9 +796,14 @@ impl JsRuntime {
           EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-            // debug_assert!(req.source.starts_with("js"));
-            let _anonymous_filename = format!("<ExCommand{}>", req.future_id);
-            // self.execute_module(&anonymous_filename, Some(&req.source));
+            debug_assert!(req.command.is_js());
+
+            let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
+              future_id: req.future_id,
+              command: req.command,
+            });
+
+            futures.push(command_cb);
           }
         }
       }
