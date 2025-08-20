@@ -413,7 +413,7 @@ fn execute_module_impl(
 
   let tc_scope = &mut v8::TryCatch::new(scope);
 
-  let module = match fetch_module_tree(tc_scope, filename, None) {
+  let module = match fetch_module_tree(tc_scope, filename, source) {
     Some(module) => module,
     None => {
       assert!(tc_scope.has_caught());
