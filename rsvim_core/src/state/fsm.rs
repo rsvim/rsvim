@@ -68,6 +68,7 @@ pub struct StatefulDataAccess {
 }
 
 impl StatefulDataAccess {
+  #[allow(clippy::too_many_arguments)]
   pub fn new(
     event: Event,
     state: StateArc,

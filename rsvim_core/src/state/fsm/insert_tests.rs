@@ -5,6 +5,7 @@ use super::insert::*;
 use crate::buf::opt::FileFormatOption;
 use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
+use crate::command::ExCommandsManager;
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
