@@ -226,10 +226,22 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
+pub fn viewport_editable_tree_node_mut(
+  tree: &mut Tree,
+  id: TreeNodeId,
+) -> &mut dyn ViewportEditable {
+  debug_assert!(tree.node_mut(id).is_some());
+  match tree.node_mut(id).unwrap() {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  }
+}
+
 // NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
-pub fn _update_viewport(
+fn _update_viewport(
   vnode: &mut dyn ViewportEditable,
   text: &Text,
   start_line: usize,
@@ -251,7 +263,7 @@ pub fn _update_viewport(
 // NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
-pub fn _update_cursor_viewport(
+fn _update_cursor_viewport(
   vnode: &mut dyn ViewportEditable,
   viewport: &Viewport,
   text: &Text,
@@ -416,12 +428,7 @@ fn _update_viewport_after_text_changed(
   id: TreeNodeId,
   text: &Text,
 ) {
-  debug_assert!(tree.node_mut(id).is_some());
-  let vnode: &mut dyn ViewportEditable = match tree.node_mut(id).unwrap() {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
+  let vnode = viewport_editable_tree_node_mut(tree, id);
 
   let viewport = vnode.editable_viewport();
   let cursor_viewport = vnode.editable_cursor_viewport();
@@ -474,14 +481,7 @@ pub fn cursor_move(
   op: Operation,
   include_eol: bool,
 ) {
-  debug_assert!(tree.node_mut(id).is_some());
-
-  let vnode: &mut dyn ViewportEditable = match tree.node_mut(id).unwrap() {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
-
+  let vnode = viewport_editable_tree_node_mut(tree, id);
   let viewport = vnode.editable_viewport();
   let cursor_viewport = vnode.editable_cursor_viewport();
 
