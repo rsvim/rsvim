@@ -12,7 +12,7 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
-use crate::command::ExCommandsManagerArc;
+use crate::command::{ExCommand, ExCommandsManagerArc};
 use crate::content::TextContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
@@ -464,6 +464,20 @@ fn execute_module_impl(
   Ok(())
 }
 
+struct BuiltinJsCommand {
+  future_id: JsFutureId,
+  command: ExCommand,
+}
+
+impl JsFuture for BuiltinJsCommand {
+  fn run(&mut self, scope: &mut v8::HandleScope) {
+    debug_assert!(self.command.is_js());
+    let filename = format!("<ExCommand{}>", self.future_id);
+    execute_module_impl(scope, &filename, Some(self.command.payload()))
+      .unwrap();
+  }
+}
+
 impl JsRuntime {
   /// Creates a new JsRuntime with snapshot.
   #[allow(clippy::too_many_arguments)]
@@ -782,9 +796,14 @@ impl JsRuntime {
           EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-            // debug_assert!(req.source.starts_with("js"));
-            let _anonymous_filename = format!("<ExCommand{}>", req.future_id);
-            // self.execute_module(&anonymous_filename, Some(&req.source));
+            debug_assert!(req.command.is_js());
+
+            let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
+              future_id: req.future_id,
+              command: req.command,
+            });
+
+            futures.push(command_cb);
           }
         }
       }
