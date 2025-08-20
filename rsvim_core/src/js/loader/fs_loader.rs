@@ -80,8 +80,7 @@ impl FsModuleLoader {
     }
 
     // 3. Bail out with an error.
-    let path_display = path.display();
-    anyhow::bail!(format!("Module path not found: {path_display:?}"));
+    anyhow::bail!(format!("Error: Module path {path:?} not found!"));
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
@@ -101,8 +100,7 @@ impl FsModuleLoader {
       }
     }
 
-    let path_display = path.display();
-    anyhow::bail!(format!("Module path not found: {path_display:?}"));
+    anyhow::bail!(format!("Module path {path:?} not found!"));
   }
 }
 
@@ -137,7 +135,7 @@ impl ModuleLoader for FsModuleLoader {
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
         None => {
-          anyhow::bail!(format!("Module path {specifier:?} not found"))
+          anyhow::bail!(format!("Error: Module path {specifier:?} not found!"))
         }
       };
 
@@ -158,7 +156,9 @@ impl ModuleLoader for FsModuleLoader {
             }
           }
           Err(e) => {
-            anyhow::bail!(format!("Module path {specifier:?} not found: {e:?}"))
+            anyhow::bail!(format!(
+              "Error: Module path {specifier:?} not found: {e:?}"
+            ))
           }
         }
 
@@ -171,7 +171,9 @@ impl ModuleLoader for FsModuleLoader {
             }
           }
           Err(e) => {
-            anyhow::bail!(format!("Module path {specifier:?} not found: {e:?}"))
+            anyhow::bail!(format!(
+              "Error: Module path {specifier:?} not found: {e:?}"
+            ))
           }
         }
 
@@ -195,7 +197,7 @@ impl ModuleLoader for FsModuleLoader {
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
       Err(_) => {
-        anyhow::bail!(format!("Module path not found \"{}\"", path.display()))
+        anyhow::bail!(format!("Error: Module path {path:?} not found!"))
       }
     };
 
