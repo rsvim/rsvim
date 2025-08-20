@@ -328,6 +328,8 @@ impl NormalStateful {
     data_access: &StatefulDataAccess,
     op: Operation,
   ) {
+    use crate::ui::viewport::ViewportEditable;
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let (buffer, viewport, current_window_id) = {
@@ -343,9 +345,16 @@ impl NormalStateful {
       viewport.start_column_idx(),
       viewport.start_line_idx(),
     );
+
+    let vnode: &mut dyn ViewportEditable =
+      match tree.node_mut(current_window_id).unwrap() {
+        TreeNode::Window(window) => window,
+        TreeNode::CommandLine(cmdline) => cmdline,
+        _ => unreachable!(),
+      };
+
     cursor_ops::raw_viewport_scroll_to(
-      &mut tree,
-      current_window_id,
+      vnode,
       &viewport,
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),
