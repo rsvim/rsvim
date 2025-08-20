@@ -228,6 +228,9 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
+// NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
+// on "cmdline-message", since the formers have cursor inside and can be
+// editing, while the ladder doesn't.
 pub fn _update_viewport(
   tree: &mut Tree,
   id: TreeNodeId,
@@ -267,6 +270,9 @@ pub fn _update_viewport(
   }
 }
 
+// NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
+// on "cmdline-message", since the formers have cursor inside and can be
+// editing, while the ladder doesn't.
 pub fn _update_cursor_viewport(
   tree: &mut Tree,
   id: TreeNodeId,
