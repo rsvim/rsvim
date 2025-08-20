@@ -7,8 +7,8 @@ use crate::ui::tree::*;
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
 };
-use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::{EditableWidgetable, Widgetable};
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 use content::Content;
 use opt::*;
@@ -158,6 +158,45 @@ impl Window {
   }
 }
 // Viewport }
+
+// Editable Viewport {
+impl EditableWidgetable for Window {
+  fn editable_viewport(&self) -> ViewportArc {
+    self.viewport()
+  }
+
+  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
+    self.set_viewport(viewport);
+  }
+
+  fn editable_cursor_viewport(&self) -> CursorViewportArc {
+    self.cursor_viewport()
+  }
+
+  fn set_editable_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) {
+    self.set_cursor_viewport(cursor_viewport);
+  }
+
+  fn editable_options(&self) -> &WindowOptions {
+    self.options()
+  }
+
+  fn editable_actual_shape(&self) -> &U16Rect {
+    self.content().actual_shape()
+  }
+
+  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    self.move_cursor_to(x, y)
+  }
+
+  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id()
+  }
+}
+// Editable Viewport }
 
 // Sub-Widgets {
 impl Window {

@@ -1,6 +1,10 @@
 //! Basic atom of all UI components.
 
+use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::TreeNodeId;
+use crate::ui::viewport::{CursorViewportArc, ViewportArc};
+use crate::ui::widget::window::opt::WindowOptions;
 
 pub mod command_line;
 pub mod cursor;
@@ -33,4 +37,25 @@ macro_rules! widget_enum_dispatcher {
       }
     }
   }
+}
+
+pub trait EditableWidgetable {
+  fn editable_viewport(&self) -> ViewportArc;
+
+  fn set_editable_viewport(&mut self, viewport: ViewportArc);
+
+  fn editable_cursor_viewport(&self) -> CursorViewportArc;
+
+  fn set_editable_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  );
+
+  fn editable_options(&self) -> &WindowOptions;
+
+  fn editable_actual_shape(&self) -> &U16Rect;
+
+  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect>;
+
+  fn editable_cursor_id(&self) -> Option<TreeNodeId>;
 }
