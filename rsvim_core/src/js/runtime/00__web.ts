@@ -12,6 +12,14 @@
  */
 export interface GlobalThis {
   /**
+   * Cancel a timeout previously established by calling {@link setTimeout}.
+   *
+   * @param {number} id - The ID (integer) which identifies the timer.
+   * @throws Throws {@link !Error} if ID is not an integer value.
+   */
+  clearTimeout(id: number): void;
+
+  /**
    * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
@@ -25,14 +33,6 @@ export interface GlobalThis {
     delay: number,
     ...args: any[]
   ): number;
-
-  /**
-   * Cancel a timeout previously established by calling {@link setTimeout}.
-   *
-   * @param {number} id - The ID (integer) which identifies the timer.
-   * @throws Throws {@link !Error} if ID is not an integer value.
-   */
-  clearTimeout(id: number): void;
 }
 
 ((globalThis: GlobalThis) => {
@@ -46,6 +46,21 @@ export interface GlobalThis {
   // See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
   let nextTimerId = 1;
   const activeTimers = new Map();
+
+  function clearTimeout(id: number): void {
+    // Check parameter's type.
+    if (!Number.isInteger(id)) {
+      throw new Error(
+        `"clearTimeout" id parameter must be an integer value, but found ${id} (${typeof id})`,
+      );
+    }
+
+    if (activeTimers.has(id)) {
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
+      activeTimers.delete(id);
+    }
+  }
 
   function setTimeout(
     callback: (...args: any[]) => void,
@@ -82,21 +97,6 @@ export interface GlobalThis {
     return id;
   }
 
-  function clearTimeout(id: number): void {
-    // Check parameter's type.
-    if (!Number.isInteger(id)) {
-      throw new Error(
-        `"clearTimeout" id parameter must be an integer value, but found ${id} (${typeof id})`,
-      );
-    }
-
-    if (activeTimers.has(id)) {
-      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
-      activeTimers.delete(id);
-    }
-  }
-
   // Timer API }
 
   // const { $$queueMicrotask, reportError } = globalThis;
@@ -119,6 +119,6 @@ export interface GlobalThis {
   //   });
   // }
 
-  globalThis.setTimeout = setTimeout;
   globalThis.clearTimeout = clearTimeout;
+  globalThis.setTimeout = setTimeout;
 })(globalThis as unknown as GlobalThis);
