@@ -287,25 +287,29 @@ impl NormalStateful {
   ) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut().unwrap();
-    let buffer = current_window.buffer().upgrade().unwrap();
+
+    let (buffer, viewport, cursor_viewport, current_window_id) = {
+      let current_window = tree.current_window_mut().unwrap();
+      let buffer = current_window.buffer().upgrade().unwrap();
+      let viewport = current_window.viewport();
+      let cursor_viewport = current_window.cursor_viewport();
+      (buffer, viewport, cursor_viewport, current_window.id())
+    };
     let buffer = lock!(buffer);
-    let viewport = current_window.viewport();
-    let cursor_viewport = current_window.cursor_viewport();
 
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
       &mut tree,
-      current_window.id(),
+      current_window_id,
       &viewport,
       &cursor_viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    current_window.move_cursor_to(
+    tree.current_window_mut().unwrap().move_cursor_to(
       new_cursor_viewport.column_idx() as isize,
       new_cursor_viewport.row_idx() as isize,
     );

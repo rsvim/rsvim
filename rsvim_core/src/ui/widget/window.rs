@@ -1,7 +1,6 @@
 //! Window.
 
 use crate::buf::BufferWk;
-use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;

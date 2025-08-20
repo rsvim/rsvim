@@ -12,7 +12,6 @@ use crate::ui::viewport::{
 use crate::ui::widget::window::opt::WindowOptions;
 
 use compact_str::CompactString;
-use swc_ecma_transforms_compat::es2022::optional_chaining_impl;
 
 #[derive(Debug, Copy, Clone)]
 /// Cursor move direction.
