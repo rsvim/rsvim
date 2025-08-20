@@ -3,6 +3,7 @@
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::widget::window::opt::WindowOptions;
 
 use litemap::LiteMap;
@@ -722,20 +723,22 @@ impl Viewport {
 }
 
 pub trait ViewportEditable {
-  /// Get editable viewport.
   fn editable_viewport(&self) -> ViewportArc;
 
-  /// Set editable viewport.
   fn set_editable_viewport(&mut self, viewport: ViewportArc);
 
-  /// Get editable cursor viewport.
   fn editable_cursor_viewport(&self) -> CursorViewportArc;
 
-  /// Set editable cursor viewport.
   fn set_editable_cursor_viewport(
     &mut self,
     cursor_viewport: CursorViewportArc,
   );
 
   fn editable_options(&self) -> &WindowOptions;
+
+  fn editable_actual_shape(&self) -> &U16Rect;
+
+  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect>;
+
+  fn editable_cursor_id(&self) -> Option<TreeNodeId>;
 }

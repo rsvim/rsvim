@@ -183,6 +183,18 @@ impl ViewportEditable for Window {
   fn editable_options(&self) -> &WindowOptions {
     self.options()
   }
+
+  fn editable_actual_shape(&self) -> &U16Rect {
+    self.content().actual_shape()
+  }
+
+  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    self.move_cursor_to(x, y)
+  }
+
+  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id()
+  }
 }
 // Editable Viewport }
 
