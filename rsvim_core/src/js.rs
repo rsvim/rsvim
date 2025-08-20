@@ -694,61 +694,7 @@ impl JsRuntime {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
-    // The following code allows the runtime to execute code with no valid
-    // location passed as parameter as an ES module.
-    let path = if source.is_some() {
-      filename.to_string()
-    } else {
-      match resolve_import(None, filename, None) {
-        Ok(specifier) => specifier,
-        Err(e) => {
-          // Returns the error directly.
-          return Err(e);
-        }
-      }
-    };
-    trace!("Resolved main js module (path): {:?}", path);
-
-    let tc_scope = &mut v8::TryCatch::new(scope);
-
-    let module = match fetch_module_tree(tc_scope, filename, None) {
-      Some(module) => module,
-      None => {
-        assert!(tc_scope.has_caught());
-        let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        anyhow::bail!(exception);
-      }
-    };
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      anyhow::bail!(exception);
-    }
-
-    match module.evaluate(tc_scope) {
-      Some(result) => {
-        trace!(
-          "Evaluated user config module result ({:?}): {:?}",
-          result.type_repr(),
-          result.to_rust_string_lossy(tc_scope),
-        );
-      }
-      None => trace!("Evaluated user config module result: None"),
-    }
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      anyhow::bail!(exception);
-    }
-
-    Ok(())
+    execute_module_impl(scope, filename, source)
   }
 
   /// Runs a single tick of the event-loop.
