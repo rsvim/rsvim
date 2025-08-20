@@ -98,17 +98,25 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
-    let current_handle = tokio::runtime::Handle::current();
-    current_handle.spawn_blocking(move || {
-      jsrt_tick_dispatcher
-        .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-          ExCommandReq::new(next_future_id(), cmdline_input_content),
-        ))
-        .unwrap();
-    });
+    let commands = data_access.commands.clone();
+    let commands = lock!(commands);
+
+    match commands.parse(&cmdline_input_content) {
+      Some(parsed_cmd) => {
+        let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
+        let current_handle = tokio::runtime::Handle::current();
+        current_handle.spawn_blocking(move || {
+          jsrt_tick_dispatcher
+            .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+              ExCommandReq::new(next_future_id(), parsed_cmd),
+            ))
+            .unwrap();
+        });
+      }
+      None => { /* do nothing */ }
+    }
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }

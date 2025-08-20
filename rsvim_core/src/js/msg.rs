@@ -1,6 +1,7 @@
 //! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
+use crate::command::ExCommand;
 use crate::js::JsFutureId;
 
 use compact_str::CompactString;
@@ -78,11 +79,11 @@ impl TimeoutReq {
 #[derive(Debug)]
 pub struct ExCommandReq {
   pub future_id: JsFutureId,
-  pub source: CompactString,
+  pub command: ExCommand,
 }
 
 impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, source: CompactString) -> Self {
-    ExCommandReq { future_id, source }
+  pub fn new(future_id: JsFutureId, command: ExCommand) -> Self {
+    ExCommandReq { future_id, command }
   }
 }
