@@ -117,6 +117,8 @@ pub struct EventLoop {
   /// Channel: "js runtime" => "master"
   ///
   /// Sender: js runtime send to master.
+  /// NOTE: This data is stored inside `EventLoop` because it is also been used
+  /// to sending messages from master to master.
   pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
   /// Receiver: master receive from js runtime.
   pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
