@@ -100,7 +100,7 @@ impl FsModuleLoader {
       }
     }
 
-    anyhow::bail!(format!("Module path {path:?} not found!"));
+    anyhow::bail!(format!("Error: Module path {path:?} not found!"));
   }
 }
 
@@ -178,10 +178,10 @@ impl ModuleLoader for FsModuleLoader {
         }
 
         // Otherwise we try to resolve it as node/npm package.
-        anyhow::bail!(format!("Module path {specifier:?} not found"));
+        anyhow::bail!(format!("Error: Module path {specifier:?} not found"));
       }
       None => {
-        anyhow::bail!(format!("Module path {specifier:?} not found"));
+        anyhow::bail!(format!("Error: Module path {specifier:?} not found"));
       }
     }
   }
