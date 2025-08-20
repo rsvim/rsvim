@@ -1,7 +1,6 @@
 //! Cursor operations.
 
 use crate::buf::text::Text;
-use crate::coord::U16Rect;
 use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
@@ -9,7 +8,6 @@ use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc,
   ViewportSearchDirection,
 };
-use crate::ui::widget::window::opt::WindowOptions;
 
 use compact_str::CompactString;
 

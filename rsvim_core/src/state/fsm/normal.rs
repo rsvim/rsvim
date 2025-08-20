@@ -322,26 +322,26 @@ impl NormalStateful {
   ) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut().unwrap();
-    let buffer = current_window.buffer().upgrade().unwrap();
+    let (buffer, viewport, current_window_id) = {
+      let current_window = tree.current_window_mut().unwrap();
+      let buffer = current_window.buffer().upgrade().unwrap();
+      let viewport = current_window.viewport();
+      (buffer, viewport, current_window.id())
+    };
     let buffer = lock!(buffer);
-    let viewport = current_window.viewport();
 
     let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
       op,
       viewport.start_column_idx(),
       viewport.start_line_idx(),
     );
-    let maybe_new_viewport_arc = cursor_ops::raw_viewport_scroll_to(
+    cursor_ops::raw_viewport_scroll_to(
+      &mut tree,
+      current_window_id,
       &viewport,
-      current_window.actual_shape(),
-      current_window.options(),
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),
     );
-    if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
-      current_window.set_viewport(new_viewport_arc.clone());
-    }
   }
 
   pub fn editor_quit(
