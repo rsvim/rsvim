@@ -613,8 +613,8 @@ impl EventLoop {
             self.process_master_message(master_message).await;
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_resp = self.jstick_rx.recv() => {
-            self.process_jstick_message(js_resp).await;
+        js_message = self.jstick_rx.recv() => {
+            self.process_jstick_message(js_message).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
@@ -642,14 +642,12 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        // Receive notification from js runtime => master
-        js_req = self.master_rx.recv() => {
-            self.process_master_message(js_req).await;
+        master_message = self.master_rx.recv() => {
+            self.process_master_message(master_message).await;
         }
-        js_resp = self.jstick_rx.recv() => {
-            self.process_jstick_message(js_resp).await;
+        js_message = self.jstick_rx.recv() => {
+            self.process_jstick_message(js_message).await;
         }
-        // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
           break;
