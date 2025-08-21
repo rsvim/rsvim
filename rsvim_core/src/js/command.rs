@@ -46,14 +46,16 @@ impl JsFuture for ExCommand {
       Err(e) => {
         // Capture exception if there's any error while loading/evaluating module.
         trace!("Failed to execute module, filename:{filename:?}, error:{e:?}");
-        let state_rc = JsRuntime::state(scope);
-        let mut state = state_rc.borrow_mut();
         let message = e.to_string().to_owned();
         let message = v8::String::new(scope, &message).unwrap();
         let exception = v8::Exception::error(scope, message);
         binding::set_exception_code(scope, exception, &e);
         let exception = v8::Global::new(scope, exception);
-        state.exceptions.capture_exception(exception);
+        let state_rc = JsRuntime::state(scope);
+        state_rc
+          .borrow_mut()
+          .exceptions
+          .capture_exception(exception);
       }
     }
   }
