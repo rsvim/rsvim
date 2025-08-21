@@ -5,7 +5,7 @@ use crate::cli::CliOptions;
 use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::msg::{self, EventLoopToJsRuntimeMessage, MasterMessage};
+use crate::msg::{self, JsrtMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
@@ -99,7 +99,7 @@ pub struct EventLoop {
   // Receiver: js runtime receive from master.
   // pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   /// Sender: master send to js runtime.
-  pub master_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
+  pub master_to_jsrt: Sender<JsrtMessage>,
 
   /// Channel: "js runtime" => "master"
   ///
@@ -113,9 +113,9 @@ pub struct EventLoop {
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
   /// Sender: dispatcher.
-  pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  pub jsrt_tick_dispatcher: Sender<JsrtMessage>,
   /// Receiver: queue.
-  pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
+  pub jsrt_tick_queue: Receiver<JsrtMessage>,
 }
 
 #[cfg(test)]
@@ -158,10 +158,10 @@ impl EventLoop {
     /* jsrt_to_master */
     Sender<MasterMessage>,
     /* master_from_jsrt */ Receiver<MasterMessage>,
-    /* master_to_jsrt */ Sender<EventLoopToJsRuntimeMessage>,
-    /* jsrt_from_master */ Receiver<EventLoopToJsRuntimeMessage>,
-    /* jsrt_tick_dispatcher */ Sender<EventLoopToJsRuntimeMessage>,
-    /* jsrt_tick_queue */ Receiver<EventLoopToJsRuntimeMessage>,
+    /* master_to_jsrt */ Sender<JsrtMessage>,
+    /* jsrt_from_master */ Receiver<JsrtMessage>,
+    /* jsrt_tick_dispatcher */ Sender<JsrtMessage>,
+    /* jsrt_tick_queue */ Receiver<JsrtMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -593,9 +593,10 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = jsrt_tick_dispatcher
-              .send(EventLoopToJsRuntimeMessage::TimeoutResp(
-                msg::TimeoutResp::new(req.future_id, req.duration),
-              ))
+              .send(JsrtMessage::TimeoutResp(msg::TimeoutResp::new(
+                req.future_id,
+                req.duration,
+              )))
               .await;
           });
         }
@@ -605,7 +606,7 @@ impl EventLoop {
 
   async fn process_js_runtime_response(
     &mut self,
-    message: Option<EventLoopToJsRuntimeMessage>,
+    message: Option<JsrtMessage>,
   ) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);

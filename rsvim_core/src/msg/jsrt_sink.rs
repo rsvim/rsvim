@@ -7,7 +7,7 @@ use std::time::Duration;
 
 #[derive(Debug)]
 /// Message sent to [`JsRuntime`](crate::js::JsRuntime).
-pub enum EventLoopToJsRuntimeMessage {
+pub enum JsrtMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   TimeoutResp(TimeoutResp),
 

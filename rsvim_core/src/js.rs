@@ -21,7 +21,7 @@ use crate::js::module::{
   ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
   fetch_module_tree, resolve_import,
 };
-use crate::msg::{EventLoopToJsRuntimeMessage, MasterMessage};
+use crate::msg::{JsrtMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -337,7 +337,7 @@ pub struct JsRuntimeState {
   // Sender: js runtime send to master.
   pub jsrt_to_master: Sender<MasterMessage>,
   // Receiver: js runtime receive from master.
-  pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  pub jsrt_from_master: Receiver<JsrtMessage>,
   pub cli_opts: CliOptions,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
@@ -484,7 +484,7 @@ impl JsRuntime {
     startup_moment: Instant,
     time_origin: u128,
     jsrt_to_master: Sender<MasterMessage>,
-    jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    jsrt_from_master: Receiver<JsrtMessage>,
     cli_opts: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -577,7 +577,7 @@ impl JsRuntime {
     startup_moment: Instant,
     time_origin: u128,
     jsrt_to_master: Sender<MasterMessage>,
-    jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    jsrt_from_master: Receiver<JsrtMessage>,
     cli_opt: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -773,7 +773,7 @@ impl JsRuntime {
       let mut state = state_rc.borrow_mut();
       while let Ok(msg) = state.jsrt_from_master.try_recv() {
         match msg {
-          EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+          JsrtMessage::TimeoutResp(resp) => {
             trace!("Recv TimeResp:{resp:?}");
             let timeout_id_exists =
               state.timeout_handles.remove(&resp.future_id);
@@ -790,7 +790,7 @@ impl JsRuntime {
               futures.push(timeout_cb);
             }
           }
-          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
+          JsrtMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
             debug_assert!(req.command.is_js());
