@@ -621,7 +621,7 @@ impl EventLoop {
             tokio::time::sleep(req.duration).await;
             let _ = jsrt_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
-                message::TimeoutResp::new(req.future_id, req.duration),
+                msg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
           });
