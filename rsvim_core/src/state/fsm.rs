@@ -15,8 +15,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::command::ExCommandsManagerArc;
 use crate::content::TextContentsArc;
-use crate::js::msg::EventLoopToJsRuntimeMessage;
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::signal::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;

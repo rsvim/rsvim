@@ -13,6 +13,7 @@ pub mod lock;
 pub mod log;
 pub mod prelude;
 pub mod results;
+pub mod signal;
 pub mod state;
 pub mod ui;
 

@@ -1,4 +1,4 @@
-//! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
+//! Notifications between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::command::ExCommand;
