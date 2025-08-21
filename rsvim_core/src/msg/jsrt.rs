@@ -4,6 +4,8 @@ use crate::command::ExCommand;
 use crate::js::JsFutureId;
 
 use std::time::Duration;
+use tokio::sync::mpsc::Sender;
+use tokio::task::JoinHandle;
 
 #[derive(Debug)]
 /// Message sent to [`JsRuntime`](crate::js::JsRuntime).
@@ -40,4 +42,14 @@ impl ExCommandReq {
   pub fn new(future_id: JsFutureId, command: ExCommand) -> Self {
     ExCommandReq { future_id, command }
   }
+}
+
+/// Send js message in sync/blocking way, with tokio's "current_runtime".
+pub fn sync_send(
+  master_tx: Sender<JsMessage>,
+  message: JsMessage,
+) -> JoinHandle<()> {
+  tokio::runtime::Handle::current().spawn_blocking(move || {
+    master_tx.blocking_send(message).unwrap();
+  })
 }

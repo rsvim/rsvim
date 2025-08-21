@@ -5,6 +5,8 @@ use crate::js::JsFutureId;
 
 use compact_str::CompactString;
 use std::time::Duration;
+use tokio::sync::mpsc::Sender;
+use tokio::task::JoinHandle;
 
 #[derive(Debug)]
 /// Message sent to [`EventLoop`](crate::evloop::EventLoop).
@@ -38,4 +40,14 @@ impl TimeoutReq {
       duration,
     }
   }
+}
+
+/// Send master message in sync/blocking way, with tokio's "current_runtime".
+pub fn sync_send(
+  master_tx: Sender<MasterMessage>,
+  message: MasterMessage,
+) -> JoinHandle<()> {
+  tokio::runtime::Handle::current().spawn_blocking(move || {
+    master_tx.blocking_send(message).unwrap();
+  })
 }
