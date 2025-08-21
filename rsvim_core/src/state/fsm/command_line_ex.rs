@@ -1,11 +1,10 @@
 //! The command-line ex mode.
 
-use crate::js::msg::{
-  self as jsmsg, EventLoopToJsRuntimeMessage, ExCommandReq,
-  JsRuntimeToEventLoopMessage,
-};
 use crate::js::{self, next_future_id};
 use crate::prelude::*;
+use crate::signal::{
+  self, EventLoopToJsRuntimeMessage, ExCommandReq, JsRuntimeToEventLoopMessage,
+};
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{
   CursorInsertPayload, Operation, cmdline_ops, cursor_ops,
@@ -127,7 +126,7 @@ impl CommandLineExStateful {
         current_handle.spawn_blocking(move || {
           jsrt_to_master
             .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-              jsmsg::PrintReq::new(message_id, e),
+              signal::PrintReq::new(message_id, e),
             ))
             .unwrap();
         });
