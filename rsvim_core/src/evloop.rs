@@ -139,12 +139,18 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* master_tx */ Sender<MasterMessage>,
-    /* master_rx */ Receiver<MasterMessage>,
-    /* jsrt_tx */ Sender<JsMessage>,
-    /* jsrt_rx */ Receiver<JsMessage>,
-    /* jstick_tx */ Sender<JsMessage>,
-    /* jstick_rx */ Receiver<JsMessage>,
+    (
+      /* master_tx */ Sender<MasterMessage>,
+      /* master_rx */ Receiver<MasterMessage>,
+    ),
+    (
+      /* jsrt_tx */ Sender<JsMessage>,
+      /* jsrt_rx */ Receiver<JsMessage>,
+    ),
+    (
+      /* jstick_tx */ Sender<JsMessage>,
+      /* jstick_rx */ Receiver<JsMessage>,
+    ),
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -226,12 +232,9 @@ impl EventLoop {
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
-      master_tx,
-      master_rx,
-      jsrt_tx,
-      jsrt_rx,
-      jstick_tx,
-      jstick_rx,
+      (master_tx, master_rx),
+      (jsrt_tx, jsrt_rx),
+      (jstick_tx, jstick_rx),
     ))
   }
 
@@ -251,12 +254,9 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      master_tx,
-      master_rx,
-      jsrt_tx,
-      jsrt_rx,
-      jstick_tx,
-      jstick_rx,
+      (master_tx, master_rx),
+      (jsrt_tx, jsrt_rx),
+      (jstick_tx, jstick_rx),
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -325,12 +325,9 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      master_tx,
-      master_rx,
-      jsrt_tx,
-      jsrt_rx,
-      jstick_tx,
-      jstick_rx,
+      (master_tx, master_rx),
+      (jsrt_tx, jsrt_rx),
+      (jstick_tx, jstick_rx),
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let writer = StdoutWriterValue::dev_null();
