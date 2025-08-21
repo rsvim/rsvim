@@ -2,7 +2,6 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
-use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
@@ -70,8 +69,6 @@ pub struct EventLoop {
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
   pub contents: TextContentsArc,
-  /// Ex commands.
-  pub commands: ExCommandsManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -136,7 +133,6 @@ impl EventLoop {
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
-    /* commands */ ExCommandsManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -164,8 +160,6 @@ impl EventLoop {
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
-    let ex_commands_manager =
-      ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
     let state = State::to_arc(State::new());
@@ -229,7 +223,6 @@ impl EventLoop {
       stateful_machine,
       buffers_manager,
       text_contents,
-      ex_commands_manager,
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
@@ -251,7 +244,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -278,7 +270,6 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
-      commands.clone(),
       state.clone(),
     );
 
@@ -292,7 +283,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -322,7 +312,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -344,7 +333,6 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
-      commands.clone(),
       state.clone(),
     );
 
@@ -358,7 +346,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -512,7 +499,6 @@ impl EventLoop {
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
-          self.commands.clone(),
           self.master_tx.clone(),
           self.jstick_tx.clone(),
         );

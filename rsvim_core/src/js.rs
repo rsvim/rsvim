@@ -12,7 +12,6 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
-use crate::command::{ExCommand, ExCommandsManagerArc};
 use crate::content::TextContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
@@ -26,6 +25,7 @@ use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
+use compact_str::CompactString;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -342,7 +342,6 @@ pub struct JsRuntimeState {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
-  pub commands: ExCommandsManagerArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -463,7 +462,7 @@ fn execute_module_impl(
 
 struct BuiltinJsCommand {
   future_id: JsFutureId,
-  command: ExCommand,
+  command: CompactString,
 }
 
 impl JsFuture for BuiltinJsCommand {
@@ -489,7 +488,6 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -544,7 +542,6 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
-      commands,
       editing_state,
     });
 
@@ -582,7 +579,6 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -621,7 +617,6 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
-      commands,
       editing_state,
     });
 
@@ -793,11 +788,11 @@ impl JsRuntime {
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-            debug_assert!(req.command.is_js());
+            debug_assert!(req.payload.is_js());
 
             let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
               future_id: req.future_id,
-              command: req.command,
+              command: req.payload,
             });
 
             futures.push(command_cb);

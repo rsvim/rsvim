@@ -2,7 +2,6 @@
 
 pub mod buf;
 pub mod cli;
-pub mod command;
 pub mod constant;
 pub mod content;
 pub mod coord;
