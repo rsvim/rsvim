@@ -17,7 +17,7 @@ use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
-use command::ExCommand;
+use command::{ExCommandManager, ExCommandManagerArc};
 use err::JsError;
 use exception::ExceptionState;
 use hook::module_resolve_cb;
@@ -343,6 +343,7 @@ pub struct JsRuntimeState {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
+  pub commands: ExCommandManagerArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -475,6 +476,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -566,6 +568,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
+    commands: ExCommandManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -775,9 +778,10 @@ impl JsRuntime {
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-            debug_assert!(req.payload.is_js());
+            // For now only `:js` command is supported.
+            debug_assert!(req.payload.trim().starts_with("js"));
 
-            let command_cb: Box<dyn JsFuture> = Box::new(ExCommand {
+            let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
               future_id: req.future_id,
               command: req.payload,
             });

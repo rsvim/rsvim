@@ -3,6 +3,7 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
+use crate::js::command::{ExCommandManager, ExCommandManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
@@ -133,6 +134,7 @@ impl EventLoop {
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
+    /* commands */ ExCommandManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -160,6 +162,7 @@ impl EventLoop {
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
+    let ex_commands_manager = ExCommandManager::to_arc(ExCommandManager::new());
 
     // State
     let state = State::to_arc(State::new());
@@ -223,6 +226,7 @@ impl EventLoop {
       stateful_machine,
       buffers_manager,
       text_contents,
+      ex_commands_manager,
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
@@ -244,6 +248,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -270,6 +275,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands,
       state.clone(),
     );
 
@@ -312,6 +318,7 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
+      commands,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -333,6 +340,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
+      commands,
       state.clone(),
     );
 
