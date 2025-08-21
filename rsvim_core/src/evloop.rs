@@ -112,9 +112,9 @@ pub struct EventLoop {
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
   /// Sender: dispatcher.
-  pub jsrt_tick_dispatcher: Sender<JsrtMessage>,
+  pub jstick_dispatcher: Sender<JsrtMessage>,
   /// Receiver: queue.
-  pub jsrt_tick_queue: Receiver<JsrtMessage>,
+  pub jstick_queue: Receiver<JsrtMessage>,
 }
 
 #[cfg(test)]
@@ -154,8 +154,7 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* jsrt_to_master */
-    Sender<MasterMessage>,
+    /* jsrt_to_master */ Sender<MasterMessage>,
     /* master_from_jsrt */ Receiver<MasterMessage>,
     /* master_to_jsrt */ Sender<JsrtMessage>,
     /* jsrt_from_master */ Receiver<JsrtMessage>,
@@ -180,10 +179,9 @@ impl EventLoop {
     let state = State::to_arc(State::new());
     let stateful_machine = StatefulValue::default();
 
-    // Since there are technical limitations that we cannot use tokio APIs
-    // along with V8 engine, because V8 rust bindings are not Arc/Mutex (i.e.
-    // not thread safe), while tokio async runtime requires Arc/Mutex (i.e.
-    // thread safe).
+    // There are technical limitations that we cannot use tokio APIs along with
+    // V8 engine, since V8 rust bindings are not Arc/Mutex (i.e. not thread
+    // safe), while tokio async runtime requires Arc/Mutex (i.e. thread safe).
     //
     // We have to first send js task requests to master, let the master handles
     // these tasks for us (in async way), then send the task results back to js
@@ -314,8 +312,8 @@ impl EventLoop {
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
-      jsrt_tick_dispatcher,
-      jsrt_tick_queue,
+      jstick_dispatcher: jsrt_tick_dispatcher,
+      jstick_queue: jsrt_tick_queue,
     })
   }
 
@@ -383,8 +381,8 @@ impl EventLoop {
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
-      jsrt_tick_dispatcher,
-      jsrt_tick_queue,
+      jstick_dispatcher: jsrt_tick_dispatcher,
+      jstick_queue: jsrt_tick_queue,
     })
   }
 
@@ -535,7 +533,7 @@ impl EventLoop {
           self.contents.clone(),
           self.commands.clone(),
           self.jsrt_to_master.clone(),
-          self.jsrt_tick_dispatcher.clone(),
+          self.jstick_dispatcher.clone(),
         );
 
         // Handle by state machine
@@ -581,7 +579,7 @@ impl EventLoop {
         }
         MasterMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
-          let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
+          let jsrt_tick_dispatcher = self.jstick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = jsrt_tick_dispatcher
@@ -634,7 +632,7 @@ impl EventLoop {
         js_req = self.master_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.jsrt_tick_queue.recv() => {
+        js_resp = self.jstick_queue.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify
@@ -668,7 +666,7 @@ impl EventLoop {
         js_req = self.master_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.jsrt_tick_queue.recv() => {
+        js_resp = self.jstick_queue.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify
