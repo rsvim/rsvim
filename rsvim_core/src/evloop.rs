@@ -93,8 +93,8 @@ pub struct EventLoop {
   pub master_rx: Receiver<MasterMessage>,
 
   /// Channel-2
-  pub jstick_tx: Sender<JsMessage>,
-  pub jstick_rx: Receiver<JsMessage>,
+  pub jsrt_forwarder_tx: Sender<JsMessage>,
+  pub jsrt_forwarder_rx: Receiver<JsMessage>,
 
   /// Channel-3
   pub jsrt_tx: Sender<JsMessage>,
@@ -143,8 +143,8 @@ impl EventLoop {
       /* master_rx */ Receiver<MasterMessage>,
     ),
     (
-      /* jstick_tx */ Sender<JsMessage>,
-      /* jstick_rx */ Receiver<JsMessage>,
+      /* jsrt_forwarder_tx */ Sender<JsMessage>,
+      /* jsrt_forwarder_rx */ Receiver<JsMessage>,
     ),
     (
       /* jsrt_tx */ Sender<JsMessage>,
@@ -190,7 +190,7 @@ impl EventLoop {
     // The request/response data flow uses below message channels:
     //
     // - Channel-1 `master_tx` => `master_rx` on `MasterMessage`.
-    // - Channel-2 `jstick_tx` => `jstick_rx` on `JsMessage`.
+    // - Channel-2 `jsrt_forwarder_tx` => `jsrt_forwarder_rx` on `JsMessage`.
     // - Channel-3 `jsrt_tx` => `jsrt_rx` on `JsMessage`.
     //
     // The dataflow follows below steps:
@@ -207,7 +207,7 @@ impl EventLoop {
     // Channel-1: js runtime => master
     let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2
-    let (jstick_tx, jstick_rx) = channel(*CHANNEL_BUF_SIZE);
+    let (jsrt_forwarder_tx, jsrt_forwarder_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-3
     let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
 
@@ -232,7 +232,7 @@ impl EventLoop {
       TaskTracker::new(),
       TaskTracker::new(),
       (master_tx, master_rx),
-      (jstick_tx, jstick_rx),
+      (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
     ))
   }
@@ -254,7 +254,7 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       (master_tx, master_rx),
-      (jstick_tx, jstick_rx),
+      (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(cols, rows)?;
 
@@ -297,8 +297,8 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jstick_tx,
-      jstick_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
       jsrt_tx,
     })
   }
@@ -324,7 +324,7 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       (master_tx, master_rx),
-      (jstick_tx, jstick_rx),
+      (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
@@ -362,8 +362,8 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jstick_tx,
-      jstick_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
       jsrt_tx,
     })
   }
@@ -509,7 +509,7 @@ impl EventLoop {
           self.buffers.clone(),
           self.contents.clone(),
           self.master_tx.clone(),
-          self.jstick_tx.clone(),
+          self.jsrt_forwarder_tx.clone(),
         );
 
         // Handle by state machine
@@ -552,10 +552,10 @@ impl EventLoop {
         }
         MasterMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
-          let jstick_tx = self.jstick_tx.clone();
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = jstick_tx
+            let _ = jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
                 req.future_id,
                 req.duration,
@@ -567,7 +567,7 @@ impl EventLoop {
     }
   }
 
-  async fn process_jstick_message(&mut self, message: Option<JsMessage>) {
+  async fn forward_js_message(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
       let _ = self.jsrt_tx.send(message).await;
@@ -603,8 +603,8 @@ impl EventLoop {
             self.process_master_message(master_message).await;
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_message = self.jstick_rx.recv() => {
-            self.process_jstick_message(js_message).await;
+        js_message = self.jsrt_forwarder_rx.recv() => {
+            self.forward_js_message(js_message).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
@@ -635,8 +635,8 @@ impl EventLoop {
         master_message = self.master_rx.recv() => {
             self.process_master_message(master_message).await;
         }
-        js_message = self.jstick_rx.recv() => {
-            self.process_jstick_message(js_message).await;
+        js_message = self.jsrt_forwarder_rx.recv() => {
+            self.forward_js_message(js_message).await;
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;

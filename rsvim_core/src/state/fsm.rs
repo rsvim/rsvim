@@ -61,7 +61,7 @@ pub struct StatefulDataAccess {
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
   pub master_tx: Sender<MasterMessage>,
-  pub jstick_tx: Sender<JsMessage>,
+  pub jsrt_forwarder_tx: Sender<JsMessage>,
 }
 
 impl StatefulDataAccess {
@@ -73,7 +73,7 @@ impl StatefulDataAccess {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     master_tx: Sender<MasterMessage>,
-    jstick_tx: Sender<JsMessage>,
+    jsrt_forwarder_tx: Sender<JsMessage>,
   ) -> Self {
     StatefulDataAccess {
       event,
@@ -82,7 +82,7 @@ impl StatefulDataAccess {
       buffers,
       contents,
       master_tx,
-      jstick_tx,
+      jsrt_forwarder_tx,
     }
   }
 }
