@@ -1,7 +1,7 @@
 //! The command-line ex mode.
 
-use crate::js::{self, next_future_id};
-use crate::msg::{self, ExCommandReq, JsMessage, MasterMessage};
+use crate::js::next_future_id;
+use crate::msg::{self, ExCommandReq, JsMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{

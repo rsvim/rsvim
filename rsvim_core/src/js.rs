@@ -17,7 +17,7 @@ use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
-use command::{ExCommand, ExCommandManagerArc};
+use command::ExCommandManagerArc;
 use err::JsError;
 use exception::ExceptionState;
 use hook::module_resolve_cb;
