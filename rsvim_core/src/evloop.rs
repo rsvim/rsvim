@@ -619,7 +619,6 @@ impl EventLoop {
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
-          // let _ = self.master_send_to_js_worker.send(JsMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
       }
