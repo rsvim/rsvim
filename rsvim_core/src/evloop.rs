@@ -46,12 +46,6 @@ pub mod writer;
 /// tokio's async tasks and let them sync back data once they are done. The event loop controls all
 /// the tasks with [`CancellationToken`] and [`TaskTracker`].
 ///
-/// # Terms
-///
-/// * Master: The event loop itself.
-/// * Worker: A spawned task.
-/// * JsRuntime: The javascript runtime (including V8 engine).
-///
 /// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
   /// Indicates the start time of the process.
