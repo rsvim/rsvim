@@ -90,22 +90,10 @@ pub struct EventLoop {
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
-  /// Channel: "master" => "js runtime"
-  /// NOTE: In variables naming, we use "jsrt" for "js runtime".
-  ///
-  // Receiver: js runtime receive from master.
-  // pub jsrt_from_master: Receiver<JsMessage>,
-  /// Sender: master send to js runtime.
-  pub master_to_jsrt: Sender<JsMessage>,
-
   /// Channel: "js runtime" => "master"
-  ///
-  /// Sender: js runtime send to master.
-  /// NOTE: This data is stored inside `EventLoop` because it is also been used
-  /// to sending messages from master to master.
-  pub jsrt_to_master: Sender<MasterMessage>,
+  pub master_tx: Sender<MasterMessage>,
   /// Receiver: master receive from js runtime.
-  pub master_from_jsrt: Receiver<MasterMessage>,
+  pub master_rx: Receiver<MasterMessage>,
 
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
@@ -113,6 +101,9 @@ pub struct EventLoop {
   pub jstick_dispatcher: Sender<JsMessage>,
   /// Receiver: queue.
   pub jstick_queue: Receiver<JsMessage>,
+
+  /// Channel-3: jsrt_tx => jsrt_rx
+  pub jsrt_tx: Sender<JsMessage>,
 }
 
 #[cfg(test)]
@@ -154,8 +145,8 @@ impl EventLoop {
     /* blocked_tracker */ TaskTracker,
     /* jsrt_to_master */ Sender<MasterMessage>,
     /* master_from_jsrt */ Receiver<MasterMessage>,
-    /* master_to_jsrt */ Sender<JsMessage>,
-    /* jsrt_from_master */ Receiver<JsMessage>,
+    /* jsrt_tx */ Sender<JsMessage>,
+    /* jsrt_rx */ Receiver<JsMessage>,
     /* jstick_dispatcher */ Sender<JsMessage>,
     /* jstick_queue */ Receiver<JsMessage>,
   )> {
@@ -199,7 +190,7 @@ impl EventLoop {
     //
     // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on `MasterMessage`.
     // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `JsMessage`.
-    // - Channel-3 `master_to_jsrt` => `jsrt_from_master` on `JsMessage`.
+    // - Channel-3 `jsrt_tx` => `jsrt_rx` on `JsMessage`.
     //
     // The dataflow follows below steps:
     //
@@ -216,8 +207,8 @@ impl EventLoop {
     let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2: master => master
     let (jstick_dispatcher, jstick_queue) = channel(*CHANNEL_BUF_SIZE);
-    // Channel-3: master => js runtime
-    let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
+    // Channel-3
+    let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
 
     // Startup time
     let startup_moment = Instant::now();
@@ -241,8 +232,8 @@ impl EventLoop {
       TaskTracker::new(),
       jsrt_to_master,
       master_from_jsrt,
-      master_to_jsrt,
-      jsrt_from_master,
+      jsrt_tx,
+      jsrt_rx,
       jstick_dispatcher,
       jstick_queue,
     ))
@@ -266,8 +257,8 @@ impl EventLoop {
       blocked_tracker,
       jsrt_to_master,
       master_from_jsrt,
-      master_to_jsrt,
-      jsrt_from_master,
+      jsrt_tx,
+      jsrt_rx,
       jstick_dispatcher,
       jstick_queue,
     ) = Self::_internal_new(cols, rows)?;
@@ -285,7 +276,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       jsrt_to_master.clone(),
-      jsrt_from_master,
+      jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
       buffers.clone(),
@@ -310,9 +301,9 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      jsrt_to_master,
-      master_from_jsrt,
-      master_to_jsrt,
+      master_tx: jsrt_to_master,
+      master_rx: master_from_jsrt,
+      jsrt_tx: jsrt_tx,
       jstick_dispatcher,
       jstick_queue,
     })
@@ -340,8 +331,8 @@ impl EventLoop {
       blocked_tracker,
       jsrt_to_master,
       master_from_jsrt,
-      master_to_jsrt,
-      jsrt_from_master,
+      jsrt_tx,
+      jsrt_rx,
       jstick_dispatcher,
       jstick_queue,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
@@ -354,7 +345,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       jsrt_to_master.clone(),
-      jsrt_from_master,
+      jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
       buffers.clone(),
@@ -379,9 +370,9 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      jsrt_to_master,
-      master_from_jsrt,
-      master_to_jsrt,
+      master_tx: jsrt_to_master,
+      master_rx: master_from_jsrt,
+      jsrt_tx,
       jstick_dispatcher,
       jstick_queue,
     })
@@ -414,7 +405,7 @@ impl EventLoop {
         Err(e) => {
           // Send error message to command-line
           let current_handle = tokio::runtime::Handle::current();
-          let jsrt_to_master = self.jsrt_to_master.clone();
+          let jsrt_to_master = self.master_tx.clone();
           let message_id = js::next_future_id();
           let e = e.to_compact_string();
           current_handle.spawn_blocking(move || {
@@ -533,7 +524,7 @@ impl EventLoop {
           self.buffers.clone(),
           self.contents.clone(),
           self.commands.clone(),
-          self.jsrt_to_master.clone(),
+          self.master_tx.clone(),
           self.jstick_dispatcher.clone(),
         );
 
@@ -598,7 +589,7 @@ impl EventLoop {
   async fn process_js_runtime_response(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
-      let _ = self.master_to_jsrt.send(message).await;
+      let _ = self.jsrt_tx.send(message).await;
       self.js_runtime.tick_event_loop();
     }
   }
@@ -627,7 +618,7 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive notification from js runtime => master
-        js_req = self.master_from_jsrt.recv() => {
+        js_req = self.master_rx.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
         js_resp = self.jstick_queue.recv() => {
@@ -661,7 +652,7 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive notification from js runtime => master
-        js_req = self.master_from_jsrt.recv() => {
+        js_req = self.master_rx.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
         js_resp = self.jstick_queue.recv() => {

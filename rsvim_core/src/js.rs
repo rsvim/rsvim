@@ -337,7 +337,7 @@ pub struct JsRuntimeState {
   // Sender: js runtime send to master.
   pub jsrt_to_master: Sender<MasterMessage>,
   // Receiver: js runtime receive from master.
-  pub jsrt_from_master: Receiver<JsMessage>,
+  pub jsrt_rx: Receiver<JsMessage>,
   pub cli_opts: CliOptions,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
@@ -484,7 +484,7 @@ impl JsRuntime {
     startup_moment: Instant,
     time_origin: u128,
     jsrt_to_master: Sender<MasterMessage>,
-    jsrt_from_master: Receiver<JsMessage>,
+    jsrt_rx: Receiver<JsMessage>,
     cli_opts: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -539,7 +539,7 @@ impl JsRuntime {
       options,
       // wake_event_queued: false,
       jsrt_to_master,
-      jsrt_from_master,
+      jsrt_rx,
       cli_opts,
       tree,
       buffers,
@@ -577,7 +577,7 @@ impl JsRuntime {
     startup_moment: Instant,
     time_origin: u128,
     jsrt_to_master: Sender<MasterMessage>,
-    jsrt_from_master: Receiver<JsMessage>,
+    jsrt_rx: Receiver<JsMessage>,
     cli_opt: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -616,7 +616,7 @@ impl JsRuntime {
       options,
       // wake_event_queued: false,
       jsrt_to_master,
-      jsrt_from_master,
+      jsrt_rx,
       cli_opts: cli_opt,
       tree,
       buffers,
@@ -771,7 +771,7 @@ impl JsRuntime {
     {
       let state_rc = Self::state(scope);
       let mut state = state_rc.borrow_mut();
-      while let Ok(msg) = state.jsrt_from_master.try_recv() {
+      while let Ok(msg) = state.jsrt_rx.try_recv() {
         match msg {
           JsMessage::TimeoutResp(resp) => {
             trace!("Recv TimeResp:{resp:?}");
