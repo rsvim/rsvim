@@ -547,10 +547,7 @@ impl EventLoop {
     }
   }
 
-  async fn process_js_runtime_request(
-    &mut self,
-    message: Option<MasterMessage>,
-  ) {
+  async fn process_master_message(&mut self, message: Option<MasterMessage>) {
     if let Some(message) = message {
       match message {
         MasterMessage::PrintReq(req) => {
@@ -580,7 +577,7 @@ impl EventLoop {
     }
   }
 
-  async fn process_js_runtime_response(&mut self, message: Option<JsMessage>) {
+  async fn process_jstick_message(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
       let _ = self.jsrt_tx.send(message).await;
@@ -599,7 +596,7 @@ impl EventLoop {
   ///
   /// 1. Receives several things:
   ///    1. User keyboard/mouse events.
-  ///    2. Messages sent from workers.
+  ///    2. Received messages.
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
@@ -611,12 +608,13 @@ impl EventLoop {
         event = reader.next() => {
           self.process_event(event).await;
         }
-        // Receive notification from js runtime => master
-        js_req = self.master_rx.recv() => {
-            self.process_js_runtime_request(js_req).await;
+        // Receive master message
+        master_message = self.master_rx.recv() => {
+            self.process_master_message(master_message).await;
         }
+        // Receive loopback js message (should be sent to js runtime)
         js_resp = self.jstick_rx.recv() => {
-            self.process_js_runtime_response(js_resp).await;
+            self.process_jstick_message(js_resp).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
@@ -647,10 +645,10 @@ impl EventLoop {
         }
         // Receive notification from js runtime => master
         js_req = self.master_rx.recv() => {
-            self.process_js_runtime_request(js_req).await;
+            self.process_master_message(js_req).await;
         }
         js_resp = self.jstick_rx.recv() => {
-            self.process_js_runtime_response(js_resp).await;
+            self.process_jstick_message(js_resp).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
