@@ -11,6 +11,7 @@ pub mod evloop;
 pub mod js;
 pub mod lock;
 pub mod log;
+pub mod msg;
 pub mod prelude;
 pub mod results;
 pub mod state;

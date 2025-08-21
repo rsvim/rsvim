@@ -1,10 +1,7 @@
 //! The command-line ex mode.
 
-use crate::js::msg::{
-  self as jsmsg, EventLoopToJsRuntimeMessage, ExCommandReq,
-  JsRuntimeToEventLoopMessage,
-};
 use crate::js::{self, next_future_id};
+use crate::msg::{self, ExCommandReq, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{
@@ -29,7 +26,7 @@ impl CommandLineExStateful {
       Event::FocusLost => None,
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
-          trace!("Event::key:{:?}", key_event);
+          trace!("key_event:{key_event:?}");
           match key_event.code {
             // KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
             // KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
@@ -109,26 +106,27 @@ impl CommandLineExStateful {
     let current_handle = tokio::runtime::Handle::current();
     match commands.parse(&cmdline_input_content) {
       Some(parsed_cmd) => {
-        let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
+        let jstick_tx = data_access.jstick_tx.clone();
         current_handle.spawn_blocking(move || {
-          jsrt_tick_dispatcher
-            .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-              ExCommandReq::new(next_future_id(), parsed_cmd),
-            ))
+          jstick_tx
+            .blocking_send(JsMessage::ExCommandReq(ExCommandReq::new(
+              next_future_id(),
+              parsed_cmd,
+            )))
             .unwrap();
         });
       }
       None => {
         // Print error message
-        let jsrt_to_master = data_access.jsrt_to_master.clone();
+        let master_tx = data_access.master_tx.clone();
         let message_id = js::next_future_id();
         let e = format!("Error: invalid command {cmdline_input_content:?}");
         let e = e.to_compact_string();
         current_handle.spawn_blocking(move || {
-          jsrt_to_master
-            .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-              jsmsg::PrintReq::new(message_id, e),
-            ))
+          master_tx
+            .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
+              message_id, e,
+            )))
             .unwrap();
         });
       }

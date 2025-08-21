@@ -21,9 +21,7 @@ use crate::js::module::{
   ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
   fetch_module_tree, resolve_import,
 };
-use crate::js::msg::{
-  EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
-};
+use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -40,7 +38,6 @@ pub mod exception;
 pub mod hook;
 pub mod loader;
 pub mod module;
-pub mod msg;
 pub mod transpiler;
 
 #[cfg(test)]
@@ -338,9 +335,9 @@ pub struct JsRuntimeState {
 
   // Data Access for RSVIM {
   // Sender: js runtime send to master.
-  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub master_tx: Sender<MasterMessage>,
   // Receiver: js runtime receive from master.
-  pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  pub jsrt_rx: Receiver<JsMessage>,
   pub cli_opts: CliOptions,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
@@ -486,8 +483,8 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
-    jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    master_tx: Sender<MasterMessage>,
+    jsrt_rx: Receiver<JsMessage>,
     cli_opts: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -541,8 +538,8 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_master,
-      jsrt_from_master,
+      master_tx,
+      jsrt_rx,
       cli_opts,
       tree,
       buffers,
@@ -579,8 +576,8 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
-    jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    master_tx: Sender<MasterMessage>,
+    jsrt_rx: Receiver<JsMessage>,
     cli_opt: CliOptions,
     tree: TreeArc,
     buffers: BuffersManagerArc,
@@ -618,8 +615,8 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_master,
-      jsrt_from_master,
+      master_tx,
+      jsrt_rx,
       cli_opts: cli_opt,
       tree,
       buffers,
@@ -774,9 +771,9 @@ impl JsRuntime {
     {
       let state_rc = Self::state(scope);
       let mut state = state_rc.borrow_mut();
-      while let Ok(msg) = state.jsrt_from_master.try_recv() {
+      while let Ok(msg) = state.jsrt_rx.try_recv() {
         match msg {
-          EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+          JsMessage::TimeoutResp(resp) => {
             trace!("Recv TimeResp:{resp:?}");
             let timeout_id_exists =
               state.timeout_handles.remove(&resp.future_id);
@@ -793,7 +790,7 @@ impl JsRuntime {
               futures.push(timeout_cb);
             }
           }
-          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
+          JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
             debug_assert!(req.command.is_js());
