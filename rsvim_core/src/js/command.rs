@@ -39,6 +39,7 @@ impl JsFuture for ExCommand {
     // For now only `:js` command is supported.
     debug_assert!(self.is_builtin_js());
     let filename = format!("<ExCommand{}>", self.future_id);
+    // FIXME: Handle the invalid js scripts, don't panic editor process.
     execute_module_impl(scope, &filename, Some(self.payload().trim())).unwrap();
   }
 }

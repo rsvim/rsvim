@@ -13,7 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::msg::{JsMessage, MasterMessage};
+use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -26,6 +26,7 @@ use module::{
   fetch_module_tree, resolve_import,
 };
 
+use compact_str::ToCompactString;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -785,9 +786,19 @@ impl JsRuntime {
 
             let commands = state.commands.clone();
             let commands = lock!(commands);
-            let command_cb = commands.parse(&req.payload).unwrap();
-
-            futures.push(Box::new(command_cb));
+            if let Some(command_cb) = commands.parse(&req.payload) {
+              futures.push(Box::new(command_cb));
+            } else {
+              // Print error message
+              let e = format!("Error: invalid command {:?}", req.payload);
+              msg::sync_send_to_master(
+                state.master_tx.clone(),
+                MasterMessage::PrintReq(msg::PrintReq::new(
+                  next_future_id(),
+                  e.to_compact_string(),
+                )),
+              );
+            }
           }
         }
       }
