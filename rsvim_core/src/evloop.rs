@@ -166,7 +166,6 @@ impl EventLoop {
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ ExCommandsManagerArc,
-    /* writer */ StdoutWriterValue,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -247,12 +246,6 @@ impl EventLoop {
       .unwrap()
       .as_millis();
 
-    let writer = if cli_opts.headless() {
-      StdoutWriterValue::headless()
-    } else {
-      StdoutWriterValue::editor()
-    };
-
     Ok((
       startup_moment,
       startup_unix_epoch,
@@ -263,7 +256,6 @@ impl EventLoop {
       buffers_manager,
       text_contents,
       ex_commands_manager,
-      writer,
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
@@ -291,7 +283,6 @@ impl EventLoop {
       buffers,
       contents,
       commands,
-      writer,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
@@ -304,6 +295,12 @@ impl EventLoop {
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
     ) = Self::_internal_new(cols, rows, &cli_opts)?;
+
+    let writer = if cli_opts.headless() {
+      StdoutWriterValue::headless()
+    } else {
+      StdoutWriterValue::editor()
+    };
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -364,7 +361,6 @@ impl EventLoop {
       buffers,
       contents,
       commands,
-      _writer,
       cancellation_token,
       detached_tracker,
       blocked_tracker,
