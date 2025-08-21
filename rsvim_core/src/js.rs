@@ -335,7 +335,7 @@ pub struct JsRuntimeState {
 
   // Data Access for RSVIM {
   // Sender: js runtime send to master.
-  pub jsrt_to_master: Sender<MasterMessage>,
+  pub master_tx: Sender<MasterMessage>,
   // Receiver: js runtime receive from master.
   pub jsrt_rx: Receiver<JsMessage>,
   pub cli_opts: CliOptions,
@@ -483,7 +483,7 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<MasterMessage>,
+    master_tx: Sender<MasterMessage>,
     jsrt_rx: Receiver<JsMessage>,
     cli_opts: CliOptions,
     tree: TreeArc,
@@ -538,7 +538,7 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_master,
+      master_tx,
       jsrt_rx,
       cli_opts,
       tree,
@@ -576,7 +576,7 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<MasterMessage>,
+    master_tx: Sender<MasterMessage>,
     jsrt_rx: Receiver<JsMessage>,
     cli_opt: CliOptions,
     tree: TreeArc,
@@ -615,7 +615,7 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      jsrt_to_master,
+      master_tx,
       jsrt_rx,
       cli_opts: cli_opt,
       tree,

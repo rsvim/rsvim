@@ -143,8 +143,8 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* jsrt_to_master */ Sender<MasterMessage>,
-    /* master_from_jsrt */ Receiver<MasterMessage>,
+    /* master_tx */ Sender<MasterMessage>,
+    /* master_rx */ Receiver<MasterMessage>,
     /* jsrt_tx */ Sender<JsMessage>,
     /* jsrt_rx */ Receiver<JsMessage>,
     /* jstick_dispatcher */ Sender<JsMessage>,
@@ -188,7 +188,7 @@ impl EventLoop {
     //
     // The request/response data flow uses below message channels:
     //
-    // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on `MasterMessage`.
+    // - Channel-1 `master_tx` => `master_rx` on `MasterMessage`.
     // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `JsMessage`.
     // - Channel-3 `jsrt_tx` => `jsrt_rx` on `JsMessage`.
     //
@@ -204,7 +204,7 @@ impl EventLoop {
     // they're simply for trigger the `tokio::select!` loop.
 
     // Channel-1: js runtime => master
-    let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
+    let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2: master => master
     let (jstick_dispatcher, jstick_queue) = channel(*CHANNEL_BUF_SIZE);
     // Channel-3
@@ -230,8 +230,8 @@ impl EventLoop {
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
-      jsrt_to_master,
-      master_from_jsrt,
+      master_tx,
+      master_rx,
       jsrt_tx,
       jsrt_rx,
       jstick_dispatcher,
@@ -255,8 +255,8 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      jsrt_to_master,
-      master_from_jsrt,
+      master_tx,
+      master_rx,
       jsrt_tx,
       jsrt_rx,
       jstick_dispatcher,
@@ -275,7 +275,7 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      jsrt_to_master.clone(),
+      master_tx.clone(),
       jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
@@ -301,8 +301,8 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      master_tx: jsrt_to_master,
-      master_rx: master_from_jsrt,
+      master_tx: master_tx,
+      master_rx: master_rx,
       jsrt_tx: jsrt_tx,
       jstick_dispatcher,
       jstick_queue,
@@ -329,8 +329,8 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      jsrt_to_master,
-      master_from_jsrt,
+      master_tx,
+      master_rx,
       jsrt_tx,
       jsrt_rx,
       jstick_dispatcher,
@@ -344,7 +344,7 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      jsrt_to_master.clone(),
+      master_tx.clone(),
       jsrt_rx,
       cli_opts.clone(),
       tree.clone(),
@@ -370,8 +370,8 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      master_tx: jsrt_to_master,
-      master_rx: master_from_jsrt,
+      master_tx,
+      master_rx,
       jsrt_tx,
       jstick_dispatcher,
       jstick_queue,
@@ -405,11 +405,11 @@ impl EventLoop {
         Err(e) => {
           // Send error message to command-line
           let current_handle = tokio::runtime::Handle::current();
-          let jsrt_to_master = self.master_tx.clone();
+          let master_tx = self.master_tx.clone();
           let message_id = js::next_future_id();
           let e = e.to_compact_string();
           current_handle.spawn_blocking(move || {
-            jsrt_to_master
+            master_tx
               .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
                 message_id, e,
               )))
