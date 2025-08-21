@@ -301,9 +301,9 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      master_tx: master_tx,
-      master_rx: master_rx,
-      jsrt_tx: jsrt_tx,
+      master_tx,
+      master_rx,
+      jsrt_tx,
       jstick_dispatcher,
       jstick_queue,
     })
