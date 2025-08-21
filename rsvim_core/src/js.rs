@@ -387,11 +387,11 @@ impl std::fmt::Debug for JsRuntime {
   }
 }
 
-fn execute_module_impl(
+pub fn execute_module_impl(
   scope: &mut v8::HandleScope,
   filename: &str,
   source: Option<&str>,
-) -> Result<(), AnyErr> {
+) -> AnyResult<()> {
   trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
   // The following code allows the runtime to execute code with no valid
