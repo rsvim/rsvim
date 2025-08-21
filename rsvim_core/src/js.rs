@@ -43,8 +43,6 @@ pub mod module;
 pub mod transpiler;
 
 #[cfg(test)]
-mod command_tests;
-#[cfg(test)]
 mod module_tests;
 
 pub fn v8_version() -> &'static str {
