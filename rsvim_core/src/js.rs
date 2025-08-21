@@ -806,10 +806,7 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
-    let master_tx = {
-      let state_rc = Self::state(scope);
-      state_rc.borrow().master_tx.clone()
-    };
+    let master_tx = { Self::state(scope).borrow().master_tx.clone() };
 
     for mut fut in futures {
       fut.run(scope);
