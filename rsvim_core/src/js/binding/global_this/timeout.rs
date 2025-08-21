@@ -1,8 +1,8 @@
 //! Timeout APIs.
 
-use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
 use crate::prelude::*;
+use crate::signal::{self, JsRuntimeToEventLoopMessage};
 
 use std::rc::Rc;
 use std::time::Duration;
@@ -78,7 +78,7 @@ pub fn set_timeout(
   current_handle.spawn_blocking(move || {
     jsrt_to_master
       .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+        signal::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
       ))
       .unwrap();
   });
