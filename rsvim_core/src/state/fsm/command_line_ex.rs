@@ -103,32 +103,27 @@ impl CommandLineExStateful {
     let commands = data_access.commands.clone();
     let commands = lock!(commands);
 
-    let current_handle = tokio::runtime::Handle::current();
     match commands.parse(&cmdline_input_content) {
       Some(parsed_cmd) => {
-        let jstick_tx = data_access.jstick_tx.clone();
-        current_handle.spawn_blocking(move || {
-          jstick_tx
-            .blocking_send(JsMessage::ExCommandReq(ExCommandReq::new(
-              next_future_id(),
-              parsed_cmd,
-            )))
-            .unwrap();
-        });
+        msg::sync_send_js(
+          data_access.jstick_tx.clone(),
+          JsMessage::ExCommandReq(ExCommandReq::new(
+            next_future_id(),
+            parsed_cmd,
+          )),
+        );
       }
       None => {
         // Print error message
-        let master_tx = data_access.master_tx.clone();
         let message_id = js::next_future_id();
         let e = format!("Error: invalid command {cmdline_input_content:?}");
-        let e = e.to_compact_string();
-        current_handle.spawn_blocking(move || {
-          master_tx
-            .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
-              message_id, e,
-            )))
-            .unwrap();
-        });
+        msg::sync_send_master(
+          data_access.master_tx.clone(),
+          MasterMessage::PrintReq(msg::PrintReq::new(
+            message_id,
+            e.to_compact_string(),
+          )),
+        );
       }
     }
 

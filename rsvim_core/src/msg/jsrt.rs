@@ -45,7 +45,7 @@ impl ExCommandReq {
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send(
+pub fn sync_send_js(
   master_tx: Sender<JsMessage>,
   message: JsMessage,
 ) -> JoinHandle<()> {

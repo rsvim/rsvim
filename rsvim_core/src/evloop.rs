@@ -398,17 +398,12 @@ impl EventLoop {
         Ok(_) => { /* do nothing */ }
         Err(e) => {
           // Send error message to command-line
-          let current_handle = tokio::runtime::Handle::current();
-          let master_tx = self.master_tx.clone();
           let message_id = js::next_future_id();
           let e = e.to_compact_string();
-          current_handle.spawn_blocking(move || {
-            master_tx
-              .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
-                message_id, e,
-              )))
-              .unwrap();
-          });
+          msg::sync_send_master(
+            self.master_tx.clone(),
+            MasterMessage::PrintReq(msg::PrintReq::new(message_id, e)),
+          );
         }
       }
     }
