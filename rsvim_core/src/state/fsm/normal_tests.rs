@@ -7595,7 +7595,7 @@ mod tests_goto_insert_mode {
       );
 
       let expect_canvas = vec![
-        "Bye, ould go to insert mode ",
+        "ShBye, ould go to insert mode ",
         "                              ",
         "                              ",
       ];
