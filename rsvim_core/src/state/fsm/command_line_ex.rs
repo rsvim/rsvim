@@ -1,7 +1,7 @@
 //! The command-line ex mode.
 
 use crate::js::{self, next_future_id};
-use crate::msg::{self, ExCommandReq, JsrtMessage, MasterMessage};
+use crate::msg::{self, ExCommandReq, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{
@@ -109,7 +109,7 @@ impl CommandLineExStateful {
         let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
         current_handle.spawn_blocking(move || {
           jsrt_tick_dispatcher
-            .blocking_send(JsrtMessage::ExCommandReq(ExCommandReq::new(
+            .blocking_send(JsMessage::ExCommandReq(ExCommandReq::new(
               next_future_id(),
               parsed_cmd,
             )))

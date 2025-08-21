@@ -5,7 +5,7 @@ use crate::cli::CliOptions;
 use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::msg::{self, JsrtMessage, MasterMessage};
+use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
@@ -34,8 +34,6 @@ use bitflags::bitflags_match;
 #[cfg(test)]
 use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 
-// pub mod msg;
-// pub mod task;
 pub mod writer;
 
 #[derive(Debug)]
@@ -96,9 +94,9 @@ pub struct EventLoop {
   /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
   // Receiver: js runtime receive from master.
-  // pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  // pub jsrt_from_master: Receiver<JsMessage>,
   /// Sender: master send to js runtime.
-  pub master_to_jsrt: Sender<JsrtMessage>,
+  pub master_to_jsrt: Sender<JsMessage>,
 
   /// Channel: "js runtime" => "master"
   ///
@@ -112,9 +110,9 @@ pub struct EventLoop {
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
   /// Sender: dispatcher.
-  pub jstick_dispatcher: Sender<JsrtMessage>,
+  pub jstick_dispatcher: Sender<JsMessage>,
   /// Receiver: queue.
-  pub jstick_queue: Receiver<JsrtMessage>,
+  pub jstick_queue: Receiver<JsMessage>,
 }
 
 #[cfg(test)]
@@ -156,10 +154,10 @@ impl EventLoop {
     /* blocked_tracker */ TaskTracker,
     /* jsrt_to_master */ Sender<MasterMessage>,
     /* master_from_jsrt */ Receiver<MasterMessage>,
-    /* master_to_jsrt */ Sender<JsrtMessage>,
-    /* jsrt_from_master */ Receiver<JsrtMessage>,
-    /* jstick_dispatcher */ Sender<JsrtMessage>,
-    /* jstick_queue */ Receiver<JsrtMessage>,
+    /* master_to_jsrt */ Sender<JsMessage>,
+    /* jsrt_from_master */ Receiver<JsMessage>,
+    /* jstick_dispatcher */ Sender<JsMessage>,
+    /* jstick_queue */ Receiver<JsMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -200,15 +198,15 @@ impl EventLoop {
     // The request/response data flow uses below message channels:
     //
     // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on [`MasterMessage`].
-    // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `EventLoopToJsRuntimeMessage`.
-    // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
+    // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `JsMessage`.
+    // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `JsMessage`.
     //
     // The dataflow follows below steps:
     //
     // 1. Js runtime --- [`MasterMessage`] (channel-1) --> Tokio event loop
     // 2. Tokio event loop handles the request (read/write, timer, etc) in async way
-    // 3. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
-    // 4. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    // 3. Tokio event loop --- JsMessage (channel-2) --> Tokio event loop
+    // 4. Tokio event loop --- JsMessage (channel-3) --> Js runtime
     // 5. Js runtime completes all async results.
     //
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
@@ -586,7 +584,7 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = jstick_dispatcher
-              .send(JsrtMessage::TimeoutResp(msg::TimeoutResp::new(
+              .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
                 req.future_id,
                 req.duration,
               )))
@@ -597,10 +595,7 @@ impl EventLoop {
     }
   }
 
-  async fn process_js_runtime_response(
-    &mut self,
-    message: Option<JsrtMessage>,
-  ) {
+  async fn process_js_runtime_response(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
       let _ = self.master_to_jsrt.send(message).await;
@@ -641,7 +636,7 @@ impl EventLoop {
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
-          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+          // let _ = self.master_send_to_js_worker.send(JsMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
       }
@@ -675,7 +670,6 @@ impl EventLoop {
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
-          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
       }

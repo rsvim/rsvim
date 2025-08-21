@@ -15,7 +15,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::command::ExCommandsManagerArc;
 use crate::content::TextContentsArc;
-use crate::msg::{JsrtMessage, MasterMessage};
+use crate::msg::{JsMessage, MasterMessage};
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
@@ -63,7 +63,7 @@ pub struct StatefulDataAccess {
   pub contents: TextContentsArc,
   pub commands: ExCommandsManagerArc,
   pub jsrt_to_master: Sender<MasterMessage>,
-  pub jsrt_tick_dispatcher: Sender<JsrtMessage>,
+  pub jsrt_tick_dispatcher: Sender<JsMessage>,
 }
 
 impl StatefulDataAccess {
@@ -76,7 +76,7 @@ impl StatefulDataAccess {
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
     jsrt_to_master: Sender<MasterMessage>,
-    jsrt_tick_dispatcher: Sender<JsrtMessage>,
+    jsrt_tick_dispatcher: Sender<JsMessage>,
   ) -> Self {
     StatefulDataAccess {
       event,
