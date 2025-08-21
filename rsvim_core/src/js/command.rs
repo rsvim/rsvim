@@ -8,20 +8,38 @@ use compact_str::{CompactString, ToCompactString};
 const JS_COMMAND_NAME: &str = "js";
 
 #[derive(Debug, Clone)]
-/// Parsed ex command instance
+/// Ex command execution instance
 pub struct ExCommand {
   future_id: JsFutureId,
   name: CompactString,
   payload: CompactString,
-  is_js: bool,
+  is_builtin_js: bool,
+}
+
+impl ExCommand {
+  pub fn future_id(&self) -> JsFutureId {
+    self.future_id
+  }
+
+  pub fn name(&self) -> &str {
+    &self.name
+  }
+
+  pub fn payload(&self) -> &str {
+    &self.payload
+  }
+
+  pub fn is_builtin_js(&self) -> bool {
+    self.is_builtin_js
+  }
 }
 
 impl JsFuture for ExCommand {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    debug_assert!(self.command.is_js());
+    // For now only `:js` command is supported.
+    debug_assert!(self.is_builtin_js());
     let filename = format!("<ExCommand{}>", self.future_id);
-    execute_module_impl(scope, &filename, Some(self.command.payload()))
-      .unwrap();
+    execute_module_impl(scope, &filename, Some(self.payload().trim())).unwrap();
   }
 }
 
@@ -52,7 +70,7 @@ impl ExCommandManager {
             future_id: command_id,
             name,
             payload,
-            is_js,
+            is_builtin_js: is_js,
           })
         } else {
           if self.commands.contains(&name) {
@@ -60,7 +78,7 @@ impl ExCommandManager {
               future_id: command_id,
               name,
               payload,
-              is_js,
+              is_builtin_js: is_js,
             })
           } else {
             None
