@@ -396,7 +396,7 @@ impl EventLoop {
           // Send error message to command-line
           let message_id = js::next_future_id();
           let e = e.to_compact_string();
-          msg::sync_send_master(
+          msg::sync_send_to_master(
             self.master_tx.clone(),
             MasterMessage::PrintReq(msg::PrintReq::new(message_id, e)),
           );

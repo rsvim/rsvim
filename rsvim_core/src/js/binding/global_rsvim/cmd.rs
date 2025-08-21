@@ -18,7 +18,7 @@ pub fn echo(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  msg::sync_send_master(
+  msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::PrintReq(msg::PrintReq::new(
       message_id,
