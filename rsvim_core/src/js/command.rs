@@ -1,7 +1,7 @@
 //! Vim ex commands.
 
 use crate::js::binding;
-use crate::js::{self, JsFuture, JsFutureId, execute_module_impl};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module_impl};
 use crate::prelude::*;
 
 use compact_str::{CompactString, ToCompactString};
@@ -43,12 +43,17 @@ impl JsFuture for ExCommand {
 
     match execute_module_impl(scope, &filename, Some(self.body().trim())) {
       Ok(_) => { /* do nothing */ }
-      Err(exception) => {
-        // Throw exception if there's any error while loading/evaluating module.
-        trace!(
-          "Failed to execute module, filename:{filename:?}, exception:{exception:?}"
-        );
-        binding::throw_exception(scope, &exception);
+      Err(e) => {
+        // Capture exception if there's any error while loading/evaluating module.
+        trace!("Failed to execute module, filename:{filename:?}, error:{e:?}");
+        let state_rc = JsRuntime::state(scope);
+        let mut state = state_rc.borrow_mut();
+        let message = e.to_string().to_owned();
+        let message = v8::String::new(scope, &message).unwrap();
+        let exception = v8::Exception::error(scope, message);
+        binding::set_exception_code(scope, exception, &e);
+        let exception = v8::Global::new(scope, exception);
+        state.exceptions.capture_exception(exception);
       }
     }
   }
