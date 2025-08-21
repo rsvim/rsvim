@@ -16,7 +16,6 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use compact_str::ToCompactString;
-// use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
 use crate::ui::widget::command_line::CommandLine;
@@ -563,13 +562,6 @@ impl EventLoop {
       }
     }
   }
-
-  // async fn process_worker_notify(
-  //   &mut self,
-  //   message: Option<WorkerToMasterMessage>,
-  // ) {
-  //   trace!("Received {:?} message from workers", message);
-  // }
 
   async fn process_js_runtime_request(
     &mut self,
