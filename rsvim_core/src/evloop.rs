@@ -5,9 +5,7 @@ use crate::cli::CliOptions;
 use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::msg::{
-  self, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
-};
+use crate::msg::{self, EventLoopToJsRuntimeMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
@@ -108,9 +106,9 @@ pub struct EventLoop {
   /// Sender: js runtime send to master.
   /// NOTE: This data is stored inside `EventLoop` because it is also been used
   /// to sending messages from master to master.
-  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub jsrt_to_master: Sender<MasterMessage>,
   /// Receiver: master receive from js runtime.
-  pub master_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
+  pub master_from_jsrt: Receiver<MasterMessage>,
 
   /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
@@ -158,8 +156,8 @@ impl EventLoop {
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
     /* jsrt_to_master */
-    Sender<JsRuntimeToEventLoopMessage>,
-    /* master_from_jsrt */ Receiver<JsRuntimeToEventLoopMessage>,
+    Sender<MasterMessage>,
+    /* master_from_jsrt */ Receiver<MasterMessage>,
     /* master_to_jsrt */ Sender<EventLoopToJsRuntimeMessage>,
     /* jsrt_from_master */ Receiver<EventLoopToJsRuntimeMessage>,
     /* jsrt_tick_dispatcher */ Sender<EventLoopToJsRuntimeMessage>,
@@ -423,9 +421,9 @@ impl EventLoop {
           let e = e.to_compact_string();
           current_handle.spawn_blocking(move || {
             jsrt_to_master
-              .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-                msg::PrintReq::new(message_id, e),
-              ))
+              .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
+                message_id, e,
+              )))
               .unwrap();
           });
         }
@@ -575,11 +573,11 @@ impl EventLoop {
 
   async fn process_js_runtime_request(
     &mut self,
-    message: Option<JsRuntimeToEventLoopMessage>,
+    message: Option<MasterMessage>,
   ) {
     if let Some(message) = message {
       match message {
-        JsRuntimeToEventLoopMessage::PrintReq(req) => {
+        MasterMessage::PrintReq(req) => {
           trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
@@ -589,7 +587,7 @@ impl EventLoop {
             req.payload,
           );
         }
-        JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
+        MasterMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
           let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {

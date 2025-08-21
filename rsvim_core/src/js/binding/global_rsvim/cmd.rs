@@ -1,5 +1,5 @@
 use crate::js::{self, JsRuntime};
-use crate::msg::{self, JsRuntimeToEventLoopMessage};
+use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
 use compact_str::CompactString;
@@ -23,7 +23,7 @@ pub fn echo(
   current_handle.spawn_blocking(move || {
     let message = CompactString::from(message);
     jsrt_to_master
-      .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(msg::PrintReq::new(
+      .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
         message_id, message,
       )))
       .unwrap();

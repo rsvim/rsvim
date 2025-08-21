@@ -2,7 +2,7 @@
 
 use crate::js::{self, next_future_id};
 use crate::msg::{
-  self, EventLoopToJsRuntimeMessage, ExCommandReq, JsRuntimeToEventLoopMessage,
+  self, EventLoopToJsRuntimeMessage, ExCommandReq, MasterMessage,
 };
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -125,9 +125,9 @@ impl CommandLineExStateful {
         let e = e.to_compact_string();
         current_handle.spawn_blocking(move || {
           jsrt_to_master
-            .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-              msg::PrintReq::new(message_id, e),
-            ))
+            .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
+              message_id, e,
+            )))
             .unwrap();
         });
       }

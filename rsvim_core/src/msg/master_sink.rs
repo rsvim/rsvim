@@ -9,7 +9,7 @@ use std::time::Duration;
 #[derive(Debug)]
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
 /// [`JsRuntime`](crate::js::JsRuntime).
-pub enum JsRuntimeToEventLoopMessage {
+pub enum MasterMessage {
   PrintReq(PrintReq),
   TimeoutReq(TimeoutReq),
 }

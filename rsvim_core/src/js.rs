@@ -21,7 +21,7 @@ use crate::js::module::{
   ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
   fetch_module_tree, resolve_import,
 };
-use crate::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::msg::{EventLoopToJsRuntimeMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -335,7 +335,7 @@ pub struct JsRuntimeState {
 
   // Data Access for RSVIM {
   // Sender: js runtime send to master.
-  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub jsrt_to_master: Sender<MasterMessage>,
   // Receiver: js runtime receive from master.
   pub jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opts: CliOptions,
@@ -483,7 +483,7 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_to_master: Sender<MasterMessage>,
     jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opts: CliOptions,
     tree: TreeArc,
@@ -576,7 +576,7 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_to_master: Sender<MasterMessage>,
     jsrt_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOptions,
     tree: TreeArc,

@@ -15,7 +15,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::command::ExCommandsManagerArc;
 use crate::content::TextContentsArc;
-use crate::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::msg::{EventLoopToJsRuntimeMessage, MasterMessage};
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
@@ -62,7 +62,7 @@ pub struct StatefulDataAccess {
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
   pub commands: ExCommandsManagerArc,
-  pub jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub jsrt_to_master: Sender<MasterMessage>,
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
@@ -75,7 +75,7 @@ impl StatefulDataAccess {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
-    jsrt_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_to_master: Sender<MasterMessage>,
     jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     StatefulDataAccess {

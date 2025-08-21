@@ -1,7 +1,7 @@
 //! Timeout APIs.
 
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
-use crate::msg::{self, JsRuntimeToEventLoopMessage};
+use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
 use std::rc::Rc;
@@ -77,9 +77,10 @@ pub fn set_timeout(
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
     jsrt_to_master
-      .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-        msg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
-      ))
+      .blocking_send(MasterMessage::TimeoutReq(msg::TimeoutReq::new(
+        timer_id,
+        Duration::from_millis(millis),
+      )))
       .unwrap();
   });
   let timeout_cb = TimeoutFuture {
