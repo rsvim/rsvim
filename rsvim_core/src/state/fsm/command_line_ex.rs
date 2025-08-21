@@ -26,7 +26,7 @@ impl CommandLineExStateful {
       Event::FocusLost => None,
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
-          trace!("Event::key:{:?}", key_event);
+          trace!("key_event:{key_event:?}");
           match key_event.code {
             // KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
             // KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
