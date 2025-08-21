@@ -203,10 +203,10 @@ impl EventLoop {
     //
     // The dataflow follows below steps:
     //
-    // 1. Js runtime --- [`MasterMessage`] (channel-1) --> Tokio event loop
-    // 2. Tokio event loop handles js requests in async way
-    // 3. Tokio event loop --- JsMessage (channel-2) --> Tokio event loop
-    // 4. Tokio event loop --- JsMessage (channel-3) --> Js runtime
+    // 1. Js runtime --- [`MasterMessage`] (channel-1) --> Event loop
+    // 2. Event loop handles js requests with tokio async tasks
+    // 3. Event loop --- JsMessage (channel-2) --> Event loop
+    // 4. Event loop --- JsMessage (channel-3) --> Js runtime
     // 5. Js runtime completes all async results.
     //
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
