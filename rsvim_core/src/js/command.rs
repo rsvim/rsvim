@@ -62,27 +62,25 @@ impl ExCommandManager {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
         let payload = payload.get(pos..).unwrap().to_compact_string();
-        let is_js = name == JS_COMMAND_NAME;
+        let is_builtin_js = name == JS_COMMAND_NAME;
         let command_id = js::next_future_id();
-        if is_js {
+        if is_builtin_js {
           debug_assert!(!self.commands.contains(&name));
           Some(ExCommand {
             future_id: command_id,
             name,
             payload,
-            is_builtin_js: is_js,
+            is_builtin_js,
+          })
+        } else if self.commands.contains(&name) {
+          Some(ExCommand {
+            future_id: command_id,
+            name,
+            payload,
+            is_builtin_js,
           })
         } else {
-          if self.commands.contains(&name) {
-            Some(ExCommand {
-              future_id: command_id,
-              name,
-              payload,
-              is_builtin_js: is_js,
-            })
-          } else {
-            None
-          }
+          None
         }
       }
       None => None,
