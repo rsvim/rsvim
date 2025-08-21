@@ -1,7 +1,7 @@
 use crate::buf::BuffersManager;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
-use crate::js::command::ExCommandManager;
+use crate::js::command::ExCommandsManager;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
 use crate::state::State;
@@ -22,7 +22,7 @@ pub fn make_js_runtime() -> JsRuntime {
   let tree = Tree::to_arc(Tree::new(canvas_size));
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
   let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
-  let ex_commands_manager = ExCommandManager::to_arc(ExCommandManager::new());
+  let ex_commands_manager = ExCommandsManager::to_arc(ExCommandsManager::new());
 
   let startup_moment = Instant::now();
   let startup_unix_epoch = SystemTime::now()

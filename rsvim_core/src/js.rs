@@ -17,7 +17,7 @@ use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
-use command::ExCommandManagerArc;
+use command::ExCommandsManagerArc;
 use err::JsError;
 use exception::ExceptionState;
 use hook::module_resolve_cb;
@@ -343,7 +343,7 @@ pub struct JsRuntimeState {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
-  pub commands: ExCommandManagerArc,
+  pub commands: ExCommandsManagerArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -476,7 +476,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    commands: ExCommandManagerArc,
+    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
@@ -569,7 +569,7 @@ impl JsRuntime {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    commands: ExCommandManagerArc,
+    commands: ExCommandsManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.

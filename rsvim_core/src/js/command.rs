@@ -44,13 +44,13 @@ impl JsFuture for ExCommand {
 }
 
 #[derive(Debug)]
-pub struct ExCommandManager {
+pub struct ExCommandsManager {
   commands: HashSet<CompactString>,
 }
 
-arc_mutex_ptr!(ExCommandManager);
+arc_mutex_ptr!(ExCommandsManager);
 
-impl ExCommandManager {
+impl ExCommandsManager {
   pub fn new() -> Self {
     Self {
       commands: HashSet::new(),
@@ -88,7 +88,7 @@ impl ExCommandManager {
   }
 }
 
-impl Default for ExCommandManager {
+impl Default for ExCommandsManager {
   fn default() -> Self {
     Self::new()
   }
