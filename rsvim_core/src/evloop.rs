@@ -5,10 +5,10 @@ use crate::cli::CliOptions;
 use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::prelude::*;
-use crate::signal::{
+use crate::msg::{
   self, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
 };
+use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
 use crate::state::{State, StateArc};
@@ -449,7 +449,7 @@ impl EventLoop {
           current_handle.spawn_blocking(move || {
             jsrt_to_master
               .blocking_send(JsRuntimeToEventLoopMessage::PrintReq(
-                signal::PrintReq::new(message_id, e),
+                msg::PrintReq::new(message_id, e),
               ))
               .unwrap();
           });
@@ -621,7 +621,7 @@ impl EventLoop {
             tokio::time::sleep(req.duration).await;
             let _ = jsrt_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
-                signal::TimeoutResp::new(req.future_id, req.duration),
+                message::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
           });

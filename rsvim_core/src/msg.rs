@@ -1,4 +1,4 @@
-//! Notifications between [`EventLoop`](crate::evloop::EventLoop) and
+//! Messages between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::command::ExCommand;

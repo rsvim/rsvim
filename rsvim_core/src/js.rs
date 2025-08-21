@@ -21,8 +21,10 @@ use crate::js::module::{
   ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
   fetch_module_tree, resolve_import,
 };
+use crate::message::{
+  EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
+};
 use crate::prelude::*;
-use crate::signal::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
