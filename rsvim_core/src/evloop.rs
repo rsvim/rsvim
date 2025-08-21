@@ -153,9 +153,8 @@ fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
 impl EventLoop {
   #[allow(clippy::type_complexity)]
   pub fn _internal_new(
-    cols: u16,
-    rows: u16,
-    cli_opts: &CliOptions,
+    terminal_cols: u16,
+    terminal_rows: u16,
   ) -> IoResult<(
     /* startup_moment */ Instant,
     /* startup_unix_epoch */ u128,
@@ -179,7 +178,7 @@ impl EventLoop {
     /* jsrt_tick_queue */ Receiver<EventLoopToJsRuntimeMessage>,
   )> {
     // Canvas
-    let canvas_size = U16Size::new(cols, rows);
+    let canvas_size = U16Size::new(terminal_cols, terminal_rows);
     let canvas = Canvas::new(canvas_size);
     let canvas = Canvas::to_arc(canvas);
 
