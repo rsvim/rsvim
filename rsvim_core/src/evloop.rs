@@ -299,9 +299,9 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jsrt_tx,
       jstick_tx,
       jstick_rx,
+      jsrt_tx,
     })
   }
 
@@ -365,9 +365,9 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jsrt_tx,
       jstick_tx,
       jstick_rx,
+      jsrt_tx,
     })
   }
 
