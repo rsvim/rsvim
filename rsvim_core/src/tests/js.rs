@@ -1,7 +1,7 @@
 use crate::buf::BuffersManager;
 use crate::cli::CliOptions;
-use crate::command::ExCommandsManager;
 use crate::content::TextContents;
+use crate::js::command::ExCommandsManager;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
 use crate::state::State;

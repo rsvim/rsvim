@@ -73,7 +73,7 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  msg::sync_send_master(
+  msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq::new(
       timer_id,

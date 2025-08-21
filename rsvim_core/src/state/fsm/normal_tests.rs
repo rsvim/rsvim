@@ -4,7 +4,6 @@ use super::normal::*;
 
 use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::buf::{BufferArc, BuffersManagerArc};
-use crate::command::ExCommandsManager;
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{
@@ -49,7 +48,6 @@ pub fn make_tree_with_buffer_opts(
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
   let state = State::to_arc(State::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -64,7 +62,6 @@ pub fn make_tree_with_buffer_opts(
     tree.clone(),
     bufs.clone(),
     contents.clone(),
-    commands,
     master_tx,
     jstick_tx,
   );
@@ -106,7 +103,6 @@ pub fn make_tree_with_cmdline(
   let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
-  let commands = ExCommandsManager::to_arc(ExCommandsManager::new());
   let tree = make_tree_with_buffers_cmdline(
     terminal_size,
     window_local_opts,
@@ -128,7 +124,6 @@ pub fn make_tree_with_cmdline(
     tree.clone(),
     bufs.clone(),
     contents.clone(),
-    commands,
     master_tx,
     jstick_tx,
   );

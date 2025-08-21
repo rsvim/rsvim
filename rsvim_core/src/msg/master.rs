@@ -43,7 +43,7 @@ impl TimeoutReq {
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send_master(
+pub fn sync_send_to_master(
   master_tx: Sender<MasterMessage>,
   message: MasterMessage,
 ) -> JoinHandle<()> {

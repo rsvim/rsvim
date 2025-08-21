@@ -1,7 +1,7 @@
 //! The command-line ex mode.
 
-use crate::js::{self, next_future_id};
-use crate::msg::{self, ExCommandReq, JsMessage, MasterMessage};
+use crate::js::next_future_id;
+use crate::msg::{self, ExCommandReq, JsMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{
@@ -100,32 +100,13 @@ impl CommandLineExStateful {
   ) -> StatefulValue {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
-    let commands = data_access.commands.clone();
-    let commands = lock!(commands);
-
-    match commands.parse(&cmdline_input_content) {
-      Some(parsed_cmd) => {
-        msg::sync_send_js(
-          data_access.jstick_tx.clone(),
-          JsMessage::ExCommandReq(ExCommandReq::new(
-            next_future_id(),
-            parsed_cmd,
-          )),
-        );
-      }
-      None => {
-        // Print error message
-        let message_id = js::next_future_id();
-        let e = format!("Error: invalid command {cmdline_input_content:?}");
-        msg::sync_send_master(
-          data_access.master_tx.clone(),
-          MasterMessage::PrintReq(msg::PrintReq::new(
-            message_id,
-            e.to_compact_string(),
-          )),
-        );
-      }
-    }
+    msg::sync_send_to_js(
+      data_access.jstick_tx.clone(),
+      JsMessage::ExCommandReq(ExCommandReq::new(
+        next_future_id(),
+        cmdline_input_content,
+      )),
+    );
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }

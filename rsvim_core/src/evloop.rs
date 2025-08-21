@@ -2,8 +2,8 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
-use crate::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::content::{TextContents, TextContentsArc};
+use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
@@ -70,8 +70,6 @@ pub struct EventLoop {
   pub buffers: BuffersManagerArc,
   /// Text contents (except buffers).
   pub contents: TextContentsArc,
-  /// Ex commands.
-  pub commands: ExCommandsManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -278,7 +276,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
-      commands.clone(),
+      commands,
       state.clone(),
     );
 
@@ -292,7 +290,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -344,7 +341,7 @@ impl EventLoop {
       tree.clone(),
       buffers.clone(),
       contents.clone(),
-      commands.clone(),
+      commands,
       state.clone(),
     );
 
@@ -358,7 +355,6 @@ impl EventLoop {
       stateful_machine,
       buffers,
       contents,
-      commands,
       writer,
       cancellation_token,
       detached_tracker,
@@ -400,7 +396,7 @@ impl EventLoop {
           // Send error message to command-line
           let message_id = js::next_future_id();
           let e = e.to_compact_string();
-          msg::sync_send_master(
+          msg::sync_send_to_master(
             self.master_tx.clone(),
             MasterMessage::PrintReq(msg::PrintReq::new(message_id, e)),
           );
@@ -512,7 +508,6 @@ impl EventLoop {
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
-          self.commands.clone(),
           self.master_tx.clone(),
           self.jstick_tx.clone(),
         );
