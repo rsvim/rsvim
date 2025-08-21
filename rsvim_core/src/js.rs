@@ -13,19 +13,19 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::err::JsError;
-use crate::js::exception::ExceptionState;
-use crate::js::hook::module_resolve_cb;
-use crate::js::module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
-  fetch_module_tree, resolve_import,
-};
 use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
+use command::ExCommand;
+use err::JsError;
+use exception::ExceptionState;
+use hook::module_resolve_cb;
+use module::{
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
+  fetch_module_tree, resolve_import,
+};
 
-use compact_str::CompactString;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -33,6 +33,7 @@ use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 pub mod binding;
+pub mod command;
 pub mod err;
 pub mod exception;
 pub mod hook;
@@ -460,20 +461,6 @@ fn execute_module_impl(
   Ok(())
 }
 
-struct BuiltinJsCommand {
-  future_id: JsFutureId,
-  command: CompactString,
-}
-
-impl JsFuture for BuiltinJsCommand {
-  fn run(&mut self, scope: &mut v8::HandleScope) {
-    debug_assert!(self.command.is_js());
-    let filename = format!("<ExCommand{}>", self.future_id);
-    execute_module_impl(scope, &filename, Some(self.command.payload()))
-      .unwrap();
-  }
-}
-
 impl JsRuntime {
   /// Creates a new JsRuntime with snapshot.
   #[allow(clippy::too_many_arguments)]
@@ -790,7 +777,7 @@ impl JsRuntime {
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
             debug_assert!(req.payload.is_js());
 
-            let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
+            let command_cb: Box<dyn JsFuture> = Box::new(ExCommand {
               future_id: req.future_id,
               command: req.payload,
             });
