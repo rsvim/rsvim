@@ -7492,9 +7492,9 @@ mod tests_goto_command_line_ex_mode {
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 34);
+      assert_eq!(actual1.char_idx(), 4);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 4);
 
       let expect_canvas = vec![
         "           ",
