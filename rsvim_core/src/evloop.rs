@@ -90,9 +90,8 @@ pub struct EventLoop {
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
-  /// Channel: "js runtime" => "master"
+  /// Channel-1
   pub master_tx: Sender<MasterMessage>,
-  /// Receiver: master receive from js runtime.
   pub master_rx: Receiver<MasterMessage>,
 
   /// Channel-2
