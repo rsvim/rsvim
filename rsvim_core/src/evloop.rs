@@ -313,8 +313,8 @@ impl EventLoop {
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
-      jstick_dispatcher: jstick_dispatcher,
-      jstick_queue: jstick_queue,
+      jstick_dispatcher,
+      jstick_queue,
     })
   }
 
