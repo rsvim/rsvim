@@ -17,7 +17,7 @@ use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
-use command::{ExCommandManager, ExCommandManagerArc};
+use command::{ExCommand, ExCommandManagerArc};
 use err::JsError;
 use exception::ExceptionState;
 use hook::module_resolve_cb;
@@ -531,6 +531,7 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
+      commands,
       editing_state,
     });
 
@@ -607,6 +608,7 @@ impl JsRuntime {
       tree,
       buffers,
       contents,
+      commands,
       editing_state,
     });
 
@@ -781,12 +783,11 @@ impl JsRuntime {
             // For now only `:js` command is supported.
             debug_assert!(req.payload.trim().starts_with("js"));
 
-            let command_cb: Box<dyn JsFuture> = Box::new(BuiltinJsCommand {
-              future_id: req.future_id,
-              command: req.payload,
-            });
+            let commands = state.commands.clone();
+            let commands = lock!(commands);
+            let command_cb = commands.parse(&req.payload).unwrap();
 
-            futures.push(command_cb);
+            futures.push(Box::new(command_cb));
           }
         }
       }
