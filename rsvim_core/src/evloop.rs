@@ -158,8 +158,8 @@ impl EventLoop {
     /* master_from_jsrt */ Receiver<MasterMessage>,
     /* master_to_jsrt */ Sender<JsrtMessage>,
     /* jsrt_from_master */ Receiver<JsrtMessage>,
-    /* jsrt_tick_dispatcher */ Sender<JsrtMessage>,
-    /* jsrt_tick_queue */ Receiver<JsrtMessage>,
+    /* jstick_dispatcher */ Sender<JsrtMessage>,
+    /* jstick_queue */ Receiver<JsrtMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -179,30 +179,33 @@ impl EventLoop {
     let state = State::to_arc(State::new());
     let stateful_machine = StatefulValue::default();
 
-    // There are technical limitations that we cannot use tokio APIs along with
-    // V8 engine, since V8 rust bindings are not Arc/Mutex (i.e. not thread
-    // safe), while tokio async runtime requires Arc/Mutex (i.e. thread safe).
+    // When implements `Promise`, `async`/`await` APIs for javascript runtime,
+    // we need to leverage tokio's async runtime. i.e. first we send js task
+    // requests to master (i.e. "this" event loop, here call it "master"), let
+    // the master handles these tasks with tokio's async tasks. Once a task is
+    // done, we send js task results back to js runtime.
     //
-    // We have to first send js task requests to master, let the master handles
-    // these tasks for us (in async way), then send the task results back to js
-    // runtime. These tasks are very common and low level, serve as an
-    // infrastructure layer for js world. For example:
+    // These tasks are low-level infrastructures, for example:
     //
     // - File IO
-    // - Timer
     // - Network
+    // - Timer
     // - And more...
     //
-    // When js runtime handles `Promise` and `async` APIs, the message flow
-    // uses several channels:
+    // But there are technical limitations that we cannot use tokio APIs along
+    // with V8 engine, since V8 rust bindings are not Arc/Mutex (i.e. not
+    // thread safe), while tokio async runtime requires Arc/Mutex (i.e. thread
+    // safe).
     //
-    // - Channel-1 `jsrt_to_master` => `master_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
-    // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
+    // The request/response data flow uses below message channels:
+    //
+    // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on [`MasterMessage`].
+    // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `EventLoopToJsRuntimeMessage`.
     // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `EventLoopToJsRuntimeMessage`.
     //
     // The dataflow follows below steps:
     //
-    // 1. Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
+    // 1. Js runtime --- [`MasterMessage`] (channel-1) --> Tokio event loop
     // 2. Tokio event loop handles the request (read/write, timer, etc) in async way
     // 3. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
     // 4. Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
@@ -214,7 +217,7 @@ impl EventLoop {
     // Channel-1: js runtime => master
     let (jsrt_to_master, master_from_jsrt) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2: master => master
-    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(*CHANNEL_BUF_SIZE);
+    let (jstick_dispatcher, jstick_queue) = channel(*CHANNEL_BUF_SIZE);
     // Channel-3: master => js runtime
     let (master_to_jsrt, jsrt_from_master) = channel(*CHANNEL_BUF_SIZE);
 
@@ -242,8 +245,8 @@ impl EventLoop {
       master_from_jsrt,
       master_to_jsrt,
       jsrt_from_master,
-      jsrt_tick_dispatcher,
-      jsrt_tick_queue,
+      jstick_dispatcher,
+      jstick_queue,
     ))
   }
 
@@ -267,8 +270,8 @@ impl EventLoop {
       master_from_jsrt,
       master_to_jsrt,
       jsrt_from_master,
-      jsrt_tick_dispatcher,
-      jsrt_tick_queue,
+      jstick_dispatcher,
+      jstick_queue,
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -312,8 +315,8 @@ impl EventLoop {
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
-      jstick_dispatcher: jsrt_tick_dispatcher,
-      jstick_queue: jsrt_tick_queue,
+      jstick_dispatcher: jstick_dispatcher,
+      jstick_queue: jstick_queue,
     })
   }
 
@@ -341,8 +344,8 @@ impl EventLoop {
       master_from_jsrt,
       master_to_jsrt,
       jsrt_from_master,
-      jsrt_tick_dispatcher,
-      jsrt_tick_queue,
+      jstick_dispatcher,
+      jstick_queue,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let writer = StdoutWriterValue::dev_null();
@@ -381,8 +384,8 @@ impl EventLoop {
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
-      jstick_dispatcher: jsrt_tick_dispatcher,
-      jstick_queue: jsrt_tick_queue,
+      jstick_dispatcher,
+      jstick_queue,
     })
   }
 
@@ -579,10 +582,10 @@ impl EventLoop {
         }
         MasterMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
-          let jsrt_tick_dispatcher = self.jstick_dispatcher.clone();
+          let jstick_dispatcher = self.jstick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = jsrt_tick_dispatcher
+            let _ = jstick_dispatcher
               .send(JsrtMessage::TimeoutResp(msg::TimeoutResp::new(
                 req.future_id,
                 req.duration,
