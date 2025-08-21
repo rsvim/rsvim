@@ -73,10 +73,10 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let jsrt_to_master = state.jsrt_to_master.clone();
+  let master_tx = state.master_tx.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
-    jsrt_to_master
+    master_tx
       .blocking_send(MasterMessage::TimeoutReq(msg::TimeoutReq::new(
         timer_id,
         Duration::from_millis(millis),

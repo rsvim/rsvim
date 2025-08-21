@@ -18,11 +18,11 @@ pub fn echo(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let jsrt_to_master = state.jsrt_to_master.clone();
+  let master_tx = state.master_tx.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
     let message = CompactString::from(message);
-    jsrt_to_master
+    master_tx
       .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
         message_id, message,
       )))

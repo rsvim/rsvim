@@ -12,7 +12,7 @@ use tokio::sync::mpsc::channel;
 
 pub fn make_js_runtime() -> JsRuntime {
   let canvas_size = U16Size::new(10, 10);
-  let (jsrt_to_master, _master_from_jsrt) = channel(1);
+  let (master_tx, _master_rx) = channel(1);
   let (_master_to_jsrt, jsrt_from_master) = channel(1);
 
   let cli_opts =
@@ -34,7 +34,7 @@ pub fn make_js_runtime() -> JsRuntime {
     JsRuntimeOptions::default(),
     startup_moment,
     startup_unix_epoch,
-    jsrt_to_master,
+    master_tx,
     jsrt_from_master,
     cli_opts,
     tree,

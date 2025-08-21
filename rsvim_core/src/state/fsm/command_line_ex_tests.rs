@@ -59,7 +59,7 @@ pub fn make_tree(
     KeyEventKind::Press,
   );
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let (jsrt_to_master, _master_from_jsrt) = channel(1);
+  let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
     state.clone(),
@@ -67,7 +67,7 @@ pub fn make_tree(
     bufs.clone(),
     contents.clone(),
     commands,
-    jsrt_to_master,
+    master_tx,
     jsrt_tick_dispatcher,
   );
 
@@ -105,7 +105,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     KeyEventKind::Press,
   );
   let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
-  let (jsrt_to_master, _master_from_jsrt) = channel(1);
+  let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
     state.clone(),
@@ -113,7 +113,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     bufs.clone(),
     contents.clone(),
     commands,
-    jsrt_to_master,
+    master_tx,
     jsrt_tick_dispatcher,
   );
 
