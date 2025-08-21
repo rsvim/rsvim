@@ -42,11 +42,13 @@ use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 pub mod writer;
 
 #[derive(Debug)]
-/// For slow tasks that are suitable to put in the background, this event loop will spawn them in
-/// tokio's async tasks and let them sync back data once they are done. The event loop controls all
-/// the tasks with [`CancellationToken`] and [`TaskTracker`].
+/// For slow tasks that are suitable to put in the background, this event loop
+/// will spawn them in tokio's async tasks and let them sync back data once
+/// they are done. The event loop controls all the tasks with
+/// [`CancellationToken`] and [`TaskTracker`].
 ///
-/// Js runtime and this event loop communicate via channels.
+/// Js runtime and event loop also communicate via channels, since js runtime
+/// is based on v8 engine, all v8 APIs are not thread-safe.
 pub struct EventLoop {
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
