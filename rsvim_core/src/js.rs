@@ -815,13 +815,11 @@ impl JsRuntime {
       fut.run(scope);
       if let Some(exception) = check_exceptions(scope) {
         trace!("Got exceptions when running pending futures: {exception:?}");
-        let e = format!("{}", exception);
-
         msg::sync_send_to_master(
           master_tx.clone(),
           MasterMessage::PrintReq(msg::PrintReq::new(
             next_future_id(),
-            e.to_compact_string(),
+            exception.to_compact_string(),
           )),
         );
       }
