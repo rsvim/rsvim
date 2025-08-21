@@ -293,7 +293,7 @@ impl EventLoop {
       jsrt_from_master,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
-    ) = Self::_internal_new(cols, rows, &cli_opts)?;
+    ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
       StdoutWriterValue::headless()
@@ -371,7 +371,7 @@ impl EventLoop {
       jsrt_from_master,
       jsrt_tick_dispatcher,
       jsrt_tick_queue,
-    ) = Self::_internal_new(terminal_columns, terminal_rows, &cli_opts)?;
+    ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let writer = StdoutWriterValue::dev_null();
 
