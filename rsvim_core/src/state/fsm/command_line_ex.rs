@@ -100,7 +100,7 @@ impl CommandLineExStateful {
   ) -> StatefulValue {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
-    msg::sync_send_js(
+    msg::sync_send_to_js(
       data_access.jstick_tx.clone(),
       JsMessage::ExCommandReq(ExCommandReq::new(
         next_future_id(),
