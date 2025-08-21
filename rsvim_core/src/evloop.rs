@@ -95,14 +95,11 @@ pub struct EventLoop {
   /// Receiver: master receive from js runtime.
   pub master_rx: Receiver<MasterMessage>,
 
-  /// Channel: "master" => "master" ("dispatcher" => "queue")
-  ///
-  /// Sender: dispatcher.
-  pub jstick_dispatcher: Sender<JsMessage>,
-  /// Receiver: queue.
-  pub jstick_queue: Receiver<JsMessage>,
+  /// Channel-2
+  pub jstick_tx: Sender<JsMessage>,
+  pub jstick_rx: Receiver<JsMessage>,
 
-  /// Channel-3: jsrt_tx => jsrt_rx
+  /// Channel-3
   pub jsrt_tx: Sender<JsMessage>,
 }
 
@@ -147,8 +144,8 @@ impl EventLoop {
     /* master_rx */ Receiver<MasterMessage>,
     /* jsrt_tx */ Sender<JsMessage>,
     /* jsrt_rx */ Receiver<JsMessage>,
-    /* jstick_dispatcher */ Sender<JsMessage>,
-    /* jstick_queue */ Receiver<JsMessage>,
+    /* jstick_tx */ Sender<JsMessage>,
+    /* jstick_rx */ Receiver<JsMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -189,7 +186,7 @@ impl EventLoop {
     // The request/response data flow uses below message channels:
     //
     // - Channel-1 `master_tx` => `master_rx` on `MasterMessage`.
-    // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `JsMessage`.
+    // - Channel-2 `jstick_tx` => `jstick_rx` on `JsMessage`.
     // - Channel-3 `jsrt_tx` => `jsrt_rx` on `JsMessage`.
     //
     // The dataflow follows below steps:
@@ -205,8 +202,8 @@ impl EventLoop {
 
     // Channel-1: js runtime => master
     let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
-    // Channel-2: master => master
-    let (jstick_dispatcher, jstick_queue) = channel(*CHANNEL_BUF_SIZE);
+    // Channel-2
+    let (jstick_tx, jstick_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-3
     let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
 
@@ -234,8 +231,8 @@ impl EventLoop {
       master_rx,
       jsrt_tx,
       jsrt_rx,
-      jstick_dispatcher,
-      jstick_queue,
+      jstick_tx,
+      jstick_rx,
     ))
   }
 
@@ -259,8 +256,8 @@ impl EventLoop {
       master_rx,
       jsrt_tx,
       jsrt_rx,
-      jstick_dispatcher,
-      jstick_queue,
+      jstick_tx,
+      jstick_rx,
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -304,8 +301,8 @@ impl EventLoop {
       master_tx,
       master_rx,
       jsrt_tx,
-      jstick_dispatcher,
-      jstick_queue,
+      jstick_tx,
+      jstick_rx,
     })
   }
 
@@ -333,8 +330,8 @@ impl EventLoop {
       master_rx,
       jsrt_tx,
       jsrt_rx,
-      jstick_dispatcher,
-      jstick_queue,
+      jstick_tx,
+      jstick_rx,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let writer = StdoutWriterValue::dev_null();
@@ -373,8 +370,8 @@ impl EventLoop {
       master_tx,
       master_rx,
       jsrt_tx,
-      jstick_dispatcher,
-      jstick_queue,
+      jstick_tx,
+      jstick_rx,
     })
   }
 
@@ -525,7 +522,7 @@ impl EventLoop {
           self.contents.clone(),
           self.commands.clone(),
           self.master_tx.clone(),
-          self.jstick_dispatcher.clone(),
+          self.jstick_tx.clone(),
         );
 
         // Handle by state machine
@@ -571,10 +568,10 @@ impl EventLoop {
         }
         MasterMessage::TimeoutReq(req) => {
           trace!("Receive TimeoutReq:{:?}", req.future_id);
-          let jstick_dispatcher = self.jstick_dispatcher.clone();
+          let jstick_tx = self.jstick_tx.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = jstick_dispatcher
+            let _ = jstick_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
                 req.future_id,
                 req.duration,
@@ -621,7 +618,7 @@ impl EventLoop {
         js_req = self.master_rx.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.jstick_queue.recv() => {
+        js_resp = self.jstick_rx.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify
@@ -655,7 +652,7 @@ impl EventLoop {
         js_req = self.master_rx.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.jstick_queue.recv() => {
+        js_resp = self.jstick_rx.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify

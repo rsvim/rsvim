@@ -106,9 +106,9 @@ impl CommandLineExStateful {
     let current_handle = tokio::runtime::Handle::current();
     match commands.parse(&cmdline_input_content) {
       Some(parsed_cmd) => {
-        let jsrt_tick_dispatcher = data_access.jsrt_tick_dispatcher.clone();
+        let jstick_tx = data_access.jstick_tx.clone();
         current_handle.spawn_blocking(move || {
-          jsrt_tick_dispatcher
+          jstick_tx
             .blocking_send(JsMessage::ExCommandReq(ExCommandReq::new(
               next_future_id(),
               parsed_cmd,
