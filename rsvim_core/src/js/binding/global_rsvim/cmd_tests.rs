@@ -7,6 +7,7 @@ use crate::tests::log::init as test_log_init;
 use std::time::Duration;
 
 #[tokio::test]
+#[cfg_attr(miri, ignore)]
 // #[should_panic(
 //   expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
 // )]
@@ -57,6 +58,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
 }
 
 #[tokio::test]
+#[cfg_attr(miri, ignore)]
 // #[should_panic(
 //   expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
 // )]
@@ -107,6 +109,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
 }
 
 #[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_echo3() -> IoResult<()> {
   test_log_init();
 
