@@ -782,7 +782,7 @@ impl JsRuntime {
             trace!("Recv ExCommandReq:{req:?}");
             debug_assert!(!state.pending_futures.contains_key(&req.future_id));
             // For now only `:js` command is supported.
-            debug_assert!(req.payload.trim().starts_with("js"));
+            // debug_assert!(req.payload.trim().starts_with("js"));
 
             let commands = state.commands.clone();
             let commands = lock!(commands);

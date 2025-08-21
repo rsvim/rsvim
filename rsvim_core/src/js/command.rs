@@ -12,7 +12,7 @@ const JS_COMMAND_NAME: &str = "js";
 pub struct ExCommand {
   future_id: JsFutureId,
   name: CompactString,
-  payload: CompactString,
+  body: CompactString,
   is_builtin_js: bool,
 }
 
@@ -25,8 +25,8 @@ impl ExCommand {
     &self.name
   }
 
-  pub fn payload(&self) -> &str {
-    &self.payload
+  pub fn body(&self) -> &str {
+    &self.body
   }
 
   pub fn is_builtin_js(&self) -> bool {
@@ -40,7 +40,7 @@ impl JsFuture for ExCommand {
     debug_assert!(self.is_builtin_js());
     let filename = format!("<ExCommand{}>", self.future_id);
     // FIXME: Handle the invalid js scripts, don't panic editor process.
-    execute_module_impl(scope, &filename, Some(self.payload().trim())).unwrap();
+    execute_module_impl(scope, &filename, Some(self.body().trim())).unwrap();
   }
 }
 
@@ -59,32 +59,38 @@ impl ExCommandsManager {
   }
 
   pub fn parse(&self, payload: &str) -> Option<ExCommand> {
-    match payload.find(char::is_whitespace) {
+    let (name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
-        let payload = payload.get(pos..).unwrap().to_compact_string();
-        let is_builtin_js = name == JS_COMMAND_NAME;
-        let command_id = js::next_future_id();
-        if is_builtin_js {
-          debug_assert!(!self.commands.contains(&name));
-          Some(ExCommand {
-            future_id: command_id,
-            name,
-            payload,
-            is_builtin_js,
-          })
-        } else if self.commands.contains(&name) {
-          Some(ExCommand {
-            future_id: command_id,
-            name,
-            payload,
-            is_builtin_js,
-          })
-        } else {
-          None
-        }
+        let body = payload.get(pos..).unwrap().to_compact_string();
+        (name, body)
       }
-      None => None,
+      None => {
+        let name = payload.trim().to_compact_string();
+        let body = "".to_compact_string();
+        (name, body)
+      }
+    };
+
+    let is_builtin_js = name == JS_COMMAND_NAME;
+    let future_id = js::next_future_id();
+    if is_builtin_js {
+      debug_assert!(!self.commands.contains(&name));
+      Some(ExCommand {
+        future_id,
+        name,
+        body,
+        is_builtin_js,
+      })
+    } else if self.commands.contains(&name) {
+      Some(ExCommand {
+        future_id,
+        name,
+        body,
+        is_builtin_js,
+      })
+    } else {
+      None
     }
   }
 }
