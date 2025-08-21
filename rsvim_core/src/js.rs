@@ -806,16 +806,19 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
-    let state_rc = Self::state(scope);
-    let state = state_rc.borrow_mut();
+    let master_tx = {
+      let state_rc = Self::state(scope);
+      state_rc.borrow().master_tx.clone()
+    };
 
     for mut fut in futures {
       fut.run(scope);
       if let Some(exception) = check_exceptions(scope) {
         trace!("Got exceptions when running pending futures: {exception:?}");
         let e = format!("{}", exception);
+
         msg::sync_send_to_master(
-          state.master_tx.clone(),
+          master_tx.clone(),
           MasterMessage::PrintReq(msg::PrintReq::new(
             next_future_id(),
             e.to_compact_string(),
