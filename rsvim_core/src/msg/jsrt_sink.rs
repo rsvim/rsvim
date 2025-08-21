@@ -6,8 +6,7 @@ use crate::js::JsFutureId;
 use std::time::Duration;
 
 #[derive(Debug)]
-/// Message between [`EventLoop`](crate::evloop::EventLoop) and
-/// [`JsRuntime`](crate::js::JsRuntime).
+/// Message sent to [`JsRuntime`](crate::js::JsRuntime).
 pub enum EventLoopToJsRuntimeMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   TimeoutResp(TimeoutResp),
