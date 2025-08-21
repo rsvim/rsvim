@@ -7497,11 +7497,9 @@ mod tests_goto_command_line_ex_mode {
       assert_eq!(actual1.column_idx(), 4);
 
       let expect_canvas = vec![
-        "           ",
-        "           ",
-        "           ",
-        "           ",
-        ":Bye1      ",
+        "Should go to insert mode with message command line          ",
+        "                                                            ",
+        ":Bye1                                                       ",
       ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
