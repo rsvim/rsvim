@@ -1,7 +1,7 @@
 //! Vim ex commands.
 
 use crate::js::binding;
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module_impl};
+use crate::js::{self, JsFuture, JsFutureId, execute_module_impl};
 use crate::prelude::*;
 
 use compact_str::{CompactString, ToCompactString};
