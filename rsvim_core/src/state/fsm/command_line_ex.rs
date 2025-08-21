@@ -118,12 +118,12 @@ impl CommandLineExStateful {
       }
       None => {
         // Print error message
-        let jsrt_to_master = data_access.jsrt_to_master.clone();
+        let master_tx = data_access.master_tx.clone();
         let message_id = js::next_future_id();
         let e = format!("Error: invalid command {cmdline_input_content:?}");
         let e = e.to_compact_string();
         current_handle.spawn_blocking(move || {
-          jsrt_to_master
+          master_tx
             .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
               message_id, e,
             )))
