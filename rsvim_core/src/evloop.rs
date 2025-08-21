@@ -144,12 +144,12 @@ impl EventLoop {
       /* master_rx */ Receiver<MasterMessage>,
     ),
     (
-      /* jsrt_tx */ Sender<JsMessage>,
-      /* jsrt_rx */ Receiver<JsMessage>,
-    ),
-    (
       /* jstick_tx */ Sender<JsMessage>,
       /* jstick_rx */ Receiver<JsMessage>,
+    ),
+    (
+      /* jsrt_tx */ Sender<JsMessage>,
+      /* jsrt_rx */ Receiver<JsMessage>,
     ),
   )> {
     // Canvas
@@ -233,8 +233,8 @@ impl EventLoop {
       TaskTracker::new(),
       TaskTracker::new(),
       (master_tx, master_rx),
-      (jsrt_tx, jsrt_rx),
       (jstick_tx, jstick_rx),
+      (jsrt_tx, jsrt_rx),
     ))
   }
 
@@ -255,8 +255,8 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       (master_tx, master_rx),
-      (jsrt_tx, jsrt_rx),
       (jstick_tx, jstick_rx),
+      (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -326,8 +326,8 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       (master_tx, master_rx),
-      (jsrt_tx, jsrt_rx),
       (jstick_tx, jstick_rx),
+      (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let writer = StdoutWriterValue::dev_null();
