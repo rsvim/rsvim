@@ -18,7 +18,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use compact_str::ToCompactString;
-use msg::WorkerToMasterMessage;
+// use msg::WorkerToMasterMessage;
 use writer::{StdoutWritable, StdoutWriterValue};
 
 use crate::ui::widget::command_line::CommandLine;
@@ -37,7 +37,7 @@ use bitflags::bitflags_match;
 #[cfg(test)]
 use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
 
-pub mod msg;
+// pub mod msg;
 pub mod task;
 pub mod writer;
 
@@ -99,13 +99,12 @@ pub struct EventLoop {
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
-  /// Channel: "workers" => "master"
-  ///
-  /// Sender: workers send to master.
-  pub worker_to_master: Sender<WorkerToMasterMessage>,
-  /// Receiver: master receive from workers.
-  pub master_from_worker: Receiver<WorkerToMasterMessage>,
-
+  // /// Channel: "workers" => "master"
+  // ///
+  // /// Sender: workers send to master.
+  // pub worker_to_master: Sender<WorkerToMasterMessage>,
+  // /// Receiver: master receive from workers.
+  // pub master_from_worker: Receiver<WorkerToMasterMessage>,
   /// Channel: "master" => "js runtime"
   /// NOTE: In variables naming, we use "jsrt" for "js runtime".
   ///
@@ -168,9 +167,10 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
-    /* worker_to_master */ Sender<WorkerToMasterMessage>,
-    /* master_from_worker */ Receiver<WorkerToMasterMessage>,
-    /* jsrt_to_master */ Sender<JsRuntimeToEventLoopMessage>,
+    // /* worker_to_master */ Sender<WorkerToMasterMessage>,
+    // /* master_from_worker */ Receiver<WorkerToMasterMessage>,
+    /* jsrt_to_master */
+    Sender<JsRuntimeToEventLoopMessage>,
     /* master_from_jsrt */ Receiver<JsRuntimeToEventLoopMessage>,
     /* master_to_jsrt */ Sender<EventLoopToJsRuntimeMessage>,
     /* jsrt_from_master */ Receiver<EventLoopToJsRuntimeMessage>,
@@ -195,8 +195,8 @@ impl EventLoop {
     let state = State::to_arc(State::new());
     let stateful_machine = StatefulValue::default();
 
-    // Channel: workers => master
-    let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
+    // // Channel: workers => master
+    // let (worker_to_master, master_from_worker) = channel(*CHANNEL_BUF_SIZE);
 
     // Since there are technical limitations that we cannot use tokio APIs
     // along with V8 engine, because V8 rust bindings are not Arc/Mutex (i.e.
@@ -258,8 +258,8 @@ impl EventLoop {
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
-      worker_to_master,
-      master_from_worker,
+      // worker_to_master,
+      // master_from_worker,
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
@@ -285,8 +285,8 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      worker_to_master,
-      master_from_worker,
+      // worker_to_master,
+      // master_from_worker,
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
@@ -333,9 +333,9 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      worker_to_master,
+      // worker_to_master,
+      // master_from_worker,
       jsrt_to_master,
-      master_from_worker,
       master_from_jsrt,
       master_to_jsrt,
       jsrt_tick_dispatcher,
@@ -363,8 +363,8 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
-      worker_to_master,
-      master_from_worker,
+      // worker_to_master,
+      // master_from_worker,
       jsrt_to_master,
       master_from_jsrt,
       master_to_jsrt,
@@ -406,9 +406,9 @@ impl EventLoop {
       detached_tracker,
       blocked_tracker,
       js_runtime,
-      worker_to_master,
+      // worker_to_master,
+      // master_from_worker,
       jsrt_to_master,
-      master_from_worker,
       master_from_jsrt,
       master_to_jsrt,
       jsrt_tick_dispatcher,
@@ -591,12 +591,12 @@ impl EventLoop {
     }
   }
 
-  async fn process_worker_notify(
-    &mut self,
-    message: Option<WorkerToMasterMessage>,
-  ) {
-    trace!("Received {:?} message from workers", message);
-  }
+  // async fn process_worker_notify(
+  //   &mut self,
+  //   message: Option<WorkerToMasterMessage>,
+  // ) {
+  //   trace!("Received {:?} message from workers", message);
+  // }
 
   async fn process_js_runtime_request(
     &mut self,
@@ -664,10 +664,10 @@ impl EventLoop {
         event = reader.next() => {
           self.process_event(event).await;
         }
-        // Receive notification from workers => master
-        worker_msg = self.master_from_worker.recv() => {
-          self.process_worker_notify(worker_msg).await;
-        }
+        // // Receive notification from workers => master
+        // worker_msg = self.master_from_worker.recv() => {
+        //   self.process_worker_notify(worker_msg).await;
+        // }
         // Receive notification from js runtime => master
         js_req = self.master_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
@@ -702,10 +702,10 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        // Receive notification from workers => master
-        worker_msg = self.master_from_worker.recv() => {
-          self.process_worker_notify(worker_msg).await;
-        }
+        // // Receive notification from workers => master
+        // worker_msg = self.master_from_worker.recv() => {
+        //   self.process_worker_notify(worker_msg).await;
+        // }
         // Receive notification from js runtime => master
         js_req = self.master_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
