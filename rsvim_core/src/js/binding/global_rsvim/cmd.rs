@@ -2,7 +2,7 @@ use crate::js::{self, JsRuntime};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
-use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 /// Javascript `echo` API.
 pub fn echo(
@@ -18,14 +18,11 @@ pub fn echo(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let master_tx = state.master_tx.clone();
-  let current_handle = tokio::runtime::Handle::current();
-  current_handle.spawn_blocking(move || {
-    let message = CompactString::from(message);
-    master_tx
-      .blocking_send(MasterMessage::PrintReq(msg::PrintReq::new(
-        message_id, message,
-      )))
-      .unwrap();
-  });
+  msg::sync_send_master(
+    state.master_tx.clone(),
+    MasterMessage::PrintReq(msg::PrintReq::new(
+      message_id,
+      message.to_compact_string(),
+    )),
+  );
 }

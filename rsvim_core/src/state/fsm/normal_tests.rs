@@ -7458,8 +7458,9 @@ mod tests_goto_command_line_ex_mode {
 
     let stateful = NormalStateful::default();
 
-    stateful.goto_command_line_ex_mode(&data_access);
+    let next_stateful = stateful.goto_command_line_ex_mode(&data_access);
 
+    // Goto Command-Line-Ex-1
     {
       let tree = data_access.tree.clone();
       let expect_canvas = vec![
@@ -7470,6 +7471,46 @@ mod tests_goto_command_line_ex_mode {
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    assert!(matches!(next_stateful, StatefulValue::CommandLineExMode(_)));
+    let stateful = match next_stateful {
+      StatefulValue::CommandLineExMode(s) => s,
+      _ => unreachable!(),
+    };
+
+    // Insert-2
+    {
+      stateful.cursor_insert(
+        &data_access,
+        CursorInsertPayload::Text("Bye1".to_compact_string()),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual1 = lock!(tree.clone())
+        .command_line()
+        .unwrap()
+        .input_cursor_viewport();
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let expect_canvas = vec![
+        "Should go to insert mode with message command line          ",
+        "                                                            ",
+        ":Bye1                                                       ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Goto Normal-3
+    {
+      let cmdline_input_content = stateful._goto_normal_mode_impl(&data_access);
+      info!("cmdline content:{cmdline_input_content:?}");
+      assert_eq!("Bye1", cmdline_input_content.as_str());
     }
   }
 }
