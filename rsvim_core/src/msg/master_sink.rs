@@ -7,8 +7,7 @@ use compact_str::CompactString;
 use std::time::Duration;
 
 #[derive(Debug)]
-/// Message between [`EventLoop`](crate::evloop::EventLoop) and
-/// [`JsRuntime`](crate::js::JsRuntime).
+/// Message sent to [`EventLoop`](crate::evloop::EventLoop).
 pub enum MasterMessage {
   PrintReq(PrintReq),
   TimeoutReq(TimeoutReq),
