@@ -197,9 +197,9 @@ impl EventLoop {
     //
     // The request/response data flow uses below message channels:
     //
-    // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on [`MasterMessage`].
+    // - Channel-1 `jsrt_to_master` => `master_from_jsrt` on `MasterMessage`.
     // - Channel-2 `jstick_dispatcher` => `jstick_queue` on `JsMessage`.
-    // - Channel-3 `master_to_jsrt` => `jsrt_from_master`, on message `JsMessage`.
+    // - Channel-3 `master_to_jsrt` => `jsrt_from_master` on `JsMessage`.
     //
     // The dataflow follows below steps:
     //
