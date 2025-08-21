@@ -100,6 +100,7 @@ pub struct EventLoop {
 
   /// Channel-3
   pub jsrt_tx: Sender<JsMessage>,
+  // pub jsrt_rx: Receiver<JsMessage>,
 }
 
 #[cfg(test)]
