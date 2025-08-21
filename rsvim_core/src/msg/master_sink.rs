@@ -1,4 +1,5 @@
-//! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop).
+//! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
+//! call it "master".
 
 use crate::js::JsFutureId;
 
