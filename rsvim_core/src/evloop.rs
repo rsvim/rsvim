@@ -297,8 +297,8 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jsrt_forwarder_tx: jsrt_forwarder_tx,
-      jsrt_forwarder_rx: jsrt_forwarder_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
       jsrt_tx,
     })
   }
@@ -362,8 +362,8 @@ impl EventLoop {
       js_runtime,
       master_tx,
       master_rx,
-      jsrt_forwarder_tx: jsrt_forwarder_tx,
-      jsrt_forwarder_rx: jsrt_forwarder_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
       jsrt_tx,
     })
   }
