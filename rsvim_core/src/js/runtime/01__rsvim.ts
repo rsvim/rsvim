@@ -84,7 +84,7 @@ export class RsvimBuf {
   }
 
   /**
-   * Write (save) buffer's text contents to local filesystem.
+   * Write (save) buffer's text contents to local filesystem synchronizely.
    *
    * @param {number} bufId - The buffer's ID that you want to write to filesystem.
    *
