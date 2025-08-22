@@ -341,7 +341,7 @@ impl BuffersManager {
         let metadata = match fp.metadata() {
           Ok(metadata) => metadata,
           Err(e) => {
-            trace!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            error!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
             return Err(e);
           }
         };
@@ -350,7 +350,7 @@ impl BuffersManager {
         let bytes = match reader.read_to_end(&mut buf) {
           Ok(bytes) => bytes,
           Err(e) => {
-            trace!("Failed to read file {:?}:{:?}", filename, e);
+            error!("Failed to read file {:?}:{:?}", filename, e);
             return Err(e);
           }
         };
@@ -373,7 +373,7 @@ impl BuffersManager {
         ))
       }
       Err(e) => {
-        trace!("Failed to open file {:?}:{:?}", filename, e);
+        error!("Failed to open file {:?}:{:?}", filename, e);
         Err(e)
       }
     }
