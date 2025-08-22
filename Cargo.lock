@@ -996,6 +996,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "humansize"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cb51c9a029ddc91b07a787f1d86b53ccfa49b0e86688c946ebe8d3555685dd7"
+dependencies = [
+ "libm",
+]
+
+[[package]]
 name = "i_float"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2368,6 +2377,7 @@ dependencies = [
  "foldhash",
  "futures",
  "geo",
+ "humansize",
  "icu",
  "itertools 0.14.0",
  "jiff",

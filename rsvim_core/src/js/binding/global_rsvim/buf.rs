@@ -4,6 +4,7 @@ use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
 use compact_str::ToCompactString;
+use humansize::{FormatSizeOptions, WINDOWS, format_size};
 
 /// `Rsvim.buf.currentBuffer` API.
 pub fn current_buffer(
@@ -64,8 +65,12 @@ pub fn write_sync(
     Ok(n) => {
       let buf = buffers.get(&buf_id).unwrap();
       let buf = lock!(buf);
+      let written_format_options = FormatSizeOptions::from(WINDOWS)
+        .decimal_places(2)
+        .long_units(false);
+      let n = format_size(n, written_format_options);
       let message = format!(
-        "Buffer {:?} ({buf_id}) has been saved ({n}B).",
+        "Buffer {:?} ({buf_id}) has been saved ({n}).",
         buf
           .filename()
           .as_ref()
