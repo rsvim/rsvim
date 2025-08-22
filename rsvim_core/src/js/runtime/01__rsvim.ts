@@ -86,7 +86,7 @@ export class RsvimBuf {
   /**
    * Write (save) buffer's text contents to local filesystem.
    *
-   * @param {number} bufId - The buffer's ID that you want to write.
+   * @param {number} bufId - The buffer's ID that you want to write to filesystem.
    *
    * @example
    * ```javascript
