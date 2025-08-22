@@ -43,8 +43,8 @@ export class Rsvim {
  *
  * @example
  * ```javascript
- * // Create a alias to 'Rsvim.cmd'.
- * const cmd = Rsvim.cmd;
+ * // Create a alias to 'Rsvim.buf'.
+ * const buf = Rsvim.buf;
  * ```
  *
  * @category Editor APIs
@@ -52,21 +52,22 @@ export class Rsvim {
  */
 export class RsvimBuf {
   /**
-   * Echo message to the command-line.
+   * Write (save) buffer's text contents to local filesystem.
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.echo("Hello Rsvim!");
+   * const bufId = Rsvim.buf.currentBufferId();
+   * Rsvim.buf.write(bufId);
    * ```
    */
-  public echo(message: string) {
-    if (message === undefined || message === null) {
+  public write(bufId: int) {
+    if (typeof bufId !== "boolean") {
       throw new Error(
-        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+        `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.cmd_echo(message);
+    __InternalRsvimGlobalObject.buf_write(bufId);
   }
 }
 
