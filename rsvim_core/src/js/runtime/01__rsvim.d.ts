@@ -4,7 +4,7 @@ export declare class Rsvim {
     readonly opt: RsvimOpt;
 }
 export declare class RsvimBuf {
-    write(bufId: int): void;
+    write(bufId: number): void;
 }
 export declare class RsvimCmd {
     echo(message: string): void;

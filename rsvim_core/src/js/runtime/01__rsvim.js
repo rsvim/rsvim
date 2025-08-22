@@ -5,7 +5,7 @@ export class Rsvim {
 }
 export class RsvimBuf {
     write(bufId) {
-        if (typeof bufId !== "boolean") {
+        if (typeof bufId !== "number") {
             throw new Error(`"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`);
         }
         __InternalRsvimGlobalObject.buf_write(bufId);
