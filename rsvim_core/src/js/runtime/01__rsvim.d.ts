@@ -1,6 +1,10 @@
 export declare class Rsvim {
+    readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly opt: RsvimOpt;
+}
+export declare class RsvimBuf {
+    write(bufId: int): void;
 }
 export declare class RsvimCmd {
     echo(message: string): void;

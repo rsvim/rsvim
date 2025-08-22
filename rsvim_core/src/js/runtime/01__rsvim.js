@@ -1,6 +1,15 @@
 export class Rsvim {
+    buf = new RsvimBuf();
     cmd = new RsvimCmd();
     opt = new RsvimOpt();
+}
+export class RsvimBuf {
+    write(bufId) {
+        if (typeof bufId !== "boolean") {
+            throw new Error(`"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`);
+        }
+        __InternalRsvimGlobalObject.buf_write(bufId);
+    }
 }
 export class RsvimCmd {
     echo(message) {

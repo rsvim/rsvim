@@ -60,8 +60,8 @@ export class RsvimBuf {
    * Rsvim.buf.write(bufId);
    * ```
    */
-  public write(bufId: int) {
-    if (typeof bufId !== "boolean") {
+  public write(bufId: number) {
+    if (typeof bufId !== "number") {
       throw new Error(
         `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
       );
