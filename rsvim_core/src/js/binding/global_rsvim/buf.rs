@@ -4,6 +4,21 @@ use crate::prelude::*;
 
 use compact_str::ToCompactString;
 
+/// `Rsvim.buf.currentBufferId` API.
+pub fn current_buffer_id(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  rv: v8::ReturnValue,
+) {
+  debug_assert!(_args.length() == 0);
+  let state_rc = JsRuntime::state(scope);
+  let tree = state_rc.borrow().tree.clone();
+  let tree = lock!(tree);
+  let value = tree.global_local_options().wrap();
+  trace!("get_wrap: {:?}", value);
+  rv.set_int32(value);
+}
+
 /// `Rsvim.buf.write` API.
 pub fn write(
   scope: &mut v8::HandleScope,
