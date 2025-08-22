@@ -65,7 +65,7 @@ export class RsvimBuf {
    */
   public currentBuffer(): number {
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.buf_current_buffer();
+    return __InternalRsvimGlobalObject.buf_current_buffer();
   }
 
   /**
@@ -80,7 +80,7 @@ export class RsvimBuf {
    */
   public listAllBuffers(): number[] {
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.buf_list_all_buffers();
+    return __InternalRsvimGlobalObject.buf_list_all_buffers();
   }
 
   /**
