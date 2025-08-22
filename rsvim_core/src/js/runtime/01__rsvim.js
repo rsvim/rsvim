@@ -5,10 +5,10 @@ export class Rsvim {
 }
 export class RsvimBuf {
     currentBuffer() {
-        __InternalRsvimGlobalObject.buf_current_buffer();
+        return __InternalRsvimGlobalObject.buf_current_buffer();
     }
     listAllBuffers() {
-        __InternalRsvimGlobalObject.buf_list_all_buffers();
+        return __InternalRsvimGlobalObject.buf_list_all_buffers();
     }
     write(bufId) {
         if (typeof bufId !== "number") {
