@@ -2406,7 +2406,6 @@ dependencies = [
  "swc_trace_macro",
  "swc_visit",
  "swc_visit_macros",
- "thiserror",
  "tokio",
  "tokio-util",
  "unicode-width 0.2.1",
