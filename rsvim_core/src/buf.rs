@@ -132,6 +132,12 @@ impl Buffer {
   }
 }
 
+impl Buffer {
+  pub fn has_filename(&self) -> bool {
+    self.filename.is_some() && self.absolute_filename.is_some()
+  }
+}
+
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
 ///
@@ -270,7 +276,18 @@ impl BuffersManager {
   /// Write (save) a buffer to filesystem.
   pub fn write_buffer(&self, buf_id: BufferId) -> AnyResult<usize> {
     match self.buffers.get(&buf_id) {
-      Some(buf) => {}
+      Some(buf) => {
+        let buf = lock!(buf);
+        let abs_filename = buf.absolute_filename();
+
+        let existed = match std::fs::exists(abs_filename.clone()) {
+          Ok(existed) => existed,
+          Err(e) => {
+            trace!("Failed to detect file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+      }
       None => {
         anyhow::bail!("Error: buffer {buf_id:?} not exist!")
       }
