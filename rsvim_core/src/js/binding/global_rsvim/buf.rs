@@ -23,7 +23,22 @@ pub fn write(
     Some(buf) => {
       let mut buf = lock!(buf);
       buf.write();
+      msg::sync_send_to_master(
+        state.master_tx.clone(),
+        MasterMessage::PrintReq(msg::PrintReq::new(
+          js::next_future_id(),
+          message.to_compact_string(),
+        )),
+      );
     }
-    None => {}
+    None => {
+      msg::sync_send_to_master(
+        state.master_tx.clone(),
+        MasterMessage::PrintReq(msg::PrintReq::new(
+          message_id,
+          message.to_compact_string(),
+        )),
+      );
+    }
   }
 }
