@@ -387,7 +387,7 @@ impl std::fmt::Debug for JsRuntime {
   }
 }
 
-pub fn execute_module_impl(
+pub fn execute_module(
   scope: &mut v8::HandleScope,
   filename: &str,
   source: Option<&str>,
@@ -693,7 +693,7 @@ impl JsRuntime {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
-    execute_module_impl(scope, filename, source)
+    execute_module(scope, filename, source)
   }
 
   /// Runs a single tick of the event-loop.

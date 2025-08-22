@@ -1,7 +1,7 @@
 //! Vim ex commands.
 
 use crate::js::binding;
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module_impl};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module};
 use crate::prelude::*;
 
 use compact_str::{CompactString, ToCompactString};
@@ -41,7 +41,7 @@ impl JsFuture for ExCommand {
     debug_assert!(self.is_builtin_js());
     let filename = format!("<ExCommand{}>", self.future_id);
 
-    match execute_module_impl(scope, &filename, Some(self.body().trim())) {
+    match execute_module(scope, &filename, Some(self.body().trim())) {
       Ok(_) => { /* do nothing */ }
       Err(e) => {
         // Capture exception if there's any error while loading/evaluating module.
