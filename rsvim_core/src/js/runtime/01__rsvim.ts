@@ -56,6 +56,8 @@ export class RsvimBuf {
    *
    * NOTE: The "current" word indicates where your cursor is.
    *
+   * @returns {number}
+   *
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.currentBuffer();
@@ -69,6 +71,8 @@ export class RsvimBuf {
   /**
    * List all buffers' IDs.
    *
+   * @returns {number[]}
+   *
    * @example
    * ```javascript
    * const bufIds = Rsvim.buf.listAllBuffers();
@@ -81,6 +85,8 @@ export class RsvimBuf {
 
   /**
    * Write (save) buffer's text contents to local filesystem.
+   *
+   * @param {number} bufId - The buffer's ID that you want to write.
    *
    * @example
    * ```javascript
