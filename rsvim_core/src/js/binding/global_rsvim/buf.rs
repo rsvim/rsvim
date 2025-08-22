@@ -65,7 +65,7 @@ pub fn write_sync(
       let buf = buffers.get(&buf_id).unwrap();
       let buf = lock!(buf);
       let message = format!(
-        "Buffer {:?} ({buf_id}) has been saved ({n} bytes written).",
+        "Buffer {:?} ({buf_id}) has been saved ({n}B).",
         buf
           .filename()
           .as_ref()
