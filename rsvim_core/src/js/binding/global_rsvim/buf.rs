@@ -1,5 +1,3 @@
-use std::arch::aarch64::veor3q_s16;
-
 use crate::buf::BufferId;
 use crate::js::{self, JsRuntime};
 use crate::msg::{self, MasterMessage};
