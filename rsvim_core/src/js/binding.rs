@@ -81,6 +81,18 @@ pub fn create_new_context<'s>(
   // For `Rsvim.buf`
   {
     set_function_to(scope, vim, "buf_write", global_rsvim::buf::write);
+    set_function_to(
+      scope,
+      vim,
+      "buf_current_buffer",
+      global_rsvim::buf::current_buffer,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "buf_list_all_buffers",
+      global_rsvim::buf::list_all_buffers,
+    );
   }
 
   // For `Rsvim.cmd`
