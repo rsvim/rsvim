@@ -1,7 +1,6 @@
 //! Vim buffers.
 
 use crate::prelude::*;
-
 use opt::*;
 use text::Text;
 
@@ -132,14 +131,6 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 }
-
-// Write {
-impl Buffer {
-  pub fn write(&mut self) -> IoResult<()> {
-    Ok(())
-  }
-}
-// Write }
 
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
@@ -276,7 +267,18 @@ impl BuffersManager {
     buf_id
   }
 
-  #[cfg(debug_assertions)]
+  /// Write (save) a buffer to filesystem.
+  pub fn write_buffer(&self, buf_id: BufferId) -> AnyResult<usize> {
+    match self.buffers.get(&buf_id) {
+      Some(buf) => {}
+      None => {
+        anyhow::bail!("Error: buffer {buf_id:?} not exist!")
+      }
+    }
+    Ok(1)
+  }
+
+  #[cfg(test)]
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {

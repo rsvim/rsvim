@@ -218,8 +218,7 @@ impl ModuleLoader for FsModuleLoader {
     // Use a preprocessor if necessary.
     match path_extension {
       // "wasm" => Ok(Wasm::parse(&source)),
-      "ts" => TypeScript::compile(fname, &source)
-        .map_err(|e| JsRuntimeErr::Message(e.to_string()).into()),
+      "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
       // }
