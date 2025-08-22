@@ -134,6 +134,7 @@ impl Buffer {
 
 impl Buffer {
   pub fn has_filename(&self) -> bool {
+    debug_assert_eq!(self.filename.is_some(), self.absolute_filename.is_some());
     self.filename.is_some() && self.absolute_filename.is_some()
   }
 }
