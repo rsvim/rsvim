@@ -80,7 +80,7 @@ pub fn create_new_context<'s>(
 
   // For `Rsvim.buf`
   {
-    set_function_to(scope, vim, "buf_write", global_rsvim::buf::write);
+    set_function_to(scope, vim, "buf_write", global_rsvim::buf::write_sync);
     set_function_to(
       scope,
       vim,

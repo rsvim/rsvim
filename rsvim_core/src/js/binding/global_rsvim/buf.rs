@@ -44,15 +44,15 @@ pub fn list_all_buffers(
   rv.set(v8::Local::new(scope, buf_ids_array).into());
 }
 
-/// `Rsvim.buf.write` API.
-pub fn write(
+/// `Rsvim.buf.writeSync` API.
+pub fn write_sync(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let buf_id = args.get(0).int32_value(scope).unwrap();
-  trace!("write: {:?}", buf_id);
+  trace!("write_sync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
