@@ -374,8 +374,10 @@ impl BuffersManager {
     }
   }
 
-  fn write_file(&self, buf: &Buffer) -> AnyResult<usize> {
+  fn write_file(&self, buf: &mut Buffer) -> AnyResult<usize> {
+    let filename = buf.filename().as_ref().unwrap();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
+
     let written_bytes =
       match std::fs::OpenOptions::new().write(true).open(abs_filename) {
         Ok(fp) => {
@@ -400,11 +402,28 @@ impl BuffersManager {
           }
         }
         Err(e) => {
+          error!("Failed to open(w) file {:?}:{:?}", filename, e);
           anyhow::bail!(e);
         }
       };
 
-    let filename = buf.filename().as_ref().unwrap();
+    match std::fs::File::open(abs_filename) {
+      Ok(fp) => {
+        let metadata = match fp.metadata() {
+          Ok(metadata) => metadata,
+          Err(e) => {
+            error!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            anyhow::bail!(e);
+          }
+        };
+        buf.set_metadata(Some(metadata));
+        buf.set_last_sync_time(Some(Instant::now()));
+      }
+      Err(e) => {
+        error!("Failed to open(r) file {:?}:{:?}", filename, e);
+        anyhow::bail!(e);
+      }
+    }
 
     Ok(written_bytes)
   }
