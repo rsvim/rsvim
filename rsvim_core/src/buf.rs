@@ -330,7 +330,6 @@ impl BuffersManager {
     }
   }
 
-  // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
   fn edit_file(
     &self,
     canvas_size: U16Size,
