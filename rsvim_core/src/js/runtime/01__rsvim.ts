@@ -91,7 +91,7 @@ export class RsvimBuf {
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.currentBufferId();
-   * Rsvim.buf.write(bufId);
+   * Rsvim.buf.writeSync(bufId);
    * ```
    */
   public writeSync(bufId: number) {
