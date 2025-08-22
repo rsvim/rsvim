@@ -1,23 +1,50 @@
+use std::arch::aarch64::veor3q_s16;
+
+use crate::buf::BufferId;
 use crate::js::{self, JsRuntime};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
 use compact_str::ToCompactString;
 
-// /// `Rsvim.buf.currentBufferId` API.
-// pub fn current_buffer_id(
-//   scope: &mut v8::HandleScope,
-//   _args: v8::FunctionCallbackArguments,
-//   rv: v8::ReturnValue,
-// ) {
-//   debug_assert!(_args.length() == 0);
-//   let state_rc = JsRuntime::state(scope);
-//   let tree = state_rc.borrow().tree.clone();
-//   let tree = lock!(tree);
-//   let value = tree.global_local_options().wrap();
-//   trace!("get_wrap: {:?}", value);
-//   rv.set_int32(value);
-// }
+/// `Rsvim.buf.currentBuffer` API.
+pub fn current_buffer(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(_args.length() == 0);
+  let state_rc = JsRuntime::state(scope);
+  let tree = state_rc.borrow().tree.clone();
+  let tree = lock!(tree);
+  let current_window = tree.current_window().unwrap();
+  let buf = current_window.buffer().upgrade().unwrap();
+  let buf_id = lock!(buf).id();
+  trace!("current_buffer: {:?}", buf_id);
+  rv.set_int32(buf_id);
+}
+
+/// `Rsvim.buf.listAllBuffers` API.
+pub fn list_all_buffers(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(_args.length() == 0);
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = lock!(buffers);
+  trace!("list_all_buffers: {:?}", buffers.keys());
+  let buf_ids = buffers.keys().copied().collect::<Vec<BufferId>>();
+
+  let buf_ids_array = v8::Array::new(scope, buf_ids.len() as i32);
+  for (i, buf_id) in buf_ids.iter().enumerate() {
+    let v = v8::Integer::new(scope, *buf_id);
+    let v = v8::Local::new(scope, v);
+    buf_ids_array.set_index(scope, i as u32, v.into());
+  }
+  rv.set(v8::Local::new(scope, buf_ids_array).into());
+}
 
 /// `Rsvim.buf.write` API.
 pub fn write(
