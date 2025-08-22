@@ -208,7 +208,7 @@ impl BuffersManager {
         .contains_key(&Some(abs_filename.clone()))
     );
 
-    let existed = match std::fs::exists(abs_filename.clone()) {
+    let existed = match std::fs::exists(&abs_filename) {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
@@ -288,7 +288,6 @@ impl BuffersManager {
         anyhow::bail!("Error: buffer {buf_id:?} not exist!")
       }
     }
-    Ok(1)
   }
 
   #[cfg(test)]
@@ -376,28 +375,38 @@ impl BuffersManager {
   }
 
   fn write_file(&self, buf: &Buffer) -> AnyResult<usize> {
-    let abs_filename = buf.absolute_filename().clone().unwrap();
-    match std::fs::OpenOptions::new().write(true).open(abs_filename) {
-      Ok(fp) => {
-        let mut writer = std::io::BufWriter::new(fp);
-        let payload = buf.text().rope().to_string();
-        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
-        match data.write(payload.as_bytes()) {
-          Ok(n) => match writer.write_all(&data) {
-            Ok(_) => Ok(n),
+    let abs_filename = buf.absolute_filename().as_ref().unwrap();
+    let written_bytes =
+      match std::fs::OpenOptions::new().write(true).open(abs_filename) {
+        Ok(fp) => {
+          let mut writer = std::io::BufWriter::new(fp);
+          let payload = buf.text().rope().to_string();
+          let mut data: Vec<u8> = Vec::with_capacity(payload.len());
+          match data.write(payload.as_bytes()) {
+            Ok(written_bytes) => match writer.write_all(&data) {
+              Ok(_) => match writer.flush() {
+                Ok(_) => written_bytes,
+                Err(e) => {
+                  anyhow::bail!(e);
+                }
+              },
+              Err(e) => {
+                anyhow::bail!(e);
+              }
+            },
             Err(e) => {
               anyhow::bail!(e);
             }
-          },
-          Err(e) => {
-            anyhow::bail!(e);
           }
         }
-      }
-      Err(e) => {
-        anyhow::bail!(e);
-      }
-    }
+        Err(e) => {
+          anyhow::bail!(e);
+        }
+      };
+
+    let filename = buf.filename().as_ref().unwrap();
+
+    Ok(written_bytes)
   }
 }
 

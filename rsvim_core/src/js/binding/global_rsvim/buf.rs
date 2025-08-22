@@ -19,7 +19,7 @@ pub fn write(
   let buffers = state.buffers.clone();
   let buffers = lock!(buffers);
 
-  match buffers.get(&buf_id) {
+  match buffers.write_buffer(buf_id) {
     Some(buf) => {
       let mut buf = lock!(buf);
       buf.write();
