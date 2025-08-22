@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 use compact_str::ToCompactString;
 
-/// Javascript `echo` API.
+/// `Rsvim.cmd.echo` API.
 pub fn echo(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,

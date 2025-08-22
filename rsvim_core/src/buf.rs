@@ -133,6 +133,14 @@ impl Buffer {
   }
 }
 
+// Write {
+impl Buffer {
+  pub fn write(&mut self) -> IoResult<()> {
+    Ok(())
+  }
+}
+// Write }
+
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
 ///
