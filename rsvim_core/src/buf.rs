@@ -279,6 +279,10 @@ impl BuffersManager {
     match self.buffers.get(&buf_id) {
       Some(buf) => {
         let buf = lock!(buf);
+        if !buf.has_filename() {
+          anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!")
+        }
+
         let abs_filename = buf.absolute_filename();
 
         let existed = match std::fs::exists(abs_filename.clone()) {
