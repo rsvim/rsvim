@@ -7,7 +7,7 @@ use text::Text;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
 use std::fs::Metadata;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
@@ -283,15 +283,7 @@ impl BuffersManager {
           anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!")
         }
 
-        let abs_filename = buf.absolute_filename();
-
-        let existed = match std::fs::exists(abs_filename.clone()) {
-          Ok(existed) => existed,
-          Err(e) => {
-            trace!("Failed to detect file {:?}:{:?}", filename, e);
-            return Err(e);
-          }
-        };
+        let abs_filename = buf.absolute_filename().unwrap();
       }
       None => {
         anyhow::bail!("Error: buffer {buf_id:?} not exist!")
@@ -350,9 +342,9 @@ impl BuffersManager {
             return Err(e);
           }
         };
-        let mut buf: Vec<u8> = Vec::new();
+        let mut data: Vec<u8> = Vec::new();
         let mut reader = std::io::BufReader::new(fp);
-        let bytes = match reader.read_to_end(&mut buf) {
+        let bytes = match reader.read_to_end(&mut data) {
           Ok(bytes) => bytes,
           Err(e) => {
             error!("Failed to read file {:?}:{:?}", filename, e);
@@ -360,17 +352,17 @@ impl BuffersManager {
           }
         };
         trace!(
-          "Read {} bytes (buf: {}) from file {:?}",
+          "Read {} bytes (data: {}) from file {:?}",
           bytes,
-          buf.len(),
+          data.len(),
           filename
         );
-        debug_assert!(bytes == buf.len());
+        debug_assert!(bytes == data.len());
 
         Ok(Buffer::_new(
           *self.global_local_options(),
           canvas_size,
-          self.to_rope(&buf, buf.len()),
+          self.to_rope(&data, data.len()),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -380,6 +372,31 @@ impl BuffersManager {
       Err(e) => {
         error!("Failed to open file {:?}:{:?}", filename, e);
         Err(e)
+      }
+    }
+  }
+
+  fn write_file(&self, buf: &Buffer) -> AnyResult<usize> {
+    let abs_filename = buf.absolute_filename().clone().unwrap();
+    match std::fs::OpenOptions::new().write(true).open(abs_filename) {
+      Ok(fp) => {
+        let mut writer = std::io::BufWriter::new(fp);
+        let payload = buf.text().rope().to_string();
+        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
+        match data.write(payload.as_bytes()) {
+          Ok(n) => match writer.write_all(&data) {
+            Ok(_) => Ok(n),
+            Err(e) => {
+              anyhow::bail!(e);
+            }
+          },
+          Err(e) => {
+            anyhow::bail!(e);
+          }
+        }
+      }
+      Err(e) => {
+        anyhow::bail!(e);
       }
     }
   }
