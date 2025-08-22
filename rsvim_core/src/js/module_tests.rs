@@ -9,6 +9,7 @@ use assert_fs::TempDir;
 use std::io::Write;
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn fetch1() {
   test_log_init();
 
@@ -49,6 +50,7 @@ fn fetch1() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn fetch2() {
   test_log_init();
 
@@ -78,6 +80,7 @@ fn fetch2() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn fetch_tree3() {
   test_log_init();
 
@@ -178,6 +181,7 @@ fn fetch_tree3() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn fetch_tree4() {
   test_log_init();
 

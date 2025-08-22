@@ -387,11 +387,11 @@ impl std::fmt::Debug for JsRuntime {
   }
 }
 
-fn execute_module_impl(
+pub fn execute_module(
   scope: &mut v8::HandleScope,
   filename: &str,
   source: Option<&str>,
-) -> Result<(), AnyErr> {
+) -> AnyResult<()> {
   trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
   // The following code allows the runtime to execute code with no valid
@@ -693,7 +693,7 @@ impl JsRuntime {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
-    execute_module_impl(scope, filename, source)
+    execute_module(scope, filename, source)
   }
 
   /// Runs a single tick of the event-loop.
@@ -806,12 +806,19 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
+    let master_tx = { Self::state(scope).borrow().master_tx.clone() };
+
     for mut fut in futures {
       fut.run(scope);
-      if let Some(error) = check_exceptions(scope) {
-        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-        error!("Js runtime timeout error:{error:?}");
-        eprintln!("Js runtime timeout error:{error:?}");
+      if let Some(exception) = check_exceptions(scope) {
+        trace!("Got exceptions when running pending futures: {exception:?}");
+        msg::sync_send_to_master(
+          master_tx.clone(),
+          MasterMessage::PrintReq(msg::PrintReq::new(
+            next_future_id(),
+            exception.to_compact_string(),
+          )),
+        );
       }
       run_next_tick_callbacks(scope);
     }

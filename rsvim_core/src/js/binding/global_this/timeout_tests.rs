@@ -6,6 +6,7 @@ use crate::tests::log::init as test_log_init;
 use std::time::Duration;
 
 #[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_timeout1() -> IoResult<()> {
   test_log_init();
 
@@ -53,6 +54,7 @@ async fn test_timeout1() -> IoResult<()> {
 }
 
 #[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_timeout2() -> IoResult<()> {
   test_log_init();
 

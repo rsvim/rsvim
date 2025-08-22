@@ -1,6 +1,7 @@
 //! Vim ex commands.
 
-use crate::js::{self, JsFuture, JsFutureId, execute_module_impl};
+use crate::js::binding;
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module};
 use crate::prelude::*;
 
 use compact_str::{CompactString, ToCompactString};
@@ -39,8 +40,24 @@ impl JsFuture for ExCommand {
     // For now only `:js` command is supported.
     debug_assert!(self.is_builtin_js());
     let filename = format!("<ExCommand{}>", self.future_id);
-    // FIXME: Handle the invalid js scripts, don't panic editor process.
-    execute_module_impl(scope, &filename, Some(self.body().trim())).unwrap();
+
+    match execute_module(scope, &filename, Some(self.body().trim())) {
+      Ok(_) => { /* do nothing */ }
+      Err(e) => {
+        // Capture exception if there's any error while loading/evaluating module.
+        trace!("Failed to execute module, filename:{filename:?}, error:{e:?}");
+        let message = e.to_string().to_owned();
+        let message = v8::String::new(scope, &message).unwrap();
+        let exception = v8::Exception::error(scope, message);
+        binding::set_exception_code(scope, exception, &e);
+        let exception = v8::Global::new(scope, exception);
+        let state_rc = JsRuntime::state(scope);
+        state_rc
+          .borrow_mut()
+          .exceptions
+          .capture_exception(exception);
+      }
+    }
   }
 }
 
