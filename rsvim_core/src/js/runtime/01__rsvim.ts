@@ -67,6 +67,19 @@ export class RsvimBuf {
   }
 
   /**
+   * List all buffers' IDs.
+   *
+   * @example
+   * ```javascript
+   * const bufIds = Rsvim.buf.listAllBuffers();
+   * ```
+   */
+  public listAllBuffers(): number[] {
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.buf_list_all_buffers();
+  }
+
+  /**
    * Write (save) buffer's text contents to local filesystem.
    *
    * @example
