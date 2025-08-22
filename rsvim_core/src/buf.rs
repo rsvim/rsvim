@@ -282,8 +282,7 @@ impl BuffersManager {
         if !buf.has_filename() {
           anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!")
         }
-
-        let abs_filename = buf.absolute_filename().unwrap();
+        self.write_file(&buf)
       }
       None => {
         anyhow::bail!("Error: buffer {buf_id:?} not exist!")
