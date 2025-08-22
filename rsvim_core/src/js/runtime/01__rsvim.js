@@ -10,11 +10,11 @@ export class RsvimBuf {
     listAllBuffers() {
         return __InternalRsvimGlobalObject.buf_list_all_buffers();
     }
-    write(bufId) {
+    writeSync(bufId) {
         if (typeof bufId !== "number") {
             throw new Error(`"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`);
         }
-        __InternalRsvimGlobalObject.buf_write(bufId);
+        __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
 }
 export class RsvimCmd {
