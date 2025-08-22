@@ -4,6 +4,8 @@ export declare class Rsvim {
     readonly opt: RsvimOpt;
 }
 export declare class RsvimBuf {
+    currentBuffer(): number;
+    listAllBuffers(): number[];
     write(bufId: number): void;
 }
 export declare class RsvimCmd {

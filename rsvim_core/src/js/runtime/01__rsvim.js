@@ -4,6 +4,12 @@ export class Rsvim {
     opt = new RsvimOpt();
 }
 export class RsvimBuf {
+    currentBuffer() {
+        __InternalRsvimGlobalObject.buf_current_buffer();
+    }
+    listAllBuffers() {
+        __InternalRsvimGlobalObject.buf_list_all_buffers();
+    }
     write(bufId) {
         if (typeof bufId !== "number") {
             throw new Error(`"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`);
