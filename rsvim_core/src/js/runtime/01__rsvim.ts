@@ -19,8 +19,9 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global options.
- * - `Rsvim.cmd`: Ex commands.
+ * - `Rsvim.buf`: Buffers.
+ * - `Rsvim.cmd`: Commands.
+ * - `Rsvim.opt`: Options.
  *
  * @example
  * ```javascript
@@ -32,8 +33,41 @@
  * @hideconstructor
  */
 export class Rsvim {
+  readonly buf: RsvimBuf = new RsvimBuf();
   readonly cmd: RsvimCmd = new RsvimCmd();
   readonly opt: RsvimOpt = new RsvimOpt();
+}
+
+/**
+ * The `Rsvim.buf` global object for buffers.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.cmd'.
+ * const cmd = Rsvim.cmd;
+ * ```
+ *
+ * @category Editor APIs
+ * @hideconstructor
+ */
+export class RsvimBuf {
+  /**
+   * Echo message to the command-line.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.echo("Hello Rsvim!");
+   * ```
+   */
+  public echo(message: string) {
+    if (message === undefined || message === null) {
+      throw new Error(
+        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.cmd_echo(message);
+  }
 }
 
 /**
@@ -47,6 +81,7 @@ export class Rsvim {
  *
  * @example
  * ```javascript
+ * // Create a alias to 'Rsvim.cmd'.
  * const cmd = Rsvim.cmd;
  * ```
  *
