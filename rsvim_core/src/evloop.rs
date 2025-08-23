@@ -9,7 +9,6 @@ use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
-use crate::state::{EditingState, EditingStateArc};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
@@ -61,8 +60,6 @@ pub struct EventLoop {
   /// Canvas for UI.
   pub canvas: CanvasArc,
 
-  /// Editing state.
-  pub state: EditingStateArc,
   /// Finite-state machine for editing state.
   pub stateful_machine: StatefulValue,
 
@@ -130,7 +127,6 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* state */ EditingStateArc,
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
@@ -286,7 +282,6 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
       stateful_machine,
       buffers,
       contents,
@@ -351,7 +346,6 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
       stateful_machine,
       buffers,
       contents,
@@ -504,7 +498,6 @@ impl EventLoop {
 
         let data_access = StatefulDataAccess::new(
           event,
-          self.state.clone(),
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
@@ -515,10 +508,6 @@ impl EventLoop {
         // Handle by state machine
         let stateful = self.stateful_machine;
         let next_stateful = stateful.handle(data_access);
-        {
-          let mut state = lock!(self.state);
-          state.update_state_machine(&next_stateful);
-        }
         self.stateful_machine = next_stateful;
 
         // Exit loop and quit.

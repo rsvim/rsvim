@@ -15,7 +15,6 @@
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::msg::{JsMessage, MasterMessage};
-use crate::state::EditingStateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 
@@ -56,7 +55,6 @@ mod normal_tests;
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess {
   pub event: Event,
-  pub state: EditingStateArc,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
@@ -68,7 +66,6 @@ impl StatefulDataAccess {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     event: Event,
-    state: EditingStateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
@@ -77,7 +74,6 @@ impl StatefulDataAccess {
   ) -> Self {
     StatefulDataAccess {
       event,
-      state,
       tree,
       buffers,
       contents,
