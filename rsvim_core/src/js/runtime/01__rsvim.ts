@@ -58,7 +58,7 @@ export class RsvimBuf {
    * located is binded to. See {@link RsvimWin}.
    *
    *
-   * @returns {number}
+   * @returns {number | undefined}
    *
    * @example
    * ```javascript
