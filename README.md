@@ -51,11 +51,9 @@ Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
-Contributions to RSVIM are always welcomed.
+Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up the development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
 
-A few guidelines that help quickly set up the development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
-
-Product decision/trade-off and high-level design can be found in [RFC](https://github.com/rsvim/rfc) and [blogs](https://rsvim.github.io/blog).
+Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
 ## Credits
 
