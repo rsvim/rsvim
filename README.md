@@ -55,7 +55,7 @@ Contributions to RSVIM are always welcomed. Some guidelines can be found in belo
 
 - [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md)
 
-Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
+Product decision, trade-off and high-level design can be found in [RFC](https://github.com/rsvim/rfc) and [Rsvim's blogs](https://rsvim.github.io/blog).
 
 ## Credits
 
