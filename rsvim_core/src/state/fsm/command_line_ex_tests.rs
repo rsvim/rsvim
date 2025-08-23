@@ -11,7 +11,6 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
-use crate::state::{EditingState, EditingStateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::{
@@ -37,7 +36,6 @@ pub fn make_tree(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -48,7 +46,6 @@ pub fn make_tree(
   let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let state = EditingState::to_arc(EditingState::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
@@ -60,7 +57,6 @@ pub fn make_tree(
   let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
-    state.clone(),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -68,7 +64,7 @@ pub fn make_tree(
     jsrt_forwarder_tx,
   );
 
-  (tree, state, bufs, buf, contents, data_access)
+  (tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline_and_buffer_options(
@@ -78,7 +74,6 @@ pub fn make_tree_with_cmdline_and_buffer_options(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -93,7 +88,6 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     bufs.clone(),
     contents.clone(),
   );
-  let state = EditingState::to_arc(EditingState::new());
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -104,7 +98,6 @@ pub fn make_tree_with_cmdline_and_buffer_options(
   let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
-    state.clone(),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -112,7 +105,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     jsrt_forwarder_tx,
   );
 
-  (tree, state, bufs, buf, contents, data_access)
+  (tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline(
@@ -121,7 +114,6 @@ pub fn make_tree_with_cmdline(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -308,7 +300,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents, data_access) =
+    let (tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -464,7 +456,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents, data_access) =
+    let (tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline_and_buffer_options(
         terminal_size,
         buf_opts,
@@ -626,7 +618,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, _buf, contents, data_access) =
+    let (tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
