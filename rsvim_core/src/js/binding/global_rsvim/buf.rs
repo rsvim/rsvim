@@ -30,8 +30,8 @@ pub fn current(
   }
 }
 
-/// `Rsvim.buf.listAllBuffers` API.
-pub fn list_all_buffers(
+/// `Rsvim.buf.list` API.
+pub fn list(
   scope: &mut v8::HandleScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
@@ -40,7 +40,7 @@ pub fn list_all_buffers(
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
   let buffers = lock!(buffers);
-  trace!("list_all_buffers: {:?}", buffers.keys());
+  trace!("Rsvim.buf.list: {:?}", buffers.keys());
   let buf_ids = buffers.keys().copied().collect::<Vec<BufferId>>();
 
   let buf_ids_array = v8::Array::new(scope, buf_ids.len() as i32);
@@ -60,7 +60,7 @@ pub fn write_sync(
 ) {
   debug_assert!(args.length() == 1);
   let buf_id = args.get(0).int32_value(scope).unwrap();
-  trace!("write_sync: {:?}", buf_id);
+  trace!("Rsvim.buf.writeSync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
@@ -72,12 +72,13 @@ pub fn write_sync(
     Ok(n) => {
       let buf = buffers.get(&buf_id).unwrap();
       let buf = lock!(buf);
+      let buf_lines = buf.text().rope().len_lines();
       let written_format_options = FormatSizeOptions::from(WINDOWS)
         .decimal_places(2)
         .long_units(false);
       let n = format_size(n, written_format_options);
       let message = format!(
-        "Buffer {:?} ({buf_id}) has been saved ({n}).",
+        "{:?} ({buf_id}) {buf_lines} lines, {n} written.",
         buf
           .filename()
           .as_ref()

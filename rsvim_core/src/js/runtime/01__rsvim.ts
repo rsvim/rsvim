@@ -76,15 +76,16 @@ export class RsvimBuf {
   /**
    * List all buffers' IDs.
    *
-   * @returns {number[]} It returns all the buffers' IDs as an array. If there's no
-   * buffer (i.e. the editor is not initialized), it returns an empty array.
+   * @returns {number[]} It returns all the buffers' IDs as an array. If
+   * there's no buffer (i.e. the editor is not initialized), it returns an
+   * empty array.
    *
    * @example
    * ```javascript
-   * const bufIds = Rsvim.buf.listBuffers();
+   * const bufIds = Rsvim.buf.list();
    * ```
    */
-  public listBuffers(): number[] {
+  public list(): number[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_list_all_buffers();
   }
