@@ -21,9 +21,16 @@ mod tests_current_buffer {
     let tp = TempPathCfg::create();
 
     let src: &str = r#"
-    const bufId = Rsvim.buf.currentBuffer();
-    if (bufId != undefined) {
+    const buf = Rsvim.buf.current();
+    if (buf != undefined) {
         throw new Error("Current buffer ID is not undefined!");
+    }
+    const bufs = Rsvim.buf.list();
+    if (typeof bufs != "array") {
+        throw new Error("Buffers is not an array!");
+    }
+    if (bufs.length > 0) {
+        throw new Error("Buffers list is not empty!");
     }
     "#;
 
