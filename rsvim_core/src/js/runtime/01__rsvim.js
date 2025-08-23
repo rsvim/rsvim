@@ -7,7 +7,7 @@ export class RsvimBuf {
     currentBuffer() {
         return __InternalRsvimGlobalObject.buf_current_buffer();
     }
-    listAllBuffers() {
+    listBuffers() {
         return __InternalRsvimGlobalObject.buf_list_all_buffers();
     }
     writeSync(bufId) {
