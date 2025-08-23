@@ -54,7 +54,9 @@ export class RsvimBuf {
   /**
    * Get current buffer's ID.
    *
-   * The "current" buffer is where your cursor is.
+   * The "current" buffer is the buffer that the window where your cursor is
+   * located is binded to. See {@link RsvimWin}.
+   *
    *
    * @returns {number}
    *
