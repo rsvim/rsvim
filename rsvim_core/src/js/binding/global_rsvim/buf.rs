@@ -6,8 +6,8 @@ use crate::prelude::*;
 use compact_str::ToCompactString;
 use humansize::{FormatSizeOptions, WINDOWS, format_size};
 
-/// `Rsvim.buf.currentBuffer` API.
-pub fn current_buffer(
+/// `Rsvim.buf.current` API.
+pub fn current(
   scope: &mut v8::HandleScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
@@ -20,11 +20,11 @@ pub fn current_buffer(
     Some(current_window) => {
       let buf = current_window.buffer().upgrade().unwrap();
       let buf_id = lock!(buf).id();
-      trace!("current_buffer: {:?}", buf_id);
+      trace!("Rsvim.buf.current: {:?}", buf_id);
       rv.set_int32(buf_id);
     }
     None => {
-      trace!("current_buffer: not exist");
+      trace!("Rsvim.buf.current: not exist");
       rv.set_undefined();
     }
   }

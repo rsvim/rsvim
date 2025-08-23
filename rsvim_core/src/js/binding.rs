@@ -86,12 +86,7 @@ pub fn create_new_context<'s>(
       "buf_write_sync",
       global_rsvim::buf::write_sync,
     );
-    set_function_to(
-      scope,
-      vim,
-      "buf_current_buffer",
-      global_rsvim::buf::current_buffer,
-    );
+    set_function_to(scope, vim, "buf_current", global_rsvim::buf::current);
     set_function_to(
       scope,
       vim,
