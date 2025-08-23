@@ -15,7 +15,6 @@ use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::EditingStateArc;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
 use err::JsError;
