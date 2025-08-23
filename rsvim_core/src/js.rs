@@ -345,8 +345,6 @@ pub struct JsRuntimeState {
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
   pub commands: ExCommandsManagerArc,
-  // Same as the `state` in EventLoop.
-  pub editing_state: EditingStateArc,
   // Data Access for RSVIM }
 }
 
@@ -478,7 +476,6 @@ impl JsRuntime {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
-    editing_state: EditingStateArc,
   ) -> Self {
     // Fire up the v8 engine.
     init_v8_platform(false, Some(&options.v8_flags));
@@ -533,7 +530,6 @@ impl JsRuntime {
       buffers,
       contents,
       commands,
-      editing_state,
     });
 
     isolate.set_slot(state.clone());
@@ -571,7 +567,6 @@ impl JsRuntime {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
-    editing_state: EditingStateArc,
   ) -> Self {
     // Fire up the v8 engine.
     init_v8_platform(false, Some(&options.v8_flags));
@@ -610,7 +605,6 @@ impl JsRuntime {
       buffers,
       contents,
       commands,
-      editing_state,
     });
 
     isolate.set_slot(state.clone());

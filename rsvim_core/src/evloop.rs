@@ -162,7 +162,6 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let state = EditingState::to_arc(EditingState::new());
     let stateful_machine = StatefulValue::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
@@ -219,7 +218,6 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
       stateful_machine,
       buffers_manager,
       text_contents,
@@ -241,7 +239,6 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
       stateful_machine,
       buffers,
       contents,
@@ -273,7 +270,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
