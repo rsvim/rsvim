@@ -306,7 +306,6 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
       stateful_machine,
       buffers,
       contents,
@@ -333,7 +332,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
