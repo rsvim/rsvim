@@ -58,9 +58,10 @@ export class RsvimBuf {
    * located is binded to. See {@link RsvimWin}.
    *
    * @returns {number | undefined} It returns `undefined` before the editor is
-   * initialized. Once the editor is initialized, it always returns a valid buffer ID
-   * `number`, since there will always have a valid buffer binded to the current
-   * window (where your cursor is).
+   * initialized since there's no buffer/window created. Once the editor is
+   * initialized, it always returns a valid buffer ID `number`, since there
+   * will always have a valid buffer binded to the current window (where your
+   * cursor is).
    *
    * @example
    * ```javascript
