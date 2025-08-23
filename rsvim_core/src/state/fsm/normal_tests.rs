@@ -11,7 +11,6 @@ use crate::state::fsm::{
 };
 use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::state::ops::{cmdline_ops, cursor_ops};
-use crate::state::{EditingState, EditingStateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::{Canvas, CanvasArc};
@@ -34,7 +33,6 @@ pub fn make_tree_with_buffer_opts(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -46,7 +44,6 @@ pub fn make_tree_with_buffer_opts(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let state = EditingState::to_arc(EditingState::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
@@ -58,7 +55,6 @@ pub fn make_tree_with_buffer_opts(
   let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
-    state.clone(),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -66,7 +62,7 @@ pub fn make_tree_with_buffer_opts(
     jsrt_forwarder_tx,
   );
 
-  (tree, state, bufs, buf, contents, data_access)
+  (tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree(
@@ -75,7 +71,6 @@ pub fn make_tree(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -91,7 +86,6 @@ pub fn make_tree_with_cmdline(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -109,7 +103,6 @@ pub fn make_tree_with_cmdline(
     bufs.clone(),
     contents.clone(),
   );
-  let state = EditingState::to_arc(EditingState::new());
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),
@@ -120,7 +113,6 @@ pub fn make_tree_with_cmdline(
   let (master_tx, _master_rx) = channel(1);
   let data_access = StatefulDataAccess::new(
     Event::Key(key_event),
-    state.clone(),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -128,7 +120,7 @@ pub fn make_tree_with_cmdline(
     jsrt_forwarder_tx,
   );
 
-  (tree, state, bufs, buf, contents, data_access)
+  (tree, bufs, buf, contents, data_access)
 }
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
@@ -311,7 +303,7 @@ mod tests_raw_cursor_move_y_by {
     test_log_init();
 
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -344,7 +336,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -377,7 +369,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
+    let (tree, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -417,7 +409,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
+    let (tree, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -450,7 +442,7 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -483,7 +475,7 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
+    let (tree, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -522,7 +514,7 @@ mod tests_raw_cursor_move_x_by {
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -557,7 +549,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -592,7 +584,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -627,7 +619,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -670,7 +662,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -720,7 +712,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -780,7 +772,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -838,7 +830,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(50, 50);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines.clone(),
@@ -888,7 +880,7 @@ mod tests_raw_cursor_move_to {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -948,7 +940,7 @@ mod tests_raw_cursor_move_to {
     ];
     let terminal_size = U16Size::new(10, 10);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -1007,7 +999,7 @@ mod tests_raw_cursor_move_to {
 
     let terminal_size = U16Size::new(50, 50);
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines.clone(),
@@ -1049,7 +1041,7 @@ mod tests_raw_window_scroll_y_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
@@ -1115,7 +1107,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -1209,7 +1201,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 7),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -1294,7 +1286,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -1375,7 +1367,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -1600,7 +1592,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -1695,7 +1687,7 @@ mod tests_raw_window_scroll_y_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -1889,7 +1881,7 @@ mod tests_raw_window_scroll_x_by {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
@@ -1955,7 +1947,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -2058,7 +2050,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 7),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -2143,7 +2135,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -2226,7 +2218,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -2400,7 +2392,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -2635,7 +2627,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -2730,7 +2722,7 @@ mod tests_raw_window_scroll_x_by {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(15, 15),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -2949,7 +2941,7 @@ mod tests_raw_window_scroll_to {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -3043,7 +3035,7 @@ mod tests_raw_window_scroll_to {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -3262,7 +3254,7 @@ mod tests_raw_window_scroll_to {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -3489,7 +3481,7 @@ mod tests_cursor_move {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
+    let (tree, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec![],
@@ -3521,7 +3513,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, _buf, contents, data_access) = make_tree(
+    let (tree, bufs, _buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -3553,7 +3545,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -3668,13 +3660,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 10),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3785,13 +3776,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 10),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3898,7 +3888,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 5),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -4193,13 +4183,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 5),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 5),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4490,13 +4479,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 5),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 5),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4782,7 +4770,7 @@ mod tests_cursor_move {
       "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "\t2. When the line is too long to be completely put in a row of the window content widget, there're still multiple cases.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -4905,7 +4893,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -5070,7 +5058,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -5410,7 +5398,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(25, 7),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -5625,13 +5613,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(25, 7),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(25, 7),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5842,13 +5829,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(25, 7),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(25, 7),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6055,7 +6041,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(25, 7),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -6206,13 +6192,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(15, 7),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(15, 7),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6360,13 +6345,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(15, 7),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(15, 7),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6510,7 +6494,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -6679,7 +6663,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -7023,7 +7007,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(25, 7),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -7238,7 +7222,7 @@ mod tests_cursor_move {
       "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(25, 7),
       WindowOptionsBuilder::default().wrap(true).build().unwrap(),
       lines,
@@ -7381,12 +7365,11 @@ mod tests_goto_command_line_ex_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
-    let (tree, state, bufs, _buf, contents, data_access) =
-      make_tree_with_cmdline(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        vec![],
-      );
+    let (tree, bufs, _buf, contents, data_access) = make_tree_with_cmdline(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      vec![],
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7427,12 +7410,11 @@ mod tests_goto_command_line_ex_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(60, 3);
-    let (tree, state, bufs, _buf, contents, data_access) =
-      make_tree_with_cmdline(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        vec!["Should go to insert mode with message command line\n"],
-      );
+    let (tree, bufs, _buf, contents, data_access) = make_tree_with_cmdline(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      vec!["Should go to insert mode with message command line\n"],
+    );
 
     // Prepare
     {
@@ -7519,7 +7501,7 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
@@ -7605,7 +7587,7 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
@@ -7691,7 +7673,7 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
@@ -7777,7 +7759,7 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(30, 3);
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       terminal_size,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       vec!["Should go to insert mode\n"],
@@ -7864,12 +7846,11 @@ mod tests_goto_insert_mode {
     test_log_init();
 
     let terminal_size = U16Size::new(60, 3);
-    let (tree, state, bufs, _buf, contents, data_access) =
-      make_tree_with_cmdline(
-        terminal_size,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        vec!["Should go to insert mode with message command line\n"],
-      );
+    let (tree, bufs, _buf, contents, data_access) = make_tree_with_cmdline(
+      terminal_size,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      vec!["Should go to insert mode with message command line\n"],
+    );
 
     // Prepare
     {
