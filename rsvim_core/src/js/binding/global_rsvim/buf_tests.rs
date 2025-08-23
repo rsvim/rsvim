@@ -26,7 +26,7 @@ mod tests_current_buffer {
         throw new Error("Current buffer ID is not undefined!");
     }
     const bufs = Rsvim.buf.list();
-    if (typeof bufs != "array") {
+    if (!Array.isArray(bufs)) {
         throw new Error("Buffers is not an array!");
     }
     if (bufs.length > 0) {
@@ -47,6 +47,7 @@ mod tests_current_buffer {
     {
       let contents = lock!(event_loop.contents);
       let payload = contents.command_line_message().rope().to_string();
+      info!("After payload:{payload:?}");
       let payload = payload.trim();
       assert!(payload.is_empty());
     }
