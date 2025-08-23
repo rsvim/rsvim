@@ -65,12 +65,12 @@ export class RsvimBuf {
    *
    * @example
    * ```javascript
-   * const bufId = Rsvim.buf.currentBuffer();
+   * const bufId = Rsvim.buf.current();
    * ```
    */
-  public currentBuffer(): number | undefined {
+  public current(): number | undefined {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_current_buffer();
+    return __InternalRsvimGlobalObject.buf_current();
   }
 
   /**
