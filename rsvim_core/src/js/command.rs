@@ -39,7 +39,7 @@ impl JsFuture for ExCommand {
   fn run(&mut self, scope: &mut v8::HandleScope) {
     // For now only `:js` command is supported.
     debug_assert!(self.is_builtin_js());
-    let filename = format!("<ExCommand{}>", self.future_id);
+    let filename = format!("<command{}>", self.future_id);
 
     match execute_module(scope, &filename, Some(self.body().trim())) {
       Ok(_) => { /* do nothing */ }
