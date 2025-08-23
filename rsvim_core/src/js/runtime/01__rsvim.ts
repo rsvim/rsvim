@@ -87,7 +87,7 @@ export class RsvimBuf {
    */
   public list(): number[] {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_list_all_buffers();
+    return __InternalRsvimGlobalObject.buf_list();
   }
 
   /**
