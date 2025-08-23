@@ -4,11 +4,11 @@ export class Rsvim {
     opt = new RsvimOpt();
 }
 export class RsvimBuf {
-    currentBuffer() {
-        return __InternalRsvimGlobalObject.buf_current_buffer();
+    current() {
+        return __InternalRsvimGlobalObject.buf_current();
     }
-    listBuffers() {
-        return __InternalRsvimGlobalObject.buf_list_all_buffers();
+    list() {
+        return __InternalRsvimGlobalObject.buf_list();
     }
     writeSync(bufId) {
         if (typeof bufId !== "number") {
