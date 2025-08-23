@@ -11,7 +11,7 @@ use crate::state::fsm::{
 };
 use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::state::ops::{cmdline_ops, cursor_ops};
-use crate::state::{State, StateArc};
+use crate::state::{EditingState, EditingStateArc};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::{Canvas, CanvasArc};
@@ -34,7 +34,7 @@ pub fn make_tree_with_buffer_opts(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  StateArc,
+  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -46,7 +46,7 @@ pub fn make_tree_with_buffer_opts(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let state = State::to_arc(State::new());
+  let state = EditingState::to_arc(EditingState::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
@@ -75,7 +75,7 @@ pub fn make_tree(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  StateArc,
+  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -91,7 +91,7 @@ pub fn make_tree_with_cmdline(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  StateArc,
+  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -109,7 +109,7 @@ pub fn make_tree_with_cmdline(
     bufs.clone(),
     contents.clone(),
   );
-  let state = State::to_arc(State::new());
+  let state = EditingState::to_arc(EditingState::new());
 
   let key_event = KeyEvent::new_with_kind(
     KeyCode::Char('a'),

@@ -9,18 +9,18 @@ pub mod mode;
 pub mod ops;
 
 #[derive(Debug, Clone)]
-pub struct State {
+pub struct EditingState {
   // Current editing mode.
   mode: Mode,
   // Last editing mode.
   last_mode: Mode,
 }
 
-arc_mutex_ptr!(State);
+arc_mutex_ptr!(EditingState);
 
-impl State {
+impl EditingState {
   pub fn new() -> Self {
-    State {
+    EditingState {
       mode: Mode::Normal,
       last_mode: Mode::Normal,
     }
@@ -35,7 +35,7 @@ impl State {
   }
 }
 
-impl State {
+impl EditingState {
   pub fn update_state_machine(&mut self, next_stateful: &StatefulValue) {
     // Save last stateful machine (only when it is different).
     if self.last_mode != self.mode {
@@ -67,7 +67,7 @@ impl State {
   }
 }
 
-impl Default for State {
+impl Default for EditingState {
   fn default() -> Self {
     Self::new()
   }

@@ -9,7 +9,7 @@ use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
-use crate::state::{State, StateArc};
+use crate::state::{EditingState, EditingStateArc};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
@@ -61,8 +61,8 @@ pub struct EventLoop {
   /// Canvas for UI.
   pub canvas: CanvasArc,
 
-  /// (Global) editing state.
-  pub state: StateArc,
+  /// Editing state.
+  pub state: EditingStateArc,
   /// Finite-state machine for editing state.
   pub stateful_machine: StatefulValue,
 
@@ -130,7 +130,7 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* state */ StateArc,
+    /* state */ EditingStateArc,
     /* stateful_machine */ StatefulValue,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
@@ -166,7 +166,7 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let state = State::to_arc(State::new());
+    let state = EditingState::to_arc(EditingState::new());
     let stateful_machine = StatefulValue::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,

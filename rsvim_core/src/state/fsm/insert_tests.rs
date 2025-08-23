@@ -11,7 +11,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
-use crate::state::{State, StateArc};
+use crate::state::{EditingState, EditingStateArc};
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
 use crate::ui::canvas::Canvas;
@@ -37,7 +37,7 @@ pub fn make_tree_with_buffer_opts(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  StateArc,
+  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -49,7 +49,7 @@ pub fn make_tree_with_buffer_opts(
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
     make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let state = State::to_arc(State::new());
+  let state = EditingState::to_arc(EditingState::new());
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
 
   let key_event = KeyEvent::new_with_kind(
@@ -78,7 +78,7 @@ pub fn make_tree(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  StateArc,
+  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,

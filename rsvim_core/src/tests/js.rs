@@ -4,7 +4,7 @@ use crate::content::TextContents;
 use crate::js::command::ExCommandsManager;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
-use crate::state::State;
+use crate::state::EditingState;
 use crate::ui::tree::Tree;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
@@ -17,7 +17,7 @@ pub fn make_js_runtime() -> JsRuntime {
 
   let cli_opts =
     CliOptions::from_args::<&Vec<std::ffi::OsString>>(&vec![]).unwrap();
-  let state = State::to_arc(State::new());
+  let state = EditingState::to_arc(EditingState::new());
 
   let tree = Tree::to_arc(Tree::new(canvas_size));
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
