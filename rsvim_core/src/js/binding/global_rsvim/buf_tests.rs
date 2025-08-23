@@ -8,10 +8,7 @@ use std::time::Duration;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-// #[should_panic(
-//   expected = "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-// )]
-async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
+async fn get_current_buffer() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;

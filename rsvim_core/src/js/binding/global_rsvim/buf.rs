@@ -16,11 +16,18 @@ pub fn current_buffer(
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
   let tree = lock!(tree);
-  let current_window = tree.current_window().unwrap();
-  let buf = current_window.buffer().upgrade().unwrap();
-  let buf_id = lock!(buf).id();
-  trace!("current_buffer: {:?}", buf_id);
-  rv.set_int32(buf_id);
+  match tree.current_window() {
+    Some(current_window) => {
+      let buf = current_window.buffer().upgrade().unwrap();
+      let buf_id = lock!(buf).id();
+      trace!("current_buffer: {:?}", buf_id);
+      rv.set_int32(buf_id);
+    }
+    None => {
+      trace!("current_buffer: not exist");
+      rv.set_undefined();
+    }
+  }
 }
 
 /// `Rsvim.buf.listAllBuffers` API.

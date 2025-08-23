@@ -63,7 +63,7 @@ export class RsvimBuf {
    * const bufId = Rsvim.buf.currentBuffer();
    * ```
    */
-  public currentBuffer(): number {
+  public currentBuffer(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current_buffer();
   }
