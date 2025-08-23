@@ -57,12 +57,10 @@ export class RsvimBuf {
    * The "current" buffer is the buffer that the window where your cursor is
    * located is binded to. See {@link RsvimWin}.
    *
-   * NOTE: This API returns `undefined` if been called before the editor is initialized,
-   * at that time, no buffer/window is been created. Once editor is initialized, this
-   * API always returns a valid buffer ID since there will always a valid buffer binded
-   * to the current window where your cursor is.
-   *
-   * @returns {number | undefined}
+   * @returns {number | undefined} It returns `undefined` before the editor is been
+   * initialized. Once the editor is initialized, it always returns a valid buffer ID,
+   * since there will always have a valid buffer binded to the current window (where
+   * your cursor is).
    *
    * @example
    * ```javascript
