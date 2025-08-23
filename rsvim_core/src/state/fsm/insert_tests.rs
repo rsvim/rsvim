@@ -36,7 +36,6 @@ pub fn make_tree_with_buffer_opts(
   lines: Vec<&str>,
 ) -> (
   TreeArc,
-  EditingStateArc,
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
@@ -290,7 +289,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -399,13 +398,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 10),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -510,13 +508,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 10),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -623,7 +620,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -867,17 +864,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1113,17 +1109,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1355,7 +1350,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) = make_tree(
+    let (tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -1599,17 +1594,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1845,17 +1839,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      U16Size::new(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2089,7 +2082,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -2308,13 +2301,12 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2532,13 +2524,12 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2751,7 +2742,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -2883,7 +2874,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3190,7 +3181,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\r\n",
       "  3. Is there any other cases?\r\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3502,7 +3493,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\r",
       "  3. Is there any other cases?\r",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3798,7 +3789,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3858,7 +3849,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3923,7 +3914,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4001,7 +3992,7 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4415,13 +4406,12 @@ mod tests_insert_text {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4834,13 +4824,12 @@ mod tests_insert_text {
       "11th.\r",
       "12th.\r",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5235,7 +5224,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5298,7 +5287,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5361,7 +5350,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5475,7 +5464,7 @@ mod tests_insert_text {
       "9th.\n",
       "10th.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5863,7 +5852,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -5945,7 +5934,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6132,7 +6121,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -6774,13 +6763,12 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
       "* The extra.\r\n",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7421,13 +7409,12 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
       "* The extra.\r",
     ];
-    let (tree, state, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
+      terminal_size,
+      buf_opts,
+      window_options,
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -8056,7 +8043,7 @@ mod tests_delete_text {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -8116,7 +8103,7 @@ mod tests_delete_text {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents, data_access) =
+    let (tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
