@@ -336,9 +336,7 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  // Sender: js runtime send to master.
   pub master_tx: Sender<MasterMessage>,
-  // Receiver: js runtime receive from master.
   pub jsrt_rx: Receiver<JsMessage>,
   pub cli_opts: CliOptions,
   pub tree: TreeArc,
