@@ -35,6 +35,7 @@ pub fn make_tree_with_buffer_opts(
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
+  Event,
   TreeArc,
   BuffersManagerArc,
   BufferArc,
@@ -54,10 +55,10 @@ pub fn make_tree_with_buffer_opts(
     KeyModifiers::empty(),
     KeyEventKind::Press,
   );
+  let event = Event::Key(key_event);
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
   let data_access = StateDataAccess::new(
-    Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -65,7 +66,7 @@ pub fn make_tree_with_buffer_opts(
     jsrt_forwarder_tx,
   );
 
-  (tree, bufs, buf, contents, data_access)
+  (event, tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree(
@@ -73,6 +74,7 @@ pub fn make_tree(
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
+  Event,
   TreeArc,
   BuffersManagerArc,
   BufferArc,
@@ -289,7 +291,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, bufs, buf, contents, data_access) = make_tree(
+    let (event, tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
@@ -398,12 +400,13 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 10),
+        buf_opts,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -508,12 +511,13 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 10),
+        buf_opts,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -620,7 +624,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, bufs, buf, contents, data_access) = make_tree(
+    let (event, tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -864,16 +868,17 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 6),
-      buf_opts,
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 6),
+        buf_opts,
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
