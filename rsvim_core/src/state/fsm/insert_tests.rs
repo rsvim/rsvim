@@ -1356,7 +1356,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, bufs, buf, contents, data_access) = make_tree(
+    let (event, tree, bufs, buf, contents, data_access) = make_tree(
       U16Size::new(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
@@ -1600,16 +1600,17 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 6),
-      buf_opts,
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(true)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 6),
+        buf_opts,
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(true)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1845,16 +1846,17 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 6),
-      buf_opts,
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(true)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 6),
+        buf_opts,
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(true)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
