@@ -491,7 +491,6 @@ impl EventLoop {
         trace!("Polled terminal event ok: {:?}", event);
 
         let data_access = StateDataAccess::new(
-          event,
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
@@ -501,7 +500,7 @@ impl EventLoop {
 
         // Handle by state machine
         let stateful = self.state_machine;
-        let next_stateful = stateful.handle(data_access);
+        let next_stateful = stateful.handle(data_access, event);
         self.state_machine = next_stateful;
 
         // Exit loop and quit.
