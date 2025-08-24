@@ -18,7 +18,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 pub struct NormalStateful {}
 
 impl NormalStateful {
-  fn get_operation(&self, event: Event) -> Option<Operation> {
+  fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
       Event::FocusLost => None,
@@ -60,17 +60,15 @@ impl NormalStateful {
         KeyEventKind::Release => None,
       },
       Event::Mouse(_mouse_event) => None,
-      Event::Paste(ref _paste_string) => None,
+      Event::Paste(_paste_string) => None,
       Event::Resize(_columns, _rows) => None,
     }
   }
 }
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StateDataAccess) -> StateMachine {
-    let event = data_access.event.clone();
-
-    if let Some(op) = self.get_operation(event) {
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+    if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
