@@ -111,19 +111,23 @@ impl Canvas {
     // cursor twinkling/jumping while refreshing the TUI screen.
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
-    if !self.cursor().hidden() {
-      shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+
+    if !cells_shaders.is_empty() {
+      if !self.cursor().hidden() {
+        shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      }
+
+      shader.append(&mut cells_shaders);
+
+      if !self.cursor().hidden() {
+        shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+      }
     }
 
-    shader.append(&mut cells_shaders);
     shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
       saved_cursor_pos.x(),
       saved_cursor_pos.y(),
     )));
-
-    if !self.cursor().hidden() {
-      shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
-    }
 
     // For cursor
     let mut cursor_shaders = self._shade_cursor();

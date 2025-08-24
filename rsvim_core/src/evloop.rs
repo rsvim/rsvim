@@ -7,9 +7,8 @@ use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
-use crate::state::{State, StateArc};
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
@@ -61,10 +60,8 @@ pub struct EventLoop {
   /// Canvas for UI.
   pub canvas: CanvasArc,
 
-  /// (Global) editing state.
-  pub state: StateArc,
   /// Finite-state machine for editing state.
-  pub stateful_machine: StatefulValue,
+  pub state_machine: StateMachine,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -130,8 +127,7 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* state */ StateArc,
-    /* stateful_machine */ StatefulValue,
+    /* state_machine */ StateMachine,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ ExCommandsManagerArc,
@@ -166,8 +162,7 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let state = State::to_arc(State::new());
-    let stateful_machine = StatefulValue::default();
+    let state_machine = StateMachine::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
     // we need to leverage tokio's async runtime. i.e. first we send js task
@@ -223,8 +218,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers_manager,
       text_contents,
       ex_commands_manager,
@@ -245,8 +239,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -277,7 +270,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
@@ -286,8 +278,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -315,8 +306,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -342,7 +332,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
@@ -351,8 +340,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -501,10 +489,7 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-
-        let data_access = StatefulDataAccess::new(
-          event,
-          self.state.clone(),
+        let data_access = StateDataAccess::new(
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
@@ -513,16 +498,12 @@ impl EventLoop {
         );
 
         // Handle by state machine
-        let stateful = self.stateful_machine;
-        let next_stateful = stateful.handle(data_access);
-        {
-          let mut state = lock!(self.state);
-          state.update_state_machine(&next_stateful);
-        }
-        self.stateful_machine = next_stateful;
+        let stateful = self.state_machine;
+        let next_stateful = stateful.handle(data_access, event);
+        self.state_machine = next_stateful;
 
         // Exit loop and quit.
-        if let StatefulValue::QuitState(_) = next_stateful {
+        if let StateMachine::QuitState(_) = next_stateful {
           self.cancellation_token.cancel();
         }
       }
