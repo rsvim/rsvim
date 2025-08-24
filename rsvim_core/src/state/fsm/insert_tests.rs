@@ -1114,16 +1114,17 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      U16Size::new(10, 6),
-      buf_opts,
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        U16Size::new(10, 6),
+        buf_opts,
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
