@@ -4835,12 +4835,13 @@ mod tests_insert_text {
       "11th.\r",
       "12th.\r",
     ];
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      terminal_size,
-      buf_opts,
-      window_options,
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        terminal_size,
+        buf_opts,
+        window_options,
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5235,7 +5236,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
