@@ -15,9 +15,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 pub struct InsertStateful {}
 
 impl InsertStateful {
-  fn get_operation(&self, data_access: &StateDataAccess) -> Option<Operation> {
-    let event = &data_access.event;
-
+  fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
       Event::FocusLost => None,
@@ -57,8 +55,8 @@ impl InsertStateful {
 }
 
 impl Stateful for InsertStateful {
-  fn handle(&self, data_access: StateDataAccess) -> StateMachine {
-    if let Some(op) = self.get_operation(&data_access) {
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+    if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
