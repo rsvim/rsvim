@@ -111,7 +111,7 @@ impl Canvas {
     // cursor twinkling/jumping while refreshing the TUI screen.
     // So here let's hide cursor before flushing shaders, and restore the
     // cursor after flushing is done.
-    if cfg!(target_os = "windows") && !self.cursor().hidden() {
+    if !self.cursor().hidden() {
       shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
     }
 
@@ -121,7 +121,7 @@ impl Canvas {
       saved_cursor_pos.y(),
     )));
 
-    if cfg!(target_os = "windows") && !self.cursor().hidden() {
+    if !self.cursor().hidden() {
       shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
     }
 
