@@ -489,7 +489,6 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-
         let data_access = StateDataAccess::new(
           self.tree.clone(),
           self.buffers.clone(),
