@@ -61,7 +61,7 @@ pub struct EventLoop {
   pub canvas: CanvasArc,
 
   /// Finite-state machine for editing state.
-  pub stateful_machine: StateMachine,
+  pub state_machine: StateMachine,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -239,7 +239,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -278,7 +278,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -306,7 +306,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -340,7 +340,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -500,9 +500,9 @@ impl EventLoop {
         );
 
         // Handle by state machine
-        let stateful = self.stateful_machine;
+        let stateful = self.state_machine;
         let next_stateful = stateful.handle(data_access);
-        self.stateful_machine = next_stateful;
+        self.state_machine = next_stateful;
 
         // Exit loop and quit.
         if let StateMachine::QuitState(_) = next_stateful {
