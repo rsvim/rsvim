@@ -127,7 +127,7 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* stateful_machine */ StateMachine,
+    /* state_machine */ StateMachine,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ ExCommandsManagerArc,
@@ -162,7 +162,7 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let stateful_machine = StateMachine::default();
+    let state_machine = StateMachine::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
     // we need to leverage tokio's async runtime. i.e. first we send js task
@@ -218,7 +218,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      stateful_machine,
+      state_machine,
       buffers_manager,
       text_contents,
       ex_commands_manager,

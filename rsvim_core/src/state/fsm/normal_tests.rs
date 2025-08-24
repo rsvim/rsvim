@@ -313,8 +313,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful_machine = NormalStateful::default();
-    stateful_machine
+    let state_machine = NormalStateful::default();
+    state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
@@ -346,8 +346,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful_machine = NormalStateful::default();
-    stateful_machine
+    let state_machine = NormalStateful::default();
+    state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
@@ -452,8 +452,8 @@ mod tests_raw_cursor_move_y_by {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful_machine = NormalStateful::default();
-    stateful_machine
+    let state_machine = NormalStateful::default();
+    state_machine
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
 
     let tree = data_access.tree.clone();
@@ -3491,8 +3491,8 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful_machine = NormalStateful::default();
-    stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    let state_machine = NormalStateful::default();
+    state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
@@ -3523,8 +3523,8 @@ mod tests_cursor_move {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful_machine = NormalStateful::default();
-    stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    let state_machine = NormalStateful::default();
+    state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
