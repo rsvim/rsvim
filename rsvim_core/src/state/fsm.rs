@@ -105,7 +105,7 @@ pub trait Stateful {
 macro_rules! state_machine_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+      fn handle(&self, data_access: StateDataAccess) -> StateMachine {
         match self {
           $(
             $enum::$variant(e) => e.handle(data_access),
@@ -113,7 +113,7 @@ macro_rules! state_machine_dispatcher {
         }
       }
 
-      fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> StateMachine {
         match self {
           $(
             $enum::$variant(e) => e.handle_op(data_access, op),
