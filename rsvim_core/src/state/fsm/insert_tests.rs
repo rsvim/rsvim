@@ -3191,7 +3191,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\r\n",
       "  3. Is there any other cases?\r\n",
     ];
-    let (tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
