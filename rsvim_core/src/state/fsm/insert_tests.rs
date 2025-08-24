@@ -3859,7 +3859,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
-    let (tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -3924,7 +3924,7 @@ mod tests_insert_text {
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
