@@ -3,10 +3,10 @@
 use crate::js::next_future_id;
 use crate::msg::{self, ExCommandReq, JsMessage};
 use crate::prelude::*;
-use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::{
   CursorInsertPayload, Operation, cmdline_ops, cursor_ops,
 };
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;

@@ -1,7 +1,7 @@
 //! The quit state.
 
-use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::Operation;
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 
 use crossterm::event::Event;
 

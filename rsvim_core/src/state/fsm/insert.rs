@@ -1,9 +1,9 @@
 //! The insert mode.
 
 use crate::prelude::*;
-use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::cursor_ops;
 use crate::state::ops::{CursorInsertPayload, Operation};
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 

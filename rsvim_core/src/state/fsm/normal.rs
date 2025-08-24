@@ -2,9 +2,9 @@
 
 use crate::prelude::*;
 use crate::state::fsm::quit::QuitStateful;
-use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::cursor_ops;
 use crate::state::ops::{GotoInsertModeVariant, Operation};
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;

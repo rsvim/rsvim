@@ -6,11 +6,10 @@ use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
-use crate::state::fsm::{
-  InsertStateful, StateDataAccess, StateMachine, Stateful,
-};
+use crate::state::fsm::InsertStateful;
 use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::state::ops::{cmdline_ops, cursor_ops};
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::{Canvas, CanvasArc};
