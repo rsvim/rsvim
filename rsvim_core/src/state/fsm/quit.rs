@@ -3,6 +3,8 @@
 use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::Operation;
 
+use crossterm::event::Event;
+
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The quit state.
 ///
@@ -10,7 +12,11 @@ use crate::state::ops::Operation;
 pub struct QuitStateful {}
 
 impl Stateful for QuitStateful {
-  fn handle(&self, _data_access: StateDataAccess) -> StateMachine {
+  fn handle(
+    &self,
+    _data_access: StateDataAccess,
+    _event: Event,
+  ) -> StateMachine {
     // unreachable!("Never handle QuitStateful");
     StateMachine::QuitState(QuitStateful::default())
   }
