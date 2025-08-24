@@ -7,7 +7,7 @@ use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
 use crate::state::fsm::{
-  InsertStateful, Stateful, StatefulDataAccess, StatefulValue,
+  InsertStateful, StateDataAccess, StateMachine, Stateful,
 };
 use crate::state::ops::{CursorInsertPayload, Operation};
 use crate::state::ops::{cmdline_ops, cursor_ops};
@@ -36,7 +36,7 @@ pub fn make_tree_with_buffer_opts(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
-  StatefulDataAccess,
+  StateDataAccess,
 ) {
   use crate::tests::tree::make_tree_with_buffers;
 
@@ -53,7 +53,7 @@ pub fn make_tree_with_buffer_opts(
   );
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
-  let data_access = StatefulDataAccess::new(
+  let data_access = StateDataAccess::new(
     Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
@@ -74,7 +74,7 @@ pub fn make_tree(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
-  StatefulDataAccess,
+  StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
@@ -89,7 +89,7 @@ pub fn make_tree_with_cmdline(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
-  StatefulDataAccess,
+  StateDataAccess,
 ) {
   use crate::tests::tree::make_tree_with_buffers_cmdline;
 
@@ -111,7 +111,7 @@ pub fn make_tree_with_cmdline(
   );
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
-  let data_access = StatefulDataAccess::new(
+  let data_access = StateDataAccess::new(
     Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
@@ -7450,9 +7450,9 @@ mod tests_goto_command_line_ex_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    assert!(matches!(next_stateful, StatefulValue::CommandLineExMode(_)));
+    assert!(matches!(next_stateful, StateMachine::CommandLineExMode(_)));
     let stateful = match next_stateful {
-      StatefulValue::CommandLineExMode(s) => s,
+      StateMachine::CommandLineExMode(s) => s,
       _ => unreachable!(),
     };
 
@@ -7522,7 +7522,7 @@ mod tests_goto_insert_mode {
       );
       assert_eq!(
         insert_result,
-        StatefulValue::InsertMode(InsertStateful::default())
+        StateMachine::InsertMode(InsertStateful::default())
       );
 
       let tree = data_access.tree.clone();
@@ -7608,7 +7608,7 @@ mod tests_goto_insert_mode {
       );
       assert_eq!(
         insert_result,
-        StatefulValue::InsertMode(InsertStateful::default())
+        StateMachine::InsertMode(InsertStateful::default())
       );
 
       let tree = data_access.tree.clone();
@@ -7694,7 +7694,7 @@ mod tests_goto_insert_mode {
       );
       assert_eq!(
         insert_result,
-        StatefulValue::InsertMode(InsertStateful::default())
+        StateMachine::InsertMode(InsertStateful::default())
       );
 
       let tree = data_access.tree.clone();
@@ -7779,7 +7779,7 @@ mod tests_goto_insert_mode {
       );
       assert_eq!(
         insert_result,
-        StatefulValue::InsertMode(InsertStateful::default())
+        StateMachine::InsertMode(InsertStateful::default())
       );
 
       let tree = data_access.tree.clone();
@@ -7883,7 +7883,7 @@ mod tests_goto_insert_mode {
       );
       assert_eq!(
         insert_result,
-        StatefulValue::InsertMode(InsertStateful::default())
+        StateMachine::InsertMode(InsertStateful::default())
       );
 
       let tree = data_access.tree.clone();

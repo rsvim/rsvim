@@ -7,7 +7,7 @@ use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::cmdline_ops;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
@@ -61,7 +61,7 @@ pub struct EventLoop {
   pub canvas: CanvasArc,
 
   /// Finite-state machine for editing state.
-  pub stateful_machine: StatefulValue,
+  pub stateful_machine: StateMachine,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -127,7 +127,7 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* stateful_machine */ StatefulValue,
+    /* stateful_machine */ StateMachine,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ ExCommandsManagerArc,
@@ -162,7 +162,7 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let stateful_machine = StatefulValue::default();
+    let stateful_machine = StateMachine::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
     // we need to leverage tokio's async runtime. i.e. first we send js task
@@ -490,7 +490,7 @@ impl EventLoop {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
 
-        let data_access = StatefulDataAccess::new(
+        let data_access = StateDataAccess::new(
           event,
           self.tree.clone(),
           self.buffers.clone(),
@@ -505,7 +505,7 @@ impl EventLoop {
         self.stateful_machine = next_stateful;
 
         // Exit loop and quit.
-        if let StatefulValue::QuitState(_) = next_stateful {
+        if let StateMachine::QuitState(_) = next_stateful {
           self.cancellation_token.cancel();
         }
       }

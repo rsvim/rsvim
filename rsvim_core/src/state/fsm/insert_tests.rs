@@ -7,7 +7,7 @@ use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::{BufferArc, BuffersManagerArc};
 use crate::content::{TextContents, TextContentsArc};
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
@@ -39,7 +39,7 @@ pub fn make_tree_with_buffer_opts(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
-  StatefulDataAccess,
+  StateDataAccess,
 ) {
   use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
 
@@ -56,7 +56,7 @@ pub fn make_tree_with_buffer_opts(
   );
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
-  let data_access = StatefulDataAccess::new(
+  let data_access = StateDataAccess::new(
     Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
@@ -77,7 +77,7 @@ pub fn make_tree(
   BuffersManagerArc,
   BufferArc,
   TextContentsArc,
-  StatefulDataAccess,
+  StateDataAccess,
 ) {
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)

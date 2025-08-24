@@ -53,7 +53,7 @@ mod normal_tests;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
-pub struct StatefulDataAccess {
+pub struct StateDataAccess {
   pub event: Event,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
@@ -62,7 +62,7 @@ pub struct StatefulDataAccess {
   pub jsrt_forwarder_tx: Sender<JsMessage>,
 }
 
-impl StatefulDataAccess {
+impl StateDataAccess {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     event: Event,
@@ -72,7 +72,7 @@ impl StatefulDataAccess {
     master_tx: Sender<MasterMessage>,
     jsrt_forwarder_tx: Sender<JsMessage>,
   ) -> Self {
-    StatefulDataAccess {
+    StateDataAccess {
       event,
       tree,
       buffers,
@@ -88,21 +88,21 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
+  fn handle(&self, data_access: StateDataAccess) -> StateMachine;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
   fn handle_op(
     &self,
-    data_access: StatefulDataAccess,
+    data_access: StateDataAccess,
     op: Operation,
-  ) -> StatefulValue;
+  ) -> StateMachine;
 }
 
 /// Generate enum dispatcher for `Stateful`.
 #[macro_export]
-macro_rules! stateful_enum_dispatcher {
+macro_rules! state_machine_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
       fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
@@ -126,7 +126,7 @@ macro_rules! stateful_enum_dispatcher {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
-pub enum StatefulValue {
+pub enum StateMachine {
   // Editing modes.
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
@@ -141,8 +141,8 @@ pub enum StatefulValue {
   QuitState(QuitStateful),
 }
 
-stateful_enum_dispatcher!(
-  StatefulValue,
+state_machine_dispatcher!(
+  StateMachine,
   NormalMode,
   VisualMode,
   SelectMode,
@@ -155,10 +155,10 @@ stateful_enum_dispatcher!(
   QuitState
 );
 
-impl Default for StatefulValue {
+impl Default for StateMachine {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    StatefulValue::NormalMode(NormalStateful::default())
+    StateMachine::NormalMode(NormalStateful::default())
   }
 }

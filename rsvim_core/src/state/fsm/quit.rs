@@ -1,6 +1,6 @@
 //! The quit state.
 
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -10,16 +10,16 @@ use crate::state::ops::Operation;
 pub struct QuitStateful {}
 
 impl Stateful for QuitStateful {
-  fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
+  fn handle(&self, _data_access: StateDataAccess) -> StateMachine {
     // unreachable!("Never handle QuitStateful");
-    StatefulValue::QuitState(QuitStateful::default())
+    StateMachine::QuitState(QuitStateful::default())
   }
   fn handle_op(
     &self,
-    _data_access: StatefulDataAccess,
+    _data_access: StateDataAccess,
     _op: Operation,
-  ) -> StatefulValue {
+  ) -> StateMachine {
     // unreachable!("Never handle QuitStateful");
-    StatefulValue::QuitState(QuitStateful::default())
+    StateMachine::QuitState(QuitStateful::default())
   }
 }

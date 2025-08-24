@@ -1,6 +1,6 @@
 //! The command-line search backward mode.
 
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{StateDataAccess, StateMachine, Stateful};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -8,17 +8,17 @@ use crate::state::ops::Operation;
 pub struct CommandLineSearchBackwardStateful {}
 
 impl Stateful for CommandLineSearchBackwardStateful {
-  fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineSearchBackwardMode(
+  fn handle(&self, _data_access: StateDataAccess) -> StateMachine {
+    StateMachine::CommandLineSearchBackwardMode(
       CommandLineSearchBackwardStateful::default(),
     )
   }
   fn handle_op(
     &self,
-    _data_access: StatefulDataAccess,
+    _data_access: StateDataAccess,
     _op: Operation,
-  ) -> StatefulValue {
-    StatefulValue::CommandLineSearchBackwardMode(
+  ) -> StateMachine {
+    StateMachine::CommandLineSearchBackwardMode(
       CommandLineSearchBackwardStateful::default(),
     )
   }
