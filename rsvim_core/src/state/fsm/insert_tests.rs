@@ -4002,7 +4002,7 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, bufs, buf, contents, data_access) =
+    let (event, tree, bufs, buf, contents, data_access) =
       make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
@@ -4416,12 +4416,13 @@ mod tests_insert_text {
       "11th.\r\n",
       "12th.\r\n",
     ];
-    let (tree, bufs, buf, contents, data_access) = make_tree_with_buffer_opts(
-      terminal_size,
-      buf_opts,
-      window_options,
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_tree_with_buffer_opts(
+        terminal_size,
+        buf_opts,
+        window_options,
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
