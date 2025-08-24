@@ -54,7 +54,6 @@ mod normal_tests;
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StateDataAccess {
-  pub event: Event,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
@@ -65,7 +64,6 @@ pub struct StateDataAccess {
 impl StateDataAccess {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
-    event: Event,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
@@ -73,7 +71,6 @@ impl StateDataAccess {
     jsrt_forwarder_tx: Sender<JsMessage>,
   ) -> Self {
     StateDataAccess {
-      event,
       tree,
       buffers,
       contents,
@@ -88,7 +85,7 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StateDataAccess) -> StateMachine;
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
@@ -105,10 +102,10 @@ pub trait Stateful {
 macro_rules! state_machine_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, data_access: StateDataAccess) -> StateMachine {
+      fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
         match self {
           $(
-            $enum::$variant(e) => e.handle(data_access),
+            $enum::$variant(e) => e.handle(data_access, event),
           )*
         }
       }

@@ -35,6 +35,7 @@ pub fn make_tree(
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
+  Event,
   TreeArc,
   BuffersManagerArc,
   BufferArc,
@@ -53,10 +54,11 @@ pub fn make_tree(
     KeyModifiers::empty(),
     KeyEventKind::Press,
   );
+  let event = Event::Key(key_event);
+
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
   let data_access = StateDataAccess::new(
-    Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -64,7 +66,7 @@ pub fn make_tree(
     jsrt_forwarder_tx,
   );
 
-  (tree, bufs, buf, contents, data_access)
+  (event, tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline_and_buffer_options(
@@ -73,6 +75,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
+  Event,
   TreeArc,
   BuffersManagerArc,
   BufferArc,
@@ -94,10 +97,10 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     KeyModifiers::empty(),
     KeyEventKind::Press,
   );
+  let event = Event::Key(key_event);
   let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
   let (master_tx, _master_rx) = channel(1);
   let data_access = StateDataAccess::new(
-    Event::Key(key_event),
     tree.clone(),
     bufs.clone(),
     contents.clone(),
@@ -105,7 +108,7 @@ pub fn make_tree_with_cmdline_and_buffer_options(
     jsrt_forwarder_tx,
   );
 
-  (tree, bufs, buf, contents, data_access)
+  (event, tree, bufs, buf, contents, data_access)
 }
 
 pub fn make_tree_with_cmdline(
@@ -113,6 +116,7 @@ pub fn make_tree_with_cmdline(
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
+  Event,
   TreeArc,
   BuffersManagerArc,
   BufferArc,
@@ -300,7 +304,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -456,7 +460,7 @@ mod tests_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline_and_buffer_options(
         terminal_size,
         buf_opts,
@@ -618,7 +622,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
-    let (tree, bufs, _buf, contents, data_access) =
+    let (event, tree, bufs, _buf, contents, data_access) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())

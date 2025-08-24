@@ -60,9 +60,7 @@ impl CommandLineExStateful {
 }
 
 impl Stateful for CommandLineExStateful {
-  fn handle(&self, data_access: StateDataAccess) -> StateMachine {
-    let event = data_access.event.clone();
-
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
     if let Some(op) = self.get_operation(event) {
       return self.handle_op(data_access, op);
     }
