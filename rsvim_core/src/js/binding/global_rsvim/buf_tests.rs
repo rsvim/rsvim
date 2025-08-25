@@ -7,17 +7,17 @@ use crate::tests::log::init as test_log_init;
 use std::time::Duration;
 
 #[cfg(test)]
-mod tests_current_buffer {
+mod tests_current1 {
   use super::*;
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn undefined1() -> IoResult<()> {
+  async fn null1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
 
     let src: &str = r#"
@@ -41,7 +41,7 @@ mod tests_current_buffer {
 
     event_loop.initialize()?;
     event_loop
-      .run_with_mock_events(MockEventReader::new(mocked_events))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
