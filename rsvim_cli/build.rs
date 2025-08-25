@@ -4,15 +4,8 @@ use std::path::Path;
 
 fn version() {
   let profile = std::env::var("PROFILE").unwrap();
-
-  let output_path =
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION_INFO.TXT");
-  eprintln!(
-    "[RSVIM] Writing version into {:?}...",
-    output_path.as_path()
-  );
   let version = if profile == "release" {
-    format!("{}", env!("CARGO_PKG_VERSION"))
+    env!("CARGO_PKG_VERSION").to_string()
   } else {
     let git_commit = {
       let repo =
@@ -31,6 +24,14 @@ fn version() {
       &git_commit[0..8]
     )
   };
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION_INFO.TXT");
+  eprintln!(
+    "[RSVIM] Writing version into {:?}...",
+    output_path.as_path()
+  );
+
   std::fs::write(output_path.as_path(), version.as_bytes()).unwrap();
 }
 
