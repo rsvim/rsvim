@@ -1,5 +1,4 @@
-use crate::js::{/* self, */ JsRuntime};
-// use crate::msg::{self, MasterMessage};
+use crate::js::JsRuntime;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 
@@ -27,15 +26,4 @@ pub fn echo(
       message.to_compact_string(),
     );
   }
-
-  // } else {
-  //   let message_id = js::next_future_id();
-  //   msg::sync_send_to_master(
-  //     state.master_tx.clone(),
-  //     MasterMessage::PrintReq(msg::PrintReq::new(
-  //       message_id,
-  //       message.to_compact_string(),
-  //     )),
-  //   );
-  // }
 }
