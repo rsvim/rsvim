@@ -143,7 +143,9 @@ export class RsvimCmd {
   /**
    * Echo message to the command-line.
    *
-   * NOTE: It will not succeed until the editor is initialized since the TUI is still not created.
+   * :::info
+   * It will not succeed until the editor is initialized since the TUI is still not created.
+   * :::
    *
    * @returns {number} It returns `0` if echo successfully, otherwise it returns `-1` if failed
    * (before the editor is initialized).
