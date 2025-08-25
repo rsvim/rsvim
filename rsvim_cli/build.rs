@@ -5,10 +5,11 @@ use std::path::Path;
 fn version() {
   let profile = std::env::var("PROFILE").unwrap();
   let opt_level = std::env::var("OPT_LEVEL").unwrap();
+  let debug = std::env::var("DEBUG").unwrap();
 
   let profile = if profile == "release" && opt_level == "z" {
     "release"
-  } else if profile == "release" && opt_level != "z" {
+  } else if profile == "release" && debug == "true" {
     "nightly"
   } else {
     "dev"
