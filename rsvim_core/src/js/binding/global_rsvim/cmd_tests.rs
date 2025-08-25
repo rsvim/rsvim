@@ -158,3 +158,52 @@ async fn test_echo3() -> IoResult<()> {
 
   Ok(())
 }
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_echo4() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
+  let tp = TempPathCfg::create();
+
+  let src: &str = r#"
+  setTimeout(() => {
+    Rsvim.cmd.echo("");
+    Rsvim.cmd.echo("Test echo");
+    Rsvim.cmd.echo(123);
+    Rsvim.cmd.echo(true);
+  }, 1);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  make_configs(&tp, src);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  // Before running
+  {
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message().rope().to_string();
+    assert!(actual.is_empty());
+  }
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message().rope().to_string();
+    let actual = actual.trim();
+    assert_eq!(actual, "true");
+  }
+
+  Ok(())
+}
