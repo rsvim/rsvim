@@ -28,10 +28,9 @@ fn version() {
       id.to_string()
     };
     format!(
-      "{}+{}+opt{}+{}",
+      "{}+{}+{}",
       env!("CARGO_PKG_VERSION"),
       profile,
-      opt_level,
       &git_commit[0..8]
     )
   };
