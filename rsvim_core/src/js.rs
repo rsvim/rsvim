@@ -788,8 +788,6 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
-    // let master_tx = { Self::state(scope).borrow().master_tx.clone() };
-
     for mut fut in futures {
       fut.run(scope);
       if let Some(exception) = check_exceptions(scope) {
@@ -806,13 +804,6 @@ impl JsRuntime {
           &mut contents,
           exception.to_compact_string(),
         );
-        // msg::sync_send_to_master(
-        //   master_tx.clone(),
-        //   MasterMessage::PrintReq(msg::PrintReq::new(
-        //     next_future_id(),
-        //     exception.to_compact_string(),
-        //   )),
-        // );
       }
       run_next_tick_callbacks(scope);
     }
