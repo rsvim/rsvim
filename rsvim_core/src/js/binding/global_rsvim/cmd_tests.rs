@@ -174,7 +174,13 @@ async fn test_echo4() -> IoResult<()> {
     Rsvim.cmd.echo("");
     Rsvim.cmd.echo("Test echo");
     Rsvim.cmd.echo(123);
-    Rsvim.cmd.echo(true);
+    const result = Rsvim.cmd.echo(true);
+    if (typeof result !== "number") {
+      throw new Error(`Echo result ${result} (${typeof result}) is not a number`);
+    }
+    if (result !== 0) {
+      throw new Error(`Echo result ${result} (${typeof result}) is not 0 (failed)`);
+    }
   }, 1);
     "#;
 
