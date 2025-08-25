@@ -78,7 +78,7 @@ pub fn write_sync(
         .long_units(false);
       let n = format_size(n, written_format_options);
       let message = format!(
-        "{:?} ({buf_id}) {buf_lines} lines, {n} written.",
+        "{:?} {buf_lines} lines, {n} written.",
         buf
           .filename()
           .as_ref()
