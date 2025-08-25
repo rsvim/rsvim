@@ -27,9 +27,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::{
-  MockEventReader, MockOperation, MockOperationReader,
-};
+use crate::tests::evloop::{MockEventReader, MockOperationReader};
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
