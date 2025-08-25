@@ -45,7 +45,11 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install rust stable
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       - name: Check out 'current' branch
         uses: actions/checkout@v5
         with:
