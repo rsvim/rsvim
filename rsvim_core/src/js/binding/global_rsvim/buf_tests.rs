@@ -41,7 +41,8 @@ mod tests_current1 {
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, src);
 
-    let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
