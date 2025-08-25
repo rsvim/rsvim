@@ -22,8 +22,8 @@ mod tests_current_buffer {
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
-    if (buf != undefined) {
-        throw new Error("Current buffer ID is not undefined!");
+    if (buf != null) {
+        throw new Error("Current buffer ID is not null!");
     }
     const bufs = Rsvim.buf.list();
     if (!Array.isArray(bufs)) {
