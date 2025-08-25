@@ -1,5 +1,5 @@
 use git2::Repository;
-use rsvim_core::js::JsRuntimeForSnapshot;
+use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
 use std::path::Path;
 
 fn version() {
@@ -15,7 +15,7 @@ fn version() {
   };
 
   let version = if profile == "release" {
-    env!("CARGO_PKG_VERSION").to_string()
+    format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
     let git_commit = {
       let repo =
@@ -28,10 +28,11 @@ fn version() {
       id.to_string()
     };
     format!(
-      "{}+{}+{}",
+      "{}+{}+{} (v8 {})",
       env!("CARGO_PKG_VERSION"),
       profile,
-      &git_commit[0..8]
+      &git_commit[0..8],
+      v8_version()
     )
   };
 
