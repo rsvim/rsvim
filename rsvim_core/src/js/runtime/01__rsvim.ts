@@ -153,7 +153,7 @@ export class RsvimCmd {
    * const result = Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  public echo(message: string): void {
+  public echo(message: string): number {
     if (message === undefined || message === null) {
       throw new Error(
         '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
