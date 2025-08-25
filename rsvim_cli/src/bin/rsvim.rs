@@ -2,9 +2,12 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::{CliOptions, LONG_HELP, SHORT_HELP, VERSION};
+use rsvim_core::cli::{
+  CliOptions, LONG_HELP, RSVIM_BIN_NAME, RSVIM_PKG_VERSION, RSVIM_V8_VERSION,
+  SHORT_HELP, VERSION,
+};
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::SnapshotData;
+use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
@@ -19,6 +22,14 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   )
   .unwrap()
   .into_boxed_slice()
+});
+
+static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
+  let pkg_version = env!("CARGO_PKG_VERSION");
+  VERSION
+    .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+    .replace(RSVIM_PKG_VERSION, pkg_version)
+    .replace(RSVIM_V8_VERSION, v8_version())
 });
 
 fn main() -> IoResult<()> {
