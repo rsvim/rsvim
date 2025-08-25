@@ -68,16 +68,6 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub type JsHandleId = i32;
-
-/// Next handle ID for js runtime.
-///
-/// NOTE: Start form 1.
-pub fn next_handle_id() -> JsHandleId {
-  static VALUE: AtomicI32 = AtomicI32::new(1);
-  VALUE.fetch_add(1, Ordering::Relaxed)
-}
-
 pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   static V8_INIT: Once = Once::new();
 

@@ -78,6 +78,18 @@ pub fn create_new_context<'s>(
     );
   }
 
+  // For `Rsvim.buf`
+  {
+    set_function_to(
+      scope,
+      vim,
+      "buf_write_sync",
+      global_rsvim::buf::write_sync,
+    );
+    set_function_to(scope, vim, "buf_current", global_rsvim::buf::current);
+    set_function_to(scope, vim, "buf_list", global_rsvim::buf::list);
+  }
+
   // For `Rsvim.cmd`
   {
     set_function_to(scope, vim, "cmd_echo", global_rsvim::cmd::echo);

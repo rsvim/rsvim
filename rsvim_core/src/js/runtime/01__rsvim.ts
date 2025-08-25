@@ -19,8 +19,9 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global options.
- * - `Rsvim.cmd`: Ex commands.
+ * - `Rsvim.buf`: Buffers.
+ * - `Rsvim.cmd`: Commands.
+ * - `Rsvim.opt`: Options.
  *
  * @example
  * ```javascript
@@ -32,8 +33,92 @@
  * @hideconstructor
  */
 export class Rsvim {
+  readonly buf: RsvimBuf = new RsvimBuf();
   readonly cmd: RsvimCmd = new RsvimCmd();
   readonly opt: RsvimOpt = new RsvimOpt();
+}
+
+/**
+ * The `Rsvim.buf` global object for buffers.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.buf'.
+ * const buf = Rsvim.buf;
+ * ```
+ *
+ * @category Editor APIs
+ * @hideconstructor
+ */
+export class RsvimBuf {
+  /**
+   * Get current buffer's ID.
+   *
+   * The "current" buffer is the buffer that the window where your cursor is
+   * located is binded to. See {@link RsvimWin}.
+   *
+   * @returns {number | null} It returns `null` before the editor is
+   * initialized since there's no buffer/window created. Once the editor is
+   * initialized, it always returns a valid buffer ID `number`, since there
+   * will always have a valid buffer binded to the current window (where your
+   * cursor is).
+   *
+   * @example
+   * ```javascript
+   * const bufId = Rsvim.buf.current();
+   * ```
+   */
+  public current(): number | null {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_current();
+  }
+
+  /**
+   * List all buffers' IDs.
+   *
+   * @returns {number[]} All the buffers' IDs as an array. If there's no
+   * buffer (i.e. the editor is not initialized), it returns an empty array.
+   *
+   * @example
+   * ```javascript
+   * const bufIds = Rsvim.buf.list();
+   * ```
+   */
+  public list(): number[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_list();
+  }
+
+  /**
+   * Write (save) buffer's text contents to local filesystem synchronizely.
+   *
+   * @param {number} bufId - The buffer's ID that you want to write to filesystem.
+   *
+   * @returns {number} It returns a positive integer to indicate how many bytes
+   * have been written to the file, if written successfully.
+   *
+   * @throws Throws {@link !Error} if failed to write buffer contents to file system.
+   *
+   * @example
+   * ```javascript
+   * const bufId = Rsvim.buf.currentBufferId();
+   * try {
+   *   const bytes = Rsvim.buf.writeSync(bufId);
+   *   Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   * } catch (e) {
+   *   Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
+   * }
+   * ```
+   */
+  public writeSync(bufId: number): number {
+    if (typeof bufId !== "number") {
+      throw new Error(
+        `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_write_sync(bufId);
+  }
 }
 
 /**
@@ -47,6 +132,7 @@ export class Rsvim {
  *
  * @example
  * ```javascript
+ * // Create a alias to 'Rsvim.cmd'.
  * const cmd = Rsvim.cmd;
  * ```
  *
@@ -91,7 +177,7 @@ export class RsvimOpt {
    *
    * Local to Window.
    *
-   * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
+   * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
    * It only affects the way the file is displayed, not its contents.
    *
    * This option is not used when the {@link wrap} option is `false`.
@@ -140,8 +226,8 @@ export class RsvimOpt {
    *
    * This option changes how text is displayed.
    *
-   * When `true` (on), lines longer than the width of the window will wrap and
-   * displaying continues on the next line. When `false` (off) lines will not wrap
+   * When `true`, lines longer than the width of the window will wrap and
+   * displaying continues on the next line. When `false` lines will not wrap
    * and only part of long lines will be displayed. When the cursor is
    * moved to a part that is not shown, the screen will scroll horizontally.
    *

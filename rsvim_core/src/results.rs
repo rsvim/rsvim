@@ -1,7 +1,5 @@
 //! Results and errors.
 
-use thiserror::Error as ThisError;
-
 // anyhow {
 
 /// [`anyhow::Error`]
@@ -24,17 +22,3 @@ pub type IoErrKind = std::io::ErrorKind;
 pub type IoResult<T> = std::io::Result<T>;
 
 // std::io }
-
-// Js Runtime {
-
-#[derive(Debug, Clone, ThisError)]
-/// Error code implemented by [`thiserror::Error`].
-pub enum JsRuntimeErr {
-  #[error("Error: {0}")]
-  Message(String),
-}
-
-/// [`std::result::Result`] with `T` if ok, [`JsRuntimeErr`] if error.
-pub type JsRuntimeResult<T> = std::result::Result<T, JsRuntimeErr>;
-
-// Js Runtime }

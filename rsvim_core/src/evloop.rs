@@ -384,11 +384,12 @@ impl EventLoop {
         Ok(_) => { /* do nothing */ }
         Err(e) => {
           // Send error message to command-line
-          let message_id = js::next_future_id();
-          let e = e.to_compact_string();
           msg::sync_send_to_master(
             self.master_tx.clone(),
-            MasterMessage::PrintReq(msg::PrintReq::new(message_id, e)),
+            MasterMessage::PrintReq(msg::PrintReq::new(
+              js::next_future_id(),
+              e.to_compact_string(),
+            )),
           );
         }
       }
@@ -411,7 +412,15 @@ impl EventLoop {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
+            // Send error message to command-line
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
+            msg::sync_send_to_master(
+              self.master_tx.clone(),
+              MasterMessage::PrintReq(msg::PrintReq::new(
+                js::next_future_id(),
+                e.to_compact_string(),
+              )),
+            );
           }
         }
       }

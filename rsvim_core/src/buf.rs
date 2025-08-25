@@ -1,14 +1,13 @@
 //! Vim buffers.
 
 use crate::prelude::*;
-
 use opt::*;
 use text::Text;
 
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
 use std::fs::Metadata;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
@@ -133,6 +132,13 @@ impl Buffer {
   }
 }
 
+impl Buffer {
+  pub fn has_filename(&self) -> bool {
+    debug_assert_eq!(self.filename.is_some(), self.absolute_filename.is_some());
+    self.filename.is_some() && self.absolute_filename.is_some()
+  }
+}
+
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
 ///
@@ -202,7 +208,7 @@ impl BuffersManager {
         .contains_key(&Some(abs_filename.clone()))
     );
 
-    let existed = match std::fs::exists(abs_filename.clone()) {
+    let existed = match std::fs::exists(&abs_filename) {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
@@ -268,7 +274,23 @@ impl BuffersManager {
     buf_id
   }
 
-  #[cfg(debug_assertions)]
+  /// Write (save) a buffer to filesystem.
+  pub fn write_buffer(&self, buf_id: BufferId) -> AnyResult<usize> {
+    match self.buffers.get(&buf_id) {
+      Some(buf) => {
+        let mut buf = lock!(buf);
+        if !buf.has_filename() {
+          anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!");
+        }
+        self.write_file(&mut buf)
+      }
+      None => {
+        anyhow::bail!("Error: buffer {buf_id:?} not exist!");
+      }
+    }
+  }
+
+  #[cfg(test)]
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
@@ -303,7 +325,6 @@ impl BuffersManager {
     }
   }
 
-  // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
   fn edit_file(
     &self,
     canvas_size: U16Size,
@@ -312,34 +333,28 @@ impl BuffersManager {
   ) -> IoResult<Buffer> {
     match std::fs::File::open(filename) {
       Ok(fp) => {
-        let metadata = match fp.metadata() {
-          Ok(metadata) => metadata,
-          Err(e) => {
-            trace!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
-            return Err(e);
-          }
-        };
-        let mut buf: Vec<u8> = Vec::new();
+        let metadata = fp.metadata().unwrap();
+        let mut data: Vec<u8> = Vec::new();
         let mut reader = std::io::BufReader::new(fp);
-        let bytes = match reader.read_to_end(&mut buf) {
+        let bytes = match reader.read_to_end(&mut data) {
           Ok(bytes) => bytes,
           Err(e) => {
-            trace!("Failed to read file {:?}:{:?}", filename, e);
+            error!("Failed to read file {:?}:{:?}", filename, e);
             return Err(e);
           }
         };
         trace!(
-          "Read {} bytes (buf: {}) from file {:?}",
+          "Read {} bytes (data: {}) from file {:?}",
           bytes,
-          buf.len(),
+          data.len(),
           filename
         );
-        debug_assert!(bytes == buf.len());
+        debug_assert!(bytes == data.len());
 
         Ok(Buffer::_new(
           *self.global_local_options(),
           canvas_size,
-          self.to_rope(&buf, buf.len()),
+          self.to_rope(&data, data.len()),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -347,10 +362,59 @@ impl BuffersManager {
         ))
       }
       Err(e) => {
-        trace!("Failed to open file {:?}:{:?}", filename, e);
+        error!("Failed to open file {:?}:{:?}", filename, e);
         Err(e)
       }
     }
+  }
+
+  fn write_file(&self, buf: &mut Buffer) -> AnyResult<usize> {
+    let filename = buf.filename().as_ref().unwrap();
+    let abs_filename = buf.absolute_filename().as_ref().unwrap();
+
+    let written_bytes = match std::fs::OpenOptions::new()
+      .create(true)
+      .truncate(true)
+      .write(true)
+      .open(abs_filename)
+    {
+      Ok(fp) => {
+        let mut writer = std::io::BufWriter::new(fp);
+        let payload = buf.text().rope().to_string();
+        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
+
+        let n = match data.write(payload.as_bytes()) {
+          Ok(n) => match writer.write_all(&data) {
+            Ok(_) => match writer.flush() {
+              Ok(_) => n,
+              Err(e) => {
+                anyhow::bail!(e);
+              }
+            },
+            Err(e) => {
+              anyhow::bail!(e);
+            }
+          },
+          Err(e) => {
+            anyhow::bail!(e);
+          }
+        };
+        trace!("Write file {:?}, bytes: {:?}", filename, n);
+
+        let fp1 = writer.get_ref();
+        let metadata = fp1.metadata().unwrap();
+        buf.set_metadata(Some(metadata));
+        buf.set_last_sync_time(Some(Instant::now()));
+
+        n
+      }
+      Err(e) => {
+        error!("Failed to open(w) file {:?}:{:?}", filename, e);
+        anyhow::bail!(e);
+      }
+    };
+
+    Ok(written_bytes)
   }
 }
 

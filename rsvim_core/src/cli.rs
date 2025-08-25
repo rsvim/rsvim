@@ -135,4 +135,13 @@ impl CliOptions {
       headless,
     }
   }
+
+  #[cfg(test)]
+  pub fn empty() -> Self {
+    Self {
+      special_opts: CliSpecialOptions::empty(),
+      file: vec![],
+      headless: true,
+    }
+  }
 }

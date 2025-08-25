@@ -26,7 +26,7 @@ pub fn set_wrap(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_boolean(scope).boolean_value(scope);
+  let value = args.get(0).boolean_value(scope);
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -57,7 +57,7 @@ pub fn set_line_break(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_boolean(scope).boolean_value(scope);
+  let value = args.get(0).boolean_value(scope);
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();

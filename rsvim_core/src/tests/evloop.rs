@@ -22,9 +22,11 @@ pub fn make_configs(tp: &TempPathCfg, src: &str) {
   config_entry.flush().unwrap();
 }
 
-pub fn make_event_loop(terminal_cols: u16, terminal_rows: u16) -> EventLoop {
-  let cli_opts = CliOptions::from_args(&vec!["--headless"]).unwrap();
-
+pub fn make_event_loop(
+  terminal_cols: u16,
+  terminal_rows: u16,
+  cli_opts: CliOptions,
+) -> EventLoop {
   EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 

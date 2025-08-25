@@ -1,3 +1,4 @@
+use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::constant::TempPathCfg;
@@ -26,7 +27,8 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, src);
 
-  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
   {
@@ -79,7 +81,8 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, src);
 
-  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
   {
@@ -132,7 +135,8 @@ async fn test_echo3() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, src);
 
-  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
   {
