@@ -1,6 +1,7 @@
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
+use crate::state::ops::Operation;
 use crate::tests::constant::TempPathCfg;
 
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -27,6 +28,13 @@ pub fn make_event_loop(terminal_cols: u16, terminal_rows: u16) -> EventLoop {
   EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
+const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
+
+#[derive(Debug)]
+struct SharedWaker {
+  pub waker: Option<Waker>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MockEvent {
   /// Normal keyboard event
@@ -45,20 +53,13 @@ const CTRL_D: Event = Event::Key(KeyEvent::new_with_kind(
   KeyEventKind::Press,
 ));
 
-const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
-
 #[derive(Debug)]
-struct SharedWaker {
-  pub waker: Option<Waker>,
-}
-
-#[derive(Debug)]
-pub struct MockReader {
+pub struct MockEventReader {
   rx: Receiver<IoResult<Event>>,
   shared_waker: Arc<Mutex<SharedWaker>>,
 }
 
-impl MockReader {
+impl MockEventReader {
   pub fn new(events: Vec<MockEvent>) -> Self {
     let (tx, rx) = channel();
     let shared_waker = Arc::new(Mutex::new(SharedWaker { waker: None }));
@@ -107,7 +108,7 @@ impl MockReader {
   }
 }
 
-impl futures::Stream for MockReader {
+impl futures::Stream for MockEventReader {
   type Item = IoResult<Event>;
 
   fn poll_next(
@@ -122,5 +123,77 @@ impl futures::Stream for MockReader {
       Ok(event) => Poll::Ready(Some(event)),
       _ => Poll::Pending,
     }
+  }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MockOperation {
+  /// Editor operation
+  Operation(Operation),
+
+  /// Sleep for a specific amount of time.
+  SleepFor(Duration),
+
+  /// Sleep until a specific time point.
+  SleepUntil(Zoned),
+}
+
+const EDITOR_QUIT: Operation = Operation::EditorQuit;
+
+#[derive(Debug)]
+pub struct MockOperationReader {
+  rx: Receiver<IoResult<Operation>>,
+  shared_waker: Arc<Mutex<SharedWaker>>,
+}
+
+impl MockOperationReader {
+  pub fn new(operations: Vec<MockOperation>) -> Self {
+    let (tx, rx) = channel();
+    let shared_waker = Arc::new(Mutex::new(SharedWaker { waker: None }));
+    let cloned_shared_waker = shared_waker.clone();
+
+    std::thread::spawn(move || {
+      for (i, op) in operations.iter().enumerate() {
+        trace!("Send mock event[{i}]: {op:?}");
+
+        match op {
+          MockOperation::Operation(op) => {
+            std::thread::sleep(INTERVAL_MILLIS);
+            tx.send(Ok(op.clone())).unwrap();
+          }
+          MockOperation::SleepFor(d) => {
+            std::thread::sleep(*d);
+          }
+          MockOperation::SleepUntil(ts) => {
+            let now = Zoned::now();
+            let d = ts.duration_since(&now);
+            let d = d.as_millis();
+            if d > 0 {
+              let d = Duration::from_millis(d as u64);
+              std::thread::sleep(d);
+            }
+          }
+        }
+
+        let mut thread_shared_waker = cloned_shared_waker.lock();
+        if let Some(waker) = thread_shared_waker.waker.take() {
+          waker.wake();
+        }
+      }
+
+      trace!(
+        "Send final mock event[{}]: EditorQuit {EDITOR_QUIT:?}",
+        operations.len()
+      );
+      std::thread::sleep(INTERVAL_MILLIS);
+      tx.send(Ok(EDITOR_QUIT.clone())).unwrap();
+
+      let mut thread_shared_waker = cloned_shared_waker.lock();
+      if let Some(waker) = thread_shared_waker.waker.take() {
+        waker.wake();
+      }
+    });
+
+    Self { rx, shared_waker }
   }
 }

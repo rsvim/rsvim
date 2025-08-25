@@ -7,7 +7,7 @@ use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::ops::cmdline_ops;
+use crate::state::ops::{Operation, cmdline_ops};
 use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
@@ -27,7 +27,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::MockReader;
+use crate::tests::evloop::MockEventReader;
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
@@ -518,6 +518,39 @@ impl EventLoop {
     }
   }
 
+  async fn process_operation(&mut self, op: Option<IoResult<Operation>>) {
+    match op {
+      Some(Ok(op)) => {
+        trace!("Polled editor operation ok: {:?}", op);
+        let data_access = StateDataAccess::new(
+          self.tree.clone(),
+          self.buffers.clone(),
+          self.contents.clone(),
+          self.master_tx.clone(),
+          self.jsrt_forwarder_tx.clone(),
+        );
+
+        // Handle by state machine
+        let stateful = self.state_machine;
+        let next_stateful = stateful.handle_op(data_access, op);
+        self.state_machine = next_stateful;
+
+        // Exit loop and quit.
+        if let StateMachine::QuitState(_) = next_stateful {
+          self.cancellation_token.cancel();
+        }
+      }
+      Some(Err(e)) => {
+        error!("Polled terminal event error: {:?}", e);
+        self.cancellation_token.cancel();
+      }
+      None => {
+        error!("Terminal event stream is exhausted, exit loop");
+        self.cancellation_token.cancel();
+      }
+    }
+  }
+
   async fn process_master_message(&mut self, message: Option<MasterMessage>) {
     if let Some(message) = message {
       match message {
@@ -603,7 +636,10 @@ impl EventLoop {
   }
 
   #[cfg(test)]
-  pub async fn mock_run(&mut self, mut reader: MockReader) -> IoResult<()> {
+  pub async fn run_with_mock_events(
+    &mut self,
+    mut reader: MockEventReader,
+  ) -> IoResult<()> {
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
