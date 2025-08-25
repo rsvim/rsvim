@@ -1,17 +1,19 @@
+use crate::cli::{CliOptions, CliSpecialOptions};
 use crate::prelude::*;
 use crate::results::IoResult;
+use crate::state::ops::{
+  CursorInsertPayload, GotoInsertModeVariant, Operation,
+};
 use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
+use compact_str::ToCompactString;
+use std::path::Path;
 use std::time::Duration;
 
 #[cfg(test)]
 mod tests_current1 {
-  use std::path::Path;
-
-  use crate::cli::{CliOptions, CliSpecialOptions};
-
   use super::*;
 
   #[tokio::test]
@@ -142,7 +144,16 @@ mod tests_current1 {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+    let mocked_ops = vec![
+      MockOperation::Operation(Operation::GotoInsertMode(
+        GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(Operation::CursorInsert(
+        CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
+      )),
+      MockOperation::Operation(Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(30)),
+    ];
     let tp = TempPathCfg::create();
 
     let f1 = assert_fs::NamedTempFile::new("write_sync1.txt").unwrap();
