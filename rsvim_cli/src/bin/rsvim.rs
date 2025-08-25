@@ -2,16 +2,16 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::{
-  CliOptions, LONG_HELP, RSVIM_BIN_NAME, RSVIM_PKG_VERSION, RSVIM_V8_VERSION,
-  SHORT_HELP, VERSION,
-};
+use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
-
 use std::sync::LazyLock;
+
+const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
+const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
+const RSVIM_V8_VERSION: &str = "{RSVIM_V8_VERSION}";
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   static COMPRESSED_BYTES: &[u8] =
@@ -25,21 +25,35 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 });
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
-  let pkg_version = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/RSVIM_VERSION_INFO.TXT"
-  ));
+  const VERSION: &str =
+    "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
+
+  let pkg_version =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
   VERSION
     .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
     .replace(RSVIM_PKG_VERSION, pkg_version)
     .replace(RSVIM_V8_VERSION, v8_version())
 });
 
-static RSVIM_SHORT_HELP: LazyLock<String> =
-  LazyLock::new(|| SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME")));
+// --headless (experimental)  Run in headless mode without TUI
+static RSVIM_SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
+  const SHORT_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
+  SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+});
 
-static RSVIM_LONG_HELP: LazyLock<String> =
-  LazyLock::new(|| LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME")));
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
+static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
+  const LONG_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
+  LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+});
 
 fn main() -> IoResult<()> {
   log::init();

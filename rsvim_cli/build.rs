@@ -36,7 +36,7 @@ fn version() {
   };
 
   let output_path =
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION_INFO.TXT");
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
   eprintln!(
     "[RSVIM] Writing version into {:?}...",
     output_path.as_path()
