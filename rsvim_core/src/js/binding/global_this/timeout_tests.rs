@@ -21,7 +21,7 @@ async fn test_timeout1() -> IoResult<()> {
   const timerId = setTimeout(() => {
     Rsvim.opt.wrap = false;
     Rsvim.opt.lineBreak = true;
-  }, 10);
+  }, 1);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -66,7 +66,7 @@ async fn test_timeout2() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let tp = TempPathCfg::create();
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let src: &str = r#"
   // Set timeout to update global options.
   const timerId = setTimeout(() => {
