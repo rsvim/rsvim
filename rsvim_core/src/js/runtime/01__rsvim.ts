@@ -76,9 +76,8 @@ export class RsvimBuf {
   /**
    * List all buffers' IDs.
    *
-   * @returns {number[]} It returns all the buffers' IDs as an array. If
-   * there's no buffer (i.e. the editor is not initialized), it returns an
-   * empty array.
+   * @returns {number[]} All the buffers' IDs as an array. If there's no
+   * buffer (i.e. the editor is not initialized), it returns an empty array.
    *
    * @example
    * ```javascript
@@ -99,6 +98,8 @@ export class RsvimBuf {
    * have been written to the file, if written successfully. Otherwise it throws
    * an `Error` to indidate there's an error when writing to the file.
    *
+   * @throws Throws {@link !Error} if failed to write buffer contents to file system.
+   *
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.currentBufferId();
@@ -109,7 +110,7 @@ export class RsvimBuf {
    * }
    * ```
    */
-  public writeSync(bufId: number) {
+  public writeSync(bufId: number): number {
     if (typeof bufId !== "number") {
       throw new Error(
         `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
