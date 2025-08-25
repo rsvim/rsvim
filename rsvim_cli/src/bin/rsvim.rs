@@ -25,7 +25,13 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
 });
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
-  let pkg_version = env!("CARGO_PKG_VERSION");
+  let pkg_version = concat!(
+    concat!(
+      concat!(concat!(env!("CARGO_PKG_VERSION"), "+"), env!("PROFILE")),
+      "+"
+    ),
+    env!("OPT_LEVEL")
+  );
   VERSION
     .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
     .replace(RSVIM_PKG_VERSION, pkg_version)

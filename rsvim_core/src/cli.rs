@@ -52,9 +52,9 @@ pub struct CliOptions {
   headless: bool,
 }
 
-pub const RSVIM_BIN_NAME: &str = "RSVIM_BIN_NAME";
-pub const RSVIM_PKG_VERSION: &str = "RSVIM_PKG_VERSION";
-pub const RSVIM_V8_VERSION: &str = "RSVIM_V8_VERSION";
+pub const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
+pub const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
+pub const RSVIM_V8_VERSION: &str = "{RSVIM_V8_VERSION}";
 
 // --headless (experimental)  Run in headless mode without TUI
 pub const SHORT_HELP: &str =
