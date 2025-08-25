@@ -112,7 +112,7 @@ def list_test():
     os.system(command)
 
 
-def build(release, features, all_features):
+def build(profile, features, all_features):
     set_sccache()
     set_rustflags()
 
@@ -128,11 +128,16 @@ def build(release, features, all_features):
         else:
             return ff
 
-    if release:
+    if profile == "release":
         logging.info(
             f"Run 'cargo build --release' with features: {show_feat(feature_flags)}"
         )
         command = f"cargo build --release {feature_flags}"
+    elif profile == "nightly":
+        logging.info(
+            f"Run 'cargo build --profile nightly' with features: {show_feat(feature_flags)}"
+        )
+        command = f"cargo build --profile nightly {feature_flags}"
     else:
         logging.info(
             f"Run 'cargo build --debug' with features: {show_feat(feature_flags)}"
@@ -263,6 +268,12 @@ if __name__ == "__main__":
         "-r", "--release", action="store_true", help="Build release target"
     )
     build_subparser.add_argument(
+        "-n",
+        "--nightly",
+        action="store_true",
+        help="Build nightly target",
+    )
+    build_subparser.add_argument(
         "-f",
         "--features",
         nargs="+",
@@ -328,7 +339,12 @@ if __name__ == "__main__":
         else:
             test(parser.name, parser.miri, parser.job)
     elif parser.subcommand == "build" or parser.subcommand == "b":
-        build(parser.release, parser.features, parser.all_features)
+        profile = "debug"
+        if parser.release:
+            profile = "release"
+        elif parser.nightly:
+            profile = "nightly"
+        build(profile, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "fmt" or parser.subcommand == "f":
