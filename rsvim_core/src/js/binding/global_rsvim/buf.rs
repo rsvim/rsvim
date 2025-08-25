@@ -1,10 +1,6 @@
 use crate::buf::BufferId;
-use crate::js::{self, JsRuntime};
-use crate::msg::{self, MasterMessage};
+use crate::js::{JsRuntime, binding};
 use crate::prelude::*;
-
-use compact_str::ToCompactString;
-use humansize::{FormatSizeOptions, WINDOWS, format_size};
 
 /// `Rsvim.buf.current` API.
 pub fn current(
@@ -67,43 +63,13 @@ pub fn write_sync(
   let buffers = state.buffers.clone();
   let buffers = lock!(buffers);
 
-  let message_id = js::next_future_id();
   match buffers.write_buffer(buf_id) {
     Ok(n) => {
-      let buf = buffers.get(&buf_id).unwrap();
-      let buf = lock!(buf);
-      let buf_lines = buf.text().rope().len_lines();
-      let written_format_options = FormatSizeOptions::from(WINDOWS)
-        .decimal_places(2)
-        .long_units(false);
-      let human_n = format_size(n, written_format_options);
-      let message = format!(
-        "{:?} {buf_lines} lines, {human_n} written.",
-        buf
-          .filename()
-          .as_ref()
-          .map(|p| String::from(p.as_path().to_string_lossy()))
-          .unwrap_or("<unknown>".to_string())
-          .to_owned()
-      );
-      msg::sync_send_to_master(
-        state.master_tx.clone(),
-        MasterMessage::PrintReq(msg::PrintReq::new(
-          message_id,
-          message.to_compact_string(),
-        )),
-      );
+      trace!("writeSync bufId:{:?}, bytes:{:?}", buf_id, n);
       rv.set_int32(n as i32);
     }
     Err(e) => {
-      msg::sync_send_to_master(
-        state.master_tx.clone(),
-        MasterMessage::PrintReq(msg::PrintReq::new(
-          message_id,
-          e.to_compact_string(),
-        )),
-      );
-      rv.set_int32(-1);
+      binding::throw_exception(scope, &e);
     }
   }
 }

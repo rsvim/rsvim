@@ -95,6 +95,10 @@ export class RsvimBuf {
    *
    * @param {number} bufId - The buffer's ID that you want to write to filesystem.
    *
+   * @returns {number} It returns a positive integer to indicate how many bytes
+   * have been written to the file, if written successfully. Otherwise it throws
+   * an `Error` to indidate there's an error when writing to the file.
+   *
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.currentBufferId();
@@ -108,7 +112,7 @@ export class RsvimBuf {
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.buf_write_sync(bufId);
+    return __InternalRsvimGlobalObject.buf_write_sync(bufId);
   }
 }
 
