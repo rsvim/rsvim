@@ -27,7 +27,9 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::MockEventReader;
+use crate::tests::evloop::{
+  MockEventReader, MockOperation, MockOperationReader,
+};
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
@@ -639,6 +641,40 @@ impl EventLoop {
   pub async fn run_with_mock_events(
     &mut self,
     mut reader: MockEventReader,
+  ) -> IoResult<()> {
+    loop {
+      tokio::select! {
+        // Receive mocked keyboard/mouse events
+        event = reader.next() => {
+          if is_ctrl_d(&event) {
+            break;
+          }
+          self.process_event(event).await;
+        }
+        master_message = self.master_rx.recv() => {
+            self.process_master_message(master_message).await;
+        }
+        js_message = self.jsrt_forwarder_rx.recv() => {
+            self.forward_js_message(js_message).await;
+        }
+        _ = self.cancellation_token.cancelled() => {
+          self.process_cancellation_notify().await;
+          break;
+        }
+      }
+
+      // Flush logic UI to terminal, i.e. print UI to stdout
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))?;
+    }
+
+    Ok(())
+  }
+
+  #[cfg(test)]
+  pub async fn run_with_mock_operations(
+    &mut self,
+    mut reader: MockOperationReader,
   ) -> IoResult<()> {
     loop {
       tokio::select! {

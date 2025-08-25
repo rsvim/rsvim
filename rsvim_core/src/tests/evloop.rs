@@ -197,3 +197,21 @@ impl MockOperationReader {
     Self { rx, shared_waker }
   }
 }
+
+impl futures::Stream for MockOperationReader {
+  type Item = IoResult<Operation>;
+
+  fn poll_next(
+    self: std::pin::Pin<&mut Self>,
+    cx: &mut std::task::Context<'_>,
+  ) -> Poll<Option<Self::Item>> {
+    {
+      let mut shared_waker = self.shared_waker.lock();
+      shared_waker.waker = Some(cx.waker().clone());
+    }
+    match self.rx.try_recv() {
+      Ok(event) => Poll::Ready(Some(event)),
+      _ => Poll::Pending,
+    }
+  }
+}
