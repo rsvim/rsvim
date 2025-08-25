@@ -26,7 +26,7 @@ mod tests_current1 {
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
-    if (buf != null) {
+    if (buf !== null) {
         throw new Error("Current buffer ID is not null!");
     }
     const bufs = Rsvim.buf.list();
@@ -71,7 +71,37 @@ mod tests_current1 {
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
 
-    let src: &str = r#""#;
+    let src: &str = r#"
+  setTimeout(() => {
+    const buf1 = Rsvim.buf.current();
+    if (buf1 === null || buf1 === undefined) {
+      throw new Error("Current buffer ID1 is null or undefined!");
+    }
+    if (typeof buf1 !== "number") {
+      throw new Error(`Current buffer ID1 ${buf1} (${typeof buf1}) is not a number!`);
+    }
+    if (buf1 <= 0) {
+      throw new Error(`Current buffer ID1 ${buf1} (${typeof buf1}) <= 0`);
+    }
+    const bufs = Rsvim.buf.list();
+    if (!Array.isArray(bufs)) {
+        throw new Error("Buffers is not an array!");
+    }
+    if (bufs.length !== 1) {
+        throw new Error("Buffers list size is not 1!");
+    }
+    const buf2 = bufs[0];
+    if (buf2 === null || buf2 === undefined) {
+      throw new Error("Current buffer ID2 is null or undefined!");
+    }
+    if (typeof buf2 !== "number") {
+      throw new Error(`Current buffer ID2 ${buf2} (${typeof buf2}) is not a number!`);
+    }
+    if (buf2 != buf1) {
+      throw new Error(`Current buffer ID2 ${buf2} (${typeof buf2}) != ID1 ${buf1} (${typeof buf1})`);
+    }
+  }, 20);
+      "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, src);
