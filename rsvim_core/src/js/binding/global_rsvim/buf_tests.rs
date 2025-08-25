@@ -9,6 +9,7 @@ use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
 use compact_str::ToCompactString;
+use regex::Regex;
 use std::path::Path;
 use std::time::Duration;
 
@@ -200,8 +201,11 @@ mod tests_current1 {
         let contents = lock!(event_loop.contents);
         let payload = contents.command_line_message().rope().to_string();
         info!("After payload:{payload:?}");
-        // let payload = payload.trim();
-        // assert!(payload.is_empty());
+        let payload = payload.trim();
+        let expect =
+          Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
+            .unwrap();
+        assert!(expect.is_match(payload));
       }
     }
 
@@ -240,8 +244,11 @@ mod tests_current1 {
         let contents = lock!(event_loop.contents);
         let payload = contents.command_line_message().rope().to_string();
         info!("After payload:{payload:?}");
-        // let payload = payload.trim();
-        // assert!(payload.is_empty());
+        let payload = payload.trim();
+        let expect =
+          Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
+            .unwrap();
+        assert!(expect.is_match(payload));
       }
     }
 
