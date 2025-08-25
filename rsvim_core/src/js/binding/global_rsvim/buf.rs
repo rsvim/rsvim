@@ -65,10 +65,11 @@ pub fn write_sync(
 
   match buffers.write_buffer(buf_id) {
     Ok(n) => {
-      trace!("writeSync bufId:{:?}, bytes:{:?}", buf_id, n);
+      trace!("writeSync success, bufId:{:?}, bytes:{:?}", buf_id, n);
       rv.set_int32(n as i32);
     }
     Err(e) => {
+      trace!("writeSync failed, bufId:{:?}, error:{:?}", buf_id, e);
       binding::throw_exception(scope, &e);
     }
   }
