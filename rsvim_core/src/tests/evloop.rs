@@ -154,7 +154,7 @@ impl MockOperationReader {
 
     std::thread::spawn(move || {
       for (i, op) in operations.iter().enumerate() {
-        trace!("Send mock event[{i}]: {op:?}");
+        trace!("Send mock operation[{i}]: {op:?}");
 
         match op {
           MockOperation::Operation(op) => {
@@ -182,7 +182,7 @@ impl MockOperationReader {
       }
 
       trace!(
-        "Send final mock event[{}]: EditorQuit {EDITOR_QUIT:?}",
+        "Send final mock operation[{}]: EditorQuit {EDITOR_QUIT:?}",
         operations.len()
       );
       std::thread::sleep(INTERVAL_MILLIS);
