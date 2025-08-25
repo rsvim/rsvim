@@ -41,7 +41,9 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   }
 
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
   event_loop.shutdown()?;
 
   // After running
@@ -92,7 +94,9 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   }
 
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
   event_loop.shutdown()?;
 
   // After running
@@ -143,7 +147,9 @@ async fn test_echo3() -> IoResult<()> {
   }
 
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
   event_loop.shutdown()?;
 
   // After running

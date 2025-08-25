@@ -52,26 +52,6 @@ pub struct CliOptions {
   headless: bool,
 }
 
-pub const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
-pub const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
-pub const RSVIM_V8_VERSION: &str = "{RSVIM_V8_VERSION}";
-
-// --headless (experimental)  Run in headless mode without TUI
-pub const SHORT_HELP: &str =
-  include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
-
-// --headless (experimental)
-//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
-//     terminal's raw mode, it uses STDIN to receive javascript script, and
-//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
-//     internal data structures (such as buffers, windows, command-line,
-//     etc) and scripts/plugins will still be initialized
-pub const LONG_HELP: &str =
-  include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
-
-pub const VERSION: &str =
-  "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
-
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 

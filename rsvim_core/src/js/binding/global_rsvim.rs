@@ -5,3 +5,5 @@ pub mod opt;
 
 #[cfg(test)]
 mod cmd_tests;
+#[cfg(test)]
+mod opt_tests;
