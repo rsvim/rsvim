@@ -57,7 +57,7 @@ export class RsvimBuf {
    * The "current" buffer is the buffer that the window where your cursor is
    * located is binded to. See {@link RsvimWin}.
    *
-   * @returns {number | undefined} It returns `undefined` before the editor is
+   * @returns {number | null} It returns `null` before the editor is
    * initialized since there's no buffer/window created. Once the editor is
    * initialized, it always returns a valid buffer ID `number`, since there
    * will always have a valid buffer binded to the current window (where your
@@ -68,7 +68,7 @@ export class RsvimBuf {
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  public current(): number | undefined {
+  public current(): number | null {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
   }

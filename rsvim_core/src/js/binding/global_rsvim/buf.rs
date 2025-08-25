@@ -25,7 +25,7 @@ pub fn current(
     }
     None => {
       trace!("Rsvim.buf.current: not exist");
-      rv.set_undefined();
+      rv.set_null();
     }
   }
 }
