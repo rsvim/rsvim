@@ -9,7 +9,7 @@ fn version() {
       Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
         .unwrap();
     let head = repo.head().unwrap();
-    let oid = head.oid().unwrap();
+    let oid = head.target().unwrap();
     let commit = repo.find_commit(oid).unwrap();
     let id = commit.id();
     id.to_string()
@@ -21,8 +21,12 @@ fn version() {
     "[RSVIM] Writing version into {:?}...",
     output_path.as_path()
   );
-  let payload =
-    format!("{}+{}+{}", env!("CARGO_PKG_VERSION"), profile, git_commit);
+  let payload = format!(
+    "{}+{}+{}",
+    env!("CARGO_PKG_VERSION"),
+    profile,
+    &git_commit[0..8]
+  );
   std::fs::write(output_path.as_path(), payload.as_bytes()).unwrap();
 }
 
