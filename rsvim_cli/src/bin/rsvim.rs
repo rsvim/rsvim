@@ -2,9 +2,12 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::{CliOptions, LONG_HELP, SHORT_HELP, VERSION};
+use rsvim_core::cli::{
+  CliOptions, LONG_HELP, RSVIM_BIN_NAME, RSVIM_PKG_VERSION, RSVIM_V8_VERSION,
+  SHORT_HELP, VERSION,
+};
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::SnapshotData;
+use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
@@ -21,6 +24,23 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   .into_boxed_slice()
 });
 
+static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
+  let pkg_version = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/RSVIM_VERSION_INFO.TXT"
+  ));
+  VERSION
+    .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+    .replace(RSVIM_PKG_VERSION, pkg_version)
+    .replace(RSVIM_V8_VERSION, v8_version())
+});
+
+static RSVIM_SHORT_HELP: LazyLock<String> =
+  LazyLock::new(|| SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME")));
+
+static RSVIM_LONG_HELP: LazyLock<String> =
+  LazyLock::new(|| LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME")));
+
 fn main() -> IoResult<()> {
   log::init();
 
@@ -36,15 +56,15 @@ fn main() -> IoResult<()> {
   trace!("cli_opts:{:?}", cli_opts);
 
   if cli_opts.special_opts().version() {
-    println!("{}", *VERSION);
+    println!("{}", *RSVIM_VERSION);
     std::process::exit(0);
   }
   if cli_opts.special_opts().short_help() {
-    println!("{}", *SHORT_HELP);
+    println!("{}", *RSVIM_SHORT_HELP);
     std::process::exit(0);
   }
   if cli_opts.special_opts().long_help() {
-    println!("{}", *LONG_HELP);
+    println!("{}", *RSVIM_LONG_HELP);
     std::process::exit(0);
   }
 

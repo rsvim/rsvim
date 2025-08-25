@@ -1,10 +1,7 @@
 //! Command line options.
 
-use crate::js::v8_version;
-
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {
@@ -55,15 +52,13 @@ pub struct CliOptions {
   headless: bool,
 }
 
-// --headless (experimental)  Run in headless mode without TUI
-pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
-  const CLI_SHORT_HELP: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
+pub const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
+pub const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
+pub const RSVIM_V8_VERSION: &str = "{RSVIM_V8_VERSION}";
 
-  let exe_name = std::env::current_exe().unwrap();
-  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  CLI_SHORT_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
-});
+// --headless (experimental)  Run in headless mode without TUI
+pub const SHORT_HELP: &str =
+  include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
 
 // --headless (experimental)
 //     Run in headless mode without TUI. In this mode, rsvim doesn't enter
@@ -71,26 +66,11 @@ pub static SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
 //     uses STDOUT, STDERR to print messages instead of rendering TUI. All
 //     internal data structures (such as buffers, windows, command-line,
 //     etc) and scripts/plugins will still be initialized
-pub static LONG_HELP: LazyLock<String> = LazyLock::new(|| {
-  const CLI_LONG_HELP: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
+pub const LONG_HELP: &str =
+  include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
 
-  let exe_name = std::env::current_exe().unwrap();
-  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  CLI_LONG_HELP.replace("{RSVIM_BIN_NAME}", bin_name)
-});
-
-const VERSION_TEXT: &str =
+pub const VERSION: &str =
   "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION} (v8 {RSVIM_V8_VERSION})";
-
-pub static VERSION: LazyLock<String> = LazyLock::new(|| {
-  let exe_name = std::env::current_exe().unwrap();
-  let bin_name = exe_name.as_path().file_stem().unwrap().to_str().unwrap();
-  VERSION_TEXT
-    .replace("{RSVIM_BIN_NAME}", bin_name)
-    .replace("{RSVIM_PKG_VERSION}", env!("CARGO_PKG_VERSION"))
-    .replace("{RSVIM_V8_VERSION}", v8_version())
-});
 
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
