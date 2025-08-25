@@ -22,7 +22,7 @@ export class RsvimCmd {
         if (message === undefined || message === null) {
             throw new Error('"Rsvim.cmd.echo" message parameter cannot be undefined or null');
         }
-        __InternalRsvimGlobalObject.cmd_echo(message);
+        return __InternalRsvimGlobalObject.cmd_echo(message);
     }
 }
 export class RsvimOpt {
