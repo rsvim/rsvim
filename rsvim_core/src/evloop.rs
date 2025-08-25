@@ -199,7 +199,7 @@ impl EventLoop {
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
     // they're simply for trigger the `tokio::select!` loop.
 
-    // Channel-1: js runtime => master
+    // Channel-1
     let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2
     let (jsrt_forwarder_tx, jsrt_forwarder_rx) = channel(*CHANNEL_BUF_SIZE);
