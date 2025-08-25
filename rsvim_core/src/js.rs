@@ -13,7 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::msg::{/* self, */ JsMessage, MasterMessage};
+use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
@@ -780,13 +780,6 @@ impl JsRuntime {
                 &mut contents,
                 e.to_compact_string(),
               );
-              // msg::sync_send_to_master(
-              //   state.master_tx.clone(),
-              //   MasterMessage::PrintReq(msg::PrintReq::new(
-              //     next_future_id(),
-              //     e.to_compact_string(),
-              //   )),
-              // );
             }
           }
         }
