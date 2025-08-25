@@ -36,7 +36,11 @@ jobs:
           git diff --exit-code HEAD
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
@@ -105,7 +109,11 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       - uses: actions/checkout@v5
       - name: Cargo test
         run: |
@@ -134,9 +142,11 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ matrix.rust_version }}
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update ${{ matrix.rust_version }}
+          rustup default ${{ matrix.rust_version }}
+          rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
       - uses: actions/checkout@v5
       - name: Build Release
         run: |

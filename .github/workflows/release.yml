@@ -27,7 +27,11 @@ jobs:
         with:
           fetch-depth: 0
       - uses: Swatinem/rust-cache@v2
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       - uses: ncipollo/release-action@v1
         with:
           draft: true
@@ -62,7 +66,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       # - uses: taiki-e/setup-cross-toolchain-action@v1
       #   with:
       #     target: ${{ matrix.target }}
