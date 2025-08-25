@@ -6,7 +6,7 @@ export declare class Rsvim {
 export declare class RsvimBuf {
     current(): number | null;
     list(): number[];
-    writeSync(bufId: number): void;
+    writeSync(bufId: number): number;
 }
 export declare class RsvimCmd {
     echo(message: string): void;
