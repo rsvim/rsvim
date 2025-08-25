@@ -9,7 +9,7 @@ export declare class RsvimBuf {
     writeSync(bufId: number): number;
 }
 export declare class RsvimCmd {
-    echo(message: string): void;
+    echo(message: string): number;
 }
 export declare class RsvimOpt {
     get lineBreak(): boolean;

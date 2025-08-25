@@ -13,8 +13,9 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::msg::{self, JsMessage, MasterMessage};
+use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
+use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
 use err::JsError;
@@ -772,12 +773,12 @@ impl JsRuntime {
             } else {
               // Print error message
               let e = format!("Error: invalid command {:?}", req.payload);
-              msg::sync_send_to_master(
-                state.master_tx.clone(),
-                MasterMessage::PrintReq(msg::PrintReq::new(
-                  next_future_id(),
-                  e.to_compact_string(),
-                )),
+              let mut tree = lock!(state.tree);
+              let mut contents = lock!(state.contents);
+              cmdline_ops::cmdline_set_message(
+                &mut tree,
+                &mut contents,
+                e.to_compact_string(),
               );
             }
           }
@@ -787,18 +788,21 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
-    let master_tx = { Self::state(scope).borrow().master_tx.clone() };
-
     for mut fut in futures {
       fut.run(scope);
       if let Some(exception) = check_exceptions(scope) {
         trace!("Got exceptions when running pending futures: {exception:?}");
-        msg::sync_send_to_master(
-          master_tx.clone(),
-          MasterMessage::PrintReq(msg::PrintReq::new(
-            next_future_id(),
-            exception.to_compact_string(),
-          )),
+        let (tree, contents) = {
+          let state_rc = Self::state(scope);
+          let state = state_rc.borrow();
+          (state.tree.clone(), state.contents.clone())
+        };
+        let mut tree = lock!(tree);
+        let mut contents = lock!(contents);
+        cmdline_ops::cmdline_set_message(
+          &mut tree,
+          &mut contents,
+          exception.to_compact_string(),
         );
       }
       run_next_tick_callbacks(scope);
