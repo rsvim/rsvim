@@ -4,8 +4,10 @@ use std::path::Path;
 
 fn version() {
   let profile = std::env::var("PROFILE").unwrap();
+  let opt_level = std::env::var("OPT_LEVEL").unwrap();
   let version = if profile == "release" {
-    env!("CARGO_PKG_VERSION").to_string()
+    format!("{}+{}+opt{}", env!("CARGO_PKG_VERSION"), profile, opt_level)
+    // env!("CARGO_PKG_VERSION").to_string()
   } else {
     let git_commit = {
       let repo =
@@ -18,9 +20,10 @@ fn version() {
       id.to_string()
     };
     format!(
-      "{}+{}+{}",
+      "{}+{}+opt{}+{}",
       env!("CARGO_PKG_VERSION"),
       profile,
+      opt_level,
       &git_commit[0..8]
     )
   };
