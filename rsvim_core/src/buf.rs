@@ -383,10 +383,10 @@ impl BuffersManager {
         let payload = buf.text().rope().to_string();
         let mut data: Vec<u8> = Vec::with_capacity(payload.len());
 
-        let written_bytes = match data.write(payload.as_bytes()) {
-          Ok(written_bytes) => match writer.write_all(&data) {
+        let n = match data.write(payload.as_bytes()) {
+          Ok(n) => match writer.write_all(&data) {
             Ok(_) => match writer.flush() {
-              Ok(_) => written_bytes,
+              Ok(_) => n,
               Err(e) => {
                 anyhow::bail!(e);
               }
@@ -399,13 +399,14 @@ impl BuffersManager {
             anyhow::bail!(e);
           }
         };
+        trace!("Write file {:?}, bytes: {:?}", filename, n);
 
         let fp1 = writer.get_ref();
         let metadata = fp1.metadata().unwrap();
         buf.set_metadata(Some(metadata));
         buf.set_last_sync_time(Some(Instant::now()));
 
-        written_bytes
+        n
       }
       Err(e) => {
         error!("Failed to open(w) file {:?}:{:?}", filename, e);
