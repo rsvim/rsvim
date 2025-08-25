@@ -28,7 +28,7 @@ generated-typedocs
 
 # Snapshot
 RSVIM_SNAPSHOT.BIN
-RSVIM_VERSION.TXT
+RSVIM_VERSION_INFO.TXT
 
 # Tests/Benchmarks
 /tests_and_benchmarks
