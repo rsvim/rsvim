@@ -44,14 +44,14 @@ jobs:
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
-          # cargo binstall --force --no-confirm taplo-cli
-          echo "Info: taplo --version"
+          set -x
+          # curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
+          cargo binstall --force --no-confirm taplo-cli
           taplo --version
-          echo "Info: taplo check"
           taplo check
-          echo "Info: taplo fmt --check"
           taplo fmt --check
       - name: MSRV
         run: |
