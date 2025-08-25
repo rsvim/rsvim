@@ -13,7 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::msg::{self, JsMessage, MasterMessage};
+use crate::msg::{/* self, */ JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
@@ -795,7 +795,7 @@ impl JsRuntime {
       // Drop borrowed `state_rc` or it will panics when running these futures.
     }
 
-    let master_tx = { Self::state(scope).borrow().master_tx.clone() };
+    // let master_tx = { Self::state(scope).borrow().master_tx.clone() };
 
     for mut fut in futures {
       fut.run(scope);
