@@ -40,7 +40,9 @@ mod tests_current_buffer {
     let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
 
     event_loop.initialize()?;
-    event_loop.mock_run(MockReader::new(mocked_events)).await?;
+    event_loop
+      .run_with_mock_events(MockEventReader::new(mocked_events))
+      .await?;
     event_loop.shutdown()?;
 
     // After running
