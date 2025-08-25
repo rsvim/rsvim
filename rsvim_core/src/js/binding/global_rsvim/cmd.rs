@@ -8,7 +8,7 @@ use compact_str::ToCompactString;
 pub fn echo(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let message = args.get(0).to_rust_string_lossy(scope).to_string();
@@ -25,5 +25,8 @@ pub fn echo(
       &mut contents,
       message.to_compact_string(),
     );
+    rv.set_int32(0);
+  } else {
+    rv.set_int32(-1);
   }
 }
