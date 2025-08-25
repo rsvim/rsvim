@@ -70,7 +70,7 @@ export class RsvimBuf {
    */
   public current(): number | null {
     // @ts-ignore Ignore warning
-     __InternalRsvimGlobalObject.buf_current();
+    return __InternalRsvimGlobalObject.buf_current();
   }
 
   /**
@@ -117,7 +117,7 @@ export class RsvimBuf {
       );
     }
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_write_sync(bufId);
+    __InternalRsvimGlobalObject.buf_write_sync(bufId);
   }
 }
 
