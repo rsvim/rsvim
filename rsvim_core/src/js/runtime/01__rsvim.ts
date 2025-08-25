@@ -110,14 +110,14 @@ export class RsvimBuf {
    * }
    * ```
    */
-  public writeSync(bufId: number): void{
+  public writeSync(bufId: number): number {
     if (typeof bufId !== "number") {
       throw new Error(
         `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.buf_write_sync(bufId);
+    return __InternalRsvimGlobalObject.buf_write_sync(bufId);
   }
 }
 
