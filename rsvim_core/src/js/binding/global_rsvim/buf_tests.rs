@@ -63,7 +63,7 @@ mod tests_current1 {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn null1() -> IoResult<()> {
+  async fn valid1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
