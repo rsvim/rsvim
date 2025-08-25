@@ -36,7 +36,7 @@ static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
 // --headless (experimental)  Run in headless mode without TUI
 static RSVIM_SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
   const SHORT_HELP: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_SHORT_HELP.TXT"));
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/SHORT_HELP.TXT"));
   SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
 });
 
@@ -48,7 +48,7 @@ static RSVIM_SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
 //     etc) and scripts/plugins will still be initialized
 static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
   const LONG_HELP: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/CLI_LONG_HELP.TXT"));
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/LONG_HELP.TXT"));
   LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
 });
 
