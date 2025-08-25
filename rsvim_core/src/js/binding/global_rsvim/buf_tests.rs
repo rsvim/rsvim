@@ -134,4 +134,54 @@ mod tests_current1 {
 
     Ok(())
   }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn write_sync1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+    let tp = TempPathCfg::create();
+
+    let f1 = assert_fs::NamedTempFile::new("write_sync1.txt").unwrap();
+
+    let src: &str = r#"
+  setTimeout(() => {
+    const buf1 = Rsvim.buf.current();
+    if (typeof buf1 !== "number" || buf1 <= 0) {
+      throw new Error(`Current buffer ID ${buf1} (${typeof buf1}) is invalid!`);
+    }
+    const bytes = Rsvim.buf.writeSync(buf1);
+    Rsvim.cmd.echo(`Buffer ${buf1} has been saved, ${bytes} bytes written`);
+  }, 20);
+      "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    make_configs(&tp, src);
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::new(CliSpecialOptions::empty(), vec![f1.to_path_buf()], true),
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let contents = lock!(event_loop.contents);
+      let payload = contents.command_line_message().rope().to_string();
+      info!("After payload:{payload:?}");
+      let payload = payload.trim();
+      assert!(payload.is_empty());
+    }
+
+    Ok(())
+  }
 }
