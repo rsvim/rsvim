@@ -141,13 +141,7 @@ async fn test_echo3() -> IoResult<()> {
   // Before running
   {
     let contents = lock!(event_loop.contents);
-    assert!(
-      contents
-        .command_line_message()
-        .rope()
-        .to_string()
-        .is_empty()
-    );
+    assert_eq!(contents.command_line_message().rope().to_string(), "");
   }
 
   event_loop.initialize()?;
@@ -159,14 +153,7 @@ async fn test_echo3() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.contents);
-    let payload = contents.command_line_message().rope().to_string();
-    let payload = payload.trim();
-    assert!(
-      payload.is_empty()
-        || payload == "Test echo"
-        || payload == "123"
-        || payload == "true"
-    );
+    assert_eq!(contents.command_line_message().rope().to_string(), "");
   }
 
   Ok(())
