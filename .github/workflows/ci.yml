@@ -113,7 +113,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup default stable
-          rustup component add --toolchain stable rust-src clippy
+          rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
       - name: Cargo test
         run: |
