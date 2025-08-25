@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
       - run: gh release delete nightly --cleanup-tag -y || true
       - uses: Swatinem/rust-cache@v2
-      - name: Install rust stable
+      - name: Install Rust
         run: |
           rustup update --no-self-update stable
           rustup default stable
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: Swatinem/rust-cache@v2
-      - name: Install rust stable
+      - name: Install Rust
         run: |
           rustup update --no-self-update stable
           rustup default stable
