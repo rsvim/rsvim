@@ -7,7 +7,7 @@ use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::ops::{Operation, cmdline_ops};
+use crate::state::ops::cmdline_ops;
 use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
@@ -26,6 +26,8 @@ use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
+#[cfg(test)]
+use crate::state::ops::Operation;
 #[cfg(test)]
 use crate::tests::evloop::{MockEventReader, MockOperationReader};
 #[cfg(test)]
@@ -528,6 +530,7 @@ impl EventLoop {
     }
   }
 
+  #[cfg(test)]
   async fn process_operation(&mut self, op: Option<IoResult<Operation>>) {
     match op {
       Some(Ok(op)) => {
