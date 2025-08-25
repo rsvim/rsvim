@@ -36,7 +36,7 @@ jobs:
           git diff --exit-code HEAD
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Install rust stable
+      - name: Install Rust
         run: |
           rustup update --no-self-update stable
           rustup default stable
@@ -109,7 +109,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Install rust stable
+      - name: Install Rust
         run: |
           rustup update --no-self-update stable
           rustup default stable
@@ -142,7 +142,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - name: Install rust stable
+      - name: Install Rust
         run: |
           rustup update --no-self-update ${{ matrix.rust_version }}
           rustup default ${{ matrix.rust_version }}
