@@ -23,7 +23,7 @@ The VIM editor reinvented in Rust+TypeScript.
 
 ## About
 
-RSVIM is an open source terminal based text editor, built from scratch with [rust](https://www.rust-lang.org/), [tokio](https://tokio.rs/) and [v8](https://v8.dev/) javascript engine. It strives to be highly extensible by following the main features, concepts, philosophy of ([NEO](https://neovim.io/))[VIM](https://www.vim.org/), while also to be:
+RSVIM is an open source terminal based text editor, built from scratch with [rust](https://www.rust-lang.org/), [tokio](https://tokio.rs/) and [v8](https://v8.dev/) javascript engine. It strives to be highly extensible by following the main features, concepts, philosophy of ([NEO](https://neovim.io/))[VIM](https://www.vim.org/), also to be:
 
 - A fast editor that fully utilizes all CPU cores and never freezes.
 - A powerful TUI engine that provides widgets, event handlers, layouts, etc.
@@ -51,11 +51,9 @@ Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
-Contributions to RSVIM are always welcomed. Some guidelines can be found in below files:
+Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up the development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
 
-- [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md)
-
-Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
+Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
 ## Credits
 

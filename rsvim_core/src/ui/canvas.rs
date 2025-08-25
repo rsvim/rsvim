@@ -106,7 +106,24 @@ impl Canvas {
     // For cells, it needs extra save and restore cursor position
     let mut cells_shaders = self._shade_cells();
     let saved_cursor_pos = self.cursor().pos();
-    shader.append(&mut cells_shaders);
+
+    // On Windows Terminal, flushing shaders without hiding cursor makes the
+    // cursor twinkling/jumping while refreshing the TUI screen.
+    // So here let's hide cursor before flushing shaders, and restore the
+    // cursor after flushing is done.
+
+    if !cells_shaders.is_empty() {
+      if !self.cursor().hidden() {
+        shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
+      }
+
+      shader.append(&mut cells_shaders);
+
+      if !self.cursor().hidden() {
+        shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+      }
+    }
+
     shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
       saved_cursor_pos.x(),
       saved_cursor_pos.y(),

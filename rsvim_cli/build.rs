@@ -1,5 +1,50 @@
-use rsvim_core::js::JsRuntimeForSnapshot;
+use git2::Repository;
+use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
 use std::path::Path;
+
+fn version() {
+  let profile = std::env::var("PROFILE").unwrap();
+  let opt_level = std::env::var("OPT_LEVEL").unwrap();
+
+  let profile = if profile == "release" && opt_level == "z" {
+    "release"
+  } else if profile == "release" && opt_level == "s" {
+    "nightly"
+  } else {
+    "dev"
+  };
+
+  let version = if profile == "release" {
+    format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
+  } else {
+    let git_commit = {
+      let repo =
+        Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
+          .unwrap();
+      let head = repo.head().unwrap();
+      let oid = head.target().unwrap();
+      let commit = repo.find_commit(oid).unwrap();
+      let id = commit.id();
+      id.to_string()
+    };
+    format!(
+      "{}+{}+{} (v8 {})",
+      env!("CARGO_PKG_VERSION"),
+      profile,
+      &git_commit[0..8],
+      v8_version()
+    )
+  };
+
+  let output_path =
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
+  eprintln!(
+    "[RSVIM] Writing version into {:?}...",
+    output_path.as_path()
+  );
+
+  std::fs::write(output_path.as_path(), version.as_bytes()).unwrap();
+}
 
 fn snapshot() {
   let js_runtime = JsRuntimeForSnapshot::new();
@@ -28,11 +73,14 @@ fn snapshot() {
   };
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_SNAPSHOT.BIN");
-  let output_path1 = output_path.as_path();
-  eprintln!("[RSVIM] Writing snapshot into {output_path1:?}...");
+  eprintln!(
+    "[RSVIM] Writing snapshot into {:?}...",
+    output_path.as_path()
+  );
   std::fs::write(output_path.as_path(), &snapshot).unwrap();
 }
 
 fn main() {
+  version();
   snapshot();
 }

@@ -7,9 +7,8 @@ use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cmdline_ops;
-use crate::state::{State, StateArc};
+use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
@@ -28,7 +27,9 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::MockReader;
+use crate::state::ops::Operation;
+#[cfg(test)]
+use crate::tests::evloop::{MockEventReader, MockOperationReader};
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
@@ -61,10 +62,8 @@ pub struct EventLoop {
   /// Canvas for UI.
   pub canvas: CanvasArc,
 
-  /// (Global) editing state.
-  pub state: StateArc,
   /// Finite-state machine for editing state.
-  pub stateful_machine: StatefulValue,
+  pub state_machine: StateMachine,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -130,8 +129,7 @@ impl EventLoop {
     /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* state */ StateArc,
-    /* stateful_machine */ StatefulValue,
+    /* state_machine */ StateMachine,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ ExCommandsManagerArc,
@@ -166,8 +164,7 @@ impl EventLoop {
       ExCommandsManager::to_arc(ExCommandsManager::new());
 
     // State
-    let state = State::to_arc(State::new());
-    let stateful_machine = StatefulValue::default();
+    let state_machine = StateMachine::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
     // we need to leverage tokio's async runtime. i.e. first we send js task
@@ -204,7 +201,7 @@ impl EventLoop {
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes,
     // they're simply for trigger the `tokio::select!` loop.
 
-    // Channel-1: js runtime => master
+    // Channel-1
     let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
     // Channel-2
     let (jsrt_forwarder_tx, jsrt_forwarder_rx) = channel(*CHANNEL_BUF_SIZE);
@@ -223,8 +220,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers_manager,
       text_contents,
       ex_commands_manager,
@@ -245,8 +241,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -277,7 +272,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
@@ -286,8 +280,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -315,8 +308,7 @@ impl EventLoop {
       startup_unix_epoch,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       commands,
@@ -342,7 +334,6 @@ impl EventLoop {
       buffers.clone(),
       contents.clone(),
       commands,
-      state.clone(),
     );
 
     Ok(EventLoop {
@@ -351,8 +342,7 @@ impl EventLoop {
       cli_opts,
       canvas,
       tree,
-      state,
-      stateful_machine,
+      state_machine,
       buffers,
       contents,
       writer,
@@ -510,10 +500,7 @@ impl EventLoop {
     match event {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
-
-        let data_access = StatefulDataAccess::new(
-          event,
-          self.state.clone(),
+        let data_access = StateDataAccess::new(
           self.tree.clone(),
           self.buffers.clone(),
           self.contents.clone(),
@@ -522,16 +509,46 @@ impl EventLoop {
         );
 
         // Handle by state machine
-        let stateful = self.stateful_machine;
-        let next_stateful = stateful.handle(data_access);
-        {
-          let mut state = lock!(self.state);
-          state.update_state_machine(&next_stateful);
-        }
-        self.stateful_machine = next_stateful;
+        let stateful = self.state_machine;
+        let next_stateful = stateful.handle(data_access, event);
+        self.state_machine = next_stateful;
 
         // Exit loop and quit.
-        if let StatefulValue::QuitState(_) = next_stateful {
+        if let StateMachine::QuitState(_) = next_stateful {
+          self.cancellation_token.cancel();
+        }
+      }
+      Some(Err(e)) => {
+        error!("Polled terminal event error: {:?}", e);
+        self.cancellation_token.cancel();
+      }
+      None => {
+        error!("Terminal event stream is exhausted, exit loop");
+        self.cancellation_token.cancel();
+      }
+    }
+  }
+
+  #[cfg(test)]
+  async fn process_operation(&mut self, op: Option<IoResult<Operation>>) {
+    match op {
+      Some(Ok(op)) => {
+        trace!("Polled editor operation ok: {:?}", op);
+        let data_access = StateDataAccess::new(
+          self.tree.clone(),
+          self.buffers.clone(),
+          self.contents.clone(),
+          self.master_tx.clone(),
+          self.jsrt_forwarder_tx.clone(),
+        );
+
+        // Handle by state machine
+        let stateful = self.state_machine;
+        let next_stateful = stateful.handle_op(data_access, op);
+        self.state_machine = next_stateful;
+
+        // Exit loop and quit.
+        if let StateMachine::QuitState(_) = next_stateful {
           self.cancellation_token.cancel();
         }
       }
@@ -633,7 +650,7 @@ impl EventLoop {
   #[cfg(test)]
   pub async fn run_with_mock_events(
     &mut self,
-    mut reader: MockReader,
+    mut reader: MockEventReader,
   ) -> IoResult<()> {
     loop {
       tokio::select! {
@@ -643,6 +660,37 @@ impl EventLoop {
             break;
           }
           self.process_event(event).await;
+        }
+        master_message = self.master_rx.recv() => {
+            self.process_master_message(master_message).await;
+        }
+        js_message = self.jsrt_forwarder_rx.recv() => {
+            self.forward_js_message(js_message).await;
+        }
+        _ = self.cancellation_token.cancelled() => {
+          self.process_cancellation_notify().await;
+          break;
+        }
+      }
+
+      // Flush logic UI to terminal, i.e. print UI to stdout
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))?;
+    }
+
+    Ok(())
+  }
+
+  #[cfg(test)]
+  pub async fn run_with_mock_operations(
+    &mut self,
+    mut reader: MockOperationReader,
+  ) -> IoResult<()> {
+    loop {
+      tokio::select! {
+        // Receive mocked keyboard/mouse events
+        op = reader.next() => {
+          self.process_operation(op).await;
         }
         master_message = self.master_rx.recv() => {
             self.process_master_message(master_message).await;

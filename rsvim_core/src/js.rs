@@ -15,7 +15,6 @@ use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
-use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
 use err::JsError;
@@ -326,17 +325,13 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  // Sender: js runtime send to master.
   pub master_tx: Sender<MasterMessage>,
-  // Receiver: js runtime receive from master.
   pub jsrt_rx: Receiver<JsMessage>,
   pub cli_opts: CliOptions,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
   pub commands: ExCommandsManagerArc,
-  // Same as the `state` in EventLoop.
-  pub editing_state: StateArc,
   // Data Access for RSVIM }
 }
 
@@ -468,7 +463,6 @@ impl JsRuntime {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
-    editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
     init_v8_platform(false, Some(&options.v8_flags));
@@ -523,7 +517,6 @@ impl JsRuntime {
       buffers,
       contents,
       commands,
-      editing_state,
     });
 
     isolate.set_slot(state.clone());
@@ -561,7 +554,6 @@ impl JsRuntime {
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
     commands: ExCommandsManagerArc,
-    editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
     init_v8_platform(false, Some(&options.v8_flags));
@@ -600,7 +592,6 @@ impl JsRuntime {
       buffers,
       contents,
       commands,
-      editing_state,
     });
 
     isolate.set_slot(state.clone());

@@ -39,7 +39,9 @@ async fn test_timeout1() -> IoResult<()> {
   }
 
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
   event_loop.shutdown()?;
 
   // After timeout, it changes to new value
@@ -90,7 +92,9 @@ async fn test_timeout2() -> IoResult<()> {
   }
 
   event_loop.initialize()?;
-  event_loop.mock_run(MockReader::new(mocked_events)).await?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
   event_loop.shutdown()?;
 
   // Still remains the same value

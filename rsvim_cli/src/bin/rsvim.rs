@@ -2,13 +2,15 @@
 //!
 //! See [rsvim_core] for more details.
 
-use rsvim_core::cli::{CliOptions, LONG_HELP, SHORT_HELP, VERSION};
+use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
-
 use std::sync::LazyLock;
+
+const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
+const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
 
 static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   static COMPRESSED_BYTES: &[u8] =
@@ -19,6 +21,35 @@ static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
   )
   .unwrap()
   .into_boxed_slice()
+});
+
+static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
+  const VERSION: &str = "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION}";
+
+  let pkg_version =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
+  VERSION
+    .replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+    .replace(RSVIM_PKG_VERSION, pkg_version)
+});
+
+// --headless (experimental)  Run in headless mode without TUI
+static RSVIM_SHORT_HELP: LazyLock<String> = LazyLock::new(|| {
+  const SHORT_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/SHORT_HELP.TXT"));
+  SHORT_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
+});
+
+// --headless (experimental)
+//     Run in headless mode without TUI. In this mode, rsvim doesn't enter
+//     terminal's raw mode, it uses STDIN to receive javascript script, and
+//     uses STDOUT, STDERR to print messages instead of rendering TUI. All
+//     internal data structures (such as buffers, windows, command-line,
+//     etc) and scripts/plugins will still be initialized
+static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
+  const LONG_HELP: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/LONG_HELP.TXT"));
+  LONG_HELP.replace(RSVIM_BIN_NAME, env!("CARGO_BIN_NAME"))
 });
 
 fn main() -> IoResult<()> {
@@ -36,15 +67,15 @@ fn main() -> IoResult<()> {
   trace!("cli_opts:{:?}", cli_opts);
 
   if cli_opts.special_opts().version() {
-    println!("{}", *VERSION);
+    println!("{}", *RSVIM_VERSION);
     std::process::exit(0);
   }
   if cli_opts.special_opts().short_help() {
-    println!("{}", *SHORT_HELP);
+    println!("{}", *RSVIM_SHORT_HELP);
     std::process::exit(0);
   }
   if cli_opts.special_opts().long_help() {
-    println!("{}", *LONG_HELP);
+    println!("{}", *RSVIM_LONG_HELP);
     std::process::exit(0);
   }
 
