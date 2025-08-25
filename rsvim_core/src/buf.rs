@@ -333,13 +333,7 @@ impl BuffersManager {
   ) -> IoResult<Buffer> {
     match std::fs::File::open(filename) {
       Ok(fp) => {
-        let metadata = match fp.metadata() {
-          Ok(metadata) => metadata,
-          Err(e) => {
-            error!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
-            return Err(e);
-          }
-        };
+        let metadata = fp.metadata().unwrap();
         let mut data: Vec<u8> = Vec::new();
         let mut reader = std::io::BufReader::new(fp);
         let bytes = match reader.read_to_end(&mut data) {
@@ -384,7 +378,8 @@ impl BuffersManager {
           let mut writer = std::io::BufWriter::new(fp);
           let payload = buf.text().rope().to_string();
           let mut data: Vec<u8> = Vec::with_capacity(payload.len());
-          match data.write(payload.as_bytes()) {
+
+          let written_bytes = match data.write(payload.as_bytes()) {
             Ok(written_bytes) => match writer.write_all(&data) {
               Ok(_) => match writer.flush() {
                 Ok(_) => written_bytes,
@@ -399,31 +394,20 @@ impl BuffersManager {
             Err(e) => {
               anyhow::bail!(e);
             }
-          }
+          };
+
+          let fp1 = writer.get_ref();
+          let metadata = fp1.metadata().unwrap();
+          buf.set_metadata(Some(metadata));
+          buf.set_last_sync_time(Some(Instant::now()));
+
+          written_bytes
         }
         Err(e) => {
           error!("Failed to open(w) file {:?}:{:?}", filename, e);
           anyhow::bail!(e);
         }
       };
-
-    match std::fs::File::open(abs_filename) {
-      Ok(fp) => {
-        let metadata = match fp.metadata() {
-          Ok(metadata) => metadata,
-          Err(e) => {
-            error!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
-            anyhow::bail!(e);
-          }
-        };
-        buf.set_metadata(Some(metadata));
-        buf.set_last_sync_time(Some(Instant::now()));
-      }
-      Err(e) => {
-        error!("Failed to open(r) file {:?}:{:?}", filename, e);
-        anyhow::bail!(e);
-      }
-    }
 
     Ok(written_bytes)
   }
