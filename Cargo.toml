@@ -108,6 +108,7 @@ opt-level = 1
 # Nightly
 [profile.nightly]
 inherits = "release"
+opt-level = 's'
 debug = true
 
 # Release
