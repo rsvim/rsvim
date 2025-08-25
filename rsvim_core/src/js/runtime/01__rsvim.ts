@@ -150,7 +150,7 @@ export class RsvimCmd {
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.echo("Hello Rsvim!");
+   * const result = Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
   public echo(message: string): void {
