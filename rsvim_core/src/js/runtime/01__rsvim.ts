@@ -148,8 +148,13 @@ export class RsvimCmd {
    * When editor is not initialized, it will not print anything to the terminal.
    * :::
    *
+   * @param {message} message - It accepts string and other primitive types, except `null`
+   * and `undefined`.
+   *
    * @returns {number} It returns `0` if echo successfully, otherwise it returns `-1` if failed
    * (before the editor is initialized).
+   *
+   * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
    *
    * @example
    * ```javascript
