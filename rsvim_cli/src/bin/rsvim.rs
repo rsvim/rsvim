@@ -47,7 +47,7 @@ fn main() -> IoResult<()> {
   trace!("cli_opts:{:?}", cli_opts);
 
   if cli_opts.special_opts().version() {
-    println!("{}", *VERSION);
+    println!("{}", *RSVIM_VERSION);
     std::process::exit(0);
   }
   if cli_opts.special_opts().short_help() {
