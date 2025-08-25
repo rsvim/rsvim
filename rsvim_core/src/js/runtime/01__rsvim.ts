@@ -95,8 +95,7 @@ export class RsvimBuf {
    * @param {number} bufId - The buffer's ID that you want to write to filesystem.
    *
    * @returns {number} It returns a positive integer to indicate how many bytes
-   * have been written to the file, if written successfully. Otherwise it throws
-   * an `Error` to indidate there's an error when writing to the file.
+   * have been written to the file, if written successfully.
    *
    * @throws Throws {@link !Error} if failed to write buffer contents to file system.
    *
