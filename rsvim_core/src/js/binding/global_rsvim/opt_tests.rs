@@ -1,3 +1,4 @@
+use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::constant::TempPathCfg;
@@ -24,7 +25,8 @@ async fn test_wrap1() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, src);
 
-  let mut event_loop = make_event_loop(terminal_cols, terminal_rows);
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before running
   {
