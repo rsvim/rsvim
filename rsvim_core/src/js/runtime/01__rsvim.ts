@@ -70,7 +70,7 @@ export class RsvimBuf {
    */
   public current(): number | null {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_current();
+     __InternalRsvimGlobalObject.buf_current();
   }
 
   /**
