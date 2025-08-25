@@ -103,7 +103,8 @@ export class RsvimBuf {
    * ```javascript
    * const bufId = Rsvim.buf.currentBufferId();
    * try {
-   *   Rsvim.buf.writeSync(bufId);
+   *   const bytes = Rsvim.buf.writeSync(bufId);
+   *   Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
    * } catch (e) {
    *   Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
    * }
