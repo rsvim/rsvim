@@ -33,6 +33,7 @@ jobs:
           echo "show PWD=${PWD}"
           echo "tsc"
           tsc
+          git diff --exit-code HEAD
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
