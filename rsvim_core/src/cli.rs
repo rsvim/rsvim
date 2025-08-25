@@ -1,10 +1,7 @@
 //! Command line options.
 
-use crate::js::v8_version;
-
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {
