@@ -172,25 +172,73 @@ mod tests_current1 {
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, src);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::new(CliSpecialOptions::empty(), vec![f1.to_path_buf()], true),
-    );
-
-    event_loop.initialize()?;
-    event_loop
-      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
-      .await?;
-    event_loop.shutdown()?;
-
-    // After running
+    // Open editor 1st time, f1 not exists, the `writeSync` will create new
+    // file and write.
     {
-      let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
-      info!("After payload:{payload:?}");
-      // let payload = payload.trim();
-      // assert!(payload.is_empty());
+      let mut event_loop = make_event_loop(
+        terminal_cols,
+        terminal_rows,
+        CliOptions::new(
+          CliSpecialOptions::empty(),
+          vec![f1.to_path_buf()],
+          true,
+        ),
+      );
+
+      event_loop.initialize()?;
+      event_loop
+        .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+        .await?;
+      event_loop.shutdown()?;
+
+      // After running
+      {
+        let contents = lock!(event_loop.contents);
+        let payload = contents.command_line_message().rope().to_string();
+        info!("After payload:{payload:?}");
+        // let payload = payload.trim();
+        // assert!(payload.is_empty());
+      }
+    }
+
+    let mocked_ops = vec![
+      MockOperation::Operation(Operation::GotoInsertMode(
+        GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(Operation::CursorInsert(
+        CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
+      )),
+      MockOperation::Operation(Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(30)),
+    ];
+
+    // Open editor 2nd time, f1 already exists, the `writeSync` will overwrite
+    // exist text contents.
+    {
+      let mut event_loop = make_event_loop(
+        terminal_cols,
+        terminal_rows,
+        CliOptions::new(
+          CliSpecialOptions::empty(),
+          vec![f1.to_path_buf()],
+          true,
+        ),
+      );
+
+      event_loop.initialize()?;
+      event_loop
+        .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+        .await?;
+      event_loop.shutdown()?;
+
+      // After running
+      {
+        let contents = lock!(event_loop.contents);
+        let payload = contents.command_line_message().rope().to_string();
+        info!("After payload:{payload:?}");
+        // let payload = payload.trim();
+        // assert!(payload.is_empty());
+      }
     }
 
     Ok(())
