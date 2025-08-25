@@ -1,9 +1,20 @@
+use git2::Repository;
 use rsvim_core::js::JsRuntimeForSnapshot;
 use std::path::Path;
 
 fn version() {
   let profile = std::env::var("PROFILE").unwrap();
-  let opt_level = std::env::var("OPT_LEVEL").unwrap();
+  let git_commit = {
+    let repo =
+      Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
+        .unwrap();
+    let head = repo.head().unwrap();
+    let oid = head.oid().unwrap();
+    let commit = repo.find_commit(oid).unwrap();
+    let id = commit.id();
+    id.to_string()
+  };
+
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION_INFO.TXT");
   eprintln!(
@@ -11,7 +22,7 @@ fn version() {
     output_path.as_path()
   );
   let payload =
-    format!("{}+{}+{}", env!("CARGO_PKG_VERSION"), profile, opt_level);
+    format!("{}+{}+{}", env!("CARGO_PKG_VERSION"), profile, git_commit);
   std::fs::write(output_path.as_path(), payload.as_bytes()).unwrap();
 }
 
