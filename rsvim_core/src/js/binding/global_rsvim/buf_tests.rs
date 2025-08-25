@@ -165,8 +165,8 @@ mod tests_current1 {
       throw new Error(`Current buffer ID ${buf1} (${typeof buf1}) is invalid!`);
     }
     try {
-      const bytes = Rsvim.buf.writeSync(buf1);
-      Rsvim.cmd.echo(`Buffer ${buf1} has been saved, ${bytes} bytes written`);
+      const n = Rsvim.buf.writeSync(buf1);
+      Rsvim.cmd.echo(`Buffer ${buf1} has been saved, ${n} bytes written`);
     } catch (e) {
       Rsvim.cmd.echo(`Failed to save buffer ${buf1}, exception: ${e}`);
     }
