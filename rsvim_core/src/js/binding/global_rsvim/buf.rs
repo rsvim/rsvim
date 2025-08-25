@@ -56,7 +56,7 @@ pub fn list(
 pub fn write_sync(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let buf_id = args.get(0).int32_value(scope).unwrap();
@@ -76,9 +76,9 @@ pub fn write_sync(
       let written_format_options = FormatSizeOptions::from(WINDOWS)
         .decimal_places(2)
         .long_units(false);
-      let n = format_size(n, written_format_options);
+      let human_n = format_size(n, written_format_options);
       let message = format!(
-        "{:?} {buf_lines} lines, {n} written.",
+        "{:?} {buf_lines} lines, {human_n} written.",
         buf
           .filename()
           .as_ref()
@@ -93,6 +93,7 @@ pub fn write_sync(
           message.to_compact_string(),
         )),
       );
+      rv.set_int32(n as i32);
     }
     Err(e) => {
       msg::sync_send_to_master(
@@ -102,6 +103,7 @@ pub fn write_sync(
           e.to_compact_string(),
         )),
       );
+      rv.set_int32(-1);
     }
   }
 }
