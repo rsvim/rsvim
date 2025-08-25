@@ -372,21 +372,21 @@ impl BuffersManager {
     let filename = buf.filename().as_ref().unwrap();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
-    let written_bytes =
-      match std::fs::OpenOptions::new().write(true).open(abs_filename) {
-        Ok(fp) => {
-          let mut writer = std::io::BufWriter::new(fp);
-          let payload = buf.text().rope().to_string();
-          let mut data: Vec<u8> = Vec::with_capacity(payload.len());
+    let written_bytes = match std::fs::OpenOptions::new()
+      .create(true)
+      .truncate(true)
+      .write(true)
+      .open(abs_filename)
+    {
+      Ok(fp) => {
+        let mut writer = std::io::BufWriter::new(fp);
+        let payload = buf.text().rope().to_string();
+        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
 
-          let written_bytes = match data.write(payload.as_bytes()) {
-            Ok(written_bytes) => match writer.write_all(&data) {
-              Ok(_) => match writer.flush() {
-                Ok(_) => written_bytes,
-                Err(e) => {
-                  anyhow::bail!(e);
-                }
-              },
+        let written_bytes = match data.write(payload.as_bytes()) {
+          Ok(written_bytes) => match writer.write_all(&data) {
+            Ok(_) => match writer.flush() {
+              Ok(_) => written_bytes,
               Err(e) => {
                 anyhow::bail!(e);
               }
@@ -394,20 +394,24 @@ impl BuffersManager {
             Err(e) => {
               anyhow::bail!(e);
             }
-          };
+          },
+          Err(e) => {
+            anyhow::bail!(e);
+          }
+        };
 
-          let fp1 = writer.get_ref();
-          let metadata = fp1.metadata().unwrap();
-          buf.set_metadata(Some(metadata));
-          buf.set_last_sync_time(Some(Instant::now()));
+        let fp1 = writer.get_ref();
+        let metadata = fp1.metadata().unwrap();
+        buf.set_metadata(Some(metadata));
+        buf.set_last_sync_time(Some(Instant::now()));
 
-          written_bytes
-        }
-        Err(e) => {
-          error!("Failed to open(w) file {:?}:{:?}", filename, e);
-          anyhow::bail!(e);
-        }
-      };
+        written_bytes
+      }
+      Err(e) => {
+        error!("Failed to open(w) file {:?}:{:?}", filename, e);
+        anyhow::bail!(e);
+      }
+    };
 
     Ok(written_bytes)
   }
