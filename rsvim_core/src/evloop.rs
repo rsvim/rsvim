@@ -119,16 +119,6 @@ fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   }
 }
 
-#[cfg(test)]
-fn is_editor_quit(op: &Option<IoResult<Operation>>) -> bool {
-  match op {
-    Some(Ok(op)) => {
-      matches!(op, Operation::EditorQuit)
-    }
-    _ => false,
-  }
-}
-
 impl EventLoop {
   #[allow(clippy::type_complexity)]
   pub fn _internal_new(
@@ -691,9 +681,6 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
-          if is_editor_quit(&op) {
-            break;
-          }
           self.process_operation(op).await;
         }
         master_message = self.master_rx.recv() => {
