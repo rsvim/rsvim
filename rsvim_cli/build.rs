@@ -4,16 +4,6 @@ use std::path::Path;
 
 fn version() {
   let profile = std::env::var("PROFILE").unwrap();
-  let git_commit = {
-    let repo =
-      Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
-        .unwrap();
-    let head = repo.head().unwrap();
-    let oid = head.target().unwrap();
-    let commit = repo.find_commit(oid).unwrap();
-    let id = commit.id();
-    id.to_string()
-  };
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION_INFO.TXT");
@@ -21,13 +11,27 @@ fn version() {
     "[RSVIM] Writing version into {:?}...",
     output_path.as_path()
   );
-  let payload = format!(
-    "{}+{}+{}",
-    env!("CARGO_PKG_VERSION"),
-    profile,
-    &git_commit[0..8]
-  );
-  std::fs::write(output_path.as_path(), payload.as_bytes()).unwrap();
+  let version = if profile == "release" {
+    format!("{}", env!("CARGO_PKG_VERSION"))
+  } else {
+    let git_commit = {
+      let repo =
+        Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
+          .unwrap();
+      let head = repo.head().unwrap();
+      let oid = head.target().unwrap();
+      let commit = repo.find_commit(oid).unwrap();
+      let id = commit.id();
+      id.to_string()
+    };
+    format!(
+      "{}+{}+{}",
+      env!("CARGO_PKG_VERSION"),
+      profile,
+      &git_commit[0..8]
+    )
+  };
+  std::fs::write(output_path.as_path(), version.as_bytes()).unwrap();
 }
 
 fn snapshot() {
