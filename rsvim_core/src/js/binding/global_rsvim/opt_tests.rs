@@ -55,6 +55,8 @@ async fn test_wrap1() -> IoResult<()> {
 
 #[cfg(test)]
 mod tests_buffer_options {
+  use regex::Regex;
+
   use super::*;
 
   #[tokio::test]
@@ -172,7 +174,11 @@ mod tests_buffer_options {
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
-      assert!(actual.trim().is_empty());
+      let actual = actual.trim();
+      assert!(actual.contains("RSvim.opt.tabStop"));
+      assert!(
+        actual.contains("parameter must be an integer value between [1,65535]")
+      );
     }
 
     Ok(())
