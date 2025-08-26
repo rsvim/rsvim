@@ -5,6 +5,7 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
+use regex::Regex;
 use std::time::Duration;
 
 #[tokio::test]
@@ -173,13 +174,10 @@ mod tests_buffer_options {
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
-      let res1 = actual.contains("Rsvim.opt.tabStop");
-      let res2 = actual.contains(
-        "parameter must be an integer value between [1,65535], but found",
-      );
-      info!("actual:{actual:?}, res1:{res1:?}, res2:{res2:?}");
-      assert!(res1);
-      assert!(res2);
+      let expect =
+          Regex::new(r####""Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found"####)
+            .unwrap();
+      assert!(expect.is_match(actual));
     }
 
     Ok(())
