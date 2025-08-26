@@ -4,6 +4,21 @@ export class Rsvim {
     opt = new RsvimOpt();
     rt = new RsvimRt();
 }
+(function (Rsvim) {
+    let opt;
+    (function (opt) {
+        let FileEncodingOption;
+        (function (FileEncodingOption) {
+            FileEncodingOption["UTF_8"] = "utf-8";
+        })(FileEncodingOption = opt.FileEncodingOption || (opt.FileEncodingOption = {}));
+        let FileFormatOption;
+        (function (FileFormatOption) {
+            FileFormatOption["DOS"] = "dos";
+            FileFormatOption["UNIX"] = "unix";
+            FileFormatOption["MAC"] = "mac";
+        })(FileFormatOption || (FileFormatOption = {}));
+    })(opt = Rsvim.opt || (Rsvim.opt = {}));
+})(Rsvim || (Rsvim = {}));
 export class RsvimBuf {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
@@ -27,86 +42,53 @@ export class RsvimCmd {
     }
 }
 export class RsvimOpt {
-}
-var FileEncodingOption;
-(function (FileEncodingOption) {
-    FileEncodingOption["UTF_8"] = "utf-8";
-})(FileEncodingOption || (FileEncodingOption = {}));
-get;
-fileEncoding();
-FileEncodingOption;
-{
-    return __InternalRsvimGlobalObject.opt_get_file_encoding();
-}
-set;
-fileEncoding(value, FileEncodingOption);
-{
-    if (value !== FileEncodingOption.UTF_8) {
-        throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+    get fileEncoding() {
+        return __InternalRsvimGlobalObject.opt_get_file_encoding();
     }
-    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-}
-var FileFormatOption;
-(function (FileFormatOption) {
-    FileFormatOption["DOS"] = "dos";
-    FileFormatOption["UNIX"] = "unix";
-    FileFormatOption["MAC"] = "mac";
-})(FileFormatOption || (FileFormatOption = {}));
-get;
-fileEncoding();
-FileFormatOption;
-{
-    return __InternalRsvimGlobalObject.opt_get_file_format();
-}
-set;
-fileEncoding(value, FileFormatOption);
-{
-    if (value !== FileFormatOption.DOS || value !== FileFormatOption.UNIX || value !== FileFormatOption.MAC) {
-        throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+    set fileEncoding(value) {
+        if (value !== FileEncodingOption.UTF_8) {
+            throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_file_encoding(value);
     }
-    __InternalRsvimGlobalObject.opt_set_file_format(value);
-}
-get;
-lineBreak();
-boolean;
-{
-    return __InternalRsvimGlobalObject.opt_get_line_break();
-}
-set;
-lineBreak(value, boolean);
-{
-    if (typeof value !== "boolean") {
-        throw new Error(`"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`);
+    get fileFormat() {
+        return __InternalRsvimGlobalObject.opt_get_file_format();
     }
-    __InternalRsvimGlobalObject.opt_set_line_break(value);
-}
-get;
-tabStop();
-number;
-{
-    return __InternalRsvimGlobalObject.opt_get_tab_stop();
-}
-set;
-tabStop(value, number);
-{
-    if (typeof value !== "number" || value < 1 || value > 65535) {
-        throw new Error(`"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`);
+    set fileFormat(value) {
+        if (value !== FileFormatOption.DOS ||
+            value !== FileFormatOption.UNIX ||
+            value !== FileFormatOption.MAC) {
+            throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_file_format(value);
     }
-    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
-}
-get;
-wrap();
-boolean;
-{
-    return __InternalRsvimGlobalObject.opt_get_wrap();
-}
-set;
-wrap(value, boolean);
-{
-    if (typeof value !== "boolean") {
-        throw new Error(`"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`);
+    get lineBreak() {
+        return __InternalRsvimGlobalObject.opt_get_line_break();
     }
-    __InternalRsvimGlobalObject.opt_set_wrap(value);
+    set lineBreak(value) {
+        if (typeof value !== "boolean") {
+            throw new Error(`"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_line_break(value);
+    }
+    get tabStop() {
+        return __InternalRsvimGlobalObject.opt_get_tab_stop();
+    }
+    set tabStop(value) {
+        if (typeof value !== "number" || value < 1 || value > 65535) {
+            throw new Error(`"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_tab_stop(value);
+    }
+    get wrap() {
+        return __InternalRsvimGlobalObject.opt_get_wrap();
+    }
+    set wrap(value) {
+        if (typeof value !== "boolean") {
+            throw new Error(`"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_wrap(value);
+    }
 }
 export class RsvimRt {
     exit(exitCode) {

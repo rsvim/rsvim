@@ -56,7 +56,7 @@ export namespace Rsvim {
      * - `UNIX`: equivalent to `LF` line end.
      * - `MAC`: equivalent to `CR` line end. You would never use it today.
      */
-    enum FileFormatOption {
+    export enum FileFormatOption {
       DOS = "dos",
       UNIX = "unix",
       MAC = "mac",
@@ -232,9 +232,9 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {FileEncodingOption}
+   * @returns {Rsvim.opt.FileEncodingOption}
    *
-   * @defaultValue `FileEncodingOption.UTF_8`
+   * @defaultValue `UTF_8`
    *
    * @example
    * ```javascript
@@ -242,7 +242,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): FileEncodingOption {
+  get fileEncoding(): Rsvim.opt.FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
@@ -250,17 +250,17 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {FileEncodingOption} value - The _file-encoding_ option.
+   * @param {Rsvim.opt.FileEncodingOption} value - The _file-encoding_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
    * ```javascript
    * // Set the 'file-encoding' option.
-   * Rsvim.opt.fileEncoding = FileEncodingOption.UTF_8;
+   * Rsvim.opt.fileEncoding = Rsvim.opt.FileEncodingOption.UTF_8;
    * ```
    */
-  set fileEncoding(value: FileEncodingOption) {
-    if (value !== FileEncodingOption.UTF_8) {
+  set fileEncoding(value: Rsvim.opt.FileEncodingOption) {
+    if (value !== Rsvim.opt.FileEncodingOption.UTF_8) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
@@ -289,9 +289,9 @@ export class RsvimOpt {
    * - `UNIX`: equivalent to `LF` line end.
    * - `MAC`: equivalent to `CR` line end. You would never use it today.
    *
-   * @returns {FileFormatOption}
+   * @returns {Rsvim.opt.FileFormatOption}
    *
-   * @defaultValue `FileFormatOption.DOS` for Windows/MS-DOS, `FileFormatOption.UNIX` for Linux/Unix/MacOS.
+   * @defaultValue `DOS` for Windows/MS-DOS, `UNIX` for Linux/Unix/MacOS.
    *
    * @example
    * ```javascript
@@ -299,7 +299,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileEncoding(): FileFormatOption {
+  get fileFormat(): Rsvim.opt.FileFormatOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_format();
   }
@@ -307,7 +307,7 @@ export class RsvimOpt {
   /**
    * Set the _file-format_ option.
    *
-   * @param {FileFormatOption} value - The _file-format_ option.
+   * @param {Rsvim.opt.FileFormatOption} value - The _file-format_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
@@ -316,11 +316,11 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: FileFormatOption) {
+  set fileFormat(value: Rsvim.opt.FileFormatOption) {
     if (
-      value !== FileFormatOption.DOS ||
-      value !== FileFormatOption.UNIX ||
-      value !== FileFormatOption.MAC
+      value !== Rsvim.opt.FileFormatOption.DOS ||
+      value !== Rsvim.opt.FileFormatOption.UNIX ||
+      value !== Rsvim.opt.FileFormatOption.MAC
     ) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
