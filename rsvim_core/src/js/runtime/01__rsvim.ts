@@ -320,7 +320,7 @@ export class RsvimOpt {
   /**
    * Set the _tab-stop_ option.
    *
-   * @param {number} value - The _tab-stop_ option. This value should be between `[1,65535]`.
+   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,65535]`.
    * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,65535]`.
    *
    * @example
