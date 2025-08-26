@@ -251,7 +251,7 @@ export class RsvimOpt {
    * Local to {@link Buffer}. This option changes how text is displayed.
    *
    * Defines how many columns (on the terminal) used to display the
-   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`)
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65536]`.
    *
    *
    * @returns {number}
