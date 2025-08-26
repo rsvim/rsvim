@@ -208,46 +208,41 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
-   * It only affects the way the file is displayed, not its contents.
-   *
-   * This option is not used when the {@link wrap} option is `false`.
-   *
    * @returns {boolean}
    *
    * @defaultValue `utf-8`
    *
    * @example
    * ```javascript
-   * // Get the 'lineBreak' option.
-   * const value = Rsvim.opt.lineBreak;
+   * // Get the 'file-encoding' option.
+   * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): boolean {
+  get fileEncoding(): "utf-8" {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_line_break();
+    return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
 
   /**
-   * Set the _line-break_ option.
+   * Set the _file-encoding_ option.
    *
-   * @param {boolean} value - The _line-break_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @param {string} value - The _file-encoding_ option. It only accepts: "utf-8".
+   * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
    * ```javascript
-   * // Set the 'lineBreak' option.
-   * Rsvim.opt.lineBreak = true;
+   * // Set the 'file-encoding' option.
+   * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: boolean) {
-    if (typeof value !== "boolean") {
+  set fileEncoding(value: "utf-8") {
+    if (value !== "utf-8") {
       throw new Error(
-        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_line_break(value);
+    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
   }
 
   /**
