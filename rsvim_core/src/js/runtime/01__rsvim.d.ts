@@ -9,6 +9,11 @@ export declare namespace Rsvim {
         enum FileEncodingOption {
             UTF_8 = "utf-8"
         }
+        enum FileFormatOption {
+            DOS = "dos",
+            UNIX = "unix",
+            MAC = "mac"
+        }
     }
 }
 export declare class RsvimBuf {
@@ -21,9 +26,9 @@ export declare class RsvimCmd {
 }
 export declare class RsvimOpt {
     get fileEncoding(): Rsvim.opt.FileEncodingOption;
-    set fileEncoding(value: FileEncodingOption);
-    get fileFormat(): FileFormatOption;
-    set fileFormat(value: FileFormatOption);
+    set fileEncoding(value: Rsvim.opt.FileEncodingOption);
+    get fileFormat(): Rsvim.opt.FileFormatOption;
+    set fileFormat(value: Rsvim.opt.FileFormatOption);
     get lineBreak(): boolean;
     set lineBreak(value: boolean);
     get tabStop(): number;
