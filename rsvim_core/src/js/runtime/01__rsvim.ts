@@ -258,7 +258,7 @@ export class RsvimOpt {
    * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
    * :::
    *
-   * For this API, it returns below options:
+   * For this API, it has below options:
    * - `"dos"`: equivalent to `CRLF` line end.
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end. You would never use it today.
