@@ -284,10 +284,10 @@ export class RsvimOpt {
    * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
    * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` in most of today's operating systems.
    *
-   * For this API, it returns 3 kind of options:
-   * - `DOS`: equivalent to `CRLF` line end.
-   * - `UNIX`: equivalent to `LF` line end.
-   * - `MAC`: equivalent to `CR` line end. You would never use it today.
+   * For this API, it returns below options:
+   * - `"dos"`: equivalent to `CRLF` line end.
+   * - `"unix"`: equivalent to `LF` line end.
+   * - `"mac"`: equivalent to `CR` line end. You would never use it today.
    *
    * @returns {string} It returns `"dos"`, `"unix"` or `"mac"`.
    *
