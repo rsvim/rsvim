@@ -40,30 +40,6 @@ export class Rsvim {
   readonly rt: RsvimRt = new RsvimRt();
 }
 
-export namespace Rsvim {
-  export namespace opt {
-    /**
-     * File encoding option.
-     */
-    export enum FileEncodingOption {
-      UTF_8 = "utf-8",
-    }
-
-    /**
-     * File format option.
-     *
-     * - `DOS`: equivalent to `CRLF` line end.
-     * - `UNIX`: equivalent to `LF` line end.
-     * - `MAC`: equivalent to `CR` line end. You would never use it today.
-     */
-    export enum FileFormatOption {
-      DOS = "dos",
-      UNIX = "unix",
-      MAC = "mac",
-    }
-  }
-}
-
 /**
  * The `Rsvim.buf` global object for Vim buffers.
  *
@@ -232,9 +208,9 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {Rsvim.opt.FileEncodingOption}
+   * @returns {string}
    *
-   * @defaultValue `UTF_8`
+   * @defaultValue `"utf-8"`
    *
    * @example
    * ```javascript
@@ -242,7 +218,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): Rsvim.opt.FileEncodingOption {
+  get fileEncoding(): "utf-8" {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
@@ -250,17 +226,17 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {Rsvim.opt.FileEncodingOption} value - The _file-encoding_ option.
+   * @param {string} value - The _file-encoding_ option. It only accepts `"utf-8"` (for now).
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
    * ```javascript
    * // Set the 'file-encoding' option.
-   * Rsvim.opt.fileEncoding = Rsvim.opt.FileEncodingOption.UTF_8;
+   * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: Rsvim.opt.FileEncodingOption) {
-    if (value !== Rsvim.opt.FileEncodingOption.UTF_8) {
+  set fileEncoding(value: "utf-8") {
+    if (value !== "utf-8") {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
@@ -289,7 +265,7 @@ export class RsvimOpt {
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end. You would never use it today.
    *
-   * @returns {"dos" | "unix" | "mac"} It returns `"dos"`, `"unix"` or `"mac"`.
+   * @returns {string} It returns `"dos"`, `"unix"` or `"mac"`.
    *
    * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
