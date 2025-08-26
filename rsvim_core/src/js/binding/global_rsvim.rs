@@ -11,3 +11,5 @@ mod buf_tests;
 mod cmd_tests;
 #[cfg(test)]
 mod opt_tests;
+#[cfg(test)]
+mod rt_tests;
