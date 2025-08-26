@@ -310,7 +310,38 @@ export class RsvimOpt {
  * @category General APIs
  * @hideconstructor
  */
-export class RsvimRt {}
+export class RsvimRt {
+  /**
+   * Exit editor.
+   *
+   * :::tip
+   * To ensure data security of file system, editor will wait for all writing operations done until it quit.
+   * But new writing operations will be rejected.
+   * :::
+   *
+   * @param {message} message - It accepts string and other primitive types, except `null`
+   * and `undefined`.
+   *
+   * @returns {number} It returns `0` if echo successfully, otherwise it returns `-1` if failed
+   * (before the editor is initialized).
+   *
+   * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
+   *
+   * @example
+   * ```javascript
+   * const result = Rsvim.cmd.echo("Hello Rsvim!");
+   * ```
+   */
+  public echo(message: string): number {
+    if (message === undefined || message === null) {
+      throw new Error(
+        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+      );
+    }
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_echo(message);
+  }
+}
 
 (function (globalThis: { Rsvim: Rsvim }) {
   globalThis.Rsvim = new Rsvim();
