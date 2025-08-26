@@ -13,11 +13,12 @@ export declare class RsvimCmd {
     echo(message: string): number;
 }
 type FileEncodingOption = "utf-8";
+type FileFormatOption = "dos" | "unix" | "mac";
 export declare class RsvimOpt {
     get fileEncoding(): FileEncodingOption;
     set fileEncoding(value: FileEncodingOption);
-    get fileFormat(): "dos" | "unix" | "mac";
-    set fileFormat(value: "dos" | "unix" | "mac");
+    get fileFormat(): FileFormatOption;
+    set fileFormat(value: FileFormatOption);
     get lineBreak(): boolean;
     set lineBreak(value: boolean);
     get tabStop(): number;
