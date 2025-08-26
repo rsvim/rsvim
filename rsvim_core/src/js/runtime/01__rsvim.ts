@@ -319,11 +319,8 @@ export class RsvimRt {
    * to complete before actually exiting. However, any new write requests will be rejected.
    * :::
    *
-   * @param {message} message - It accepts string and other primitive types, except `null`
-   * and `undefined`.
-   *
-   * @returns {number} It returns `0` if echo successfully, otherwise it returns `-1` if failed
-   * (before the editor is initialized).
+   * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
+   * by default it uses `0` to indicate no error happens.
    *
    * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
    *
@@ -332,14 +329,14 @@ export class RsvimRt {
    * const result = Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  public echo(message: string): number {
-    if (message === undefined || message === null) {
+  public exit(exitCode?: number) {
+    if (exitCode !== undefined && typeof exitCode !== "number") {
       throw new Error(
-        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+        '"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined',
       );
     }
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.cmd_echo(message);
+    return __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
 }
 
