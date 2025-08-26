@@ -19,7 +19,6 @@ async fn test_exit1() -> IoResult<()> {
 
   let src: &str = r#"
   setTimeout(() => {
-    Rsvim.opt.wrap = false;
     Rsvim.rt.exit();
   }, 1);
     "#;
@@ -32,11 +31,7 @@ async fn test_exit1() -> IoResult<()> {
 
   // Before running
   {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(event_loop.exit_code, 0);
   }
 
   event_loop.initialize()?;
@@ -47,9 +42,7 @@ async fn test_exit1() -> IoResult<()> {
 
   // After running
   {
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert!(!global_local_options.wrap());
+    assert_eq!(event_loop.exit_code, 0);
   }
 
   Ok(())
@@ -67,7 +60,6 @@ async fn test_exit2() -> IoResult<()> {
 
   let src: &str = r#"
   setTimeout(() => {
-    Rsvim.opt.wrap = false;
     Rsvim.rt.exit(-1);
   }, 1);
     "#;
@@ -80,11 +72,7 @@ async fn test_exit2() -> IoResult<()> {
 
   // Before running
   {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(event_loop.exit_code, 0);
   }
 
   event_loop.initialize()?;
@@ -95,9 +83,7 @@ async fn test_exit2() -> IoResult<()> {
 
   // After running
   {
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert!(!global_local_options.wrap());
+    assert_eq!(event_loop.exit_code, -1);
   }
 
   Ok(())
