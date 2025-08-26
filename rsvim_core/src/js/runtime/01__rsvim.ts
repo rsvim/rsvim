@@ -199,9 +199,60 @@ export class RsvimCmd {
  */
 export class RsvimOpt {
   /**
-   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
-   * Local to Window.
+   * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
+   * This will determine which character encoding is used when RSVIM read/write a file from file system.
+   *
+   * :::warning
+   * For now, only **utf-8** encoding is supported.
+   * :::
+   *
+   * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
+   * It only affects the way the file is displayed, not its contents.
+   *
+   * This option is not used when the {@link wrap} option is `false`.
+   *
+   * @returns {boolean}
+   *
+   * @defaultValue `utf-8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'lineBreak' option.
+   * const value = Rsvim.opt.lineBreak;
+   * ```
+   */
+  get fileEncoding(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
+
+  /**
+   * Set the _line-break_ option.
+   *
+   * @param {boolean} value - The _line-break_ option.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'lineBreak' option.
+   * Rsvim.opt.lineBreak = true;
+   * ```
+   */
+  set fileEncoding(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
+
+  /**
+   * Get the _line-break_ option. This options is also known as
+   * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to {@link Window}.
    *
    * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
    * It only affects the way the file is displayed, not its contents.
@@ -246,9 +297,11 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _tab-stop_ option. This option is also known as [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
+   * Get the _tab-stop_ option. This option is also known as
+   * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
+   * Local to {@link Buffer}.
    *
-   * Local to {@link Buffer}. This option changes how text is displayed.
+   * This option changes how text is displayed.
    *
    * Defines how many columns (on the terminal) used to display the
    * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65535]`.
@@ -292,9 +345,10 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * Get the _wrap_ option. This option is also known as
+   * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to {@link Window}.
    *
-   * Local to Window. This option changes how text is displayed.
+   * This option changes how text is displayed.
    *
    * When `true`, lines longer than the width of the window will wrap and
    * displaying continues on the next line. When `false` lines will not wrap
