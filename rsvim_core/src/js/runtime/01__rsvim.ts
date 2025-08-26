@@ -312,14 +312,14 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: "utf-8") {
-    if (value !== "utf-8") {
+  set fileEncoding(value: FileFormatOption) {
+    if (value !== FileFormatOption.DOS || value !== FileFormatOption.UNIX || value !== FileFormatOption.MAC) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+    __InternalRsvimGlobalObject.opt_set_file_format(value);
   }
 
   /**
