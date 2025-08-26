@@ -525,7 +525,7 @@ impl EventLoop {
         // self.cancellation_token.cancel();
       }
       None => {
-        error!("Terminal event stream is exhausted, exit loop");
+        error!("Terminal event stream is exhausted");
         // self.cancellation_token.cancel();
       }
     }
@@ -554,7 +554,7 @@ impl EventLoop {
         // self.cancellation_token.cancel();
       }
       None => {
-        error!("Terminal event stream is exhausted, exit loop");
+        error!("Terminal event stream is exhausted");
         // self.cancellation_token.cancel();
       }
     }
