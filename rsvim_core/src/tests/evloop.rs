@@ -146,7 +146,7 @@ const EXIT: MockOperation = MockOperation::Exit;
 
 #[derive(Debug)]
 pub struct MockOperationReader {
-  rx: Receiver<IoResult<Operation>>,
+  rx: Receiver<IoResult<MockOperation>>,
   shared_waker: Arc<Mutex<SharedWaker>>,
 }
 
