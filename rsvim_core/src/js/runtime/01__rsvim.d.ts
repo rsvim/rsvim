@@ -2,6 +2,7 @@ export declare class Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly opt: RsvimOpt;
+    readonly rt: RsvimRt;
 }
 export declare class RsvimBuf {
     current(): number | null;
@@ -16,4 +17,7 @@ export declare class RsvimOpt {
     set lineBreak(value: boolean);
     get wrap(): boolean;
     set wrap(value: boolean);
+}
+export declare class RsvimRt {
+    exit(exitCode?: number): any;
 }
