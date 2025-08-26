@@ -96,7 +96,5 @@ fn main() -> IoResult<()> {
     event_loop.shutdown()?;
 
     std::process::exit(event_loop.exit_code);
-
-    Ok(())
   })
 }
