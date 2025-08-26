@@ -246,6 +246,57 @@ export class RsvimOpt {
   }
 
   /**
+   * Get the _file-format_ option. Local to {@link Buffer}.
+   *
+   * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the file of this buffer.
+   *
+   * :::tip
+   * In fact it should be named to "line-end", it is named "file-format" just to be consistent
+   * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
+   * :::
+   *
+   * :::warning
+   * For now, only **utf-8** encoding is supported.
+   * :::
+   *
+   * @returns {boolean}
+   *
+   * @defaultValue `utf-8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'file-encoding' option.
+   * const value = Rsvim.opt.fileEncoding;
+   * ```
+   */
+  get fileEncoding(): "utf-8" {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+  }
+
+  /**
+   * Set the _file-encoding_ option.
+   *
+   * @param {string} value - The _file-encoding_ option. It only accepts: "utf-8".
+   * @throws Throws {@link !Error} if value is not a valid option.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'file-encoding' option.
+   * Rsvim.opt.fileEncoding = "utf-8";
+   * ```
+   */
+  set fileEncoding(value: "utf-8") {
+    if (value !== "utf-8") {
+      throw new Error(
+        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+  }
+
+  /**
    * Get the _line-break_ option. This options is also known as
    * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to {@link Window}.
    *
