@@ -22,7 +22,7 @@
  * - `Rsvim.buf`: Buffer APIs.
  * - `Rsvim.cmd`: Ex command APIs.
  * - `Rsvim.opt`: Global options.
- * - `Rsvim.rt`: Editor/runtime/process APIs.
+ * - `Rsvim.rt`: JavaScript runtime (editor process) APIs.
  *
  * @example
  * ```javascript
@@ -299,7 +299,7 @@ export class RsvimOpt {
 }
 
 /**
- * The `Rsvim.rt` global object for editor/runtime/process.
+ * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
  * @example
  * ```javascript
@@ -315,8 +315,8 @@ export class RsvimRt {
    * Exit editor.
    *
    * :::tip
-   * To ensure data security of file system, editor will wait for all the ongoing file write operations
-   * to complete before actually exiting. However, any new write requests will be rejected.
+   * To ensure file system data safety, editor will wait for all the ongoing file write operations
+   * to complete before actually exiting, however any new write requests will be rejected.
    * :::
    *
    * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
@@ -340,7 +340,7 @@ export class RsvimRt {
       );
     }
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.rt_exit(exitCode);
+    __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
 }
 
