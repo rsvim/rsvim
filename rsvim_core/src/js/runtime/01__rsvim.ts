@@ -217,7 +217,7 @@ export class RsvimOpt {
    *
    * @returns {FileEncodingOption}
    *
-   * @defaultValue `"utf-8"`
+   * @defaultValue `FileEncodingOption.UTF_8`
    *
    * @example
    * ```javascript
@@ -239,11 +239,11 @@ export class RsvimOpt {
    * @example
    * ```javascript
    * // Set the 'file-encoding' option.
-   * Rsvim.opt.fileEncoding = "utf-8";
+   * Rsvim.opt.fileEncoding = FileEncodingOption.UTF_8;
    * ```
    */
   set fileEncoding(value: FileEncodingOption) {
-    if (value !== FileEncodingOption::UTF_8) {
+    if (value !== FileEncodingOption.UTF_8) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
@@ -287,7 +287,7 @@ export class RsvimOpt {
    *
    * @returns {FileFormatOption}
    *
-   * @defaultValue `DOS` for Windows/MS-DOS, `UNIX` for Linux/Unix/MacOS.
+   * @defaultValue `FileFormatOption.DOS` for Windows/MS-DOS, `FileFormatOption.UNIX` for Linux/Unix/MacOS.
    *
    * @example
    * ```javascript
