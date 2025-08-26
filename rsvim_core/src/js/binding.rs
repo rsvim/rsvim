@@ -111,6 +111,42 @@ pub fn create_new_context<'s>(
       "opt_set_line_break",
       global_rsvim::opt::set_line_break,
     );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_tab_stop",
+      global_rsvim::opt::get_tab_stop,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_tab_stop",
+      global_rsvim::opt::set_tab_stop,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_file_encoding",
+      global_rsvim::opt::get_file_encoding,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_file_encoding",
+      global_rsvim::opt::set_file_encoding,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_file_format",
+      global_rsvim::opt::get_file_format,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_file_format",
+      global_rsvim::opt::set_file_format,
+    );
   }
 
   // For `Rsvim.rt`
