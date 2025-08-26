@@ -315,8 +315,8 @@ export class RsvimRt {
    * Exit editor.
    *
    * :::tip
-   * To ensure data security of file system, editor will wait for all the ongoing file write operations
-   * to complete before actually exiting. However, any new write requests will be rejected.
+   * To ensure file system data safety, editor will wait for all the ongoing file write operations
+   * to complete before actually exiting, however any new write requests will be rejected.
    * :::
    *
    * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
