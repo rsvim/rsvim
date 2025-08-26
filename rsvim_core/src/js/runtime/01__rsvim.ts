@@ -315,8 +315,8 @@ export class RsvimRt {
    * Exit editor.
    *
    * :::tip
-   * To ensure data security of file system, editor will wait for all writing operations done until it quit.
-   * But new writing operations will be rejected.
+   * To ensure data security of file system, editor will wait for all the ongoing file write operations
+   * to complete before actually exiting. However, any new write requests will be rejected.
    * :::
    *
    * @param {message} message - It accepts string and other primitive types, except `null`
