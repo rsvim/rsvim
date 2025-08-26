@@ -251,7 +251,7 @@ export class RsvimOpt {
    * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the file of this buffer.
    *
    * :::tip
-   * In fact it should be named to "line-end", it is named "file-format" just to be consistent
+   * In fact it should be named to "line-end", it is called "file-format" just to be consistent
    * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
    * :::
    *
