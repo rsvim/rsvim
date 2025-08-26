@@ -248,17 +248,15 @@ export class RsvimOpt {
   /**
    * Get the _file-format_ option. Local to {@link Buffer}.
    *
-   * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the file of this buffer.
+   * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the file of this buffer. There are 3 kinds of line end:
+   * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
+   * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
+   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` in most of today's operating systems.
    *
    * :::note
    * In fact it should be named to "line-end", it is called "file-format" just to be consistent
    * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
    * :::
-   *
-   * There are 3 kinds of line end:
-   * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
-   * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
-   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` in most of today's operating systems.
    *
    * For this API, it returns below options:
    * - `"dos"`: equivalent to `CRLF` line end.
