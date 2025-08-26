@@ -40,9 +40,7 @@ export class RsvimOpt {
         return __InternalRsvimGlobalObject.opt_get_file_format();
     }
     set fileFormat(value) {
-        if (value !== "dos" ||
-            value !== "unix" ||
-            value !== "mac") {
+        if (value !== "dos" && value !== "unix" && value !== "mac") {
             throw new Error(`"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_file_format(value);
