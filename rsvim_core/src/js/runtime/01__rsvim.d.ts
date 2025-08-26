@@ -12,9 +12,10 @@ export declare class RsvimBuf {
 export declare class RsvimCmd {
     echo(message: string): number;
 }
+type FileEncodingOption = "utf-8";
 export declare class RsvimOpt {
-    get fileEncoding(): "utf-8";
-    set fileEncoding(value: "utf-8");
+    get fileEncoding(): FileEncodingOption;
+    set fileEncoding(value: FileEncodingOption);
     get fileFormat(): "dos" | "unix" | "mac";
     set fileFormat(value: "dos" | "unix" | "mac");
     get lineBreak(): boolean;
@@ -27,3 +28,4 @@ export declare class RsvimOpt {
 export declare class RsvimRt {
     exit(exitCode?: number): void;
 }
+export {};

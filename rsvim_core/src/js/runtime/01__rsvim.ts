@@ -185,6 +185,9 @@ export class RsvimCmd {
   }
 }
 
+type FileEncodingOption = "utf-8";
+type FileFormatOption = "dos" | "unix" | "mac";
+
 /**
  * The `Rsvim.opt` global object for global editor options.
  *
@@ -208,7 +211,7 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {"utf-8"}
+   * @returns {FileEncodingOption}
    *
    * @defaultValue `"utf-8"`
    *
@@ -218,7 +221,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): "utf-8" {
+  get fileEncoding(): FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
@@ -226,7 +229,7 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {"utf-8"} value - The _file-encoding_ option.
+   * @param {FileEncodingOption} value - The _file-encoding_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
@@ -235,7 +238,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: "utf-8") {
+  set fileEncoding(value: FileEncodingOption) {
     if (value !== "utf-8") {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
@@ -263,7 +266,7 @@ export class RsvimOpt {
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end. You would never use it today.
    *
-   * @returns {"dos" | "unix" | "mac"}
+   * @returns {FileFormatOption}
    *
    * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
@@ -273,7 +276,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileFormat(): "dos" | "unix" | "mac" {
+  get fileFormat(): FileFormatOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_format();
   }
@@ -281,7 +284,7 @@ export class RsvimOpt {
   /**
    * Set the _file-format_ option.
    *
-   * @param {"dos" | "unix" | "mac"} value - The _file-format_ option.
+   * @param {FileFormatOption} value - The _file-format_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
@@ -290,7 +293,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileFormat = "unix";
    * ```
    */
-  set fileFormat(value: "dos" | "unix" | "mac") {
+  set fileFormat(value: FileFormatOption) {
     if (
       value !== "dos" ||
       (value as string) !== "unix" ||
