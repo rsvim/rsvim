@@ -255,9 +255,10 @@ export class RsvimOpt {
    * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
    * :::
    *
-   * :::warning
-   * For now, only **utf-8** encoding is supported.
-   * :::
+   * There are 3 kinds of line end:
+   * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
+   * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
+   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` in most of today's operating systems.
    *
    * @returns {boolean}
    *
