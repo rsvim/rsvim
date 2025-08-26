@@ -175,8 +175,9 @@ mod tests_buffer_options {
       let actual = actual.trim();
       info!("actual:{actual:?}");
       let res1 = actual.contains("RSvim.opt.tabStop");
-      let res2 =
-        actual.contains("parameter must be an integer value between [1,65535]");
+      let res2 = actual.contains(
+        "parameter must be an integer value between [1,65535], but found",
+      );
       assert!(res1);
       assert!(res2);
     }
