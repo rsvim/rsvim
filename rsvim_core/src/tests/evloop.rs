@@ -188,7 +188,7 @@ impl MockOperationReader {
         operations.len()
       );
       std::thread::sleep(INTERVAL_MILLIS);
-      tx.send(Ok(EDITOR_QUIT.clone())).unwrap();
+      tx.send(Ok(EDITOR_QUIT)).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
       if let Some(waker) = thread_shared_waker.waker.take() {
