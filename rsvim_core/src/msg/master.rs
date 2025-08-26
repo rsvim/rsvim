@@ -13,6 +13,22 @@ use tokio::task::JoinHandle;
 pub enum MasterMessage {
   PrintReq(PrintReq),
   TimeoutReq(TimeoutReq),
+  ExitReq(ExitReq),
+}
+
+#[derive(Debug)]
+pub struct ExitReq {
+  pub future_id: JsFutureId,
+  pub exit_code: i32,
+}
+
+impl ExitReq {
+  pub fn new(future_id: JsFutureId, exit_code: i32) -> Self {
+    ExitReq {
+      future_id,
+      exit_code,
+    }
+  }
 }
 
 #[derive(Debug)]

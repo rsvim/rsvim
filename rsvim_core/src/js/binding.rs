@@ -113,6 +113,11 @@ pub fn create_new_context<'s>(
     );
   }
 
+  // For `Rsvim.rt`
+  {
+    set_function_to(scope, vim, "rt_exit", global_rsvim::rt::exit);
+  }
+
   // Expose low-level functions to JavaScript.
   // process::initialize(scope, global);
   scope.escape(context)

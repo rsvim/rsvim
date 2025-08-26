@@ -1,3 +1,5 @@
+//! APIs for `Rsvim.cmd` namespace.
+
 use crate::js::JsRuntime;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;

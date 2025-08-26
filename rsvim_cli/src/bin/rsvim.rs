@@ -93,6 +93,8 @@ fn main() -> IoResult<()> {
     event_loop.run().await?;
 
     // Shutdown.
-    event_loop.shutdown()
+    event_loop.shutdown()?;
+
+    std::process::exit(event_loop.exit_code);
   })
 }

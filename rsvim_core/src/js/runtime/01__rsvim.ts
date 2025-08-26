@@ -19,9 +19,10 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.buf`: Buffers.
- * - `Rsvim.cmd`: Commands.
- * - `Rsvim.opt`: Options.
+ * - `Rsvim.buf`: Buffer APIs.
+ * - `Rsvim.cmd`: Ex command APIs.
+ * - `Rsvim.opt`: Global options.
+ * - `Rsvim.rt`: Editor/runtime/process APIs.
  *
  * @example
  * ```javascript
@@ -36,10 +37,11 @@ export class Rsvim {
   readonly buf: RsvimBuf = new RsvimBuf();
   readonly cmd: RsvimCmd = new RsvimCmd();
   readonly opt: RsvimOpt = new RsvimOpt();
+  readonly rt: RsvimRt = new RsvimRt();
 }
 
 /**
- * The `Rsvim.buf` global object for buffers.
+ * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
  * ```javascript
@@ -133,7 +135,7 @@ export class RsvimBuf {
 }
 
 /**
- * The `Rsvim.cmd` global object for ex commands.
+ * The `Rsvim.cmd` global object for Ex commands.
  *
  * :::tip
  * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
@@ -293,6 +295,52 @@ export class RsvimOpt {
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
+  }
+}
+
+/**
+ * The `Rsvim.rt` global object for editor/runtime/process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.rt'.
+ * const rt = Rsvim.rt;
+ * ```
+ *
+ * @category General APIs
+ * @hideconstructor
+ */
+export class RsvimRt {
+  /**
+   * Exit editor.
+   *
+   * :::tip
+   * To ensure data security of file system, editor will wait for all the ongoing file write operations
+   * to complete before actually exiting. However, any new write requests will be rejected.
+   * :::
+   *
+   * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
+   * by default it uses `0` to indicate no error happens.
+   *
+   * @throws Throws {@link !Error} if `exitCode` parameter is neither a integer nor `undefined`.
+   *
+   * @example
+   * ```javascript
+   * // Exit with default exit code `0`.
+   * Rsvim.rt.exit();
+   *
+   * // Exit with error exit code `-1`.
+   * Rsvim.rt.exit(-1);
+   * ```
+   */
+  public exit(exitCode?: number) {
+    if (exitCode !== undefined && typeof exitCode !== "number") {
+      throw new Error(
+        '"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined',
+      );
+    }
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
 }
 

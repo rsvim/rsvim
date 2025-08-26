@@ -2,6 +2,7 @@ export class Rsvim {
     buf = new RsvimBuf();
     cmd = new RsvimCmd();
     opt = new RsvimOpt();
+    rt = new RsvimRt();
 }
 export class RsvimBuf {
     current() {
@@ -43,6 +44,14 @@ export class RsvimOpt {
             throw new Error(`"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_wrap(value);
+    }
+}
+export class RsvimRt {
+    exit(exitCode) {
+        if (exitCode !== undefined && typeof exitCode !== "number") {
+            throw new Error('"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined');
+        }
+        return __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
 }
 (function (globalThis) {

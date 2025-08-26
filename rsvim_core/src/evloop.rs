@@ -83,6 +83,7 @@ pub struct EventLoop {
   /// calculations, they will be cancelled when editor exit.
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
+  pub exit_code: i32,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
@@ -136,6 +137,7 @@ impl EventLoop {
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
+    /* exit_code */ i32,
     (
       /* master_tx */ Sender<MasterMessage>,
       /* master_rx */ Receiver<MasterMessage>,
@@ -227,6 +229,7 @@ impl EventLoop {
       CancellationToken::new(),
       TaskTracker::new(),
       TaskTracker::new(),
+      0,
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
@@ -248,6 +251,7 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
+      exit_code,
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
@@ -287,6 +291,7 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
+      exit_code,
       js_runtime,
       master_tx,
       master_rx,
@@ -315,6 +320,7 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
+      exit_code,
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
@@ -349,6 +355,7 @@ impl EventLoop {
       cancellation_token,
       detached_tracker,
       blocked_tracker,
+      exit_code,
       js_runtime,
       master_tx,
       master_rx,
@@ -520,11 +527,11 @@ impl EventLoop {
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
       None => {
         error!("Terminal event stream is exhausted, exit loop");
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
     }
   }
@@ -554,11 +561,11 @@ impl EventLoop {
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
       None => {
         error!("Terminal event stream is exhausted, exit loop");
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
     }
   }
@@ -566,6 +573,11 @@ impl EventLoop {
   async fn process_master_message(&mut self, message: Option<MasterMessage>) {
     if let Some(message) = message {
       match message {
+        MasterMessage::ExitReq(req) => {
+          trace!("Receive ExitReq:{:?}", req.future_id);
+          self.exit_code = req.exit_code;
+          self.cancellation_token.cancel();
+        }
         MasterMessage::PrintReq(req) => {
           trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
