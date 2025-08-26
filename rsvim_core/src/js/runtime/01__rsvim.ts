@@ -208,7 +208,7 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {string}
+   * @returns {"utf-8"}
    *
    * @defaultValue `"utf-8"`
    *
@@ -263,7 +263,7 @@ export class RsvimOpt {
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end. You would never use it today.
    *
-   * @returns {string} It returns `"dos"`, `"unix"` or `"mac"`.
+   * @returns {"dos" | "unix" | "mac"}
    *
    * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
