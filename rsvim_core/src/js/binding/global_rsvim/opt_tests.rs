@@ -55,8 +55,6 @@ async fn test_wrap1() -> IoResult<()> {
 
 #[cfg(test)]
 mod tests_buffer_options {
-  use regex::Regex;
-
   use super::*;
 
   #[tokio::test]
