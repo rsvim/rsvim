@@ -251,7 +251,7 @@ export class RsvimOpt {
    * Local to {@link Buffer}. This option changes how text is displayed.
    *
    * Defines how many columns (on the terminal) used to display the
-   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65536]`.
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65535]`.
    *
    *
    * @returns {number}
@@ -260,8 +260,8 @@ export class RsvimOpt {
    *
    * @example
    * ```javascript
-   * // Get the 'wrap' option.
-   * const value = Rsvim.opt.wrap;
+   * // Get the 'tab-stop' option.
+   * const value = Rsvim.opt.tabStop;
    * ```
    */
   get tabStop(): number {
@@ -272,23 +272,23 @@ export class RsvimOpt {
   /**
    * Set the _tab-stop_ option.
    *
-   * @param {number} value - The _tab-stop_ option.
-   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is negative.
+   * @param {number} value - The _tab-stop_ option. This value should be between `[1,65535]`.
+   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,65535]`.
    *
    * @example
    * ```javascript
-   * // Set the 'wrap' option.
-   * Rsvim.opt.tabStop = 8;
+   * // Set the 'tab-stop' option.
+   * Rsvim.opt.tabStop = 4;
    * ```
    */
-  set wrap(value: boolean) {
-    if (typeof value !== "boolean") {
+  set tabStop(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 65535) {
       throw new Error(
-        `"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_wrap(value);
+    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
 
   /**
