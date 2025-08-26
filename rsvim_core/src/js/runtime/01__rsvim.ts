@@ -233,7 +233,7 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {FileEncodingOption} value - The _file-encoding_ option. It only accepts a valid option.
+   * @param {FileEncodingOption} value - The _file-encoding_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
@@ -301,9 +301,9 @@ export class RsvimOpt {
   }
 
   /**
-   * Set the _file-encoding_ option.
+   * Set the _file-format_ option.
    *
-   * @param {string} value - The _file-encoding_ option. It only accepts: "utf-8".
+   * @param {FileFormatOption} value - The _file-format_ option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
