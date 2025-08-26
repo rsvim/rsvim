@@ -43,7 +43,7 @@ export class RsvimOpt {
         if (value !== "dos" ||
             value !== "unix" ||
             value !== "mac") {
-            throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+            throw new Error(`"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_file_format(value);
     }
