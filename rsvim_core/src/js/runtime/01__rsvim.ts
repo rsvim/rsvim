@@ -199,6 +199,13 @@ export class RsvimCmd {
  */
 export class RsvimOpt {
   /**
+   * File encoding option.
+   */
+  enum FileEncodingOption {
+    UTF_8 = "utf-8",
+  }
+
+  /**
    * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
    * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
@@ -208,9 +215,9 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {boolean}
+   * @returns {FileEncodingOption}
    *
-   * @defaultValue `utf-8`
+   * @defaultValue `"utf-8"`
    *
    * @example
    * ```javascript
@@ -218,7 +225,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): "utf-8" {
+  get fileEncoding(): FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
@@ -226,7 +233,7 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {string} value - The _file-encoding_ option. It only accepts: "utf-8".
+   * @param {FileEncodingOption} value - The _file-encoding_ option. It only accepts a valid option.
    * @throws Throws {@link !Error} if value is not a valid option.
    *
    * @example
@@ -235,14 +242,27 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: "utf-8") {
-    if (value !== "utf-8") {
+  set fileEncoding(value: FileEncodingOption) {
+    if (value !== FileEncodingOption::UTF_8) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+  }
+
+  /**
+   * File format option.
+   *
+   * - `DOS`: equivalent to `CRLF` line end.
+   * - `UNIX`: equivalent to `LF` line end.
+   * - `MAC`: equivalent to `CR` line end. You would never use it today.
+   */
+  enum FileFormatOption {
+    DOS = "dos",
+    UNIX = "unix",
+    MAC = "mac",
   }
 
   /**
@@ -260,19 +280,24 @@ export class RsvimOpt {
    * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
    * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` in most of today's operating systems.
    *
-   * @returns {boolean}
+   * For this API, it returns 3 kind of options:
+   * - `DOS`: equivalent to `CRLF` line end.
+   * - `UNIX`: equivalent to `LF` line end.
+   * - `MAC`: equivalent to `CR` line end. You would never use it today.
    *
-   * @defaultValue `utf-8`
+   * @returns {FileFormatOption}
+   *
+   * @defaultValue `DOS` for Windows/MS-DOS, `UNIX` for Linux/Unix/MacOS.
    *
    * @example
    * ```javascript
-   * // Get the 'file-encoding' option.
-   * const value = Rsvim.opt.fileEncoding;
+   * // Get the 'file-format' option.
+   * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileEncoding(): "utf-8" {
+  get fileEncoding(): FileFormatOption {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+    return __InternalRsvimGlobalObject.opt_get_file_format();
   }
 
   /**

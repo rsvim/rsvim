@@ -13,10 +13,6 @@ export declare class RsvimCmd {
     echo(message: string): number;
 }
 export declare class RsvimOpt {
-    get lineBreak(): boolean;
-    set lineBreak(value: boolean);
-    get wrap(): boolean;
-    set wrap(value: boolean);
 }
 export declare class RsvimRt {
     exit(exitCode?: number): void;
