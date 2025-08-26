@@ -326,7 +326,11 @@ export class RsvimRt {
    *
    * @example
    * ```javascript
-   * const result = Rsvim.cmd.echo("Hello Rsvim!");
+   * // Exit with default exit code `0`.
+   * Rsvim.rt.exit();
+   *
+   * // Exit with error exit code `-1`.
+   * Rsvim.rt.exit(-1);
    * ```
    */
   public exit(exitCode?: number) {
