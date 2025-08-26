@@ -10,8 +10,13 @@ pub fn exit(
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 1);
-  let exit_code = args.get(0).int32_value(scope).unwrap();
+  debug_assert!(args.length() <= 1);
+  let exit_code = if args.length() == 0 {
+    0_i32
+  } else {
+    debug_assert!(args.length() == 1);
+    args.get(0).int32_value(scope).unwrap()
+  };
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
