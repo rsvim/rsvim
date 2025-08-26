@@ -246,11 +246,59 @@ export class RsvimOpt {
   }
 
   /**
+   * Get the _tab-stop_ option.
+   *
+   * Local to Buffer. This option changes how text is displayed.
+   *
+   * When `true`, lines longer than the width of the window will wrap and
+   * displaying continues on the next line. When `false` lines will not wrap
+   * and only part of long lines will be displayed. When the cursor is
+   * moved to a part that is not shown, the screen will scroll horizontally.
+   *
+   * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
+   * to get the break at a word boundary.
+   *
+   * @returns {number}
+   *
+   * @defaultValue `true`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'wrap' option.
+   * const value = Rsvim.opt.wrap;
+   * ```
+   */
+  get tabStop(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_tab_stop();
+  }
+
+  /**
+   * Set the _wrap_ option.
+   *
+   * @param {boolean} value - The _wrap_ option.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'wrap' option.
+   * Rsvim.opt.wrap = true;
+   * ```
+   */
+  set wrap(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_wrap(value);
+  }
+
+  /**
    * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
-   * Local to Window.
-   *
-   * This option changes how text is displayed.
+   * Local to Window. This option changes how text is displayed.
    *
    * When `true`, lines longer than the width of the window will wrap and
    * displaying continues on the next line. When `false` lines will not wrap
