@@ -566,6 +566,10 @@ impl EventLoop {
   async fn process_master_message(&mut self, message: Option<MasterMessage>) {
     if let Some(message) = message {
       match message {
+        MasterMessage::ExitReq(req) => {
+          trace!("Receive ExitReq:{:?}", req.future_id);
+          self.cancellation_token.cancel();
+        }
         MasterMessage::PrintReq(req) => {
           trace!("Receive PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
