@@ -13,7 +13,7 @@ pub fn echo(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let message = args.get(0).to_rust_string_lossy(scope).to_string();
+  let message = args.get(0).to_rust_string_lossy(scope);
   trace!("echo: {:?}", message);
 
   let state_rc = JsRuntime::state(scope);

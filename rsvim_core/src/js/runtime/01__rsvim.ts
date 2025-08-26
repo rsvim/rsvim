@@ -185,6 +185,9 @@ export class RsvimCmd {
   }
 }
 
+type FileEncodingOption = "utf-8";
+type FileFormatOption = "dos" | "unix" | "mac";
+
 /**
  * The `Rsvim.opt` global object for global editor options.
  *
@@ -199,9 +202,110 @@ export class RsvimCmd {
  */
 export class RsvimOpt {
   /**
-   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
-   * Local to Window.
+   * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
+   * This will determine which character encoding is used when RSVIM read/write a file from file system.
+   *
+   * :::warning
+   * For now, only **utf-8** encoding is supported.
+   * :::
+   *
+   * @returns {FileEncodingOption}
+   *
+   * @defaultValue `"utf-8"`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'file-encoding' option.
+   * const value = Rsvim.opt.fileEncoding;
+   * ```
+   */
+  get fileEncoding(): FileEncodingOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+  }
+
+  /**
+   * Set the _file-encoding_ option.
+   *
+   * @param {FileEncodingOption} value - The _file-encoding_ option.
+   * @throws Throws {@link !Error} if value is not a valid option.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'file-encoding' option.
+   * Rsvim.opt.fileEncoding = "utf-8";
+   * ```
+   */
+  set fileEncoding(value: FileEncodingOption) {
+    if (value !== "utf-8") {
+      throw new Error(
+        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+  }
+
+  /**
+   * Get the _file-format_ option. Local to {@link Buffer}.
+   *
+   * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the file of this buffer. There are 3 kinds of line end:
+   * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
+   * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
+   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` any more.
+   *
+   * :::note
+   * In fact it should be named to "line-end", it is called "file-format" just to be consistent
+   * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
+   * :::
+   *
+   * For this API, it has below options:
+   * - `"dos"`: equivalent to `CRLF` line end.
+   * - `"unix"`: equivalent to `LF` line end.
+   * - `"mac"`: equivalent to `CR` line end. You would never use it today.
+   *
+   * @returns {FileFormatOption}
+   *
+   * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
+   *
+   * @example
+   * ```javascript
+   * // Get the 'file-format' option.
+   * const value = Rsvim.opt.fileFormat;
+   * ```
+   */
+  get fileFormat(): FileFormatOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_format();
+  }
+
+  /**
+   * Set the _file-format_ option.
+   *
+   * @param {FileFormatOption} value - The _file-format_ option.
+   * @throws Throws {@link !Error} if value is not a valid option.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'file-format' option.
+   * Rsvim.opt.fileFormat = "unix";
+   * ```
+   */
+  set fileFormat(value: FileFormatOption) {
+    if (value !== "dos" && value !== "unix" && value !== "mac") {
+      throw new Error(
+        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_format(value);
+  }
+
+  /**
+   * Get the _line-break_ option. This options is also known as
+   * [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to {@link Window}.
    *
    * If `true`, Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
    * It only affects the way the file is displayed, not its contents.
@@ -246,9 +350,56 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * Get the _tab-stop_ option. This option is also known as
+   * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
+   * Local to {@link Buffer}.
    *
-   * Local to Window.
+   * This option changes how text is displayed.
+   *
+   * Defines how many columns (on the terminal) used to display the
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65535]`.
+   *
+   *
+   * @returns {number}
+   *
+   * @defaultValue `8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'tab-stop' option.
+   * const value = Rsvim.opt.tabStop;
+   * ```
+   */
+  get tabStop(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_tab_stop();
+  }
+
+  /**
+   * Set the _tab-stop_ option.
+   *
+   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,65535]`.
+   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,65535]`.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'tab-stop' option.
+   * Rsvim.opt.tabStop = 4;
+   * ```
+   */
+  set tabStop(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 65535) {
+      throw new Error(
+        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
+  }
+
+  /**
+   * Get the _wrap_ option. This option is also known as
+   * [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap). Local to {@link Window}.
    *
    * This option changes how text is displayed.
    *
