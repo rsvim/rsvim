@@ -289,9 +289,9 @@ export class RsvimOpt {
    * - `UNIX`: equivalent to `LF` line end.
    * - `MAC`: equivalent to `CR` line end. You would never use it today.
    *
-   * @returns {Rsvim.opt.FileFormatOption}
+   * @returns {string} It returns `"dos"`, `"unix"` or `"mac"`.
    *
-   * @defaultValue `DOS` for Windows/MS-DOS, `UNIX` for Linux/Unix/MacOS.
+   * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
    * @example
    * ```javascript
