@@ -9,8 +9,6 @@
 //!
 //! Besides, there're some other internal states which are not editing modes or visible to
 //! user, but help maintaining the internal state of the editor:
-//!
-//! * Quit state: The editor should quit on this state.
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
@@ -103,7 +101,6 @@ macro_rules! state_machine_dispatcher {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
 pub enum StateMachine {
-  // Editing modes.
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
   SelectMode(SelectStateful),
@@ -125,7 +122,7 @@ state_machine_dispatcher!(
   CommandLineExMode,
   CommandLineSearchForwardMode,
   CommandLineSearchBackwardMode,
-  TerminalMode,
+  TerminalMode
 );
 
 impl Default for StateMachine {
