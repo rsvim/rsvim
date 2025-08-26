@@ -5,7 +5,6 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
-use regex::Regex;
 use std::time::Duration;
 
 #[tokio::test]
@@ -138,7 +137,6 @@ mod tests_buffer_options {
     let tp = TempPathCfg::create();
 
     let src: &str = r#"
-  const v1 = Rsvim.opt.tabStop;
   Rsvim.opt.tabStop = -1;
     "#;
 
@@ -176,6 +174,126 @@ mod tests_buffer_options {
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect = r####"Uncaught Error: "Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found"####;
+      assert!(actual.starts_with(expect));
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed2() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+  Rsvim.opt.fileEncoding = "utf-16";
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    make_configs(&tp, src);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      use crate::defaults;
+
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(
+        global_local_options.file_encoding(),
+        defaults::buf::FILE_ENCODING
+      );
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      use crate::defaults;
+
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(
+        global_local_options.file_encoding(),
+        defaults::buf::FILE_ENCODING
+      );
+
+      let contents = lock!(event_loop.contents);
+      let actual = contents.command_line_message().rope().to_string();
+      let actual = actual.trim();
+      info!("actual:{actual}");
+      let expect = r####"Uncaught Error: "Rsvim.opt.fileEncoding" parameter must be a valid option, but found"####;
+      assert!(actual.starts_with(expect));
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed3() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+  Rsvim.opt.fileFormat = "CRLF";
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    make_configs(&tp, src);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      use crate::defaults;
+
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(
+        global_local_options.file_format(),
+        defaults::buf::FILE_FORMAT
+      );
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      use crate::defaults;
+
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(
+        global_local_options.file_format(),
+        defaults::buf::FILE_FORMAT
+      );
+
+      let contents = lock!(event_loop.contents);
+      let actual = contents.command_line_message().rope().to_string();
+      let actual = actual.trim();
+      info!("actual:{actual}");
+      let expect = r####"Uncaught Error: "Rsvim.opt.fileEncoding" parameter must be a valid option, but found"####;
       assert!(actual.starts_with(expect));
     }
 
