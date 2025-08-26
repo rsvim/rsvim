@@ -19,9 +19,10 @@
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
- * - `Rsvim.buf`: Buffers.
- * - `Rsvim.cmd`: Commands.
- * - `Rsvim.opt`: Options.
+ * - `Rsvim.buf`: Buffer APIs.
+ * - `Rsvim.cmd`: Ex command APIs.
+ * - `Rsvim.opt`: Global options.
+ * - `Rsvim.rt`: Editor/runtime/process APIs.
  *
  * @example
  * ```javascript
@@ -36,10 +37,11 @@ export class Rsvim {
   readonly buf: RsvimBuf = new RsvimBuf();
   readonly cmd: RsvimCmd = new RsvimCmd();
   readonly opt: RsvimOpt = new RsvimOpt();
+  readonly rt: RsvimRt = new RsvimRt();
 }
 
 /**
- * The `Rsvim.buf` global object for buffers.
+ * The `Rsvim.buf` global object for Vim buffers.
  *
  * @example
  * ```javascript
@@ -133,7 +135,7 @@ export class RsvimBuf {
 }
 
 /**
- * The `Rsvim.cmd` global object for ex commands.
+ * The `Rsvim.cmd` global object for Ex commands.
  *
  * :::tip
  * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
@@ -295,6 +297,20 @@ export class RsvimOpt {
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
 }
+
+/**
+ * The `Rsvim.rt` global object for editor/runtime/process.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.rt'.
+ * const rt = Rsvim.rt;
+ * ```
+ *
+ * @category General APIs
+ * @hideconstructor
+ */
+export class RsvimRt {}
 
 (function (globalThis: { Rsvim: Rsvim }) {
   globalThis.Rsvim = new Rsvim();
