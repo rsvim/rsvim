@@ -51,7 +51,7 @@ export class RsvimRt {
         if (exitCode !== undefined && typeof exitCode !== "number") {
             throw new Error('"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined');
         }
-        return __InternalRsvimGlobalObject.rt_exit(exitCode);
+        __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
 }
 (function (globalThis) {

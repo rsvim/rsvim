@@ -19,5 +19,5 @@ export declare class RsvimOpt {
     set wrap(value: boolean);
 }
 export declare class RsvimRt {
-    exit(exitCode?: number): any;
+    exit(exitCode?: number): void;
 }
