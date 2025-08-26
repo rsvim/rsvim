@@ -4,21 +4,6 @@ export class Rsvim {
     opt = new RsvimOpt();
     rt = new RsvimRt();
 }
-(function (Rsvim) {
-    let opt;
-    (function (opt) {
-        let FileEncodingOption;
-        (function (FileEncodingOption) {
-            FileEncodingOption["UTF_8"] = "utf-8";
-        })(FileEncodingOption = opt.FileEncodingOption || (opt.FileEncodingOption = {}));
-        let FileFormatOption;
-        (function (FileFormatOption) {
-            FileFormatOption["DOS"] = "dos";
-            FileFormatOption["UNIX"] = "unix";
-            FileFormatOption["MAC"] = "mac";
-        })(FileFormatOption = opt.FileFormatOption || (opt.FileFormatOption = {}));
-    })(opt = Rsvim.opt || (Rsvim.opt = {}));
-})(Rsvim || (Rsvim = {}));
 export class RsvimBuf {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
@@ -46,7 +31,7 @@ export class RsvimOpt {
         return __InternalRsvimGlobalObject.opt_get_file_encoding();
     }
     set fileEncoding(value) {
-        if (value !== Rsvim.opt.FileEncodingOption.UTF_8) {
+        if (value !== "utf-8") {
             throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
@@ -55,9 +40,7 @@ export class RsvimOpt {
         return __InternalRsvimGlobalObject.opt_get_file_format();
     }
     set fileFormat(value) {
-        if (value !== Rsvim.opt.FileFormatOption.DOS ||
-            value !== Rsvim.opt.FileFormatOption.UNIX ||
-            value !== Rsvim.opt.FileFormatOption.MAC) {
+        if (value !== "dos" || value !== "unix" || value !== "mac") {
             throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_file_format(value);

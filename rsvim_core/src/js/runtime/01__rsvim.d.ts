@@ -4,18 +4,6 @@ export declare class Rsvim {
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
-export declare namespace Rsvim {
-    namespace opt {
-        enum FileEncodingOption {
-            UTF_8 = "utf-8"
-        }
-        enum FileFormatOption {
-            DOS = "dos",
-            UNIX = "unix",
-            MAC = "mac"
-        }
-    }
-}
 export declare class RsvimBuf {
     current(): number | null;
     list(): number[];
@@ -25,10 +13,10 @@ export declare class RsvimCmd {
     echo(message: string): number;
 }
 export declare class RsvimOpt {
-    get fileEncoding(): Rsvim.opt.FileEncodingOption;
-    set fileEncoding(value: Rsvim.opt.FileEncodingOption);
-    get fileFormat(): Rsvim.opt.FileFormatOption;
-    set fileFormat(value: Rsvim.opt.FileFormatOption);
+    get fileEncoding(): "utf-8";
+    set fileEncoding(value: "utf-8");
+    get fileFormat(): "dos" | "unix" | "mac";
+    set fileFormat(value: "dos" | "unix" | "mac");
     get lineBreak(): boolean;
     set lineBreak(value: boolean);
     get tabStop(): number;
