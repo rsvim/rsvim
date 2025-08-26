@@ -246,21 +246,17 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _tab-stop_ option.
+   * Get the _tab-stop_ option. This option is also known as [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
    *
-   * Local to Buffer. This option changes how text is displayed.
+   * Local to {@link Buffer}. This option changes how text is displayed.
    *
-   * When `true`, lines longer than the width of the window will wrap and
-   * displaying continues on the next line. When `false` lines will not wrap
-   * and only part of long lines will be displayed. When the cursor is
-   * moved to a part that is not shown, the screen will scroll horizontally.
+   * Defines how many columns (on the terminal) used to display the
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`)
    *
-   * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
-   * to get the break at a word boundary.
    *
    * @returns {number}
    *
-   * @defaultValue `true`
+   * @defaultValue `8`
    *
    * @example
    * ```javascript
@@ -274,15 +270,15 @@ export class RsvimOpt {
   }
 
   /**
-   * Set the _wrap_ option.
+   * Set the _tab-stop_ option.
    *
-   * @param {boolean} value - The _wrap_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @param {number} value - The _tab-stop_ option.
+   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is negative.
    *
    * @example
    * ```javascript
    * // Set the 'wrap' option.
-   * Rsvim.opt.wrap = true;
+   * Rsvim.opt.tabStop = 8;
    * ```
    */
   set wrap(value: boolean) {
