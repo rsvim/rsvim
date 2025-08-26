@@ -174,6 +174,7 @@ mod tests_buffer_options {
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
+      info!("actual:{actual}");
       let expect =
           Regex::new(r####""Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found"####)
             .unwrap();
