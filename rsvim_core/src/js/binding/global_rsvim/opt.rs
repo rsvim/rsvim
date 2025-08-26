@@ -64,3 +64,35 @@ pub fn set_line_break(
   let mut tree = lock!(tree);
   tree.global_local_options_mut().set_line_break(value);
 }
+
+/// Get the _tap-stop_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>
+pub fn get_tab_stop(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = lock!(buffers);
+  let value = buffers.global_local_options().tab_stop();
+  trace!("get_tab_stop: {:?}", value);
+  rv.set_int32(value as i32);
+}
+
+/// Set the _tab-stop_ option.
+pub fn set_tab_stop(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let value = args.get(0).int32_value(scope).unwrap();
+  trace!("set_tab_stop: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let mut buffers = lock!(buffers);
+
+  let value = num_traits::clamp(value, 0, u16::MAX as i32) as u16;
+  buffers.global_local_options_mut().set_tab_stop(value);
+}
