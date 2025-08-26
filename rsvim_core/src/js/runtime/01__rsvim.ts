@@ -322,7 +322,7 @@ export class RsvimRt {
    * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
    * by default it uses `0` to indicate no error happens.
    *
-   * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
+   * @throws Throws {@link !Error} if `exitCode` parameter is neither a integer nor `undefined`.
    *
    * @example
    * ```javascript
