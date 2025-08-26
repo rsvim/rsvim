@@ -69,7 +69,7 @@ async fn test_buf_options1() -> IoResult<()> {
   const v2 = Rsvim.opt.fileEncoding;
   Rsvim.opt.fileEncoding = "utf-8";
   const v3 = Rsvim.opt.fileFormat;
-  Rsvim.opt.fileFormat = "unix";
+  Rsvim.opt.fileFormat = "mac";
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -112,7 +112,7 @@ async fn test_buf_options1() -> IoResult<()> {
       global_local_options.file_encoding(),
       FileEncodingOption::Utf8,
     );
-    assert_eq!(global_local_options.file_format(), FileFormatOption::Unix);
+    assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
   }
 
   Ok(())
