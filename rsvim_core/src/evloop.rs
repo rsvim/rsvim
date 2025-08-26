@@ -519,11 +519,6 @@ impl EventLoop {
         let stateful = self.state_machine;
         let next_stateful = stateful.handle(data_access, event);
         self.state_machine = next_stateful;
-
-        // Exit loop and quit.
-        if let StateMachine::QuitState(_) = next_stateful {
-          self.cancellation_token.cancel();
-        }
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
@@ -553,11 +548,6 @@ impl EventLoop {
         let stateful = self.state_machine;
         let next_stateful = stateful.handle_op(data_access, op);
         self.state_machine = next_stateful;
-
-        // Exit loop and quit.
-        if let StateMachine::QuitState(_) = next_stateful {
-          self.cancellation_token.cancel();
-        }
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);

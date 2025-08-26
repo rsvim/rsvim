@@ -20,8 +20,7 @@ use crate::ui::tree::TreeArc;
 use fsm::{
   CommandLineExStateful, CommandLineSearchBackwardStateful,
   CommandLineSearchForwardStateful, InsertStateful, NormalStateful,
-  OperatorPendingStateful, QuitStateful, SelectStateful, TerminalStateful,
-  VisualStateful,
+  OperatorPendingStateful, SelectStateful, TerminalStateful, VisualStateful,
 };
 
 use crossterm::event::Event;
@@ -114,8 +113,6 @@ pub enum StateMachine {
   CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
   CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
   TerminalMode(TerminalStateful),
-  // Internal states.
-  QuitState(QuitStateful),
 }
 
 state_machine_dispatcher!(
@@ -129,7 +126,6 @@ state_machine_dispatcher!(
   CommandLineSearchForwardMode,
   CommandLineSearchBackwardMode,
   TerminalMode,
-  QuitState
 );
 
 impl Default for StateMachine {
