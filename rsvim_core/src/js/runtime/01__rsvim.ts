@@ -22,7 +22,7 @@
  * - `Rsvim.buf`: Buffer APIs.
  * - `Rsvim.cmd`: Ex command APIs.
  * - `Rsvim.opt`: Global options.
- * - `Rsvim.rt`: Editor/runtime/process APIs.
+ * - `Rsvim.rt`: JavaScript runtime (editor process) APIs.
  *
  * @example
  * ```javascript
@@ -299,7 +299,7 @@ export class RsvimOpt {
 }
 
 /**
- * The `Rsvim.rt` global object for editor/runtime/process.
+ * The `Rsvim.rt` global object for javascript runtime (editor process).
  *
  * @example
  * ```javascript
