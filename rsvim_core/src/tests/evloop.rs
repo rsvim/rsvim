@@ -138,13 +138,15 @@ pub enum MockOperation {
 
   /// Sleep until a specific time point.
   SleepUntil(Zoned),
+
+  Exit,
 }
 
-const EDITOR_QUIT: Operation = Operation::EditorQuit;
+const EXIT: MockOperation = MockOperation::Exit;
 
 #[derive(Debug)]
 pub struct MockOperationReader {
-  rx: Receiver<IoResult<Operation>>,
+  rx: Receiver<IoResult<MockOperation>>,
   shared_waker: Arc<Mutex<SharedWaker>>,
 }
 
@@ -161,7 +163,7 @@ impl MockOperationReader {
         match op {
           MockOperation::Operation(op) => {
             std::thread::sleep(INTERVAL_MILLIS);
-            tx.send(Ok(op.clone())).unwrap();
+            tx.send(Ok(MockOperation::Operation(op.clone()))).unwrap();
           }
           MockOperation::SleepFor(d) => {
             std::thread::sleep(*d);
@@ -175,6 +177,10 @@ impl MockOperationReader {
               std::thread::sleep(d);
             }
           }
+          MockOperation::Exit => {
+            std::thread::sleep(INTERVAL_MILLIS);
+            tx.send(Ok(MockOperation::Exit)).unwrap();
+          }
         }
 
         let mut thread_shared_waker = cloned_shared_waker.lock();
@@ -184,11 +190,12 @@ impl MockOperationReader {
       }
 
       trace!(
-        "Send final mock operation[{}]: EditorQuit {EDITOR_QUIT:?}",
-        operations.len()
+        "Send final mock operation[{}]: Exit {:?}",
+        operations.len(),
+        EXIT
       );
       std::thread::sleep(INTERVAL_MILLIS);
-      tx.send(Ok(EDITOR_QUIT.clone())).unwrap();
+      tx.send(Ok(EXIT.clone())).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
       if let Some(waker) = thread_shared_waker.waker.take() {
@@ -201,7 +208,7 @@ impl MockOperationReader {
 }
 
 impl futures::Stream for MockOperationReader {
-  type Item = IoResult<Operation>;
+  type Item = IoResult<MockOperation>;
 
   fn poll_next(
     self: std::pin::Pin<&mut Self>,
@@ -212,7 +219,7 @@ impl futures::Stream for MockOperationReader {
       shared_waker.waker = Some(cx.waker().clone());
     }
     match self.rx.try_recv() {
-      Ok(event) => Poll::Ready(Some(event)),
+      Ok(op) => Poll::Ready(Some(op)),
       _ => Poll::Pending,
     }
   }

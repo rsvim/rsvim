@@ -27,9 +27,9 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::state::ops::Operation;
-#[cfg(test)]
-use crate::tests::evloop::{MockEventReader, MockOperationReader};
+use crate::tests::evloop::{
+  MockEventReader, MockOperation, MockOperationReader,
+};
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
@@ -519,44 +519,42 @@ impl EventLoop {
         let stateful = self.state_machine;
         let next_stateful = stateful.handle(data_access, event);
         self.state_machine = next_stateful;
-
-        // Exit loop and quit.
-        if let StateMachine::QuitState(_) = next_stateful {
-          self.cancellation_token.cancel();
-        }
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
         // self.cancellation_token.cancel();
       }
       None => {
-        error!("Terminal event stream is exhausted, exit loop");
+        error!("Terminal event stream is exhausted");
         // self.cancellation_token.cancel();
       }
     }
   }
 
   #[cfg(test)]
-  async fn process_operation(&mut self, op: Option<IoResult<Operation>>) {
+  async fn process_operation(&mut self, op: Option<IoResult<MockOperation>>) {
     match op {
       Some(Ok(op)) => {
         trace!("Polled editor operation ok: {:?}", op);
-        let data_access = StateDataAccess::new(
-          self.tree.clone(),
-          self.buffers.clone(),
-          self.contents.clone(),
-          self.master_tx.clone(),
-          self.jsrt_forwarder_tx.clone(),
-        );
+        match op {
+          MockOperation::Operation(op) => {
+            let data_access = StateDataAccess::new(
+              self.tree.clone(),
+              self.buffers.clone(),
+              self.contents.clone(),
+              self.master_tx.clone(),
+              self.jsrt_forwarder_tx.clone(),
+            );
 
-        // Handle by state machine
-        let stateful = self.state_machine;
-        let next_stateful = stateful.handle_op(data_access, op);
-        self.state_machine = next_stateful;
-
-        // Exit loop and quit.
-        if let StateMachine::QuitState(_) = next_stateful {
-          self.cancellation_token.cancel();
+            // Handle by state machine
+            let stateful = self.state_machine;
+            let next_stateful = stateful.handle_op(data_access, op);
+            self.state_machine = next_stateful;
+          }
+          MockOperation::Exit => {
+            self.cancellation_token.cancel();
+          }
+          _ => unreachable!(),
         }
       }
       Some(Err(e)) => {
@@ -564,7 +562,7 @@ impl EventLoop {
         // self.cancellation_token.cancel();
       }
       None => {
-        error!("Terminal event stream is exhausted, exit loop");
+        error!("Terminal event stream is exhausted");
         // self.cancellation_token.cancel();
       }
     }

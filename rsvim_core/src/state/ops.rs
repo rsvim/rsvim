@@ -82,9 +82,6 @@ pub enum Operation {
 
   /// Confirm ex command and goto normal mode.
   ConfirmExCommandAndGotoNormalMode,
-
-  /// Quit editor
-  EditorQuit,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

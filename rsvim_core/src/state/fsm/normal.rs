@@ -1,7 +1,6 @@
 //! The normal mode.
 
 use crate::prelude::*;
-use crate::state::fsm::quit::QuitStateful;
 use crate::state::ops::cursor_ops;
 use crate::state::ops::{GotoInsertModeVariant, Operation};
 use crate::state::{StateDataAccess, StateMachine, Stateful};
@@ -52,7 +51,6 @@ impl NormalStateful {
             KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
-            KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
         }
@@ -93,7 +91,6 @@ impl Stateful for NormalStateful {
       // Operation::GotoCommandLineSearchBackwardMode => {
       //   self.goto_command_line_search_backward_mode(&data_access)
       // }
-      Operation::EditorQuit => self.editor_quit(&data_access),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
@@ -343,9 +340,5 @@ impl NormalStateful {
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),
     );
-  }
-
-  pub fn editor_quit(&self, _data_access: &StateDataAccess) -> StateMachine {
-    StateMachine::QuitState(QuitStateful::default())
   }
 }
