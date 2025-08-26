@@ -1,6 +1,6 @@
 //! APIs for `Rsvim.opt` namespace.
 
-use crate::buf::opt::FileEncodingOption;
+use crate::buf::opt::{FileEncodingOption, FileFormatOption};
 use crate::js::JsRuntime;
 use crate::prelude::*;
 
@@ -129,4 +129,37 @@ pub fn set_file_encoding(
 
   let value = FileEncodingOption::try_from(value.as_str()).unwrap();
   buffers.global_local_options_mut().set_file_encoding(value);
+}
+
+/// Get the _file-format_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27fileformat%27>
+pub fn get_file_format(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = lock!(buffers);
+  let value = buffers.global_local_options().file_format();
+  trace!("get_file_format: {:?}", value);
+  let value = v8::String::new(scope, &value.to_string()).unwrap();
+  rv.set(value.into());
+}
+
+/// Set the _file-format_ option.
+pub fn set_file_format(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
+  trace!("set_file_format: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let mut buffers = lock!(buffers);
+
+  let value = FileFormatOption::try_from(value.as_str()).unwrap();
+  buffers.global_local_options_mut().set_file_format(value);
 }
