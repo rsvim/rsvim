@@ -340,7 +340,7 @@ export class RsvimRt {
       );
     }
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.rt_exit(exitCode);
+    __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
 }
 
