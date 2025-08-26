@@ -575,6 +575,7 @@ impl EventLoop {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Receive ExitReq:{:?}", req.future_id);
+          self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }
         MasterMessage::PrintReq(req) => {

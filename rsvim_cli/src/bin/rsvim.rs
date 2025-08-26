@@ -81,7 +81,7 @@ fn main() -> IoResult<()> {
 
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
-  evloop_tokio_runtime.block_on(async {
+  let exit_code = evloop_tokio_runtime.block_on(async {
     // Create event loop.
     let mut event_loop =
       EventLoop::new(cli_opts, SnapshotData::new(&RSVIM_SNAPSHOT))?;
@@ -93,6 +93,12 @@ fn main() -> IoResult<()> {
     event_loop.run().await?;
 
     // Shutdown.
-    event_loop.shutdown()
-  })
+    event_loop.shutdown()?;
+
+    event_loop.exit_code
+  })?;
+
+  std::process::exit(exit_code);
+
+  Ok(())
 }
