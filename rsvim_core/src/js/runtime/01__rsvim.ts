@@ -300,7 +300,7 @@ export class RsvimOpt {
       (value as string) !== "mac"
     ) {
       throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
