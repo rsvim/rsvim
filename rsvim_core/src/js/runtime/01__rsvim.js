@@ -30,7 +30,7 @@ export class RsvimOpt {
 }
 var FileEncodingOption;
 (function (FileEncodingOption) {
-    FileEncodingOption["UTF8"] = "utf-8";
+    FileEncodingOption["UTF_8"] = "utf-8";
 })(FileEncodingOption || (FileEncodingOption = {}));
 get;
 fileEncoding();
@@ -39,26 +39,32 @@ FileEncodingOption;
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
 }
 set;
-fileEncoding(value, "utf-8");
+fileEncoding(value, FileEncodingOption);
 {
-    if (value !== "utf-8") {
+    if (value !== FileEncodingOption.UTF_8) {
         throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
     }
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
 }
+var FileFormatOption;
+(function (FileFormatOption) {
+    FileFormatOption["DOS"] = "dos";
+    FileFormatOption["UNIX"] = "unix";
+    FileFormatOption["MAC"] = "mac";
+})(FileFormatOption || (FileFormatOption = {}));
 get;
 fileEncoding();
-"utf-8";
+FileFormatOption;
 {
-    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+    return __InternalRsvimGlobalObject.opt_get_file_format();
 }
 set;
-fileEncoding(value, "utf-8");
+fileEncoding(value, FileFormatOption);
 {
-    if (value !== "utf-8") {
+    if (value !== FileFormatOption.DOS || value !== FileFormatOption.UNIX || value !== FileFormatOption.MAC) {
         throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
     }
-    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+    __InternalRsvimGlobalObject.opt_set_file_format(value);
 }
 get;
 lineBreak();

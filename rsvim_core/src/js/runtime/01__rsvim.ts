@@ -40,6 +40,30 @@ export class Rsvim {
   readonly rt: RsvimRt = new RsvimRt();
 }
 
+export namespace Rsvim {
+  export namespace opt {
+    /**
+     * File encoding option.
+     */
+    export enum FileEncodingOption {
+      UTF_8 = "utf-8",
+    }
+
+    /**
+     * File format option.
+     *
+     * - `DOS`: equivalent to `CRLF` line end.
+     * - `UNIX`: equivalent to `LF` line end.
+     * - `MAC`: equivalent to `CR` line end. You would never use it today.
+     */
+    enum FileFormatOption {
+      DOS = "dos",
+      UNIX = "unix",
+      MAC = "mac",
+    }
+  }
+}
+
 /**
  * The `Rsvim.buf` global object for Vim buffers.
  *
@@ -199,13 +223,6 @@ export class RsvimCmd {
  */
 export class RsvimOpt {
   /**
-   * File encoding option.
-   */
-  enum FileEncodingOption {
-    UTF_8 = "utf-8",
-  }
-
-  /**
    * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
    * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
@@ -250,19 +267,6 @@ export class RsvimOpt {
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-  }
-
-  /**
-   * File format option.
-   *
-   * - `DOS`: equivalent to `CRLF` line end.
-   * - `UNIX`: equivalent to `LF` line end.
-   * - `MAC`: equivalent to `CR` line end. You would never use it today.
-   */
-  enum FileFormatOption {
-    DOS = "dos",
-    UNIX = "unix",
-    MAC = "mac",
   }
 
   /**
@@ -313,7 +317,11 @@ export class RsvimOpt {
    * ```
    */
   set fileEncoding(value: FileFormatOption) {
-    if (value !== FileFormatOption.DOS || value !== FileFormatOption.UNIX || value !== FileFormatOption.MAC) {
+    if (
+      value !== FileFormatOption.DOS ||
+      value !== FileFormatOption.UNIX ||
+      value !== FileFormatOption.MAC
+    ) {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
       );
