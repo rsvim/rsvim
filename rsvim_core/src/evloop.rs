@@ -554,11 +554,11 @@ impl EventLoop {
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
       None => {
         error!("Terminal event stream is exhausted, exit loop");
-        self.cancellation_token.cancel();
+        // self.cancellation_token.cancel();
       }
     }
   }
