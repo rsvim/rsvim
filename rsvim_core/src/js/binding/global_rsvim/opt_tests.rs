@@ -231,7 +231,7 @@ mod tests_file_encoding {
 
     // After running
     {
-      use crate::buf::opt::{FileEncodingOption, FileFormatOption};
+      use crate::buf::opt::FileEncodingOption;
 
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
