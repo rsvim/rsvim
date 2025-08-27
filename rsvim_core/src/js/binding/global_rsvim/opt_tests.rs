@@ -99,8 +99,6 @@ mod tests_tab_stop {
 
     // After running
     {
-      use crate::buf::opt::{FileEncodingOption, FileFormatOption};
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 4);
