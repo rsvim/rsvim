@@ -4,6 +4,8 @@ use crate::buf::opt::*;
 
 pub const TAB_STOP: u16 = 8;
 
+pub const EXPAND_TAB: bool = false;
+
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 
 #[cfg(target_os = "windows")]
