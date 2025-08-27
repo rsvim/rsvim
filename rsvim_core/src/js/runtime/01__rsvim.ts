@@ -419,18 +419,18 @@ export class RsvimOpt {
    *
    * @example
    * ```javascript
-   * // Set the 'expand-tab' option.
-   * Rsvim.opt.expandTab = true;
+   * // Set the 'shift-width' option.
+   * Rsvim.opt.shiftWidth = 4;
    * ```
    */
-  set expandTab(value: boolean) {
-    if (typeof value !== "boolean") {
+  set shiftWidth(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
       throw new Error(
-        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+    __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
 
   /**
@@ -474,7 +474,7 @@ export class RsvimOpt {
   set tabStop(value: number) {
     if (typeof value !== "number" || value < 1 || value > 255) {
       throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,255], but found ${value} (${typeof value})`,
+        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
