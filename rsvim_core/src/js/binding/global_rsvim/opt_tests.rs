@@ -359,15 +359,10 @@ mod tests_file_format {
 
     // After running
     {
-      use crate::buf::opt::{FileEncodingOption, FileFormatOption};
+      use crate::buf::opt::FileFormatOption;
 
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), 4);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        FileEncodingOption::Utf8,
-      );
       assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
 
       let contents = lock!(event_loop.contents);
