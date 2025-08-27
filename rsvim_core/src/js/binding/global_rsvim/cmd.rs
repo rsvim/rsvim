@@ -1,6 +1,7 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::js::JsRuntime;
+use crate::js::{self, JsRuntime};
+use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 
@@ -10,7 +11,7 @@ use compact_str::ToCompactString;
 pub fn echo(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  mut rv: v8::ReturnValue,
+  mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let message = args.get(0).to_rust_string_lossy(scope);
@@ -27,8 +28,13 @@ pub fn echo(
       &mut contents,
       message.to_compact_string(),
     );
-    rv.set_int32(0);
   } else {
-    rv.set_int32(-1);
+    msg::sync_send_to_master(
+      state.master_tx.clone(),
+      MasterMessage::PrintReq(msg::PrintReq::new(
+        js::next_future_id(),
+        message.to_compact_string(),
+      )),
+    );
   }
 }
