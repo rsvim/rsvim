@@ -387,6 +387,53 @@ export class RsvimOpt {
   }
 
   /**
+   * Get the _shift-width_ option. Local to {@link Buffer}.
+   *
+   * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   *
+   * When {@link expandTab} is `false`, this option is not been used.
+   *
+   *
+   * @returns {number}
+   *
+   * @defaultValue `8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'shift-width' option.
+   * const value = Rsvim.opt.shiftWidth;
+   * ```
+   */
+  get shiftWidth(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_shift_width();
+  }
+
+  /**
+   * Set the _expand-tab_ option. This value should be between `[1,255]`.
+   *
+   *
+   * @param {boolean} value - The _expand-tab_ option.
+   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'expand-tab' option.
+   * Rsvim.opt.expandTab = true;
+   * ```
+   */
+  set expandTab(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+  }
+
+  /**
    * Get the _tab-stop_ option. This option is also known as
    * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
    * Local to {@link Buffer}.
@@ -416,7 +463,7 @@ export class RsvimOpt {
    * Set the _tab-stop_ option.
    *
    * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,255]`.
+   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
    *
    * @example
    * ```javascript
