@@ -660,7 +660,7 @@ mod tests_shift_width {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.fileFormat" parameter must be a valid option, but found"####;
+      let expect = r####"Uncaught Error: "Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found"####;
       assert!(actual.starts_with(expect));
     }
 
