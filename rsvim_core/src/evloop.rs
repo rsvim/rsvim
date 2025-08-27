@@ -724,7 +724,7 @@ impl EventLoop {
           self.process_operation(op).await;
         }
         master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, js_messages.len());
+          debug_assert_eq!(master_n, master_messages.len());
           if master_n> 0 {
              self.process_master_message(master_messages).await;
           }
