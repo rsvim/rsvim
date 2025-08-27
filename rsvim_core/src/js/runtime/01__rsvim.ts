@@ -178,12 +178,12 @@ export class RsvimCmd {
 }
 
 /**
- * @expand
+ * @inline
  */
 type FileEncodingOption = "utf-8";
 
 /**
- * @expand
+ * @inline
  */
 type FileFormatOption = "dos" | "unix" | "mac";
 
