@@ -173,7 +173,7 @@ mod tests_tab_stop {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found"####;
+      let expect = r####"Uncaught Error: "Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found"####;
       assert!(actual.starts_with(expect));
     }
 
