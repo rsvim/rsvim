@@ -129,6 +129,7 @@ impl InsertStateful {
           '\t'.to_compact_string()
         } else {
           std::iter::repeat_n(' ', buffer.options().shift_width() as usize)
+            .collect::<String>()
             .to_compact_string()
         }
       }
