@@ -568,8 +568,8 @@ impl EventLoop {
     }
   }
 
-  async fn process_master_message(&mut self, message: Option<MasterMessage>) {
-    if let Some(message) = message {
+  async fn process_master_message(&mut self, messages: Vec<MasterMessage>) {
+    for message in messages {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Receive ExitReq:{:?}", req.future_id);
@@ -603,8 +603,8 @@ impl EventLoop {
     }
   }
 
-  async fn forward_js_message(&mut self, message: Option<JsMessage>) {
-    if let Some(message) = message {
+  async fn forward_js_message(&mut self, messages: Vec<JsMessage>) {
+    for message in messages {
       trace!("Process resp msg:{:?}", message);
       let _ = self.jsrt_tx.send(message).await;
       self.js_runtime.tick_event_loop();
@@ -629,18 +629,27 @@ impl EventLoop {
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
     loop {
+      let mut master_messages: Vec<MasterMessage> = vec![];
+      let mut js_messages: Vec<JsMessage> = vec![];
+
       tokio::select! {
         // Receive keyboard/mouse events
         event = reader.next() => {
           self.process_event(event).await;
         }
         // Receive master message
-        master_message = self.master_rx.recv() => {
-            self.process_master_message(master_message).await;
+        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n , master_messages.len());
+          if master_n > 0 {
+            self.process_master_message(master_messages).await;
+          }
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_message = self.jsrt_forwarder_rx.recv() => {
-            self.forward_js_message(js_message).await;
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, js_messages.len());
+          if js_n > 0 {
+            self.forward_js_message(js_messages).await;
+          }
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
@@ -663,6 +672,9 @@ impl EventLoop {
     mut reader: MockEventReader,
   ) -> IoResult<()> {
     loop {
+      let mut master_messages: Vec<MasterMessage> = vec![];
+      let mut js_messages: Vec<JsMessage> = vec![];
+
       tokio::select! {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
@@ -671,11 +683,17 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        master_message = self.master_rx.recv() => {
-            self.process_master_message(master_message).await;
+        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n, master_messages.len());
+          if master_n > 0 {
+            self.process_master_message(master_messages).await;
+          }
         }
-        js_message = self.jsrt_forwarder_rx.recv() => {
-            self.forward_js_message(js_message).await;
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, js_messages.len());
+          if js_n > 0 {
+             self.forward_js_message(js_messages).await;
+          }
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
@@ -697,16 +715,25 @@ impl EventLoop {
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
     loop {
+      let mut master_messages: Vec<MasterMessage> = vec![];
+      let mut js_messages: Vec<JsMessage> = vec![];
+
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
           self.process_operation(op).await;
         }
-        master_message = self.master_rx.recv() => {
-            self.process_master_message(master_message).await;
+        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n, master_messages.len());
+          if master_n> 0 {
+             self.process_master_message(master_messages).await;
+          }
         }
-        js_message = self.jsrt_forwarder_rx.recv() => {
-            self.forward_js_message(js_message).await;
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, js_messages.len());
+          if js_n > 0 {
+             self.forward_js_message(js_messages).await;
+          }
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;

@@ -156,32 +156,24 @@ export class RsvimCmd {
   /**
    * Echo message to the command-line.
    *
-   * :::warning
-   * It will not succeed until the editor is initialized since the TUI is still not created.
-   * When editor is not initialized, it will not print anything to the terminal.
-   * :::
-   *
    * @param {message} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
-   *
-   * @returns {number} It returns `0` if echo successfully, otherwise it returns `-1` if failed
-   * (before the editor is initialized).
    *
    * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
    *
    * @example
    * ```javascript
-   * const result = Rsvim.cmd.echo("Hello Rsvim!");
+   * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  public echo(message: string): number {
+  public echo(message: string) {
     if (message === undefined || message === null) {
       throw new Error(
         '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
       );
     }
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.cmd_echo(message);
+    __InternalRsvimGlobalObject.cmd_echo(message);
   }
 }
 

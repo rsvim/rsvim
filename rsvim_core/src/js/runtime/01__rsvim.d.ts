@@ -10,7 +10,7 @@ export declare class RsvimBuf {
     writeSync(bufId: number): number;
 }
 export declare class RsvimCmd {
-    echo(message: string): number;
+    echo(message: string): void;
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
