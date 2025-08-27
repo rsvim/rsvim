@@ -15,12 +15,16 @@ export declare class RsvimCmd {
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
 export declare class RsvimOpt {
+    get expandTab(): boolean;
+    set expandTab(value: boolean);
     get fileEncoding(): FileEncodingOption;
     set fileEncoding(value: FileEncodingOption);
     get fileFormat(): FileFormatOption;
     set fileFormat(value: FileFormatOption);
     get lineBreak(): boolean;
     set lineBreak(value: boolean);
+    get shiftWidth(): number;
+    set shiftWidth(value: number);
     get tabStop(): number;
     set tabStop(value: number);
     get wrap(): boolean;
