@@ -2416,7 +2416,7 @@ dependencies = [
 
 [[package]]
 name = "rsvim"
-version = "0.1.1-alpha.10"
+version = "0.1.1-beta.1"
 dependencies = [
  "git2",
  "log",
@@ -2427,7 +2427,7 @@ dependencies = [
 
 [[package]]
 name = "rsvim_core"
-version = "0.1.1-alpha.10"
+version = "0.1.1-beta.1"
 dependencies = [
  "anyhow",
  "ascii",
