@@ -5451,6 +5451,48 @@ mod tests_insert_text {
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
+
+    // Insert-3
+    {
+      let mut buf_opts = *lock!(buf).options();
+      buf_opts.set_expand_tab(true);
+      buf_opts.set_shift_width(2);
+      lock!(buf).set_options(&buf_opts);
+
+      stateful.cursor_insert(&data_access, CursorInsertPayload::Tab);
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 2);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["这个", "\t  ", ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas =
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
   }
 
   #[test]
