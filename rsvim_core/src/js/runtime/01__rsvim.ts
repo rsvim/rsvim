@@ -199,7 +199,7 @@ export class RsvimOpt {
    * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
    * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
    *
-   * See {@link shiftWidth} to get the number of spaces when inserting spaces.
+   * See {@link shiftWidth} to get the number of spaces when inserting.
    *
    * @returns {boolean}
    *
