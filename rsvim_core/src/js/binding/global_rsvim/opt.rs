@@ -141,7 +141,7 @@ pub fn get_shift_width(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().shift_width();
   trace!("get_shift_width: {:?}", value);
-  rv.set_int32(value);
+  rv.set_int32(value as i32);
 }
 
 /// Set the _shift-width_ option.
@@ -151,7 +151,7 @@ pub fn set_shift_width(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).int32_value(scope);
+  let value = args.get(0).int32_value(scope).unwrap();
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
