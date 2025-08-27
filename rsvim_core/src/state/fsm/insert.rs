@@ -7,7 +7,7 @@ use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 
-use compact_str::ToCompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -128,9 +128,9 @@ impl InsertStateful {
         if !buffer.options().expand_tab() {
           '\t'.to_compact_string()
         } else {
-          std::iter::repeat_n(' ', buffer.options().shift_width() as usize)
-            .collect::<String>()
+          ' '
             .to_compact_string()
+            .repeat(buffer.options().shift_width() as usize)
         }
       }
       CursorInsertPayload::Eol => {
