@@ -22,6 +22,12 @@ pub struct BufferOptions {
   #[builder(default = defaults::buf::TAB_STOP)]
   tab_stop: u16,
 
+  #[builder(default = defaults::buf::EXPAND_TAB)]
+  expand_tab: bool,
+
+  #[builder(default = defaults::buf::SHIFT_WIDTH)]
+  shift_width: u16,
+
   #[builder(default = defaults::buf::FILE_ENCODING)]
   file_encoding: FileEncodingOption,
 
@@ -39,6 +45,28 @@ impl BufferOptions {
 
   pub fn set_tab_stop(&mut self, value: u16) {
     self.tab_stop = value;
+  }
+
+  /// Buffer 'expand-tab' option.
+  ///
+  /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
+  pub fn expand_tab(&self) -> bool {
+    self.expand_tab
+  }
+
+  pub fn set_expand_tab(&mut self, value: bool) {
+    self.expand_tab = value;
+  }
+
+  /// Buffer 'shift-width' option.
+  ///
+  /// See: <https://vimhelp.org/options.txt.html#%27shiftwidth%27>.
+  pub fn shift_width(&self) -> u16 {
+    self.shift_width
+  }
+
+  pub fn set_shift_width(&mut self, value: u16) {
+    self.shift_width = value;
   }
 
   /// Buffer 'file-encoding' option.

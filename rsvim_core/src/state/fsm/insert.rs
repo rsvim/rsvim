@@ -124,7 +124,15 @@ impl InsertStateful {
 
     let payload = match payload {
       CursorInsertPayload::Text(c) => c,
-      CursorInsertPayload::Tab => '\t'.to_compact_string(),
+      CursorInsertPayload::Tab => {
+        if !buffer.options().expand_tab() {
+          '\t'.to_compact_string()
+        } else {
+          ' '
+            .to_compact_string()
+            .repeat(buffer.options().shift_width() as usize)
+        }
+      }
       CursorInsertPayload::Eol => {
         let eol = buffer.options().end_of_line();
         let eol = format!("{eol}");

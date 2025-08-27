@@ -194,6 +194,51 @@ type FileFormatOption = "dos" | "unix" | "mac";
  */
 export class RsvimOpt {
   /**
+   * Get the _expand-tab_ option. Local to {@link Buffer}.
+   *
+   * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
+   * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   *
+   * See {@link shiftWidth} to get the number of spaces when inserting.
+   *
+   * @returns {boolean}
+   *
+   * @defaultValue `false`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'expand-tab' option.
+   * const value = Rsvim.opt.expandTab;
+   * ```
+   */
+  get expandTab(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_expand_tab();
+  }
+
+  /**
+   * Set the _expand-tab_ option.
+   *
+   * @param {boolean} value - The _expand-tab_ option.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'expand-tab' option.
+   * Rsvim.opt.expandTab = true;
+   * ```
+   */
+  set expandTab(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+  }
+
+  /**
    * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
    * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.
@@ -342,6 +387,53 @@ export class RsvimOpt {
   }
 
   /**
+   * Get the _shift-width_ option. Local to {@link Buffer}.
+   *
+   * When {@link expandTab} is `true`, the number of spaces that is used when inserts a
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   *
+   * When {@link expandTab} is `false`, this option is not been used.
+   *
+   *
+   * @returns {number}
+   *
+   * @defaultValue `8`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'shift-width' option.
+   * const value = Rsvim.opt.shiftWidth;
+   * ```
+   */
+  get shiftWidth(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_shift_width();
+  }
+
+  /**
+   * Set the _expand-tab_ option. This value should be between `[1,255]`.
+   *
+   *
+   * @param {boolean} value - The _expand-tab_ option.
+   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'shift-width' option.
+   * Rsvim.opt.shiftWidth = 4;
+   * ```
+   */
+  set shiftWidth(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
+      throw new Error(
+        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_shift_width(value);
+  }
+
+  /**
    * Get the _tab-stop_ option. This option is also known as
    * [tab-size](https://developer.mozilla.org/en-US/docs/Web/CSS/tab-size).
    * Local to {@link Buffer}.
@@ -349,7 +441,7 @@ export class RsvimOpt {
    * This option changes how text is displayed.
    *
    * Defines how many columns (on the terminal) used to display the
-   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65535]`.
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,255]`.
    *
    *
    * @returns {number}
@@ -370,8 +462,8 @@ export class RsvimOpt {
   /**
    * Set the _tab-stop_ option.
    *
-   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,65535]`.
-   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,65535]`.
+   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
+   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -380,9 +472,9 @@ export class RsvimOpt {
    * ```
    */
   set tabStop(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 65535) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
       throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`,
+        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning

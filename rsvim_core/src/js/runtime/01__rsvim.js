@@ -27,6 +27,15 @@ export class RsvimCmd {
     }
 }
 export class RsvimOpt {
+    get expandTab() {
+        return __InternalRsvimGlobalObject.opt_get_expand_tab();
+    }
+    set expandTab(value) {
+        if (typeof value !== "boolean") {
+            throw new Error(`"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+    }
     get fileEncoding() {
         return __InternalRsvimGlobalObject.opt_get_file_encoding();
     }
@@ -54,12 +63,21 @@ export class RsvimOpt {
         }
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
+    get shiftWidth() {
+        return __InternalRsvimGlobalObject.opt_get_shift_width();
+    }
+    set shiftWidth(value) {
+        if (typeof value !== "number" || value < 1 || value > 255) {
+            throw new Error(`"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`);
+        }
+        __InternalRsvimGlobalObject.opt_set_shift_width(value);
+    }
     get tabStop() {
         return __InternalRsvimGlobalObject.opt_get_tab_stop();
     }
     set tabStop(value) {
-        if (typeof value !== "number" || value < 1 || value > 65535) {
-            throw new Error(`"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`);
+        if (typeof value !== "number" || value < 1 || value > 255) {
+            throw new Error(`"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_tab_stop(value);
     }

@@ -94,8 +94,71 @@ pub fn set_tab_stop(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u16::MAX as i32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
   buffers.global_local_options_mut().set_tab_stop(value);
+}
+
+/// Get the _expand-tab_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>
+pub fn get_expand_tab(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = lock!(buffers);
+  let value = buffers.global_local_options().expand_tab();
+  trace!("get_expand_tab: {:?}", value);
+  rv.set_bool(value);
+}
+
+/// Set the _expand-tab_ option.
+pub fn set_expand_tab(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let value = args.get(0).boolean_value(scope);
+  trace!("set_expand_tab: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let mut buffers = lock!(buffers);
+
+  buffers.global_local_options_mut().set_expand_tab(value);
+}
+
+/// Get the _shift-width_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27shiftwidth%27>
+pub fn get_shift_width(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let buffers = lock!(buffers);
+  let value = buffers.global_local_options().shift_width();
+  trace!("get_shift_width: {:?}", value);
+  rv.set_int32(value as i32);
+}
+
+/// Set the _shift-width_ option.
+pub fn set_shift_width(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let value = args.get(0).int32_value(scope).unwrap();
+  trace!("set_shift_width: {:?}", value);
+  let state_rc = JsRuntime::state(scope);
+  let buffers = state_rc.borrow().buffers.clone();
+  let mut buffers = lock!(buffers);
+
+  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
+  buffers.global_local_options_mut().set_shift_width(value);
 }
 
 /// Get the _file-encoding_ option.
