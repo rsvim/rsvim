@@ -194,6 +194,51 @@ type FileFormatOption = "dos" | "unix" | "mac";
  */
 export class RsvimOpt {
   /**
+   * Get the _expand-tab_ option. Local to {@link Buffer}.
+   *
+   * When in insert mode, inserts [spaces](https://en.wikipedia.org/wiki/Whitespace_character) (ASCII `32`)
+   * instead of a [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`).
+   *
+   * See {@link shiftWidth} to get the number of spaces when inserting spaces.
+   *
+   * @returns {boolean}
+   *
+   * @defaultValue `false`
+   *
+   * @example
+   * ```javascript
+   * // Get the 'expand-tab' option.
+   * const value = Rsvim.opt.expandTab;
+   * ```
+   */
+  get expandTab(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_expand_tab();
+  }
+
+  /**
+   * Set the _expand-tab_ option.
+   *
+   * @param {boolean} value - The _expand-tab_ option.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'expand-tab' option.
+   * Rsvim.opt.expandTab = true;
+   * ```
+   */
+  set expandTab(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+  }
+
+  /**
    * Get the _file-encoding_ option. Local to {@link Buffer}.
    *
    * Sets the [character encoding](https://en.wikipedia.org/wiki/Character_encoding) for the file of this buffer.

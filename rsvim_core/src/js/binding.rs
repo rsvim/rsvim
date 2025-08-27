@@ -126,6 +126,30 @@ pub fn create_new_context<'s>(
     set_function_to(
       scope,
       vim,
+      "opt_get_expand_tab",
+      global_rsvim::opt::get_expand_tab,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_expand_tab",
+      global_rsvim::opt::set_expand_tab,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_shift_width",
+      global_rsvim::opt::get_shift_width,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_shift_width",
+      global_rsvim::opt::set_shift_width,
+    );
+    set_function_to(
+      scope,
+      vim,
       "opt_get_file_encoding",
       global_rsvim::opt::get_file_encoding,
     );
