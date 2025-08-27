@@ -58,8 +58,8 @@ export class RsvimOpt {
         return __InternalRsvimGlobalObject.opt_get_tab_stop();
     }
     set tabStop(value) {
-        if (typeof value !== "number" || value < 1 || value > 65535) {
-            throw new Error(`"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`);
+        if (typeof value !== "number" || value < 1 || value > 255) {
+            throw new Error(`"Rsvim.opt.tabStop" parameter must be an integer value between [1,255], but found ${value} (${typeof value})`);
         }
         __InternalRsvimGlobalObject.opt_set_tab_stop(value);
     }
