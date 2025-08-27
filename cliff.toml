@@ -33,19 +33,6 @@ body = """
   {{ commit.message | upper_first | trim }} ({{ self::makecommitid(commit_id=commit.id) }})\
   {% if commit.remote.username %} by @{{ commit.remote.username }}{%- endif -%}\
   {% if commit.remote.pr_number %} ([#{{ commit.remote.pr_number }}]($REPO/pull/{{ commit.remote.pr_number }})){%- endif %}\
-{% if commit.body %}
-  {{ '  ' }}````text
-  {% for bod in commit.body | split(pat="\n") -%}\
-  {{ '  '}}{{ bod | trim }}
-  {% endfor %}\
-  {{ '  ' }}````
-{% endif %}\
-{% for footer in commit.footers -%}
-  {%- if footer.token != "Signed-off-by" and footer.token != "Co-authored-by" %}
-
-  {{ '  ' }}{{ footer.token }}{{ footer.separator }}{{ footer.value }}
-  {%- endif %}
-{% endfor %}\
 {% endmacro -%}
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
