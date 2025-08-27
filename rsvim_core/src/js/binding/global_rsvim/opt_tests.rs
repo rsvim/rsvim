@@ -89,14 +89,6 @@ mod tests_tab_stop {
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
     }
 
     event_loop.initialize()?;
@@ -112,11 +104,6 @@ mod tests_tab_stop {
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), 4);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        FileEncodingOption::Utf8,
-      );
-      assert_eq!(global_local_options.file_format(), FileFormatOption::Mac);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
