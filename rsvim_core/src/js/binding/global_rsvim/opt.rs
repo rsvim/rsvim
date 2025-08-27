@@ -94,7 +94,7 @@ pub fn set_tab_stop(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u16::MAX as i32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
   buffers.global_local_options_mut().set_tab_stop(value);
 }
 

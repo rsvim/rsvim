@@ -349,7 +349,7 @@ export class RsvimOpt {
    * This option changes how text is displayed.
    *
    * Defines how many columns (on the terminal) used to display the
-   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,65535]`.
+   * [horizontal tab](https://en.wikipedia.org/wiki/Tab_key) (ASCII `9`). This value should be between `[1,255]`.
    *
    *
    * @returns {number}
@@ -370,8 +370,8 @@ export class RsvimOpt {
   /**
    * Set the _tab-stop_ option.
    *
-   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,65535]`.
-   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,65535]`.
+   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
+   * @throws Throws {@link !Error} if value is not a integer value, or the integer value is not between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -380,9 +380,9 @@ export class RsvimOpt {
    * ```
    */
   set tabStop(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 65535) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
       throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,65535], but found ${value} (${typeof value})`,
+        `"Rsvim.opt.tabStop" parameter must be an integer value between [1,255], but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
