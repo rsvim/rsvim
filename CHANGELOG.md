@@ -1,6 +1,6 @@
-## [0.1.2-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.1..0.1.2-alpha.1) - 2025-08-28
+## [0.1.2-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.1..v0.1.2-alpha.1) - 2025-08-28
 
-[6b2e14ea](https://github.com/rsvim/rsvim/commit/6b2e14ea3e91b9074116a796e0119f4427efb7b7)...[0edc36c7](https://github.com/rsvim/rsvim/commit/0edc36c74fa305d0d034aadb8147e9915be3fda1)
+[6b2e14ea](https://github.com/rsvim/rsvim/commit/6b2e14ea3e91b9074116a796e0119f4427efb7b7)...[b8c8f11a](https://github.com/rsvim/rsvim/commit/b8c8f11a90e7520f56704f6880e97d1be20eaeec)
 
 ### <!-- 1 -->Bug Fixes
 
