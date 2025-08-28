@@ -3,7 +3,7 @@ use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
 use std::path::Path;
 
 fn version() {
-  let profile = std::env::var("PROFILE").unwrap_or("dev");
+  let profile = std::env::var("PROFILE").unwrap_or("dev".to_string());
 
   let profile = if profile == "release" {
     "release"
