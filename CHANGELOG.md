@@ -1,3 +1,11 @@
+## [0.1.2-alpha.1](https://github.com/rsvim/rsvim/compare/v0.1.1..0.1.2-alpha.1) - 2025-08-28
+
+[6b2e14ea](https://github.com/rsvim/rsvim/commit/6b2e14ea3e91b9074116a796e0119f4427efb7b7)...[0edc36c7](https://github.com/rsvim/rsvim/commit/0edc36c74fa305d0d034aadb8147e9915be3fda1)
+
+### <!-- 1 -->Bug Fixes
+
+- *(build)* Fix git repo not found when install with "cargo install" (#627) ([0edc36c7](https://github.com/rsvim/rsvim/commit/0edc36c74fa305d0d034aadb8147e9915be3fda1)) by @linrongbin16 ([#627](https://github.com/rsvim/rsvim/pull/627))
+
 ## [0.1.1-beta.1](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.10..v0.1.1-beta.1) - 2025-08-27
 
 [3f21c820](https://github.com/rsvim/rsvim/commit/3f21c820de70cae32720139252c8f198f398ad45)...[31ea70b5](https://github.com/rsvim/rsvim/commit/31ea70b58d406cfaacf277f5cf4ae6f5fea6b502)
