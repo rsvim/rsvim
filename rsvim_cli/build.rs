@@ -5,12 +5,6 @@ use std::path::Path;
 fn version() {
   let profile = std::env::var("PROFILE").unwrap_or("dev".to_string());
 
-  let profile = if profile == "release" {
-    "release"
-  } else {
-    "dev"
-  };
-
   let version = if profile == "release" {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
