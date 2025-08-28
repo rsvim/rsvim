@@ -6,10 +6,8 @@ fn version() {
   let profile = std::env::var("PROFILE").unwrap();
   let opt_level = std::env::var("OPT_LEVEL").unwrap();
 
-  let profile = if profile == "release" && opt_level == "z" {
+  let profile = if profile == "release" {
     "release"
-  } else if profile == "release" && opt_level == "s" {
-    "nightly"
   } else {
     "dev"
   };
