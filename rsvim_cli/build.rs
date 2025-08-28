@@ -3,35 +3,29 @@ use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
 use std::path::Path;
 
 fn version() {
-  let profile = std::env::var("PROFILE").unwrap();
-  let opt_level = std::env::var("OPT_LEVEL").unwrap();
-
-  let profile = if profile == "release" && opt_level == "z" {
-    "release"
-  } else if profile == "release" && opt_level == "s" {
-    "nightly"
-  } else {
-    "dev"
-  };
+  let profile = std::env::var("PROFILE").unwrap_or("dev".to_string());
 
   let version = if profile == "release" {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
-    let git_commit = {
-      let repo =
-        Repository::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(".."))
-          .unwrap();
-      let head = repo.head().unwrap();
-      let oid = head.target().unwrap();
-      let commit = repo.find_commit(oid).unwrap();
-      let id = commit.id();
-      id.to_string()
+    let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    let maybe_git_commit = match Repository::open(repo_path) {
+      Ok(repo) => {
+        let head = repo.head().unwrap();
+        let oid = head.target().unwrap();
+        let commit = repo.find_commit(oid).unwrap();
+        let id = commit.id();
+        let id = id.to_string();
+        format!("+{}", &id[0..8])
+      }
+      Err(_) => "".to_string(),
     };
+
     format!(
-      "{}+{}+{} (v8 {})",
+      "{}+{}{} (v8 {})",
       env!("CARGO_PKG_VERSION"),
       profile,
-      &git_commit[0..8],
+      maybe_git_commit,
       v8_version()
     )
   };
