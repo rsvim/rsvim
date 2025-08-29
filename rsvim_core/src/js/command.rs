@@ -1,6 +1,6 @@
 //! Vim ex commands.
 
-use crate::js::binding;
+// use crate::js::binding;
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module};
 use crate::prelude::*;
 
@@ -49,7 +49,7 @@ impl JsFuture for ExCommand {
         let message = e.to_string().to_owned();
         let message = v8::String::new(scope, &message).unwrap();
         let exception = v8::Exception::error(scope, message);
-        binding::set_exception_code(scope, exception, &e);
+        // binding::set_exception_code(scope, exception, &e);
         let exception = v8::Global::new(scope, exception);
         let state_rc = JsRuntime::state(scope);
         state_rc
