@@ -107,9 +107,12 @@ opt-level = 1
 
 # Nightly
 [profile.nightly]
-inherits = "release"
-opt-level = 's'
-debug = true
+inherits = "dev"
+lto = true
+strip = true
+incremental = true
+codegen-units = 1
+opt-level = 'z'
 
 # Release
 [profile.release]
