@@ -9,7 +9,11 @@ fn version() {
   let version = if profile == "release" {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
-    let profile = if opt_level == "z" { "nightly" } else { profile };
+    let profile = if opt_level == "z" {
+      "nightly".to_string()
+    } else {
+      profile
+    };
     let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
     let maybe_git_commit = match Repository::open(repo_path) {
       Ok(repo) => {
