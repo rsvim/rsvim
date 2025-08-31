@@ -3,11 +3,17 @@ use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
 use std::path::Path;
 
 fn version() {
-  let profile = std::env::var("PROFILE").unwrap_or("dev".to_string());
+  let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
+  let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
 
   let version = if profile == "release" {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
+    let profile = if opt_level == "z" {
+      "nightly".to_string()
+    } else {
+      profile
+    };
     let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
     let maybe_git_commit = match Repository::open(repo_path) {
       Ok(repo) => {
