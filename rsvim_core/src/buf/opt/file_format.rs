@@ -4,7 +4,6 @@
   Debug,
   Copy,
   Clone,
-  Hash,
   PartialEq,
   Eq,
   strum_macros::Display,
@@ -12,16 +11,15 @@
 )]
 pub enum FileFormatOption {
   #[strum(serialize = "dos")]
-  /// CRLF (`<CR><NL>`)
+  /// CRLF
   Dos,
 
   #[strum(serialize = "unix")]
-  /// LF (`<NL>`)
+  /// LF
   Unix,
 
   #[strum(serialize = "mac")]
-  /// CR (`<CR>`)
-  ///
+  /// CR
   /// NOTE: This is a legacy and actually not used today.
   Mac,
 }
@@ -40,7 +38,6 @@ impl From<EndOfLineOption> for FileFormatOption {
   Debug,
   Copy,
   Clone,
-  Hash,
   PartialEq,
   Eq,
   strum_macros::Display,
