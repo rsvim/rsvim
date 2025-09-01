@@ -11,16 +11,15 @@
 )]
 pub enum FileFormatOption {
   #[strum(serialize = "dos")]
-  /// CRLF (`<CR><NL>`)
+  /// CRLF
   Dos,
 
   #[strum(serialize = "unix")]
-  /// LF (`<NL>`)
+  /// LF
   Unix,
 
   #[strum(serialize = "mac")]
-  /// CR (`<CR>`)
-  ///
+  /// CR
   /// NOTE: This is a legacy and actually not used today.
   Mac,
 }
