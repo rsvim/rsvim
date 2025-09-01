@@ -298,11 +298,15 @@ export class RsvimOpt {
    * Sets the [line end](https://en.wikipedia.org/wiki/Newline) for the buffer. There are 3 kinds of line end:
    * - `CRLF`: used by [Windows](https://www.microsoft.com/windows).
    * - `LF`: used by [Linux](https://en.wikipedia.org/wiki/Linux) and [Unix](https://en.wikipedia.org/wiki/Unix) (include [MacOS](https://www.apple.com/macos/)).
-   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS). Today's Mac also uses `LF` as line end, you would never use `CR` any more.
+   * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS).
+   *
+   * :::warning
+   * Today's Mac also uses `LF` as line end, you would never use `CR` any more.
+   * :::
    *
    * :::note
-   * In fact it should be named to "line-end", it is called "file-format" just to be consistent
-   * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27) option.
+   * In fact this option should be named to "line-end", "file-format" is just to be consistent
+   * with Vim's [fileformat](https://vimhelp.org/options.txt.html#%27fileformat%27).
    * :::
    *
    * For this API, it has below options:
