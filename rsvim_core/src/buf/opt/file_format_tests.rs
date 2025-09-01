@@ -10,11 +10,11 @@ fn display1() {
 
 #[test]
 fn display2() {
-  assert_eq!("\r\n", EndOfLineOption::CRLF.to_string());
-  assert_eq!("\r\n", format!("{}", EndOfLineOption::CRLF));
+  assert_eq!("\r\n", EndOfLineOption::Crlf.to_string());
+  assert_eq!("\r\n", format!("{}", EndOfLineOption::Crlf));
 
-  assert_eq!("\n", EndOfLineOption::LF.to_string());
-  assert_eq!("\n", format!("{}", EndOfLineOption::LF));
+  assert_eq!("\n", EndOfLineOption::Lf.to_string());
+  assert_eq!("\n", format!("{}", EndOfLineOption::Lf));
 
   assert_eq!("\r", EndOfLineOption::CR.to_string());
   assert_eq!("\r", format!("{}", EndOfLineOption::CR));
@@ -24,11 +24,11 @@ fn display2() {
 fn from_str() {
   assert_eq!(
     EndOfLineOption::from_str("\r\n").unwrap(),
-    EndOfLineOption::CRLF
+    EndOfLineOption::Crlf
   );
   assert_eq!(
     EndOfLineOption::from_str("\n").unwrap(),
-    EndOfLineOption::LF
+    EndOfLineOption::Lf
   );
   assert_eq!(
     EndOfLineOption::from_str("\r").unwrap(),
