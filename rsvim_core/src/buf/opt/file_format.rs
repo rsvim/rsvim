@@ -51,43 +51,55 @@ impl From<EndOfLineOption> for FileFormatOption {
   }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  Hash,
+  PartialEq,
+  Eq,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
 pub enum EndOfLineOption {
+  #[strum(serialize = "\r\n")]
   /// Windows
   CRLF,
 
+  #[strum(serialize = "\n")]
   /// Unix
   LF,
 
+  #[strum(serialize = "\r")]
   /// Mac
   CR,
 }
 
-impl Display for EndOfLineOption {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    use crate::defaults::ascii::end_of_line as eol;
-
-    match self {
-      EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
-      EndOfLineOption::LF => write!(f, "{}", eol::LF),
-      EndOfLineOption::CR => write!(f, "{}", eol::CR),
-    }
-  }
-}
-
-impl TryFrom<&str> for EndOfLineOption {
-  type Error = String;
-
-  fn try_from(value: &str) -> Result<Self, Self::Error> {
-    let lower_value = value.to_lowercase();
-    match lower_value.as_str() {
-      "CRLF" => Ok(EndOfLineOption::CRLF),
-      "LF" => Ok(EndOfLineOption::LF),
-      "CR" => Ok(EndOfLineOption::CR),
-      _ => Err("Unknown EndOfLine value".to_string()),
-    }
-  }
-}
+// impl Display for EndOfLineOption {
+//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//     use crate::defaults::ascii::end_of_line as eol;
+//
+//     match self {
+//       EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
+//       EndOfLineOption::LF => write!(f, "{}", eol::LF),
+//       EndOfLineOption::CR => write!(f, "{}", eol::CR),
+//     }
+//   }
+// }
+//
+// impl TryFrom<&str> for EndOfLineOption {
+//   type Error = String;
+//
+//   fn try_from(value: &str) -> Result<Self, Self::Error> {
+//     let lower_value = value.to_lowercase();
+//     match lower_value.as_str() {
+//       "CRLF" => Ok(EndOfLineOption::CRLF),
+//       "LF" => Ok(EndOfLineOption::LF),
+//       "CR" => Ok(EndOfLineOption::CR),
+//       _ => Err("Unknown EndOfLine value".to_string()),
+//     }
+//   }
+// }
 
 impl From<FileFormatOption> for EndOfLineOption {
   fn from(value: FileFormatOption) -> Self {
