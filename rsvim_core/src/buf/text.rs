@@ -1,6 +1,6 @@
 //! Text content backend for buffer.
 
-use crate::buf::opt::BufferOptions;
+use crate::buf::opt::{BufferOptions, EndOfLineOption};
 use crate::buf::unicode;
 use crate::prelude::*;
 
@@ -118,7 +118,7 @@ impl Text {
   // library since we heavily rely on it, and cannot do anything without it. But anyway it works
   // great, so let's keep it.
   fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
-    use crate::defaults::ascii::end_of_line as ascii_eol;
+    // use crate::defaults::ascii::end_of_line as ascii_eol;
 
     let len_chars = line.len_chars();
 
@@ -132,18 +132,20 @@ impl Text {
       && char_idx >= len_chars - 2
       && char_idx < len_chars
       && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1))
-        == ascii_eol::CRLF;
+        == EndOfLineOption::Crlf.to_compact_string();
     let is_cr_or_lf = len_chars >= 1
       && char_idx == len_chars - 1
-      && (format!("{}", line.char(len_chars - 1)) == ascii_eol::CR
-        || format!("{}", line.char(len_chars - 1)) == ascii_eol::LF);
+      && (format!("{}", line.char(len_chars - 1))
+        == EndOfLineOption::Cr.to_compact_string()
+        || format!("{}", line.char(len_chars - 1))
+          == EndOfLineOption::Lf.to_compact_string());
 
     is_crlf || is_cr_or_lf
   }
 
   // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
   fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
-    use crate::defaults::ascii::end_of_line as ascii_eol;
+    // use crate::defaults::ascii::end_of_line as ascii_eol;
 
     let r = &self.rope;
     let len_chars = r.len_chars();
@@ -152,11 +154,13 @@ impl Text {
       && char_idx >= len_chars - 2
       && char_idx < len_chars
       && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1))
-        == ascii_eol::CRLF;
+        == EndOfLineOption::Crlf.to_compact_string();
     let is_cr_or_lf = len_chars >= 1
       && char_idx == len_chars - 1
-      && (format!("{}", r.char(len_chars - 1)) == ascii_eol::CR
-        || format!("{}", r.char(len_chars - 1)) == ascii_eol::LF);
+      && (format!("{}", r.char(len_chars - 1))
+        == EndOfLineOption::Cr.to_compact_string()
+        || format!("{}", r.char(len_chars - 1))
+          == EndOfLineOption::Lf.to_compact_string());
 
     is_crlf || is_cr_or_lf
   }
@@ -623,7 +627,7 @@ impl Text {
   }
 
   fn _n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
-    use crate::defaults::ascii::end_of_line as ascii_eol;
+    // use crate::defaults::ascii::end_of_line as ascii_eol;
 
     debug_assert!(n > 0);
     let mut i = absolute_char_idx as isize;
@@ -638,7 +642,8 @@ impl Text {
       };
       if c1.is_some()
         && c2.is_some()
-        && format!("{}{}", c2.unwrap(), c1.unwrap()) == ascii_eol::CRLF
+        && format!("{}{}", c2.unwrap(), c1.unwrap())
+          == EndOfLineOption::Crlf.to_compact_string()
       {
         i -= 2;
       } else {
@@ -662,7 +667,7 @@ impl Text {
       if c1.is_some()
         && c2.is_some()
         && format!("{}{}", c1.unwrap(), c2.unwrap())
-          == crate::defaults::ascii::end_of_line::CRLF
+          == EndOfLineOption::Crlf.to_compact_string()
       {
         i += 2;
       } else {
