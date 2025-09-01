@@ -9,15 +9,12 @@ use std::str::FromStr;
 )]
 pub enum EndOfLine {
   #[strum(serialize = "\r\n")]
-  #[strum(to_string = "\r\n")]
   Crlf,
 
   #[strum(serialize = "\n")]
-  #[strum(to_string = "\n")]
   Lf,
 
   #[strum(serialize = "\r")]
-  #[strum(to_string = "\r")]
   Cr,
 }
 
