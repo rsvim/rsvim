@@ -16,8 +16,8 @@ fn display2() {
   assert_eq!("\n", EndOfLineOption::Lf.to_string());
   assert_eq!("\n", format!("{}", EndOfLineOption::Lf));
 
-  assert_eq!("\r", EndOfLineOption::CR.to_string());
-  assert_eq!("\r", format!("{}", EndOfLineOption::CR));
+  assert_eq!("\r", EndOfLineOption::Cr.to_string());
+  assert_eq!("\r", format!("{}", EndOfLineOption::Cr));
 }
 
 #[test]
@@ -32,7 +32,7 @@ fn from_str() {
   );
   assert_eq!(
     EndOfLineOption::from_str("\r").unwrap(),
-    EndOfLineOption::CR
+    EndOfLineOption::Cr
   );
   assert!(EndOfLineOption::from_str("a").is_err());
 }
