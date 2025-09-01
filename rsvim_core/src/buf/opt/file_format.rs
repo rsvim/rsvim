@@ -1,100 +1,97 @@
 //! The "file-format" option for Vim buffer.
 
-use std::fmt::Display;
-use std::string::ToString;
-
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  Hash,
+  PartialEq,
+  Eq,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
 pub enum FileFormatOption {
+  #[strum(serialize = "dos")]
   /// CRLF (`<CR><NL>`)
   Dos,
 
+  #[strum(serialize = "unix")]
   /// LF (`<NL>`)
   Unix,
 
+  #[strum(serialize = "mac")]
   /// CR (`<CR>`)
   ///
   /// NOTE: This is a legacy and actually not used today.
   Mac,
 }
 
-impl Display for FileFormatOption {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    match self {
-      FileFormatOption::Dos => write!(f, "dos"),
-      FileFormatOption::Unix => write!(f, "unix"),
-      FileFormatOption::Mac => write!(f, "mac"),
-    }
-  }
-}
-
-impl TryFrom<&str> for FileFormatOption {
-  type Error = String;
-
-  fn try_from(value: &str) -> Result<Self, Self::Error> {
-    let lower_value = value.to_lowercase();
-    match lower_value.as_str() {
-      "dos" => Ok(FileFormatOption::Dos),
-      "unix" => Ok(FileFormatOption::Unix),
-      "mac" => Ok(FileFormatOption::Mac),
-      _ => Err("Unknown FileFormat value".to_string()),
-    }
-  }
-}
-
 impl From<EndOfLineOption> for FileFormatOption {
   fn from(value: EndOfLineOption) -> Self {
     match value {
-      EndOfLineOption::CRLF => FileFormatOption::Dos,
-      EndOfLineOption::LF => FileFormatOption::Unix,
-      EndOfLineOption::CR => FileFormatOption::Mac,
+      EndOfLineOption::Crlf => FileFormatOption::Dos,
+      EndOfLineOption::Lf => FileFormatOption::Unix,
+      EndOfLineOption::Cr => FileFormatOption::Mac,
     }
   }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  Hash,
+  PartialEq,
+  Eq,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
 pub enum EndOfLineOption {
+  #[strum(serialize = "\r\n")]
   /// Windows
-  CRLF,
+  Crlf,
 
+  #[strum(serialize = "\n")]
   /// Unix
-  LF,
+  Lf,
 
+  #[strum(serialize = "\r")]
   /// Mac
-  CR,
+  Cr,
 }
 
-impl Display for EndOfLineOption {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    use crate::defaults::ascii::end_of_line as eol;
-
-    match self {
-      EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
-      EndOfLineOption::LF => write!(f, "{}", eol::LF),
-      EndOfLineOption::CR => write!(f, "{}", eol::CR),
-    }
-  }
-}
-
-impl TryFrom<&str> for EndOfLineOption {
-  type Error = String;
-
-  fn try_from(value: &str) -> Result<Self, Self::Error> {
-    let lower_value = value.to_lowercase();
-    match lower_value.as_str() {
-      "CRLF" => Ok(EndOfLineOption::CRLF),
-      "LF" => Ok(EndOfLineOption::LF),
-      "CR" => Ok(EndOfLineOption::CR),
-      _ => Err("Unknown EndOfLine value".to_string()),
-    }
-  }
-}
+// impl Display for EndOfLineOption {
+//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//     use crate::defaults::ascii::end_of_line as eol;
+//
+//     match self {
+//       EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
+//       EndOfLineOption::LF => write!(f, "{}", eol::LF),
+//       EndOfLineOption::CR => write!(f, "{}", eol::CR),
+//     }
+//   }
+// }
+//
+// impl TryFrom<&str> for EndOfLineOption {
+//   type Error = String;
+//
+//   fn try_from(value: &str) -> Result<Self, Self::Error> {
+//     let lower_value = value.to_lowercase();
+//     match lower_value.as_str() {
+//       "CRLF" => Ok(EndOfLineOption::CRLF),
+//       "LF" => Ok(EndOfLineOption::LF),
+//       "CR" => Ok(EndOfLineOption::CR),
+//       _ => Err("Unknown EndOfLine value".to_string()),
+//     }
+//   }
+// }
 
 impl From<FileFormatOption> for EndOfLineOption {
   fn from(value: FileFormatOption) -> Self {
     match value {
-      FileFormatOption::Dos => EndOfLineOption::CRLF,
-      FileFormatOption::Unix => EndOfLineOption::LF,
-      FileFormatOption::Mac => EndOfLineOption::CR,
+      FileFormatOption::Dos => EndOfLineOption::Crlf,
+      FileFormatOption::Unix => EndOfLineOption::Lf,
+      FileFormatOption::Mac => EndOfLineOption::Cr,
     }
   }
 }
