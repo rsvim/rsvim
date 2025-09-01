@@ -301,7 +301,7 @@ export class RsvimOpt {
    * - `CR`: used by [classic MacOS](https://en.wikipedia.org/wiki/Classic_Mac_OS).
    *
    * :::warning
-   * Today's Mac also uses `LF` as line end, you would never use `CR` any more.
+   * Today's Mac also uses `LF` as line end, you should never use `CR` any more.
    * :::
    *
    * :::note
