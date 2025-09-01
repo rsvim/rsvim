@@ -1,5 +1,7 @@
 use super::file_format::*;
 
+use std::str::FromStr;
+
 #[test]
 fn display1() {
   let actual1 = format!("{}", FileFormatOption::Dos);
