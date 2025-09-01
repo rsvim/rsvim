@@ -1,7 +1,13 @@
 //! The "file-format" option for Vim buffer.
 
 #[derive(
-  Debug, Copy, PartialEq, Eq, strum_macros::Display, strum_macros::EnumString,
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  strum_macros::Display,
+  strum_macros::EnumString,
 )]
 pub enum FileFormatOption {
   #[strum(serialize = "dos")]
@@ -30,7 +36,13 @@ impl From<EndOfLineOption> for FileFormatOption {
 }
 
 #[derive(
-  Debug, Copy, PartialEq, Eq, strum_macros::Display, strum_macros::EnumString,
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  strum_macros::Display,
+  strum_macros::EnumString,
 )]
 pub enum EndOfLineOption {
   #[strum(serialize = "\r\n")]
