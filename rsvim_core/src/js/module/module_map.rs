@@ -128,6 +128,8 @@ pub struct ModuleMap {
 }
 
 impl ModuleMap {
+  /// Entry point of runtime execution, for rsvim this is the `rsvim.{js,ts}`
+  /// file.
   pub fn main(&self) -> &Option<ModulePath> {
     &self.main
   }
