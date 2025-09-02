@@ -143,17 +143,9 @@ impl ModuleMap {
     &self.seen
   }
 
-  // pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
-  //   self.seen.borrow_mut()
-  // }
-
   pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
     &self.pending
   }
-
-  // pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
-  //   self.pending.borrow_mut()
-  // }
 }
 
 impl ModuleMap {
