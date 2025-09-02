@@ -59,14 +59,14 @@ pub enum ModuleStatus {
   // Indicates the module **itself** is fetching.
   Fetching,
 
-  // Indicates the module dependencies are resolving (fetching, loading,
-  // compiling, etc).
+  // Indicates the module dependencies are resolving, i.e.
+  // fetching/loading/compiling/etc.
   Resolving,
 
   // Indicates the module has been seen before.
   Duplicate,
 
-  // Indicates the module (include its dependencies) is resolved.
+  // Indicates the module include all its dependencies is resolved.
   Ready,
 }
 
