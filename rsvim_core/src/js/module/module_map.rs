@@ -134,6 +134,7 @@ impl ModuleMap {
     &self.main
   }
 
+  /// All cached modules, maps from "Module Path" to "v8 Module".
   pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
     &self.index
   }
