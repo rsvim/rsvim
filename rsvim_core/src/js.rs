@@ -26,6 +26,10 @@ use module::{
   fetch_module_tree, resolve_import,
 };
 
+// Re-export
+pub use boost::*;
+pub use snapshot::*;
+
 use compact_str::ToCompactString;
 use std::rc::Rc;
 use std::sync::Once;
