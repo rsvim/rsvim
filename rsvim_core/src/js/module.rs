@@ -43,6 +43,11 @@ pub mod es_module;
 pub mod import_map;
 pub mod module_map;
 
+#[cfg(test)]
+mod es_module_tests;
+#[cfg(test)]
+mod module_map_tests;
+
 /// Module path on local file system.
 pub type ModulePath = String;
 
