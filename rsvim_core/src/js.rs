@@ -73,6 +73,17 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+/// Snapshot data.
+pub struct SnapshotData {
+  pub value: &'static [u8],
+}
+
+impl SnapshotData {
+  pub fn new(value: &'static [u8]) -> Self {
+    SnapshotData { value }
+  }
+}
+
 pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   static V8_INIT: Once = Once::new();
 
@@ -355,17 +366,6 @@ pub mod boost {
   }
 
   rc_refcell_ptr!(JsRuntimeState);
-
-  /// Snapshot data for startup.
-  pub struct SnapshotData {
-    pub value: &'static [u8],
-  }
-
-  impl SnapshotData {
-    pub fn new(value: &'static [u8]) -> Self {
-      SnapshotData { value }
-    }
-  }
 
   /// Javascript runtime.
   ///
