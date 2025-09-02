@@ -158,9 +158,9 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
 
 /// Snapshot builder version js runtime.
 ///
-/// NOTE: This runtime is for creating snapshot with builtin Runtime APIs to
+/// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
-pub mod snapshot_builder {
+pub mod snapshot {
   use super::*;
 
   /// The state for js runtime of snapshot.
@@ -284,12 +284,12 @@ pub mod snapshot_builder {
   }
 }
 
-/// Non-Snapshot version js runtime
+/// Snapshot boost version js runtime
 ///
 /// NOTE: This runtime is the real js runtime used by editor, it directly
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
-pub mod nonsnapshot {
+pub mod sd {
   use super::*;
 
   #[derive(Debug, Default, Clone)]
