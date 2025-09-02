@@ -56,12 +56,16 @@ pub type ModuleSource = String;
 /// network/http modules will be fetching. The only one use case of `Resolving` status should be
 /// dynamically import and its `Promise`.
 pub enum ModuleStatus {
-  // Indicates the module **itself** is being fetched.
+  // Indicates the module **itself** is fetching.
   Fetching,
-  // Indicates the module dependencies are being fetched.
+
+  // Indicates the module dependencies are resolving (fetching, loading,
+  // compiling, etc).
   Resolving,
-  // Indicates the module has ben seen before.
+
+  // Indicates the module has been seen before.
   Duplicate,
+
   // Indicates the module (include its dependencies) is resolved.
   Ready,
 }
