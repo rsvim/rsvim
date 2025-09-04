@@ -145,7 +145,13 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
         undefined
       }
     },
-    PromiseRejectWithNoHandler => message.get_value().unwrap(),
+    PromiseRejectWithNoHandler => {
+      trace!(
+        "promise_reject_cb event reason:get_value.unwrap {:?}",
+        message.get_value().unwrap()
+      );
+      message.get_value().unwrap()
+    }
   };
 
   let promise = message.get_promise();
