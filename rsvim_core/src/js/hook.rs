@@ -174,10 +174,10 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
 // https://v8.dev/features/dynamic-import
 pub fn host_import_module_dynamically_cb<'s>(
   scope: &mut v8::HandleScope<'s>,
-  _: v8::Local<'s, v8::Data>,
+  _host_defined_options: v8::Local<'s, v8::Data>,
   base: v8::Local<'s, v8::Value>,
   specifier: v8::Local<'s, v8::String>,
-  _: v8::Local<v8::FixedArray>,
+  _import_attributes: v8::Local<v8::FixedArray>,
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
