@@ -4,7 +4,8 @@ use crate::js::JsRuntime;
 use crate::js::binding::{set_exception_code, throw_type_error};
 use crate::js::err::JsError;
 use crate::js::module::{
-  ModuleGraph, ModuleSource, ModuleStatus, create_origin, resolve_import,
+  EsModule, ModuleGraph, ModuleSource, ModuleStatus, create_origin,
+  resolve_import,
 };
 use crate::prelude::*;
 
@@ -198,18 +199,17 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let resolved = resolve_import(Some(&base), &specifier, import_map);
-  if resolved.is_err() {
-    let e = resolved.err().unwrap();
-    drop(state);
-    let exception = v8::String::new(scope, &e.to_string()).unwrap();
-    let exception = v8::Exception::error(scope, exception);
-    set_exception_code(scope, exception, &e);
-    promise_resolver.reject(scope, exception);
-    return Some(promise);
-  }
-
-  let specifier = resolved.unwrap();
+  let specifier = match resolve_import(Some(&base), &specifier, import_map) {
+    Ok(specifier) => specifier,
+    Err(e) => {
+      drop(state);
+      let exception = v8::String::new(scope, &e.to_string()).unwrap();
+      let exception = v8::Exception::error(scope, exception);
+      set_exception_code(scope, exception, &e);
+      promise_resolver.reject(scope, exception);
+      return Some(promise);
+    }
+  };
 
   let dynamic_import_being_fetched =
     state.module_map.pending().borrow().iter().any(|graph_rc| {
@@ -333,7 +333,7 @@ pub fn host_import_module_dynamically_cb<'s>(
       };
 
       // Check if requested module has been seen already.
-      let seen_module = state.module_map.seen.get(&specifier);
+      let seen_module = state.module_map.seen().borrow().get(&specifier);
       let status = match seen_module {
         Some(ModuleStatus::Ready) => continue,
         Some(_) => ModuleStatus::Duplicate,
@@ -341,13 +341,13 @@ pub fn host_import_module_dynamically_cb<'s>(
       };
 
       // Create a new ES module instance.
-      let es_module = Rc::new(RefCell::new(EsModule {
-        path: specifier.clone(),
+      let es_module = Rc::new(RefCell::new(EsModule::new(
+        specifier.clone(),
         status,
-        dependencies: vec![],
-        exception: Rc::clone(&root_module_rc.borrow().exception),
-        is_dynamic_import: root_module_rc.borrow().is_dynamic_import,
-      }));
+        vec![],
+        root_module_rc.borrow().exception().clone(),
+        root_module_rc.borrow().is_dynamic_import(),
+      )));
 
       dependencies.push(Rc::clone(&es_module));
 
@@ -355,7 +355,11 @@ pub fn host_import_module_dynamically_cb<'s>(
       // the requested module.
       if seen_module.is_none() {
         // Recursively going down.
-        state.module_map.seen.insert(specifier, status);
+        state
+          .module_map
+          .seen()
+          .borrow_mut()
+          .insert(specifier, status);
         state.task_tracker.spawn_local(async move {
           let specifier = specifier.clone();
           move || match load_import(&specifier, false) {
