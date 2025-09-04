@@ -1,7 +1,7 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
 use crate::js::JsRuntime;
-use crate::js::binding::throw_type_error;
+use crate::js::binding::{set_exception_code, throw_type_error};
 use crate::js::module::resolve_import;
 use crate::prelude::*;
 
@@ -192,7 +192,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let resolved = resolve_import(Some(&base), &specifier, false, import_map);
+  let resolved = resolve_import(Some(&base), &specifier, import_map);
   if resolved.is_err() {
     let e = resolved.err().unwrap();
     drop(state);
@@ -207,12 +207,13 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let dynamic_import_being_fetched = state
     .module_map
-    .pending
+    .pending()
+    .borrow()
     .iter()
-    .any(|graph_rc| graph_rc.borrow().root_rc.borrow().path == specifier);
+    .any(|graph_rc| graph_rc.borrow().root_rc().borrow().path() == specifier);
 
   // Check if the requested dynamic module is already resolved.
-  if state.module_map.index.contains_key(&specifier)
+  if state.module_map.index().contains_key(&specifier)
     && !dynamic_import_being_fetched
   {
     // Create a local handle for the module.
