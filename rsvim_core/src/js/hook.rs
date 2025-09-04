@@ -265,7 +265,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     .insert(specifier.clone(), status);
 
   let handle_task_err = |e: anyhow::Error| {
-    let module = Rc::clone(&graph_rc.borrow().root_rc);
+    let module = Rc::clone(&graph_rc.borrow().root_rc());
     if module.is_dynamic_import {
       module.exception.borrow_mut().replace(e.to_string());
     }
