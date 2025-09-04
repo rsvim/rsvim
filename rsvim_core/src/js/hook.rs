@@ -137,18 +137,23 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
     | PromiseRejectAfterResolved
     | PromiseResolveAfterResolved => match message.get_value() {
       Some(value) => {
-        trace!("promise_reject_cb event reason:value {:?}", value);
+        trace!(
+          "promise_reject_cb event non-PromiseRejectWithNoHandler, message.value {:?}",
+          value
+        );
         value
       }
       None => {
-        trace!("promise_reject_cb event reason:undefined");
+        trace!(
+          "promise_reject_cb event non-PromiseRejectWithNoHandler, message.value undefined"
+        );
         undefined
       }
     },
     PromiseRejectWithNoHandler => {
       trace!(
-        "promise_reject_cb event reason:get_value.unwrap {:?}",
-        message.get_value().unwrap()
+        "promise_reject_cb event PromiseRejectWithNoHandler, message.get_value.unwrap {:?}",
+        message.get_value()
       );
       message.get_value().unwrap()
     }
