@@ -2,9 +2,9 @@
 
 use crate::js::JsRuntime;
 use crate::js::binding::{set_exception_code, throw_type_error};
-use crate::js::module::resolve_import;
+use crate::js::err::JsError;
 use crate::js::module::{
-  ModuleGraph, ModuleSource, ModuleStatus, create_origin,
+  ModuleGraph, ModuleSource, ModuleStatus, create_origin, resolve_import,
 };
 use crate::prelude::*;
 
@@ -323,14 +323,14 @@ pub fn host_import_module_dynamically_cb<'s>(
       // Transform v8's ModuleRequest into Rust string.
       let base = Some(base.as_str());
       let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
-      let specifier =
-        match resolve_import(base, &specifier, false, import_map.clone()) {
-          Ok(specifier) => specifier,
-          Err(e) => {
-            handle_task_err(anyhow::Error::msg(e.to_string()));
-            return;
-          }
-        };
+      let specifier = match resolve_import(base, &specifier, import_map.clone())
+      {
+        Ok(specifier) => specifier,
+        Err(e) => {
+          handle_task_err(anyhow::Error::msg(e.to_string()));
+          return;
+        }
+      };
 
       // Check if requested module has been seen already.
       let seen_module = state.module_map.seen.get(&specifier);
