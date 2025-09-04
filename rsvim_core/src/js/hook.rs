@@ -205,12 +205,10 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let specifier = resolved.unwrap();
 
-  let dynamic_import_being_fetched = state
-    .module_map
-    .pending()
-    .borrow()
-    .iter()
-    .any(|graph_rc| graph_rc.borrow().root_rc().borrow().path() == specifier);
+  let dynamic_import_being_fetched =
+    state.module_map.pending().borrow().iter().any(|graph_rc| {
+      *graph_rc.borrow().root_rc().borrow().path() == specifier
+    });
 
   // Check if the requested dynamic module is already resolved.
   if state.module_map.index().contains_key(&specifier)
