@@ -3,7 +3,11 @@
 use crate::js::JsRuntime;
 use crate::js::binding::{set_exception_code, throw_type_error};
 use crate::js::module::resolve_import;
+use crate::js::module::{ModuleGraph, ModuleStatus};
 use crate::prelude::*;
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Called during `Module::instantiate_module`, see:
 /// - Rusty V8 API:
@@ -249,8 +253,16 @@ pub fn host_import_module_dynamically_cb<'s>(
   let graph_rc = Rc::new(RefCell::new(graph));
   let status = ModuleStatus::Fetching;
 
-  state.module_map.pending.push(Rc::clone(&graph_rc));
-  state.module_map.seen.insert(specifier.clone(), status);
+  state
+    .module_map
+    .pending()
+    .borrow_mut()
+    .push(Rc::clone(&graph_rc));
+  state
+    .module_map
+    .seen()
+    .borrow_mut()
+    .insert(specifier.clone(), status);
 
   let handle_task_err = |e: anyhow::Error| {
     let module = Rc::clone(&graph_rc.borrow().root_rc);
