@@ -3,7 +3,9 @@
 use crate::js::JsRuntime;
 use crate::js::binding::{set_exception_code, throw_type_error};
 use crate::js::module::resolve_import;
-use crate::js::module::{ModuleGraph, ModuleStatus};
+use crate::js::module::{
+  ModuleGraph, ModuleSource, ModuleStatus, create_origin,
+};
 use crate::prelude::*;
 
 use std::cell::RefCell;
@@ -266,8 +268,8 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let handle_task_err = |e: anyhow::Error| {
     let module = Rc::clone(&graph_rc.borrow().root_rc());
-    if module.is_dynamic_import {
-      module.exception.borrow_mut().replace(e.to_string());
+    if module.borrow().is_dynamic_import() {
+      module.borrow().exception_mut().replace(e.to_string());
     }
   };
 

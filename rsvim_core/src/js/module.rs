@@ -106,7 +106,7 @@ pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
 /// - Rusty V8 API: <https://docs.rs/v8/latest/v8/struct.ScriptOrigin.html>.
 /// - MDN script: <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script>.
 /// - HTML5 origin: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
-fn create_origin<'s>(
+pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
   is_module: bool,
