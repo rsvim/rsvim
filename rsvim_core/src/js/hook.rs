@@ -301,7 +301,11 @@ pub fn host_import_module_dynamically_cb<'s>(
     let module_ref = v8::Global::new(tc_scope, module);
 
     state.module_map.insert(specifier.as_str(), module_ref);
-    state.module_map.seen.insert(specifier.clone(), new_status);
+    state
+      .module_map
+      .seen()
+      .borrow_mut()
+      .insert(specifier.clone(), new_status);
 
     let import_map = state.options.import_map.clone();
 
