@@ -74,6 +74,12 @@ impl ModuleGraph {
   pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
     &self.same_origin
   }
+
+  pub fn same_origin_mut(
+    &mut self,
+  ) -> &mut LinkedList<v8::Global<v8::PromiseResolver>> {
+    &mut self.same_origin
+  }
 }
 
 impl ModuleGraph {

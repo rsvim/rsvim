@@ -239,7 +239,7 @@ pub fn host_import_module_dynamically_cb<'s>(
       })
       .unwrap()
       .borrow_mut()
-      .same_origin
+      .same_origin_mut()
       .push_back(global_promise);
 
     return Some(promise);
