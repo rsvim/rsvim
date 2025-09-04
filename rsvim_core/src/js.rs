@@ -124,7 +124,9 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
   isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
   isolate.set_promise_reject_callback(hook::promise_reject_cb);
-  // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
+  isolate.set_host_import_module_dynamically_callback(
+    hook::host_import_module_dynamically_cb,
+  );
   isolate.set_host_initialize_import_meta_object_callback(
     hook::host_initialize_import_meta_object_cb,
   );
