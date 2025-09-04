@@ -231,9 +231,12 @@ pub fn host_import_module_dynamically_cb<'s>(
     // and declare this graph as same origin.
     state
       .module_map
-      .pending
+      .pending()
+      .borrow()
       .iter()
-      .find(|graph_rc| graph_rc.borrow().root_rc.borrow().path == specifier)
+      .find(|graph_rc| {
+        *graph_rc.borrow().root_rc().borrow().path() == specifier
+      })
       .unwrap()
       .borrow_mut()
       .same_origin
