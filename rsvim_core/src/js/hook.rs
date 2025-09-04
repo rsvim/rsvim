@@ -120,9 +120,7 @@ fn import_meta_resolve(
 /// See: <https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html>.
 /// See: <https://v8.dev/features/promise-combinators>.
 pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
-  {
-    trace!("promise_reject_cb");
-  }
+  trace!("promise_reject_cb");
 
   // Create a v8 callback-scope.
   let scope = &mut unsafe { v8::CallbackScope::new(&message) };
