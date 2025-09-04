@@ -267,7 +267,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     .insert(specifier.clone(), status);
 
   let handle_task_err = |e: anyhow::Error| {
-    let module = Rc::clone(&graph_rc.borrow().root_rc());
+    let module = graph_rc.borrow().root_rc();
     if module.borrow().is_dynamic_import() {
       module.borrow().exception_mut().replace(e.to_string());
     }
@@ -276,7 +276,7 @@ pub fn host_import_module_dynamically_cb<'s>(
   let task = |source: ModuleSource| {
     let tc_scope = &mut v8::TryCatch::new(scope);
     let origin = create_origin(tc_scope, &specifier, true);
-    let root_module_rc = Rc::clone(&graph_rc.borrow().root_rc);
+    let root_module_rc = graph_rc.borrow().root_rc();
 
     // Compile source and get it's dependencies.
     let source = v8::String::new(tc_scope, &source).unwrap();
