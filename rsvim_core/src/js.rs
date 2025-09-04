@@ -622,11 +622,9 @@ pub mod boost {
 
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
-      let isolate_has_pending_tasks =
-        self.isolate.has_pending_background_tasks();
       trace!(
-        "Tick js runtime, isolate has pending tasks: {:?}",
-        isolate_has_pending_tasks
+        "Tick js runtime, isolate has pending tasks: {}",
+        self.isolate.has_pending_background_tasks()
       );
       run_next_tick_callbacks(&mut self.handle_scope());
       self.fast_forward_imports();
