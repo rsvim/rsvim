@@ -135,7 +135,16 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   let reason = match event {
     PromiseHandlerAddedAfterReject
     | PromiseRejectAfterResolved
-    | PromiseResolveAfterResolved => undefined,
+    | PromiseResolveAfterResolved => match message.get_value() {
+      Some(value) => {
+        trace!("promise_reject_cb event reason:value {:?}", value);
+        value
+      }
+      None => {
+        trace!("promise_reject_cb event reason:undefined");
+        undefined
+      }
+    },
     PromiseRejectWithNoHandler => message.get_value().unwrap(),
   };
 
