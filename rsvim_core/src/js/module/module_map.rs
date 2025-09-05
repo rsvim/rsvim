@@ -138,7 +138,7 @@ pub struct ModuleMap {
   reversed_index: HashMap<i32, ModulePath>,
 
   // Module status.
-  seen: HashMap<ModulePath, ModuleStatus>,
+  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
 
   // Pending modules.
   pending: RefCell<Vec<ModuleGraphRc>>,
@@ -161,7 +161,7 @@ impl ModuleMap {
       main: None,
       index: HashMap::new(),
       reversed_index: HashMap::new(),
-      seen: HashMap::new(),
+      seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
     }
   }
@@ -203,8 +203,8 @@ impl ModuleMap {
 }
 
 impl ModuleMap {
-  pub fn seen_mut(&mut self) -> &mut HashMap<ModulePath, ModuleStatus> {
-    &mut self.seen
+  pub fn seen(&mut self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
+    &self.seen
   }
 
   pub fn update_status(&mut self, specifier: &str, status: ModuleStatus) {

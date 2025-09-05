@@ -730,6 +730,7 @@ pub mod boost {
       {
         let state = state_rc.borrow();
 
+        let mut seen_modules = state.module_map.seen().borrow_mut();
         let mut pending_graphs = state.module_map.pending().borrow_mut();
 
         pending_graphs.retain(|graph_rc| {
@@ -761,7 +762,7 @@ pub mod boost {
 
           // If the graph is still loading, fast-forward the dependencies.
           if graph_root.status() != ModuleStatus::Ready {
-            graph_root.fast_forward(state.module_map.seen_mut());
+            graph_root.fast_forward(&mut seen_modules);
             return true;
           }
 
