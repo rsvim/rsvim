@@ -243,13 +243,13 @@ impl JsFuture for EsModuleFuture {
       };
 
       // Create a new ES module instance.
-      let module = Rc::new(RefCell::new(EsModule {
-        path: specifier.clone(),
+      let module = Rc::new(RefCell::new(EsModule::new(
+        specifier.clone(),
         status,
-        dependencies: vec![],
-        exception: Rc::clone(&self.module.borrow().exception()),
-        is_dynamic_import: self.module.borrow().is_dynamic_import,
-      }));
+        vec![],
+        self.module.borrow().exception().clone(),
+        self.module.borrow().is_dynamic_import(),
+      )));
 
       dependencies.push(Rc::clone(&module));
 
