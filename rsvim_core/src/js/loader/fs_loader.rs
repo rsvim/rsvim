@@ -287,9 +287,10 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
   async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = async_load_as_file(path)
-      .await
-      .or_else(|_| async_load_as_directory(path).await);
+    let maybe_source = match async_load_as_file(path).await {
+      Ok(source) => Ok(source),
+      Err(_) => async_load_as_directory(path).await,
+    };
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
