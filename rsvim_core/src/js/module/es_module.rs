@@ -167,7 +167,7 @@ impl JsFuture for EsModuleFuture {
 
     // If the graph has exceptions, stop resolving the current sub-tree (dynamic imports).
     if self.module.borrow().exception().is_some() {
-      state.module_map.remove_status(&self.path);
+      state.module_map.seen().borrow_mut().remove(&self.path);
       return;
     }
 
@@ -248,7 +248,7 @@ impl JsFuture for EsModuleFuture {
 
       // Check if requested module has been seen already.
       let (not_seen_before, status) =
-        match state.module_map.get_status(&specifier) {
+        match state.module_map.seen().borrow().get(&specifier) {
           Some(ModuleStatus::Ready) => continue,
           Some(_) => (false, ModuleStatus::Duplicate),
           None => (true, ModuleStatus::Fetching),
@@ -278,7 +278,11 @@ impl JsFuture for EsModuleFuture {
         };
         state.pending_futures.insert(load_id, Box::new(load_cb));
 
-        state.module_map.update_status(&specifier, status);
+        state
+          .module_map
+          .seen()
+          .borrow_mut()
+          .insert(specifier.clone(), status);
 
         msg::sync_send_to_master(
           state.master_tx.clone(),

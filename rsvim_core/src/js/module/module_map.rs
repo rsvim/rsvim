@@ -206,18 +206,6 @@ impl ModuleMap {
   pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
     &self.seen
   }
-
-  pub fn update_status(&self, specifier: &str, status: ModuleStatus) {
-    self.seen.borrow_mut().insert(specifier.into(), status);
-  }
-
-  pub fn get_status(&self, specifier: &str) -> Option<ModuleStatus> {
-    self.seen.borrow().get(specifier).cloned()
-  }
-
-  pub fn remove_status(&self, specifier: &str) {
-    self.seen.borrow_mut().remove(specifier);
-  }
 }
 
 impl Default for ModuleMap {
