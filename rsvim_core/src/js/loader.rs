@@ -60,6 +60,9 @@ pub trait ModuleLoader {
 /// Asynchronous Module loader.
 ///
 /// It is the same with [`ModuleLoader`] but running asynchronously.
+///
+/// NOTE: This module loader is actually used in event loop, i.e. with tokio
+/// runtime, not in js runtime.
 pub trait AsyncModuleLoader {
   async fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
 }
