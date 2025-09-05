@@ -149,10 +149,6 @@ impl ModuleMap {
     &self.main
   }
 
-  pub fn seen_mut(&mut self) -> &mut HashMap<ModulePath, ModuleStatus> {
-    &mut self.seen
-  }
-
   pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
     &self.pending
   }
@@ -203,6 +199,12 @@ impl ModuleMap {
   /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
     self.reversed_index.get(&module_id).cloned()
+  }
+}
+
+impl ModuleMap {
+  pub fn seen_mut(&mut self) -> &mut HashMap<ModulePath, ModuleStatus> {
+    &mut self.seen
   }
 
   pub fn update_status(&mut self, specifier: &str, status: ModuleStatus) {
