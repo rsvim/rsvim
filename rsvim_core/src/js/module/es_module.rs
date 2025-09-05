@@ -1,7 +1,7 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js::JsFuture;
 use crate::js::module::{ModulePath, ModuleStatus};
+use crate::js::{JsFuture, JsRuntime};
 use crate::prelude::*;
 
 use std::cell::RefCell;
@@ -142,7 +142,7 @@ impl EsModuleFuture {
 
     // In static imports we exit the process.
     // FIXME: Only send the error to command-line, instead of exit process.
-    eprintln!("{}", generic_error(e.to_string()));
+    eprintln!("{}", e.to_string());
     std::process::exit(1);
   }
 }
