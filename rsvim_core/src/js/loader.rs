@@ -13,6 +13,7 @@ pub use fs_loader::FsModuleLoader;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
 // use url::Url;
+use async_trait::async_trait;
 
 pub mod core_loader;
 pub mod fs_loader;
@@ -53,4 +54,12 @@ pub trait ModuleLoader {
   /// For url module loader, it will first download the resource to local filesystem as local file
   /// cache, then read the cache contents and return as module source code.
   fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
+}
+
+#[async_trait]
+/// Asynchronous Module loader.
+///
+/// It is the same with [`ModuleLoader`] but running asynchronously.
+pub trait AsyncModuleLoader {
+  async fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
 }

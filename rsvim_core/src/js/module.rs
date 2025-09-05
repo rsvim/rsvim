@@ -196,12 +196,14 @@ pub fn load_import(
   loader.load(specifier)
 }
 
-/// FIXME: Not supported yet.
+/// Same with [`load_import`] but asynchronously.
 pub async fn load_import_async(
   specifier: &str,
-  skip_cache: bool,
+  _skip_cache: bool,
 ) -> AnyResult<ModuleSource> {
-  load_import(specifier, skip_cache)
+  let loader: &dyn ModuleLoader = _choose_module_loader(specifier);
+
+  loader.load(specifier)
 }
 
 /// Resolves module imports without dependency.
