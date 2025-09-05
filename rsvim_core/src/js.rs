@@ -729,6 +729,15 @@ pub mod boost {
                 );
               }
             }
+            JsMessage::LoadImportResp(resp) => {
+              trace!("Recv LoadImportResp:{resp:?}");
+              debug_assert!(
+                state.pending_futures.contains_key(&resp.future_id)
+              );
+              let load_cb =
+                state.pending_futures.remove(&resp.future_id).unwrap();
+              futures.push(load_cb);
+            }
           }
         }
 
