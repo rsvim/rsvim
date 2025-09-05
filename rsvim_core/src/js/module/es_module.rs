@@ -1,13 +1,16 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
+use crate::js::binding::global_rsvim::cmd::echo_impl;
 use crate::js::err::JsError;
 use crate::js::module::{
   ModulePath, ModuleStatus, create_origin, resolve_import,
 };
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
+use crate::state::ops::cmdline_ops;
 
+use compact_str::ToCompactString;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -137,7 +140,7 @@ pub struct EsModuleFuture {
 
 impl EsModuleFuture {
   // Handles static import error.
-  fn handle_failure(&mut self, e: anyhow::Error) {
+  fn handle_failure(&self, state: &JsRuntimeState, e: anyhow::Error) {
     let mut module = self.module.borrow_mut();
     // In dynamic imports we reject the promise(s).
     if module.is_dynamic_import() {
@@ -145,10 +148,9 @@ impl EsModuleFuture {
       return;
     }
 
-    // In static imports we exit the process.
-    // FIXME: Only send the error to command-line, instead of exit process.
-    eprintln!("{e}");
-    std::process::exit(1);
+    // In static imports, throw error to command-line.
+    trace!("Failed to static import: {e:?}");
+    echo_impl(state, e.to_compact_string());
   }
 }
 
@@ -170,7 +172,7 @@ impl JsFuture for EsModuleFuture {
     let source = match source {
       Ok(source) => source,
       Err(e) => {
-        self.handle_failure(anyhow::Error::msg(e.to_string()));
+        self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
         return;
       }
     };
@@ -192,7 +194,7 @@ impl JsFuture for EsModuleFuture {
           let exception =
             format!("{} ({})", exception.message, exception.resource_name);
 
-          self.handle_failure(anyhow::Error::msg(exception));
+          self.handle_failure(&state, anyhow::Error::msg(exception));
           return;
         }
       };
@@ -231,7 +233,7 @@ impl JsFuture for EsModuleFuture {
       {
         Ok(specifier) => specifier,
         Err(e) => {
-          self.handle_failure(anyhow::Error::msg(e.to_string()));
+          self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
           return;
         }
       };

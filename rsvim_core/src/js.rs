@@ -172,6 +172,7 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
       error!(
         "Failed to evaluate builtin modules: {filename}, error: {exception:?}"
       );
+      // Exit process!
       std::process::exit(1);
     }
   }
