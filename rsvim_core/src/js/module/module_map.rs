@@ -156,7 +156,7 @@ impl ModuleMap {
 }
 
 impl ModuleMap {
-  /// Creates a new module-map instance.
+  /// Creates a global module map.
   pub fn new() -> ModuleMap {
     Self {
       main: None,
@@ -166,7 +166,7 @@ impl ModuleMap {
     }
   }
 
-  /// Inserts a compiled ES module to the map.
+  /// Add a compiled v8 module to the cache.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
