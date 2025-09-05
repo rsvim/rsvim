@@ -41,7 +41,7 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
-use std::collections::{HashMap, LinkedList};
+use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
 /// Import kind.
