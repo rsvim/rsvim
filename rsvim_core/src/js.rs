@@ -13,6 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
+use crate::js::module::EsModuleFuture;
 use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
@@ -31,6 +32,7 @@ pub use boost::*;
 pub use snapshot::*;
 
 use compact_str::ToCompactString;
+use downcast_rs::{Downcast, impl_downcast};
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -59,9 +61,11 @@ pub fn v8_version() -> &'static str {
 /// An abstract interface for javascript `Promise` and `async`.
 /// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
 /// the async task into tokio `spawn` API.
-pub trait JsFuture {
+pub trait JsFuture: Downcast {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
+
+impl_downcast!(JsFuture);
 
 pub type JsFutureId = i32;
 
@@ -307,6 +311,7 @@ pub mod snapshot {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
+
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -736,6 +741,7 @@ pub mod boost {
               );
               let load_cb =
                 state.pending_futures.remove(&resp.future_id).unwrap();
+              let load_cb = load_cb.downcast_ref::<EsModuleFuture>();
               futures.push(load_cb);
             }
           }

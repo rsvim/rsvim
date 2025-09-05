@@ -1,6 +1,7 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::js::JsFutureId;
+use crate::prelude::*;
 
 use compact_str::CompactString;
 use std::time::Duration;
@@ -50,11 +51,11 @@ impl ExCommandReq {
 #[derive(Debug)]
 pub struct LoadImportResp {
   pub future_id: JsFutureId,
-  pub source: String,
+  pub source: AnyResult<String>,
 }
 
 impl LoadImportResp {
-  pub fn new(future_id: JsFutureId, source: String) -> Self {
+  pub fn new(future_id: JsFutureId, source: AnyResult<String>) -> Self {
     Self { future_id, source }
   }
 }

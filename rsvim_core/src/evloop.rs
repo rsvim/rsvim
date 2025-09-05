@@ -602,23 +602,15 @@ impl EventLoop {
         }
         MasterMessage::LoadImportReq(req) => {
           trace!("Receive LoadImportReq:{:?}", req.future_id);
-          match load_import(&req.specifier, false) {
-            Ok(source) => {
-              let _ = self
-                .jsrt_forwarder_tx
-                .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(
-                  req.future_id,
-                  source,
-                )))
-                .await;
-            }
-            Err(e) => {
-              trace!(
-                "Failed LoadImportReq, future_id:{}, error:{:?}",
-                req.future_id, e
-              );
-            }
-          }
+          // FIXME: Use async file reading for load import.
+          let maybe_source = load_import(&req.specifier, false);
+          let _ = self
+            .jsrt_forwarder_tx
+            .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(
+              req.future_id,
+              maybe_source,
+            )))
+            .await;
         }
       }
     }

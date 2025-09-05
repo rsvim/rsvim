@@ -65,6 +65,7 @@ assert_fs = "1.1.3"
 git2 = "0.20"
 strum = "0.27.2"
 strum_macros = "0.27.2"
+downcast-rs = "2.0.2"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
