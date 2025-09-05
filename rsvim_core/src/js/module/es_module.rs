@@ -1,5 +1,6 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
+use crate::js::err::JsError;
 use crate::js::module::create_origin;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::js::{JsFuture, JsRuntime};
@@ -187,7 +188,7 @@ impl JsFuture for EsModuleFuture {
           let exception =
             format!("{} ({})", exception.message, exception.resource_name);
 
-          self.handle_failure(Error::msg(exception));
+          self.handle_failure(anyhow::Error::msg(exception));
           return;
         }
       };
