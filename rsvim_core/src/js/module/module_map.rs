@@ -207,16 +207,16 @@ impl ModuleMap {
     &self.seen
   }
 
-  pub fn update_status(&mut self, specifier: &str, status: ModuleStatus) {
-    self.seen.insert(specifier.into(), status);
+  pub fn update_status(&self, specifier: &str, status: ModuleStatus) {
+    self.seen.borrow_mut().insert(specifier.into(), status);
   }
 
-  pub fn get_status(&self, specifier: &str) -> Option<&ModuleStatus> {
-    self.seen.get(specifier)
+  pub fn get_status(&self, specifier: &str) -> Option<ModuleStatus> {
+    self.seen.borrow().get(specifier).cloned()
   }
 
-  pub fn remove_status(&mut self, specifier: &str) {
-    self.seen.remove(specifier);
+  pub fn remove_status(&self, specifier: &str) {
+    self.seen.borrow_mut().remove(specifier);
   }
 }
 
