@@ -138,7 +138,7 @@ pub struct ModuleMap {
   reversed_index: HashMap<i32, ModulePath>,
 
   // Module status.
-  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
+  seen: HashMap<ModulePath, ModuleStatus>,
 
   // Pending modules.
   pending: RefCell<Vec<ModuleGraphRc>>,
@@ -149,8 +149,8 @@ impl ModuleMap {
     &self.main
   }
 
-  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
-    &self.seen
+  pub fn seen_mut(&mut self) -> &mut HashMap<ModulePath, ModuleStatus> {
+    &mut self.seen
   }
 
   pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
@@ -165,7 +165,7 @@ impl ModuleMap {
       main: None,
       index: HashMap::new(),
       reversed_index: HashMap::new(),
-      seen: RefCell::new(HashMap::new()),
+      seen: HashMap::new(),
       pending: RefCell::new(vec![]),
     }
   }
@@ -203,6 +203,18 @@ impl ModuleMap {
   /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
     self.reversed_index.get(&module_id).cloned()
+  }
+
+  pub fn update_status(&mut self, specifier: &str, status: ModuleStatus) {
+    self.seen.insert(specifier.into(), status);
+  }
+
+  pub fn get_status(&self, specifier: &str) -> Option<&ModuleStatus> {
+    self.seen.get(specifier)
+  }
+
+  pub fn remove_status(&mut self, specifier: &str) {
+    self.seen.remove(specifier);
   }
 }
 
