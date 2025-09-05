@@ -1,6 +1,5 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js::binding::global_rsvim::cmd::echo_impl;
 use crate::js::err::JsError;
 use crate::js::module::{
   ModulePath, ModuleStatus, create_origin, resolve_import,
@@ -8,6 +7,7 @@ use crate::js::module::{
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
+use crate::state::ops::cmdline_ops;
 
 use compact_str::ToCompactString;
 use std::cell::RefCell;
@@ -149,7 +149,13 @@ impl EsModuleFuture {
 
     // In static imports, throw error to command-line.
     trace!("Failed to static import: {e:?}");
-    echo_impl(state, e.to_compact_string());
+    let mut tree = lock!(state.tree);
+    let mut contents = lock!(state.contents);
+    cmdline_ops::cmdline_set_message(
+      &mut tree,
+      &mut contents,
+      e.to_compact_string(),
+    );
   }
 }
 
