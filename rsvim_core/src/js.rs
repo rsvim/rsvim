@@ -311,7 +311,6 @@ pub mod build {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
-
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -1063,7 +1062,7 @@ fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
 
 // Returns an error if an uncaught exception or unhandled rejection has been captured.
 pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
-  let state_rc = boost::JsRuntime::state(scope);
+  let state_rc = JsRuntime::state(scope);
   let maybe_exception = state_rc.borrow_mut().exceptions.exception.take();
 
   // Check for uncaught exceptions first.
