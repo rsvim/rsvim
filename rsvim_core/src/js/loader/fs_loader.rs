@@ -7,15 +7,10 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
-// use regex::Regex;
-// use sha::sha1::Sha1;
-// use sha::utils::Digest;
-// use sha::utils::DigestExt;
 use async_trait::async_trait;
 use path_absolutize::Absolutize;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
-// use url::Url;
 
 static FILE_EXTENSIONS: &[&str] =
   &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
