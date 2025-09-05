@@ -264,11 +264,12 @@ pub fn fetch_module_tree<'a>(
   let state_rc = JsRuntime::state(scope);
 
   // Subscribe module to the module-map.
+  let module_id = module.get_identity_hash().get();
   let module_ref = v8::Global::new(scope, module);
   state_rc
     .borrow_mut()
     .module_map
-    .insert(filename, module_ref);
+    .insert(filename, module_id, module_ref);
 
   let requests = module.get_module_requests();
   trace!("Get {} module requests", requests.length());

@@ -41,7 +41,7 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
-use std::collections::LinkedList;
+use std::collections::{HashMap, LinkedList};
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -134,6 +134,9 @@ pub struct ModuleMap {
   // Cached modules, maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
 
+  // Reversed index for `index`, maps from "v8 Module's ID" to "Module Path".
+  reversed_index: HashMap<i32, ModulePath>,
+
   // Module status.
   seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
 
@@ -161,18 +164,25 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
+      reversed_index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
     }
   }
 
   /// Add a compiled v8 module to the cache.
-  pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
+  pub fn insert(
+    &mut self,
+    path: &str,
+    module_id: i32,
+    module: v8::Global<v8::Module>,
+  ) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
       self.main = Some(path.into());
     }
     self.index.insert(path.into(), module);
+    self.reversed_index.insert(module_id.get(), path.into());
   }
 
   // // Returns if there are still pending imports to be loaded.
@@ -180,7 +190,7 @@ impl ModuleMap {
   //   !self.pending.is_empty()
   // }
 
-  /// Returns a v8 module reference from me module-map.
+  /// Returns a compiled v8 module.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
     self.index.get(key).cloned()
   }
