@@ -565,7 +565,7 @@ pub mod boost {
       runtime
     }
 
-    /// Executes JavaScript code as ES module.
+    /// Executes javascript source code as ES module.
     pub fn execute_module(
       &mut self,
       filename: &str,
