@@ -182,7 +182,7 @@ impl ModuleMap {
       self.main = Some(path.into());
     }
     self.index.insert(path.into(), module);
-    self.reversed_index.insert(module_id.get(), path.into());
+    self.reversed_index.insert(module_id, path.into());
   }
 
   // // Returns if there are still pending imports to be loaded.
