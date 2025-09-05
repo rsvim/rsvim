@@ -14,6 +14,7 @@ pub enum MasterMessage {
   PrintReq(PrintReq),
   TimeoutReq(TimeoutReq),
   ExitReq(ExitReq),
+  LoadImportReq(LoadImportReq),
 }
 
 #[derive(Debug)]
@@ -54,6 +55,21 @@ impl TimeoutReq {
     TimeoutReq {
       future_id,
       duration,
+    }
+  }
+}
+
+#[derive(Debug)]
+pub struct LoadImportReq {
+  pub future_id: JsFutureId,
+  pub specifier: String,
+}
+
+impl LoadImportReq {
+  pub fn new(future_id: JsFutureId, specifier: String) -> Self {
+    LoadImportReq {
+      future_id,
+      specifier,
     }
   }
 }
