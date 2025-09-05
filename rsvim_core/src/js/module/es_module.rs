@@ -2,7 +2,7 @@
 
 use crate::js::err::JsError;
 use crate::js::module::{
-  ModulePath, ModuleStatus, create_origin, load_import, resolve_import,
+  ModulePath, ModuleStatus, create_origin, resolve_import,
 };
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
 use crate::msg::{self, MasterMessage};
