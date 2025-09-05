@@ -604,11 +604,11 @@ impl EventLoop {
           trace!("Receive LoadImportReq:{:?}", req.future_id);
           match load_import(&req.specifier, false) {
             Ok(source) => {
-              let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
-              let _ = jsrt_forwarder_tx
-                .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
+              let _ = self
+                .jsrt_forwarder_tx
+                .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(
                   req.future_id,
-                  req.duration,
+                  source,
                 )))
                 .await;
             }

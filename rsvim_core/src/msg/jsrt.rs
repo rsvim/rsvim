@@ -50,15 +50,12 @@ impl ExCommandReq {
 #[derive(Debug)]
 pub struct LoadImportResp {
   pub future_id: JsFutureId,
-  pub duration: Duration,
+  pub source: String,
 }
 
 impl LoadImportResp {
-  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
-    Self {
-      future_id,
-      duration,
-    }
+  pub fn new(future_id: JsFutureId, source: String) -> Self {
+    Self { future_id, source }
   }
 }
 
