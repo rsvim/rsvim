@@ -236,7 +236,8 @@ impl JsFuture for EsModuleFuture {
       };
 
       // Check if requested module has been seen already.
-      let seen_module = state.module_map.seen().borrow().get(&specifier);
+      let seen = state.module_map.seen().borrow();
+      let seen_module = seen.get(&specifier);
       let status = match seen_module {
         Some(ModuleStatus::Ready) => continue,
         Some(_) => ModuleStatus::Duplicate,
@@ -271,7 +272,7 @@ impl JsFuture for EsModuleFuture {
           .module_map
           .seen()
           .borrow_mut()
-          .insert(specifier, status);
+          .insert(specifier.clone(), status);
 
         msg::sync_send_to_master(
           state.master_tx.clone(),
