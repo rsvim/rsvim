@@ -29,7 +29,7 @@ use module::{
 
 // Re-export
 pub use boost::*;
-pub use snapshot::*;
+pub use build::*;
 
 use compact_str::ToCompactString;
 use downcast_rs::{Downcast, impl_downcast};
@@ -181,7 +181,7 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
 ///
 /// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
-pub mod snapshot {
+pub mod build {
   use super::*;
 
   /// The state for js runtime of snapshot.
