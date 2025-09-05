@@ -639,6 +639,7 @@ pub mod boost {
       let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
       {
         let mut state = state_rc.borrow_mut();
+
         while let Ok(msg) = state.jsrt_rx.try_recv() {
           match msg {
             JsMessage::TimeoutResp(resp) => {
