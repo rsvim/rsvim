@@ -258,7 +258,11 @@ pub fn host_import_module_dynamically_cb<'s>(
     .pending()
     .borrow_mut()
     .push(Rc::clone(&graph_rc));
-  state.module_map.update_status(&specifier, status);
+  state
+    .module_map
+    .seen()
+    .borrow_mut()
+    .insert(specifier.clone(), status);
 
   /*  Use the event-loop to asynchronously load the requested module. */
 
