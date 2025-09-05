@@ -14,7 +14,6 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use path_absolutize::Absolutize;
 use std::ffi::OsString;
-use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 // use url::Url;
@@ -60,7 +59,19 @@ fn wrap_json(source: &str) -> String {
 
 /// Loads contents from a file.
 fn load_source(path: &Path) -> AnyResult<ModuleSource> {
-  let source = fs::read_to_string(path)?;
+  let source = std::fs::read_to_string(path)?;
+  let source = if is_json_import(path) {
+    wrap_json(source.as_str())
+  } else {
+    source
+  };
+
+  Ok(source)
+}
+
+/// Async [`load_source`].
+async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
+  let source = tokio::fs::read_to_string(path).await?;
   let source = if is_json_import(path) {
     wrap_json(source.as_str())
   } else {
@@ -102,7 +113,7 @@ fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
 async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   // If path is a file.
   if path.is_file() {
-    return match load_source(path) {
+    return match async_load_source(path).await {
       Ok(source) => Ok((path.to_path_buf(), source)),
       Err(e) => Err(e),
     };
@@ -114,7 +125,7 @@ async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     for ext in FILE_EXTENSIONS {
       let ext_path = path.with_extension(ext);
       if ext_path.is_file() {
-        return match load_source(&ext_path) {
+        return match async_load_source(&ext_path).await {
           Ok(source) => Ok((ext_path.to_path_buf(), source)),
           Err(e) => Err(e),
         };
@@ -134,6 +145,23 @@ fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     let path = &path.join(format!("index.{ext}"));
     if path.is_file() {
       return match load_source(path) {
+        Ok(source) => Ok((path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
+    }
+  }
+
+  anyhow::bail!(path_not_found(path));
+}
+
+/// Async [`load_as_directory`].
+async fn async_load_as_directory(
+  path: &Path,
+) -> AnyResult<(PathBuf, ModuleSource)> {
+  for ext in FILE_EXTENSIONS {
+    let path = &path.join(format!("index.{ext}"));
+    if path.is_file() {
+      return match async_load_source(path).await {
         Ok(source) => Ok((path.to_path_buf(), source)),
         Err(e) => Err(e),
       };
@@ -260,7 +288,9 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
   async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = load_as_file(path).or_else(|_| load_as_directory(path));
+    let maybe_source = async_load_as_file(path)
+      .await
+      .or_else(|_| async_load_as_directory(path).await);
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
