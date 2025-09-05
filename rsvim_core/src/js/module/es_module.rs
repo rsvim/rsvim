@@ -2,7 +2,9 @@
 
 use crate::js::err::JsError;
 use crate::js::module::create_origin;
-use crate::js::module::{ModulePath, ModuleStatus};
+use crate::js::module::{
+  ModulePath, ModuleStatus, load_import, resolve_import,
+};
 use crate::js::{JsFuture, JsRuntime};
 use crate::prelude::*;
 
@@ -205,10 +207,10 @@ impl JsFuture for EsModuleFuture {
 
     let import_map = state.options.import_map.clone();
 
-    let skip_cache = match self.module.borrow().is_dynamic_import {
-      true => !state.options.test_mode || state.options.reload,
-      false => state.options.reload,
-    };
+    // let skip_cache = match self.module.borrow().is_dynamic_import() {
+    //   true => !state.options.test_mode || state.options.reload,
+    //   false => state.options.reload,
+    // };
 
     let mut dependencies = vec![];
 
@@ -223,17 +225,17 @@ impl JsFuture for EsModuleFuture {
       // Transform v8's ModuleRequest into Rust string.
       let base = Some(base.as_str());
       let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
-      let specifier =
-        match resolve_import(base, &specifier, false, import_map.clone()) {
-          Ok(specifier) => specifier,
-          Err(e) => {
-            self.handle_failure(Error::msg(e.to_string()));
-            return;
-          }
-        };
+      let specifier = match resolve_import(base, &specifier, import_map.clone())
+      {
+        Ok(specifier) => specifier,
+        Err(e) => {
+          self.handle_failure(anyhow::Error::msg(e.to_string()));
+          return;
+        }
+      };
 
       // Check if requested module has been seen already.
-      let seen_module = state.module_map.seen.get(&specifier);
+      let seen_module = state.module_map.seen().borrow().get(&specifier);
       let status = match seen_module {
         Some(ModuleStatus::Ready) => continue,
         Some(_) => ModuleStatus::Duplicate,
@@ -245,7 +247,7 @@ impl JsFuture for EsModuleFuture {
         path: specifier.clone(),
         status,
         dependencies: vec![],
-        exception: Rc::clone(&self.module.borrow().exception),
+        exception: Rc::clone(&self.module.borrow().exception()),
         is_dynamic_import: self.module.borrow().is_dynamic_import,
       }));
 
@@ -256,7 +258,7 @@ impl JsFuture for EsModuleFuture {
       if seen_module.is_none() {
         let task = {
           let specifier = specifier.clone();
-          move || match load_import(&specifier, skip_cache) {
+          move || match load_import(&specifier, false) {
             Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
             Err(e) => Some(Result::Err(e)),
           }
