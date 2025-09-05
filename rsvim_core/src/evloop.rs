@@ -4,7 +4,7 @@ use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
-use crate::js::module::load_import;
+use crate::js::module::async_load_import;
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
@@ -603,7 +603,7 @@ impl EventLoop {
         MasterMessage::LoadImportReq(req) => {
           trace!("Receive LoadImportReq:{:?}", req.future_id);
           // FIXME: Use async file reading for load import.
-          let maybe_source = load_import(&req.specifier, false);
+          let maybe_source = async_load_import(&req.specifier, false).await;
           let _ = self
             .jsrt_forwarder_tx
             .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(

@@ -199,11 +199,11 @@ pub fn load_import(
   loader.load(specifier)
 }
 
-/// Same with [`load_import`] but asynchronously.
+/// Async [`load_import`].
 ///
 /// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
 /// in js runtime.
-pub async fn load_import_async(
+pub async fn async_load_import(
   specifier: &str,
   _skip_cache: bool,
 ) -> AnyResult<ModuleSource> {
