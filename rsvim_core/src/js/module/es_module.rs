@@ -8,7 +8,6 @@ use crate::js::module::{
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
-use crate::state::ops::cmdline_ops;
 
 use compact_str::ToCompactString;
 use std::cell::RefCell;
