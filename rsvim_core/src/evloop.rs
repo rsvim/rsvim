@@ -602,7 +602,6 @@ impl EventLoop {
         }
         MasterMessage::LoadImportReq(req) => {
           trace!("Receive LoadImportReq:{:?}", req.future_id);
-          // FIXME: Use async file reading for load import.
           let maybe_source = async_load_import(&req.specifier, false).await;
           let _ = self
             .jsrt_forwarder_tx
