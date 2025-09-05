@@ -236,13 +236,12 @@ impl JsFuture for EsModuleFuture {
       };
 
       // Check if requested module has been seen already.
-      let seen = state.module_map.seen().borrow();
-      let seen_module = seen.get(&specifier);
-      let status = match seen_module {
-        Some(ModuleStatus::Ready) => continue,
-        Some(_) => ModuleStatus::Duplicate,
-        None => ModuleStatus::Fetching,
-      };
+      let (not_seen_before, status) =
+        match state.module_map.seen().borrow().get(&specifier) {
+          Some(ModuleStatus::Ready) => continue,
+          Some(_) => (false, ModuleStatus::Duplicate),
+          None => (true, ModuleStatus::Fetching),
+        };
 
       // Create a new ES module instance.
       let module = Rc::new(RefCell::new(EsModule::new(
@@ -257,7 +256,7 @@ impl JsFuture for EsModuleFuture {
 
       // If the module is newly seen, use the event-loop to load
       // the requested module.
-      if seen_module.is_none() {
+      if not_seen_before {
         let load_id = js::next_future_id();
 
         let load_cb = EsModuleFuture {
