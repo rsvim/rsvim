@@ -11,9 +11,16 @@ use tokio::task::JoinHandle;
 #[derive(Debug)]
 /// Message sent to [`EventLoop`](crate::evloop::EventLoop).
 pub enum MasterMessage {
+  /// Js runtime ask master to print message
   PrintReq(PrintReq),
+
+  /// Js runtime ask master to set timeout, i.e. sleep
   TimeoutReq(TimeoutReq),
+
+  /// Js runtime ask master to exit
   ExitReq(ExitReq),
+
+  /// Js runtime ask master to load import
   LoadImportReq(LoadImportReq),
 }
 
@@ -25,7 +32,7 @@ pub struct ExitReq {
 
 impl ExitReq {
   pub fn new(future_id: JsFutureId, exit_code: i32) -> Self {
-    ExitReq {
+    Self {
       future_id,
       exit_code,
     }
@@ -52,7 +59,7 @@ pub struct TimeoutReq {
 
 impl TimeoutReq {
   pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
-    TimeoutReq {
+    Self {
       future_id,
       duration,
     }
@@ -67,7 +74,7 @@ pub struct LoadImportReq {
 
 impl LoadImportReq {
   pub fn new(future_id: JsFutureId, specifier: String) -> Self {
-    LoadImportReq {
+    Self {
       future_id,
       specifier,
     }

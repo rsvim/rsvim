@@ -15,6 +15,9 @@ pub enum JsMessage {
 
   /// Event loop send ex command to js runtime to run.
   ExCommandReq(ExCommandReq),
+
+  /// Master send js runtime the result of load import
+  LoadImportResp(LoadImportResp),
 }
 
 #[derive(Debug)]
@@ -25,7 +28,7 @@ pub struct TimeoutResp {
 
 impl TimeoutResp {
   pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
-    TimeoutResp {
+    Self {
       future_id,
       duration,
     }
@@ -41,6 +44,21 @@ pub struct ExCommandReq {
 impl ExCommandReq {
   pub fn new(future_id: JsFutureId, payload: CompactString) -> Self {
     ExCommandReq { future_id, payload }
+  }
+}
+
+#[derive(Debug)]
+pub struct LoadImportResp {
+  pub future_id: JsFutureId,
+  pub duration: Duration,
+}
+
+impl LoadImportResp {
+  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
+    Self {
+      future_id,
+      duration,
+    }
   }
 }
 

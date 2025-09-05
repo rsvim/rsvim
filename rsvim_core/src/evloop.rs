@@ -4,6 +4,7 @@ use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOptions;
 use crate::content::{TextContents, TextContentsArc};
 use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
+use crate::js::module::load_import;
 use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
@@ -601,6 +602,23 @@ impl EventLoop {
         }
         MasterMessage::LoadImportReq(req) => {
           trace!("Receive LoadImportReq:{:?}", req.future_id);
+          match load_import(&req.specifier, false) {
+            Ok(source) => {
+              let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+              let _ = jsrt_forwarder_tx
+                .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
+                  req.future_id,
+                  req.duration,
+                )))
+                .await;
+            }
+            Err(e) => {
+              trace!(
+                "Failed LoadImportReq, future_id:{}, error:{:?}",
+                req.future_id, e
+              );
+            }
+          }
         }
       }
     }
