@@ -1,5 +1,6 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
+use crate::js::module::create_origin;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::js::{JsFuture, JsRuntime};
 use crate::prelude::*;
@@ -127,7 +128,7 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_result: IoResult<String>,
+  pub maybe_result: Option<IoResult<String>>,
 }
 
 impl EsModuleFuture {
@@ -154,17 +155,17 @@ impl JsFuture for EsModuleFuture {
     let mut state = state_rc.borrow_mut();
 
     // If the graph has exceptions, stop resolving the current sub-tree (dynamic imports).
-    if self.module.borrow().exception.borrow().is_some() {
-      state.module_map.seen.remove(&self.path);
+    if self.module.borrow().exception().is_some() {
+      state.module_map.seen().borrow_mut().remove(&self.path);
       return;
     }
 
     // Extract module's source code.
     let source = self.maybe_result.take().unwrap();
     let source = match source {
-      Ok(source) => bincode::deserialize::<String>(&source).unwrap(),
+      Ok(source) => source,
       Err(e) => {
-        self.handle_failure(Error::msg(e.to_string()));
+        self.handle_failure(anyhow::Error::msg(e.to_string()));
         return;
       }
     };
