@@ -14,8 +14,7 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use path_absolutize::Absolutize;
 use std::ffi::OsString;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 // use url::Url;
 
 static FILE_EXTENSIONS: &[&str] =
