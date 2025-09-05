@@ -142,7 +142,7 @@ impl EsModuleFuture {
 
     // In static imports we exit the process.
     // FIXME: Only send the error to command-line, instead of exit process.
-    eprintln!("{}", e.to_string());
+    eprintln!("{e}");
     std::process::exit(1);
   }
 }
