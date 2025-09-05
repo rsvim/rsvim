@@ -1,11 +1,11 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
 use crate::js::err::JsError;
-use crate::js::module::create_origin;
 use crate::js::module::{
-  ModulePath, ModuleStatus, load_import, resolve_import,
+  ModulePath, ModuleStatus, create_origin, load_import, resolve_import,
 };
-use crate::js::{JsFuture, JsRuntime};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
+use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
 
 use std::cell::RefCell;
@@ -131,6 +131,7 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
+  pub load_id: JsFutureId,
   pub maybe_result: Option<IoResult<String>>,
 }
 
@@ -256,30 +257,29 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if seen_module.is_none() {
-        let task = {
-          let specifier = specifier.clone();
-          move || match load_import(&specifier, false) {
-            Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-            Err(e) => Some(Result::Err(e)),
-          }
-        };
+        let load_id = js::next_future_id();
 
-        let task_cb = {
-          let specifier = specifier.clone();
-          let state_rc = state_rc.clone();
-          move |_: LoopHandle, maybe_result: TaskResult| {
-            let mut state = state_rc.borrow_mut();
-            let future = EsModuleFuture {
-              path: specifier,
-              module: Rc::clone(&module),
-              maybe_result,
-            };
-            state.pending_futures.push(Box::new(future));
-          }
+        let load_cb = EsModuleFuture {
+          path: specifier.clone(),
+          module: Rc::clone(&module),
+          load_id,
+          maybe_result: None,
         };
+        state.pending_futures.insert(load_id, Box::new(load_cb));
 
-        state.module_map.seen.insert(specifier, status);
-        state.handle.spawn(task, Some(task_cb));
+        state
+          .module_map
+          .seen()
+          .borrow_mut()
+          .insert(specifier, status);
+
+        msg::sync_send_to_master(
+          state.master_tx.clone(),
+          MasterMessage::LoadImportReq(msg::LoadImportReq::new(
+            load_id,
+            specifier.clone(),
+          )),
+        );
       }
     }
 
