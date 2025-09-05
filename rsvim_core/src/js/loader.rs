@@ -53,9 +53,7 @@ pub trait ModuleLoader {
 }
 
 #[async_trait]
-/// Asynchronous Module loader.
-///
-/// It is the same with [`ModuleLoader`] but running asynchronously.
+/// Async [`ModuleLoader`].
 ///
 /// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
 /// in js runtime.
