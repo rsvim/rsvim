@@ -215,9 +215,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     });
 
   // Check if the requested dynamic module is already resolved.
-  if state.module_map.index().contains_key(&specifier)
-    && !dynamic_import_being_fetched
-  {
+  if state.module_map.contains(&specifier) && !dynamic_import_being_fetched {
     // Create a local handle for the module.
     let module = state.module_map.get(&specifier).unwrap();
     let module = module.open(scope);

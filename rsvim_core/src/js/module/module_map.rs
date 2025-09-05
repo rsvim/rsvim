@@ -127,22 +127,23 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
+  // Entry point of runtime execution, this is the `rsvim.{js,ts}`
+  // configuration entry point for Rsvim.
   main: Option<ModulePath>,
+
+  // Cached modules, maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
+
+  // Module status.
   seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
+
+  // Pending modules.
   pending: RefCell<Vec<ModuleGraphRc>>,
 }
 
 impl ModuleMap {
-  /// Entry point of runtime execution, this is the `rsvim.{js,ts}`
-  /// configuration entry point for Rsvim.
   pub fn main(&self) -> &Option<ModulePath> {
     &self.main
-  }
-
-  /// All cached modules, maps from "Module Path" to "v8 Module".
-  pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
-    &self.index
   }
 
   pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
@@ -182,6 +183,11 @@ impl ModuleMap {
   /// Returns a v8 module reference from me module-map.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
     self.index.get(key).cloned()
+  }
+
+  /// Whether a v8 module already resolved.
+  pub fn contains(&self, key: &str) -> bool {
+    self.index.contains_key(key)
   }
 
   /// Returns a specifier by a v8 module.

@@ -289,12 +289,7 @@ pub fn fetch_module_tree<'a>(
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.
-    if !state_rc
-      .borrow()
-      .module_map
-      .index()
-      .contains_key(&specifier)
-    {
+    if !state_rc.borrow().module_map.contains(&specifier) {
       fetch_module_tree(scope, &specifier, None)?;
     }
   }
