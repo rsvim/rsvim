@@ -599,6 +599,9 @@ impl EventLoop {
               .await;
           });
         }
+        MasterMessage::LoadImportReq(req) => {
+          trace!("Receive LoadImportReq:{:?}", req.future_id);
+        }
       }
     }
   }

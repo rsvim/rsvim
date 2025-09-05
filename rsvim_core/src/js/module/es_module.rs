@@ -129,9 +129,9 @@ impl EsModule {
 }
 
 pub struct EsModuleFuture {
+  pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub load_id: JsFutureId,
   pub maybe_result: Option<IoResult<String>>,
 }
 
@@ -260,9 +260,9 @@ impl JsFuture for EsModuleFuture {
         let load_id = js::next_future_id();
 
         let load_cb = EsModuleFuture {
+          future_id: load_id,
           path: specifier.clone(),
           module: Rc::clone(&module),
-          load_id,
           maybe_result: None,
         };
         state.pending_futures.insert(load_id, Box::new(load_cb));

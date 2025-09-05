@@ -269,9 +269,9 @@ pub fn host_import_module_dynamically_cb<'s>(
   let load_id = js::next_future_id();
 
   let load_cb = EsModuleFuture {
+    future_id: load_id,
     path: specifier.clone(),
     module: graph_rc.borrow().root_rc(),
-    load_id,
     maybe_result: None,
   };
   state.pending_futures.insert(load_id, Box::new(load_cb));
