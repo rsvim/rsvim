@@ -203,11 +203,6 @@ impl ModuleMap {
   /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
     self.reversed_index.get(&module_id).cloned()
-    // self
-    //   .index
-    //   .iter()
-    //   .find(|(_, m)| **m == module)
-    //   .map(|(p, _)| p.clone())
   }
 }
 
