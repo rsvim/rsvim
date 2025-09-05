@@ -707,12 +707,9 @@ pub mod boost {
         fut.run(scope);
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
-          let (tree, contents) = {
-            let state = state_rc.borrow();
-            (state.tree.clone(), state.contents.clone())
-          };
-          let mut tree = lock!(tree);
-          let mut contents = lock!(contents);
+          let state = state_rc.borrow();
+          let mut tree = lock!(state.tree);
+          let mut contents = lock!(state.contents);
           cmdline_ops::cmdline_set_message(
             &mut tree,
             &mut contents,
