@@ -762,7 +762,7 @@ pub mod boost {
 
           // If the graph is still loading, fast-forward the dependencies.
           if graph_root.status() != ModuleStatus::Ready {
-            graph_root.fast_forward(&mut *seen_modules);
+            graph_root.fast_forward(&mut seen_modules);
             return true;
           }
 
