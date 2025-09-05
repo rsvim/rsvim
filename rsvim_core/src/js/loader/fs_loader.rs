@@ -250,6 +250,9 @@ impl ModuleLoader for FsModuleLoader {
 
 #[derive(Default)]
 /// Async [`FsModuleLoader`].
+///
+/// NOTE: This module loader is actually used in event loop, i.e. with tokio
+/// runtime, not in js runtime.
 pub struct AsyncFsModuleLoader;
 
 #[async_trait]
