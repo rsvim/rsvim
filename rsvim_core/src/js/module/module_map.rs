@@ -203,7 +203,7 @@ impl ModuleMap {
 }
 
 impl ModuleMap {
-  pub fn seen(&mut self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
+  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
     &self.seen
   }
 
