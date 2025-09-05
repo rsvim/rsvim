@@ -272,7 +272,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     future_id: load_id,
     path: specifier.clone(),
     module: graph_rc.borrow().root_rc(),
-    maybe_result: None,
+    source: None,
   };
   state.pending_futures.insert(load_id, Box::new(load_cb));
 

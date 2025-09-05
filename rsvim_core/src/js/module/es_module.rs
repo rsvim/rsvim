@@ -132,7 +132,7 @@ pub struct EsModuleFuture {
   pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_result: Option<AnyResult<String>>,
+  pub source: Option<AnyResult<String>>,
 }
 
 impl EsModuleFuture {
@@ -165,7 +165,8 @@ impl JsFuture for EsModuleFuture {
     }
 
     // Extract module's source code.
-    let source = self.maybe_result.take().unwrap();
+    debug_assert!(self.source.is_some());
+    let source = self.source.take().unwrap();
     let source = match source {
       Ok(source) => source,
       Err(e) => {
@@ -263,7 +264,7 @@ impl JsFuture for EsModuleFuture {
           future_id: load_id,
           path: specifier.clone(),
           module: Rc::clone(&module),
-          maybe_result: None,
+          source: None,
         };
         state.pending_futures.insert(load_id, Box::new(load_cb));
 
