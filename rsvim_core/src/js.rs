@@ -739,9 +739,11 @@ pub mod boost {
               debug_assert!(
                 state.pending_futures.contains_key(&resp.future_id)
               );
-              let load_cb =
+              let mut load_cb =
                 state.pending_futures.remove(&resp.future_id).unwrap();
-              let load_cb = load_cb.downcast_ref::<EsModuleFuture>();
+              let load_cb_impl =
+                load_cb.downcast_mut::<EsModuleFuture>().unwrap();
+              load_cb_impl.maybe_result = Some(resp.source);
               futures.push(load_cb);
             }
           }

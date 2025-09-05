@@ -132,7 +132,7 @@ pub struct EsModuleFuture {
   pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_result: Option<IoResult<String>>,
+  pub maybe_result: Option<AnyResult<String>>,
 }
 
 impl EsModuleFuture {
