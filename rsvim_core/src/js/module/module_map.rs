@@ -204,12 +204,13 @@ impl ModuleMap {
   ///
   /// FIXME: This method has performance issue, make it `O(1)` instead of
   /// `O(N)`.
-  pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
-    self
-      .index
-      .iter()
-      .find(|(_, m)| **m == module)
-      .map(|(p, _)| p.clone())
+  pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
+    self.reversed_index.get(&module_id).cloned()
+    // self
+    //   .index
+    //   .iter()
+    //   .find(|(_, m)| **m == module)
+    //   .map(|(p, _)| p.clone())
   }
 }
 
