@@ -197,7 +197,11 @@ impl JsFuture for EsModuleFuture {
     let module_ref = v8::Global::new(tc_scope, module);
 
     state.module_map.insert(self.path.as_str(), module_ref);
-    state.module_map.seen.insert(self.path.clone(), new_status);
+    state
+      .module_map
+      .seen()
+      .borrow_mut()
+      .insert(self.path.clone(), new_status);
 
     let import_map = state.options.import_map.clone();
 
