@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 // Re-export
 pub use core_loader::CoreModuleLoader;
-pub use fs_loader::FsModuleLoader;
+pub use fs_loader::{AsyncFsModuleLoader, FsModuleLoader};
 
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
@@ -61,8 +61,8 @@ pub trait ModuleLoader {
 ///
 /// It is the same with [`ModuleLoader`] but running asynchronously.
 ///
-/// NOTE: This module loader is actually used in event loop, i.e. with tokio
-/// runtime, not in js runtime.
+/// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
+/// in js runtime.
 pub trait AsyncModuleLoader {
   async fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
 }

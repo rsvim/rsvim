@@ -28,7 +28,10 @@
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::JsRuntime;
-use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
+use crate::js::loader::{
+  AsyncFsModuleLoader, AsyncModuleLoader, CoreModuleLoader, FsModuleLoader,
+  ModuleLoader,
+};
 use crate::prelude::*;
 
 use std::sync::LazyLock;
@@ -197,13 +200,17 @@ pub fn load_import(
 }
 
 /// Same with [`load_import`] but asynchronously.
+///
+/// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
+/// in js runtime.
 pub async fn load_import_async(
   specifier: &str,
   _skip_cache: bool,
 ) -> AnyResult<ModuleSource> {
-  let loader: &dyn ModuleLoader = _choose_module_loader(specifier);
+  static ASYNC_FS_MODULE_LOADER: AsyncFsModuleLoader = AsyncFsModuleLoader {};
 
-  loader.load(specifier)
+  let loader: &dyn AsyncModuleLoader = &ASYNC_FS_MODULE_LOADER;
+  loader.load(specifier).await
 }
 
 /// Resolves module imports without dependency.
