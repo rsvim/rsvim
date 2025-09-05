@@ -28,10 +28,6 @@ mod fs_loader_tests;
 /// 1. Core module loader, provide builtin modules.
 /// 2. Fs module loader, provide modules on local filesystem.
 /// 3. URL module loader, provide remote modules on network.
-///
-/// TODO:
-/// For now we only implement the fs module loader, in the future we may want to implement other
-/// loaders.
 pub trait ModuleLoader {
   /// Resolve module path by its specifier.
   ///
