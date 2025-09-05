@@ -133,9 +133,9 @@ pub struct EsModuleFuture {
 impl EsModuleFuture {
   // Handles an error based on static import.
   fn handle_failure(&mut self, e: anyhow::Error) {
-    let module = self.module.borrow();
+    let mut module = self.module.borrow_mut();
     // In dynamic imports we reject the promise(s).
-    if module.is_dynamic_import {
+    if module.is_dynamic_import() {
       module.exception_mut().replace(e.to_string());
       return;
     }
