@@ -309,7 +309,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 
     let import_map = state.options.import_map.clone();
 
-    let skip_cache = match root_module_rc.borrow().is_dynamic_import {
+    let skip_cache = match root_module_rc.borrow().is_dynamic_import() {
       true => !state.options.test_mode,
       false => false,
     };
