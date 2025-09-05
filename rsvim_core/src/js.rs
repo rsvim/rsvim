@@ -634,10 +634,10 @@ pub mod boost {
     fn run_pending_futures(&mut self) {
       // Get a handle-scope and a reference to the runtime's state.
       let scope = &mut self.handle_scope();
-      let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
+      let state_rc = Self::state(scope);
 
+      let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
       {
-        let state_rc = Self::state(scope);
         let mut state = state_rc.borrow_mut();
         while let Ok(msg) = state.jsrt_rx.try_recv() {
           match msg {
@@ -699,7 +699,7 @@ pub mod boost {
           }
         }
 
-        // Drop borrowed `state_rc` or it will panics when running these futures.
+        // Drop borrowed `state` or it will panics when running these futures.
       }
 
       for mut fut in futures {
@@ -707,7 +707,6 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let (tree, contents) = {
-            let state_rc = Self::state(scope);
             let state = state_rc.borrow();
             (state.tree.clone(), state.contents.clone())
           };
