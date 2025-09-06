@@ -260,15 +260,17 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if not_seen_before {
-        let load_id = js::next_future_id();
+        let load_import_id = js::next_future_id();
 
-        let load_cb = EsModuleFuture {
-          future_id: load_id,
+        let load_import_cb = EsModuleFuture {
+          future_id: load_import_id,
           path: specifier.clone(),
           module: Rc::clone(&module),
           source: None,
         };
-        state.pending_futures.insert(load_id, Box::new(load_cb));
+        state
+          .pending_futures
+          .insert(load_import_id, Box::new(load_import_cb));
 
         state
           .module_map
@@ -279,7 +281,7 @@ impl JsFuture for EsModuleFuture {
         msg::sync_send_to_master(
           state.master_tx.clone(),
           MasterMessage::LoadImportReq(msg::LoadImportReq::new(
-            load_id,
+            load_import_id,
             specifier.clone(),
           )),
         );
