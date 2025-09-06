@@ -142,12 +142,12 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
     PromiseHandlerAddedAfterReject
     | PromiseRejectAfterResolved
     | PromiseResolveAfterResolved => {
-      trace!("promise_reject_cb event non-PromiseRejectWithNoHandler",);
+      trace!("non-PromiseRejectWithNoHandler event:{event:?}");
       undefined
     }
     PromiseRejectWithNoHandler => {
       trace!(
-        "promise_reject_cb event PromiseRejectWithNoHandler, message.value {:?}",
+        "PromiseRejectWithNoHandler event:{event:?}, value{:?}",
         message.get_value()
       );
       message.get_value().unwrap()
