@@ -262,8 +262,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     .borrow_mut()
     .insert(specifier.clone(), status);
 
-  /*  Use the event-loop to asynchronously load the requested module. */
-
+  // Use the event-loop to asynchronously load the requested module.
   let load_id = js::next_future_id();
 
   let load_cb = EsModuleFuture {
