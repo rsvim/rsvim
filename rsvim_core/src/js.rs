@@ -478,17 +478,6 @@ pub mod boost {
         state,
         // inspector,
       }
-
-      // With snapshot, we no longer need to initialize builtin runtime modules any more.
-      // runtime.init_environment(module_handles);
-
-      // // Start inspector agent is requested.
-      // if let Some(inspector) = runtime.inspector().as_mut() {
-      //   let address = address.unwrap();
-      //   inspector.borrow_mut().start_agent(address);
-      // }
-
-      // runtime
     }
 
     /// Creates a new JsRuntime from scratch, i.e. without snapshot, usually for
