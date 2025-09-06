@@ -793,9 +793,17 @@ pub mod boost {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-          error!("{exception:?}");
-          eprintln!("{exception:?}");
+
+          // NOTE: Send error message to command-line.
+          trace!("{exception:?}");
+          let state = state_rc.borrow_mut();
+          let mut tree = lock!(state.tree);
+          let mut contents = lock!(state.contents);
+          cmdline_ops::cmdline_set_message(
+            &mut tree,
+            &mut contents,
+            exception.to_compact_string(),
+          );
           continue;
         }
 
