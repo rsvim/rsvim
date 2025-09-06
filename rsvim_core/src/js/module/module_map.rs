@@ -146,6 +146,10 @@ impl ModuleMap {
     &self.main
   }
 
+  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
+    &self.seen
+  }
+
   pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
     &self.pending
   }
@@ -193,12 +197,6 @@ impl ModuleMap {
       .iter()
       .find(|(_, m)| **m == module)
       .map(|(p, _)| p.clone())
-  }
-}
-
-impl ModuleMap {
-  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
-    &self.seen
   }
 }
 
