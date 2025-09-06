@@ -1,12 +1,13 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js::err::{JsError, report_js_exception};
+use crate::js::err::JsError;
 use crate::js::module::{
   ModulePath, ModuleStatus, create_origin, resolve_import,
 };
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
 use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
+use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 
 use compact_str::ToCompactString;
@@ -149,7 +150,7 @@ impl EsModuleFuture {
 
     // In static imports, throw error to command-line.
     trace!("Failed to static import: {e:?}");
-    report_js_exception(&state, e);
+    report_js_error!(state, e);
   }
 }
 

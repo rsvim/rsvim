@@ -1,11 +1,5 @@
 //! Js error.
 
-use crate::js::JsRuntimeState;
-use crate::prelude::*;
-use crate::state::ops::cmdline_ops;
-
-use compact_str::{CompactString, ToCompactString};
-
 /// Represents an exception coming from V8.
 #[derive(Eq, PartialEq, Clone, Default)]
 pub struct JsError {
