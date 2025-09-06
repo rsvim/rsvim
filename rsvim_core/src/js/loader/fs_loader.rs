@@ -2,8 +2,8 @@
 
 use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
 use crate::js::module::{ModulePath, ModuleSource};
-// use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
+// use crate::js::transpiler::Jsx;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
