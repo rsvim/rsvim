@@ -1115,9 +1115,14 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
   None
 }
 
-// /// Report unhandled exceptions and clear it.
-// pub fn report_and_exit(e: JsError) {
-//   error!("{:?}", e);
-//   eprintln!("{:?}", e);
-//   std::process::exit(1);
-// }
+/// Report unhandled exceptions and clear it.
+pub fn report_js_exception(state: &JsRuntimeState, e: JsError) {
+  trace!("js exception:{e:?}");
+  let mut tree = lock!(state.tree);
+  let mut contents = lock!(state.contents);
+  cmdline_ops::cmdline_set_message(
+    &mut tree,
+    &mut contents,
+    e.to_compact_string(),
+  );
+}
