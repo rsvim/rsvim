@@ -16,6 +16,7 @@ use crate::content::TextContentsArc;
 use crate::js::module::EsModuleFuture;
 use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
+use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
@@ -676,13 +677,7 @@ pub mod boost {
               } else {
                 // Print error message
                 let e = format!("Error: invalid command {:?}", req.payload);
-                let mut tree = lock!(state.tree);
-                let mut contents = lock!(state.contents);
-                cmdline_ops::cmdline_set_message(
-                  &mut tree,
-                  &mut contents,
-                  e.to_compact_string(),
-                );
+                report_js_error!(state, e);
               }
             }
             JsMessage::LoadImportResp(resp) => {
@@ -1113,16 +1108,4 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
   }
 
   None
-}
-
-/// Report unhandled exceptions and clear it.
-pub fn report_js_exception(state: &JsRuntimeState, e: JsError) {
-  trace!("js exception:{e:?}");
-  let mut tree = lock!(state.tree);
-  let mut contents = lock!(state.contents);
-  cmdline_ops::cmdline_set_message(
-    &mut tree,
-    &mut contents,
-    e.to_compact_string(),
-  );
 }

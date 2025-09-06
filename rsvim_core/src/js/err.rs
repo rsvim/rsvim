@@ -1,5 +1,11 @@
 //! Js error.
 
+use crate::js::JsRuntimeState;
+use crate::prelude::*;
+use crate::state::ops::cmdline_ops;
+
+use compact_str::{CompactString, ToCompactString};
+
 /// Represents an exception coming from V8.
 #[derive(Eq, PartialEq, Clone, Default)]
 pub struct JsError {
@@ -157,4 +163,19 @@ impl std::fmt::Debug for JsError {
 
     Ok(())
   }
+}
+
+#[macro_export]
+/// Report unhandled exceptions to command-line message.
+macro_rules! report_js_error {
+  ($state:ident,$e:expr) => {
+    trace!("report js error:{:?}", $e);
+    let mut tree = lock!($state.tree);
+    let mut contents = lock!($state.contents);
+    cmdline_ops::cmdline_set_message(
+      &mut tree,
+      &mut contents,
+      $e.to_compact_string(),
+    );
+  };
 }
