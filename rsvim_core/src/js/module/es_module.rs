@@ -200,12 +200,9 @@ impl JsFuture for EsModuleFuture {
       };
 
     let new_status = ModuleStatus::Resolving;
-    let module_id = module.get_identity_hash().get();
     let module_ref = v8::Global::new(tc_scope, module);
 
-    state
-      .module_map
-      .insert(self.path.as_str(), module_id, module_ref);
+    state.module_map.insert(self.path.as_str(), module_ref);
     state
       .module_map
       .seen()

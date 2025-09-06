@@ -134,9 +134,6 @@ pub struct ModuleMap {
   // Maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
 
-  // Maps from "v8 Module ID" to "Module Path".
-  path_index: HashMap<i32, ModulePath>,
-
   // Module status.
   seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
 
@@ -160,25 +157,18 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      path_index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
     }
   }
 
   /// Add a compiled v8 module to the cache.
-  pub fn insert(
-    &mut self,
-    path: &str,
-    module_id: i32,
-    module: v8::Global<v8::Module>,
-  ) {
+  pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
       self.main = Some(path.into());
     }
     self.index.insert(path.into(), module);
-    self.path_index.insert(module_id, path.into());
   }
 
   // // Returns if there are still pending imports to be loaded.
@@ -197,8 +187,12 @@ impl ModuleMap {
   }
 
   /// Returns a specifier by a v8 module ID.
-  pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
-    self.path_index.get(&module_id).cloned()
+  pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
+    self
+      .index
+      .iter()
+      .find(|(_, m)| **m == module)
+      .map(|(p, _)| p.clone())
   }
 }
 
