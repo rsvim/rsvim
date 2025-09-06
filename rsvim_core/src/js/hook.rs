@@ -263,20 +263,22 @@ pub fn host_import_module_dynamically_cb<'s>(
     .insert(specifier.clone(), status);
 
   // Use the event-loop to asynchronously load the requested module.
-  let load_id = js::next_future_id();
+  let load_import_id = js::next_future_id();
 
-  let load_cb = EsModuleFuture {
-    future_id: load_id,
+  let load_import_cb = EsModuleFuture {
+    future_id: load_import_id,
     path: specifier.clone(),
     module: graph_rc.borrow().root_rc(),
     source: None,
   };
-  state.pending_futures.insert(load_id, Box::new(load_cb));
+  state
+    .pending_futures
+    .insert(load_import_id, Box::new(load_import_cb));
 
   msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::LoadImportReq(msg::LoadImportReq::new(
-      load_id,
+      load_import_id,
       specifier.clone(),
     )),
   );
