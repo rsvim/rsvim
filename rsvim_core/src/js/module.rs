@@ -28,7 +28,10 @@
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::JsRuntime;
-use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
+use crate::js::loader::{
+  AsyncFsModuleLoader, AsyncModuleLoader, CoreModuleLoader, FsModuleLoader,
+  ModuleLoader,
+};
 use crate::prelude::*;
 
 use std::sync::LazyLock;
@@ -43,6 +46,11 @@ pub mod es_module;
 pub mod import_map;
 pub mod module_map;
 
+#[cfg(test)]
+mod es_module_tests;
+#[cfg(test)]
+mod module_map_tests;
+
 /// Module path on local file system.
 pub type ModulePath = String;
 
@@ -56,13 +64,17 @@ pub type ModuleSource = String;
 /// network/http modules will be fetching. The only one use case of `Resolving` status should be
 /// dynamically import and its `Promise`.
 pub enum ModuleStatus {
-  // Indicates the module **itself** is being fetched.
+  // Indicates the module **itself** is fetching.
   Fetching,
-  // Indicates the module dependencies are being fetched.
+
+  // Indicates the module dependencies are resolving, i.e.
+  // fetching/loading/compiling/etc.
   Resolving,
-  // Indicates the module has ben seen before.
+
+  // Indicates the module has been seen before.
   Duplicate,
-  // Indicates the module (include its dependencies) is resolved.
+
+  // Indicates the module include all its dependencies is resolved.
   Ready,
 }
 
@@ -97,7 +109,7 @@ pub static CORE_MODULES: LazyLock<HashMap<&'static str, &'static str>> =
 /// - Rusty V8 API: <https://docs.rs/v8/latest/v8/struct.ScriptOrigin.html>.
 /// - MDN script: <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script>.
 /// - HTML5 origin: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
-fn create_origin<'s>(
+pub fn create_origin<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
   name: &str,
   is_module: bool,
@@ -120,10 +132,10 @@ fn create_origin<'s>(
   )
 }
 
-const CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
-const FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
-
 fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
+  static CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
+  static FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
+
   let is_core_module_import = CORE_MODULES.contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
@@ -187,12 +199,18 @@ pub fn load_import(
   loader.load(specifier)
 }
 
-/// FIXME: Not supported yet.
-pub async fn load_import_async(
+/// Async [`load_import`].
+///
+/// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
+/// in js runtime.
+pub async fn async_load_import(
   specifier: &str,
-  skip_cache: bool,
+  _skip_cache: bool,
 ) -> AnyResult<ModuleSource> {
-  load_import(specifier, skip_cache)
+  static ASYNC_FS_MODULE_LOADER: AsyncFsModuleLoader = AsyncFsModuleLoader {};
+
+  let loader: &dyn AsyncModuleLoader = &ASYNC_FS_MODULE_LOADER;
+  loader.load(specifier).await
 }
 
 /// Resolves module imports without dependency.
@@ -271,12 +289,7 @@ pub fn fetch_module_tree<'a>(
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.
-    if !state_rc
-      .borrow()
-      .module_map
-      .index()
-      .contains_key(&specifier)
-    {
+    if !state_rc.borrow().module_map.contains(&specifier) {
       fetch_module_tree(scope, &specifier, None)?;
     }
   }

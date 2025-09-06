@@ -18,8 +18,7 @@ pub fn echo(
   trace!("echo: {:?}", message);
 
   let state_rc = JsRuntime::state(scope);
-  let state = state_rc.borrow_mut();
-
+  let state = state_rc.borrow();
   let mut tree = lock!(state.tree);
   let mut contents = lock!(state.contents);
   if tree.command_line_id().is_some() {
