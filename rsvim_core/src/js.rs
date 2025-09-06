@@ -782,9 +782,6 @@ pub mod boost {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-
-          // NOTE: Send error message to command-line.
-          trace!("{exception:?}");
           let state = state_rc.borrow_mut();
           report_js_error!(state, exception);
           continue;
