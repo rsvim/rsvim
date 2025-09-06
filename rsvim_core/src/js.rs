@@ -703,13 +703,7 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let state = state_rc.borrow();
-          let mut tree = lock!(state.tree);
-          let mut contents = lock!(state.contents);
-          cmdline_ops::cmdline_set_message(
-            &mut tree,
-            &mut contents,
-            exception.to_compact_string(),
-          );
+          report_js_error!(state, exception);
         }
         run_next_tick_callbacks(scope);
       }
