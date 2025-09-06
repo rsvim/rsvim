@@ -131,11 +131,11 @@ pub struct ModuleMap {
   // configuration entry point for Rsvim.
   main: Option<ModulePath>,
 
-  // Cached modules, maps from "Module Path" to "v8 Module".
+  // Maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
 
-  // Reversed index for `index`, maps from "v8 Module's ID" to "Module Path".
-  reversed_index: HashMap<i32, ModulePath>,
+  // Maps from "v8 Module ID" to "Module Path".
+  path_index: HashMap<i32, ModulePath>,
 
   // Module status.
   seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
@@ -160,7 +160,7 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      reversed_index: HashMap::new(),
+      path_index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
     }
@@ -178,7 +178,7 @@ impl ModuleMap {
       self.main = Some(path.into());
     }
     self.index.insert(path.into(), module);
-    self.reversed_index.insert(module_id, path.into());
+    self.path_index.insert(module_id, path.into());
   }
 
   // // Returns if there are still pending imports to be loaded.
@@ -198,7 +198,7 @@ impl ModuleMap {
 
   /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module_id: i32) -> Option<ModulePath> {
-    self.reversed_index.get(&module_id).cloned()
+    self.path_index.get(&module_id).cloned()
   }
 }
 
