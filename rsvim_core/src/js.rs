@@ -782,7 +782,7 @@ pub mod boost {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          let state = state_rc.borrow_mut();
+          let state = state_rc.borrow();
           report_js_error!(state, exception);
           continue;
         }
@@ -804,8 +804,7 @@ pub mod boost {
           drop(state);
 
           if let Some(error) = check_exceptions(tc_scope) {
-            trace!("Evaluate module error:{error:?}");
-            let state = state_rc.borrow_mut();
+            let state = state_rc.borrow();
             report_js_error!(state, error);
             continue;
           }
