@@ -35,9 +35,9 @@ pub fn module_resolve_cb<'a>(
   let state = state_rc.borrow();
 
   let import_map = state.options.import_map.clone();
-  let referrer_id = referrer.get_identity_hash().get();
+  let referrer = v8::Global::new(scope, referrer);
 
-  let dependant = state.module_map.get_path(referrer_id);
+  let dependant = state.module_map.get_path(referrer);
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
@@ -71,9 +71,9 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   let state = state_rc.borrow();
 
   // Make the module global.
-  let module_id = module.get_identity_hash().get();
+  let module = v8::Global::new(scope, module);
 
-  let url = state.module_map.get_path(module_id).unwrap();
+  let url = state.module_map.get_path(module).unwrap();
   let is_main = state.module_map.main().clone() == Some(url.to_owned());
 
   // Setup import.url property.
