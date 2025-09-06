@@ -807,9 +807,9 @@ pub mod boost {
           drop(state);
 
           if let Some(error) = check_exceptions(tc_scope) {
-            // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-            error!("{error:?}");
-            eprintln!("{error:?}");
+            trace!("Evaluate module error:{error:?}");
+            let state = state_rc.borrow_mut();
+            report_js_error!(state, error);
             continue;
           }
         }
