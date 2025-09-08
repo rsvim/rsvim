@@ -205,7 +205,7 @@ mod test_static_import {
 
     let p4 = Path::new("node_modules/utils/lib/index.js");
     let src4: &str = r#"
-    import {add} from "./calc";
+    import {add} from "./calc.js";
     import {echo} from "./echo.js";
 
     export default {add, echo};
