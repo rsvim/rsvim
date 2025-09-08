@@ -13,6 +13,8 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
+  use compact_str::ToCompactString;
+
   use super::*;
 
   #[tokio::test]
@@ -59,9 +61,9 @@ mod test_static_import {
     // After running
     {
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().len());
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1"),
+        Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
