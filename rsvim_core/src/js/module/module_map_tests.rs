@@ -73,9 +73,20 @@ mod test_static_import {
       assert!(module_map.pending().borrow().is_empty());
       assert!(module_map.failed_counter().is_empty());
       assert_eq!(module_map.resolved_counter().len(), 0);
+      info!(
+        "module_map.evaluate_counter:{:?}",
+        module_map.evaluate_counter()
+      );
       assert_eq!(module_map.evaluate_counter().len(), 1);
       assert_eq!(
-        module_map.evaluate_counter().get("rsvim/rsvim.js"),
+        module_map.evaluate_counter().get(
+          tp.xdg_config_home
+            .join("rsvim")
+            .join(p1)
+            .as_path()
+            .to_str()
+            .unwrap()
+        ),
         Some(&1)
       );
     }
