@@ -569,7 +569,7 @@ mod tests_async_filepath {
           console.log('Hello, World!');
       }
   "#;
-    let src_file: &str = "./core/tests/006_more_imports/index.js";
+    let src_file: &str = "./core/tests/006_more_imports/lib/index.js";
 
     let pkg: &str = r#"
       {
