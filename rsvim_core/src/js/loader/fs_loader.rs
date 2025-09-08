@@ -17,7 +17,7 @@ use std::path::{Path, PathBuf};
 static FILE_EXTENSIONS: &[&str] =
   &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
 
-static PACKAGE_EXTENSIONS: &[&str] = &["package.json", "package.json5"];
+static PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
@@ -137,12 +137,76 @@ async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   anyhow::bail!(path_not_found(path));
 }
 
+fn load_as_node_module(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+  if path.is_dir() {
+    for pkg in PACKAGE_FILES {
+      let pkg_path = path.join(pkg);
+      if pkg_path.is_file() {
+        match std::fs::read_to_string(pkg_path) {
+          Ok(pkg_src) => {
+            match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+              Ok(pkg_json) => match pkg_json.get("exports") {
+                Some(json_exports) => {
+                  // Case-1: "exports" is plain string
+                  //
+                  // ```json
+                  // {
+                  //   "exports": "./index.js"
+                  // }
+                  // ```
+                  if json_exports.is_string() {
+                    let json_path =
+                      path.join(Path::new(json_exports.as_str().unwrap()));
+                    load_source_if_file!(json_path.as_path());
+                  }
+
+                  if json_exports.is_object() {
+                    // Case-2: "exports" is json object and use default field:
+                    // "." or "default"
+                    //
+                    // ```json
+                    // {
+                    //   "exports": {
+                    //     ".": "./index.js"
+                    //     // Or
+                    //     "default": "./index.js"
+                    //   }
+                    // }
+                    // ```
+                    for field in [".", "default"] {
+                      match json_exports.get(field) {
+                        Some(json_exports_cwd) => {
+                          debug_assert!(json_exports_cwd.is_string());
+                          let json_path = path.join(Path::new(
+                            json_exports_cwd.as_str().unwrap(),
+                          ));
+                          load_source_if_file!(json_path.as_path());
+                        }
+                        None => { /* do nothing */ }
+                      }
+                    }
+                  }
+                }
+                None => { /* do nothing */ }
+              },
+              Err(e) => return Err(e.into()),
+            }
+          }
+          Err(e) => return Err(e.into()),
+        }
+      }
+    }
+  }
+
+  anyhow::bail!(path_not_found(path));
+}
+
 /// Loads import as directory using the 'index.[ext]' convention.
 ///
 /// TODO: In the future, we may want to also support the npm package.
 fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   if path.is_dir() {
-    for pkg in PACKAGE_EXTENSIONS {
+    for pkg in PACKAGE_FILES {
       let pkg_path = path.join(pkg);
       if pkg_path.is_file() {
         match std::fs::read_to_string(pkg_path) {
@@ -214,7 +278,7 @@ async fn async_load_as_directory(
   path: &Path,
 ) -> AnyResult<(PathBuf, ModuleSource)> {
   if path.is_dir() {
-    for pkg in PACKAGE_EXTENSIONS {
+    for pkg in PACKAGE_FILES {
       let pkg_path = path.join(pkg);
       if pkg_path.is_file() {
         match tokio::fs::read_to_string(pkg_path).await {
