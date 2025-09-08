@@ -965,6 +965,10 @@ pub fn execute_module(
       trace!("No module result, filename:{filename:?}({path:?})")
     }
   }
+  if cfg!(debug_assertions) {
+    let state_rc = JsRuntime::state(tc_scope);
+    state_rc.borrow_mut().module_map.increase_evaluate(&path);
+  }
 
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();
