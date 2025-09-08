@@ -65,6 +65,17 @@ mod test_static_import {
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
+
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      let module_map = state.module_map;
+      assert_eq!(module_map.pending_counter().len(), 1);
+      assert_eq!(module_map.pending_counter().get("./util.js"), Some(&1));
+      assert_eq!(module_map.evaluate_counter().len(), 1);
+      assert_eq!(
+        module_map.evaluate_counter().get("rsvim/rsvim.js"),
+        Some(&1)
+      );
     }
 
     Ok(())
