@@ -189,21 +189,21 @@ mod test_static_import {
   util.echo(util.add(1,2));
     "#;
 
-    let p2 = Path::new("utils/lib/echo.js");
+    let p2 = Path::new("node_modules/utils/lib/echo.js");
     let src2: &str = r#"
     export function echo(value) {
         Rsvim.cmd.echo(value);
     }
     "#;
 
-    let p3 = Path::new("utils/lib/calc.js");
+    let p3 = Path::new("node_modules/utils/lib/calc.js");
     let src3: &str = r#"
     export function add(a, b) {
         return a+b;
     }
     "#;
 
-    let p4 = Path::new("utils/lib/index.js");
+    let p4 = Path::new("node_modules/utils/lib/index.js");
     let src4: &str = r#"
     import {add} from "./calc";
     import {echo} from "./echo.js";
@@ -211,7 +211,7 @@ mod test_static_import {
     export default {add, echo};
     "#;
 
-    let p5 = Path::new("utils/package.json");
+    let p5 = Path::new("node_modules/utils/package.json");
     let src5: &str = r#"
 {
   "exports": "./lib/index.js"
@@ -244,7 +244,7 @@ mod test_static_import {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("3".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
 
