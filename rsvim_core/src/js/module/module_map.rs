@@ -167,12 +167,8 @@ impl ModuleMap {
 
   #[cfg(debug_assertions)]
   pub fn increase_pending(&mut self, specifier: &str) {
-    match self.pending_counter.get_mut(specifier) {
-      Some(&c) => c += 1,
-      None => {
-        self.pending_counter.insert(specifier, 1);
-      }
-    }
+    let old = self.pending_counter.get(specifier).unwrap_or(&0);
+    self.pending_counter.insert(specifier.into(), old + 1);
   }
 
   #[cfg(debug_assertions)]
