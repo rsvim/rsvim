@@ -9,9 +9,7 @@ use crate::prelude::*;
 
 use async_trait::async_trait;
 use path_absolutize::Absolutize;
-use serde_json::json;
 use std::ffi::OsString;
-use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 static FILE_EXTENSIONS: &[&str] =
