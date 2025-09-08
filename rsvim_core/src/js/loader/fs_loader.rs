@@ -100,12 +100,11 @@ mod sync_load {
     anyhow::bail!(path_not_found(path));
   }
 
-  macro_rules! load_source_if_json {
+  macro_rules! load_source_for_json {
     ($field:expr,$path:expr) => {
-      if $field.is_string() {
-        trace!("load_source_if_json field:{:?}, path:{:?}", $field, $path);
-        let json_path = $path.join(Path::new($field.as_str().unwrap()));
-        load_source_if_file!(json_path.as_path());
+      let json_path = $path.join(Path::new($field.as_str().unwrap()));
+      if json_path.is_file() {
+        load_source_for_file!(json_path.as_path());
       }
     };
   }
@@ -139,12 +138,16 @@ mod sync_load {
               match serde_json::from_str::<serde_json::Value>(&pkg_src) {
                 Ok(pkg_json) => match pkg_json.get("exports") {
                   Some(json_exports) => {
-                    load_source_if_json!(json_exports, path);
+                    if json_exports.is_string() {
+                      load_source_for_json!(json_exports, path);
+                    }
 
                     if json_exports.is_object() {
                       match json_exports.get(".") {
                         Some(json_exports_cwd) => {
-                          load_source_if_json!(json_exports_cwd, path);
+                          if json_exports_cwd.is_string() {
+                            load_source_for_json!(json_exports_cwd, path);
+                          }
                         }
                         None => { /* do nothing */ }
                       }
@@ -193,14 +196,12 @@ mod async_load {
     Ok(source)
   }
 
-  macro_rules! async_load_source_if_file {
+  macro_rules! async_load_source_for_file {
     ($path:expr) => {
-      if $path.is_file() {
-        return match async_load_source($path).await {
-          Ok(source) => Ok(($path.to_path_buf(), source)),
-          Err(e) => Err(e),
-        };
-      }
+      return match async_load_source($path).await {
+        Ok(source) => Ok(($path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
     };
   }
 
@@ -208,14 +209,18 @@ mod async_load {
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
-    async_load_source_if_file!(path);
+    if path.is_file() {
+      async_load_source_for_file!(path);
+    }
 
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
     // file extension.
     if path.extension().is_none() {
       for ext in FILE_EXTENSIONS {
         let ext_path = path.with_extension(ext);
-        async_load_source_if_file!(ext_path.as_path());
+        if ext_path.is_file() {
+          async_load_source_for_file!(ext_path.as_path());
+        }
       }
     }
 
@@ -223,12 +228,10 @@ mod async_load {
     anyhow::bail!(path_not_found(path));
   }
 
-  macro_rules! async_load_source_if_json {
+  macro_rules! async_load_source_for_json {
     ($field:expr,$path:expr) => {
-      if $field.is_string() {
-        let json_path = $path.join(Path::new($field.as_str().unwrap()));
-        async_load_source_if_file!(json_path.as_path());
-      }
+      let json_path = $path.join(Path::new($field.as_str().unwrap()));
+      async_load_source_for_file!(json_path.as_path());
     };
   }
 
@@ -244,16 +247,18 @@ mod async_load {
               match serde_json::from_str::<serde_json::Value>(&pkg_src) {
                 Ok(pkg_json) => match pkg_json.get("exports") {
                   Some(json_exports) => {
-                    async_load_source_if_json!(json_exports, path);
+                    if json_exports.is_string() {
+                      async_load_source_for_json!(json_exports, path);
+                    }
 
                     if json_exports.is_object() {
-                      for field in [".", "default"] {
-                        match json_exports.get(field) {
-                          Some(json_exports_cwd) => {
-                            async_load_source_if_json!(json_exports_cwd, path);
+                      match json_exports.get(".") {
+                        Some(json_exports_cwd) => {
+                          if json_exports_cwd.is_string() {
+                            async_load_source_for_json!(json_exports_cwd, path);
                           }
-                          None => { /* do nothing */ }
                         }
+                        None => { /* do nothing */ }
                       }
                     }
                   }
