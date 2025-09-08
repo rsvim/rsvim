@@ -143,6 +143,9 @@ pub struct ModuleMap {
   pending_counter: HashMap<ModulePath, u32>,
 
   #[cfg(debug_assertions)]
+  resolved_counter: HashMap<ModulePath, u32>,
+
+  #[cfg(debug_assertions)]
   evaluate_counter: HashMap<ModulePath, u32>,
 }
 
@@ -171,6 +174,17 @@ impl ModuleMap {
   }
 
   #[cfg(debug_assertions)]
+  pub fn resolved_counter(&self) -> &HashMap<ModulePath, u32> {
+    &self.resolved_counter
+  }
+
+  #[cfg(debug_assertions)]
+  pub fn increase_resolved(&mut self, specifier: &str) {
+    let old = self.resolved_counter.get(specifier).unwrap_or(&0);
+    self.resolved_counter.insert(specifier.into(), old + 1);
+  }
+
+  #[cfg(debug_assertions)]
   pub fn evaluate_counter(&self) -> &HashMap<ModulePath, u32> {
     &self.evaluate_counter
   }
@@ -193,6 +207,8 @@ impl ModuleMap {
 
       #[cfg(debug_assertions)]
       pending_counter: HashMap::new(),
+      #[cfg(debug_assertions)]
+      resolved_counter: HashMap::new(),
       #[cfg(debug_assertions)]
       evaluate_counter: HashMap::new(),
     }
