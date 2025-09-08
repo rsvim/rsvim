@@ -313,8 +313,6 @@ pub mod build {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
-  use crate::js::module::module_map;
-
   use super::*;
 
   #[derive(Debug, Default, Clone)]
