@@ -370,9 +370,10 @@ impl ModuleLoader for FsModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = sync_load::load_as_file(path)
-      .or_else(|_| sync_load::load_as_node_module(path))
-      .or_else(|_| sync_load::load_as_directory(path));
+    let maybe_source = sync_load::load_as_file(path).or_else(|_| {
+      sync_load::load_as_node_module(path)
+        .or_else(|_| sync_load::load_as_directory(path))
+    });
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
