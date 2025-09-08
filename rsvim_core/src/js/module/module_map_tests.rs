@@ -68,7 +68,7 @@ mod test_static_import {
 
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      let module_map = state.module_map;
+      let module_map = &state.module_map;
       assert_eq!(module_map.pending_counter().len(), 1);
       assert_eq!(module_map.pending_counter().get("./util.js"), Some(&1));
       assert_eq!(module_map.evaluate_counter().len(), 1);
