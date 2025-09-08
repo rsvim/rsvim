@@ -2498,6 +2498,7 @@ dependencies = [
  "regex",
  "ringbuf",
  "ropey",
+ "serde_json",
  "smallvec",
  "strum",
  "strum_macros",

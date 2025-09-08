@@ -63,6 +63,7 @@ strum_macros = { workspace = true }
 downcast-rs = { workspace = true }
 async-trait = { workspace = true }
 ringbuf = { workspace = true }
+serde_json = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
