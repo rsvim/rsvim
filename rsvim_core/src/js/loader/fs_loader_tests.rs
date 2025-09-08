@@ -13,7 +13,7 @@ mod tests_sync {
   use super::*;
 
   #[test]
-  fn test_resolve1() {
+  fn resolve_relative1() {
     test_log_init();
 
     // Tests to run later on.
@@ -70,7 +70,7 @@ mod tests_sync {
   }
 
   #[test]
-  fn test_load1() {
+  fn load_reltive1() {
     test_log_init();
     // Crate temp dir.
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -116,7 +116,7 @@ mod tests_sync {
   }
 
   #[test]
-  fn test_load2() {
+  fn load_relative_json1() {
     test_log_init();
     // Crate temp dir.
     let temp_dir = assert_fs::TempDir::new().unwrap();
