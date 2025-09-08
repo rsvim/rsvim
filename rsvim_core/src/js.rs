@@ -805,9 +805,11 @@ pub mod boost {
         }
 
         let _ = module.evaluate(tc_scope);
-        if cfg!(debug_assertions) {
+
+        if cfg!(test) {
           state_rc.borrow_mut().module_map.increase_evaluate(&path);
         }
+
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
         // Note: Due to the architecture, when a module errors, the `promise_reject_cb`
@@ -965,7 +967,7 @@ pub fn execute_module(
       trace!("No module result, filename:{filename:?}({path:?})")
     }
   }
-  if cfg!(debug_assertions) {
+  if cfg!(test) {
     let state_rc = JsRuntime::state(tc_scope);
     state_rc.borrow_mut().module_map.increase_evaluate(&path);
   }

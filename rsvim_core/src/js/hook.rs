@@ -255,9 +255,11 @@ pub fn host_import_module_dynamically_cb<'s>(
     .pending()
     .borrow_mut()
     .push(Rc::clone(&graph_rc));
-  if cfg!(debug_assertions) {
+
+  if cfg!(test) {
     state.module_map.increase_pending(&specifier);
   }
+
   state
     .module_map
     .seen()
