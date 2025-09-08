@@ -28,7 +28,7 @@ mod test_static_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-  import util from "./util.js";
+  import * as util from "./util.js";
   util.echo(1);
     "#;
 
