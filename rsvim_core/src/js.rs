@@ -774,10 +774,11 @@ pub mod boost {
         for graph_rc in ready_imports.clone() {
           state
             .module_map
+            .counter_mut()
             .increase_resolved(graph_rc.borrow().root_rc().borrow().path());
         }
         for failed_path in _failed_paths {
-          state.module_map.increase_failed(&failed_path);
+          state.module_map.counter_mut().increase_failed(&failed_path);
         }
       }
 
@@ -807,7 +808,11 @@ pub mod boost {
         let _ = module.evaluate(tc_scope);
 
         if cfg!(test) {
-          state_rc.borrow_mut().module_map.increase_evaluate(&path);
+          state_rc
+            .borrow_mut()
+            .module_map
+            .counter_mut()
+            .increase_evaluate(&path);
         }
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
@@ -969,7 +974,11 @@ pub fn execute_module(
   }
   if cfg!(test) {
     let state_rc = JsRuntime::state(tc_scope);
-    state_rc.borrow_mut().module_map.increase_evaluate(&path);
+    state_rc
+      .borrow_mut()
+      .module_map
+      .counter_mut()
+      .increase_evaluate(&path);
   }
 
   if module.get_status() == v8::ModuleStatus::Errored {

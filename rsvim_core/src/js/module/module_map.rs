@@ -139,17 +139,8 @@ pub struct ModuleMap {
   // Pending modules.
   pending: RefCell<Vec<ModuleGraphRc>>,
 
-  #[cfg(test)]
-  pending_counter: HashMap<ModulePath, u32>,
-
-  #[cfg(test)]
-  resolved_counter: HashMap<ModulePath, u32>,
-
-  #[cfg(test)]
-  failed_counter: HashMap<ModulePath, u32>,
-
-  #[cfg(test)]
-  evaluate_counter: HashMap<ModulePath, u32>,
+  // Only for testing
+  counter: ModuleMapCounter,
 }
 
 impl ModuleMap {
@@ -165,48 +156,12 @@ impl ModuleMap {
     &self.pending
   }
 
-  #[cfg(test)]
-  pub fn pending_counter(&self) -> &HashMap<ModulePath, u32> {
-    &self.pending_counter
+  pub fn counter(&self) -> &ModuleMapCounter {
+    &self.counter
   }
 
-  #[cfg(test)]
-  pub fn increase_pending(&mut self, specifier: &str) {
-    let old = self.pending_counter.get(specifier).unwrap_or(&0);
-    self.pending_counter.insert(specifier.into(), old + 1);
-  }
-
-  #[cfg(test)]
-  pub fn resolved_counter(&self) -> &HashMap<ModulePath, u32> {
-    &self.resolved_counter
-  }
-
-  #[cfg(test)]
-  pub fn increase_resolved(&mut self, specifier: &str) {
-    let old = self.resolved_counter.get(specifier).unwrap_or(&0);
-    self.resolved_counter.insert(specifier.into(), old + 1);
-  }
-
-  #[cfg(test)]
-  pub fn failed_counter(&self) -> &HashMap<ModulePath, u32> {
-    &self.failed_counter
-  }
-
-  #[cfg(test)]
-  pub fn increase_failed(&mut self, specifier: &str) {
-    let old = self.failed_counter.get(specifier).unwrap_or(&0);
-    self.failed_counter.insert(specifier.into(), old + 1);
-  }
-
-  #[cfg(test)]
-  pub fn evaluate_counter(&self) -> &HashMap<ModulePath, u32> {
-    &self.evaluate_counter
-  }
-
-  #[cfg(test)]
-  pub fn increase_evaluate(&mut self, specifier: &str) {
-    let old = self.evaluate_counter.get(specifier).unwrap_or(&0);
-    self.evaluate_counter.insert(specifier.into(), old + 1);
+  pub fn counter_mut(&mut self) -> &mut ModuleMapCounter {
+    &mut self.counter
   }
 }
 
@@ -218,15 +173,7 @@ impl ModuleMap {
       index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
-
-      #[cfg(test)]
-      pending_counter: HashMap::new(),
-      #[cfg(test)]
-      failed_counter: HashMap::new(),
-      #[cfg(test)]
-      resolved_counter: HashMap::new(),
-      #[cfg(test)]
-      evaluate_counter: HashMap::new(),
+      counter: ModuleMapCounter::default(),
     }
   }
 
@@ -267,5 +214,52 @@ impl ModuleMap {
 impl Default for ModuleMap {
   fn default() -> Self {
     ModuleMap::new()
+  }
+}
+
+#[cfg(not(test))]
+#[derive(Debug, Default)]
+pub struct ModuleMapCounter {}
+
+#[cfg(not(test))]
+impl ModuleMapCounter {
+  pub fn increase_pending(&mut self, _specifier: &str) {}
+
+  pub fn increase_resolved(&mut self, _specifier: &str) {}
+
+  pub fn increase_failed(&mut self, _specifier: &str) {}
+
+  pub fn increase_evaluate(&mut self, _specifier: &str) {}
+}
+
+#[cfg(test)]
+#[derive(Debug, Default)]
+pub struct ModuleMapCounter {
+  pub pending: HashMap<ModulePath, u32>,
+  pub resolved: HashMap<ModulePath, u32>,
+  pub failed: HashMap<ModulePath, u32>,
+  pub evaluate: HashMap<ModulePath, u32>,
+}
+
+#[cfg(test)]
+impl ModuleMapCounter {
+  pub fn increase_pending(&mut self, specifier: &str) {
+    let old = self.pending.get(specifier).unwrap_or(&0);
+    self.pending.insert(specifier.into(), old + 1);
+  }
+
+  pub fn increase_resolved(&mut self, specifier: &str) {
+    let old = self.resolved.get(specifier).unwrap_or(&0);
+    self.resolved.insert(specifier.into(), old + 1);
+  }
+
+  pub fn increase_failed(&mut self, specifier: &str) {
+    let old = self.failed.get(specifier).unwrap_or(&0);
+    self.failed.insert(specifier.into(), old + 1);
+  }
+
+  pub fn increase_evaluate(&mut self, specifier: &str) {
+    let old = self.evaluate.get(specifier).unwrap_or(&0);
+    self.evaluate.insert(specifier.into(), old + 1);
   }
 }

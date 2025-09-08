@@ -69,17 +69,17 @@ mod test_static_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      assert!(module_map.pending_counter().is_empty());
+      assert!(module_map.counter().pending.is_empty());
       assert!(module_map.pending().borrow().is_empty());
-      assert!(module_map.failed_counter().is_empty());
-      assert_eq!(module_map.resolved_counter().len(), 0);
+      assert!(module_map.counter().failed.is_empty());
+      assert_eq!(module_map.counter().resolved.len(), 0);
       info!(
         "module_map.evaluate_counter:{:?}",
-        module_map.evaluate_counter()
+        module_map.counter().evaluate
       );
-      assert_eq!(module_map.evaluate_counter().len(), 1);
+      assert_eq!(module_map.counter().evaluate.len(), 1);
       assert_eq!(
-        module_map.evaluate_counter().get(
+        module_map.counter().evaluate.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -148,17 +148,17 @@ mod test_static_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      assert!(module_map.pending_counter().is_empty());
+      assert!(module_map.counter().pending.is_empty());
       assert!(module_map.pending().borrow().is_empty());
-      assert!(module_map.failed_counter().is_empty());
-      assert_eq!(module_map.resolved_counter().len(), 0);
+      assert!(module_map.counter().failed.is_empty());
+      assert_eq!(module_map.counter().resolved.len(), 0);
       info!(
         "module_map.evaluate_counter:{:?}",
-        module_map.evaluate_counter()
+        module_map.counter().evaluate
       );
-      assert_eq!(module_map.evaluate_counter().len(), 1);
+      assert_eq!(module_map.counter().evaluate.len(), 1);
       assert_eq!(
-        module_map.evaluate_counter().get(
+        module_map.counter().evaluate.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
