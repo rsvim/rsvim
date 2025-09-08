@@ -212,6 +212,7 @@ fn load_as_node_module(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   anyhow::bail!(path_not_found(path));
 }
 
+/// Async [`load_as_node_module`].
 async fn async_load_as_node_module(
   path: &Path,
 ) -> AnyResult<(PathBuf, ModuleSource)> {
@@ -270,76 +271,6 @@ fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
 async fn async_load_as_directory(
   path: &Path,
 ) -> AnyResult<(PathBuf, ModuleSource)> {
-  if path.is_dir() {
-    for pkg in PACKAGE_FILES {
-      let pkg_path = path.join(pkg);
-      if pkg_path.is_file() {
-        match tokio::fs::read_to_string(pkg_path).await {
-          Ok(pkg_src) => {
-            match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-              Ok(pkg_json) => match pkg_json.get("exports") {
-                Some(json_exports) => {
-                  // Case-1: "exports" is plain string
-                  //
-                  // ```json
-                  // {
-                  //   "exports": "./index.js"
-                  // }
-                  // ```
-                  if json_exports.is_string() {
-                    let entry_path =
-                      path.join(Path::new(json_exports.as_str().unwrap()));
-                    if entry_path.is_file() {
-                      return match async_load_source(path).await {
-                        Ok(source) => Ok((path.to_path_buf(), source)),
-                        Err(e) => Err(e),
-                      };
-                    }
-                  }
-
-                  if json_exports.is_object() {
-                    // Case-2: "exports" is json object and use default field:
-                    // "." or "default"
-                    //
-                    // ```json
-                    // {
-                    //   "exports": {
-                    //     ".": "./index.js"
-                    //     // Or
-                    //     "default": "./index.js"
-                    //   }
-                    // }
-                    // ```
-                    for field in [".", "default"] {
-                      match json_exports.get(field) {
-                        Some(json_exports_cwd) => {
-                          debug_assert!(json_exports_cwd.is_string());
-                          let entry_path = path.join(Path::new(
-                            json_exports_cwd.as_str().unwrap(),
-                          ));
-                          if entry_path.is_file() {
-                            return match load_source(path) {
-                              Ok(source) => Ok((path.to_path_buf(), source)),
-                              Err(e) => Err(e),
-                            };
-                          }
-                        }
-                        None => { /* do nothing */ }
-                      }
-                    }
-                  }
-                }
-                None => { /* do nothing */ }
-              },
-              Err(e) => return Err(e.into()),
-            }
-          }
-          Err(e) => return Err(e.into()),
-        }
-      }
-    }
-  }
-
   for ext in FILE_EXTENSIONS {
     let path = &path.join(format!("index.{ext}"));
     if path.is_file() {
@@ -430,7 +361,9 @@ impl ModuleLoader for FsModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = load_as_file(path).or_else(|_| load_as_directory(path));
+    let maybe_source = load_as_file(path)
+      .or_else(|_| load_as_node_module(path))
+      .or_else(|_| load_as_directory(path));
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
@@ -471,7 +404,10 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
     let path = Path::new(specifier);
     let maybe_source = match async_load_as_file(path).await {
       Ok(source) => Ok(source),
-      Err(_) => async_load_as_directory(path).await,
+      Err(_) => match async_load_as_node_module(path).await {
+        Ok(source) => Ok(source),
+        Err(_) => async_load_as_directory(path).await,
+      },
     };
 
     let (path, source) = match maybe_source {
