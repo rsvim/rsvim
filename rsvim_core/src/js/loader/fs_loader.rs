@@ -79,27 +79,39 @@ async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
   Ok(source)
 }
 
+macro_rules! load_source_if_file {
+  ($path:expr) => {
+    if $path.is_file() {
+      return match load_source($path) {
+        Ok(source) => Ok(($path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
+    }
+  };
+}
+
+macro_rules! async_load_source_if_file {
+  ($path:expr) => {
+    if $path.is_file() {
+      return match async_load_source($path).await {
+        Ok(source) => Ok(($path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
+    }
+  };
+}
+
 /// Loads import as file.
 fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   // If path is a file.
-  if path.is_file() {
-    return match load_source(path) {
-      Ok(source) => Ok((path.to_path_buf(), source)),
-      Err(e) => Err(e),
-    };
-  }
+  load_source_if_file!(path);
 
   // If path is not a file, and it doesn't has a file extension, try to find it by adding the
   // file extension.
   if path.extension().is_none() {
     for ext in FILE_EXTENSIONS {
       let ext_path = path.with_extension(ext);
-      if ext_path.is_file() {
-        return match load_source(&ext_path) {
-          Ok(source) => Ok((ext_path.to_path_buf(), source)),
-          Err(e) => Err(e),
-        };
-      }
+      load_source_if_file!(ext_path.as_path());
     }
   }
 
@@ -110,24 +122,14 @@ fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
 /// Async [`load_as_file`].
 async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   // If path is a file.
-  if path.is_file() {
-    return match async_load_source(path).await {
-      Ok(source) => Ok((path.to_path_buf(), source)),
-      Err(e) => Err(e),
-    };
-  }
+  async_load_source_if_file!(path);
 
   // If path is not a file, and it doesn't has a file extension, try to find it by adding the
   // file extension.
   if path.extension().is_none() {
     for ext in FILE_EXTENSIONS {
       let ext_path = path.with_extension(ext);
-      if ext_path.is_file() {
-        return match async_load_source(&ext_path).await {
-          Ok(source) => Ok((ext_path.to_path_buf(), source)),
-          Err(e) => Err(e),
-        };
-      }
+      async_load_source_if_file!(ext_path.as_path());
     }
   }
 
@@ -156,10 +158,82 @@ fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
                   // }
                   // ```
                   if json_exports.is_string() {
+                    let json_path =
+                      path.join(Path::new(json_exports.as_str().unwrap()));
+                    load_source_if_file!(json_path.as_path());
+                  }
+
+                  if json_exports.is_object() {
+                    // Case-2: "exports" is json object and use default field:
+                    // "." or "default"
+                    //
+                    // ```json
+                    // {
+                    //   "exports": {
+                    //     ".": "./index.js"
+                    //     // Or
+                    //     "default": "./index.js"
+                    //   }
+                    // }
+                    // ```
+                    for field in [".", "default"] {
+                      match json_exports.get(field) {
+                        Some(json_exports_cwd) => {
+                          debug_assert!(json_exports_cwd.is_string());
+                          let json_path = path.join(Path::new(
+                            json_exports_cwd.as_str().unwrap(),
+                          ));
+                          load_source_if_file!(json_path.as_path());
+                        }
+                        None => { /* do nothing */ }
+                      }
+                    }
+                  }
+                }
+                None => { /* do nothing */ }
+              },
+              Err(e) => return Err(e.into()),
+            }
+          }
+          Err(e) => return Err(e.into()),
+        }
+      }
+    }
+  }
+
+  for ext in FILE_EXTENSIONS {
+    let path = &path.join(format!("index.{ext}"));
+    load_source_if_file!(path);
+  }
+
+  anyhow::bail!(path_not_found(path));
+}
+
+/// Async [`load_as_directory`].
+async fn async_load_as_directory(
+  path: &Path,
+) -> AnyResult<(PathBuf, ModuleSource)> {
+  if path.is_dir() {
+    for pkg in PACKAGE_EXTENSIONS {
+      let pkg_path = path.join(pkg);
+      if pkg_path.is_file() {
+        match tokio::fs::read_to_string(pkg_path).await {
+          Ok(pkg_src) => {
+            match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+              Ok(pkg_json) => match pkg_json.get("exports") {
+                Some(json_exports) => {
+                  // Case-1: "exports" is plain string
+                  //
+                  // ```json
+                  // {
+                  //   "exports": "./index.js"
+                  // }
+                  // ```
+                  if json_exports.is_string() {
                     let entry_path =
                       path.join(Path::new(json_exports.as_str().unwrap()));
                     if entry_path.is_file() {
-                      return match load_source(path) {
+                      return match async_load_source(path).await {
                         Ok(source) => Ok((path.to_path_buf(), source)),
                         Err(e) => Err(e),
                       };
@@ -209,23 +283,6 @@ fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     }
   }
 
-  for ext in FILE_EXTENSIONS {
-    let path = &path.join(format!("index.{ext}"));
-    if path.is_file() {
-      return match load_source(path) {
-        Ok(source) => Ok((path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    }
-  }
-
-  anyhow::bail!(path_not_found(path));
-}
-
-/// Async [`load_as_directory`].
-async fn async_load_as_directory(
-  path: &Path,
-) -> AnyResult<(PathBuf, ModuleSource)> {
   for ext in FILE_EXTENSIONS {
     let path = &path.join(format!("index.{ext}"));
     if path.is_file() {
