@@ -22,15 +22,14 @@ pub fn module_resolve_cb<'a>(
   _import_attributes: v8::Local<'a, v8::FixedArray>,
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
+  // Get `CallbackScope` from context.
+  let scope = &mut unsafe { v8::CallbackScope::new(context) };
   trace!(
     "module_resolve_cb, specifier:{:?}, referrer_scriptid:{:?}, referrer_identity_hash:{:?}",
-    specifier,
+    specifier.to_rust_string_lossy(scope),
     referrer.script_id(),
     referrer.get_identity_hash().get()
   );
-
-  // Get `CallbackScope` from context.
-  let scope = &mut unsafe { v8::CallbackScope::new(context) };
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
