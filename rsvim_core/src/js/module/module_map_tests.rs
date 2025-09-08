@@ -219,7 +219,10 @@ mod test_static_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    make_multi_file_configs(
+      &tp,
+      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
+    );
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
