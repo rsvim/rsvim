@@ -114,15 +114,12 @@ mod sync_load {
   // }
   // ```
   //
-  // Case-2: "exports" is json object and use default field:
-  // "." or "default"
+  // Case-2: "exports" is json object and use "." field
   //
   // ```json
   // {
   //   "exports": {
   //     ".": "./index.js"
-  //     // Or
-  //     "default": "./index.js"
   //   }
   // }
   // ```
@@ -141,13 +138,11 @@ mod sync_load {
                     load_source_if_json!(json_exports, path);
 
                     if json_exports.is_object() {
-                      for field in [".", "default"] {
-                        match json_exports.get(field) {
-                          Some(json_exports_cwd) => {
-                            load_source_if_json!(json_exports_cwd, path);
-                          }
-                          None => { /* do nothing */ }
+                      match json_exports.get(".") {
+                        Some(json_exports_cwd) => {
+                          load_source_if_json!(json_exports_cwd, path);
                         }
+                        None => { /* do nothing */ }
                       }
                     }
                   }
