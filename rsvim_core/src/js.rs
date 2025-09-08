@@ -13,7 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::module::EsModuleFuture;
+use crate::js::module::{EsModuleFuture, ModulePath};
 use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::report_js_error;
@@ -715,6 +715,7 @@ pub mod boost {
       let scope = &mut self.handle_scope();
       let state_rc = JsRuntime::state(scope);
       let mut ready_imports = vec![];
+      let mut _failed_paths: Vec<ModulePath> = vec![];
 
       {
         let state = state_rc.borrow();
@@ -746,6 +747,10 @@ pub mod boost {
               }
             }
 
+            if cfg!(debug_assertions) {
+              _failed_paths.push(graph_root.path().clone());
+            }
+
             return false;
           }
 
@@ -762,6 +767,18 @@ pub mod boost {
         // Note: We have to drop the sate ref here to avoid borrow panics
         // during the module instantiation/evaluation process.
         // drop(state);
+      }
+
+      if cfg!(debug_assertions) {
+        let mut state = state_rc.borrow_mut();
+        for graph_rc in ready_imports.clone() {
+          state
+            .module_map
+            .increase_resolved(graph_rc.borrow().root_rc().borrow().path());
+        }
+        for failed_path in _failed_paths {
+          state.module_map.increase_failed(&failed_path);
+        }
       }
 
       // Execute the root module from the graph.
