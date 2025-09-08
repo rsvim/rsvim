@@ -56,6 +56,18 @@ impl TextContents {
   pub fn command_line_message_mut(&mut self) -> &mut Text {
     &mut self.command_line_message
   }
+
+  /// Get "command line" message history
+  pub fn command_line_message_history(&self) -> &HeapRb<CompactString> {
+    &self.command_line_message_history
+  }
+
+  /// Get mutable "command line" message history
+  pub fn command_line_message_history_mut(
+    &mut self,
+  ) -> &mut HeapRb<CompactString> {
+    &mut self.command_line_message_history
+  }
 }
 
 impl Debug for TextContents {
