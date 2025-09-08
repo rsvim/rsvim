@@ -177,8 +177,9 @@ impl ModuleMap {
   }
 
   #[cfg(debug_assertions)]
-  pub fn evaluate_counter_mut(&mut self) -> &mut HashMap<ModulePath, u32> {
-    &mut self.evaluate_counter
+  pub fn increase_evaluate(&mut self, specifier: &str) {
+    let old = self.evaluate_counter.get(specifier).unwrap_or(&0);
+    self.evaluate_counter.insert(specifier.into(), old + 1);
   }
 }
 
