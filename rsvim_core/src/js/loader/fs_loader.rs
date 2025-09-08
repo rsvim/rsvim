@@ -51,6 +51,58 @@ fn wrap_json(source: &str) -> String {
   format!("export default JSON.parse(`{source}`);")
 }
 
+mod sync_resolve {
+  use super::*;
+
+  macro_rules! resolve_for_json {
+    ($field:expr,$path:expr) => {
+      let json_path = $path.join(Path::new($field.as_str().unwrap()));
+      if json_path.is_file() {
+        return Some(Ok(json_path));
+      }
+    };
+  }
+
+  pub fn resolve_node_module(path: &Path) -> Option<AnyResult<PathBuf>> {
+    if path.is_dir() {
+      for pkg in PACKAGE_FILES {
+        let pkg_path = path.join(pkg);
+        if pkg_path.is_file() {
+          match std::fs::read_to_string(pkg_path) {
+            Ok(pkg_src) => {
+              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+                Ok(pkg_json) => match pkg_json.get("exports") {
+                  Some(json_exports) => {
+                    if json_exports.is_string() {
+                      resolve_for_json!(json_exports, path);
+                    }
+
+                    if json_exports.is_object() {
+                      match json_exports.get(".") {
+                        Some(json_exports_cwd) => {
+                          if json_exports_cwd.is_string() {
+                            resolve_for_json!(json_exports, path);
+                          }
+                        }
+                        None => { /* do nothing */ }
+                      }
+                    }
+                  }
+                  None => { /* do nothing */ }
+                },
+                Err(e) => return Some(Err(e.into())),
+              }
+            }
+            Err(e) => return Some(Err(e.into())),
+          }
+        }
+      }
+    }
+
+    None
+  }
+}
+
 mod sync_load {
   use super::*;
 
@@ -347,9 +399,17 @@ impl ModuleLoader for FsModuleLoader {
         let npm_specifier = config_home.join("node_modules").join(specifier);
         match npm_specifier.absolutize() {
           Ok(npm_path) => {
-            if npm_path.exists() {
-              return Ok(transform(npm_path.to_path_buf()));
+            if npm_path.is_dir() {
+              if let Some(result) = sync_resolve::resolve_node_module(&npm_path)
+              {
+                match result {
+                  Ok(result2) => return Ok(transform(result2)),
+                  Err(e) => anyhow::bail!(path_not_found2(specifier, e)),
+                }
+              }
             }
+
+            anyhow::bail!(path_not_found(specifier));
           }
           Err(e) => {
             anyhow::bail!(path_not_found2(specifier, e))
