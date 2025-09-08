@@ -67,6 +67,7 @@ strum = "0.27.2"
 strum_macros = "0.27.2"
 downcast-rs = "2.0.2"
 async-trait = "0.1.89"
+ringbuf = "0.4.8"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
