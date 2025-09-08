@@ -41,7 +41,6 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
-use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -57,7 +56,7 @@ pub enum ImportKind {
 pub struct ModuleGraph {
   kind: ImportKind,
   root_rc: EsModuleRc,
-  same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  same_origin: Vec<v8::Global<v8::PromiseResolver>>,
 }
 
 rc_refcell_ptr!(ModuleGraph);
@@ -71,13 +70,13 @@ impl ModuleGraph {
     self.root_rc.clone()
   }
 
-  pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
+  pub fn same_origin(&self) -> &Vec<v8::Global<v8::PromiseResolver>> {
     &self.same_origin
   }
 
   pub fn same_origin_mut(
     &mut self,
-  ) -> &mut LinkedList<v8::Global<v8::PromiseResolver>> {
+  ) -> &mut Vec<v8::Global<v8::PromiseResolver>> {
     &mut self.same_origin
   }
 }
@@ -97,7 +96,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Static,
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: vec![],
     }
   }
 
@@ -118,7 +117,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Dynamic(promise),
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: vec![],
     }
   }
 }
