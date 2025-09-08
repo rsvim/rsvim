@@ -200,10 +200,10 @@ fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
                 }
                 None => { /* do nothing */ }
               },
-              Err(e) => return Err(e),
+              Err(e) => return Err(e.into()),
             }
           }
-          Err(e) => return Err(e),
+          Err(e) => return Err(e.into()),
         }
       }
     }
