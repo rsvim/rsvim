@@ -115,7 +115,7 @@ mod test_static_import {
     function echo(value) {
         Rsvim.cmd.echo(value);
     }
-    export default {echo};
+    export default { echo };
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
