@@ -135,7 +135,7 @@ async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
   anyhow::bail!(path_not_found(path));
 }
 
-macro_rules! load_source_if_pkg_field {
+macro_rules! load_source_if_json {
   ($field:expr,$path:expr) => {
     if $field.is_string() {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
@@ -144,7 +144,7 @@ macro_rules! load_source_if_pkg_field {
   };
 }
 
-macro_rules! async_load_source_if_pkg_field {
+macro_rules! async_load_source_if_json {
   ($field:expr,$path:expr) => {
     if $field.is_string() {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
@@ -183,13 +183,13 @@ fn load_as_node_module(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
             match serde_json::from_str::<serde_json::Value>(&pkg_src) {
               Ok(pkg_json) => match pkg_json.get("exports") {
                 Some(json_exports) => {
-                  load_source_if_pkg_field!(json_exports, path);
+                  load_source_if_json!(json_exports, path);
 
                   if json_exports.is_object() {
                     for field in [".", "default"] {
                       match json_exports.get(field) {
                         Some(json_exports_cwd) => {
-                          load_source_if_pkg_field!(json_exports_cwd, path);
+                          load_source_if_json!(json_exports_cwd, path);
                         }
                         None => { /* do nothing */ }
                       }
@@ -223,16 +223,13 @@ async fn async_load_as_node_module(
             match serde_json::from_str::<serde_json::Value>(&pkg_src) {
               Ok(pkg_json) => match pkg_json.get("exports") {
                 Some(json_exports) => {
-                  async_load_source_if_pkg_field!(json_exports, path);
+                  async_load_source_if_json!(json_exports, path);
 
                   if json_exports.is_object() {
                     for field in [".", "default"] {
                       match json_exports.get(field) {
                         Some(json_exports_cwd) => {
-                          async_load_source_if_pkg_field!(
-                            json_exports_cwd,
-                            path
-                          );
+                          async_load_source_if_json!(json_exports_cwd, path);
                         }
                         None => { /* do nothing */ }
                       }
