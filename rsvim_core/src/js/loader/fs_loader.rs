@@ -68,38 +68,42 @@ mod sync_load {
     Ok(source)
   }
 
-  macro_rules! load_source_if_file {
+  macro_rules! load_source_for_file {
     ($path:expr) => {
-      if $path.is_file() {
-        return match load_source($path) {
-          Ok(source) => Ok(($path.to_path_buf(), source)),
-          Err(e) => Err(e),
-        };
-      }
+      return match load_source($path) {
+        Ok(source) => Ok(($path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
     };
   }
 
   /// Loads import as file.
   pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
-    load_source_if_file!(path);
+    if path.is_file() {
+      load_source_for_file!(path);
+    }
 
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
     // file extension.
     if path.extension().is_none() {
       for ext in FILE_EXTENSIONS {
         let ext_path = path.with_extension(ext);
-        load_source_if_file!(ext_path.as_path());
+        if ext_path.is_file() {
+          load_source_for_file!(ext_path.as_path());
+        }
       }
     }
 
     // 3. Bail out with an error.
+    trace!("load_as_file failed:{:?}", path);
     anyhow::bail!(path_not_found(path));
   }
 
   macro_rules! load_source_if_json {
     ($field:expr,$path:expr) => {
       if $field.is_string() {
+        trace!("load_source_if_json field:{:?}, path:{:?}", $field, $path);
         let json_path = $path.join(Path::new($field.as_str().unwrap()));
         load_source_if_file!(json_path.as_path());
       }
@@ -166,7 +170,9 @@ mod sync_load {
   pub fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
-      load_source_if_file!(path);
+      if path.is_file() {
+        load_source_for_file!(path);
+      }
     }
 
     anyhow::bail!(path_not_found(path));
