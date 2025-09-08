@@ -41,8 +41,6 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
-#[cfg(debug_assertions)]
-use std::collections::HashMap;
 use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
@@ -168,8 +166,13 @@ impl ModuleMap {
   }
 
   #[cfg(debug_assertions)]
-  pub fn pending_counter_mut(&mut self) -> &mut HashMap<ModulePath, u32> {
-    &mut self.pending_counter
+  pub fn increase_pending(&mut self, specifier: &str) {
+    match self.pending_counter.get_mut(specifier) {
+      Some(&c) => c += 1,
+      None => {
+        self.pending_counter.insert(specifier, 1);
+      }
+    }
   }
 
   #[cfg(debug_assertions)]

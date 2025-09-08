@@ -8,6 +8,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
 use parking_lot::Mutex;
 use std::io::Write;
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, channel};
 use std::task::{Poll, Waker};
@@ -15,11 +16,23 @@ use std::time::Duration;
 
 pub fn make_configs(tp: &TempPathCfg, src: &str) {
   std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
-  let mut config_entry =
+  let mut fp =
     std::fs::File::create(tp.xdg_config_home.join("rsvim").join("rsvim.js"))
       .unwrap();
-  config_entry.write_all(src.as_bytes()).unwrap();
-  config_entry.flush().unwrap();
+  fp.write_all(src.as_bytes()).unwrap();
+  fp.flush().unwrap();
+}
+
+pub fn make_multi_file_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
+  std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
+
+  for (path, src) in sources.iter() {
+    let mut fp =
+      std::fs::File::create(tp.xdg_config_home.join("rsvim").join(path))
+        .unwrap();
+    fp.write_all(src.as_bytes()).unwrap();
+    fp.flush().unwrap();
+  }
 }
 
 pub fn make_event_loop(
