@@ -41,6 +41,8 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
+#[cfg(debug_assertions)]
+use std::collections::HashMap;
 use std::collections::LinkedList;
 
 #[derive(Debug, Clone)]
@@ -139,6 +141,12 @@ pub struct ModuleMap {
 
   // Pending modules.
   pending: RefCell<Vec<ModuleGraphRc>>,
+
+  #[cfg(debug_assertions)]
+  pending_counter: HashMap<ModulePath, u32>,
+
+  #[cfg(debug_assertions)]
+  evaluate_counter: HashMap<ModulePath, u32>,
 }
 
 impl ModuleMap {
@@ -153,6 +161,26 @@ impl ModuleMap {
   pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
     &self.pending
   }
+
+  #[cfg(debug_assertions)]
+  pub fn pending_counter(&self) -> &HashMap<ModulePath, u32> {
+    &self.pending_counter
+  }
+
+  #[cfg(debug_assertions)]
+  pub fn pending_counter_mut(&mut self) -> &mut HashMap<ModulePath, u32> {
+    &mut self.pending_counter
+  }
+
+  #[cfg(debug_assertions)]
+  pub fn evaluate_counter(&self) -> &HashMap<ModulePath, u32> {
+    &self.evaluate_counter
+  }
+
+  #[cfg(debug_assertions)]
+  pub fn evaluate_counter_mut(&mut self) -> &mut HashMap<ModulePath, u32> {
+    &mut self.evaluate_counter
+  }
 }
 
 impl ModuleMap {
@@ -163,6 +191,10 @@ impl ModuleMap {
       index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
+      #[cfg(debug_assertions)]
+      pending_counter: HashMap::new(),
+      #[cfg(debug_assertions)]
+      evaluate_counter: HashMap::new(),
     }
   }
 
