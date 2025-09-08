@@ -53,230 +53,241 @@ fn wrap_json(source: &str) -> String {
   format!("export default JSON.parse(`{source}`);")
 }
 
-/// Loads contents from a file.
-fn load_source(path: &Path) -> AnyResult<ModuleSource> {
-  let source = std::fs::read_to_string(path)?;
-  let source = if is_json_import(path) {
-    wrap_json(source.as_str())
-  } else {
-    source
-  };
+mod sync_load {
+  use super::*;
 
-  Ok(source)
-}
+  /// Loads contents from a file.
+  pub fn load_source(path: &Path) -> AnyResult<ModuleSource> {
+    let source = std::fs::read_to_string(path)?;
+    let source = if is_json_import(path) {
+      wrap_json(source.as_str())
+    } else {
+      source
+    };
 
-/// Async [`load_source`].
-async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
-  let source = tokio::fs::read_to_string(path).await?;
-  let source = if is_json_import(path) {
-    wrap_json(source.as_str())
-  } else {
-    source
-  };
-
-  Ok(source)
-}
-
-macro_rules! load_source_if_file {
-  ($path:expr) => {
-    if $path.is_file() {
-      return match load_source($path) {
-        Ok(source) => Ok(($path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    }
-  };
-}
-
-macro_rules! async_load_source_if_file {
-  ($path:expr) => {
-    if $path.is_file() {
-      return match async_load_source($path).await {
-        Ok(source) => Ok(($path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    }
-  };
-}
-
-/// Loads import as file.
-fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
-  // If path is a file.
-  load_source_if_file!(path);
-
-  // If path is not a file, and it doesn't has a file extension, try to find it by adding the
-  // file extension.
-  if path.extension().is_none() {
-    for ext in FILE_EXTENSIONS {
-      let ext_path = path.with_extension(ext);
-      load_source_if_file!(ext_path.as_path());
-    }
+    Ok(source)
   }
 
-  // 3. Bail out with an error.
-  anyhow::bail!(path_not_found(path));
-}
-
-/// Async [`load_as_file`].
-async fn async_load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
-  // If path is a file.
-  async_load_source_if_file!(path);
-
-  // If path is not a file, and it doesn't has a file extension, try to find it by adding the
-  // file extension.
-  if path.extension().is_none() {
-    for ext in FILE_EXTENSIONS {
-      let ext_path = path.with_extension(ext);
-      async_load_source_if_file!(ext_path.as_path());
-    }
-  }
-
-  // 3. Bail out with an error.
-  anyhow::bail!(path_not_found(path));
-}
-
-macro_rules! load_source_if_json {
-  ($field:expr,$path:expr) => {
-    if $field.is_string() {
-      let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      load_source_if_file!(json_path.as_path());
-    }
-  };
-}
-
-macro_rules! async_load_source_if_json {
-  ($field:expr,$path:expr) => {
-    if $field.is_string() {
-      let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      async_load_source_if_file!(json_path.as_path());
-    }
-  };
-}
-
-// Case-1: "exports" is plain string
-//
-// ```json
-// {
-//   "exports": "./index.js"
-// }
-// ```
-//
-// Case-2: "exports" is json object and use default field:
-// "." or "default"
-//
-// ```json
-// {
-//   "exports": {
-//     ".": "./index.js"
-//     // Or
-//     "default": "./index.js"
-//   }
-// }
-// ```
-fn load_as_node_module(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
-  if path.is_dir() {
-    for pkg in PACKAGE_FILES {
-      let pkg_path = path.join(pkg);
-      if pkg_path.is_file() {
-        match std::fs::read_to_string(pkg_path) {
-          Ok(pkg_src) => {
-            match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-              Ok(pkg_json) => match pkg_json.get("exports") {
-                Some(json_exports) => {
-                  load_source_if_json!(json_exports, path);
-
-                  if json_exports.is_object() {
-                    for field in [".", "default"] {
-                      match json_exports.get(field) {
-                        Some(json_exports_cwd) => {
-                          load_source_if_json!(json_exports_cwd, path);
-                        }
-                        None => { /* do nothing */ }
-                      }
-                    }
-                  }
-                }
-                None => { /* do nothing */ }
-              },
-              Err(e) => return Err(e.into()),
-            }
-          }
-          Err(e) => return Err(e.into()),
-        }
+  macro_rules! load_source_if_file {
+    ($path:expr) => {
+      if $path.is_file() {
+        return match load_source($path) {
+          Ok(source) => Ok(($path.to_path_buf(), source)),
+          Err(e) => Err(e),
+        };
       }
-    }
+    };
   }
 
-  anyhow::bail!(path_not_found(path));
-}
-
-/// Async [`load_as_node_module`].
-async fn async_load_as_node_module(
-  path: &Path,
-) -> AnyResult<(PathBuf, ModuleSource)> {
-  if path.is_dir() {
-    for pkg in PACKAGE_FILES {
-      let pkg_path = path.join(pkg);
-      if pkg_path.is_file() {
-        match tokio::fs::read_to_string(pkg_path).await {
-          Ok(pkg_src) => {
-            match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-              Ok(pkg_json) => match pkg_json.get("exports") {
-                Some(json_exports) => {
-                  async_load_source_if_json!(json_exports, path);
-
-                  if json_exports.is_object() {
-                    for field in [".", "default"] {
-                      match json_exports.get(field) {
-                        Some(json_exports_cwd) => {
-                          async_load_source_if_json!(json_exports_cwd, path);
-                        }
-                        None => { /* do nothing */ }
-                      }
-                    }
-                  }
-                }
-                None => { /* do nothing */ }
-              },
-              Err(e) => return Err(e.into()),
-            }
-          }
-          Err(e) => return Err(e.into()),
-        }
-      }
-    }
-  }
-
-  anyhow::bail!(path_not_found(path));
-}
-
-/// Loads import as directory using the 'index.[ext]' convention.
-///
-/// TODO: In the future, we may want to also support the npm package.
-fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
-  for ext in FILE_EXTENSIONS {
-    let path = &path.join(format!("index.{ext}"));
+  /// Loads import as file.
+  pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+    // If path is a file.
     load_source_if_file!(path);
+
+    // If path is not a file, and it doesn't has a file extension, try to find it by adding the
+    // file extension.
+    if path.extension().is_none() {
+      for ext in FILE_EXTENSIONS {
+        let ext_path = path.with_extension(ext);
+        load_source_if_file!(ext_path.as_path());
+      }
+    }
+
+    // 3. Bail out with an error.
+    anyhow::bail!(path_not_found(path));
   }
 
-  anyhow::bail!(path_not_found(path));
+  macro_rules! load_source_if_json {
+    ($field:expr,$path:expr) => {
+      if $field.is_string() {
+        let json_path = $path.join(Path::new($field.as_str().unwrap()));
+        load_source_if_file!(json_path.as_path());
+      }
+    };
+  }
+
+  // Case-1: "exports" is plain string
+  //
+  // ```json
+  // {
+  //   "exports": "./index.js"
+  // }
+  // ```
+  //
+  // Case-2: "exports" is json object and use default field:
+  // "." or "default"
+  //
+  // ```json
+  // {
+  //   "exports": {
+  //     ".": "./index.js"
+  //     // Or
+  //     "default": "./index.js"
+  //   }
+  // }
+  // ```
+  pub fn load_as_node_module(
+    path: &Path,
+  ) -> AnyResult<(PathBuf, ModuleSource)> {
+    if path.is_dir() {
+      for pkg in PACKAGE_FILES {
+        let pkg_path = path.join(pkg);
+        if pkg_path.is_file() {
+          match std::fs::read_to_string(pkg_path) {
+            Ok(pkg_src) => {
+              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+                Ok(pkg_json) => match pkg_json.get("exports") {
+                  Some(json_exports) => {
+                    load_source_if_json!(json_exports, path);
+
+                    if json_exports.is_object() {
+                      for field in [".", "default"] {
+                        match json_exports.get(field) {
+                          Some(json_exports_cwd) => {
+                            load_source_if_json!(json_exports_cwd, path);
+                          }
+                          None => { /* do nothing */ }
+                        }
+                      }
+                    }
+                  }
+                  None => { /* do nothing */ }
+                },
+                Err(e) => return Err(e.into()),
+              }
+            }
+            Err(e) => return Err(e.into()),
+          }
+        }
+      }
+    }
+
+    anyhow::bail!(path_not_found(path));
+  }
+
+  /// Loads import as directory using the 'index.[ext]' convention.
+  ///
+  /// TODO: In the future, we may want to also support the npm package.
+  pub fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+    for ext in FILE_EXTENSIONS {
+      let path = &path.join(format!("index.{ext}"));
+      load_source_if_file!(path);
+    }
+
+    anyhow::bail!(path_not_found(path));
+  }
 }
 
-/// Async [`load_as_directory`].
-async fn async_load_as_directory(
-  path: &Path,
-) -> AnyResult<(PathBuf, ModuleSource)> {
-  for ext in FILE_EXTENSIONS {
-    let path = &path.join(format!("index.{ext}"));
-    if path.is_file() {
-      return match async_load_source(path).await {
-        Ok(source) => Ok((path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    }
+mod async_load {
+  use super::*;
+
+  /// Async [`load_source`].
+  pub async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
+    let source = tokio::fs::read_to_string(path).await?;
+    let source = if is_json_import(path) {
+      wrap_json(source.as_str())
+    } else {
+      source
+    };
+
+    Ok(source)
   }
 
-  anyhow::bail!(path_not_found(path));
+  macro_rules! async_load_source_if_file {
+    ($path:expr) => {
+      if $path.is_file() {
+        return match async_load_source($path).await {
+          Ok(source) => Ok(($path.to_path_buf(), source)),
+          Err(e) => Err(e),
+        };
+      }
+    };
+  }
+
+  /// Async [`load_as_file`].
+  pub async fn async_load_as_file(
+    path: &Path,
+  ) -> AnyResult<(PathBuf, ModuleSource)> {
+    // If path is a file.
+    async_load_source_if_file!(path);
+
+    // If path is not a file, and it doesn't has a file extension, try to find it by adding the
+    // file extension.
+    if path.extension().is_none() {
+      for ext in FILE_EXTENSIONS {
+        let ext_path = path.with_extension(ext);
+        async_load_source_if_file!(ext_path.as_path());
+      }
+    }
+
+    // 3. Bail out with an error.
+    anyhow::bail!(path_not_found(path));
+  }
+
+  macro_rules! async_load_source_if_json {
+    ($field:expr,$path:expr) => {
+      if $field.is_string() {
+        let json_path = $path.join(Path::new($field.as_str().unwrap()));
+        async_load_source_if_file!(json_path.as_path());
+      }
+    };
+  }
+
+  /// Async [`load_as_node_module`].
+  pub async fn async_load_as_node_module(
+    path: &Path,
+  ) -> AnyResult<(PathBuf, ModuleSource)> {
+    if path.is_dir() {
+      for pkg in PACKAGE_FILES {
+        let pkg_path = path.join(pkg);
+        if pkg_path.is_file() {
+          match tokio::fs::read_to_string(pkg_path).await {
+            Ok(pkg_src) => {
+              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+                Ok(pkg_json) => match pkg_json.get("exports") {
+                  Some(json_exports) => {
+                    async_load_source_if_json!(json_exports, path);
+
+                    if json_exports.is_object() {
+                      for field in [".", "default"] {
+                        match json_exports.get(field) {
+                          Some(json_exports_cwd) => {
+                            async_load_source_if_json!(json_exports_cwd, path);
+                          }
+                          None => { /* do nothing */ }
+                        }
+                      }
+                    }
+                  }
+                  None => { /* do nothing */ }
+                },
+                Err(e) => return Err(e.into()),
+              }
+            }
+            Err(e) => return Err(e.into()),
+          }
+        }
+      }
+    }
+
+    anyhow::bail!(path_not_found(path));
+  }
+
+  pub async fn async_load_as_directory(
+    path: &Path,
+  ) -> AnyResult<(PathBuf, ModuleSource)> {
+    for ext in FILE_EXTENSIONS {
+      let path = &path.join(format!("index.{ext}"));
+      if path.is_file() {
+        return match async_load_source(path).await {
+          Ok(source) => Ok((path.to_path_buf(), source)),
+          Err(e) => Err(e),
+        };
+      }
+    }
+
+    anyhow::bail!(path_not_found(path));
+  }
 }
 
 impl ModuleLoader for FsModuleLoader {
@@ -356,9 +367,9 @@ impl ModuleLoader for FsModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = load_as_file(path)
-      .or_else(|_| load_as_node_module(path))
-      .or_else(|_| load_as_directory(path));
+    let maybe_source = sync_load::load_as_file(path)
+      .or_else(|_| sync_load::load_as_node_module(path))
+      .or_else(|_| sync_load::load_as_directory(path));
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
@@ -397,11 +408,11 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
   async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = match async_load_as_file(path).await {
+    let maybe_source = match async_load::async_load_as_file(path).await {
       Ok(source) => Ok(source),
-      Err(_) => match async_load_as_node_module(path).await {
+      Err(_) => match async_load::async_load_as_node_module(path).await {
         Ok(source) => Ok(source),
-        Err(_) => async_load_as_directory(path).await,
+        Err(_) => async_load::async_load_as_directory(path).await,
       },
     };
 
