@@ -1,6 +1,6 @@
 use super::fs_loader::*;
 
-use crate::js::loader::ModuleLoader;
+use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 
@@ -9,11 +9,11 @@ use std::fs;
 use std::path::Path;
 
 #[cfg(test)]
-mod tests_sync {
+mod tests_sync_filepath {
   use super::*;
 
   #[test]
-  fn resolve_filepath1() {
+  fn resolve1() {
     test_log_init();
 
     // Tests to run later on.
@@ -70,7 +70,7 @@ mod tests_sync {
   }
 
   #[test]
-  fn load_reltive1() {
+  fn load_files1() {
     test_log_init();
     // Crate temp dir.
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -116,7 +116,7 @@ mod tests_sync {
   }
 
   #[test]
-  fn load_relative_json1() {
+  fn load_json1() {
     test_log_init();
     // Crate temp dir.
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -156,6 +156,106 @@ mod tests_sync {
     for specifier in tests {
       let path = format!("{}", temp_dir.child(specifier).display());
       let source = loader.load(&path);
+      info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
+      assert!(source.is_ok());
+      assert!(source.unwrap().contains(src));
+    }
+  }
+}
+
+#[cfg(test)]
+mod tests_async_filepath {
+  use super::*;
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn load_reltive1() {
+    test_log_init();
+    // Crate temp dir.
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+      export function sayHello() {
+          console.log('Hello, World!');
+      }
+  "#;
+
+    let source_files = [
+      "./core/tests/005_more_imports.js",
+      "./core/tests/006_more_imports/index.js",
+    ];
+
+    // Create source files.
+    source_files.iter().for_each(|file| {
+      let path = Path::new(file);
+      let path = temp_dir.child(path);
+
+      path.touch().unwrap();
+      fs::write(path, src).unwrap();
+    });
+
+    // Group of tests to be run.
+    let tests = vec![
+      "./core/tests/005_more_imports",
+      "./core/tests/005_more_imports.js",
+      "./core/tests/006_more_imports/",
+      "./core/tests/006_more_imports",
+    ];
+
+    // Run tests.
+    let loader = AsyncFsModuleLoader {};
+
+    for specifier in tests {
+      let path = format!("{}", temp_dir.child(specifier).display());
+      let source = loader.load(&path).await;
+      info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
+      assert!(source.is_ok());
+      assert_eq!(source.unwrap(), src);
+    }
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  fn load_relative_json1() {
+    test_log_init();
+    // Crate temp dir.
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+  {
+    "name": 1
+  }
+  "#;
+
+    let source_files = [
+      "./core/tests/005_more_imports.json",
+      "./core/tests/006_more_imports/index.json",
+    ];
+
+    // Create source files.
+    source_files.iter().for_each(|file| {
+      let path = Path::new(file);
+      let path = temp_dir.child(path);
+
+      path.touch().unwrap();
+      fs::write(path, src).unwrap();
+    });
+
+    // Group of tests to be run.
+    let tests = vec![
+      "./core/tests/005_more_imports",
+      "./core/tests/005_more_imports.json",
+      "./core/tests/006_more_imports/",
+      "./core/tests/006_more_imports",
+      "./core/tests/006_more_imports/index.json",
+    ];
+
+    // Run tests.
+    let loader = AsyncFsModuleLoader {};
+
+    for specifier in tests {
+      let path = format!("{}", temp_dir.child(specifier).display());
+      let source = loader.load(&path).await;
       info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
       assert!(source.is_ok());
       assert!(source.unwrap().contains(src));
