@@ -945,7 +945,7 @@ pub fn execute_module(
       );
     }
     None => {
-      trace!("Module result, filename:{filename:?}({path:?}), result:None")
+      trace!("No module result, filename:{filename:?}({path:?})")
     }
   }
 
