@@ -106,15 +106,16 @@ mod test_static_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-  import * as util from "./util.js";
+  import util from "./util.js";
   util.echo(1);
     "#;
 
     let p2 = Path::new("util.js");
     let src2: &str = r#"
-    export function echo(value) {
+    function echo(value) {
         Rsvim.cmd.echo(value);
     }
+    export default {echo};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
