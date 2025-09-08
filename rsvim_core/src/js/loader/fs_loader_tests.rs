@@ -116,6 +116,51 @@ mod tests_sync_filepath {
   }
 
   #[test]
+  fn load_files_dirs2() {
+    test_log_init();
+    // Crate temp dir.
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+      export function sayHello() {
+          console.log('Hello, World!');
+      }
+  "#;
+
+    let source_files = [
+      "./core/tests/005_more_imports.cjs",
+      "./core/tests/006_more_imports/index",
+    ];
+
+    // Create source files.
+    source_files.iter().for_each(|file| {
+      let path = Path::new(file);
+      let path = temp_dir.child(path);
+
+      path.touch().unwrap();
+      fs::write(path, src).unwrap();
+    });
+
+    // Group of tests to be run.
+    let tests = vec![
+      "./core/tests/005_more_imports",
+      "./core/tests/005_more_imports.js",
+      "./core/tests/006_more_imports/",
+      "./core/tests/006_more_imports",
+    ];
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    for specifier in tests {
+      let path = format!("{}", temp_dir.child(specifier).display());
+      let source = loader.load(&path);
+      info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
+      assert!(source.is_err());
+    }
+  }
+
+  #[test]
   fn load_json1() {
     test_log_init();
     // Crate temp dir.
