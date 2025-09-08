@@ -7,14 +7,13 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
+use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::path::Path;
 use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
-  use compact_str::ToCompactString;
-
   use super::*;
 
   #[tokio::test]
