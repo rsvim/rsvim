@@ -161,6 +161,55 @@ mod tests_sync_filepath {
       assert!(source.unwrap().contains(src));
     }
   }
+
+  #[test]
+  fn load_node_module1() {
+    test_log_init();
+    // Crate temp dir.
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+      export function sayHello() {
+          console.log('Hello, World!');
+      }
+  "#;
+    let src_file: &str = "./core/tests/006_more_imports/index.js";
+
+    let pkg: &str = r#"
+      {
+        "exports": "./index.js"
+      }
+    "#;
+    let pkg_file: &str = "./core/tests/006_more_imports/package.json";
+
+    // Create source files.
+    [(src_file, src), (pkg_file, pkg)]
+      .iter()
+      .for_each(|(file, src)| {
+        let path = Path::new(file);
+        let path = temp_dir.child(path);
+
+        path.touch().unwrap();
+        fs::write(path, src).unwrap();
+      });
+
+    // Group of tests to be run.
+    let tests = vec![
+      "./core/tests/006_more_imports",
+      "./core/tests/006_more_imports/",
+    ];
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    for specifier in tests {
+      let path = format!("{}", temp_dir.child(specifier).display());
+      let source = loader.load(&path);
+      info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
+      assert!(source.is_ok());
+      assert_eq!(source.unwrap(), src);
+    }
+  }
 }
 
 #[cfg(test)]
