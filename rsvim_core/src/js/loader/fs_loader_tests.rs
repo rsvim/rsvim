@@ -13,7 +13,7 @@ mod tests_sync {
   use super::*;
 
   #[test]
-  fn resolve_relative1() {
+  fn resolve_filepath1() {
     test_log_init();
 
     // Tests to run later on.
