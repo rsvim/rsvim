@@ -12,7 +12,8 @@ use std::sync::LazyLock;
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
 
-const RSVIM_SNAPSHOT: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
+const RSVIM_SNAPSHOT: &[u8] =
+  include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
   const VERSION: &str = "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION}";
