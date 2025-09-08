@@ -313,6 +313,8 @@ pub mod build {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
+  use crate::js::module::module_map;
+
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -788,6 +790,9 @@ pub mod boost {
         }
 
         let _ = module.evaluate(tc_scope);
+        if cfg!(debug_assertions) {
+          state_rc.borrow_mut().module_map.increase_evaluate(&path);
+        }
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
         // Note: Due to the architecture, when a module errors, the `promise_reject_cb`
