@@ -185,15 +185,37 @@ mod test_static_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-  import * as util from "./util.js";
-  util.echo(1);
+  import util from "util";
+  util.echo(util.add(1,2));
     "#;
 
-    let p2 = Path::new("util.js");
+    let p2 = Path::new("utils/lib/echo.js");
     let src2: &str = r#"
     export function echo(value) {
         Rsvim.cmd.echo(value);
     }
+    "#;
+
+    let p3 = Path::new("utils/lib/calc.js");
+    let src3: &str = r#"
+    export function add(a, b) {
+        return a+b;
+    }
+    "#;
+
+    let p4 = Path::new("utils/lib/index.js");
+    let src4: &str = r#"
+    import {add} from "./calc";
+    import {echo} from "./echo.js";
+
+    export default {add, echo};
+    "#;
+
+    let p5 = Path::new("utils/package.json");
+    let src5: &str = r#"
+{
+  "exports": "./lib/index.js"
+}
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
