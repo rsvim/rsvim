@@ -27,6 +27,11 @@ pub fn make_multi_file_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
   std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
 
   for (path, src) in sources.iter() {
+    let folder = path.parent().unwrap_or(Path::new("./"));
+    let abs_folder = tp.xdg_config_home.join("rsvim").join(folder);
+    if !abs_folder.exists() {
+      std::fs::create_dir_all(abs_folder).unwrap();
+    }
     let mut fp =
       std::fs::File::create(tp.xdg_config_home.join("rsvim").join(path))
         .unwrap();
