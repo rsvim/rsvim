@@ -12,9 +12,7 @@ use path_absolutize::Absolutize;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-static FILE_EXTENSIONS: &[&str] =
-  &["js", "mjs", "jsx", "ts", "tsx", "json", "wasm"];
-
+static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "ts", "json", "wasm"];
 static PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
 #[derive(Default)]
