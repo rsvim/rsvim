@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::tests::constant::TempPathCfg;
 
+use assert_fs::prelude::*;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use jiff::Zoned;
 use parking_lot::Mutex;
@@ -27,16 +28,9 @@ pub fn make_multi_file_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
   std::fs::create_dir_all(tp.xdg_config_home.join("rsvim")).unwrap();
 
   for (path, src) in sources.iter() {
-    let folder = path.parent().unwrap_or(Path::new("./"));
-    let abs_folder = tp.xdg_config_home.join("rsvim").join(folder);
-    if !abs_folder.exists() {
-      std::fs::create_dir_all(abs_folder).unwrap();
-    }
-    let mut fp =
-      std::fs::File::create(tp.xdg_config_home.join("rsvim").join(path))
-        .unwrap();
-    fp.write_all(src.as_bytes()).unwrap();
-    fp.flush().unwrap();
+    let p = tp.xdg_config_home.child("rsvim").child(path);
+    p.touch().unwrap();
+    std::fs::write(p, src).unwrap();
   }
 }
 
