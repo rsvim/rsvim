@@ -41,6 +41,7 @@ use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -133,6 +134,11 @@ pub struct ModuleMap {
   // Maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
 
+  // Maps from "Module ID" to "Module Path". Since "Module ID" is not strictly
+  // unique, we stores all the modules' path that share a same ID in an array.
+  // This also improves the lookup performance.
+  path_index: HashMap<i32, Vec<ModulePath>>,
+
   // Module status.
   seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
 
@@ -188,8 +194,10 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
+      path_index: HashMap::new(),
       seen: RefCell::new(HashMap::new()),
       pending: RefCell::new(vec![]),
+
       #[cfg(debug_assertions)]
       pending_counter: HashMap::new(),
       #[cfg(debug_assertions)]
