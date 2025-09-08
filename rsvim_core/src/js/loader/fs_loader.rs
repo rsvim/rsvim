@@ -26,7 +26,7 @@ where
   format!("Error: Module path {path:?} not found!")
 }
 
-fn path_not_found2<P>(path: P, e: std::io::Error) -> String
+fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
 where
   P: Into<OsString> + std::fmt::Debug,
 {
@@ -391,7 +391,7 @@ impl ModuleLoader for FsModuleLoader {
             }
           }
           Err(e) => {
-            anyhow::bail!(path_not_found2(specifier, e))
+            anyhow::bail!(path_not_found2(specifier, e.into()))
           }
         }
 
@@ -400,19 +400,16 @@ impl ModuleLoader for FsModuleLoader {
         match npm_specifier.absolutize() {
           Ok(npm_path) => {
             if npm_path.is_dir() {
-              if let Some(result) = sync_resolve::resolve_node_module(&npm_path)
-              {
-                match result {
-                  Ok(result2) => return Ok(transform(result2)),
-                  Err(e) => anyhow::bail!(path_not_found2(specifier, e)),
-                }
+              let maybe_result = sync_resolve::resolve_node_module(&npm_path);
+              match maybe_result {
+                Some(Ok(result)) => return Ok(transform(result)),
+                Some(Err(e)) => anyhow::bail!(path_not_found2(specifier, e)),
+                _ => { /* do nothing */ }
               }
             }
-
-            anyhow::bail!(path_not_found(specifier));
           }
           Err(e) => {
-            anyhow::bail!(path_not_found2(specifier, e))
+            anyhow::bail!(path_not_found2(specifier, e.into()))
           }
         }
 
