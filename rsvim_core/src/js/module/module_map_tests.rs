@@ -185,8 +185,8 @@ mod test_static_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-  import util from "util";
-  util.echo(util.add(1,2));
+  import utils from "utils";
+  utils.echo(utils.add(1,2));
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
