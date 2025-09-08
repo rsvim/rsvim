@@ -176,7 +176,6 @@ mod sync_load {
 mod async_load {
   use super::*;
 
-  /// Async [`load_source`].
   pub async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
     let source = tokio::fs::read_to_string(path).await?;
     let source = if is_json_import(path) {
@@ -199,7 +198,6 @@ mod async_load {
     };
   }
 
-  /// Async [`load_as_file`].
   pub async fn async_load_as_file(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
@@ -228,7 +226,6 @@ mod async_load {
     };
   }
 
-  /// Async [`load_as_node_module`].
   pub async fn async_load_as_node_module(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
