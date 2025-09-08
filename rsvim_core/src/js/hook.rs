@@ -22,12 +22,11 @@ pub fn module_resolve_cb<'a>(
   _import_attributes: v8::Local<'a, v8::FixedArray>,
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
-  {
-    let referrer_scriptid = referrer.script_id();
-    trace!(
-      "module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{referrer_scriptid:?}"
-    );
-  }
+  trace!(
+    "module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{:?}, referrer_identity_hash:{:?}",
+    referrer.script_id(),
+    referrer.get_identity_hash().get()
+  );
 
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
