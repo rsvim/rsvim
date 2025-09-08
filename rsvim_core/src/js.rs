@@ -769,7 +769,7 @@ pub mod boost {
         // drop(state);
       }
 
-      if cfg!(debug_assertions) {
+      if cfg!(test) {
         let mut state = state_rc.borrow_mut();
         for graph_rc in ready_imports.clone() {
           state
