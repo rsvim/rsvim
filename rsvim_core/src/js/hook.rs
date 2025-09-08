@@ -23,7 +23,8 @@ pub fn module_resolve_cb<'a>(
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   trace!(
-    "module_resolve_cb, specifier:{specifier:?}, referrer_scriptid:{:?}, referrer_identity_hash:{:?}",
+    "module_resolve_cb, specifier:{:?}, referrer_scriptid:{:?}, referrer_identity_hash:{:?}",
+    specifier,
     referrer.script_id(),
     referrer.get_identity_hash().get()
   );
