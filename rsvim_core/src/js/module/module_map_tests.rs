@@ -7,6 +7,7 @@ use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 
+use ringbuf::traits::*;
 use std::path::Path;
 use std::time::Duration;
 
@@ -27,7 +28,7 @@ mod test_static_import {
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
   import util from "./util.js";
-  util.echo(value);
+  util.echo(1);
     "#;
 
     let p2 = Path::new("util.js");
@@ -46,29 +47,23 @@ mod test_static_import {
     // Before running
     {
       let contents = lock!(event_loop.contents);
-      assert!(
-        contents
-          .command_line_message()
-          .rope()
-          .to_string()
-          .is_empty()
-      );
+      assert!(contents.command_line_message_history().is_empty());
     }
 
     event_loop.initialize()?;
     event_loop
-      .run_with_mock_events(MockEventReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
     // After running
     {
-      let contents = lock!(event_loop.contents);
-      let payload = contents.command_line_message().rope().to_string();
-      let payload = payload.trim();
-      assert!(payload.contains(
-        "\"Rsvim.cmd.echo\" message parameter cannot be undefined or null"
-      ));
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(1, contents.command_line_message_history().len());
+      assert_eq!(
+        Some("1"),
+        contents.command_line_message_history_mut().try_pop()
+      );
     }
 
     Ok(())
