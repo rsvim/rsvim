@@ -118,7 +118,7 @@ mod sync_load {
     Ok(source)
   }
 
-  macro_rules! load_source_for_file {
+  macro_rules! _load_file {
     ($path:expr) => {
       return match load_source($path) {
         Ok(source) => Ok(($path.to_path_buf(), source)),
@@ -131,7 +131,7 @@ mod sync_load {
   pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
-      load_source_for_file!(path);
+      _load_file!(path);
     }
 
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
@@ -140,7 +140,7 @@ mod sync_load {
       for ext in FILE_EXTENSIONS {
         let ext_path = path.with_extension(ext);
         if ext_path.is_file() {
-          load_source_for_file!(ext_path.as_path());
+          _load_file!(ext_path.as_path());
         }
       }
     }
@@ -150,11 +150,11 @@ mod sync_load {
     anyhow::bail!(path_not_found(path));
   }
 
-  macro_rules! load_source_for_json {
+  macro_rules! _load_npm {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
       if json_path.is_file() {
-        load_source_for_file!(json_path.as_path());
+        _load_file!(json_path.as_path());
       }
     };
   }
@@ -189,14 +189,14 @@ mod sync_load {
                 Ok(pkg_json) => match pkg_json.get("exports") {
                   Some(json_exports) => {
                     if json_exports.is_string() {
-                      load_source_for_json!(json_exports, path);
+                      _load_npm!(json_exports, path);
                     }
 
                     if json_exports.is_object() {
                       match json_exports.get(".") {
                         Some(json_exports_cwd) => {
                           if json_exports_cwd.is_string() {
-                            load_source_for_json!(json_exports_cwd, path);
+                            _load_npm!(json_exports_cwd, path);
                           }
                         }
                         None => { /* do nothing */ }
@@ -224,7 +224,7 @@ mod sync_load {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
-        load_source_for_file!(path);
+        _load_file!(path);
       }
     }
 
