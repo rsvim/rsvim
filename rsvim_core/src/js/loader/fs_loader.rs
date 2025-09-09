@@ -62,6 +62,14 @@ mod sync_resolve {
     }
   }
 
+  pub fn resolve_folder(path: &Path) -> AnyResult<ModulePath> {
+    if path.is_dir() {
+      Ok(transform(path.to_path_buf()))
+    } else {
+      anyhow::bail!(path_not_found(path))
+    }
+  }
+
   macro_rules! _resolve_npm {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
@@ -108,6 +116,11 @@ mod sync_resolve {
     }
 
     anyhow::bail!(path_not_found(path))
+  }
+
+  pub fn chain(path: &Path) -> AnyResult<ModulePath> {
+    resolve_file(path)
+      .or_else(|_| resolve_node_module(path).or_else(|_| resolve_folder(path)))
   }
 }
 
@@ -372,7 +385,8 @@ impl ModuleLoader for FsModuleLoader {
     if specifier.starts_with('/')
       || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
     {
-      return Ok(transform(Path::new(specifier).absolutize()?.to_path_buf()));
+      let path = Path::new(specifier).absolutize()?.to_path_buf();
+      return sync_resolve::chain(path.as_path());
     }
 
     // Relative file path.
@@ -384,17 +398,21 @@ impl ModuleLoader for FsModuleLoader {
         }
       };
 
-      return Ok(transform(base.join(specifier).absolutize()?.to_path_buf()));
+      let path = base.join(specifier).absolutize()?.to_path_buf();
+      return sync_resolve::chain(path.as_path());
+      // return Ok(transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
     // Config home
     match PATH_CONFIG.config_home() {
       Some(config_home) => {
         // Simple path in config home directory `${config_home}`.
-        let simple_path = config_home.join(specifier);
-        let simple_path = simple_path.absolutize()?;
+        let simple_path =
+          config_home.join(specifier).absolutize()?.to_path_buf();
+        // let simple_path = simple_path.absolutize()?;
         if simple_path.exists() {
-          return Ok(transform(simple_path.to_path_buf()));
+          return sync_resolve::chain(simple_path.as_path());
+          // return Ok(transform(simple_path.to_path_buf()));
         }
 
         // Npm module path in `${config_home}/node_modules`.
