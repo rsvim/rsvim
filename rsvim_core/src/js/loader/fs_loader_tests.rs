@@ -646,14 +646,17 @@ mod tests_sync_load {
       "./core/tests/006_more_imports/index.js",
     ];
 
+    let base = temp_dir.path().join("rsvim.js");
+
     // Create source files.
     source_files.iter().for_each(|file| {
-      let path = Path::new(file);
-      let path = temp_dir.child(path);
+      let path = temp_dir.child(file);
 
       path.touch().unwrap();
-      fs::write(path, src).unwrap();
+      fs::write(path, file).unwrap();
     });
+
+    let base = base.as_os_str().to_str().unwrap();
 
     // Group of tests to be run.
     let tests = vec![
@@ -667,17 +670,7 @@ mod tests_sync_load {
     let loader = FsModuleLoader {};
 
     for specifier in tests {
-      let path = loader.resolve(
-        Some(
-          temp_dir
-            .path()
-            .join("rsvim.js")
-            .as_os_str()
-            .to_str()
-            .unwrap(),
-        ),
-        specifier,
-      );
+      let path = loader.resolve(Some(base), specifier);
       assert!(path.is_ok());
       let path = path.unwrap();
       let source = loader.load(&path);
