@@ -12,8 +12,9 @@ use path_absolutize::Absolutize;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-static FILE_EXTENSIONS: &[&str] = &["js", "mjs", "ts", "json", "wasm"];
-static PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
+const FILE_EXTENSIONS: &[&str] = &["js", "mjs", "ts", "json", "wasm"];
+const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
+const MODULE_NOT_FOUND: &str = "Module not found";
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
@@ -23,14 +24,14 @@ fn path_not_found<P>(path: P) -> String
 where
   P: Into<OsString> + std::fmt::Debug,
 {
-  format!("Error: Module path {path:?} not found!")
+  format!("Module path {path:?} not found")
 }
 
 fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
 where
   P: Into<OsString> + std::fmt::Debug,
 {
-  format!("Error: Module path {path:?} not found: {e:?}")
+  format!("Module path {path:?} not found: {e:?}")
 }
 
 // Transforms `PathBuf` into `String`.
@@ -68,7 +69,7 @@ mod sync_resolve {
       }
     }
 
-    anyhow::bail!(path_not_found(path))
+    anyhow::bail!(MODULE_NOT_FOUND)
   }
 
   macro_rules! _resolve_npm {
@@ -128,10 +129,10 @@ mod sync_resolve {
                     }
                   }
                 }
-                Err(e) => anyhow::bail!(path_not_found2(path, e.into())),
+                Err(e) => return Err(e),
               }
             }
-            Err(e) => anyhow::bail!(path_not_found2(path, e.into())),
+            Err(e) => return Err(e),
           }
         }
       }
@@ -145,7 +146,7 @@ mod sync_resolve {
       }
     }
 
-    anyhow::bail!(path_not_found(path))
+    anyhow::bail!(MODULE_NOT_FOUND)
   }
 }
 
@@ -174,9 +175,7 @@ mod sync_load {
       };
     }
 
-    // 3. Bail out with an error.
-    trace!("load_as_file failed:{:?}", path);
-    anyhow::bail!(path_not_found(path));
+    anyhow::bail!(MODULE_NOT_FOUND)
   }
 }
 
@@ -205,8 +204,7 @@ mod async_load {
       };
     }
 
-    // 3. Bail out with an error.
-    anyhow::bail!(path_not_found(path));
+    anyhow::bail!(MODULE_NOT_FOUND)
   }
 }
 
@@ -240,9 +238,7 @@ impl ModuleLoader for FsModuleLoader {
     if specifier.starts_with("./") || specifier.starts_with("../") {
       let base = match base {
         Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
-        None => {
-          anyhow::bail!(path_not_found(specifier))
-        }
+        None => anyhow::bail!(MODULE_NOT_FOUND),
       };
 
       let path = base.join(specifier).absolutize()?.to_path_buf();
@@ -268,9 +264,7 @@ impl ModuleLoader for FsModuleLoader {
         let npm_path = npm_path.absolutize()?;
         sync_resolve::resolve_node_module(&npm_path)
       }
-      None => {
-        anyhow::bail!(path_not_found(specifier));
-      }
+      None => anyhow::bail!(MODULE_NOT_FOUND),
     }
   }
 
@@ -282,9 +276,7 @@ impl ModuleLoader for FsModuleLoader {
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
-      Err(_) => {
-        anyhow::bail!(path_not_found(path))
-      }
+      Err(_) => anyhow::bail!(MODULE_NOT_FOUND),
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
@@ -321,9 +313,7 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
-      Err(_) => {
-        anyhow::bail!(path_not_found(path))
-      }
+      Err(_) => anyhow::bail!(MODULE_NOT_FOUND),
     };
 
     let path_extension = path.extension().unwrap().to_str().unwrap();
