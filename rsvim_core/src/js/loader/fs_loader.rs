@@ -246,7 +246,7 @@ mod async_load {
     Ok(source)
   }
 
-  macro_rules! async_load_source_for_file {
+  macro_rules! _async_load_file {
     ($path:expr) => {
       return match async_load_source($path).await {
         Ok(source) => Ok(($path.to_path_buf(), source)),
@@ -260,7 +260,7 @@ mod async_load {
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
-      async_load_source_for_file!(path);
+      _async_load_file!(path);
     }
 
     // If path is not a file, and it doesn't has a file extension, try to find it by adding the
@@ -269,7 +269,7 @@ mod async_load {
       for ext in FILE_EXTENSIONS {
         let ext_path = path.with_extension(ext);
         if ext_path.is_file() {
-          async_load_source_for_file!(ext_path.as_path());
+          _async_load_file!(ext_path.as_path());
         }
       }
     }
@@ -278,10 +278,10 @@ mod async_load {
     anyhow::bail!(path_not_found(path));
   }
 
-  macro_rules! async_load_source_for_json {
+  macro_rules! _async_load_npm {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      async_load_source_for_file!(json_path.as_path());
+      _async_load_file!(json_path.as_path());
     };
   }
 
@@ -298,14 +298,14 @@ mod async_load {
                 Ok(pkg_json) => match pkg_json.get("exports") {
                   Some(json_exports) => {
                     if json_exports.is_string() {
-                      async_load_source_for_json!(json_exports, path);
+                      _async_load_npm!(json_exports, path);
                     }
 
                     if json_exports.is_object() {
                       match json_exports.get(".") {
                         Some(json_exports_cwd) => {
                           if json_exports_cwd.is_string() {
-                            async_load_source_for_json!(json_exports_cwd, path);
+                            _async_load_npm!(json_exports_cwd, path);
                           }
                         }
                         None => { /* do nothing */ }
