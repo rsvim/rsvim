@@ -2,6 +2,7 @@ use super::fs_loader::*;
 
 use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
 use crate::prelude::*;
+use crate::tests::constant::*;
 use crate::tests::log::init as test_log_init;
 
 use assert_fs::prelude::*;
@@ -9,11 +10,11 @@ use std::fs;
 use std::path::Path;
 
 #[cfg(test)]
-mod tests_sync_file {
+mod tests_sync_resolve {
   use super::*;
 
   #[test]
-  fn resolve1() {
+  fn resolve_file1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -56,7 +57,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn resolve2() {
+  fn resolve_file2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -101,7 +102,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn resolve3() {
+  fn resolve_file3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -146,7 +147,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn resolve4() {
+  fn resolve_file4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -190,11 +191,6 @@ export function sayHello() {
     //   assert_eq!(actual, expect);
     // }
   }
-}
-
-#[cfg(test)]
-mod tests_sync_node_module {
-  use super::*;
 
   #[test]
   fn resolve_folder1() {
@@ -377,7 +373,240 @@ export function sayHello() {
   }
 
   #[test]
-  fn load_files_dirs1() {
+  fn resolve_npm_package1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "main": "./lib/index.js"
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports";
+    let pkg = temp_dir.child("core/tests/006_more_imports/package.json");
+    let expect = temp_dir.child("core/tests/006_more_imports/lib/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(actual, expect);
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
+  }
+
+  #[test]
+  fn resolve_npm_package2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": {
+    ".": "./src/index.js"
+  }
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports/";
+    let pkg = temp_dir.child("core/006_more_imports/package.json");
+    let expect = temp_dir.child("core/006_more_imports/src/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(actual, expect);
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
+  }
+
+  #[test]
+  fn resolve_npm_package3() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let pkg = tp
+      .xdg_config_home
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports/";
+    let expect = tp
+      .xdg_config_home
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(actual, expect);
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
+  }
+
+  #[test]
+  fn resolve_npm_package4() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let pkg = tp
+      .xdg_config_home
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(actual, expect);
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
+  }
+}
+
+#[cfg(test)]
+mod tests_sync_load {
+  use super::*;
+
+  #[test]
+  fn load_file1() {
     test_log_init();
     // Crate temp dir.
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -415,7 +644,14 @@ export function sayHello() {
 
     for specifier in tests {
       let path = loader.resolve(
-        Some(temp_dir.path().as_os_str().to_str().unwrap()),
+        Some(
+          temp_dir
+            .path()
+            .join("rsvim.js")
+            .as_os_str()
+            .to_str()
+            .unwrap(),
+        ),
         specifier,
       );
       assert!(path.is_ok());
