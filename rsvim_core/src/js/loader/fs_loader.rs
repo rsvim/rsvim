@@ -248,7 +248,6 @@ impl ModuleLoader for FsModuleLoader {
       let path = base.join(specifier).absolutize()?.to_path_buf();
       return sync_resolve::resolve_file(path.as_path())
         .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
-      // return Ok(transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
     // Config home
@@ -262,7 +261,6 @@ impl ModuleLoader for FsModuleLoader {
           return sync_resolve::resolve_file(simple_path.as_path()).or_else(
             |_| sync_resolve::resolve_node_module(simple_path.as_path()),
           );
-          // return Ok(transform(simple_path.to_path_buf()));
         }
 
         // Npm module path in `${config_home}/node_modules`.
