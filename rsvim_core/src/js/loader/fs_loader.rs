@@ -26,12 +26,12 @@ where
   format!("Error: Module path {path:?} not found!")
 }
 
-fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
-where
-  P: Into<OsString> + std::fmt::Debug,
-{
-  format!("Error: Module path {path:?} not found: {e:?}")
-}
+// fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
+// where
+//   P: Into<OsString> + std::fmt::Debug,
+// {
+//   format!("Error: Module path {path:?} not found: {e:?}")
+// }
 
 // Transforms `PathBuf` into `String`.
 fn transform(path: PathBuf) -> String {
