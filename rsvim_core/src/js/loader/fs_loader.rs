@@ -91,7 +91,7 @@ mod sync_resolve {
                           match json_entry.get(".") {
                             Some(json_entry_cwd) => {
                               if json_entry_cwd.is_string() {
-                                _resolve_npm!(json_entry, path);
+                                _resolve_npm!(json_entry_cwd, path);
                               }
                             }
                             None => { /* do nothing */ }

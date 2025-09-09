@@ -6,6 +6,7 @@ use crate::tests::constant::*;
 use crate::tests::log::init as test_log_init;
 
 use assert_fs::prelude::*;
+use normpath::PathExt;
 use std::fs;
 use std::path::Path;
 
@@ -50,7 +51,10 @@ export function sayHello() {
       expect.replace("/", "\\")
     );
     // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
     // } else {
     //   assert_eq!(actual, expect);
     // }
@@ -420,7 +424,10 @@ export function sayHello() {
       expect.replace("/", "\\")
     );
     // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
     // } else {
     //   assert_eq!(actual, expect);
     // }
@@ -476,7 +483,10 @@ export function sayHello() {
       expect.replace("/", "\\")
     );
     // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
     // } else {
     //   assert_eq!(actual, expect);
     // }
@@ -499,14 +509,17 @@ export function sayHello() {
 }
 "#;
 
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
     let pkg = tp
       .xdg_config_home
+      .child("rsvim")
       .child("node_modules")
       .child("006_more_imports")
       .child("package.json");
     let specifier = "006_more_imports/";
     let expect = tp
       .xdg_config_home
+      .child("rsvim")
       .child("node_modules")
       .child("006_more_imports")
       .child("dist")
@@ -517,6 +530,7 @@ export function sayHello() {
 
     // Prepare configs
     {
+      entry.touch().unwrap();
       expect.touch().unwrap();
       fs::write(expect.path(), src).unwrap();
       pkg.touch().unwrap();
@@ -536,7 +550,10 @@ export function sayHello() {
       expect.replace("/", "\\")
     );
     // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
     // } else {
     //   assert_eq!(actual, expect);
     // }
@@ -559,13 +576,16 @@ export function sayHello() {
 }
 "#;
 
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
     let pkg = tp
       .xdg_config_home
+      .child("rsvim")
       .child("006_more_imports")
       .child("package.json");
     let specifier = "006_more_imports";
     let expect = tp
       .xdg_config_home
+      .child("rsvim")
       .child("006_more_imports")
       .child("dist")
       .child("index.js");
@@ -575,6 +595,7 @@ export function sayHello() {
 
     // Prepare configs
     {
+      entry.touch().unwrap();
       expect.touch().unwrap();
       fs::write(expect.path(), src).unwrap();
       pkg.touch().unwrap();
@@ -594,7 +615,10 @@ export function sayHello() {
       expect.replace("/", "\\")
     );
     // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
     // } else {
     //   assert_eq!(actual, expect);
     // }

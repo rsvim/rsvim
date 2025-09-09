@@ -103,3 +103,4 @@ unicode-width = { workspace = true }
 # unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
+normpath = { workspace = true }
