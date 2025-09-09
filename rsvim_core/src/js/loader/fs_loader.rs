@@ -26,15 +26,15 @@ where
   format!("Error: Module path {path:?} not found!")
 }
 
-// fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
-// where
-//   P: Into<OsString> + std::fmt::Debug,
-// {
-//   format!("Error: Module path {path:?} not found: {e:?}")
-// }
+fn path_not_found2<P>(path: P, e: anyhow::Error) -> String
+where
+  P: Into<OsString> + std::fmt::Debug,
+{
+  format!("Error: Module path {path:?} not found: {e:?}")
+}
 
 // Transforms `PathBuf` into `String`.
-fn transform(path: PathBuf) -> String {
+pub fn transform(path: PathBuf) -> String {
   path.into_os_string().into_string().unwrap()
 }
 
@@ -62,14 +62,6 @@ mod sync_resolve {
     }
   }
 
-  pub fn resolve_folder(path: &Path) -> AnyResult<ModulePath> {
-    if path.is_dir() {
-      Ok(transform(path.to_path_buf()))
-    } else {
-      anyhow::bail!(path_not_found(path))
-    }
-  }
-
   macro_rules! _resolve_npm {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
@@ -87,40 +79,47 @@ mod sync_resolve {
           match std::fs::read_to_string(pkg_path) {
             Ok(pkg_src) => {
               match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-                Ok(pkg_json) => match pkg_json.get("exports") {
-                  Some(json_exports) => {
-                    if json_exports.is_string() {
-                      _resolve_npm!(json_exports, path);
-                    }
+                Ok(pkg_json) => {
+                  for field in ["exports", "main"] {
+                    match pkg_json.get(field) {
+                      Some(json_entry) => {
+                        if json_entry.is_string() {
+                          _resolve_npm!(json_entry, path);
+                        }
 
-                    if json_exports.is_object() {
-                      match json_exports.get(".") {
-                        Some(json_exports_cwd) => {
-                          if json_exports_cwd.is_string() {
-                            _resolve_npm!(json_exports, path);
+                        if json_entry.is_object() {
+                          match json_entry.get(".") {
+                            Some(json_entry_cwd) => {
+                              if json_entry_cwd.is_string() {
+                                _resolve_npm!(json_entry, path);
+                              }
+                            }
+                            None => { /* do nothing */ }
                           }
                         }
-                        None => { /* do nothing */ }
                       }
+                      None => { /* do nothing */ }
                     }
                   }
-                  None => { /* do nothing */ }
-                },
-                Err(e) => return Err(e.into()),
+                }
+                Err(e) => anyhow::bail!(path_not_found2(path, e.into())),
               }
             }
-            Err(e) => return Err(e.into()),
+            Err(e) => anyhow::bail!(path_not_found2(path, e.into())),
           }
+        }
+      }
+
+      // Fallback to default `index.js`
+      for ext in FILE_EXTENSIONS {
+        let path = path.join(format!("index.{ext}"));
+        if path.is_file() {
+          return Ok(transform(path));
         }
       }
     }
 
     anyhow::bail!(path_not_found(path))
-  }
-
-  pub fn chain(path: &Path) -> AnyResult<ModulePath> {
-    resolve_file(path)
-      .or_else(|_| resolve_node_module(path).or_else(|_| resolve_folder(path)))
   }
 }
 
@@ -197,7 +196,7 @@ mod sync_load {
   //   }
   // }
   // ```
-  pub fn load_as_node_module(
+  pub fn _load_as_node_module(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     if path.is_dir() {
@@ -241,7 +240,7 @@ mod sync_load {
   /// Loads import as directory using the 'index.[ext]' convention.
   ///
   /// TODO: In the future, we may want to also support the npm package.
-  pub fn load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+  pub fn _load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
@@ -306,7 +305,7 @@ mod async_load {
     };
   }
 
-  pub async fn async_load_as_node_module(
+  pub async fn _async_load_as_node_module(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     if path.is_dir() {
@@ -347,7 +346,7 @@ mod async_load {
     anyhow::bail!(path_not_found(path));
   }
 
-  pub async fn async_load_as_directory(
+  pub async fn _async_load_as_directory(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     for ext in FILE_EXTENSIONS {
@@ -386,7 +385,8 @@ impl ModuleLoader for FsModuleLoader {
       || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
     {
       let path = Path::new(specifier).absolutize()?.to_path_buf();
-      return sync_resolve::chain(path.as_path());
+      return sync_resolve::resolve_file(path.as_path())
+        .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
     }
 
     // Relative file path.
@@ -399,7 +399,8 @@ impl ModuleLoader for FsModuleLoader {
       };
 
       let path = base.join(specifier).absolutize()?.to_path_buf();
-      return sync_resolve::chain(path.as_path());
+      return sync_resolve::resolve_file(path.as_path())
+        .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
       // return Ok(transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
@@ -411,7 +412,9 @@ impl ModuleLoader for FsModuleLoader {
           config_home.join(specifier).absolutize()?.to_path_buf();
         // let simple_path = simple_path.absolutize()?;
         if simple_path.exists() {
-          return sync_resolve::chain(simple_path.as_path());
+          return sync_resolve::resolve_file(simple_path.as_path()).or_else(
+            |_| sync_resolve::resolve_node_module(simple_path.as_path()),
+          );
           // return Ok(transform(simple_path.to_path_buf()));
         }
 
@@ -430,10 +433,7 @@ impl ModuleLoader for FsModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = sync_load::load_as_file(path).or_else(|_| {
-      sync_load::load_as_node_module(path)
-        .or_else(|_| sync_load::load_as_directory(path))
-    });
+    let maybe_source = sync_load::load_as_file(path);
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
@@ -472,13 +472,7 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
   async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
-    let maybe_source = match async_load::async_load_as_file(path).await {
-      Ok(source) => Ok(source),
-      Err(_) => match async_load::async_load_as_node_module(path).await {
-        Ok(source) => Ok(source),
-        Err(_) => async_load::async_load_as_directory(path).await,
-      },
-    };
+    let maybe_source = async_load::async_load_as_file(path).await;
 
     let (path, source) = match maybe_source {
       Ok((path, source)) => (path, source),
