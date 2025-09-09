@@ -25,5 +25,5 @@ tokio = { workspace = true, features = ["full"] }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
-# zstd = { workspace = true }
 git2 = { workspace = true }
+# zstd = { workspace = true }
