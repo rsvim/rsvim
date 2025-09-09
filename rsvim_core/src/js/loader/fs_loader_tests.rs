@@ -197,6 +197,24 @@ export function sayHello() {
   }
 
   #[test]
+  fn resolve_file_failed5() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_err());
+  }
+
+  #[test]
   fn resolve_folder1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -377,6 +395,31 @@ export function sayHello() {
   }
 
   #[test]
+  fn resolve_folder_failed4() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      // expect.touch().unwrap();
+      // fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_err());
+  }
+
+  #[test]
   fn resolve_npm_package1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -444,18 +487,9 @@ export function sayHello() {
 }
 "#;
 
-    let pkg_src: &str = r#"
-{
-  "exports": {
-    ".": "./src/index.js"
-  }
-}
-"#;
-
     let base = temp_dir.child("core/tests/005_more_imports.js");
     let specifier = "../006_more_imports/";
-    let pkg = temp_dir.child("core/006_more_imports/package.json");
-    let expect = temp_dir.child("core/006_more_imports/src/index.js");
+    let expect = temp_dir.child("core/006_more_imports/index.js");
 
     // Run tests.
     let loader = FsModuleLoader {};
@@ -465,8 +499,6 @@ export function sayHello() {
       base.touch().unwrap();
       expect.touch().unwrap();
       fs::write(expect.path(), src).unwrap();
-      pkg.touch().unwrap();
-      fs::write(pkg.path(), pkg_src).unwrap();
     }
 
     let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
@@ -622,6 +654,53 @@ export function sayHello() {
     // } else {
     //   assert_eq!(actual, expect);
     // }
+  }
+
+  #[test]
+  fn resolve_npm_package_failed5() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("lib")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_err());
   }
 }
 
