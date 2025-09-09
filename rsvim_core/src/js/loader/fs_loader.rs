@@ -58,12 +58,12 @@ mod sync_resolve {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
       if json_path.is_file() {
-        return Some(Ok(json_path));
+        return Ok(json_path.as_path().to_str().unwrap().to_string());
       }
     };
   }
 
-  pub fn resolve_node_module(path: &Path) -> Option<AnyResult<PathBuf>> {
+  pub fn resolve_node_module(path: &Path) -> AnyResult<ModulePath> {
     if path.is_dir() {
       for pkg in PACKAGE_FILES {
         let pkg_path = path.join(pkg);
@@ -90,16 +90,16 @@ mod sync_resolve {
                   }
                   None => { /* do nothing */ }
                 },
-                Err(e) => return Some(Err(e.into())),
+                Err(e) => return Err(e.into()),
               }
             }
-            Err(e) => return Some(Err(e.into())),
+            Err(e) => return Err(e.into()),
           }
         }
       }
     }
 
-    None
+    anyhow::bail!(path_not_found(path))
   }
 }
 
@@ -382,38 +382,17 @@ impl ModuleLoader for FsModuleLoader {
     // Config home
     match PATH_CONFIG.config_home() {
       Some(config_home) => {
-        // Simple file path in config home directory `${config_home}`.
-        let simple_specifier = config_home.join(specifier);
-        match simple_specifier.absolutize() {
-          Ok(simple_path) => {
-            if simple_path.exists() {
-              return Ok(transform(simple_path.to_path_buf()));
-            }
-          }
-          Err(e) => {
-            anyhow::bail!(path_not_found2(specifier, e.into()))
-          }
+        // Simple path in config home directory `${config_home}`.
+        let simple_path = config_home.join(specifier);
+        let simple_path = simple_path.absolutize()?;
+        if simple_path.exists() {
+          return Ok(transform(simple_path.to_path_buf()));
         }
 
-        // Npm file path in `${config_home}/node_modules`.
-        let npm_specifier = config_home.join("node_modules").join(specifier);
-        match npm_specifier.absolutize() {
-          Ok(npm_path) => {
-            if npm_path.is_dir() {
-              let maybe_result = sync_resolve::resolve_node_module(&npm_path);
-              match maybe_result {
-                Some(Ok(result)) => return Ok(transform(result)),
-                Some(Err(e)) => anyhow::bail!(path_not_found2(specifier, e)),
-                _ => { /* do nothing */ }
-              }
-            }
-          }
-          Err(e) => {
-            anyhow::bail!(path_not_found2(specifier, e.into()))
-          }
-        }
-
-        anyhow::bail!(path_not_found(specifier));
+        // Npm module path in `${config_home}/node_modules`.
+        let npm_path = config_home.join("node_modules").join(specifier);
+        let npm_path = npm_path.absolutize()?;
+        sync_resolve::resolve_node_module(&npm_path)
       }
       None => {
         anyhow::bail!(path_not_found(specifier));
