@@ -54,11 +54,19 @@ fn wrap_json(source: &str) -> String {
 mod sync_resolve {
   use super::*;
 
-  macro_rules! resolve_for_json {
+  pub fn resolve_file(path: &Path) -> AnyResult<ModulePath> {
+    if path.is_file() {
+      Ok(transform(path.to_path_buf()))
+    } else {
+      anyhow::bail!(path_not_found(path))
+    }
+  }
+
+  macro_rules! _resolve_npm {
     ($field:expr,$path:expr) => {
       let json_path = $path.join(Path::new($field.as_str().unwrap()));
       if json_path.is_file() {
-        return Ok(json_path.as_path().to_str().unwrap().to_string());
+        return Ok(transform(json_path));
       }
     };
   }
@@ -74,14 +82,14 @@ mod sync_resolve {
                 Ok(pkg_json) => match pkg_json.get("exports") {
                   Some(json_exports) => {
                     if json_exports.is_string() {
-                      resolve_for_json!(json_exports, path);
+                      _resolve_npm!(json_exports, path);
                     }
 
                     if json_exports.is_object() {
                       match json_exports.get(".") {
                         Some(json_exports_cwd) => {
                           if json_exports_cwd.is_string() {
-                            resolve_for_json!(json_exports, path);
+                            _resolve_npm!(json_exports, path);
                           }
                         }
                         None => { /* do nothing */ }
