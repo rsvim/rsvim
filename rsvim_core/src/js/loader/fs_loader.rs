@@ -56,10 +56,19 @@ mod sync_resolve {
 
   pub fn resolve_file(path: &Path) -> AnyResult<ModulePath> {
     if path.is_file() {
-      Ok(transform(path.to_path_buf()))
-    } else {
-      anyhow::bail!(path_not_found(path))
+      return Ok(transform(path.to_path_buf()));
     }
+
+    if path.extension().is_none() {
+      for ext in FILE_EXTENSIONS {
+        let ext_path = path.with_extension(ext);
+        if ext_path.is_file() {
+          return Ok(transform(ext_path.to_path_buf()));
+        }
+      }
+    }
+
+    anyhow::bail!(path_not_found(path))
   }
 
   macro_rules! _resolve_npm {
@@ -71,6 +80,23 @@ mod sync_resolve {
     };
   }
 
+  // Case-1: "exports" is plain string
+  //
+  // ```json
+  // {
+  //   "exports": "./index.js"
+  // }
+  // ```
+  //
+  // Case-2: "exports" is json object and use "." field
+  //
+  // ```json
+  // {
+  //   "exports": {
+  //     ".": "./index.js"
+  //   }
+  // }
+  // ```
   pub fn resolve_node_module(path: &Path) -> AnyResult<ModulePath> {
     if path.is_dir() {
       for pkg in PACKAGE_FILES {
@@ -138,116 +164,18 @@ mod sync_load {
     Ok(source)
   }
 
-  macro_rules! _load_file {
-    ($path:expr) => {
-      return match load_source($path) {
-        Ok(source) => Ok(($path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    };
-  }
-
   /// Loads import as file.
   pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
-      _load_file!(path);
-    }
-
-    // If path is not a file, and it doesn't has a file extension, try to find it by adding the
-    // file extension.
-    if path.extension().is_none() {
-      for ext in FILE_EXTENSIONS {
-        let ext_path = path.with_extension(ext);
-        if ext_path.is_file() {
-          _load_file!(ext_path.as_path());
-        }
-      }
+      return match load_source(path) {
+        Ok(source) => Ok((path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
     }
 
     // 3. Bail out with an error.
     trace!("load_as_file failed:{:?}", path);
-    anyhow::bail!(path_not_found(path));
-  }
-
-  macro_rules! _load_npm {
-    ($field:expr,$path:expr) => {
-      let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      if json_path.is_file() {
-        _load_file!(json_path.as_path());
-      }
-    };
-  }
-
-  // Case-1: "exports" is plain string
-  //
-  // ```json
-  // {
-  //   "exports": "./index.js"
-  // }
-  // ```
-  //
-  // Case-2: "exports" is json object and use "." field
-  //
-  // ```json
-  // {
-  //   "exports": {
-  //     ".": "./index.js"
-  //   }
-  // }
-  // ```
-  pub fn _load_as_node_module(
-    path: &Path,
-  ) -> AnyResult<(PathBuf, ModuleSource)> {
-    if path.is_dir() {
-      for pkg in PACKAGE_FILES {
-        let pkg_path = path.join(pkg);
-        if pkg_path.is_file() {
-          match std::fs::read_to_string(pkg_path) {
-            Ok(pkg_src) => {
-              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-                Ok(pkg_json) => match pkg_json.get("exports") {
-                  Some(json_exports) => {
-                    if json_exports.is_string() {
-                      _load_npm!(json_exports, path);
-                    }
-
-                    if json_exports.is_object() {
-                      match json_exports.get(".") {
-                        Some(json_exports_cwd) => {
-                          if json_exports_cwd.is_string() {
-                            _load_npm!(json_exports_cwd, path);
-                          }
-                        }
-                        None => { /* do nothing */ }
-                      }
-                    }
-                  }
-                  None => { /* do nothing */ }
-                },
-                Err(e) => return Err(e.into()),
-              }
-            }
-            Err(e) => return Err(e.into()),
-          }
-        }
-      }
-    }
-
-    anyhow::bail!(path_not_found(path));
-  }
-
-  /// Loads import as directory using the 'index.[ext]' convention.
-  ///
-  /// TODO: In the future, we may want to also support the npm package.
-  pub fn _load_as_directory(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
-    for ext in FILE_EXTENSIONS {
-      let path = &path.join(format!("index.{ext}"));
-      if path.is_file() {
-        _load_file!(path);
-      }
-    }
-
     anyhow::bail!(path_not_found(path));
   }
 }
@@ -266,99 +194,18 @@ mod async_load {
     Ok(source)
   }
 
-  macro_rules! _async_load_file {
-    ($path:expr) => {
-      return match async_load_source($path).await {
-        Ok(source) => Ok(($path.to_path_buf(), source)),
-        Err(e) => Err(e),
-      };
-    };
-  }
-
   pub async fn async_load_as_file(
     path: &Path,
   ) -> AnyResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
-      _async_load_file!(path);
-    }
-
-    // If path is not a file, and it doesn't has a file extension, try to find it by adding the
-    // file extension.
-    if path.extension().is_none() {
-      for ext in FILE_EXTENSIONS {
-        let ext_path = path.with_extension(ext);
-        if ext_path.is_file() {
-          _async_load_file!(ext_path.as_path());
-        }
-      }
+      return match async_load_source(path).await {
+        Ok(source) => Ok((path.to_path_buf(), source)),
+        Err(e) => Err(e),
+      };
     }
 
     // 3. Bail out with an error.
-    anyhow::bail!(path_not_found(path));
-  }
-
-  macro_rules! _async_load_npm {
-    ($field:expr,$path:expr) => {
-      let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      _async_load_file!(json_path.as_path());
-    };
-  }
-
-  pub async fn _async_load_as_node_module(
-    path: &Path,
-  ) -> AnyResult<(PathBuf, ModuleSource)> {
-    if path.is_dir() {
-      for pkg in PACKAGE_FILES {
-        let pkg_path = path.join(pkg);
-        if pkg_path.is_file() {
-          match tokio::fs::read_to_string(pkg_path).await {
-            Ok(pkg_src) => {
-              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
-                Ok(pkg_json) => match pkg_json.get("exports") {
-                  Some(json_exports) => {
-                    if json_exports.is_string() {
-                      _async_load_npm!(json_exports, path);
-                    }
-
-                    if json_exports.is_object() {
-                      match json_exports.get(".") {
-                        Some(json_exports_cwd) => {
-                          if json_exports_cwd.is_string() {
-                            _async_load_npm!(json_exports_cwd, path);
-                          }
-                        }
-                        None => { /* do nothing */ }
-                      }
-                    }
-                  }
-                  None => { /* do nothing */ }
-                },
-                Err(e) => return Err(e.into()),
-              }
-            }
-            Err(e) => return Err(e.into()),
-          }
-        }
-      }
-    }
-
-    anyhow::bail!(path_not_found(path));
-  }
-
-  pub async fn _async_load_as_directory(
-    path: &Path,
-  ) -> AnyResult<(PathBuf, ModuleSource)> {
-    for ext in FILE_EXTENSIONS {
-      let path = &path.join(format!("index.{ext}"));
-      if path.is_file() {
-        return match async_load_source(path).await {
-          Ok(source) => Ok((path.to_path_buf(), source)),
-          Err(e) => Err(e),
-        };
-      }
-    }
-
     anyhow::bail!(path_not_found(path));
   }
 }
