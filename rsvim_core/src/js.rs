@@ -853,7 +853,7 @@ pub mod boost {
     pub fn has_pending_imports(&mut self) -> bool {
       let state_rc = self.get_state();
       let state = state_rc.borrow();
-      !state.module_map.pending().borrow().is_empty()
+      !state.module_map.pending.is_empty()
     }
 
     // /// Returns if we have scheduled any next-tick callbacks.
@@ -960,14 +960,11 @@ pub fn execute_module(
       trace!("No module result, filename:{filename:?}({path:?})")
     }
   }
-  if cfg!(test) {
-    let state_rc = JsRuntime::state(tc_scope);
-    state_rc
-      .borrow_mut()
-      .module_map
-      .counter_mut()
-      .increase_evaluated(&path);
-  }
+  JsRuntime::state(tc_scope)
+    .borrow_mut()
+    .module_map
+    .counter
+    .increase_evaluated(&path);
 
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();

@@ -209,7 +209,7 @@ pub fn host_import_module_dynamically_cb<'s>(
   };
 
   let dynamic_import_being_fetched =
-    state.module_map.pending().borrow().iter().any(|graph_rc| {
+    state.module_map.pending.iter().any(|graph_rc| {
       *graph_rc.borrow().root_rc().borrow().path() == specifier
     });
 
@@ -232,8 +232,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     // and declare this graph as same origin.
     state
       .module_map
-      .pending()
-      .borrow()
+      .pending
       .iter()
       .find(|graph_rc| {
         *graph_rc.borrow().root_rc().borrow().path() == specifier
@@ -250,19 +249,11 @@ pub fn host_import_module_dynamically_cb<'s>(
   let graph_rc = Rc::new(RefCell::new(graph));
   let status = ModuleStatus::Fetching;
 
-  state
-    .module_map
-    .pending()
-    .borrow_mut()
-    .push(Rc::clone(&graph_rc));
-  state.module_map.counter_mut().increase_pending(&specifier);
+  state.module_map.pending.push(Rc::clone(&graph_rc));
+  state.module_map.counter.increase_pending(&specifier);
 
-  state
-    .module_map
-    .seen()
-    .borrow_mut()
-    .insert(specifier.clone(), status);
-  state.module_map.counter_mut().increase_seen(&specifier);
+  state.module_map.seen.insert(specifier.clone(), status);
+  state.module_map.counter.increase_seen(&specifier);
 
   // Use the event-loop to asynchronously load the requested module.
   let load_import_id = js::next_future_id();
