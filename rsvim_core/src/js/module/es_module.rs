@@ -293,12 +293,12 @@ impl JsFuture for EsModuleFuture {
       self.module.borrow_mut().status = ModuleStatus::Resolving;
     } else {
       self.module.borrow_mut().status = ModuleStatus::Ready;
-      msg::sync_send_to_master(
-        state.master_tx.clone(),
-        MasterMessage::TickAgainReq(msg::TickAgainReq::new(
-          js::next_future_id(),
-        )),
-      );
+      // msg::sync_send_to_master(
+      //   state.master_tx.clone(),
+      //   MasterMessage::TickAgainReq(msg::TickAgainReq::new(
+      //     js::next_future_id(),
+      //   )),
+      // );
     }
   }
 }
