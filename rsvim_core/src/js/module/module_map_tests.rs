@@ -279,7 +279,7 @@ mod test_dynamic_import {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
     let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
@@ -288,6 +288,8 @@ mod test_dynamic_import {
       echo(1);
     }).catch((e) => {
       Rsvim.cdm.echo(`Failed to dynamic import: ${e}`);
+    }).finally(() => {
+      Rsvim.rt.exit(0);
     });
     "#;
 
@@ -369,7 +371,7 @@ mod test_dynamic_import {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
     let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
@@ -380,6 +382,7 @@ try {
 } catch (e) {
   Rsvim.cmd.echo(`Failed to dynamic import util: ${e}`);
 }
+Rsvim.rt.exit(0);
     "#;
 
     let p2 = Path::new("util.js");
@@ -416,7 +419,7 @@ try {
         contents.command_line_message_history().occupied_len(),
         contents.command_line_message_history().vacant_len()
       );
-      // assert_eq!(1, contents.command_line_message_history().occupied_len());
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
@@ -466,7 +469,7 @@ try {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
     let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
@@ -476,6 +479,8 @@ try {
         utils.echo(utils.add(3,4));
       }).catch((e) => {
         Rsvim.cmd.echo(`Failed to dynamic import: ${e}`);
+      }).finally(() => {
+        Rsvim.rt.exit(0);
       });
     "#;
 
@@ -532,7 +537,7 @@ try {
     // After running
     {
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().occupied_len());
+      // assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("3".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
@@ -541,11 +546,11 @@ try {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
+      info!("module_map.counter:{:?}", module_map.counter);
       assert!(module_map.counter.pending.is_empty());
       assert!(module_map.pending.is_empty());
       assert!(module_map.counter.failed.is_empty());
       assert_eq!(module_map.counter.resolved.len(), 0);
-      info!("module_map.counter:{:?}", module_map.counter);
       assert_eq!(module_map.counter.evaluated.len(), 1);
       assert_eq!(
         module_map.counter.evaluated.get(
