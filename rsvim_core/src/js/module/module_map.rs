@@ -223,6 +223,8 @@ pub struct ModuleMapCounter {}
 
 #[cfg(not(test))]
 impl ModuleMapCounter {
+  pub fn increase_seen(&mut self, _specifier: &str) {}
+
   pub fn increase_pending(&mut self, _specifier: &str) {}
 
   pub fn increase_resolved(&mut self, _specifier: &str) {}
@@ -235,14 +237,20 @@ impl ModuleMapCounter {
 #[cfg(test)]
 #[derive(Debug, Default)]
 pub struct ModuleMapCounter {
+  pub seen: HashMap<ModulePath, u32>,
   pub pending: HashMap<ModulePath, u32>,
   pub resolved: HashMap<ModulePath, u32>,
   pub failed: HashMap<ModulePath, u32>,
-  pub evaluate: HashMap<ModulePath, u32>,
+  pub evaluated: HashMap<ModulePath, u32>,
 }
 
 #[cfg(test)]
 impl ModuleMapCounter {
+  pub fn increase_seen(&mut self, specifier: &str) {
+    let old = self.seen.get(specifier).unwrap_or(&0);
+    self.seen.insert(specifier.into(), old + 1);
+  }
+
   pub fn increase_pending(&mut self, specifier: &str) {
     let old = self.pending.get(specifier).unwrap_or(&0);
     self.pending.insert(specifier.into(), old + 1);
@@ -258,8 +266,8 @@ impl ModuleMapCounter {
     self.failed.insert(specifier.into(), old + 1);
   }
 
-  pub fn increase_evaluate(&mut self, specifier: &str) {
-    let old = self.evaluate.get(specifier).unwrap_or(&0);
-    self.evaluate.insert(specifier.into(), old + 1);
+  pub fn increase_evaluated(&mut self, specifier: &str) {
+    let old = self.evaluated.get(specifier).unwrap_or(&0);
+    self.evaluated.insert(specifier.into(), old + 1);
   }
 }

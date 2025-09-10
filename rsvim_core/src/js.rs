@@ -818,7 +818,7 @@ pub mod boost {
             .borrow_mut()
             .module_map
             .counter_mut()
-            .increase_evaluate(&path);
+            .increase_evaluated(&path);
         }
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
@@ -984,7 +984,7 @@ pub fn execute_module(
       .borrow_mut()
       .module_map
       .counter_mut()
-      .increase_evaluate(&path);
+      .increase_evaluated(&path);
   }
 
   if module.get_status() == v8::ModuleStatus::Errored {
