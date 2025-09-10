@@ -152,7 +152,7 @@ mod test_static_import {
       info!("module_map.counter:{:?}", module_map.counter);
       assert_eq!(module_map.counter.evaluated.len(), 1);
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -160,7 +160,7 @@ mod test_static_import {
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
     }
 
@@ -270,8 +270,6 @@ mod test_static_import {
 
 #[cfg(test)]
 mod test_dynamic_import {
-  use normpath::PathExt;
-
   use super::*;
 
   #[tokio::test]
