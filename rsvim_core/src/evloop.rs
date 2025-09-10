@@ -681,6 +681,7 @@ impl EventLoop {
 
       // Extra tick for missing js triggers
       if self.js_runtime.has_promise_rejections()
+        || self.js_runtime.isolate.has_pending_background_tasks()
         || self.js_runtime.has_pending_imports()
       {
         self.js_runtime.tick_event_loop();
@@ -731,6 +732,7 @@ impl EventLoop {
 
       // Extra tick for missing js triggers
       if self.js_runtime.has_promise_rejections()
+        || self.js_runtime.isolate.has_pending_background_tasks()
         || self.js_runtime.has_pending_imports()
       {
         self.js_runtime.tick_event_loop();
@@ -778,6 +780,7 @@ impl EventLoop {
 
       // Extra tick for missing js triggers
       if self.js_runtime.has_promise_rejections()
+        || self.js_runtime.isolate.has_pending_background_tasks()
         || self.js_runtime.has_pending_imports()
       {
         self.js_runtime.tick_event_loop();
