@@ -200,6 +200,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
+      trace!("host_import_module_dynamically_cb failed to resolve import {specifier:?}: {e:?}");
       let exception = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, exception);
       set_exception_code(scope, exception, &e);

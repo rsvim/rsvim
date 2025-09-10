@@ -249,10 +249,12 @@ impl ModuleLoader for FsModuleLoader {
         let simple_path =
           config_home.join(specifier).absolutize()?.to_path_buf();
         // let simple_path = simple_path.absolutize()?;
-        if simple_path.exists() {
-          return sync_resolve::resolve_file(simple_path.as_path()).or_else(
-            |_| sync_resolve::resolve_node_module(simple_path.as_path()),
-          );
+        let maybe_path = sync_resolve::resolve_file(simple_path.as_path())
+          .or_else(|_| {
+            sync_resolve::resolve_node_module(simple_path.as_path())
+          });
+        if maybe_path.is_ok() {
+          return maybe_path;
         }
 
         // Npm module path in `${config_home}/node_modules`.
