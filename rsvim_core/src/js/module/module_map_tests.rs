@@ -337,10 +337,7 @@ mod test_dynamic_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      info!(
-        "module_map.counter:{:?}",
-        module_map.counter()
-      );
+      info!("module_map.counter:{:?}", module_map.counter());
       assert_eq!(module_map.counter().pending.len(), 1);
       assert!(module_map.pending().borrow().is_empty());
       assert!(module_map.counter().failed.is_empty());
