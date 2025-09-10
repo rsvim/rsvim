@@ -695,7 +695,7 @@ export default {};
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn side_effect1() -> IoResult<()> {
+  async fn side_effect2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
