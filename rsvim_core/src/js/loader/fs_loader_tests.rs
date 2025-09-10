@@ -855,7 +855,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn filepath3() {
+  async fn file_path3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -906,7 +906,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn filepath4() {
+  async fn file_path4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -958,7 +958,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn folder1() {
+  async fn folder_path1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -1009,7 +1009,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn folder2() {
+  async fn folder_path2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -1060,7 +1060,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn folder3() {
+  async fn folder_path3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
