@@ -270,6 +270,8 @@ mod test_static_import {
 
 #[cfg(test)]
 mod test_dynamic_import {
+  use normpath::PathExt;
+
   use super::*;
 
   #[tokio::test]
@@ -559,6 +561,9 @@ Rsvim.rt.exit(0);
             .join("rsvim")
             .join(p1)
             .as_path()
+            .normalize()
+            .unwrap()
+            .as_os_str()
             .to_str()
             .unwrap()
         ),
@@ -567,11 +572,11 @@ Rsvim.rt.exit(0);
       assert_eq!(
         module_map.counter.evaluated.get(
           tp.xdg_config_home
-              .join("rsvim")
-              .join(p4)
-              .as_path()
-              .to_str()
-              .unwrap()
+            .join("rsvim")
+            .join(p4)
+            .as_path()
+            .to_str()
+            .unwrap()
         ),
         Some(&1)
       );
