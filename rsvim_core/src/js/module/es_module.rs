@@ -270,12 +270,8 @@ impl JsFuture for EsModuleFuture {
           .pending_futures
           .insert(load_import_id, Box::new(load_import_cb));
 
-        state
-          .module_map
-          .seen()
-          .borrow_mut()
-          .insert(specifier.clone(), status);
-        state.module_map.counter_mut().increase_seen(&specifier);
+        state.module_map.seen.insert(specifier.clone(), status);
+        state.module_map.counter.increase_seen(&specifier);
 
         msg::sync_send_to_master(
           state.master_tx.clone(),
