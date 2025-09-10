@@ -328,14 +328,14 @@ mod test_dynamic_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      info!("module_map.counter:{:?}", module_map.counter());
-      assert_eq!(module_map.counter().pending.len(), 1);
-      assert!(module_map.pending().borrow().is_empty());
-      assert!(module_map.counter().failed.is_empty());
-      assert_eq!(module_map.counter().resolved.len(), 1);
-      assert_eq!(module_map.counter().evaluated.len(), 2);
+      info!("module_map.counter:{:?}", module_map.counter);
+      assert_eq!(module_map.counter.pending.len(), 1);
+      assert!(module_map.pending.is_empty());
+      assert!(module_map.counter.failed.is_empty());
+      assert_eq!(module_map.counter.resolved.len(), 1);
+      assert_eq!(module_map.counter.evaluated.len(), 2);
       assert_eq!(
-        module_map.counter().evaluated.get(
+        module_map.counter.evaluated.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -346,7 +346,7 @@ mod test_dynamic_import {
         Some(&1)
       );
       assert_eq!(
-        module_map.counter().evaluated.get(
+        module_map.counter.evaluated.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p2)
@@ -519,17 +519,14 @@ mod test_dynamic_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      assert!(module_map.counter().pending.is_empty());
-      assert!(module_map.pending().borrow().is_empty());
-      assert!(module_map.counter().failed.is_empty());
-      assert_eq!(module_map.counter().resolved.len(), 0);
-      info!(
-        "module_map.evaluate_counter:{:?}",
-        module_map.counter().evaluated
-      );
-      assert_eq!(module_map.counter().evaluated.len(), 1);
+      assert!(module_map.counter.pending.is_empty());
+      assert!(module_map.pending.is_empty());
+      assert!(module_map.counter.failed.is_empty());
+      assert_eq!(module_map.counter.resolved.len(), 0);
+      info!("module_map.counter:{:?}", module_map.counter);
+      assert_eq!(module_map.counter.evaluated.len(), 1);
       assert_eq!(
-        module_map.counter().evaluated.get(
+        module_map.counter.evaluated.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
