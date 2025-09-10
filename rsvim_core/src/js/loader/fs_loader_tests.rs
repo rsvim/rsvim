@@ -15,7 +15,7 @@ mod tests_sync {
   use super::*;
 
   #[test]
-  fn file1() {
+  fn filepath1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -65,7 +65,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file2() {
+  fn filepath2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -114,7 +114,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file3() {
+  fn filepath3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -163,7 +163,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file4() {
+  fn filepath4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
