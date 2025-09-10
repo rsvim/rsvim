@@ -498,7 +498,7 @@ try {
     import {add} from "./calc.js";
     import {echo} from "./echo.js";
 
-    export default {add, echo};
+    export {add, echo};
     "#;
 
     let p5 = Path::new("node_modules/utils/package.json");

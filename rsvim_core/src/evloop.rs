@@ -679,14 +679,6 @@ impl EventLoop {
         }
       }
 
-      // Extra tick for background js tasks
-      if self.js_runtime.has_promise_rejections()
-        || self.js_runtime.isolate.has_pending_background_tasks()
-        || self.js_runtime.has_pending_imports()
-      {
-        self.js_runtime.tick_event_loop();
-      }
-
       // Flush logic UI to terminal, i.e. print UI to stdout
       lock!(self.tree).draw(self.canvas.clone());
       self.writer.write(&mut lock!(self.canvas))?;
@@ -730,14 +722,6 @@ impl EventLoop {
         }
       }
 
-      // Extra tick for background js tasks
-      if self.js_runtime.has_promise_rejections()
-        || self.js_runtime.isolate.has_pending_background_tasks()
-        || self.js_runtime.has_pending_imports()
-      {
-        self.js_runtime.tick_event_loop();
-      }
-
       // Flush logic UI to terminal, i.e. print UI to stdout
       lock!(self.tree).draw(self.canvas.clone());
       self.writer.write(&mut lock!(self.canvas))?;
@@ -776,14 +760,6 @@ impl EventLoop {
           self.process_cancellation_notify().await;
           break;
         }
-      }
-
-      // Extra tick for background js tasks
-      if self.js_runtime.has_promise_rejections()
-        || self.js_runtime.isolate.has_pending_background_tasks()
-        || self.js_runtime.has_pending_imports()
-      {
-        self.js_runtime.tick_event_loop();
       }
 
       // Flush logic UI to terminal, i.e. print UI to stdout
