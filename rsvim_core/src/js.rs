@@ -721,13 +721,13 @@ pub mod boost {
       let scope = &mut self.handle_scope();
       let state_rc = JsRuntime::state(scope);
       let mut ready_imports = vec![];
-      let mut _failed_paths: Vec<ModulePath> = vec![];
 
       {
         let state = state_rc.borrow();
 
-        let mut seen_modules = state.module_map.seen().borrow_mut();
-        let mut pending_graphs = state.module_map.pending().borrow_mut();
+        let mut seen_modules = &mut state.module_map.seen;
+        let mut pending_graphs = &mut state.module_map.pending;
+        let mut module_counter = &mut state.module_map.counter;
 
         pending_graphs.retain(|graph_rc| {
           // Get a usable ref to graph's root module.
@@ -752,11 +752,7 @@ pub mod boost {
                 }
               }
             }
-
-            if cfg!(debug_assertions) {
-              _failed_paths.push(graph_root.path().clone());
-            }
-
+            module_counter.increase_failed(graph_root.path());
             return false;
           }
 
@@ -767,25 +763,14 @@ pub mod boost {
           }
 
           ready_imports.push(Rc::clone(graph_rc));
+          module_counter
+            .increase_resolved(graph_rc.borrow().root_rc().borrow().path());
           false
         });
 
         // Note: We have to drop the sate ref here to avoid borrow panics
         // during the module instantiation/evaluation process.
         // drop(state);
-      }
-
-      if cfg!(test) {
-        let mut state = state_rc.borrow_mut();
-        for graph_rc in ready_imports.clone() {
-          state
-            .module_map
-            .counter_mut()
-            .increase_resolved(graph_rc.borrow().root_rc().borrow().path());
-        }
-        for failed_path in _failed_paths {
-          state.module_map.counter_mut().increase_failed(&failed_path);
-        }
       }
 
       // Execute the root module from the graph.
