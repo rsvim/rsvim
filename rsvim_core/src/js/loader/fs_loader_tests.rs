@@ -231,6 +231,59 @@ export function sayHello() {
   }
 
   #[test]
+  fn file_path6() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
   fn folder_path1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
@@ -951,6 +1004,61 @@ export function sayHello() {
     //   assert_eq!(actual, expect);
     // }
 
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path6() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    // if cfg!(target_os = "windows") {
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+    // } else {
+    //   assert_eq!(actual, expect);
+    // }
     let actual_module = aloader.load(&actual).await;
     assert!(actual_module.is_ok());
     assert_eq!(actual_module.unwrap(), src);
