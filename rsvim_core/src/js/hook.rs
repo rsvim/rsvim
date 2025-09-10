@@ -263,6 +263,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     .seen()
     .borrow_mut()
     .insert(specifier.clone(), status);
+  state.module_map.counter_mut().increase_seen(&specifier);
 
   // Use the event-loop to asynchronously load the requested module.
   let load_import_id = js::next_future_id();

@@ -208,6 +208,7 @@ impl JsFuture for EsModuleFuture {
       .seen()
       .borrow_mut()
       .insert(self.path.clone(), new_status);
+    state.module_map.counter_mut().increase_seen(&self.path);
 
     let import_map = state.options.import_map.clone();
 
@@ -277,6 +278,7 @@ impl JsFuture for EsModuleFuture {
           .seen()
           .borrow_mut()
           .insert(specifier.clone(), status);
+        state.module_map.counter_mut().increase_seen(&specifier);
 
         msg::sync_send_to_master(
           state.master_tx.clone(),
