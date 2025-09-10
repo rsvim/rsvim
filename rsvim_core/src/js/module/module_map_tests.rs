@@ -374,11 +374,12 @@ mod test_dynamic_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-    import("util").then((util) => {
-        util.echo(1);
-    }).catch((e) => {
-        Rsvim.cmd.echo(`Failed to dynamic import util: ${e}`);
-    });
+try {
+  const util = await import("util");
+  util.echo(1);
+} catch (e) {
+  Rsvim.cmd.echo(`Failed to dynamic import util: ${e}`);
+}
     "#;
 
     let p2 = Path::new("util.js");
