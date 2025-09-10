@@ -755,6 +755,7 @@ pub mod boost {
                 }
               }
             }
+
             module_counter.increase_failed(graph_root.path());
             return false;
           }
