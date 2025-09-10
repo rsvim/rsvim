@@ -173,6 +173,10 @@ impl JsFuture for EsModuleFuture {
     let source = match source {
       Ok(source) => source,
       Err(e) => {
+        trace!(
+          "Es module {:?} failed to take source, error:{:?}",
+          self.path, e
+        );
         self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
         return;
       }
@@ -189,6 +193,10 @@ impl JsFuture for EsModuleFuture {
       match v8::script_compiler::compile_module(tc_scope, &mut source) {
         Some(module) => module,
         None => {
+          trace!(
+            "Es module {:?} failed to compile, source:{:?}",
+            self.path, source
+          );
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
@@ -231,6 +239,10 @@ impl JsFuture for EsModuleFuture {
       {
         Ok(specifier) => specifier,
         Err(e) => {
+          trace!(
+            "Es module {:?} failed to resolve import {:?}, error:{:?}",
+            self.path, specifier, e
+          );
           self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
           return;
         }
