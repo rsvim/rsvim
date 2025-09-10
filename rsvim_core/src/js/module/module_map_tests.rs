@@ -537,9 +537,9 @@ Rsvim.rt.exit(0);
     // After running
     {
       let mut contents = lock!(event_loop.contents);
-      // assert_eq!(1, contents.command_line_message_history().occupied_len());
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("3".to_compact_string()),
+        Some("7".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
 
@@ -547,11 +547,12 @@ Rsvim.rt.exit(0);
       let state = state_rc.borrow();
       let module_map = &state.module_map;
       info!("module_map.counter:{:?}", module_map.counter);
-      assert!(module_map.counter.pending.is_empty());
       assert!(module_map.pending.is_empty());
+      assert_eq!(module_map.counter.seen.len(), 4);
+      assert_eq!(module_map.counter.pending.len(), 1);
       assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 0);
-      assert_eq!(module_map.counter.evaluated.len(), 1);
+      assert_eq!(module_map.counter.resolved.len(), 1);
+      assert_eq!(module_map.counter.evaluated.len(), 2);
       assert_eq!(
         module_map.counter.evaluated.get(
           tp.xdg_config_home
@@ -560,6 +561,17 @@ Rsvim.rt.exit(0);
             .as_path()
             .to_str()
             .unwrap()
+        ),
+        Some(&1)
+      );
+      assert_eq!(
+        module_map.counter.evaluated.get(
+          tp.xdg_config_home
+              .join("rsvim")
+              .join(p4)
+              .as_path()
+              .to_str()
+              .unwrap()
         ),
         Some(&1)
       );

@@ -225,29 +225,39 @@ pub struct ModuleMapCounter {
 }
 
 #[cfg(test)]
+macro_rules! increase {
+  ($specifier:expr,$member:expr) => {
+    use normpath::PathExt;
+    use std::path::Path;
+
+    let specifier = Path::new($specifier).normalize().unwrap();
+    let old = $member
+      .get(specifier.as_os_str().to_str().unwrap())
+      .unwrap_or(&0);
+    $member
+      .insert(specifier.as_os_str().to_str().unwrap().to_string(), old + 1);
+  };
+}
+
+#[cfg(test)]
 impl ModuleMapCounter {
   pub fn increase_seen(&mut self, specifier: &str) {
-    let old = self.seen.get(specifier).unwrap_or(&0);
-    self.seen.insert(specifier.into(), old + 1);
+    increase!(specifier, self.seen);
   }
 
   pub fn increase_pending(&mut self, specifier: &str) {
-    let old = self.pending.get(specifier).unwrap_or(&0);
-    self.pending.insert(specifier.into(), old + 1);
+    increase!(specifier, self.pending);
   }
 
   pub fn increase_resolved(&mut self, specifier: &str) {
-    let old = self.resolved.get(specifier).unwrap_or(&0);
-    self.resolved.insert(specifier.into(), old + 1);
+    increase!(specifier, self.resolved);
   }
 
   pub fn increase_failed(&mut self, specifier: &str) {
-    let old = self.failed.get(specifier).unwrap_or(&0);
-    self.failed.insert(specifier.into(), old + 1);
+    increase!(specifier, self.failed);
   }
 
   pub fn increase_evaluated(&mut self, specifier: &str) {
-    let old = self.evaluated.get(specifier).unwrap_or(&0);
-    self.evaluated.insert(specifier.into(), old + 1);
+    increase!(specifier, self.evaluated);
   }
 }
