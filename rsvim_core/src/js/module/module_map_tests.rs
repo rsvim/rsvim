@@ -574,7 +574,7 @@ Rsvim.rt.exit(0);
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn no_side_effect4() -> IoResult<()> {
+  async fn side_effect1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -663,10 +663,10 @@ export default {};
       info!("module_map.counter:{:?}", module_map.counter);
       assert!(module_map.pending.is_empty());
       assert_eq!(module_map.counter.seen.len(), 4);
-      assert_eq!(module_map.counter.pending.len(), 1);
+      assert_eq!(module_map.counter.pending.len(), 2);
       assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 1);
-      assert_eq!(module_map.counter.evaluated.len(), 2);
+      assert_eq!(module_map.counter.resolved.len(), 2);
+      assert_eq!(module_map.counter.evaluated.len(), 3);
       let p1 = tp.xdg_config_home.join("rsvim").join(p1);
       assert_eq!(
         module_map
