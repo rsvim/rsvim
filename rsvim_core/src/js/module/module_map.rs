@@ -40,8 +40,6 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-use std::cell::RefCell;
-
 #[derive(Debug, Clone)]
 /// Import kind.
 pub enum ImportKind {
