@@ -767,8 +767,7 @@ pub mod boost {
           }
 
           ready_imports.push(Rc::clone(graph_rc));
-          module_counter
-            .increase_resolved(graph_rc.borrow().root_rc().borrow().path());
+          module_counter.increase_resolved(graph_root.path());
           false
         });
 
