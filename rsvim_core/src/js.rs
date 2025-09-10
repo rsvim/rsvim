@@ -723,11 +723,14 @@ pub mod boost {
       let mut ready_imports = vec![];
 
       {
-        let state = state_rc.borrow();
+        let mut state = state_rc.borrow_mut();
 
-        let seen_modules = &mut state.module_map.seen;
-        let pending_graphs = &mut state.module_map.pending;
-        let module_counter = &mut state.module_map.counter;
+        // Note: The following is a trick to get multiple `mut` references in the same
+        // struct called splitting borrows (https://doc.rust-lang.org/nomicon/borrow-splitting.html).
+        let state_ref = &mut *state;
+        let seen_modules = &mut state_ref.module_map.seen;
+        let pending_graphs = &mut state_ref.module_map.pending;
+        let module_counter = &mut state_ref.module_map.counter;
 
         pending_graphs.retain(|graph_rc| {
           // Get a usable ref to graph's root module.
