@@ -270,10 +270,9 @@ pub fn fetch_module_tree<'a>(
     state.module_map.insert(filename, module_ref);
     state
       .module_map
-      .seen()
-      .borrow_mut()
+      .seen
       .insert(filename.into(), ModuleStatus::Ready);
-    state.module_map.counter_mut().increase_seen(filename);
+    state.module_map.counter.increase_seen(filename);
   }
 
   let requests = module.get_module_requests();
