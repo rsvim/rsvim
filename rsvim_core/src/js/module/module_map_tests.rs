@@ -651,9 +651,9 @@ export default {};
     // After running
     {
       let mut contents = lock!(event_loop.contents);
-      // assert_eq!(1, contents.command_line_message_history().occupied_len());
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("7".to_compact_string()),
+        Some("9".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
 
