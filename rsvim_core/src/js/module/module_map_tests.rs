@@ -374,8 +374,11 @@ mod test_dynamic_import {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-    const util = await import("util");
-    util.echo(1);
+    import("util").then((util) => {
+        util.echo(1);
+    }).catch((e) => {
+        Rsvim.cmd.echo(`Failed to dynamic import util: ${e}`);
+    });
     "#;
 
     let p2 = Path::new("util.js");
@@ -407,7 +410,11 @@ mod test_dynamic_import {
     // After running
     {
       let mut contents = lock!(event_loop.contents);
-      info!("command_line_message_history occupied_len:{}, vacant_len: {}", contents.command_line_message_history().occupied_len(), contents.command_line_message_history().vacant_len());
+      info!(
+        "command_line_message_history occupied_len:{}, vacant_len: {}",
+        contents.command_line_message_history().occupied_len(),
+        contents.command_line_message_history().vacant_len()
+      );
       // assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("1".to_compact_string()),
