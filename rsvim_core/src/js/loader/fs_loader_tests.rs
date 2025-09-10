@@ -15,7 +15,7 @@ mod tests_sync {
   use super::*;
 
   #[test]
-  fn filepath1() {
+  fn file_path1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -65,7 +65,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn filepath2() {
+  fn file_path2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -114,7 +114,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn filepath3() {
+  fn file_path3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -163,7 +163,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn filepath4() {
+  fn file_path4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -231,7 +231,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn folder1() {
+  fn folderpath1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -280,7 +280,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn folder2() {
+  fn folderpath2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -906,7 +906,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn file4() {
+  async fn filepath4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
