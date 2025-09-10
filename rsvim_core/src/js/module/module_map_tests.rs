@@ -387,7 +387,7 @@ try {
     function echo(value) {
         Rsvim.cmd.echo(value);
     }
-    export default { echo };
+    export { echo };
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
