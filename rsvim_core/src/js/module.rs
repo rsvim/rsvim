@@ -269,6 +269,12 @@ pub fn fetch_module_tree<'a>(
     .borrow_mut()
     .module_map
     .insert(filename, module_ref);
+  // state_rc
+  //   .borrow_mut()
+  //   .module_map
+  //   .seen()
+  //   .borrow_mut()
+  //   .insert(filename.into(), ModuleStatus::Ready);
 
   let requests = module.get_module_requests();
   trace!("Get {} module requests", requests.length());
