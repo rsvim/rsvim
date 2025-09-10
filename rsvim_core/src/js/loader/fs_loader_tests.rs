@@ -50,14 +50,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
       Path::new(&expect).normalize().unwrap()
     );
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -102,11 +98,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -151,11 +146,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -201,11 +195,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -270,14 +263,11 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
       Path::new(&expect).normalize().unwrap()
     );
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
     assert_eq!(actual_module.unwrap(), src);
@@ -321,11 +311,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -370,11 +359,10 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
 
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
@@ -418,11 +406,11 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
     assert_eq!(actual_module.unwrap(), src);
@@ -467,11 +455,11 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
-    // if cfg!(target_os = "windows") {
-    assert_eq!(actual, expect);
-    // } else {
-    //   assert_eq!(actual, expect);
-    // }
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
     assert_eq!(actual_module.unwrap(), src);
