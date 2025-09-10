@@ -674,11 +674,18 @@ export default {};
           .get_evaluated(p1.as_path().as_os_str().to_str().unwrap()),
         1
       );
-      let p4 = tp.xdg_config_home.join("rsvim").join(p4);
+      let p2 = tp.xdg_config_home.join("rsvim").join(p2);
       assert_eq!(
         module_map
           .counter
-          .get_evaluated(p4.as_path().as_os_str().to_str().unwrap()),
+          .get_evaluated(p2.as_path().as_os_str().to_str().unwrap()),
+        1
+      );
+      let p3 = tp.xdg_config_home.join("rsvim").join(p3);
+      assert_eq!(
+        module_map
+          .counter
+          .get_evaluated(p3.as_path().as_os_str().to_str().unwrap()),
         1
       );
     }
