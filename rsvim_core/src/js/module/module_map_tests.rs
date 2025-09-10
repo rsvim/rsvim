@@ -575,6 +575,9 @@ Rsvim.rt.exit(0);
             .join("rsvim")
             .join(p4)
             .as_path()
+            .normalize()
+            .unwrap()
+            .as_os_str()
             .to_str()
             .unwrap()
         ),
