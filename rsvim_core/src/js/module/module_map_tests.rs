@@ -427,7 +427,7 @@ try {
       let module_map = &state.module_map;
       assert!(module_map.pending.is_empty());
       assert_eq!(module_map.counter.seen.len(), 2);
-      assert!(module_map.counter.pending.is_empty());
+      assert_eq!(module_map.counter.pending.len(), 1);
       assert!(module_map.counter.failed.is_empty());
       assert_eq!(module_map.counter.resolved.len(), 0);
       info!("module_map.counter:{:?}", module_map.counter);
