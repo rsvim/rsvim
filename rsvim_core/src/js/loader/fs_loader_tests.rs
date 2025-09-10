@@ -1109,7 +1109,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn folder4() {
+  async fn folder_path4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
