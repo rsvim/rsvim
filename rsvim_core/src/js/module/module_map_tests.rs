@@ -430,13 +430,24 @@ try {
       assert_eq!(module_map.counter.seen.len(), 2);
       assert_eq!(module_map.counter.pending.len(), 1);
       assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 0);
-      assert_eq!(module_map.counter.evaluated.len(), 1);
+      assert_eq!(module_map.counter.resolved.len(), 1);
+      assert_eq!(module_map.counter.evaluated.len(), 2);
       assert_eq!(
         module_map.counter.evaluated.get(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
+            .as_path()
+            .to_str()
+            .unwrap()
+        ),
+        Some(&1)
+      );
+      assert_eq!(
+        module_map.counter.evaluated.get(
+          tp.xdg_config_home
+            .join("rsvim")
+            .join(p2)
             .as_path()
             .to_str()
             .unwrap()
