@@ -740,6 +740,12 @@ pub mod boost {
 
           // Check for exceptions in the graph (dynamic imports).
           if let Some(message) = graph_root.exception_mut().take() {
+            trace!(
+              "graph_root {:?} failed, error:{:?}",
+              graph_root.path(),
+              message
+            );
+
             // Create a v8 exception.
             let exception = v8::String::new(scope, &message).unwrap();
             let exception = v8::Exception::error(scope, exception);
