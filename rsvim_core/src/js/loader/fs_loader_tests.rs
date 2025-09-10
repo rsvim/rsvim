@@ -213,7 +213,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file_failed5() {
+  fn filepath_failed5() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -752,7 +752,7 @@ mod tests_async {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn file1() {
+  async fn filepath1() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -804,7 +804,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn file2() {
+  async fn filepath2() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -855,7 +855,7 @@ export function sayHello() {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn file3() {
+  async fn filepath3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
