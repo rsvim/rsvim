@@ -213,7 +213,7 @@ impl ModuleMapCounter {
 
   pub fn increase_failed(&mut self, _specifier: &str) {}
 
-  pub fn increase_evaluate(&mut self, _specifier: &str) {}
+  pub fn increase_evaluated(&mut self, _specifier: &str) {}
 }
 
 #[cfg(test)]

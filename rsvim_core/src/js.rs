@@ -797,14 +797,11 @@ pub mod boost {
         }
 
         let _ = module.evaluate(tc_scope);
-
-        if cfg!(test) {
-          state_rc
-            .borrow_mut()
-            .module_map
-            .counter_mut()
-            .increase_evaluated(&path);
-        }
+        state_rc
+          .borrow_mut()
+          .module_map
+          .counter
+          .increase_evaluated(&path);
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
