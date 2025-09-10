@@ -134,35 +134,13 @@ pub struct ModuleMap {
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
 
   // Module status.
-  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
+  pub seen: HashMap<ModulePath, ModuleStatus>,
 
   // Pending modules.
-  pending: RefCell<Vec<ModuleGraphRc>>,
+  pub pending: Vec<ModuleGraphRc>,
 
-  // Only for testing
-  counter: ModuleMapCounter,
-}
-
-impl ModuleMap {
-  pub fn main(&self) -> &Option<ModulePath> {
-    &self.main
-  }
-
-  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
-    &self.seen
-  }
-
-  pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
-    &self.pending
-  }
-
-  pub fn counter(&self) -> &ModuleMapCounter {
-    &self.counter
-  }
-
-  pub fn counter_mut(&mut self) -> &mut ModuleMapCounter {
-    &mut self.counter
-  }
+  // Internal monitor, this is only for testing.
+  pub counter: ModuleMapCounter,
 }
 
 impl ModuleMap {
@@ -171,10 +149,14 @@ impl ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      seen: RefCell::new(HashMap::new()),
-      pending: RefCell::new(vec![]),
+      seen: HashMap::new(),
+      pending: vec![],
       counter: ModuleMapCounter::default(),
     }
+  }
+
+  pub fn main(&self) -> &Option<ModulePath> {
+    &self.main
   }
 
   /// Add a compiled v8 module to the cache.

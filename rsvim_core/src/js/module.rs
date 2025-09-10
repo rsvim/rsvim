@@ -265,16 +265,16 @@ pub fn fetch_module_tree<'a>(
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
-  state_rc
-    .borrow_mut()
-    .module_map
-    .insert(filename, module_ref);
-  // state_rc
-  //   .borrow_mut()
-  //   .module_map
-  //   .seen()
-  //   .borrow_mut()
-  //   .insert(filename.into(), ModuleStatus::Ready);
+  {
+    let mut state = state_rc.borrow_mut();
+    state.module_map.insert(filename, module_ref);
+    state
+      .module_map
+      .seen()
+      .borrow_mut()
+      .insert(filename.into(), ModuleStatus::Ready);
+    state.module_map.counter_mut().increase_seen(filename);
+  }
 
   let requests = module.get_module_requests();
   trace!("Get {} module requests", requests.length());

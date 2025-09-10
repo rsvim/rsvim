@@ -255,7 +255,6 @@ pub fn host_import_module_dynamically_cb<'s>(
     .pending()
     .borrow_mut()
     .push(Rc::clone(&graph_rc));
-
   state.module_map.counter_mut().increase_pending(&specifier);
 
   state
