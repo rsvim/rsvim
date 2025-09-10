@@ -13,7 +13,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::module::{EsModuleFuture, ModulePath};
+use crate::js::module::EsModuleFuture;
 use crate::msg::{JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::report_js_error;
@@ -725,9 +725,9 @@ pub mod boost {
       {
         let state = state_rc.borrow();
 
-        let mut seen_modules = &mut state.module_map.seen;
-        let mut pending_graphs = &mut state.module_map.pending;
-        let mut module_counter = &mut state.module_map.counter;
+        let seen_modules = &mut state.module_map.seen;
+        let pending_graphs = &mut state.module_map.pending;
+        let module_counter = &mut state.module_map.counter;
 
         pending_graphs.retain(|graph_rc| {
           // Get a usable ref to graph's root module.
@@ -758,7 +758,7 @@ pub mod boost {
 
           // If the graph is still loading, fast-forward the dependencies.
           if graph_root.status() != ModuleStatus::Ready {
-            graph_root.fast_forward(&mut seen_modules);
+            graph_root.fast_forward(seen_modules, module_counter);
             return true;
           }
 

@@ -2,7 +2,7 @@
 
 use crate::js::err::JsError;
 use crate::js::module::{
-  ModulePath, ModuleStatus, create_origin, resolve_import,
+  ModuleMapCounter, ModulePath, ModuleStatus, create_origin, resolve_import,
 };
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
 use crate::msg::{self, MasterMessage};
@@ -86,6 +86,7 @@ impl EsModule {
   pub fn fast_forward(
     &mut self,
     seen_modules: &mut HashMap<ModulePath, ModuleStatus>,
+    module_counter: &mut ModuleMapCounter,
   ) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
@@ -102,15 +103,15 @@ impl EsModule {
     }
 
     // Fast-forward all dependencies.
-    self
-      .dependencies
-      .iter_mut()
-      .for_each(|dep| dep.borrow_mut().fast_forward(seen_modules));
+    self.dependencies.iter_mut().for_each(|dep| {
+      dep.borrow_mut().fast_forward(seen_modules, module_counter)
+    });
 
     // The module is compiled and has 0 dependencies.
     if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
+      module_counter.increase_seen(&self.path);
       return;
     }
 
