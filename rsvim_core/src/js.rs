@@ -692,6 +692,12 @@ pub mod boost {
               load_cb_impl.source = Some(resp.source);
               futures.push(load_cb);
             }
+            JsMessage::TickAgainResp(resp) => {
+              trace!("Recv TickAgainResp:{resp:?}");
+              debug_assert!(
+                !state.pending_futures.contains_key(&resp.future_id)
+              );
+            }
           }
         }
 
