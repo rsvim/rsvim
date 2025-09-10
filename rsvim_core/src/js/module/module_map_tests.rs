@@ -555,34 +555,14 @@ Rsvim.rt.exit(0);
       assert!(module_map.counter.failed.is_empty());
       assert_eq!(module_map.counter.resolved.len(), 1);
       assert_eq!(module_map.counter.evaluated.len(), 2);
-      assert_eq!(
-        module_map.counter.evaluated.get(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .normalize()
-            .unwrap()
-            .as_os_str()
-            .to_str()
-            .unwrap()
-        ),
-        Some(&1)
-      );
-      assert_eq!(
-        module_map.counter.evaluated.get(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p4)
-            .as_path()
-            .normalize()
-            .unwrap()
-            .as_os_str()
-            .to_str()
-            .unwrap()
-        ),
-        Some(&1)
-      );
+      let p1 = tp.xdg_config_home.join("rsvim").join(p1);
+      let p1 = p1.normalize().unwrap();
+      let p1 = p1.as_os_str().to_str().unwrap();
+      assert_eq!(module_map.counter.evaluated.get(p1), Some(&1));
+      let p4 = tp.xdg_config_home.join("rsvim").join(p4);
+      let p4 = p4.normalize().unwrap();
+      let p4 = p4.as_os_str().to_str().unwrap();
+      assert_eq!(module_map.counter.evaluated.get(p4), Some(&1));
     }
 
     Ok(())
