@@ -329,7 +329,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn folder3() {
+  fn folder_path3() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -376,7 +376,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn folder4() {
+  fn folder_path4() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
@@ -425,7 +425,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn folder_failed5() {
+  fn folder_path_failed5() {
     test_log_init();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
