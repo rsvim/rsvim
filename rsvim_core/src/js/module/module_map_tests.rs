@@ -69,14 +69,14 @@ mod test_static_import {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       let module_map = &state.module_map;
-      assert!(module_map.counter.pending.is_empty());
       assert!(module_map.pending.is_empty());
+      assert!(module_map.counter.pending.is_empty());
       assert!(module_map.counter.failed.is_empty());
       assert_eq!(module_map.counter.resolved.len(), 0);
       info!("module_map.counter:{:?}", module_map.counter);
       assert_eq!(module_map.counter.evaluated.len(), 1);
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -84,7 +84,7 @@ mod test_static_import {
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
     }
 
@@ -252,7 +252,7 @@ mod test_static_import {
       info!("module_map.counter:{:?}", module_map.counter);
       assert_eq!(module_map.counter.evaluated.len(), 1);
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -260,7 +260,7 @@ mod test_static_import {
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
     }
 
@@ -340,7 +340,7 @@ mod test_dynamic_import {
       assert_eq!(module_map.counter.resolved.len(), 1);
       assert_eq!(module_map.counter.evaluated.len(), 2);
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -348,10 +348,10 @@ mod test_dynamic_import {
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p2)
@@ -359,7 +359,7 @@ mod test_dynamic_import {
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
     }
 
@@ -438,7 +438,7 @@ Rsvim.rt.exit(0);
       assert_eq!(module_map.counter.resolved.len(), 1);
       assert_eq!(module_map.counter.evaluated.len(), 2);
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p1)
@@ -446,10 +446,10 @@ Rsvim.rt.exit(0);
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
       assert_eq!(
-        module_map.counter.evaluated.get(
+        module_map.counter.get_evaluated(
           tp.xdg_config_home
             .join("rsvim")
             .join(p2)
@@ -457,7 +457,7 @@ Rsvim.rt.exit(0);
             .to_str()
             .unwrap()
         ),
-        Some(&1)
+        1
       );
     }
 
@@ -556,13 +556,19 @@ Rsvim.rt.exit(0);
       assert_eq!(module_map.counter.resolved.len(), 1);
       assert_eq!(module_map.counter.evaluated.len(), 2);
       let p1 = tp.xdg_config_home.join("rsvim").join(p1);
-      let p1 = p1.normalize().unwrap();
-      let p1 = p1.as_os_str().to_str().unwrap();
-      assert_eq!(module_map.counter.evaluated.get(p1), Some(&1));
+      assert_eq!(
+        module_map
+          .counter
+          .get_evaluated(p1.as_path().as_os_str().to_str().unwrap()),
+        1
+      );
       let p4 = tp.xdg_config_home.join("rsvim").join(p4);
-      let p4 = p4.normalize().unwrap();
-      let p4 = p4.as_os_str().to_str().unwrap();
-      assert_eq!(module_map.counter.evaluated.get(p4), Some(&1));
+      assert_eq!(
+        module_map
+          .counter
+          .get_evaluated(p4.as_path().as_os_str().to_str().unwrap()),
+        1
+      );
     }
 
     Ok(())

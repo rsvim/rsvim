@@ -225,11 +225,10 @@ pub struct ModuleMapCounter {
 }
 
 #[cfg(test)]
-macro_rules! increase {
-  ($specifier:expr,$member:expr) => {
+macro_rules! increase_count {
+  ($specifier:ident,$member:expr) => {
     use normpath::PathExt;
     use std::path::Path;
-
     let specifier = Path::new($specifier).normalize().unwrap();
     let old = $member
       .get(specifier.as_os_str().to_str().unwrap())
@@ -240,24 +239,56 @@ macro_rules! increase {
 }
 
 #[cfg(test)]
+macro_rules! get_count {
+  ($specifier:ident,$member:expr) => {
+    use normpath::PathExt;
+    use std::path::Path;
+    let specifier = Path::new($specifier).normalize().unwrap();
+    return *$member
+      .get(specifier.as_os_str().to_str().unwrap())
+      .unwrap_or(&0);
+  };
+}
+
+#[cfg(test)]
 impl ModuleMapCounter {
   pub fn increase_seen(&mut self, specifier: &str) {
-    increase!(specifier, self.seen);
+    increase_count!(specifier, self.seen);
+  }
+
+  pub fn get_seen(&self, specifier: &str) -> u32 {
+    get_count!(specifier, self.seen);
   }
 
   pub fn increase_pending(&mut self, specifier: &str) {
-    increase!(specifier, self.pending);
+    increase_count!(specifier, self.pending);
+  }
+
+  pub fn get_pending(&self, specifier: &str) -> u32 {
+    get_count!(specifier, self.pending);
   }
 
   pub fn increase_resolved(&mut self, specifier: &str) {
-    increase!(specifier, self.resolved);
+    increase_count!(specifier, self.resolved);
+  }
+
+  pub fn get_resolved(&self, specifier: &str) -> u32 {
+    get_count!(specifier, self.resolved);
   }
 
   pub fn increase_failed(&mut self, specifier: &str) {
-    increase!(specifier, self.failed);
+    increase_count!(specifier, self.failed);
+  }
+
+  pub fn get_failed(&self, specifier: &str) -> u32 {
+    get_count!(specifier, self.failed);
   }
 
   pub fn increase_evaluated(&mut self, specifier: &str) {
-    increase!(specifier, self.evaluated);
+    increase_count!(specifier, self.evaluated);
+  }
+
+  pub fn get_evaluated(&self, specifier: &str) -> u32 {
+    get_count!(specifier, self.evaluated);
   }
 }
