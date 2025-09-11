@@ -253,6 +253,7 @@ macro_rules! get_count {
 #[cfg(test)]
 impl ModuleMapCounter {
   pub fn increase_seen(&mut self, specifier: &str) {
+    trace!("Seen {:?}", specifier);
     increase_count!(specifier, self.seen);
   }
 
@@ -261,6 +262,7 @@ impl ModuleMapCounter {
   }
 
   pub fn increase_pending(&mut self, specifier: &str) {
+    trace!("Pending {:?}", specifier);
     increase_count!(specifier, self.pending);
   }
 
@@ -269,6 +271,7 @@ impl ModuleMapCounter {
   }
 
   pub fn increase_resolved(&mut self, specifier: &str) {
+    trace!("Resolved {:?}", specifier);
     increase_count!(specifier, self.resolved);
   }
 
@@ -277,6 +280,7 @@ impl ModuleMapCounter {
   }
 
   pub fn increase_failed(&mut self, specifier: &str) {
+    trace!("Failed {:?}", specifier);
     increase_count!(specifier, self.failed);
   }
 
@@ -285,6 +289,7 @@ impl ModuleMapCounter {
   }
 
   pub fn increase_evaluated(&mut self, specifier: &str) {
+    trace!("Evaluated {:?}", specifier);
     increase_count!(specifier, self.evaluated);
   }
 
