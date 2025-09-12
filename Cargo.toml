@@ -76,9 +76,6 @@ normpath = "1.4.0"
 # deno_core: https://github.com/denoland/deno_core/blob/0.357.0/Cargo.toml
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.50.1/Cargo.toml
 
-v8 = { version = "=140.0.0", default-features = false, features = [
-  "use_custom_libcxx",
-] }
 swc_atoms = "=7.0.0"
 swc_common = { version = "=14.0.3", features = ["tty-emitter"] }
 swc_config = "=3.1.1"
@@ -108,6 +105,8 @@ swc_macros_common = "=1.0.1"
 swc_trace_macro = "=2.0.2"
 swc_visit = "=2.0.1"
 swc_sourcemap = "=9.3.4"
+
+v8 = { version = "=140.0.0", default-features = false }
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
 
