@@ -67,7 +67,9 @@ serde_json = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
-v8 = { workspace = true, default-features = false }
+v8 = { workspace = true, default-features = false, features = [
+  "use_custom_libcxx",
+] }
 swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
 swc_config = { workspace = true }
