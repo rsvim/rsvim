@@ -48,7 +48,7 @@ impl TypeScript {
       None => FileName::Anon,
     };
 
-    let fm = cm.new_source_file(filename.into(), source.into());
+    let fm = cm.new_source_file(filename.into(), source.to_string());
 
     // Initialize the TypeScript lexer.
     let lexer = Lexer::new(
