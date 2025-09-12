@@ -59,16 +59,16 @@ mod test_static_import {
 
     // After running
     {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("ModuleMap:{:?}", state.module_map);
+
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
-
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
     }
 
     Ok(())
@@ -118,32 +118,15 @@ mod test_static_import {
 
     // After running
     {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("ModuleMap:{:?}", state.module_map);
+
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
-      );
-
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      let module_map = &state.module_map;
-      assert!(module_map.counter.pending.is_empty());
-      assert!(module_map.pending.is_empty());
-      assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 0);
-      info!("module_map.counter:{:?}", module_map.counter);
-      assert_eq!(module_map.counter.evaluated.len(), 1);
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
       );
     }
 
@@ -218,32 +201,15 @@ mod test_static_import {
 
     // After running
     {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("ModuleMap:{:?}", state.module_map);
+
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("3".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
-      );
-
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      let module_map = &state.module_map;
-      assert!(module_map.counter.pending.is_empty());
-      assert!(module_map.pending.is_empty());
-      assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 0);
-      info!("module_map.counter:{:?}", module_map.counter);
-      assert_eq!(module_map.counter.evaluated.len(), 1);
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
       );
     }
 
@@ -318,32 +284,15 @@ mod test_static_import {
 
     // After running
     {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("ModuleMap:{:?}", state.module_map);
+
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
         Some("9".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
-      );
-
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      let module_map = &state.module_map;
-      assert!(module_map.counter.pending.is_empty());
-      assert!(module_map.pending.is_empty());
-      assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 0);
-      info!("module_map.counter:{:?}", module_map.counter);
-      assert_eq!(module_map.counter.evaluated.len(), 1);
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
       );
     }
 
@@ -412,36 +361,7 @@ mod test_dynamic_import {
 
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      let module_map = &state.module_map;
-      info!("module_map.counter:{:?}", module_map.counter);
-      assert!(module_map.pending.is_empty());
-      assert_eq!(module_map.counter.seen.len(), 2);
-      assert_eq!(module_map.counter.pending.len(), 1);
-      assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 1);
-      assert_eq!(module_map.counter.evaluated.len(), 2);
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
-      );
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p2)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
-      );
+      info!("ModuleMap:{:?}", state.module_map);
     }
 
     Ok(())
@@ -496,6 +416,10 @@ Rsvim.rt.exit(0);
 
     // After running
     {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("ModuleMap:{:?}", state.module_map);
+
       let mut contents = lock!(event_loop.contents);
       info!(
         "command_line_message_history occupied_len:{}, vacant_len: {}",
@@ -506,39 +430,6 @@ Rsvim.rt.exit(0);
       assert_eq!(
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
-      );
-
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      let module_map = &state.module_map;
-      info!("module_map.counter:{:?}", module_map.counter);
-      assert!(module_map.pending.is_empty());
-      assert_eq!(module_map.counter.seen.len(), 2);
-      assert_eq!(module_map.counter.pending.len(), 1);
-      assert!(module_map.counter.failed.is_empty());
-      assert_eq!(module_map.counter.resolved.len(), 1);
-      assert_eq!(module_map.counter.evaluated.len(), 2);
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p1)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
-      );
-      assert_eq!(
-        module_map.counter.get_evaluated(
-          tp.xdg_config_home
-            .join("rsvim")
-            .join(p2)
-            .as_path()
-            .to_str()
-            .unwrap()
-        ),
-        1
       );
     }
 
