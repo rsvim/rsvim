@@ -11,7 +11,6 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
-
 use compact_str::CompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
