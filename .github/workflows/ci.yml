@@ -17,6 +17,7 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
+  RUSTC_LOG: "rustc_codegen_ssa::back::link=info"
 jobs:
   check:
     name: Check
