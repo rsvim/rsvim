@@ -86,7 +86,7 @@ def test(name, miri, jobs):
         )
         if name is None:
             name = ""
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines -F v8_unsafe_use_unprotected_platform --no-default-features -p rsvim_core {name}"
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
     else:
         log_var = os.getenv("RSVIM_LOG")
         if isinstance(log_var, str):
