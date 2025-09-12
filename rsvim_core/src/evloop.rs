@@ -23,14 +23,10 @@ use crate::state::ops::cmdline_ops;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
+use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-
 use compact_str::ToCompactString;
-use writer::StdoutWritable;
-use writer::StdoutWriterValue;
-
-use crate::ui::widget::command_line::CommandLine;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -43,6 +39,8 @@ use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::channel;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
+use writer::StdoutWritable;
+use writer::StdoutWriterValue;
 
 #[cfg(test)]
 use crate::tests::evloop::MockEventReader;
