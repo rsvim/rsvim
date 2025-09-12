@@ -1,5 +1,4 @@
 use super::cidx::*;
-
 use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::text::Text;
 use crate::prelude::*;

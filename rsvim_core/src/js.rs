@@ -14,19 +14,25 @@ use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::js::module::EsModuleFuture;
-use crate::msg::{self, JsMessage, MasterMessage};
+use crate::msg;
+use crate::msg::JsMessage;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
 use err::JsError;
-use exception::{ExceptionState, PromiseRejectionEntry};
+use exception::ExceptionState;
+use exception::PromiseRejectionEntry;
 use hook::module_resolve_cb;
-use module::{
-  ImportKind, ImportMap, ModuleMap, ModuleStatus, fetch_module,
-  fetch_module_tree, resolve_import,
-};
+use module::ImportKind;
+use module::ImportMap;
+use module::ModuleMap;
+use module::ModuleStatus;
+use module::fetch_module;
+use module::fetch_module_tree;
+use module::resolve_import;
 
 // Re-export
 pub use boost::*;
