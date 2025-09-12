@@ -1,19 +1,26 @@
 //! The command-line ex mode.
 
 use crate::js::next_future_id;
-use crate::msg::{self, ExCommandReq, JsMessage};
+use crate::msg;
+use crate::msg::ExCommandReq;
+use crate::msg::JsMessage;
 use crate::prelude::*;
-use crate::state::ops::{
-  CursorInsertPayload, Operation, cmdline_ops, cursor_ops,
-};
-use crate::state::{StateDataAccess, StateMachine, Stateful};
+use crate::state::StateDataAccess;
+use crate::state::StateMachine;
+use crate::state::Stateful;
+use crate::state::ops::CursorInsertPayload;
+use crate::state::ops::Operation;
+use crate::state::ops::cmdline_ops;
+use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
-
-use compact_str::{CompactString, ToCompactString};
-use crossterm::event::{Event, KeyCode, KeyEventKind};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use crossterm::event::Event;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEventKind;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line ex mode.

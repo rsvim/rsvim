@@ -2,9 +2,9 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
-
 use geo::point;
 use std::convert::From;
 

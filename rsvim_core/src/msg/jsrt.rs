@@ -2,7 +2,6 @@
 
 use crate::js::JsFutureId;
 use crate::prelude::*;
-
 use compact_str::CompactString;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;

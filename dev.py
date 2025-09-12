@@ -136,7 +136,7 @@ def fmt():
     logging.info(command)
     os.system(command)
 
-    command = "cargo fmt"
+    command = "cargo +nightly fmt"
     logging.info(command)
     os.system(command)
 
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     fmt_subparser = subparsers.add_parser(
         "fmt",
         aliases=["f"],
-        help="Run multiple formatters and code-generator: `cargo fmt`, `taplo fmt`, `prettier`, `tsc`",
+        help="Run multiple formatters and code-generator: `cargo +nightly fmt`, `taplo fmt`, `prettier`, `tsc`",
     )
 
     release_subparser = subparsers.add_parser(

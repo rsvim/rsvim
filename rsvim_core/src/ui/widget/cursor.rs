@@ -2,10 +2,11 @@
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::{self, Canvas, CursorStyle};
+use crate::ui::canvas;
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
-
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, Copy)]

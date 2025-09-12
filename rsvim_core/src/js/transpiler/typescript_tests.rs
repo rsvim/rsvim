@@ -1,5 +1,4 @@
 use super::typescript::*;
-
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 

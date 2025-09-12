@@ -1,7 +1,9 @@
 //! APIs for `Rsvim.rt` namespace.
 
-use crate::js::{self, JsRuntime};
-use crate::msg::{self, MasterMessage};
+use crate::js;
+use crate::js::JsRuntime;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 
 /// Exit editor.

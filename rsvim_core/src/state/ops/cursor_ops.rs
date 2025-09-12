@@ -4,12 +4,12 @@ use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-  ViewportSearchDirection,
-};
+use crate::ui::viewport::CursorViewport;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
+use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::EditableWidgetable;
-
 use compact_str::CompactString;
 
 #[derive(Debug, Copy, Clone)]

@@ -1,5 +1,6 @@
 use git2::Repository;
-use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
+use rsvim_core::js::JsRuntimeForSnapshot;
+use rsvim_core::js::v8_version;
 use std::path::Path;
 
 fn version() {

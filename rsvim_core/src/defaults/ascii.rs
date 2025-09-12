@@ -3,7 +3,8 @@
 use ascii::AsciiChar;
 use std::fmt;
 
-/// The formatter for ASCII control code in [`AsciiChar`], helps implement the `Debug`/`Display` trait.
+/// The formatter for ASCII control code in [`AsciiChar`], helps implement the
+/// `Debug`/`Display` trait.
 pub struct AsciiControlCodeFormatter {
   value: AsciiChar,
 }

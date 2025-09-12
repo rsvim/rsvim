@@ -2,15 +2,18 @@
 
 use crate::prelude::*;
 use opt::*;
-use text::Text;
-
 use path_absolutize::Absolutize;
-use ropey::{Rope, RopeBuilder};
+use ropey::Rope;
+use ropey::RopeBuilder;
 use std::fs::Metadata;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicI32, Ordering};
+use std::io::Read;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
 use std::time::Instant;
+use text::Text;
 
 pub mod opt;
 pub mod text;

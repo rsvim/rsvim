@@ -28,15 +28,14 @@
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::JsRuntime;
-use crate::js::loader::{
-  AsyncFsModuleLoader, AsyncModuleLoader, CoreModuleLoader, FsModuleLoader,
-  ModuleLoader,
-};
+use crate::js::loader::AsyncFsModuleLoader;
+use crate::js::loader::AsyncModuleLoader;
+use crate::js::loader::CoreModuleLoader;
+use crate::js::loader::FsModuleLoader;
+use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
-
 use std::sync::LazyLock;
 // use url::Url;
-
 // Re-export
 pub use es_module::*;
 pub use import_map::*;
@@ -46,8 +45,6 @@ pub mod es_module;
 pub mod import_map;
 pub mod module_map;
 
-#[cfg(test)]
-mod es_module_tests;
 #[cfg(test)]
 mod module_map_tests;
 

@@ -4,7 +4,6 @@ use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::opt::WindowOptions;
-
 use litemap::LiteMap;
 use std::ops::Range;
 

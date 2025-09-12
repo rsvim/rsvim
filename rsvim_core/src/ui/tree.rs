@@ -1,17 +1,18 @@
 //! The widget tree that manages all the widget components.
 
+use crate::inode_enum_dispatcher;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, CanvasArc};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::Window;
-use crate::ui::widget::window::opt::{
-  WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowOptions,
-  WindowOptionsBuilder,
-};
-use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
-
+use crate::ui::widget::window::opt::WindowGlobalOptions;
+use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
+use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use crate::widget_enum_dispatcher;
 // Re-export
 pub use internal::*;
 

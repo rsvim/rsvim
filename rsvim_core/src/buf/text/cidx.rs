@@ -3,7 +3,6 @@
 use crate::buf::opt::BufferOptions;
 use crate::buf::unicode;
 use crate::prelude::*;
-
 use ropey::RopeSlice;
 use smallvec::SmallVec;
 

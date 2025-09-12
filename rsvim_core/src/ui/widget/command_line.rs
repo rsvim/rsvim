@@ -1,23 +1,27 @@
 //! Command-line widget.
 
 use crate::content::TextContentsWk;
+use crate::geo_rect_as;
+use crate::inode_enum_dispatcher;
+use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-};
+use crate::ui::viewport::CursorViewport;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
+use crate::ui::widget::EditableWidgetable;
+use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
-use crate::ui::widget::{EditableWidgetable, Widgetable};
-use crate::{
-  geo_rect_as, inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher,
-};
-use indicator::{Indicator, IndicatorSymbol};
+use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use crate::widget_enum_dispatcher;
+use indicator::Indicator;
+use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
 use root::RootContainer;
-
 use std::sync::Arc;
 
 pub mod indicator;

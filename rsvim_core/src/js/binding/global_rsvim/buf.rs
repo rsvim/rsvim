@@ -1,7 +1,8 @@
 //! APIs for `Rsvim.buf` namespace.
 
 use crate::buf::BufferId;
-use crate::js::{JsRuntime, binding};
+use crate::js::JsRuntime;
+use crate::js::binding;
 use crate::prelude::*;
 
 /// `Rsvim.buf.current` API.

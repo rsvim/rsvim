@@ -1,11 +1,12 @@
 use super::cidx::*;
-
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-
-use ropey::{Rope, RopeBuilder, RopeSlice};
+use ropey::Rope;
+use ropey::RopeBuilder;
+use ropey::RopeSlice;
 
 fn make_default_opts() -> BufferOptions {
   BufferOptionsBuilder::default().build().unwrap()

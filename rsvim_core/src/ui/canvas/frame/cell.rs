@@ -1,7 +1,9 @@
 //! Basic unit of canvas frame.
 
-use compact_str::{CompactString, ToCompactString};
-use crossterm::style::{Attributes, Color};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use crossterm::style::Attributes;
+use crossterm::style::Color;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.

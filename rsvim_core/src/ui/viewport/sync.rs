@@ -2,18 +2,18 @@
 
 #![allow(clippy::too_many_arguments)]
 
+use super::Viewport;
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::viewport::LineViewport;
+use crate::ui::viewport::RowViewport;
 use crate::ui::widget::window::opt::WindowOptions;
-
-use icu::segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
+use icu::segmenter::WordSegmenter;
+use icu::segmenter::options::WordBreakInvariantOptions;
 use itertools::Itertools;
 use litemap::LiteMap;
 use ropey::RopeSlice;
 use std::ops::Range;
-
-use super::Viewport;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside the viewport.

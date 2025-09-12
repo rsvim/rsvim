@@ -42,7 +42,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup default stable
-          rustup component add --toolchain stable rust-src clippy
+          rustup component add --toolchain stable rust-src clippy rustfmt
       - name: Rustfmt
         run: cargo fmt --check
       - uses: taiki-e/install-action@cargo-binstall

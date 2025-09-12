@@ -1,5 +1,4 @@
 use super::file_encoding::*;
-
 use std::str::FromStr;
 
 #[test]

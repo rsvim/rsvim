@@ -1,9 +1,12 @@
 //! Timeout APIs.
 
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
-use crate::msg::{self, MasterMessage};
+use crate::js;
+use crate::js::JsFuture;
+use crate::js::JsFutureId;
+use crate::js::JsRuntime;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
-
 use std::rc::Rc;
 use std::time::Duration;
 

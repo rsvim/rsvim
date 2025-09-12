@@ -36,10 +36,10 @@
 //!
 //! Static import runs synchronizely, dynamic import runs asynchronizely.
 
+use crate::js::module::ModulePath;
+use crate::js::module::ModuleStatus;
 use crate::js::module::es_module::*;
-use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
-
 use std::fmt::Debug;
 
 #[derive(Clone)]

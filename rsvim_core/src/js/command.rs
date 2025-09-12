@@ -1,10 +1,14 @@
 //! Vim ex commands.
 
+use crate::js;
+use crate::js::JsFuture;
+use crate::js::JsFutureId;
+use crate::js::JsRuntime;
 use crate::js::binding;
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime, execute_module};
+use crate::js::execute_module;
 use crate::prelude::*;
-
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 const JS_COMMAND_NAME: &str = "js";
 

@@ -1,6 +1,7 @@
 //! File path configs.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";

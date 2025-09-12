@@ -1,16 +1,20 @@
 //! The normal mode.
 
 use crate::prelude::*;
+use crate::state::StateDataAccess;
+use crate::state::StateMachine;
+use crate::state::Stateful;
+use crate::state::ops::GotoInsertModeVariant;
+use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
-use crate::state::ops::{GotoInsertModeVariant, Operation};
-use crate::state::{StateDataAccess, StateMachine, Stateful};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
-
 use compact_str::CompactString;
-use crossterm::event::{Event, KeyCode, KeyEventKind};
+use crossterm::event::Event;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEventKind;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
@@ -244,7 +248,9 @@ impl NormalStateful {
 #[cfg(test)]
 use crate::buf::text::Text;
 #[cfg(test)]
-use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
+use crate::ui::viewport::CursorViewport;
+#[cfg(test)]
+use crate::ui::viewport::ViewportSearchDirection;
 
 impl NormalStateful {
   #[cfg(test)]

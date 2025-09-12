@@ -1,34 +1,48 @@
 #![allow(unused_imports, dead_code, unused_variables)]
 
 use super::command_line_ex::*;
-
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
+use crate::buf::BufferArc;
+use crate::buf::BuffersManagerArc;
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::FileFormatOption;
 use crate::buf::text::Text;
-use crate::buf::{BufferArc, BuffersManagerArc};
-use crate::content::{TextContents, TextContentsArc};
+use crate::content::TextContents;
+use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::state::StateDataAccess;
+use crate::state::StateMachine;
+use crate::state::Stateful;
+use crate::state::fsm::NormalStateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
-use crate::state::{StateDataAccess, StateMachine, Stateful};
-use crate::tests::buf::{make_buffer_from_lines, make_buffers_manager};
+use crate::tests::buf::make_buffer_from_lines;
+use crate::tests::buf::make_buffers_manager;
 use crate::tests::log::init as test_log_init;
-use crate::tests::tree::{
-  make_tree_with_buffers, make_tree_with_buffers_cmdline,
-};
-use crate::ui::canvas::{Canvas, CanvasArc};
+use crate::tests::tree::make_tree_with_buffers;
+use crate::tests::tree::make_tree_with_buffers_cmdline;
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-  ViewportSearchDirection,
-};
+use crate::ui::viewport::CursorViewport;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
+use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
-
-use crate::state::fsm::NormalStateful;
-use compact_str::{CompactString, ToCompactString};
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use tokio::sync::mpsc::{Receiver, Sender, channel};
+use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use crossterm::event::Event;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
+use crossterm::event::KeyModifiers;
+use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::channel;
 
 pub fn make_tree(
   terminal_size: U16Size,

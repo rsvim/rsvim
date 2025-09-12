@@ -1,15 +1,17 @@
 //! Fs (filesystem) module loader.
 
-use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
-use crate::js::module::{ModulePath, ModuleSource};
+use crate::js::loader::AsyncModuleLoader;
+use crate::js::loader::ModuleLoader;
+use crate::js::module::ModulePath;
+use crate::js::module::ModuleSource;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Jsx;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
-
 use async_trait::async_trait;
 use path_absolutize::Absolutize;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
 const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];

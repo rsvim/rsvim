@@ -3,15 +3,20 @@ use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::tests::constant::TempPathCfg;
-
 use assert_fs::prelude::*;
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::event::Event;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
+use crossterm::event::KeyEventKind;
+use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
 use std::path::Path;
 use std::sync::Arc;
-use std::sync::mpsc::{Receiver, channel};
-use std::task::{Poll, Waker};
+use std::sync::mpsc::Receiver;
+use std::sync::mpsc::channel;
+use std::task::Poll;
+use std::task::Waker;
 use std::time::Duration;
 
 pub fn make_configs(tp: &TempPathCfg, src: &str) {

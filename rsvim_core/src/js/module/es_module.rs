@@ -1,15 +1,20 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
+use crate::js;
+use crate::js::JsFuture;
+use crate::js::JsFutureId;
+use crate::js::JsRuntime;
+use crate::js::JsRuntimeState;
 use crate::js::err::JsError;
-use crate::js::module::{
-  ModulePath, ModuleStatus, create_origin, resolve_import,
-};
-use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
-use crate::msg::{self, MasterMessage};
+use crate::js::module::ModulePath;
+use crate::js::module::ModuleStatus;
+use crate::js::module::create_origin;
+use crate::js::module::resolve_import;
+use crate::msg;
+use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
-
 use compact_str::ToCompactString;
 use std::cell::RefCell;
 use std::rc::Rc;

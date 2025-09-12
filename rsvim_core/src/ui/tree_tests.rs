@@ -1,5 +1,4 @@
 use super::tree::*;
-
 use crate::prelude::*;
 
 #[test]

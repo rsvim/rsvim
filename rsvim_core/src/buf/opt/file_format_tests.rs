@@ -1,5 +1,4 @@
 use super::file_format::*;
-
 use std::str::FromStr;
 
 #[test]

@@ -1,11 +1,7 @@
 //! Typescript transpiler.
 
 use crate::prelude::*;
-
 use anyhow::bail;
-// use regex::Regex;
-// use std::sync::OnceLock;
-// use swc_common::comments::SingleThreadedComments;
 use swc_common::FileName;
 use swc_common::GLOBALS;
 use swc_common::Globals;

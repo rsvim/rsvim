@@ -1,10 +1,9 @@
 //! Global constants.
 
+use path_config::*;
 use regex::Regex;
 use std::sync::LazyLock;
 use std::time::Duration;
-
-use path_config::*;
 
 pub mod path_config;
 

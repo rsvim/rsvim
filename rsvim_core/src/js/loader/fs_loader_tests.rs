@@ -1,10 +1,9 @@
 use super::fs_loader::*;
-
-use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
+use crate::js::loader::AsyncModuleLoader;
+use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use crate::tests::constant::*;
 use crate::tests::log::init as test_log_init;
-
 use assert_fs::prelude::*;
 use normpath::PathExt;
 use std::fs;

@@ -1,6 +1,7 @@
 //! APIs for `Rsvim.opt` namespace.
 
-use crate::buf::opt::{FileEncodingOption, FileFormatOption};
+use crate::buf::opt::FileEncodingOption;
+use crate::buf::opt::FileFormatOption;
 use crate::js::JsRuntime;
 use crate::prelude::*;
 

@@ -1,9 +1,8 @@
 use super::canvas::*;
-
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use geo::point;
 
 fn int2letter(i: u8) -> char {

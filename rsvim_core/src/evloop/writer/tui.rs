@@ -1,11 +1,10 @@
 //! TUI utility.
 
 use crate::prelude::*;
-
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange,
-  EnableMouseCapture,
-};
+use crossterm::event::DisableFocusChange;
+use crossterm::event::DisableMouseCapture;
+use crossterm::event::EnableFocusChange;
+use crossterm::event::EnableMouseCapture;
 use crossterm::execute;
 use std::io::Write;
 

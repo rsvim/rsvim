@@ -12,16 +12,20 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
-use crate::msg::{JsMessage, MasterMessage};
+use crate::msg::JsMessage;
+use crate::msg::MasterMessage;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
-use fsm::{
-  CommandLineExStateful, CommandLineSearchBackwardStateful,
-  CommandLineSearchForwardStateful, InsertStateful, NormalStateful,
-  OperatorPendingStateful, SelectStateful, TerminalStateful, VisualStateful,
-};
-
 use crossterm::event::Event;
+use fsm::CommandLineExStateful;
+use fsm::CommandLineSearchBackwardStateful;
+use fsm::CommandLineSearchForwardStateful;
+use fsm::InsertStateful;
+use fsm::NormalStateful;
+use fsm::OperatorPendingStateful;
+use fsm::SelectStateful;
+use fsm::TerminalStateful;
+use fsm::VisualStateful;
 use tokio::sync::mpsc::Sender;
 
 pub mod fsm;

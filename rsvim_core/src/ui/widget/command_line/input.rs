@@ -1,12 +1,13 @@
 //! Commandline's input content widget.
 
 use crate::content::TextContentsWk;
+use crate::inode_impl;
+use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
 /// Commandline input content.
