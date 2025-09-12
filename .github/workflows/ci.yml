@@ -88,11 +88,6 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories --allow unmaintained
-      - name: Clippy
-        env:
-          RUSTC_WRAPPER: "sccache"
-          SCCACHE_GHA_ENABLED: "true"
-        run: cargo clippy --all-targets --all-features
       - name: Docs
         env:
           RUSTDOCFLAGS: "-Dwarnings"
@@ -120,6 +115,8 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features
       - name: Cargo test
         run: |
           cargo test --workspace
@@ -144,7 +141,7 @@ jobs:
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
-    steps:
+    stes:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
