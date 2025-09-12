@@ -73,20 +73,21 @@ normpath = "1.4.0"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
-# deno: https://github.com/denoland/deno/blob/v2.4.2/Cargo.toml
-# deno_core: https://github.com/denoland/deno_core/blob/0.352.1/Cargo.toml
-# deno_ast: https://github.com/denoland/deno_ast/blob/0.48.2/Cargo.toml
+# deno: https://github.com/denoland/deno/blob/v2.5.0/Cargo.toml
+# deno_core: https://github.com/denoland/deno_core/blob/0.357.0/Cargo.toml
+# deno_ast: https://github.com/denoland/deno_ast/blob/0.50.1/Cargo.toml
 
-v8 = { version = "=137.2.1", default-features = false }
-swc_atoms = "=5.0.0"
-swc_common = "=9.2.0"
-swc_config = "=3.0.0"
-swc_config_macro = "=1.0.0"
-swc_ecma_ast = "=9.0.0"
-swc_ecma_codegen = "=11.0.0"
-swc_ecma_codegen_macros = "=2.0.0"
-swc_ecma_loader = "=9.0.0"
-swc_ecma_parser = "=12.0.0"
+v8 = { version = "=140.0.0", default-features = false }
+swc_atoms = "=7.0.0"
+swc_common = "=14.0.3"
+swc_config = "=3.1.1"
+swc_config_macro = "=1.0.1"
+swc_ecma_ast = "=15.0.0"
+swc_ecma_codegen = "=17.0.0"
+swc_ecma_codegen_macros = "=2.0.2"
+swc_ecma_loader = "=14.0.0"
+swc_ecma_lexer = "=23.0.1"
+swc_ecma_parser = "=23.0.0"
 swc_ecma_transforms_base = "=13.0.0"
 swc_ecma_transforms_classes = "=13.0.0"
 swc_ecma_transforms_compat = "=15.0.0"
