@@ -8,7 +8,6 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
-
 use std::sync::Arc;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
