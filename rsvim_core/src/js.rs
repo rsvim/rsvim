@@ -767,7 +767,10 @@ pub mod boost {
               }
             }
 
-            trace!("ModuleMap failed {:?}", graph_root.path());
+            trace!(
+              "|JsRuntime::fast_forward_imports| ModuleMap failed {:?}",
+              graph_root.path()
+            );
             return false;
           }
 
@@ -778,7 +781,10 @@ pub mod boost {
           }
 
           ready_imports.push(Rc::clone(graph_rc));
-          trace!("ModuleMap resolved {:?}", graph_root.path());
+          trace!(
+            "|JsRuntime::fast_forward_imports| ModuleMap resolved {:?}",
+            graph_root.path()
+          );
           false
         });
 
@@ -811,7 +817,10 @@ pub mod boost {
         }
 
         let _ = module.evaluate(tc_scope);
-        trace!("ModuleMap evaluated {:?}", path);
+        trace!(
+          "|JsRuntime::fast_forward_imports| ModuleMap evaluated {:?}",
+          path
+        );
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
@@ -959,7 +968,7 @@ pub fn execute_module(
   }
 
   let result = module.evaluate(tc_scope);
-  trace!("ModuleMap evaluated {:?}", path);
+  trace!("|execute_module| ModuleMap evaluated {:?}", path);
   trace!(
     "Module evaluate result, filename:{filename:?}({path:?}), result:{:?}",
     result

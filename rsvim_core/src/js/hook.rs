@@ -35,7 +35,10 @@ pub fn module_resolve_cb<'a>(
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
     resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
-  trace!("dependant:{:?}, specifier:{:?}", dependant, specifier);
+  trace!(
+    "|module_resolve_cb| dependant:{:?}, specifier:{:?}",
+    dependant, specifier
+  );
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();
@@ -62,7 +65,10 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 
   let url = state.module_map.get_path(module).unwrap();
   let is_main = state.module_map.main().clone() == Some(url.to_owned());
-  trace!("url:{:?}, is_main:{:?}", url, is_main);
+  trace!(
+    "|host_initialize_import_meta_object_cb| url:{:?}, is_main:{:?}",
+    url, is_main
+  );
 
   // Setup import.url property.
   let key = v8::String::new(scope, "url").unwrap();
@@ -97,7 +103,10 @@ fn import_meta_resolve(
 
   let base = args.data().to_rust_string_lossy(scope);
   let specifier = args.get(0).to_rust_string_lossy(scope);
-  trace!("base:{:?}, specifier:{:?}", base, specifier);
+  trace!(
+    "|import_meta_resolve| base:{:?}, specifier:{:?}",
+    base, specifier
+  );
   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
 
   match resolve_import(Some(&base), &specifier, import_map) {
@@ -110,12 +119,11 @@ fn import_meta_resolve(
 /// See: <https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html>.
 /// See: <https://v8.dev/features/promise-combinators>.
 pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
-  trace!("promise_reject_cb");
-
   // Create a v8 callback-scope.
   let scope = &mut unsafe { v8::CallbackScope::new(&message) };
   let undefined = v8::undefined(scope).into();
   let event = message.get_event();
+  trace!("|promise_reject_cb| event:{event:?}, message:{message:?}");
 
   use v8::PromiseRejectEvent::{
     PromiseHandlerAddedAfterReject, PromiseRejectAfterResolved,
@@ -125,17 +133,8 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   let reason = match event {
     PromiseHandlerAddedAfterReject
     | PromiseRejectAfterResolved
-    | PromiseResolveAfterResolved => {
-      trace!("non-PromiseRejectWithNoHandler event:{event:?}");
-      undefined
-    }
-    PromiseRejectWithNoHandler => {
-      trace!(
-        "PromiseRejectWithNoHandler event:{event:?}, value{:?}",
-        message.get_value()
-      );
-      message.get_value().unwrap()
-    }
+    | PromiseResolveAfterResolved => undefined,
+    PromiseRejectWithNoHandler => message.get_value().unwrap(),
   };
 
   let promise = message.get_promise();
@@ -171,7 +170,10 @@ pub fn host_import_module_dynamically_cb<'s>(
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
   let specifier = specifier.to_rust_string_lossy(scope);
-  trace!("base:{:?}, specifier:{:?}", base, specifier);
+  trace!(
+    "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",
+    base, specifier
+  );
 
   // Create the import promise.
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
@@ -237,10 +239,16 @@ pub fn host_import_module_dynamically_cb<'s>(
   let status = ModuleStatus::Fetching;
 
   state.module_map.pending.push(Rc::clone(&graph_rc));
-  trace!("ModuleMap pending {:?}", specifier);
+  trace!(
+    "|host_import_module_dynamically_cb| ModuleMap pending {:?}",
+    specifier
+  );
 
   state.module_map.seen.insert(specifier.clone(), status);
-  trace!("ModuleMap seen {:?} {:?}", specifier, status);
+  trace!(
+    "|host_import_module_dynamically_cb| ModuleMap seen {:?} {:?}",
+    specifier, status
+  );
 
   // Use the event-loop to asynchronously load the requested module.
   let load_import_id = js::next_future_id();

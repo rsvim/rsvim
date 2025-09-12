@@ -272,7 +272,11 @@ pub fn fetch_module_tree<'a>(
       .module_map
       .seen
       .insert(filename.into(), ModuleStatus::Ready);
-    trace!("ModuleMap seen {:?} {:?}", filename, ModuleStatus::Ready);
+    trace!(
+      "|fetch_module_tree| ModuleMap seen {:?} {:?}",
+      filename,
+      ModuleStatus::Ready
+    );
   }
 
   let requests = module.get_module_requests();

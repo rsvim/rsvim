@@ -61,7 +61,7 @@ mod test_static_import {
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -120,7 +120,7 @@ mod test_static_import {
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -203,7 +203,7 @@ mod test_static_import {
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -286,7 +286,7 @@ mod test_static_import {
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -354,7 +354,7 @@ mod test_dynamic_import {
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -418,7 +418,7 @@ Rsvim.rt.exit(0);
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       info!(
@@ -512,7 +512,7 @@ Rsvim.rt.exit(0);
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -605,7 +605,7 @@ export default {};
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
@@ -698,7 +698,7 @@ export default {};
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
-      info!("ModuleMap:{:?}", state.module_map);
+      info!("module_map:{:?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
