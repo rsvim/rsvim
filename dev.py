@@ -89,7 +89,11 @@ def test(name, miri, jobs):
             name = ""
         command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        set_env("RSVIM_LOG", "trace")
+        log_var = os.getenv("RSVIM_LOG")
+        if isinstance(log_var, "str"):
+            set_env("RSVIM_LOG", log_var)
+        else:
+            set_env("RSVIM_LOG", "trace")
         set_sccache()
         set_rustflags()
         if name is None:
@@ -231,7 +235,7 @@ if __name__ == "__main__":
     test_subparser = subparsers.add_parser(
         "test",
         aliases=["t"],
-        help="Run `cargo test` with `RSVIM_LOG=trace`, by default runs all test cases",
+        help="Run `cargo test` with by default `RSVIM_LOG=trace` on all test cases",
     )
     test_subparser.add_argument(
         "-l",
