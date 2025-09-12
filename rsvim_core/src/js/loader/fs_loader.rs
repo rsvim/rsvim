@@ -56,15 +56,6 @@ mod sync_resolve {
       return Ok(transform(path.to_path_buf()));
     }
 
-    if path.extension().is_none() {
-      for ext in FILE_EXTENSIONS {
-        let ext_path = path.with_extension(ext);
-        if ext_path.is_file() {
-          return Ok(transform(ext_path.to_path_buf()));
-        }
-      }
-    }
-
     path_not_found1!(path)
   }
 
