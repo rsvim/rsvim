@@ -60,7 +60,7 @@ Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc
 When implementing the initial prototype of javascript runtime and the [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/) for RSVIM, a lot of source code and techncial design were learned from following projects. There will be no RSVIM without them:
 
 - [dune](https://github.com/aalykiot/dune): Thanks to @aalykiot for the **dune** project. Most of core components of RSVIM's javascript runtime directly becomes it, including: ES modules, async tasks, runtime API bingings, typescript transformer and the most famous "event loop" framework, modified and adapted to tokio runtime.
-- [deno](https://deno.com/): Thanks to @denoland team for the **rusty_v8** and **deno** project. As the next generation of javascript/typescript runtime, RSVIM follows most of deno APIs design, and refers to some of the implementations.
+- [deno](https://deno.com/): Thanks to @denoland team for the **rusty_v8** and **deno** project. An extremely way to easily embed the v8 js engine instead of compiling from source code with `gn` is provided by the **rusty_v8** project. RSVIM also follows most of deno's runtime APIs design, as they are very user friendly and ergonomic.
 
 ## Supporting the Project
 
