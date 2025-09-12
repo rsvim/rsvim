@@ -61,7 +61,7 @@ def clippy():
     set_rustflags()
     set_sccache()
 
-    command = f"cargo clippy --workspace {FEATURES} --all-targets"
+    command = "cargo clippy --workspace --all-targets"
 
     command = command.strip()
     logging.info(command)
