@@ -55,7 +55,7 @@ Contributions to RSVIM are always welcomed. A few guidelines that help quickly s
 
 Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
-## Special Thanks
+## Credits
 
 Source code and technical solutions were studied from following projects for implementing the initial prototype of javascript runtime and the [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
 
