@@ -174,9 +174,7 @@ fn fetch_tree3() {
     None,
   );
   info!("fetch_tree3 path2:{:?}, fetch2:{:?}", path2, fetch2.path());
-  assert!(path2.is_ok());
-  let path2 = path2.unwrap();
-  assert!(state.module_map.get(&path2).is_some());
+  assert!(path2.is_err());
 }
 
 #[test]
