@@ -24,12 +24,6 @@ pub fn module_resolve_cb<'a>(
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
-  trace!(
-    "module_resolve_cb, specifier:{:?}, referrer_scriptid:{:?}, referrer_identity_hash:{:?}",
-    specifier.to_rust_string_lossy(scope),
-    referrer.script_id(),
-    referrer.get_identity_hash().get()
-  );
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
@@ -41,6 +35,7 @@ pub fn module_resolve_cb<'a>(
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
     resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
+  trace!("dependant:{:?}, specifier:{:?}", dependant, specifier);
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();
@@ -55,13 +50,6 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   module: v8::Local<v8::Module>,
   meta: v8::Local<v8::Object>,
 ) {
-  {
-    let module_scriptid = module.script_id();
-    trace!(
-      "host_initialize_import_meta_object_cb, module_scriptid:{module_scriptid:?}"
-    );
-  }
-
   // Get `CallbackScope` from context.
   let scope = &mut unsafe { v8::CallbackScope::new(context) };
   let scope = &mut v8::HandleScope::new(scope);
@@ -74,6 +62,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 
   let url = state.module_map.get_path(module).unwrap();
   let is_main = state.module_map.main().clone() == Some(url.to_owned());
+  trace!("url:{:?}, is_main:{:?}", url, is_main);
 
   // Setup import.url property.
   let key = v8::String::new(scope, "url").unwrap();
@@ -186,6 +175,7 @@ pub fn host_import_module_dynamically_cb<'s>(
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
   let specifier = specifier.to_rust_string_lossy(scope);
+  trace!("base:{:?}, specifier:{:?}", base, specifier);
 
   // Create the import promise.
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
@@ -200,9 +190,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
-      trace!(
-        "host_import_module_dynamically_cb failed to resolve import {specifier:?}: {e:?}"
-      );
+      trace!("Failed to resolve import {specifier:?}(base:{base:?}): {e:?}");
       let exception = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, exception);
       set_exception_code(scope, exception, &e);
