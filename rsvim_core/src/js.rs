@@ -14,7 +14,7 @@ use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::js::module::EsModuleFuture;
-use crate::msg::{JsMessage, MasterMessage};
+use crate::msg::{self, JsMessage, MasterMessage};
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
@@ -580,16 +580,26 @@ pub mod boost {
 
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
+      run_next_tick_callbacks(&mut self.handle_scope());
+      self.fast_forward_imports();
+      // self.event_loop.tick();
+      self.run_pending_futures();
+
       trace!(
         "has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
       );
-      run_next_tick_callbacks(&mut self.handle_scope());
-      self.fast_forward_imports();
-      // self.event_loop.tick();
-      self.run_pending_futures();
+      if self.has_promise_rejections()
+        || self.isolate.has_pending_background_tasks()
+        || self.has_pending_imports()
+      {
+        msg::sync_send_to_master(
+          self.get_state().borrow().master_tx.clone(),
+          MasterMessage::TickAgainReq,
+        );
+      }
     }
 
     // /// Polls the inspector for new devtools messages.
@@ -693,12 +703,7 @@ pub mod boost {
               load_cb_impl.source = Some(resp.source);
               futures.push(load_cb);
             }
-            JsMessage::TickAgainResp(resp) => {
-              trace!("Recv TickAgainResp:{resp:?}");
-              debug_assert!(
-                !state.pending_futures.contains_key(&resp.future_id)
-              );
-            }
+            JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
           }
         }
 

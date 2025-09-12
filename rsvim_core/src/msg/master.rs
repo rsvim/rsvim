@@ -24,7 +24,7 @@ pub enum MasterMessage {
   LoadImportReq(LoadImportReq),
 
   /// Js runtime ask master to tick loop again.
-  TickAgainReq(TickAgainReq),
+  TickAgainReq,
 }
 
 #[derive(Debug)]
@@ -81,17 +81,6 @@ impl LoadImportReq {
       future_id,
       specifier,
     }
-  }
-}
-
-#[derive(Debug)]
-pub struct TickAgainReq {
-  pub future_id: JsFutureId,
-}
-
-impl TickAgainReq {
-  pub fn new(future_id: JsFutureId) -> Self {
-    Self { future_id }
   }
 }
 

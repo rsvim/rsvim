@@ -21,7 +21,7 @@ pub enum JsMessage {
   LoadImportResp(LoadImportResp),
 
   /// Master send js runtime the result of tick again
-  TickAgainResp(TickAgainResp),
+  TickAgainResp,
 }
 
 #[derive(Debug)]
@@ -60,17 +60,6 @@ pub struct LoadImportResp {
 impl LoadImportResp {
   pub fn new(future_id: JsFutureId, source: AnyResult<String>) -> Self {
     Self { future_id, source }
-  }
-}
-
-#[derive(Debug)]
-pub struct TickAgainResp {
-  pub future_id: JsFutureId,
-}
-
-impl TickAgainResp {
-  pub fn new(future_id: JsFutureId) -> Self {
-    Self { future_id }
   }
 }
 

@@ -611,14 +611,9 @@ impl EventLoop {
             )))
             .await;
         }
-        MasterMessage::TickAgainReq(req) => {
-          trace!("Receive TickAgainReq:{:?}", req.future_id);
-          let _ = self
-            .jsrt_forwarder_tx
-            .send(JsMessage::TickAgainResp(msg::TickAgainResp::new(
-              req.future_id,
-            )))
-            .await;
+        MasterMessage::TickAgainReq => {
+          trace!("Receive TickAgainReq");
+          let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
         }
       }
     }
