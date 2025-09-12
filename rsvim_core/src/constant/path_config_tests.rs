@@ -1,8 +1,6 @@
 use super::path_config::*;
-
 use crate::tests::constant::TempPathCfg;
 use crate::tests::log::init as test_log_init;
-
 use std::io::Write;
 
 #[test]

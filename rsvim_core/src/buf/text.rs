@@ -10,7 +10,6 @@ use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
-
 // Re-export
 pub use cidx::ColumnIndex;
 
