@@ -22,7 +22,6 @@ use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
 use root::RootContainer;
-
 use std::sync::Arc;
 
 pub mod indicator;
