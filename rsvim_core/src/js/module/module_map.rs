@@ -40,7 +40,9 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-#[derive(Debug, Clone)]
+use std::fmt::Debug;
+
+#[derive(Clone)]
 /// Import kind.
 pub enum ImportKind {
   // Loading static imports.
@@ -49,7 +51,6 @@ pub enum ImportKind {
   Dynamic(v8::Global<v8::PromiseResolver>),
 }
 
-#[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
   kind: ImportKind,
@@ -58,6 +59,25 @@ pub struct ModuleGraph {
 }
 
 rc_refcell_ptr!(ModuleGraph);
+
+impl Debug for ModuleGraph {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("ModuleGraph")
+      .field(
+        "kind",
+        match self.kind {
+          ImportKind::Static => &"Static",
+          ImportKind::Dynamic(_) => &"Dynamic",
+        },
+      )
+      .field("root_rc", &self.root_rc)
+      .field(
+        "same_origin",
+        &format!("Vec<v8::PromiseResolver>({})", self.same_origin.len()),
+      )
+      .finish()
+  }
+}
 
 impl ModuleGraph {
   pub fn kind(&self) -> &ImportKind {
@@ -136,6 +156,24 @@ pub struct ModuleMap {
 
   // Pending modules.
   pub pending: Vec<ModuleGraphRc>,
+}
+
+impl Debug for ModuleMap {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("ModuleMap")
+      .field("main", &self.main)
+      .field(
+        "index",
+        &self
+          .index
+          .keys()
+          .map(|k| (k.clone(), "v8::Module".to_string()))
+          .collect::<HashMap<String, String>>(),
+      )
+      .field("seen", &self.seen)
+      .field("pending", &self.pending)
+      .finish()
+  }
 }
 
 impl ModuleMap {
