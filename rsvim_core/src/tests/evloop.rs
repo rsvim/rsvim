@@ -3,7 +3,6 @@ use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
 use crate::tests::constant::TempPathCfg;
-
 use assert_fs::prelude::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;

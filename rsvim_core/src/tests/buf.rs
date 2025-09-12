@@ -6,7 +6,6 @@ use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
 use crate::prelude::*;
-
 use ropey::Rope;
 use ropey::RopeBuilder;
 
