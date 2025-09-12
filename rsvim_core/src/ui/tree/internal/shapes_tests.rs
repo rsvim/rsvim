@@ -1,8 +1,6 @@
 use super::shapes::*;
-
 use crate::prelude::*;
 // use crate::tests::log::init as test_log_init;
-
 use std::cmp::min;
 
 #[test]
