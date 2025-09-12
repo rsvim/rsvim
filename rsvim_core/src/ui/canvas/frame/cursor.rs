@@ -1,7 +1,6 @@
 //! Cursor of canvas frame.
 
 use crate::prelude::*;
-
 use geo::point;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
