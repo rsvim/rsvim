@@ -40,10 +40,9 @@ use crate::js::module::es_module::*;
 use crate::js::module::{ModulePath, ModuleStatus};
 use crate::prelude::*;
 
-use std::cell::RefCell;
-use std::collections::LinkedList;
+use std::fmt::Debug;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 /// Import kind.
 pub enum ImportKind {
   // Loading static imports.
@@ -52,15 +51,33 @@ pub enum ImportKind {
   Dynamic(v8::Global<v8::PromiseResolver>),
 }
 
-#[derive(Debug)]
 /// Module graph.
 pub struct ModuleGraph {
   kind: ImportKind,
   root_rc: EsModuleRc,
-  same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  same_origin: Vec<v8::Global<v8::PromiseResolver>>,
 }
 
 rc_refcell_ptr!(ModuleGraph);
+
+impl Debug for ModuleGraph {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("ModuleGraph")
+      .field(
+        "kind",
+        match self.kind {
+          ImportKind::Static => &"Static",
+          ImportKind::Dynamic(_) => &"Dynamic",
+        },
+      )
+      .field("root_rc", &self.root_rc)
+      .field(
+        "same_origin",
+        &format!("Vec<v8::PromiseResolver>({})", self.same_origin.len()),
+      )
+      .finish()
+  }
+}
 
 impl ModuleGraph {
   pub fn kind(&self) -> &ImportKind {
@@ -71,8 +88,14 @@ impl ModuleGraph {
     self.root_rc.clone()
   }
 
-  pub fn same_origin(&self) -> &LinkedList<v8::Global<v8::PromiseResolver>> {
+  pub fn same_origin(&self) -> &Vec<v8::Global<v8::PromiseResolver>> {
     &self.same_origin
+  }
+
+  pub fn same_origin_mut(
+    &mut self,
+  ) -> &mut Vec<v8::Global<v8::PromiseResolver>> {
+    &mut self.same_origin
   }
 }
 
@@ -91,7 +114,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Static,
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: vec![],
     }
   }
 
@@ -112,7 +135,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Dynamic(promise),
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: vec![],
     }
   }
 }
@@ -121,50 +144,54 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
+  // Entry point of runtime execution, this is the `rsvim.{js,ts}`
+  // configuration entry point for Rsvim.
   main: Option<ModulePath>,
+
+  // Maps from "Module Path" to "v8 Module".
   index: HashMap<ModulePath, v8::Global<v8::Module>>,
-  seen: RefCell<HashMap<ModulePath, ModuleStatus>>,
-  pending: RefCell<Vec<ModuleGraphRc>>,
+
+  // Module status.
+  pub seen: HashMap<ModulePath, ModuleStatus>,
+
+  // Pending modules.
+  pub pending: Vec<ModuleGraphRc>,
+}
+
+impl Debug for ModuleMap {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("ModuleMap")
+      .field("main", &self.main)
+      .field(
+        "index",
+        &self
+          .index
+          .keys()
+          .map(|k| (k.clone(), "v8::Module".to_string()))
+          .collect::<HashMap<String, String>>(),
+      )
+      .field("seen", &self.seen)
+      .field("pending", &self.pending)
+      .finish()
+  }
 }
 
 impl ModuleMap {
-  pub fn main(&self) -> &Option<ModulePath> {
-    &self.main
-  }
-
-  pub fn index(&self) -> &HashMap<ModulePath, v8::Global<v8::Module>> {
-    &self.index
-  }
-
-  pub fn seen(&self) -> &RefCell<HashMap<ModulePath, ModuleStatus>> {
-    &self.seen
-  }
-
-  // pub fn seen_mut(&self) -> RefMut<'_, HashMap<ModulePath, ModuleStatus>> {
-  //   self.seen.borrow_mut()
-  // }
-
-  pub fn pending(&self) -> &RefCell<Vec<ModuleGraphRc>> {
-    &self.pending
-  }
-
-  // pub fn pending_mut(&self) -> RefMut<'_, Vec<ModuleGraphRc>> {
-  //   self.pending.borrow_mut()
-  // }
-}
-
-impl ModuleMap {
-  /// Creates a new module-map instance.
+  /// Creates a global module map.
   pub fn new() -> ModuleMap {
     Self {
       main: None,
       index: HashMap::new(),
-      seen: RefCell::new(HashMap::new()),
-      pending: RefCell::new(vec![]),
+      seen: HashMap::new(),
+      pending: vec![],
     }
   }
 
-  /// Inserts a compiled ES module to the map.
+  pub fn main(&self) -> &Option<ModulePath> {
+    &self.main
+  }
+
+  /// Add a compiled v8 module to the cache.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
@@ -178,15 +205,17 @@ impl ModuleMap {
   //   !self.pending.is_empty()
   // }
 
-  /// Returns a v8 module reference from me module-map.
+  /// Returns a compiled v8 module.
   pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
     self.index.get(key).cloned()
   }
 
-  /// Returns a specifier by a v8 module.
-  ///
-  /// FIXME: This method has performance issue, make it `O(1)` instead of
-  /// `O(N)`.
+  /// Whether a v8 module already resolved.
+  pub fn contains(&self, key: &str) -> bool {
+    self.index.contains_key(key)
+  }
+
+  /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
     self
       .index

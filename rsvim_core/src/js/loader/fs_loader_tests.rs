@@ -1,157 +1,1477 @@
 use super::fs_loader::*;
 
-use crate::js::loader::ModuleLoader;
+use crate::js::loader::{AsyncModuleLoader, ModuleLoader};
 use crate::prelude::*;
+use crate::tests::constant::*;
 use crate::tests::log::init as test_log_init;
 
 use assert_fs::prelude::*;
+use normpath::PathExt;
 use std::fs;
 use std::path::Path;
 
-#[test]
-fn test_resolve1() {
-  test_log_init();
+#[cfg(test)]
+mod tests_sync {
+  use super::*;
 
-  // Tests to run later on.
-  let tests = vec![
-    (
-      None,
-      "/dev/core/tests/005_more_imports.js",
-      "005_more_imports.js",
-    ),
-    (
-      Some("/dev/core/tests/005_more_imports.js"),
-      "./006_more_imports.js",
-      "/dev/core/tests/006_more_imports.js",
-    ),
-    (
-      Some("/dev/core/tests/005_more_imports.js"),
-      "../006_more_imports.js",
-      "/dev/core/006_more_imports.js",
-    ),
-    (
-      Some("/dev/core/tests/005_more_imports.js"),
-      "/dev/core/tests/006_more_imports.js",
-      "/dev/core/tests/006_more_imports.js",
-    ),
-    (
-      Some("/dev/core/tests/005_more_imports.js"),
-      "./006_more_imports",
-      "/dev/core/tests/006_more_imports",
-    ),
-    (
-      Some("/dev/core/tests/005_more_imports.js"),
-      "./006_more_imports/",
-      "/dev/core/tests/006_more_imports",
-    ),
-  ];
+  #[test]
+  fn file_path1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  // Run tests.
-  let loader = FsModuleLoader {};
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
 
-  for (base, specifier, expect) in tests {
-    let actual = loader.resolve(base, specifier).unwrap();
+    let base: Option<&str> = None;
+    let specifier = temp_dir.child("005_more_imports.js");
+    let expect = temp_dir.child("005_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      specifier.touch().unwrap();
+      fs::write(specifier.path(), src).unwrap();
+    }
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
     info!(
-      "base:{base:?},specifier:{specifier:?},actual:{actual:?},expect:{expect:?},expect(\\):{:?}",
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
       expect.replace("/", "\\")
     );
-    if cfg!(target_os = "windows") {
-      assert!(actual == expect || actual.ends_with(&expect.replace("/", "\\")));
-    } else {
-      assert!(actual == expect || actual.ends_with(expect));
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn file_path2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports.js";
+    let expect = temp_dir.child("core/tests/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
     }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn file_path3() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports.js";
+    let expect = temp_dir.child("core/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn file_path4() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports.js");
+    let expect = temp_dir.child("core/tests/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      specifier.touch().unwrap();
+      fs::write(specifier.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn file_path_failed5() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_err());
+  }
+
+  #[test]
+  fn file_path6() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let specifier = "006_more_imports.js";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn folder_path1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports";
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn folder_path2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports/";
+    let expect = temp_dir.child("core/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn folder_path3() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base: Option<&str> = None;
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn folder_path4() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn folder_path_failed5() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      // expect.touch().unwrap();
+      // fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_err());
+  }
+
+  #[test]
+  fn npm_package1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "main": "./lib/index.js"
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports";
+    let pkg = temp_dir.child("core/tests/006_more_imports/package.json");
+    let expect = temp_dir.child("core/tests/006_more_imports/lib/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn npm_package2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports/";
+    let expect = temp_dir.child("core/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn npm_package3() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports/";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn npm_package4() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = loader.load(&actual);
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn npm_package_failed5() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("lib")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_err());
   }
 }
 
-#[test]
-fn test_load1() {
-  test_log_init();
-  // Crate temp dir.
-  let temp_dir = assert_fs::TempDir::new().unwrap();
+#[cfg(test)]
+mod tests_async {
+  use super::*;
 
-  let src: &str = r#"
-      export function sayHello() {
-          console.log('Hello, World!');
-      }
-  "#;
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  let source_files = [
-    "./core/tests/005_more_imports.js",
-    "./core/tests/006_more_imports/index.js",
-  ];
-
-  // Create source files.
-  source_files.iter().for_each(|file| {
-    let path = Path::new(file);
-    let path = temp_dir.child(path);
-
-    path.touch().unwrap();
-    fs::write(path, src).unwrap();
-  });
-
-  // Group of tests to be run.
-  let tests = vec![
-    "./core/tests/005_more_imports",
-    "./core/tests/005_more_imports.js",
-    "./core/tests/006_more_imports/",
-    "./core/tests/006_more_imports",
-  ];
-
-  // Run tests.
-  let loader = FsModuleLoader {};
-
-  for specifier in tests {
-    let path = format!("{}", temp_dir.child(specifier).display());
-    let source = loader.load(&path);
-    info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
-    assert!(source.is_ok());
-    assert_eq!(source.unwrap(), src);
-  }
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
 }
+"#;
 
-#[test]
-fn test_load2() {
-  test_log_init();
-  // Crate temp dir.
-  let temp_dir = assert_fs::TempDir::new().unwrap();
+    let base: Option<&str> = None;
+    let specifier = temp_dir.child("005_more_imports.js");
+    let expect = temp_dir.child("005_more_imports.js");
 
-  let src: &str = r#"
-  {
-    "name": 1
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      specifier.touch().unwrap();
+      fs::write(specifier.path(), src).unwrap();
+    }
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
   }
-  "#;
 
-  let source_files = [
-    "./core/tests/005_more_imports.json",
-    "./core/tests/006_more_imports/index.json",
-  ];
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
 
-  // Create source files.
-  source_files.iter().for_each(|file| {
-    let path = Path::new(file);
-    let path = temp_dir.child(path);
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
 
-    path.touch().unwrap();
-    fs::write(path, src).unwrap();
-  });
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports.js";
+    let expect = temp_dir.child("core/tests/006_more_imports.js");
 
-  // Group of tests to be run.
-  let tests = vec![
-    "./core/tests/005_more_imports",
-    "./core/tests/005_more_imports.json",
-    "./core/tests/006_more_imports/",
-    "./core/tests/006_more_imports",
-    "./core/tests/006_more_imports/index.json",
-  ];
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
 
-  // Run tests.
-  let loader = FsModuleLoader {};
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
 
-  for specifier in tests {
-    let path = format!("{}", temp_dir.child(specifier).display());
-    let source = loader.load(&path);
-    info!("specifier:{specifier:?},path:{path:?},source:{source:?}");
-    assert!(source.is_ok());
-    assert!(source.unwrap().contains(src));
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path3() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports.js";
+    let expect = temp_dir.child("core/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path4() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports.js");
+    let expect = temp_dir.child("core/tests/006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      specifier.touch().unwrap();
+      fs::write(specifier.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn file_path5() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let specifier = "006_more_imports.js";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn folder_path1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports";
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn folder_path2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports/";
+    let expect = temp_dir.child("core/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn folder_path3() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base: Option<&str> = None;
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn folder_path4() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = temp_dir.child("core/tests/006_more_imports/");
+    let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let specifier = transform(specifier.to_path_buf());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, &specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn npm_package1() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "main": "./lib/index.js"
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "./006_more_imports";
+    let pkg = temp_dir.child("core/tests/006_more_imports/package.json");
+    let expect = temp_dir.child("core/tests/006_more_imports/lib/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn npm_package2() {
+    test_log_init();
+    let temp_dir = assert_fs::TempDir::new().unwrap();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let specifier = "../006_more_imports/";
+    let expect = temp_dir.child("core/006_more_imports/index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      base.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+    }
+
+    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(base, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn npm_package3() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports/";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("node_modules")
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn npm_package4() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    let pkg_src: &str = r#"
+{
+  "exports": "./dist/index.js"
+}
+"#;
+
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let pkg = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("package.json");
+    let specifier = "006_more_imports";
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("006_more_imports")
+      .child("dist")
+      .child("index.js");
+
+    // Run tests.
+    let loader = FsModuleLoader {};
+    let aloader = AsyncFsModuleLoader {};
+
+    // Prepare configs
+    {
+      entry.touch().unwrap();
+      expect.touch().unwrap();
+      fs::write(expect.path(), src).unwrap();
+      pkg.touch().unwrap();
+      fs::write(pkg.path(), pkg_src).unwrap();
+    }
+
+    let expect = transform(expect.to_path_buf());
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
+    info!(
+      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
+      specifier,
+      actual,
+      expect,
+      expect.replace("/", "\\")
+    );
+    assert_eq!(
+      Path::new(&actual).normalize().unwrap(),
+      Path::new(&expect).normalize().unwrap()
+    );
+
+    let actual_module = aloader.load(&actual).await;
+    assert!(actual_module.is_ok());
+    assert_eq!(actual_module.unwrap(), src);
   }
 }
