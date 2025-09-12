@@ -22,6 +22,9 @@ use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 use command::ExCommandsManagerArc;
+use compact_str::ToCompactString;
+use downcast_rs::Downcast;
+use downcast_rs::impl_downcast;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
@@ -33,14 +36,6 @@ use module::ModuleStatus;
 use module::fetch_module;
 use module::fetch_module_tree;
 use module::resolve_import;
-
-// Re-export
-pub use boost::*;
-pub use build::*;
-
-use compact_str::ToCompactString;
-use downcast_rs::Downcast;
-use downcast_rs::impl_downcast;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
@@ -48,6 +43,9 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
+// Re-export
+pub use boost::*;
+pub use build::*;
 
 pub mod binding;
 pub mod command;
