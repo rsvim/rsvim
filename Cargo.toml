@@ -35,7 +35,6 @@ futures = "0.3"
 # rand = "0.8.5"
 # heed = "0.20.5"
 # bytes = { version = "1" }
-# serde_json = "1.0.132"
 compact_str = "0.9"
 ropey = { version = "1.6.1", default-features = false }
 geo = "0.30.0"
