@@ -77,7 +77,7 @@ swc_ecma_codegen = { workspace = true }
 swc_ecma_codegen_macros = { workspace = true }
 swc_ecma_loader = { workspace = true }
 swc_ecma_parser = { workspace = true }
-swc_ecma_transforms_base = { workspace = true }
+swc_ecma_transforms_base = { workspace = true, features = ["inline-helpers"] }
 swc_ecma_transforms_classes = { workspace = true }
 swc_ecma_transforms_compat = { workspace = true }
 swc_ecma_transforms_macros = { workspace = true }
