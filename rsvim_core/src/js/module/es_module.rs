@@ -15,7 +15,6 @@ use crate::msg::{self};
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
-
 use compact_str::ToCompactString;
 use std::cell::RefCell;
 use std::rc::Rc;
