@@ -1,7 +1,6 @@
 #![allow(unused_imports)]
 
 use super::window::*;
-
 use crate::buf::Buffer;
 use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
@@ -14,7 +13,6 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::*;
-
 use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;

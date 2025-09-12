@@ -17,7 +17,6 @@ use crate::widget_enum_dispatcher;
 use content::Content;
 use opt::*;
 use root::RootContainer;
-
 use std::sync::Arc;
 
 pub mod content;
