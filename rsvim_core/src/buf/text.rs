@@ -1,6 +1,7 @@
 //! Text content backend for buffer.
 
-use crate::buf::opt::{BufferOptions, EndOfLineOption};
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
 
