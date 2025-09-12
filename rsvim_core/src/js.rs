@@ -655,7 +655,7 @@ pub mod boost {
         while let Ok(msg) = state.jsrt_rx.try_recv() {
           match msg {
             JsMessage::TimeoutResp(resp) => {
-              trace!("Recv TimeResp:{resp:?}");
+              trace!("Recv TimeResp:{:?}", resp.future_id);
               let timeout_id_exists =
                 state.timeout_handles.remove(&resp.future_id);
               trace!("TimeoutId exists:{timeout_id_exists:?}");
@@ -674,7 +674,7 @@ pub mod boost {
               }
             }
             JsMessage::ExCommandReq(req) => {
-              trace!("Recv ExCommandReq:{req:?}");
+              trace!("Recv ExCommandReq:{:?}", req.future_id);
               debug_assert!(
                 !state.pending_futures.contains_key(&req.future_id)
               );
@@ -692,7 +692,7 @@ pub mod boost {
               }
             }
             JsMessage::LoadImportResp(resp) => {
-              trace!("Recv LoadImportResp:{resp:?}");
+              trace!("Recv LoadImportResp:{:?}", resp.future_id);
               debug_assert!(
                 state.pending_futures.contains_key(&resp.future_id)
               );
