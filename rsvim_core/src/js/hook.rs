@@ -1,5 +1,6 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
+use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding::set_exception_code;
 use crate::js::binding::throw_type_error;
@@ -7,11 +8,9 @@ use crate::js::module::EsModuleFuture;
 use crate::js::module::ModuleGraph;
 use crate::js::module::ModuleStatus;
 use crate::js::module::resolve_import;
-use crate::js::{self};
+use crate::msg;
 use crate::msg::MasterMessage;
-use crate::msg::{self};
 use crate::prelude::*;
-
 use std::cell::RefCell;
 use std::rc::Rc;
 
