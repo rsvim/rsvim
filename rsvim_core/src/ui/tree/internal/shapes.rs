@@ -4,7 +4,6 @@
 
 use crate::geo_point_as;
 use crate::prelude::*;
-
 use geo::point;
 use std::cmp::max;
 use std::cmp::min;
