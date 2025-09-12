@@ -591,6 +591,100 @@ Rsvim.rt.exit(0);
   //
   // ${RSVIM_CONFIG_HOME}
   // |- rsvim.js
+  // |- utils/
+  //    |- index.js
+  //    |- echo.js
+  //    |- calc.js
+  //
+  async fn no_side_effect4() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let tp = TempPathCfg::create();
+
+    let p1 = Path::new("rsvim.js");
+    let src1: &str = r#"
+    import "./utils";
+    "#;
+
+    let p2 = Path::new("utils/echo.js");
+    let src2: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    let p3 = Path::new("utils/calc.js");
+    let src3: &str = r#"
+    export function add(a, b) {
+        return a+b;
+    }
+    "#;
+
+    let p4 = Path::new("utils/index.js");
+    let src4: &str = r#"
+try {
+  const { add } = await import('./calc.js');
+  const { echo } = await import('./echo.js');
+  echo(add(2, 3));
+} catch (e) {
+  console.log(`Failed to dynamic import: ${e}`);
+}
+    "#;
+
+    let p5 = Path::new("node_modules/utils/package.json");
+    let src5: &str = r#"
+{
+  "exports": "./lib/index.js"
+}
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    make_multi_file_configs(
+      &tp,
+      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
+    );
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let contents = lock!(event_loop.contents);
+      assert!(contents.command_line_message_history().is_empty());
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
+      assert_eq!(
+        Some("7".to_compact_string()),
+        contents.command_line_message_history_mut().try_pop()
+      );
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  // Config structure:
+  //
+  // ${RSVIM_CONFIG_HOME}
+  // |- rsvim.js
   // |- node_modules/
   //    |- utils/
   //       |- package.json
