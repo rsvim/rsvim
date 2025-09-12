@@ -28,6 +28,4 @@ mod coord_tests;
 #[cfg(test)]
 mod js_tests;
 #[cfg(test)]
-mod state_tests;
-#[cfg(test)]
 pub mod tests;
