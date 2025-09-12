@@ -1,11 +1,12 @@
 //! Unicode utils.
 
-use crate::buf::opt::{BufferOptions, FileFormatOption};
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::FileFormatOption;
 use crate::defaults::ascii::AsciiControlCodeFormatter;
-
 use ascii::AsciiChar;
 use compact_str::CompactString;
-use icu::properties::{CodePointMapData, props::EastAsianWidth};
+use icu::properties::CodePointMapData;
+use icu::properties::props::EastAsianWidth;
 
 /// Get the display width for a `char`, supports both ASCI control codes and
 /// unicode.
