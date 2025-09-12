@@ -20,7 +20,7 @@
 //       None => FileName::Anon,
 //     };
 //
-//     let fm = cm.new_source_file(filename.into(), source.into());
+//     let fm = cm.new_source_file(filename.into(), source.to_string());
 //
 //     // NOTE: We're using a TypeScript lexer to parse JSX because it's a super-set
 //     // of JavaScript and we also want to support .tsx files.
