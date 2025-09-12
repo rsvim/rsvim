@@ -136,9 +136,6 @@ pub struct ModuleMap {
 
   // Pending modules.
   pub pending: Vec<ModuleGraphRc>,
-
-  // Internal monitor, this is only for testing.
-  pub counter: ModuleMapCounter,
 }
 
 impl ModuleMap {
@@ -149,7 +146,6 @@ impl ModuleMap {
       index: HashMap::new(),
       seen: HashMap::new(),
       pending: vec![],
-      counter: ModuleMapCounter::default(),
     }
   }
 
@@ -195,23 +191,6 @@ impl Default for ModuleMap {
   fn default() -> Self {
     ModuleMap::new()
   }
-}
-
-#[cfg(not(test))]
-#[derive(Debug, Default)]
-pub struct ModuleMapCounter {}
-
-#[cfg(not(test))]
-impl ModuleMapCounter {
-  pub fn increase_seen(&mut self, _specifier: &str) {}
-
-  pub fn increase_pending(&mut self, _specifier: &str) {}
-
-  pub fn increase_resolved(&mut self, _specifier: &str) {}
-
-  pub fn increase_failed(&mut self, _specifier: &str) {}
-
-  pub fn increase_evaluated(&mut self, _specifier: &str) {}
 }
 
 #[cfg(test)]

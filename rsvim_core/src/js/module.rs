@@ -272,7 +272,7 @@ pub fn fetch_module_tree<'a>(
       .module_map
       .seen
       .insert(filename.into(), ModuleStatus::Ready);
-    state.module_map.counter.increase_seen(filename);
+    trace!("ModuleMap seen {:?} {:?}", filename, ModuleStatus::Ready);
   }
 
   let requests = module.get_module_requests();
@@ -285,12 +285,9 @@ pub fn fetch_module_tree<'a>(
 
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
+    // FIXME: Don't use `unwrap` for resolve import, handle the panics with
+    // error message.
     let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
-    trace!(
-      "Resolved dependency modules, filename: {:?}, specifier: {:?}",
-      filename,
-      specifier.as_str(),
-    );
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.

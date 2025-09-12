@@ -90,6 +90,7 @@ impl EsModule {
   ) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
+      trace!("EsModule status({:?}) Ready {:?}", self.status, self.path);
       return;
     }
 
@@ -97,8 +98,16 @@ impl EsModule {
     if self.status == ModuleStatus::Duplicate {
       let status_ref = seen_modules.get(&self.path).unwrap();
       if status_ref == &ModuleStatus::Ready {
+        trace!(
+          "EsModule status({:?}) Duplicate=>Ready {:?}",
+          self.status, self.path
+        );
         self.status = ModuleStatus::Ready;
       }
+      trace!(
+        "EsModule status({:?}) Duplicate {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -109,14 +118,22 @@ impl EsModule {
 
     // The module is compiled and has 0 dependencies.
     if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
+      trace!(
+        "EsModule status({:?}) Resolving=>Ready {:?}",
+        self.status, self.path
+      );
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
-      module_counter.increase_seen(&self.path);
+      trace!("ModuleMap seen {:?} {:?}", self.path, self.status);
       return;
     }
 
     // At this point, the module is still being fetched...
     if self.dependencies.is_empty() {
+      trace!(
+        "EsModule status({:?}) Fetching? {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -126,6 +143,10 @@ impl EsModule {
       .map(|m| m.borrow().status)
       .any(|status| status != ModuleStatus::Ready)
     {
+      trace!(
+        "EsModule status({:?}) ?=>Ready {:?}",
+        self.status, self.path
+      );
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
     }
