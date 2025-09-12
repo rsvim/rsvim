@@ -4,7 +4,6 @@ use crate::state::StateDataAccess;
 use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::Operation;
-
 use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
