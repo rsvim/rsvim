@@ -97,7 +97,7 @@ def test(name, miri, jobs):
         set_rustflags()
         if name is None:
             name = "--all"
-        command = f"cargo nextest run{jobs} -p rsvim_core --no-capture {name}"
+        command = f"cargo nextest run{jobs} --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
