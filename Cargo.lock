@@ -2501,6 +2501,7 @@ dependencies = [
  "swc_ecma_visit",
  "swc_eq_ignore_macros",
  "swc_macros_common",
+ "swc_sourcemap",
  "swc_trace_macro",
  "swc_visit",
  "tokio",
