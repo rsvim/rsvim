@@ -55,12 +55,12 @@ Contributions to RSVIM are always welcomed. A few guidelines that help quickly s
 
 Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
-## Credits
+## Special Thanks
 
-Some source code is copied and referenced from following projects to implement the initial prototype of javascript runtime, and the [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/).
+When implementing the initial prototype of javascript runtime and the [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/) for RSVIM, a lot of source code and techncial design were learned from following projects:
 
-- [dune](https://github.com/aalykiot/dune): A hobby runtime for JavaScript and TypeScript.
-- [deno](https://deno.com/): A modern runtime for JavaScript and TypeScript.
+- Thanks to [@aalykiot](https://github.com/aalykiot) for the **[dune](https://github.com/aalykiot/dune)** project. Most of javascript runtime core components directly becomes it, including: ES modules, API bingings, typescript transformer and the most famous "async event loop".
+- Thanks to [@deno](https://github.com/denoland) team for the **[rusty_v8](https://github.com/denoland/rusty_v8)** and **[deno](https://github.com/denoland/deno)** project. An extremely simple way to easily embed the v8 js engine to rust project is provided by rusty_v8. RSVIM also follows most of deno's runtime API design, as they are very user friendly and ergonomic.
 
 ## Supporting the Project
 
