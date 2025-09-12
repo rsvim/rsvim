@@ -21,7 +21,6 @@ SKIP_SCCACHE = False
 
 RUSTFLAGS = []
 
-
 def set_env(name, value):
     logging.info(f"Set env {name}={value}")
     os.environ[name] = value
@@ -59,7 +58,7 @@ def clippy():
     set_rustflags()
     set_sccache()
 
-    command = "cargo clippy --workspace --all-features --all-targets"
+    command = "cargo clippy --workspace --all-targets"
 
     command = command.strip()
     logging.info(command)
@@ -80,14 +79,14 @@ def test(name, miri, jobs):
         jobs = f" -j {jobs[0]}"
 
     set_env("RUST_BACKTRACE", "full")
-    if miri is not None:
+    if miri:
         set_env(
             "MIRIFLAGS",
             "-Zmiri-disable-isolation -Zmiri-permissive-provenance",
         )
         if name is None:
             name = ""
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
     else:
         log_var = os.getenv("RSVIM_LOG")
         if isinstance(log_var, str):
@@ -116,37 +115,16 @@ def list_test():
     os.system(command)
 
 
-def build(profile, features, all_features):
+def build(profile):
     set_sccache()
     set_rustflags()
 
-    feature_flags = ""
-    if all_features:
-        feature_flags = "--all-features"
-    elif len(features) > 0:
-        feature_flags = " ".join([f"--features {f}" for feat in features for f in feat])
-
-    def show_feat(ff):
-        if len(ff) == 0:
-            return "default"
-        else:
-            return ff
-
     if profile == "release":
-        logging.info(
-            f"Run 'cargo build --release' with features: {show_feat(feature_flags)}"
-        )
-        command = f"cargo build --release {feature_flags}"
+        command = "cargo build --release"
     elif profile == "nightly":
-        logging.info(
-            f"Run 'cargo build --profile nightly' with features: {show_feat(feature_flags)}"
-        )
-        command = f"cargo build --profile nightly {feature_flags}"
+        command = "cargo build --profile nightly"
     else:
-        logging.info(
-            f"Run 'cargo build --debug' with features: {show_feat(feature_flags)}"
-        )
-        command = f"cargo build {feature_flags}"
+        command = "cargo build"
 
     command = command.strip()
     logging.info(command)
@@ -252,7 +230,7 @@ if __name__ == "__main__":
     )
     test_subparser.add_argument(
         "--miri",
-        metavar="PACKAGE",
+        action="store_true",
         help="Run `cargo +nightly miri test` on specified [PACKAGE]",
     )
     test_subparser.add_argument(
@@ -276,20 +254,6 @@ if __name__ == "__main__":
         "--nightly",
         action="store_true",
         help="Build nightly target",
-    )
-    build_subparser.add_argument(
-        "-f",
-        "--features",
-        nargs="+",
-        default=[],
-        action="append",
-        help="Build with specified features",
-    )
-    build_subparser.add_argument(
-        "--all-features",
-        dest="all_features",
-        action="store_true",
-        help="Build with all features",
     )
 
     doc_subparser = subparsers.add_parser(
@@ -348,7 +312,7 @@ if __name__ == "__main__":
             profile = "release"
         elif parser.nightly:
             profile = "nightly"
-        build(profile, parser.features, parser.all_features)
+        build(profile)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "fmt" or parser.subcommand == "f":
