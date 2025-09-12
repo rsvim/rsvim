@@ -131,13 +131,12 @@ jobs:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-  build:
-    name: Build
-    runs-on: ${{ matrix.os }}
+  build_rust_version:
+    name: Build (Rust Version)
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         rust_version: [1.85.0, stable, beta]
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
@@ -149,6 +148,36 @@ jobs:
           rustup update --no-self-update ${{ matrix.rust_version }}
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
+      - uses: actions/checkout@v5
+      - name: Build Release
+        run: |
+          cargo build --verbose --release
+          ./target/release/rsvim --version
+      - name: Build Debug
+        run: |
+          cargo build --verbose
+          ./target/debug/rsvim --version
+      - name: Build Nightly
+        run: |
+          cargo build --profile nightly --verbose
+          ./target/nightly/rsvim --version
+  build_os:
+    name: Build (OS)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
+    env:
+      RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup component add --toolchain stable rust-src clippy
       - uses: actions/checkout@v5
       - name: Build Release
         run: |
