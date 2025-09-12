@@ -912,7 +912,7 @@ pub fn execute_module(
   filename: &str,
   source: Option<&str>,
 ) -> AnyResult<()> {
-  trace!("Execute module, filename:{filename:?}, source:{source:?}");
+  // trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
   // The following code allows the runtime to execute code with no valid
   // location passed as parameter as an ES module.
@@ -928,7 +928,7 @@ pub fn execute_module(
       }
     }
   };
-  trace!("Module path resolved, filename:{filename:?}({path:?})");
+  // trace!("Module path resolved, filename:{filename:?}({path:?})");
 
   let tc_scope = &mut v8::TryCatch::new(scope);
 
@@ -938,9 +938,9 @@ pub fn execute_module(
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      trace!(
-        "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
-      );
+      // trace!(
+      //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
+      // );
       anyhow::bail!(exception);
     }
   };
@@ -952,17 +952,16 @@ pub fn execute_module(
     assert!(tc_scope.has_caught());
     let exception = tc_scope.exception().unwrap();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    trace!(
-      "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
-    );
+    // trace!(
+    //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
+    // );
     anyhow::bail!(exception);
   }
 
   match module.evaluate(tc_scope) {
     Some(result) => {
       trace!(
-        "Module result, filename:{filename:?}({path:?}), result({:?}):{:?}",
-        result.type_repr(),
+        "Module result, filename:{filename:?}({path:?}), result:{:?}",
         result.to_rust_string_lossy(tc_scope),
       );
     }
