@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-
 use geo::point;
 use std::cell::RefCell;
 use std::collections::VecDeque;
