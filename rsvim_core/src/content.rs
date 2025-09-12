@@ -1,16 +1,20 @@
 //! Temporary contents except buffers.
 
+use std::fmt::Debug;
+
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 
+use compact_str::CompactString;
+use ringbuf::HeapRb;
 use ropey::Rope;
 
-#[derive(Debug)]
 /// Temporary contents except buffers.
 pub struct TextContents {
   command_line_input: Text,
   command_line_message: Text,
+  command_line_message_history: HeapRb<CompactString>,
 }
 
 arc_mutex_ptr!(TextContents);
@@ -29,6 +33,7 @@ impl TextContents {
         canvas_size,
         Rope::new(),
       ),
+      command_line_message_history: HeapRb::new(500),
     }
   }
 
@@ -50,5 +55,23 @@ impl TextContents {
   /// Get mutable "command line" message
   pub fn command_line_message_mut(&mut self) -> &mut Text {
     &mut self.command_line_message
+  }
+
+  /// Get "command line" message history
+  pub fn command_line_message_history(&self) -> &HeapRb<CompactString> {
+    &self.command_line_message_history
+  }
+
+  /// Get mutable "command line" message history
+  pub fn command_line_message_history_mut(
+    &mut self,
+  ) -> &mut HeapRb<CompactString> {
+    &mut self.command_line_message_history
+  }
+}
+
+impl Debug for TextContents {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.write_str("TextContents")
   }
 }

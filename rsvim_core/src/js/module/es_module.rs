@@ -1,7 +1,18 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js::module::{ModulePath, ModuleStatus};
+use crate::js::err::JsError;
+use crate::js::module::{
+  ModulePath, ModuleStatus, create_origin, resolve_import,
+};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime, JsRuntimeState};
+use crate::msg::{self, MasterMessage};
 use crate::prelude::*;
+use crate::report_js_error;
+use crate::state::ops::cmdline_ops;
+
+use compact_str::ToCompactString;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug)]
 /// ES Module.
@@ -78,6 +89,10 @@ impl EsModule {
   ) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
+      trace!(
+        "|EsModule::fast_forward| status({:?}) Ready {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -85,8 +100,16 @@ impl EsModule {
     if self.status == ModuleStatus::Duplicate {
       let status_ref = seen_modules.get(&self.path).unwrap();
       if status_ref == &ModuleStatus::Ready {
+        trace!(
+          "|EsModule::fast_forward| status({:?}) Duplicate=>Ready {:?}",
+          self.status, self.path
+        );
         self.status = ModuleStatus::Ready;
       }
+      trace!(
+        "|EsModule::fast_forward| status({:?}) Duplicate {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -98,13 +121,25 @@ impl EsModule {
 
     // The module is compiled and has 0 dependencies.
     if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
+      trace!(
+        "|EsModule::fast_forward| status({:?}) Resolving=>Ready {:?}",
+        self.status, self.path
+      );
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
+      trace!(
+        "|EsModule::fast_forward| ModuleMap seen {:?} {:?}",
+        self.path, self.status
+      );
       return;
     }
 
     // At this point, the module is still being fetched...
     if self.dependencies.is_empty() {
+      trace!(
+        "|EsModule::fast_forward| status({:?}) Fetching? {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -114,8 +149,173 @@ impl EsModule {
       .map(|m| m.borrow().status)
       .any(|status| status != ModuleStatus::Ready)
     {
+      trace!(
+        "|EsModule::fast_forward| status({:?}) ?=>Ready {:?}",
+        self.status, self.path
+      );
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
     }
+  }
+}
+
+pub struct EsModuleFuture {
+  pub future_id: JsFutureId,
+  pub path: ModulePath,
+  pub module: Rc<RefCell<EsModule>>,
+  pub source: Option<AnyResult<String>>,
+}
+
+impl EsModuleFuture {
+  // Handles static import error.
+  fn handle_failure(&self, state: &JsRuntimeState, e: anyhow::Error) {
+    let mut module = self.module.borrow_mut();
+    // In dynamic imports we reject the promise(s).
+    if module.is_dynamic_import() {
+      module.exception_mut().replace(e.to_string());
+      return;
+    }
+
+    // In static imports, throw error to command-line.
+    report_js_error!(state, e);
+  }
+}
+
+impl JsFuture for EsModuleFuture {
+  /// Drives the future to completion.
+  fn run(&mut self, scope: &mut v8::HandleScope) {
+    let state_rc = JsRuntime::state(scope);
+    let mut state = state_rc.borrow_mut();
+
+    // If the graph has exceptions, stop resolving the current sub-tree (dynamic imports).
+    if self.module.borrow().exception().is_some() {
+      state.module_map.seen.remove(&self.path);
+      return;
+    }
+
+    // Extract module's source code.
+    debug_assert!(self.source.is_some());
+    let source = self.source.take().unwrap();
+    let source = match source {
+      Ok(source) => source,
+      Err(e) => {
+        self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+        return;
+      }
+    };
+
+    let tc_scope = &mut v8::TryCatch::new(scope);
+    let origin = create_origin(tc_scope, &self.path, true);
+
+    // Compile source and get it's dependencies.
+    let source = v8::String::new(tc_scope, &source).unwrap();
+    let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+    let module =
+      match v8::script_compiler::compile_module(tc_scope, &mut source) {
+        Some(module) => module,
+        None => {
+          assert!(tc_scope.has_caught());
+          let exception = tc_scope.exception().unwrap();
+          let exception = JsError::from_v8_exception(tc_scope, exception, None);
+          let exception =
+            format!("{} ({})", exception.message, exception.resource_name);
+
+          self.handle_failure(&state, anyhow::Error::msg(exception));
+          return;
+        }
+      };
+
+    let new_status = ModuleStatus::Resolving;
+    let module_ref = v8::Global::new(tc_scope, module);
+
+    state.module_map.insert(self.path.as_str(), module_ref);
+    state.module_map.seen.insert(self.path.clone(), new_status);
+    trace!(
+      "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
+      self.path, new_status
+    );
+
+    let import_map = state.options.import_map.clone();
+
+    // let skip_cache = match self.module.borrow().is_dynamic_import() {
+    //   true => !state.options.test_mode || state.options.reload,
+    //   false => state.options.reload,
+    // };
+
+    let mut dependencies = vec![];
+
+    let requests = module.get_module_requests();
+    let base = self.path.clone();
+
+    for i in 0..requests.length() {
+      // Get import request from the `module_requests` array.
+      let request = requests.get(tc_scope, i).unwrap();
+      let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
+
+      // Transform v8's ModuleRequest into Rust string.
+      let base = Some(base.as_str());
+      let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
+      let specifier = match resolve_import(base, &specifier, import_map.clone())
+      {
+        Ok(specifier) => specifier,
+        Err(e) => {
+          self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+          return;
+        }
+      };
+
+      // Check if requested module has been seen already.
+      let (not_seen_before, status) =
+        match state.module_map.seen.get(&specifier) {
+          Some(ModuleStatus::Ready) => continue,
+          Some(_) => (false, ModuleStatus::Duplicate),
+          None => (true, ModuleStatus::Fetching),
+        };
+
+      // Create a new ES module instance.
+      let module = Rc::new(RefCell::new(EsModule::new(
+        specifier.clone(),
+        status,
+        vec![],
+        self.module.borrow().exception().clone(),
+        self.module.borrow().is_dynamic_import(),
+      )));
+
+      dependencies.push(Rc::clone(&module));
+
+      // If the module is newly seen, use the event-loop to load
+      // the requested module.
+      if not_seen_before {
+        let load_import_id = js::next_future_id();
+
+        let load_import_cb = EsModuleFuture {
+          future_id: load_import_id,
+          path: specifier.clone(),
+          module: Rc::clone(&module),
+          source: None,
+        };
+        state
+          .pending_futures
+          .insert(load_import_id, Box::new(load_import_cb));
+
+        state.module_map.seen.insert(specifier.clone(), status);
+        trace!(
+          "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
+          specifier, status
+        );
+
+        msg::sync_send_to_master(
+          state.master_tx.clone(),
+          MasterMessage::LoadImportReq(msg::LoadImportReq::new(
+            load_import_id,
+            specifier.clone(),
+          )),
+        );
+      }
+    }
+
+    self.module.borrow_mut().dependencies = dependencies;
+    self.module.borrow_mut().status = ModuleStatus::Resolving;
   }
 }

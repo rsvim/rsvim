@@ -1,18 +1,13 @@
 //! Js module loader.
 
 use crate::js::module::{ModulePath, ModuleSource};
-// use crate::js::transpiler::Jsx;
-// use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 
 // Re-export
 pub use core_loader::CoreModuleLoader;
-pub use fs_loader::FsModuleLoader;
+pub use fs_loader::{AsyncFsModuleLoader, FsModuleLoader};
 
-// use sha::sha1::Sha1;
-// use sha::utils::Digest;
-// use sha::utils::DigestExt;
-// use url::Url;
+use async_trait::async_trait;
 
 pub mod core_loader;
 pub mod fs_loader;
@@ -27,10 +22,6 @@ mod fs_loader_tests;
 /// 1. Core module loader, provide builtin modules.
 /// 2. Fs module loader, provide modules on local filesystem.
 /// 3. URL module loader, provide remote modules on network.
-///
-/// TODO:
-/// For now we only implement the fs module loader, in the future we may want to implement other
-/// loaders.
 pub trait ModuleLoader {
   /// Resolve module path by its specifier.
   ///
@@ -53,4 +44,13 @@ pub trait ModuleLoader {
   /// For url module loader, it will first download the resource to local filesystem as local file
   /// cache, then read the cache contents and return as module source code.
   fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
+}
+
+#[async_trait]
+/// Async [`ModuleLoader`].
+///
+/// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
+/// in js runtime.
+pub trait AsyncModuleLoader {
+  async fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
 }
