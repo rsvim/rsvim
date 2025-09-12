@@ -11,7 +11,7 @@ use async_trait::async_trait;
 use path_absolutize::Absolutize;
 use std::path::{Path, PathBuf};
 
-const FILE_EXTENSIONS: &[&str] = &["js", "mjs", "ts", "json", "wasm"];
+const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
 const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
 #[derive(Default)]
