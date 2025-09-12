@@ -581,14 +581,15 @@ pub mod boost {
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
       trace!(
-        "Tick event loop, isolate.has_pending_background_tasks:{}",
-        self.isolate.has_pending_background_tasks()
+        "has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}",
+        self.has_promise_rejections(),
+        self.isolate.has_pending_background_tasks(),
+        self.has_pending_imports(),
       );
       run_next_tick_callbacks(&mut self.handle_scope());
       self.fast_forward_imports();
       // self.event_loop.tick();
       self.run_pending_futures();
-      trace!("Tick event loop - done");
     }
 
     // /// Polls the inspector for new devtools messages.
