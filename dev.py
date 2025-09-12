@@ -82,14 +82,14 @@ def test(name, miri, jobs):
         jobs = f" -j {jobs[0]}"
 
     set_env("RUST_BACKTRACE", "full")
-    if miri is not None:
+    if miri:
         set_env(
             "MIRIFLAGS",
             "-Zmiri-disable-isolation -Zmiri-permissive-provenance",
         )
         if name is None:
             name = ""
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features {FEATURES} -p {miri} {name}"
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features {FEATURES} -p rsvim_core {name}"
     else:
         log_var = os.getenv("RSVIM_LOG")
         if isinstance(log_var, str):
@@ -100,7 +100,7 @@ def test(name, miri, jobs):
         set_rustflags()
         if name is None:
             name = "--all"
-        command = f"cargo nextest run{jobs} --no-capture {name}"
+        command = f"cargo nextest run{jobs} -p rsvim_core --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     )
     test_subparser.add_argument(
         "--miri",
-        metavar="PACKAGE",
+        action="store_true",
         help="Run `cargo +nightly miri test` on specified [PACKAGE]",
     )
     test_subparser.add_argument(
