@@ -2,8 +2,6 @@
 
 use crate::defaults;
 use derive_builder::Builder;
-
-// Re-export
 pub use file_encoding::*;
 pub use file_format::*;
 
