@@ -10,7 +10,6 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::EditableWidgetable;
-
 use compact_str::CompactString;
 
 #[derive(Debug, Copy, Clone)]

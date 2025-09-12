@@ -4,7 +4,6 @@ use crate::content::TextContents;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::Viewport;
-
 use compact_str::CompactString;
 use ringbuf::traits::RingBuffer;
 
