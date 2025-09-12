@@ -6,7 +6,7 @@ use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
 
 use assert_fs::TempDir;
-use assert_fs::prelude::{FileTouch, PathChild};
+use assert_fs::prelude::*;
 use std::io::Write;
 
 #[test]
