@@ -39,12 +39,15 @@ pub use boost::*;
 pub use build::*;
 
 use compact_str::ToCompactString;
-use downcast_rs::{Downcast, impl_downcast};
+use downcast_rs::Downcast;
+use downcast_rs::impl_downcast;
 use std::rc::Rc;
 use std::sync::Once;
-use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
 use std::time::Instant;
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
 
 pub mod binding;
 pub mod command;

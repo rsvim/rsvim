@@ -1,11 +1,15 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
-use crate::js::binding::{set_exception_code, throw_type_error};
-use crate::js::module::{
-  EsModuleFuture, ModuleGraph, ModuleStatus, resolve_import,
-};
-use crate::js::{self, JsRuntime};
-use crate::msg::{self, MasterMessage};
+use crate::js::JsRuntime;
+use crate::js::binding::set_exception_code;
+use crate::js::binding::throw_type_error;
+use crate::js::module::EsModuleFuture;
+use crate::js::module::ModuleGraph;
+use crate::js::module::ModuleStatus;
+use crate::js::module::resolve_import;
+use crate::js::{self};
+use crate::msg::MasterMessage;
+use crate::msg::{self};
 use crate::prelude::*;
 
 use std::cell::RefCell;
@@ -125,10 +129,10 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   let event = message.get_event();
   trace!("|promise_reject_cb| event:{event:?}, message:{message:?}");
 
-  use v8::PromiseRejectEvent::{
-    PromiseHandlerAddedAfterReject, PromiseRejectAfterResolved,
-    PromiseRejectWithNoHandler, PromiseResolveAfterResolved,
-  };
+  use v8::PromiseRejectEvent::PromiseHandlerAddedAfterReject;
+  use v8::PromiseRejectEvent::PromiseRejectAfterResolved;
+  use v8::PromiseRejectEvent::PromiseRejectWithNoHandler;
+  use v8::PromiseRejectEvent::PromiseResolveAfterResolved;
 
   let reason = match event {
     PromiseHandlerAddedAfterReject

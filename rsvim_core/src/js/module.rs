@@ -28,10 +28,11 @@
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
 use crate::js::JsRuntime;
-use crate::js::loader::{
-  AsyncFsModuleLoader, AsyncModuleLoader, CoreModuleLoader, FsModuleLoader,
-  ModuleLoader,
-};
+use crate::js::loader::AsyncFsModuleLoader;
+use crate::js::loader::AsyncModuleLoader;
+use crate::js::loader::CoreModuleLoader;
+use crate::js::loader::FsModuleLoader;
+use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 
 use std::sync::LazyLock;

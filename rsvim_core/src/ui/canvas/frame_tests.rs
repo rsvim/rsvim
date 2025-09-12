@@ -5,8 +5,10 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
 
-use compact_str::{CompactString, ToCompactString};
-use crossterm::style::{Attributes, Color};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use crossterm::style::Attributes;
+use crossterm::style::Color;
 use geo::point;
 
 #[test]

@@ -1,11 +1,13 @@
 //! Js module loader.
 
-use crate::js::module::{ModulePath, ModuleSource};
+use crate::js::module::ModulePath;
+use crate::js::module::ModuleSource;
 use crate::prelude::*;
 
 // Re-export
 pub use core_loader::CoreModuleLoader;
-pub use fs_loader::{AsyncFsModuleLoader, FsModuleLoader};
+pub use fs_loader::AsyncFsModuleLoader;
+pub use fs_loader::FsModuleLoader;
 
 use async_trait::async_trait;
 

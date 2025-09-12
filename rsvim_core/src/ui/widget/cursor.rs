@@ -2,7 +2,9 @@
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::{self, Canvas, CursorStyle};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CursorStyle;
+use crate::ui::canvas::{self};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 

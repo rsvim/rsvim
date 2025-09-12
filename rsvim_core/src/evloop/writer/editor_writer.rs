@@ -3,10 +3,14 @@
 use crate::evloop::writer::StdoutWritable;
 use crate::evloop::writer::tui;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Shader, ShaderCommand};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::Shader;
+use crate::ui::canvas::ShaderCommand;
 
 use crossterm::queue;
-use std::io::{BufWriter, Stdout, Write};
+use std::io::BufWriter;
+use std::io::Stdout;
+use std::io::Write;
 
 #[derive(Debug)]
 /// Editor mode writer, i.e. it writes the canvas to terminal.

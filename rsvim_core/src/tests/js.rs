@@ -1,11 +1,14 @@
 use crate::buf::BuffersManager;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
+use crate::js::JsRuntime;
+use crate::js::JsRuntimeOptions;
 use crate::js::command::ExCommandsManager;
-use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::prelude::*;
 use crate::ui::tree::Tree;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::Instant;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use tokio::sync::mpsc::channel;
 

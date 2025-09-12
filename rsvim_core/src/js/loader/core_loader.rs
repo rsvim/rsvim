@@ -1,7 +1,9 @@
 //! Core module loader.
 
 use crate::js::loader::ModuleLoader;
-use crate::js::module::{CORE_MODULES, ModulePath, ModuleSource};
+use crate::js::module::CORE_MODULES;
+use crate::js::module::ModulePath;
+use crate::js::module::ModuleSource;
 use crate::prelude::*;
 
 #[derive(Default)]

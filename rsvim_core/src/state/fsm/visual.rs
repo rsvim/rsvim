@@ -1,7 +1,9 @@
 //! The visual mode.
 
+use crate::state::StateDataAccess;
+use crate::state::StateMachine;
+use crate::state::Stateful;
 use crate::state::ops::Operation;
-use crate::state::{StateDataAccess, StateMachine, Stateful};
 
 use crossterm::event::Event;
 

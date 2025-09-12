@@ -1,15 +1,19 @@
 //! Window.
 
 use crate::buf::BufferWk;
+use crate::inode_enum_dispatcher;
+use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-};
+use crate::ui::viewport::CursorViewport;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
+use crate::ui::widget::EditableWidgetable;
+use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::{EditableWidgetable, Widgetable};
-use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
+use crate::widget_enum_dispatcher;
 use content::Content;
 use opt::*;
 use root::RootContainer;

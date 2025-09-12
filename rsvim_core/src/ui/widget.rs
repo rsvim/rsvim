@@ -3,7 +3,8 @@
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::viewport::{CursorViewportArc, ViewportArc};
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::window::opt::WindowOptions;
 
 pub mod command_line;

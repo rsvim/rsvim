@@ -3,24 +3,32 @@
 use super::viewport::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
-use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
+use crate::tests::buf::make_buffer_from_lines;
+use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::Content;
-use crate::ui::widget::window::opt::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptionsBuilder;
 
 use compact_str::ToCompactString;
-use ropey::{Rope, RopeBuilder};
+use ropey::Rope;
+use ropey::RopeBuilder;
 use std::cell::RefCell;
 use std::fs::File;
-use std::io::{BufReader, BufWriter};
+use std::io::BufReader;
+use std::io::BufWriter;
 use std::rc::Rc;
-use std::sync::{Arc, Once};
+use std::sync::Arc;
+use std::sync::Once;
 
 pub fn make_nowrap() -> WindowOptions {
   WindowOptionsBuilder::default().wrap(false).build().unwrap()

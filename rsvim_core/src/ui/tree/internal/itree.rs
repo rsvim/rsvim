@@ -1,13 +1,15 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
 use geo::point;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::fmt::Debug;
-use std::{collections::VecDeque, iter::Iterator};
+use std::iter::Iterator;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {

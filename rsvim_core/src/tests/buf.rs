@@ -1,10 +1,14 @@
 //! Buffer utils for testing.
 
+use crate::buf::Buffer;
+use crate::buf::BufferArc;
+use crate::buf::BuffersManager;
+use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
-use crate::buf::{Buffer, BufferArc, BuffersManager, BuffersManagerArc};
 use crate::prelude::*;
 
-use ropey::{Rope, RopeBuilder};
+use ropey::Rope;
+use ropey::RopeBuilder;
 
 pub fn make_buffer_from_lines(
   terminal_size: U16Size,

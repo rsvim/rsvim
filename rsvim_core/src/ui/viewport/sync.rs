@@ -4,10 +4,12 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::viewport::LineViewport;
+use crate::ui::viewport::RowViewport;
 use crate::ui::widget::window::opt::WindowOptions;
 
-use icu::segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
+use icu::segmenter::WordSegmenter;
+use icu::segmenter::options::WordBreakInvariantOptions;
 use itertools::Itertools;
 use litemap::LiteMap;
 use ropey::RopeSlice;

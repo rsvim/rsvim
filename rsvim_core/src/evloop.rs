@@ -1,40 +1,63 @@
 //! Event loop.
 
-use crate::buf::{BuffersManager, BuffersManagerArc};
+use crate::buf::BuffersManager;
+use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
-use crate::content::{TextContents, TextContentsArc};
-use crate::js::command::{ExCommandsManager, ExCommandsManagerArc};
+use crate::content::TextContents;
+use crate::content::TextContentsArc;
+use crate::js::JsRuntime;
+use crate::js::JsRuntimeOptions;
+use crate::js::SnapshotData;
+use crate::js::command::ExCommandsManager;
+use crate::js::command::ExCommandsManagerArc;
 use crate::js::module::async_load_import;
-use crate::js::{self, JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::msg::{self, JsMessage, MasterMessage};
+use crate::js::{self};
+use crate::msg::JsMessage;
+use crate::msg::MasterMessage;
+use crate::msg::{self};
 use crate::prelude::*;
+use crate::state::StateDataAccess;
+use crate::state::StateMachine;
+use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
-use crate::state::{StateDataAccess, StateMachine, Stateful};
-use crate::ui::canvas::{Canvas, CanvasArc};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
 use compact_str::ToCompactString;
-use writer::{StdoutWritable, StdoutWriterValue};
+use writer::StdoutWritable;
+use writer::StdoutWriterValue;
 
 use crate::ui::widget::command_line::CommandLine;
-use crossterm::event::{Event, EventStream};
+use crossterm::event::Event;
+use crossterm::event::EventStream;
 use futures::StreamExt;
 use std::sync::Arc;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use tokio::sync::mpsc::{Receiver, Sender, channel};
+use std::time::Instant;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
+use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::channel;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 #[cfg(test)]
-use crate::tests::evloop::{
-  MockEventReader, MockOperation, MockOperationReader,
-};
+use crate::tests::evloop::MockEventReader;
+#[cfg(test)]
+use crate::tests::evloop::MockOperation;
+#[cfg(test)]
+use crate::tests::evloop::MockOperationReader;
 #[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
-use crossterm::event::{KeyCode, KeyEventKind, KeyModifiers};
+use crossterm::event::KeyCode;
+#[cfg(test)]
+use crossterm::event::KeyEventKind;
+#[cfg(test)]
+use crossterm::event::KeyModifiers;
 
 pub mod writer;
 

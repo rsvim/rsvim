@@ -1,16 +1,30 @@
 //! Prelude.
 
-pub use log::{debug, error, info, trace, warn};
+pub use log::debug;
+pub use log::error;
+pub use log::info;
+pub use log::trace;
+pub use log::warn;
 
 pub use crate::constant::*;
 pub use crate::coord::*;
 pub use crate::results::*;
 
-pub use crate::{arc_mutex_ptr, arc_ptr, lock, rc_ptr, rc_refcell_ptr};
+pub use crate::arc_mutex_ptr;
+pub use crate::arc_ptr;
+pub use crate::lock;
+pub use crate::rc_ptr;
+pub use crate::rc_refcell_ptr;
 pub use paste::paste;
 
+pub use foldhash::HashMap;
+pub use foldhash::HashMapExt;
+pub use foldhash::HashSet;
+pub use foldhash::HashSetExt;
 pub use foldhash::fast::RandomState;
-pub use foldhash::{HashMap, HashMapExt, HashSet, HashSetExt};
-pub use std::collections::{BTreeMap, BTreeSet};
+pub use std::collections::BTreeMap;
+pub use std::collections::BTreeSet;
 
-pub use geo::{self, Point, Rect};
+pub use geo::Point;
+pub use geo::Rect;
+pub use geo::{self};

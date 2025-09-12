@@ -40,7 +40,8 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-use geo::{Point, Rect};
+use geo::Point;
+use geo::Rect;
 
 // Positions {
 
@@ -194,7 +195,9 @@ macro_rules! geo_size_into_rect {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use geo::{Point, Rect, point};
+  use geo::Point;
+  use geo::Rect;
+  use geo::point;
   use std::mem;
 
   #[test]

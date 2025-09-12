@@ -2,7 +2,8 @@
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::canvas::Canvas;
+use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 

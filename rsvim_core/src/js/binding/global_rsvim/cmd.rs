@@ -1,7 +1,9 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::js::{self, JsRuntime};
-use crate::msg::{self, MasterMessage};
+use crate::js::JsRuntime;
+use crate::js::{self};
+use crate::msg::MasterMessage;
+use crate::msg::{self};
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 

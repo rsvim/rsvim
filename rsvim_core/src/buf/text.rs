@@ -4,9 +4,11 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use lru::LruCache;
-use ropey::{Rope, RopeSlice};
+use ropey::Rope;
+use ropey::RopeSlice;
 use std::cell::RefCell;
 
 // Re-export

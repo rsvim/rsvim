@@ -3,21 +3,28 @@
 use super::content::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{BufferOptions, BufferOptionsBuilder, FileFormatOption};
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::FileFormatOption;
 use crate::geo_size_into_rect;
 use crate::prelude::*;
-use crate::tests::buf::{make_buffer_from_lines, make_empty_buffer};
+use crate::tests::buf::make_buffer_from_lines;
+use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
-use crate::ui::viewport::{Viewport, ViewportArc};
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::{WindowOptions, WindowOptionsBuilder};
+use crate::ui::widget::window::WindowOptions;
+use crate::ui::widget::window::WindowOptionsBuilder;
 
 use compact_str::ToCompactString;
-use ropey::{Rope, RopeBuilder};
+use ropey::Rope;
+use ropey::RopeBuilder;
 use std::fs::File;
-use std::io::{BufReader, BufWriter};
+use std::io::BufReader;
+use std::io::BufWriter;
 use std::sync::Arc;
 
 pub fn make_viewport(
