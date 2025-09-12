@@ -1,7 +1,6 @@
 //! TUI utility.
 
 use crate::prelude::*;
-
 use crossterm::event::DisableFocusChange;
 use crossterm::event::DisableMouseCapture;
 use crossterm::event::EnableFocusChange;
