@@ -9,7 +9,6 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-
 use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
