@@ -14,7 +14,12 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-Dwarnings"
+  # RUSTFLAGS: "-Dwarnings"
+  # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
+  RUSTFLAGS: >-
+    -Dwarnings -Cdebuginfo=0 ${{ inputs.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE' || '' }}
+  RUSTDOCFLAGS: >-
+    -Dwarnings -Cdebuginfo=0 ${{ inputs.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE' || '' }}
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
   RUSTC_LOG: "rustc_codegen_ssa::back::link=info"
