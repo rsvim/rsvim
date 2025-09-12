@@ -136,7 +136,42 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        rust_version: [beta, stable, 1.85.0]
+        include:
+          # ubuntu-x64
+          - rust_version: beta
+            os: ubuntu-22.04
+          - rust_version: stable
+            os: ubuntu-22.04
+          - rust_version: 1.85.0
+            os: ubuntu-22.04
+          # ubuntu-arm
+          - rust_version: beta
+            os: ubuntu-22.04-arm
+          - rust_version: stable
+            os: ubuntu-22.04-arm
+          - rust_version: 1.85.0
+            os: ubuntu-22.04-arm
+          # mac-x64
+          - rust_version: beta
+            os: macos-13
+          - rust_version: stable
+            os: macos-13
+          - rust_version: 1.85.0
+            os: macos-13
+          # mac-arm
+          - rust_version: beta
+            os: macos-14
+          - rust_version: stable
+            os: macos-14
+          - rust_version: 1.85.0
+            os: macos-14
+          # windows-x64
+          - rust_version: beta
+            os: windows-2022
+          - rust_version: stable
+            os: windows-2022
+          - rust_version: 1.85.0
+            os: windows-2022
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
