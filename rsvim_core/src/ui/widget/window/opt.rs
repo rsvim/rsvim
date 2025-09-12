@@ -1,7 +1,6 @@
 //! Window options.
 
 use crate::defaults;
-
 use derive_builder::Builder;
 
 #[derive(Debug, Copy, Clone, Builder)]
