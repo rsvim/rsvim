@@ -120,13 +120,10 @@ def build(profile):
     set_rustflags()
 
     if profile == "release":
-        logging.info("Run 'cargo build --release'")
         command = "cargo build --release"
     elif profile == "nightly":
-        logging.info("Run 'cargo build --profile nightly'")
         command = "cargo build --profile nightly"
     else:
-        logging.info("Run 'cargo build --debug'")
         command = "cargo build"
 
     command = command.strip()
