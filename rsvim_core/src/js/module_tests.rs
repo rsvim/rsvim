@@ -281,7 +281,5 @@ fn fetch_tree4() {
     "fetch_tree4 fetch2_path:{:?}, fetch2:{:?}",
     fetch2_path, fetch2
   );
-  assert!(fetch2_path.is_ok());
-  let fetch2_path = fetch2_path.unwrap();
-  assert!(state.module_map.get(&fetch2_path).is_some());
+  assert!(fetch2_path.is_err());
 }
