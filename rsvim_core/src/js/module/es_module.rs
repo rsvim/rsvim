@@ -89,7 +89,10 @@ impl EsModule {
   ) {
     // If the module is ready, no need to check the sub-tree.
     if self.status == ModuleStatus::Ready {
-      trace!("EsModule status({:?}) Ready {:?}", self.status, self.path);
+      trace!(
+        "|EsModule::fast_forward| status({:?}) Ready {:?}",
+        self.status, self.path
+      );
       return;
     }
 
@@ -98,13 +101,13 @@ impl EsModule {
       let status_ref = seen_modules.get(&self.path).unwrap();
       if status_ref == &ModuleStatus::Ready {
         trace!(
-          "EsModule status({:?}) Duplicate=>Ready {:?}",
+          "|EsModule::fast_forward| status({:?}) Duplicate=>Ready {:?}",
           self.status, self.path
         );
         self.status = ModuleStatus::Ready;
       }
       trace!(
-        "EsModule status({:?}) Duplicate {:?}",
+        "|EsModule::fast_forward| status({:?}) Duplicate {:?}",
         self.status, self.path
       );
       return;
@@ -119,19 +122,22 @@ impl EsModule {
     // The module is compiled and has 0 dependencies.
     if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
       trace!(
-        "EsModule status({:?}) Resolving=>Ready {:?}",
+        "|EsModule::fast_forward| status({:?}) Resolving=>Ready {:?}",
         self.status, self.path
       );
       self.status = ModuleStatus::Ready;
       seen_modules.insert(self.path.clone(), self.status);
-      trace!("ModuleMap seen {:?} {:?}", self.path, self.status);
+      trace!(
+        "|EsModule::fast_forward| ModuleMap seen {:?} {:?}",
+        self.path, self.status
+      );
       return;
     }
 
     // At this point, the module is still being fetched...
     if self.dependencies.is_empty() {
       trace!(
-        "EsModule status({:?}) Fetching? {:?}",
+        "|EsModule::fast_forward| status({:?}) Fetching? {:?}",
         self.status, self.path
       );
       return;
@@ -144,7 +150,7 @@ impl EsModule {
       .any(|status| status != ModuleStatus::Ready)
     {
       trace!(
-        "EsModule status({:?}) ?=>Ready {:?}",
+        "|EsModule::fast_forward| status({:?}) ?=>Ready {:?}",
         self.status, self.path
       );
       self.status = ModuleStatus::Ready;
@@ -171,7 +177,6 @@ impl EsModuleFuture {
     }
 
     // In static imports, throw error to command-line.
-    trace!("Failed to static import: {e:?}");
     report_js_error!(state, e);
   }
 }
@@ -194,10 +199,6 @@ impl JsFuture for EsModuleFuture {
     let source = match source {
       Ok(source) => source,
       Err(e) => {
-        trace!(
-          "Es module {:?} failed to take source, error:{:?}",
-          self.path, e
-        );
         self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
         return;
       }
@@ -214,10 +215,6 @@ impl JsFuture for EsModuleFuture {
       match v8::script_compiler::compile_module(tc_scope, &mut source) {
         Some(module) => module,
         None => {
-          trace!(
-            "Es module {:?} failed to compile, source:{:?}",
-            self.path, source
-          );
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
@@ -234,7 +231,10 @@ impl JsFuture for EsModuleFuture {
 
     state.module_map.insert(self.path.as_str(), module_ref);
     state.module_map.seen.insert(self.path.clone(), new_status);
-    trace!("ModuleMap seen {:?} {:?}", self.path, new_status);
+    trace!(
+      "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
+      self.path, new_status
+    );
 
     let import_map = state.options.import_map.clone();
 
@@ -260,10 +260,6 @@ impl JsFuture for EsModuleFuture {
       {
         Ok(specifier) => specifier,
         Err(e) => {
-          trace!(
-            "Es module {:?} failed to resolve import {:?}, error:{:?}",
-            self.path, specifier, e
-          );
           self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
           return;
         }
@@ -304,7 +300,10 @@ impl JsFuture for EsModuleFuture {
           .insert(load_import_id, Box::new(load_import_cb));
 
         state.module_map.seen.insert(specifier.clone(), status);
-        trace!("ModuleMap seen {:?} {:?}", specifier, status);
+        trace!(
+          "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
+          specifier, status
+        );
 
         msg::sync_send_to_master(
           state.master_tx.clone(),
