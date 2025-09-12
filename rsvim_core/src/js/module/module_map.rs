@@ -40,7 +40,6 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::es_module::*;
 use crate::prelude::*;
-
 use std::fmt::Debug;
 
 #[derive(Clone)]
