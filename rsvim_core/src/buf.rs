@@ -2,8 +2,6 @@
 
 use crate::prelude::*;
 use opt::*;
-use text::Text;
-
 use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
@@ -15,6 +13,7 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
+use text::Text;
 
 pub mod opt;
 pub mod text;
