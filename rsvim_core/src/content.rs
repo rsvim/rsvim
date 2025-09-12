@@ -1,14 +1,12 @@
 //! Temporary contents except buffers.
 
-use std::fmt::Debug;
-
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
-
 use compact_str::CompactString;
 use ringbuf::HeapRb;
 use ropey::Rope;
+use std::fmt::Debug;
 
 /// Temporary contents except buffers.
 pub struct TextContents {
