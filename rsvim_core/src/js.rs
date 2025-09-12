@@ -926,7 +926,7 @@ pub fn execute_module(
       Ok(specifier) => specifier,
       Err(e) => {
         // Returns the error directly.
-        trace!("Failed to resolve module path, filename:{filename:?}");
+        // trace!("Failed to resolve module path, filename:{filename:?}");
         return Err(e);
       }
     }
@@ -973,9 +973,9 @@ pub fn execute_module(
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    trace!(
-      "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
-    );
+    // trace!(
+    //   "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
+    // );
     anyhow::bail!(exception);
   }
 
