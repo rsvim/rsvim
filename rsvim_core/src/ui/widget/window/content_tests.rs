@@ -1,7 +1,6 @@
 #![allow(unused_imports)]
 
 use super::content::*;
-
 use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
@@ -18,7 +17,6 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::WindowOptions;
 use crate::ui::widget::window::WindowOptionsBuilder;
-
 use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;
