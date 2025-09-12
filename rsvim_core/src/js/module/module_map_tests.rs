@@ -628,23 +628,16 @@ Rsvim.rt.exit(0);
 try {
   const { add } = await import('./calc.js');
   const { echo } = await import('./echo.js');
-  echo(add(2, 3));
+  echo(add(4, 5));
 } catch (e) {
-  console.log(`Failed to dynamic import: ${e}`);
-}
-    "#;
-
-    let p5 = Path::new("node_modules/utils/package.json");
-    let src5: &str = r#"
-{
-  "exports": "./lib/index.js"
+  Rsvim.cmd.echo(`Failed to dynamic import: ${e}`);
 }
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_multi_file_configs(
       &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
+      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)],
     );
 
     let mut event_loop =
