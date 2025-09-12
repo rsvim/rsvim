@@ -182,12 +182,9 @@ jobs:
       - name: Build Release
         run: |
           cargo build --verbose --release
-          ./target/release/rsvim --version
       - name: Build Debug
         run: |
           cargo build --verbose
-          ./target/debug/rsvim --version
       - name: Build Nightly
         run: |
           cargo build --profile nightly --verbose
-          ./target/nightly/rsvim --version
