@@ -1,7 +1,6 @@
 #![allow(unused_imports, dead_code, unused_variables)]
 
 use super::command_line_ex::*;
-
 use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
@@ -14,6 +13,7 @@ use crate::prelude::*;
 use crate::state::StateDataAccess;
 use crate::state::StateMachine;
 use crate::state::Stateful;
+use crate::state::fsm::NormalStateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
@@ -33,8 +33,6 @@ use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-
-use crate::state::fsm::NormalStateful;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
