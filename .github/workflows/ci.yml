@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Cargo test
         run: |
-          cargo test --all-features --workspace
+          cargo test --verbose --all-features --workspace
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
       - name: Cargo nextest with code coverage
@@ -151,9 +151,9 @@ jobs:
       - uses: actions/checkout@v5
       - name: Build Release
         run: |
-          cargo build --release
+          cargo build --verbose --release
           ./target/release/rsvim --version
       - name: Build Debug
         run: |
-          cargo build
+          cargo build --verbose
           ./target/debug/rsvim --version
