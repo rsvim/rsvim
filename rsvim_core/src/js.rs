@@ -958,17 +958,13 @@ pub fn execute_module(
     anyhow::bail!(exception);
   }
 
-  match module.evaluate(tc_scope) {
-    Some(result) => {
-      trace!(
-        "Module result, filename:{filename:?}({path:?}), result:{:?}",
-        result.to_rust_string_lossy(tc_scope),
-      );
-    }
-    None => {
-      trace!("No module result, filename:{filename:?}({path:?})")
-    }
-  }
+  let result = module.evaluate(tc_scope);
+  trace!(
+    "Module evaluate result, filename:{filename:?}({path:?}), result:{:?}",
+    result
+      .map(|r| r.to_rust_string_lossy(tc_scope))
+      .unwrap_or("None".to_string()),
+  );
   trace!("ModuleMap evaluated {:?}", path);
 
   if module.get_status() == v8::ModuleStatus::Errored {

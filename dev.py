@@ -90,7 +90,7 @@ def test(name, miri, jobs):
         command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         log_var = os.getenv("RSVIM_LOG")
-        if isinstance(log_var, "str"):
+        if isinstance(log_var, str):
             set_env("RSVIM_LOG", log_var)
         else:
             set_env("RSVIM_LOG", "trace")
