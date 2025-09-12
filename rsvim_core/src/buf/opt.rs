@@ -1,7 +1,6 @@
 //! Vim buffer options.
 
 use crate::defaults;
-
 use derive_builder::Builder;
 
 // Re-export
