@@ -130,13 +130,13 @@ jobs:
           ./target/nightly/rsvim --version
       - name: Cargo test
         run: |
-          cargo test --verbose --features "default v8_unsafe_use_unprotected_platform" -p rsvim_core
+          cargo test --verbose -p rsvim_core
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
       - name: Cargo nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
-          cargo llvm-cov nextest --features "default v8_unsafe_use_unprotected_platform"  -p rsvim_core -v --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info
+          cargo llvm-cov nextest -p rsvim_core -v --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
