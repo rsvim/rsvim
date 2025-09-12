@@ -1,7 +1,5 @@
 use super::cursor::*;
-
 use crate::prelude::*;
-
 use geo::point;
 
 #[test]
