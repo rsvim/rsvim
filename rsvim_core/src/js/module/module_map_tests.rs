@@ -264,7 +264,7 @@ mod test_static_import {
     let src1: &str = r#"
 import { echoA } from './utils/a.js';
 
-echoA(4);
+echoA(5);
     "#;
 
     let p2 = Path::new("utils/a.js");
