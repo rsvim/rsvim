@@ -21,9 +21,9 @@ log = { workspace = true, features = [
   "release_max_level_error",
 ] }
 tokio = { workspace = true, features = ["full"] }
-zstd = { workspace = true }
+# zstd = { workspace = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
-zstd = { workspace = true }
 git2 = { workspace = true }
+# zstd = { workspace = true }

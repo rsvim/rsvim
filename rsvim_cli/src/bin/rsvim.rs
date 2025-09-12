@@ -12,16 +12,8 @@ use std::sync::LazyLock;
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
 
-static RSVIM_SNAPSHOT: LazyLock<Box<[u8]>> = LazyLock::new(|| {
-  static COMPRESSED_BYTES: &[u8] =
-    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
-  zstd::bulk::decompress(
-    &COMPRESSED_BYTES[4..],
-    u32::from_le_bytes(COMPRESSED_BYTES[0..4].try_into().unwrap()) as usize,
-  )
-  .unwrap()
-  .into_boxed_slice()
-});
+const RSVIM_SNAPSHOT: &[u8] =
+  include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
 
 static RSVIM_VERSION: LazyLock<String> = LazyLock::new(|| {
   const VERSION: &str = "{RSVIM_BIN_NAME} {RSVIM_PKG_VERSION}";
@@ -84,7 +76,7 @@ fn main() -> IoResult<()> {
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
     let mut event_loop =
-      EventLoop::new(cli_opts, SnapshotData::new(&RSVIM_SNAPSHOT))?;
+      EventLoop::new(cli_opts, SnapshotData::new(RSVIM_SNAPSHOT))?;
 
     // Initialize.
     event_loop.initialize()?;
