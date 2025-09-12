@@ -235,7 +235,7 @@ export function sayHello() {
 "#;
 
     let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-    let specifier = "006_more_imports";
+    let specifier = "006_more_imports.js";
     let expect = tp
       .xdg_config_home
       .child("rsvim")
@@ -991,7 +991,7 @@ export function sayHello() {
 "#;
 
     let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-    let specifier = "006_more_imports";
+    let specifier = "006_more_imports.js";
     let expect = tp
       .xdg_config_home
       .child("rsvim")
