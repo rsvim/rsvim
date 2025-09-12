@@ -44,7 +44,7 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy rustfmt
       - name: Rustfmt
-        run: cargo +nightly fmt --check
+        run: cargo fmt --check
       - uses: taiki-e/install-action@cargo-binstall
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
