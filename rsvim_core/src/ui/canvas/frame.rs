@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
 use crate::ui::canvas::internal::iframe::Iframe;
-
 use geo::point;
 use std::ops::Range;
 
