@@ -37,7 +37,7 @@ impl TypeScript {
     let globals = Globals::default();
     let cm: Lrc<SourceMap> = Default::default();
     let handler = Handler::with_tty_emitter(
-      ColorConfig::Auto,
+      ColorConfig::Never,
       true,
       false,
       Some(cm.clone()),
@@ -48,7 +48,7 @@ impl TypeScript {
       None => FileName::Anon,
     };
 
-    let fm = cm.new_source_file(filename.into(), source.into());
+    let fm = cm.new_source_file(filename.into(), source.to_string());
 
     // Initialize the TypeScript lexer.
     let lexer = Lexer::new(

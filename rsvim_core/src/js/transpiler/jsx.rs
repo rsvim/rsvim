@@ -13,14 +13,14 @@
 //   pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
 //     let globals = Globals::default();
 //     let cm: Lrc<SourceMap> = Default::default();
-//     let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
+//     let handler = Handler::with_tty_emitter(ColorConfig::Never, true, false, Some(cm.clone()));
 //
 //     let filename = match filename {
 //       Some(filename) => FileName::Custom(filename.into()),
 //       None => FileName::Anon,
 //     };
 //
-//     let fm = cm.new_source_file(filename.into(), source.into());
+//     let fm = cm.new_source_file(filename.into(), source.to_string());
 //
 //     // NOTE: We're using a TypeScript lexer to parse JSX because it's a super-set
 //     // of JavaScript and we also want to support .tsx files.
