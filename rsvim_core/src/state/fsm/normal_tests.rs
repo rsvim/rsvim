@@ -1,7 +1,6 @@
 #![allow(unused_imports, unused_variables)]
 
 use super::normal::*;
-
 use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
@@ -33,7 +32,6 @@ use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
