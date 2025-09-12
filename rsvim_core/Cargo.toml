@@ -67,9 +67,6 @@ serde_json = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
-v8 = { workspace = true, default-features = false, features = [
-  "use_custom_libcxx",
-] }
 swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
 swc_config = { workspace = true }
@@ -97,6 +94,21 @@ swc_macros_common = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
 swc_sourcemap = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+v8 = { workspace = true, default-features = false, features = [
+  "use_custom_libcxx",
+  "v8_enable_pointer_compression",
+] }
+[target.'cfg(all(target_os = "linux", target_arch = "x86_64"))'.dependencies]
+v8 = { workspace = true, default-features = false, features = [
+  "use_custom_libcxx",
+  "v8_enable_pointer_compression",
+] }
+[target.'cfg(not(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64"))))'.dependencies]
+v8 = { workspace = true, default-features = false, features = [
+  "use_custom_libcxx",
+] }
 
 # NOTE: Javascript dependencies }
 
