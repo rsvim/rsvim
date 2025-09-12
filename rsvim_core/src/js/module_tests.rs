@@ -6,6 +6,7 @@ use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
 
 use assert_fs::TempDir;
+use assert_fs::prelude::{FileTouch, PathChild};
 use std::io::Write;
 
 #[test]
@@ -102,30 +103,25 @@ fn fetch_tree3() {
 
   let src3: &str = r#"
   import * as pi from "./util/pi.js";
-  import addUtil from "./util/add";
+  import addUtil from "./util/add.ts";
 
   const result = addUtil.addPI(1.0, 2.5);
   "#;
 
-  let tmp_util_dir = tmpdir.join("util");
-  let fetch1 = tmp_util_dir.join("pi.js");
-  let fetch2 = tmp_util_dir.join("add.ts");
-  let fetch3 = tmpdir.join("fetch3.js");
+  let tmp_util_dir = tmpdir.child("util");
+  let fetch1 = tmp_util_dir.child("pi.js");
+  let fetch2 = tmp_util_dir.child("add.ts");
+  let fetch3 = tmpdir.child("fetch3.js");
 
   {
-    std::fs::create_dir_all(tmp_util_dir).unwrap();
+    fetch1.touch().unwrap();
+    std::fs::write(fetch1.path(), src1).unwrap();
 
-    let mut fp1 = std::fs::File::create(&fetch1).unwrap();
-    fp1.write_all(src1.as_bytes()).unwrap();
-    fp1.flush().unwrap();
+    fetch2.touch().unwrap();
+    std::fs::write(fetch2.path(), src2).unwrap();
 
-    let mut fp2 = std::fs::File::create(&fetch2).unwrap();
-    fp2.write_all(src2.as_bytes()).unwrap();
-    fp2.flush().unwrap();
-
-    let mut fp3 = std::fs::File::create(&fetch3).unwrap();
-    fp3.write_all(src3.as_bytes()).unwrap();
-    fp3.flush().unwrap();
+    fetch3.touch().unwrap();
+    std::fs::write(fetch3.path(), src3).unwrap();
   }
 
   let mut jsrt = make_js_runtime();
@@ -203,7 +199,7 @@ fn fetch_tree4() {
 
   let src3: &str = r#"
   import * as pi from "./util";
-  import addUtil from "./util/add";
+  import addUtil from "./util/add.ts";
 
   const result = addUtil.addPI(1.0, 2.5);
   "#;
