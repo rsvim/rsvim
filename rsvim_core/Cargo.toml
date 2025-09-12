@@ -23,6 +23,8 @@ doctest = false
 default = ["simd", "unicode_lines"]
 simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
+# v8_unsafe_runtime_options = ["v8/unsafe_runtime_options"]
+v8_unsafe_use_unprotected_platform = ["v8/unsafe_use_unprotected_platform"]
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
