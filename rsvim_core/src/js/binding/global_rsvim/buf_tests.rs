@@ -8,7 +8,6 @@ use crate::state::ops::Operation;
 use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-
 use compact_str::ToCompactString;
 use regex::Regex;
 use std::path::Path;
