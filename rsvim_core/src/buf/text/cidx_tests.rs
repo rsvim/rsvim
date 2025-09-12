@@ -3,7 +3,6 @@ use crate::buf::opt::{BufferOptions, BufferOptionsBuilder};
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-
 use ropey::{Rope, RopeBuilder, RopeSlice};
 
 fn make_default_opts() -> BufferOptions {

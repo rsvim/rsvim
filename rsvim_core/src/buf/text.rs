@@ -4,14 +4,13 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
-
-// Re-export
-pub use cidx::ColumnIndex;
-
 use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
 use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
+
+// Re-export
+pub use cidx::ColumnIndex;
 
 pub mod cidx;
 
