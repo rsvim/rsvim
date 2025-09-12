@@ -118,7 +118,7 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
     v8::V8::set_flags_from_string(&flags);
 
     let platform =
-      if cfg!(any(test, feature = "unsafe_use_unprotected_platform")) {
+      if cfg!(any(test, feature = "v8_unsafe_use_unprotected_platform")) {
         // Use unprotected platform for unit testing
         v8::new_unprotected_default_platform(0, false)
       } else {
