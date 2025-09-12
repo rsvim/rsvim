@@ -57,32 +57,6 @@ pub enum EndOfLineOption {
   Cr,
 }
 
-// impl Display for EndOfLineOption {
-//   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//     use crate::defaults::ascii::end_of_line as eol;
-//
-//     match self {
-//       EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
-//       EndOfLineOption::LF => write!(f, "{}", eol::LF),
-//       EndOfLineOption::CR => write!(f, "{}", eol::CR),
-//     }
-//   }
-// }
-//
-// impl TryFrom<&str> for EndOfLineOption {
-//   type Error = String;
-//
-//   fn try_from(value: &str) -> Result<Self, Self::Error> {
-//     let lower_value = value.to_lowercase();
-//     match lower_value.as_str() {
-//       "CRLF" => Ok(EndOfLineOption::CRLF),
-//       "LF" => Ok(EndOfLineOption::LF),
-//       "CR" => Ok(EndOfLineOption::CR),
-//       _ => Err("Unknown EndOfLine value".to_string()),
-//     }
-//   }
-// }
-
 impl From<FileFormatOption> for EndOfLineOption {
   fn from(value: FileFormatOption) -> Self {
     match value {
