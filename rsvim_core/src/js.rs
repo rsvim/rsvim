@@ -586,7 +586,7 @@ pub mod boost {
       self.run_pending_futures();
 
       trace!(
-        "has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}",
+        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
@@ -745,12 +745,6 @@ pub mod boost {
 
           // Check for exceptions in the graph (dynamic imports).
           if let Some(message) = graph_root.exception_mut().take() {
-            trace!(
-              "graph_root {:?} failed, error:{:?}",
-              graph_root.path(),
-              message
-            );
-
             // Create a v8 exception.
             let exception = v8::String::new(scope, &message).unwrap();
             let exception = v8::Exception::error(scope, exception);
@@ -768,8 +762,8 @@ pub mod boost {
             }
 
             trace!(
-              "|JsRuntime::fast_forward_imports| ModuleMap failed {:?}",
-              graph_root.path()
+              "|JsRuntime::fast_forward_imports| ModuleMap failed {:?}, error {:?}",
+              graph_root.path(), message
             );
             return false;
           }
