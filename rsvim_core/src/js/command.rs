@@ -1,13 +1,12 @@
 //! Vim ex commands.
 
+use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsFutureId;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::execute_module;
-use crate::js::{self};
 use crate::prelude::*;
-
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
