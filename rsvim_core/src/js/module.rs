@@ -276,7 +276,6 @@ pub fn fetch_module_tree<'a>(
   }
 
   let requests = module.get_module_requests();
-  trace!("Get {} module requests", requests.length());
 
   for i in 0..requests.length() {
     // Get import request from the `module_requests` array.
