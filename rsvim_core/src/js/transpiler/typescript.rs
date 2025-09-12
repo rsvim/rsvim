@@ -37,7 +37,7 @@ impl TypeScript {
     let globals = Globals::default();
     let cm: Lrc<SourceMap> = Default::default();
     let handler = Handler::with_tty_emitter(
-      ColorConfig::Auto,
+      ColorConfig::Never,
       true,
       false,
       Some(cm.clone()),

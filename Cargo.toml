@@ -79,7 +79,7 @@ normpath = "1.4.0"
 
 v8 = { version = "=140.0.0", default-features = false }
 swc_atoms = "=7.0.0"
-swc_common = "=14.0.3"
+swc_common = { version = "=14.0.3", features = ["tty-emitter"] }
 swc_config = "=3.1.1"
 swc_config_macro = "=1.0.1"
 swc_ecma_ast = "=15.0.0"

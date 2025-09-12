@@ -13,7 +13,7 @@
 //   pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
 //     let globals = Globals::default();
 //     let cm: Lrc<SourceMap> = Default::default();
-//     let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
+//     let handler = Handler::with_tty_emitter(ColorConfig::Never, true, false, Some(cm.clone()));
 //
 //     let filename = match filename {
 //       Some(filename) => FileName::Custom(filename.into()),

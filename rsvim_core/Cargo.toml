@@ -69,7 +69,7 @@ serde_json = { workspace = true }
 
 v8 = { workspace = true, default-features = false }
 swc_atoms = { workspace = true }
-swc_common = { workspace = true }
+swc_common = { workspace = true, features = ["tty-emitter"] }
 swc_config = { workspace = true }
 swc_config_macro = { workspace = true }
 swc_ecma_ast = { workspace = true }
