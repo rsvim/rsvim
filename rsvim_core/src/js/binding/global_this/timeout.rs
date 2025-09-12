@@ -7,7 +7,6 @@ use crate::js::{self};
 use crate::msg::MasterMessage;
 use crate::msg::{self};
 use crate::prelude::*;
-
 use std::rc::Rc;
 use std::time::Duration;
 
