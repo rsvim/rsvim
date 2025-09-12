@@ -1,12 +1,12 @@
 use super::unicode::*;
-
-use crate::buf::opt::{BufferOptionsBuilder, FileFormatOption};
+use crate::buf::opt::BufferOptionsBuilder;
+use crate::buf::opt::FileFormatOption;
 use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-
 use ascii::AsciiChar;
-use icu::properties::{CodePointMapData, props::EastAsianWidth};
+use icu::properties::CodePointMapData;
+use icu::properties::props::EastAsianWidth;
 use unicode_width::UnicodeWidthChar;
 
 #[test]
