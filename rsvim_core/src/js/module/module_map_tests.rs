@@ -18,6 +18,12 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
+  // Config structure:
+  //
+  // ${RSVIM_CONFIG_HOME}
+  // |- rsvim.js
+  // |- util.js
+  //
   async fn no_side_effect1() -> IoResult<()> {
     test_log_init();
 
@@ -76,6 +82,12 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
+  // Config structure:
+  //
+  // ${RSVIM_CONFIG_HOME}
+  // |- rsvim.js
+  // |- util.js
+  //
   async fn no_side_effect2() -> IoResult<()> {
     test_log_init();
 
@@ -135,6 +147,18 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
+  // Config structure:
+  //
+  // ${RSVIM_CONFIG_HOME}
+  // |- rsvim.js
+  // |- node_modules/
+  //    |- utils/
+  //       |- package.json
+  //       |- lib/
+  //          |- index.js
+  //          |- echo.js
+  //          |- calc.js
+  //
   async fn no_side_effect3() -> IoResult<()> {
     test_log_init();
 
