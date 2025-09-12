@@ -89,11 +89,6 @@ fn import_meta_resolve(
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
-  {
-    let args_length = args.length();
-    trace!("import_meta_resolve, args_length:{args_length:?}");
-  }
-
   // Check for provided arguments.
   if args.length() == 0 {
     throw_type_error(scope, "Not enough arguments specified.");
@@ -102,6 +97,7 @@ fn import_meta_resolve(
 
   let base = args.data().to_rust_string_lossy(scope);
   let specifier = args.get(0).to_rust_string_lossy(scope);
+  trace!("base:{:?}, specifier:{:?}", base, specifier);
   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
 
   match resolve_import(Some(&base), &specifier, import_map) {
