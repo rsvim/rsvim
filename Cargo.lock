@@ -2555,6 +2555,7 @@ dependencies = [
  "swc_sourcemap",
  "swc_trace_macro",
  "swc_visit",
+ "timezone_provider",
  "tokio",
  "tokio-util",
  "unicode-width 0.2.1",
