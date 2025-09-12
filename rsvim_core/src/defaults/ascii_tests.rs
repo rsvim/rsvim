@@ -1,5 +1,4 @@
 use super::ascii::*;
-
 use ascii::AsciiChar;
 
 #[test]
