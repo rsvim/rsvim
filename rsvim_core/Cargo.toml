@@ -93,8 +93,7 @@ swc_eq_ignore_macros = { workspace = true }
 swc_macros_common = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
-swc_visit_macros = { workspace = true }
-# sourcemap = { workspace = true }
+# swc_sourcemap = "=9.3.4"
 
 # NOTE: Javascript dependencies }
 
