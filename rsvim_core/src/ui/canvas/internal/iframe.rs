@@ -2,7 +2,6 @@
 
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
-
 use geo::point;
 use std::ops::Range;
 

@@ -1,9 +1,7 @@
 use super::iframe::*;
-
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
-
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
