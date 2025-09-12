@@ -1,7 +1,6 @@
 //! Vim editing mode.
 
 use crate::prelude::*;
-
 use std::fmt::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
