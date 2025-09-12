@@ -762,7 +762,7 @@ pub mod boost {
               }
             }
 
-            module_counter.increase_failed(graph_root.path());
+            trace!("ModuleMap failed {:?}", graph_root.path());
             return false;
           }
 
@@ -773,7 +773,7 @@ pub mod boost {
           }
 
           ready_imports.push(Rc::clone(graph_rc));
-          module_counter.increase_resolved(graph_root.path());
+          trace!("ModuleMap resolved {:?}", graph_root.path());
           false
         });
 
@@ -806,11 +806,7 @@ pub mod boost {
         }
 
         let _ = module.evaluate(tc_scope);
-        state_rc
-          .borrow_mut()
-          .module_map
-          .counter
-          .increase_evaluated(&path);
+        trace!("ModuleMap evaluated {:?}", path);
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
 
@@ -969,11 +965,7 @@ pub fn execute_module(
       trace!("No module result, filename:{filename:?}({path:?})")
     }
   }
-  JsRuntime::state(tc_scope)
-    .borrow_mut()
-    .module_map
-    .counter
-    .increase_evaluated(&path);
+  trace!("ModuleMap evaluated {:?}", path);
 
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();

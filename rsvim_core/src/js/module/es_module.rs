@@ -234,7 +234,7 @@ impl JsFuture for EsModuleFuture {
 
     state.module_map.insert(self.path.as_str(), module_ref);
     state.module_map.seen.insert(self.path.clone(), new_status);
-    state.module_map.counter.increase_seen(&self.path);
+    trace!("ModuleMap seen {:?} {:?}", self.path, new_status);
 
     let import_map = state.options.import_map.clone();
 
@@ -304,7 +304,7 @@ impl JsFuture for EsModuleFuture {
           .insert(load_import_id, Box::new(load_import_cb));
 
         state.module_map.seen.insert(specifier.clone(), status);
-        state.module_map.counter.increase_seen(&specifier);
+        trace!("ModuleMap seen {:?} {:?}", specifier, status);
 
         msg::sync_send_to_master(
           state.master_tx.clone(),

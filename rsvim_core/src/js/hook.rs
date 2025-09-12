@@ -253,10 +253,10 @@ pub fn host_import_module_dynamically_cb<'s>(
   let status = ModuleStatus::Fetching;
 
   state.module_map.pending.push(Rc::clone(&graph_rc));
-  state.module_map.counter.increase_pending(&specifier);
+  trace!("ModuleMap pending {:?}", specifier);
 
   state.module_map.seen.insert(specifier.clone(), status);
-  state.module_map.counter.increase_seen(&specifier);
+  trace!("ModuleMap seen {:?} {:?}", specifier, status);
 
   // Use the event-loop to asynchronously load the requested module.
   let load_import_id = js::next_future_id();
