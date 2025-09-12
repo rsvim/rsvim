@@ -2546,6 +2546,7 @@ dependencies = [
  "swc_ecma_transforms_macros",
  "swc_ecma_transforms_optimization",
  "swc_ecma_transforms_proposal",
+ "swc_ecma_transforms_react",
  "swc_ecma_transforms_typescript",
  "swc_ecma_utils",
  "swc_ecma_visit",
