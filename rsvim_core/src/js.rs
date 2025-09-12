@@ -730,7 +730,6 @@ pub mod boost {
         let state_ref = &mut *state;
         let seen_modules = &mut state_ref.module_map.seen;
         let pending_graphs = &mut state_ref.module_map.pending;
-        let module_counter = &mut state_ref.module_map.counter;
 
         pending_graphs.retain(|graph_rc| {
           // Get a usable ref to graph's root module.
@@ -768,7 +767,7 @@ pub mod boost {
 
           // If the graph is still loading, fast-forward the dependencies.
           if graph_root.status() != ModuleStatus::Ready {
-            graph_root.fast_forward(seen_modules, module_counter);
+            graph_root.fast_forward(seen_modules);
             return true;
           }
 
