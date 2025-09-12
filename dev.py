@@ -21,9 +21,6 @@ SKIP_SCCACHE = False
 
 RUSTFLAGS = []
 
-FEATURES = "--features 'default v8_unsafe_use_unprotected_platform'"
-
-
 def set_env(name, value):
     logging.info(f"Set env {name}={value}")
     os.environ[name] = value
