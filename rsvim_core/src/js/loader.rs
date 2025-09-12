@@ -3,13 +3,11 @@
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::prelude::*;
-
+use async_trait::async_trait;
 // Re-export
 pub use core_loader::CoreModuleLoader;
 pub use fs_loader::AsyncFsModuleLoader;
 pub use fs_loader::FsModuleLoader;
-
-use async_trait::async_trait;
 
 pub mod core_loader;
 pub mod fs_loader;
