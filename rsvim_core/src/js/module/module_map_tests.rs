@@ -342,6 +342,12 @@ mod test_dynamic_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
+  // Config structure:
+  //
+  // ${RSVIM_CONFIG_HOME}
+  // |- rsvim.js
+  // |- util.js
+  //
   async fn no_side_effect1() -> IoResult<()> {
     test_log_init();
 
