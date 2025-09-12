@@ -317,10 +317,6 @@ impl JsFuture for EsModuleFuture {
     }
 
     self.module.borrow_mut().dependencies = dependencies;
-    if requests.length() > 0 {
-      self.module.borrow_mut().status = ModuleStatus::Resolving;
-    } else {
-      self.module.borrow_mut().status = ModuleStatus::Ready;
-    }
+    self.module.borrow_mut().status = ModuleStatus::Resolving;
   }
 }
