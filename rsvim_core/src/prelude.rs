@@ -15,7 +15,6 @@ pub use foldhash::HashSetExt;
 pub use foldhash::fast::RandomState;
 pub use geo::Point;
 pub use geo::Rect;
-pub use geo::{self};
 pub use log::debug;
 pub use log::error;
 pub use log::info;
