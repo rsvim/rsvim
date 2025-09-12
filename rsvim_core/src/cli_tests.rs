@@ -1,5 +1,4 @@
 use super::cli::*;
-
 use std::path::Path;
 
 #[test]
