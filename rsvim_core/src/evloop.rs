@@ -594,12 +594,12 @@ impl EventLoop {
     for message in messages {
       match message {
         MasterMessage::ExitReq(req) => {
-          trace!("Receive ExitReq:{:?}", req.future_id);
+          trace!("Recv ExitReq:{:?}", req.future_id);
           self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }
         MasterMessage::PrintReq(req) => {
-          trace!("Receive PrintReq:{:?}", req.future_id);
+          trace!("Recv PrintReq:{:?}", req.future_id);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
           cmdline_ops::cmdline_set_message(
@@ -609,20 +609,20 @@ impl EventLoop {
           );
         }
         MasterMessage::TimeoutReq(req) => {
-          trace!("Receive TimeoutReq:{:?}", req.future_id);
+          trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
-                req.future_id,
+                req.timer_id,
                 req.duration,
               )))
               .await;
           });
         }
         MasterMessage::LoadImportReq(req) => {
-          trace!("Receive LoadImportReq:{:?}", req.future_id);
+          trace!("Recv LoadImportReq:{:?}", req.future_id);
           let maybe_source = async_load_import(&req.specifier, false).await;
           let _ = self
             .jsrt_forwarder_tx
@@ -633,7 +633,7 @@ impl EventLoop {
             .await;
         }
         MasterMessage::TickAgainReq => {
-          trace!("Receive TickAgainReq");
+          trace!("Recv TickAgainReq");
           let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
         }
       }

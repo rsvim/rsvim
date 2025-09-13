@@ -358,7 +358,7 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Timeout handles, i.e. timer IDs.
-    pub timeout_handles: HashSet<JsFutureId>,
+    pub timer_handles: HashSet<JsFutureId>,
     // /// A handle to the event-loop that can interrupt the poll-phase.
     // pub interrupt_handle: LoopInterruptHandle,
     /// Holds JS pending futures scheduled by the event-loop.
@@ -465,7 +465,7 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        timeout_handles: HashSet::new(),
+        timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),
         // timeout_queue: BTreeMap::new(),
@@ -540,7 +540,7 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        timeout_handles: HashSet::new(),
+        timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),
         // timeout_queue: BTreeMap::new(),
@@ -669,22 +669,17 @@ pub mod boost {
         while let Ok(msg) = state.jsrt_rx.try_recv() {
           match msg {
             JsMessage::TimeoutResp(resp) => {
-              trace!("Recv TimeResp:{:?}", resp.future_id);
-              let timeout_id_exists =
-                state.timeout_handles.remove(&resp.future_id);
-              trace!("TimeoutId exists:{timeout_id_exists:?}");
-
-              debug_assert!(
-                state.pending_futures.contains_key(&resp.future_id)
-              );
-              let timeout_cb =
-                state.pending_futures.remove(&resp.future_id).unwrap();
+              trace!("Recv TimeResp:{:?}", resp.timer_id);
+              debug_assert!(state.pending_futures.contains_key(&resp.timer_id));
+              let timer_id_exists = state.timer_handles.remove(&resp.timer_id);
+              let timer_cb =
+                state.pending_futures.remove(&resp.timer_id).unwrap();
 
               // Only execute 'timeout_cb' if timeout_id still exists,
               // otherwise it means the 'timeout_cb' is been cleared by
               // [`clear_timeout`](crate::js::binding::global_this::timeout::clear_timeout).
-              if timeout_id_exists {
-                futures.push(timeout_cb);
+              if timer_id_exists {
+                futures.push(timer_cb);
               }
             }
             JsMessage::ExCommandReq(req) => {

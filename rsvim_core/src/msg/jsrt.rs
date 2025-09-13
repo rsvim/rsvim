@@ -25,17 +25,8 @@ pub enum JsMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub future_id: JsFutureId,
+  pub timer_id: JsFutureId,
   pub duration: Duration,
-}
-
-impl TimeoutResp {
-  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
-    Self {
-      future_id,
-      duration,
-    }
-  }
 }
 
 #[derive(Debug)]
