@@ -1,13 +1,16 @@
 //! Pending futures.
 
+use crate::js::JsFuture;
 use crate::js::JsFutureId;
 use crate::msg;
+use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
+use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 
 fn next_timer_id() -> JsFutureId {
@@ -17,7 +20,8 @@ fn next_timer_id() -> JsFutureId {
 
 pub struct PendingFutures {
   master_tx: Sender<MasterMessage>,
-  timer_queue: HashMap<JsFutureId, Box<dyn FnMut() + 'static>>,
+  timer_queue:
+    HashMap<JsFutureId, Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>>,
 }
 
 impl Debug for PendingFutures {
@@ -45,7 +49,7 @@ impl PendingFutures {
 
   pub fn set_timeout<F>(&mut self, delay: Duration, cb: F) -> JsFutureId
   where
-    F: FnMut() + 'static,
+    F: FnMut() -> Box<dyn JsFuture> + 'static,
   {
     let timer_id = next_timer_id();
     self.timer_queue.insert(timer_id, Box::new(cb));
@@ -61,5 +65,55 @@ impl PendingFutures {
     timer_id: JsFutureId,
   ) -> Option<JsFutureId> {
     self.timer_queue.remove(&timer_id).map(|_| timer_id)
+  }
+
+  pub fn prepare(
+    &mut self,
+    jsrt_rx: Receiver<JsMessage>,
+  ) -> Vec<Box<dyn JsFuture>> {
+    let mut futures: Vec<Box<dyn JsFuture>> = vec![];
+
+    while let Ok(msg) = jsrt_rx.try_recv() {
+      match msg {
+        JsMessage::TimeoutResp(resp) => {
+          trace!("Prepare TimeResp:{:?}", resp.future_id);
+          if self.timer_queue.contains_key(&resp.future_id) {
+            trace!("Timer exists:{:?}", resp.future_id);
+            let timer_cb = self.timer_queue.remove(&resp.future_id).unwrap();
+            let fut = timer_cb();
+            futures.push(fut);
+          } else {
+            trace!("Timer not exist:{:?}", resp.future_id);
+          }
+        }
+        JsMessage::ExCommandReq(req) => {
+          trace!("Recv ExCommandReq:{:?}", req.future_id);
+          debug_assert!(!state.pending_futures.contains_key(&req.future_id));
+          // For now only `:js` command is supported.
+          // debug_assert!(req.payload.trim().starts_with("js"));
+
+          let commands = state.commands.clone();
+          let commands = lock!(commands);
+          if let Some(command_cb) = commands.parse(&req.payload) {
+            futures.push(Box::new(command_cb));
+          } else {
+            // Print error message
+            let e = format!("Error: invalid command {:?}", req.payload);
+            report_js_error!(state, e);
+          }
+        }
+        JsMessage::LoadImportResp(resp) => {
+          trace!("Recv LoadImportResp:{:?}", resp.future_id);
+          debug_assert!(state.pending_futures.contains_key(&resp.future_id));
+          let mut load_cb =
+            state.pending_futures.remove(&resp.future_id).unwrap();
+          let load_cb_impl = load_cb.downcast_mut::<EsModuleFuture>().unwrap();
+          load_cb_impl.source = Some(resp.source);
+          futures.push(load_cb);
+        }
+        JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+      }
+    }
+    futures
   }
 }
