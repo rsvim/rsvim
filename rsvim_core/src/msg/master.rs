@@ -56,7 +56,7 @@ impl PrintReq {
 #[derive(Debug)]
 pub struct TimeoutReq {
   pub timer_id: JsFutureId,
-  pub duration: Duration,
+  pub expire_at: Duration,
 }
 
 #[derive(Debug)]

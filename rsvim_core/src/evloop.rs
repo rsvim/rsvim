@@ -612,12 +612,12 @@ impl EventLoop {
           trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            tokio::time::sleep(req.duration).await;
+            tokio::time::sleep(req.expire_at).await;
             let _ = jsrt_forwarder_tx
-              .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
-                req.timer_id,
-                req.duration,
-              )))
+              .send(JsMessage::TimeoutResp(msg::TimeoutResp {
+                timer_id: req.timer_id,
+                duration: req.expire_at,
+              }))
               .await;
           });
         }

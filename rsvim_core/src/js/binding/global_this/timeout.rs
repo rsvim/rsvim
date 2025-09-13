@@ -80,7 +80,7 @@ pub fn set_timeout(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
-      duration: Duration::from_millis(millis),
+      expire_at: Duration::from_millis(millis),
     }),
   );
 
