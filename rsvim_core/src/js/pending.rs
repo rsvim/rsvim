@@ -2,10 +2,15 @@
 
 use crate::js::JsFuture;
 use crate::js::JsFutureId;
+use crate::js::JsRuntimeState;
+use crate::js::command::ExCommandsManagerArc;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
+use crate::report_js_error;
+use crate::state::ops::cmdline_ops;
+use compact_str::ToCompactString;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
@@ -18,10 +23,14 @@ fn next_timer_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+pub type TimeoutCallback = FnMut() -> Box<dyn JsFuture> + 'static;
+
 pub struct PendingFutures {
   master_tx: Sender<MasterMessage>,
+  commands: ExCommandsManagerArc,
   timer_queue:
-    HashMap<JsFutureId, Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>>,
+    HashMap<JsFutureId, Box<dyn TimeoutCallback>,
+  import_queue: HashMap<JsFutureId, Box<dyn FnMut()>>,
 }
 
 impl Debug for PendingFutures {
@@ -40,9 +49,13 @@ impl Debug for PendingFutures {
 }
 
 impl PendingFutures {
-  pub fn new(master_tx: Sender<MasterMessage>) -> Self {
+  pub fn new(
+    master_tx: Sender<MasterMessage>,
+    commands: ExCommandsManagerArc,
+  ) -> Self {
     Self {
       master_tx,
+      commands,
       timer_queue: HashMap::new(),
     }
   }
@@ -69,6 +82,7 @@ impl PendingFutures {
 
   pub fn prepare(
     &mut self,
+    state: &mut JsRuntimeState,
     jsrt_rx: Receiver<JsMessage>,
   ) -> Vec<Box<dyn JsFuture>> {
     let mut futures: Vec<Box<dyn JsFuture>> = vec![];
@@ -88,16 +102,11 @@ impl PendingFutures {
         }
         JsMessage::ExCommandReq(req) => {
           trace!("Prepare ExCommandReq:{:?}", req.future_id);
-          debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-          // For now only `:js` command is supported.
-          // debug_assert!(req.payload.trim().starts_with("js"));
-
-          let commands = state.commands.clone();
+          let commands = self.commands.clone();
           let commands = lock!(commands);
           if let Some(command_cb) = commands.parse(&req.payload) {
             futures.push(Box::new(command_cb));
           } else {
-            // Print error message
             let e = format!("Error: invalid command {:?}", req.payload);
             report_js_error!(state, e);
           }
