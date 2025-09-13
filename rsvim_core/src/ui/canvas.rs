@@ -3,6 +3,9 @@
 pub mod frame;
 pub mod internal;
 
+#[cfg(test)]
+mod frame_tests;
+
 use crate::prelude::*;
 use crossterm;
 pub use frame::cell::*;
@@ -11,9 +14,6 @@ pub use frame::*;
 use geo::point;
 use std::fmt::Debug;
 use std::slice::Iter;
-
-#[cfg(test)]
-mod frame_tests;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.

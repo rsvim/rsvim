@@ -3,15 +3,15 @@
 pub mod cell;
 pub mod cursor;
 
+#[cfg(test)]
+mod cursor_tests;
+
 use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
 use geo::point;
 use std::ops::Range;
-
-#[cfg(test)]
-mod cursor_tests;
 
 #[derive(Debug, Clone)]
 /// Logical frame for the canvas.
