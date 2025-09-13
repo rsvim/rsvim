@@ -1,4 +1,4 @@
-//! Pending futures, i.e. async tasks.
+//! Pending futures.
 
 use crate::js::JsFutureId;
 use crate::prelude::*;
@@ -11,8 +11,9 @@ fn next_timer_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+#[derive(Default)]
 pub struct PendingFutures {
-  timer_queue: BTreeMap<JsFutureId, Box<dyn FnMut() + 'static>>,
+  timer_queue: HashMap<JsFutureId, Box<dyn FnMut() + 'static>>,
 }
 
 impl Debug for PendingFutures {
@@ -24,8 +25,14 @@ impl Debug for PendingFutures {
           .timer_queue
           .keys()
           .map(|k| (*k, "FnMut()".to_string()))
-          .collect::<BTreeMap<JsFutureId, String>>(),
+          .collect::<HashMap<JsFutureId, String>>(),
       )
       .finish()
+  }
+}
+
+impl PendingFutures {
+  pub fn timer_req(&mut self, cb: Box<dyn FnMut() + 'static>) {
+    let timer_id = next_timer_id();
   }
 }
