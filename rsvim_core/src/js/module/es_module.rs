@@ -200,8 +200,12 @@ impl JsFuture for EsModuleFuture {
     // Extract module's source code.
     debug_assert!(self.source.is_some());
     let source = self.source.take().unwrap();
-    let source = match source {
-      Ok(source) => source,
+    let (source, source_len) = match source {
+      Ok(source) => bincode::decode_from_slice::<
+        String,
+        bincode::config::Configuration,
+      >(&source, bincode::config::standard())
+      .unwrap(),
       Err(e) => {
         self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
         return;
