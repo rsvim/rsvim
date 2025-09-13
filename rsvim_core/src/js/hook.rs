@@ -1,6 +1,5 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
-use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding::set_exception_code;
 use crate::js::binding::throw_type_error;
@@ -8,8 +7,6 @@ use crate::js::module::EsModuleFuture;
 use crate::js::module::ModuleGraph;
 use crate::js::module::ModuleStatus;
 use crate::js::module::resolve_import;
-use crate::msg;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -267,7 +264,6 @@ pub fn host_import_module_dynamically_cb<'s>(
       state.pending_futures.insert(0, Box::new(fut));
     }
   };
-
   let load_import_cb = Box::new(load_import_cb);
   state.pending_queue.load_import(&specifier, load_import_cb);
 

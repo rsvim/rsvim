@@ -1,8 +1,6 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsFutureId;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::err::JsError;
@@ -10,8 +8,6 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::create_origin;
 use crate::js::module::resolve_import;
-use crate::msg;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
@@ -295,29 +291,26 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if not_seen_before {
-        let load_import_id = js::next_future_id();
-
-        let load_import_cb = EsModuleFuture {
-          path: specifier.clone(),
-          module: Rc::clone(&module),
-          source: None,
+        let load_import_cb = {
+          let state_rc = state_rc.clone();
+          let specifier = specifier.clone();
+          move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+            let fut = EsModuleFuture {
+              path: specifier.clone(),
+              module: Rc::clone(&module),
+              source: maybe_result,
+            };
+            let mut state = state_rc.borrow_mut();
+            state.pending_futures.insert(0, Box::new(fut));
+          }
         };
-        state
-          .pending_futures
-          .insert(load_import_id, Box::new(load_import_cb));
+        let load_import_cb = Box::new(load_import_cb);
+        state.pending_queue.load_import(&specifier, load_import_cb);
 
         state.module_map.seen.insert(specifier.clone(), status);
         trace!(
           "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
           specifier, status
-        );
-
-        msg::sync_send_to_master(
-          state.master_tx.clone(),
-          MasterMessage::LoadImportReq(msg::LoadImportReq::new(
-            load_import_id,
-            specifier.clone(),
-          )),
         );
       }
     }
