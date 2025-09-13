@@ -1,8 +1,10 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
+use crate::js::JsFuture;
 use crate::js::JsFutureId;
 use crate::prelude::*;
 use compact_str::CompactString;
+use std::fmt::Debug;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
 use tokio::time::Instant;
@@ -23,10 +25,20 @@ pub enum JsMessage {
   TickAgainResp,
 }
 
-#[derive(Debug)]
 pub struct TimeoutResp {
   pub timer_id: JsFutureId,
   pub expire_at: Instant,
+  pub cb: Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>,
+}
+
+impl Debug for TimeoutResp {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("TimeoutResp")
+      .field("timer_id", &self.timer_id)
+      .field("expire_at", &self.expire_at)
+      .field("cb", &"Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>")
+      .finish()
+  }
 }
 
 #[derive(Debug)]

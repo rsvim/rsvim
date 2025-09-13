@@ -72,14 +72,32 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let mut state = state_rc.borrow_mut();
   let params = Rc::new(params);
 
   // Return timeout's internal id.
   let timer_id = js::next_timer_id();
   let expire_at = Instant::now() + Duration::from_millis(millis);
+  let timer_cb = {
+    let state_rc = state_rc.clone();
+    move |_: LoopHandle| {
+      let mut state = state_rc.borrow_mut();
+      let future = TimeoutFuture {
+        cb: Rc::clone(&callback),
+        params: Rc::clone(&params),
+      };
+      state.pending_futures.push(Box::new(future));
+
+      // Note: It's important to send an interrupt signal to the event-loop to prevent the
+      // event-loop from idling in the poll phase, waiting for I/O, while the timer's JS
+      // future is ready in the runtime level.
+      if !state.wake_event_queued {
+        state.interrupt_handle.interrupt();
+        state.wake_event_queued = true;
+      }
+    }
+  };
   msg::sync_send_to_master(
-    state.master_tx.clone(),
+    state_rc.borrow().master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
       expire_at,
@@ -91,6 +109,7 @@ pub fn set_timeout(
     cb: Rc::clone(&callback),
     params: Rc::clone(&params),
   };
+  let mut state = state_rc.borrow_mut();
   state.pending_futures.insert(timer_id, Box::new(timeout_cb));
   state.timer_handles.insert(timer_id);
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
