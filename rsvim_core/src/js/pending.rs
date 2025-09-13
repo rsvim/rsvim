@@ -1,0 +1,132 @@
+//! Pending async tasks.
+
+use crate::js::JsFuture;
+use crate::js::JsFutureId;
+use crate::js::JsRuntimeState;
+use crate::js::module::EsModuleFuture;
+use crate::msg;
+use crate::msg::JsMessage;
+use crate::msg::MasterMessage;
+use crate::prelude::*;
+use crate::report_js_error;
+use crate::state::ops::cmdline_ops;
+use compact_str::ToCompactString;
+use std::fmt::Debug;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
+use tokio::sync::mpsc::Sender;
+use tokio::time::Instant;
+
+pub type TimerCallbackFn = fn() -> Box<dyn JsFuture>;
+pub type TimerCallback = Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>;
+
+/// Next timer task ID.
+///
+/// NOTE: Start form 1.
+fn next_timer_id() -> JsFutureId {
+  static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
+pub struct PendingQueue {
+  master_tx: Sender<MasterMessage>,
+  timers: HashMap<JsFutureId, TimerCallback>,
+}
+
+impl PendingQueue {
+  pub fn new(master_tx: Sender<MasterMessage>) -> Self {
+    Self {
+      master_tx,
+      timers: HashMap::new(),
+    }
+  }
+
+  pub fn create_timer(
+    &mut self,
+    expire_at: Instant,
+    cb: TimerCallbackFn,
+  ) -> JsFutureId {
+    let timer_id = next_timer_id();
+    let timer_cb = Box::new(cb);
+    self.timers.insert(timer_id, timer_cb);
+    msg::sync_send_to_master(
+      self.master_tx.clone(),
+      MasterMessage::TimeoutReq(msg::TimeoutReq {
+        timer_id,
+        expire_at,
+      }),
+    );
+    timer_id
+  }
+
+  pub fn remove_timer(&mut self, timer_id: JsFutureId) -> Option<JsFutureId> {
+    self.timers.remove(&timer_id).map(|_| timer_id)
+  }
+}
+
+impl PendingQueue {
+  pub fn prepare(
+    &mut self,
+    state: &mut JsRuntimeState,
+  ) -> Vec<Box<dyn JsFuture>> {
+    let mut futures: Vec<Box<dyn JsFuture>> = vec![];
+
+    while let Ok(msg) = state.jsrt_rx.try_recv() {
+      match msg {
+        JsMessage::TimeoutResp(resp) => {
+          trace!("Recv TimeResp:{:?}", resp.timer_id);
+          match self.timers.remove(&resp.timer_id) {
+            Some(mut timer_cb) => {
+              let fut = timer_cb();
+              futures.push(fut);
+            }
+            None => {
+              // Only execute 'timeout_cb' if timer_id still exists,
+              // otherwise it means the 'timer_cb' is been cleared by
+              // `clear_timeout` API.
+            }
+          }
+        }
+        JsMessage::ExCommandReq(req) => {
+          trace!("Recv ExCommandReq:{:?}", req.future_id);
+          debug_assert!(!state.pending_futures.contains_key(&req.future_id));
+          // For now only `:js` command is supported.
+          // debug_assert!(req.payload.trim().starts_with("js"));
+
+          let commands = state.commands.clone();
+          let commands = lock!(commands);
+          if let Some(command_cb) = commands.parse(&req.payload) {
+            futures.push(Box::new(command_cb));
+          } else {
+            // Print error message
+            let e = format!("Error: invalid command {:?}", req.payload);
+            report_js_error!(state, e);
+          }
+        }
+        JsMessage::LoadImportResp(resp) => {
+          trace!("Recv LoadImportResp:{:?}", resp.future_id);
+          debug_assert!(state.pending_futures.contains_key(&resp.future_id));
+          let mut load_cb =
+            state.pending_futures.remove(&resp.future_id).unwrap();
+          let load_cb_impl = load_cb.downcast_mut::<EsModuleFuture>().unwrap();
+          load_cb_impl.source = Some(resp.source);
+          futures.push(load_cb);
+        }
+        JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+      }
+    }
+
+    futures
+  }
+}
+
+impl Debug for PendingQueue {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("PendingQueue")
+      .field(
+        "timer_queue",
+        &self.timers.keys().map(|k| *k).collect::<HashSet<_>>(),
+      )
+      .finish()
+  }
+}

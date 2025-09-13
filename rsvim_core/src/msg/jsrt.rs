@@ -25,20 +25,10 @@ pub enum JsMessage {
   TickAgainResp,
 }
 
+#[derive(Debug)]
 pub struct TimeoutResp {
   pub timer_id: JsFutureId,
   pub expire_at: Instant,
-  pub cb: Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>,
-}
-
-impl Debug for TimeoutResp {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("TimeoutResp")
-      .field("timer_id", &self.timer_id)
-      .field("expire_at", &self.expire_at)
-      .field("cb", &"Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>")
-      .finish()
-  }
 }
 
 #[derive(Debug)]

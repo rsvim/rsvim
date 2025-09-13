@@ -55,20 +55,10 @@ impl PrintReq {
   }
 }
 
+#[derive(Debug)]
 pub struct TimeoutReq {
   pub timer_id: JsFutureId,
   pub expire_at: Instant,
-  pub cb: Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>,
-}
-
-impl Debug for TimeoutReq {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("TimeoutReq")
-      .field("timer_id", &self.timer_id)
-      .field("expire_at", &self.expire_at)
-      .field("cb", &"Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>")
-      .finish()
-  }
 }
 
 #[derive(Debug)]
