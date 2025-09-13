@@ -1,11 +1,7 @@
 //! Timeout APIs.
 
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsFutureId;
 use crate::js::JsRuntime;
-use crate::msg;
-use crate::msg::MasterMessage;
 use crate::prelude::*;
 use std::rc::Rc;
 use tokio::time::Duration;
@@ -72,7 +68,6 @@ pub fn set_timeout(
 
   let state_rc = JsRuntime::state(scope);
   let params = Rc::new(params);
-  let mut state = state_rc.borrow_mut();
 
   // Return timeout's internal id.
   let expire_at = Instant::now() + Duration::from_millis(millis);
@@ -88,7 +83,11 @@ pub fn set_timeout(
     }
   };
   let timer_cb = Box::new(timer_cb);
-  let timer_id = state.pending_queue.create_timer(expire_at, timer_cb);
+
+  let timer_id = state_rc
+    .borrow_mut()
+    .pending_queue
+    .create_timer(expire_at, timer_cb);
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }

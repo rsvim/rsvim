@@ -168,7 +168,7 @@ pub struct EsModuleFuture {
   pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub source: Option<AnyResult<String>>,
+  pub source: AnyResult<String>,
 }
 
 impl EsModuleFuture {

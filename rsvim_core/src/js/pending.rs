@@ -1,6 +1,5 @@
 //! Pending async tasks.
 
-use crate::js::JsFuture;
 use crate::js::JsFutureId;
 use crate::js::JsRuntimeStateRc;
 use crate::js::module::EsModuleFuture;
@@ -13,11 +12,16 @@ use crate::state::ops::cmdline_ops;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
+use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use tokio::sync::mpsc::Sender;
 use tokio::time::Instant;
 
+type JsTaskId = usize;
+
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
+pub type TaskCallback =
+  Box<dyn FnMut() -> Option<AnyResult<Vec<u8>>> + 'static>;
 
 /// Next timer task ID.
 ///
@@ -27,9 +31,15 @@ fn next_timer_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+fn next_task_id() -> JsTaskId {
+  static VALUE: AtomicUsize = AtomicUsize::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
 pub struct PendingQueue {
   master_tx: Sender<MasterMessage>,
   timers: HashMap<JsFutureId, TimerCallback>,
+  load_imports: HashMap<JsTaskId, TaskCallback>,
 }
 
 impl PendingQueue {
@@ -37,6 +47,7 @@ impl PendingQueue {
     Self {
       master_tx,
       timers: HashMap::new(),
+      load_imports: HashMap::new(),
     }
   }
 
@@ -46,8 +57,7 @@ impl PendingQueue {
     cb: TimerCallback,
   ) -> JsFutureId {
     let timer_id = next_timer_id();
-    let timer_cb = Box::new(cb);
-    self.timers.insert(timer_id, timer_cb);
+    self.timers.insert(timer_id, cb);
     msg::sync_send_to_master(
       self.master_tx.clone(),
       MasterMessage::TimeoutReq(msg::TimeoutReq {
@@ -60,6 +70,18 @@ impl PendingQueue {
 
   pub fn remove_timer(&mut self, timer_id: JsFutureId) -> Option<JsFutureId> {
     self.timers.remove(&timer_id).map(|_| timer_id)
+  }
+
+  pub fn load_import(&mut self, specifier: &str, cb: TaskCallback) -> JsTaskId {
+    let task_id = next_task_id();
+    self.load_imports.insert(task_id, cb);
+    msg::sync_send_to_master(
+      self.master_tx.clone(),
+      MasterMessage::LoadImportReq(msg::LoadImportReq {
+        specifier: specifier.to_string(),
+      }),
+    );
+    task_id
   }
 }
 
@@ -82,14 +104,11 @@ impl PendingQueue {
         }
         JsMessage::ExCommandReq(req) => {
           trace!("Recv ExCommandReq:{:?}", req.future_id);
-          debug_assert!(!state.pending_futures.contains_key(&req.future_id));
-          // For now only `:js` command is supported.
-          // debug_assert!(req.payload.trim().starts_with("js"));
-
+          let mut state = state_rc.borrow();
           let commands = state.commands.clone();
           let commands = lock!(commands);
           if let Some(command_cb) = commands.parse(&req.payload) {
-            self.futures.push(Box::new(command_cb));
+            state.pending_futures.push(Box::new(command_cb));
           } else {
             // Print error message
             let e = format!("Error: invalid command {:?}", req.payload);

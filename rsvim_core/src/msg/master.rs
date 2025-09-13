@@ -63,17 +63,7 @@ pub struct TimeoutReq {
 
 #[derive(Debug)]
 pub struct LoadImportReq {
-  pub future_id: JsFutureId,
   pub specifier: String,
-}
-
-impl LoadImportReq {
-  pub fn new(future_id: JsFutureId, specifier: String) -> Self {
-    Self {
-      future_id,
-      specifier,
-    }
-  }
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
