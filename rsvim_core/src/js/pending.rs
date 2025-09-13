@@ -55,4 +55,11 @@ impl PendingFutures {
     );
     timer_id
   }
+
+  pub fn clear_timeout<F>(
+    &mut self,
+    timer_id: JsFutureId,
+  ) -> Option<JsFutureId> {
+    self.timer_queue.remove(&timer_id).map(|_| timer_id)
+  }
 }
