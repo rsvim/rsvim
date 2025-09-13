@@ -1,6 +1,5 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
-use crate::js::JsFuture;
 use crate::js::JsFutureId;
 use crate::prelude::*;
 use compact_str::CompactString;

@@ -63,6 +63,7 @@ pub struct TimeoutReq {
 
 #[derive(Debug)]
 pub struct LoadImportReq {
+  pub task_id: JsTaskId,
   pub specifier: String,
 }
 
