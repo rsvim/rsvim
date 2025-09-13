@@ -17,6 +17,15 @@ pub struct PendingFutures {
 
 impl Debug for PendingFutures {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("PendingFutures").finish()
+    f.debug_struct("PendingFutures")
+      .field(
+        "timer_queue",
+        &self
+          .timer_queue
+          .keys()
+          .map(|k| (*k, "FnMut()".to_string()))
+          .collect::<BTreeMap<JsFutureId, String>>(),
+      )
+      .finish()
   }
 }
