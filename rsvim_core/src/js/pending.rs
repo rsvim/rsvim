@@ -87,7 +87,7 @@ impl PendingFutures {
           }
         }
         JsMessage::ExCommandReq(req) => {
-          trace!("Recv ExCommandReq:{:?}", req.future_id);
+          trace!("Prepare ExCommandReq:{:?}", req.future_id);
           debug_assert!(!state.pending_futures.contains_key(&req.future_id));
           // For now only `:js` command is supported.
           // debug_assert!(req.payload.trim().starts_with("js"));
