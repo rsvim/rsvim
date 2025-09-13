@@ -90,9 +90,9 @@ pub fn set_timeout(
     params: Rc::clone(&params),
   };
   state.pending_futures.insert(timer_id, Box::new(timeout_cb));
-  state.timeout_handles.insert(timer_id);
+  state.timer_handles.insert(timer_id);
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
-  trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
+  trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }
 
 /// Javascript `clearTimeout` API.
@@ -105,6 +105,6 @@ pub fn clear_timeout(
   let timer_id = args.get(0).int32_value(scope).unwrap();
   let state_rc = JsRuntime::state(scope);
 
-  state_rc.borrow_mut().timeout_handles.remove(&timer_id);
-  trace!("clear_timeout: {:?}", timer_id);
+  state_rc.borrow_mut().timer_handles.remove(&timer_id);
+  trace!("|clear_timeout| timer_id:{:?}", timer_id);
 }
