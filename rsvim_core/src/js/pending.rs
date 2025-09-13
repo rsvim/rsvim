@@ -76,7 +76,7 @@ impl PendingFutures {
     while let Ok(msg) = jsrt_rx.try_recv() {
       match msg {
         JsMessage::TimeoutResp(resp) => {
-          trace!("Prepare TimeResp:{:?}", resp.future_id);
+          trace!("Prepare TimeoutResp:{:?}", resp.future_id);
           if self.timer_queue.contains_key(&resp.future_id) {
             trace!("Timer exists:{:?}", resp.future_id);
             let timer_cb = self.timer_queue.remove(&resp.future_id).unwrap();
