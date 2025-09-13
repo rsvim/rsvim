@@ -8,7 +8,8 @@ use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
 use std::rc::Rc;
-use std::time::Duration;
+use tokio::time::Duration;
+use tokio::time::Instant;
 
 struct TimeoutFuture {
   future_id: JsFutureId,
@@ -76,11 +77,12 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_timer_id();
+  let expire_at = Instant::now() + Duration::from_millis(millis);
   msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
-      expire_at: Duration::from_millis(millis),
+      expire_at,
     }),
   );
 

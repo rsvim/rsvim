@@ -3,9 +3,9 @@
 use crate::js::JsFutureId;
 use crate::prelude::*;
 use compact_str::CompactString;
-use std::time::Duration;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
+use tokio::time::Instant;
 
 #[derive(Debug)]
 /// Message sent to [`JsRuntime`](crate::js::JsRuntime).
@@ -26,7 +26,7 @@ pub enum JsMessage {
 #[derive(Debug)]
 pub struct TimeoutResp {
   pub timer_id: JsFutureId,
-  pub expire_at: Duration,
+  pub expire_at: Instant,
 }
 
 #[derive(Debug)]
