@@ -18,7 +18,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("TimeoutFuture run:{:?}", self.future_id);
+    trace!("|TimeoutFuture| run:{:?}", self.future_id);
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -75,13 +75,13 @@ pub fn set_timeout(
   let params = Rc::new(params);
 
   // Return timeout's internal id.
-  let timer_id = js::next_future_id();
+  let timer_id = js::next_timer_id();
   msg::sync_send_to_master(
     state.master_tx.clone(),
-    MasterMessage::TimeoutReq(msg::TimeoutReq::new(
+    MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
-      Duration::from_millis(millis),
-    )),
+      duration: Duration::from_millis(millis),
+    }),
   );
 
   let timeout_cb = TimeoutFuture {

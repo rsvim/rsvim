@@ -84,6 +84,14 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+/// Next timer task ID.
+///
+/// NOTE: Start form 1.
+pub fn next_timer_id() -> JsFutureId {
+  static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
 /// Snapshot data.
 pub struct SnapshotData {
   pub value: &'static [u8],
