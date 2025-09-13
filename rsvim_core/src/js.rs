@@ -51,6 +51,7 @@ use module::ModuleStatus;
 use module::fetch_module;
 use module::fetch_module_tree;
 use module::resolve_import;
+use pending::PendingQueue;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
@@ -350,6 +351,8 @@ pub mod boost {
     pub context: v8::Global<v8::Context>,
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
+    /// Pending async tasks.
+    pub pending_queue: PendingQueue,
     /// Timeout handles, i.e. timer IDs.
     pub timer_handles: HashSet<JsFutureId>,
     // /// A handle to the event-loop that can interrupt the poll-phase.
@@ -458,6 +461,7 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
+        pending_queue: PendingQueue::new(master_tx.clone()),
         timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),
@@ -533,6 +537,7 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
+        pending_queue: PendingQueue::new(master_tx.clone()),
         timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),

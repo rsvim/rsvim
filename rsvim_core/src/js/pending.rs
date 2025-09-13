@@ -2,7 +2,7 @@
 
 use crate::js::JsFuture;
 use crate::js::JsFutureId;
-use crate::js::JsRuntimeState;
+use crate::js::JsRuntimeStateRc;
 use crate::js::module::EsModuleFuture;
 use crate::msg;
 use crate::msg::JsMessage;
@@ -17,8 +17,7 @@ use std::sync::atomic::Ordering;
 use tokio::sync::mpsc::Sender;
 use tokio::time::Instant;
 
-pub type TimerCallbackFn = fn() -> Box<dyn JsFuture>;
-pub type TimerCallback = Box<dyn FnMut() -> Box<dyn JsFuture> + 'static>;
+pub type TimerCallback = Box<dyn FnMut() + 'static>;
 
 /// Next timer task ID.
 ///
@@ -44,7 +43,7 @@ impl PendingQueue {
   pub fn create_timer(
     &mut self,
     expire_at: Instant,
-    cb: TimerCallbackFn,
+    cb: TimerCallback,
   ) -> JsFutureId {
     let timer_id = next_timer_id();
     let timer_cb = Box::new(cb);
@@ -65,20 +64,14 @@ impl PendingQueue {
 }
 
 impl PendingQueue {
-  pub fn prepare(
-    &mut self,
-    state: &mut JsRuntimeState,
-  ) -> Vec<Box<dyn JsFuture>> {
-    let mut futures: Vec<Box<dyn JsFuture>> = vec![];
-
-    while let Ok(msg) = state.jsrt_rx.try_recv() {
+  pub fn prepare(&mut self, state_rc: JsRuntimeStateRc) {
+    while let Ok(msg) = state_rc.borrow().jsrt_rx.try_recv() {
       match msg {
         JsMessage::TimeoutResp(resp) => {
           trace!("Recv TimeResp:{:?}", resp.timer_id);
           match self.timers.remove(&resp.timer_id) {
             Some(mut timer_cb) => {
-              let fut = timer_cb();
-              futures.push(fut);
+              timer_cb();
             }
             None => {
               // Only execute 'timeout_cb' if timer_id still exists,
@@ -96,7 +89,7 @@ impl PendingQueue {
           let commands = state.commands.clone();
           let commands = lock!(commands);
           if let Some(command_cb) = commands.parse(&req.payload) {
-            futures.push(Box::new(command_cb));
+            self.futures.push(Box::new(command_cb));
           } else {
             // Print error message
             let e = format!("Error: invalid command {:?}", req.payload);
@@ -110,13 +103,11 @@ impl PendingQueue {
             state.pending_futures.remove(&resp.future_id).unwrap();
           let load_cb_impl = load_cb.downcast_mut::<EsModuleFuture>().unwrap();
           load_cb_impl.source = Some(resp.source);
-          futures.push(load_cb);
+          self.futures.push(load_cb);
         }
         JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
       }
     }
-
-    futures
   }
 }
 

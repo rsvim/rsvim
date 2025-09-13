@@ -12,14 +12,13 @@ use tokio::time::Duration;
 use tokio::time::Instant;
 
 struct TimeoutFuture {
-  future_id: JsFutureId,
   cb: Rc<v8::Global<v8::Function>>,
   params: Rc<Vec<v8::Global<v8::Value>>>,
 }
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("|TimeoutFuture| run:{:?}", self.future_id);
+    trace!("|TimeoutFuture| run");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -73,31 +72,23 @@ pub fn set_timeout(
 
   let state_rc = JsRuntime::state(scope);
   let params = Rc::new(params);
+  let mut state = state_rc.borrow_mut();
 
   // Return timeout's internal id.
-  let timer_id = js::next_timer_id();
   let expire_at = Instant::now() + Duration::from_millis(millis);
-  let timer_cb = move || TimeoutFuture {
-    future_id: timer_id,
-    cb: Rc::clone(&callback),
-    params: Rc::clone(&params),
+  let timer_cb = {
+    let state_rc = state_rc.clone();
+    move || {
+      let fut = TimeoutFuture {
+        cb: Rc::clone(&callback),
+        params: Rc::clone(&params),
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.insert(0, Box::new(fut));
+    }
   };
-  msg::sync_send_to_master(
-    state_rc.borrow().master_tx.clone(),
-    MasterMessage::TimeoutReq(msg::TimeoutReq {
-      timer_id,
-      expire_at,
-    }),
-  );
-
-  let timeout_cb = TimeoutFuture {
-    future_id: timer_id,
-    cb: Rc::clone(&callback),
-    params: Rc::clone(&params),
-  };
-  let mut state = state_rc.borrow_mut();
-  state.pending_futures.insert(timer_id, Box::new(timeout_cb));
-  state.timer_handles.insert(timer_id);
+  let timer_cb = Box::new(timer_cb);
+  let timer_id = state.pending_queue.create_timer(expire_at, timer_cb);
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }
