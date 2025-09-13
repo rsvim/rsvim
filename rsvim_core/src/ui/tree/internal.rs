@@ -1,12 +1,11 @@
 //! Internal tree structure.
 
-// Re-export
-pub use inode::*;
-pub use itree::*;
-
 pub mod inode;
 pub mod itree;
 pub mod shapes;
+
+pub use inode::*;
+pub use itree::*;
 
 #[cfg(test)]
 mod inode_tests;

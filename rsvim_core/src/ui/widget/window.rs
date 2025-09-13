@@ -1,5 +1,9 @@
 //! Window.
 
+pub mod content;
+pub mod opt;
+pub mod root;
+
 use crate::buf::BufferWk;
 use crate::inode_enum_dispatcher;
 use crate::inode_itree_impl;
@@ -18,10 +22,6 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
-
-pub mod content;
-pub mod opt;
-pub mod root;
 
 #[cfg(test)]
 mod content_tests;
