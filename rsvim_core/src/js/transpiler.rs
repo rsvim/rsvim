@@ -5,7 +5,7 @@
 pub mod typescript;
 // pub mod wasm;
 
-pub use typescript::TypeScript;
-
 #[cfg(test)]
 mod typescript_tests;
+
+pub use typescript::TypeScript;

@@ -3,15 +3,15 @@
 pub mod file_encoding;
 pub mod file_format;
 
-use crate::defaults;
-use derive_builder::Builder;
-pub use file_encoding::*;
-pub use file_format::*;
-
 #[cfg(test)]
 mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
+
+use crate::defaults;
+use derive_builder::Builder;
+pub use file_encoding::*;
+pub use file_format::*;
 
 #[derive(Debug, Copy, Clone, Builder)]
 /// Local buffer options.

@@ -2,6 +2,9 @@
 
 pub mod cidx;
 
+#[cfg(test)]
+mod cidx_tests;
+
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
@@ -13,9 +16,6 @@ use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
-
-#[cfg(test)]
-mod cidx_tests;
 
 #[derive(Debug)]
 /// Text content backend.
