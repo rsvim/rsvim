@@ -1,19 +1,18 @@
 //! Text content backend for buffer.
 
+pub mod cidx;
+
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
+pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
-// Re-export
-pub use cidx::ColumnIndex;
-
-pub mod cidx;
 
 #[cfg(test)]
 mod cidx_tests;
