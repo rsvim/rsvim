@@ -1,5 +1,7 @@
 //! The widget tree that manages all the widget components.
 
+pub mod internal;
+
 use crate::inode_enum_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -13,10 +15,7 @@ use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
-// Re-export
 pub use internal::*;
-
-pub mod internal;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.

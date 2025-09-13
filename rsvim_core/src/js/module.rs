@@ -27,6 +27,10 @@
 //! source can be evaluated by js engine. But in ECMAScript standards, there are also many other
 //! kinds of sources: `json`/`json5`, `wasm`, etc.
 
+pub mod es_module;
+pub mod import_map;
+pub mod module_map;
+
 use crate::js::JsRuntime;
 use crate::js::loader::AsyncFsModuleLoader;
 use crate::js::loader::AsyncModuleLoader;
@@ -36,14 +40,9 @@ use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use std::sync::LazyLock;
 // use url::Url;
-// Re-export
 pub use es_module::*;
 pub use import_map::*;
 pub use module_map::*;
-
-pub mod es_module;
-pub mod import_map;
-pub mod module_map;
 
 #[cfg(test)]
 mod module_map_tests;

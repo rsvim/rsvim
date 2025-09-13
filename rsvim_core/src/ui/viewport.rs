@@ -1,14 +1,14 @@
 //! Fundamental viewport for all kinds of buffer typeset/rendering in UI widgets.
 
+pub mod draw;
+pub mod sync;
+
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::opt::WindowOptions;
 use litemap::LiteMap;
 use std::ops::Range;
-
-pub mod draw;
-pub mod sync;
 
 #[derive(Debug, Copy, Clone)]
 /// The row viewport in a buffer line.

@@ -1,5 +1,8 @@
 //! Js runtime bindings.
 
+pub mod global_rsvim;
+pub mod global_this;
+
 use crate::prelude::*;
 // use crate::dns;
 // use crate::exceptions;
@@ -16,9 +19,6 @@ use crate::prelude::*;
 // use crate::timers;
 // use crate::prelude::*;
 use std::ffi::c_void;
-
-pub mod global_rsvim;
-pub mod global_this;
 
 // /// Function pointer for the bindings initializers.
 // type BindingInitFn = fn(&mut v8::HandleScope<'_>) -> v8::Global<v8::Object>;

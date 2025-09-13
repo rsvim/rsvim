@@ -1,17 +1,16 @@
 //! Canvas.
 
+pub mod frame;
+pub mod internal;
+
 use crate::prelude::*;
 use crossterm;
-use geo::point;
-use std::fmt::Debug;
-use std::slice::Iter;
-// Re-export
 pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
-
-pub mod frame;
-pub mod internal;
+use geo::point;
+use std::fmt::Debug;
+use std::slice::Iter;
 
 #[cfg(test)]
 mod frame_tests;

@@ -1,14 +1,14 @@
 //! Frame inside the canvas.
 
+pub mod cell;
+pub mod cursor;
+
 use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
 use geo::point;
 use std::ops::Range;
-
-pub mod cell;
-pub mod cursor;
 
 #[cfg(test)]
 mod cursor_tests;

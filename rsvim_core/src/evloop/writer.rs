@@ -12,16 +12,16 @@
 //!   prints to STDOUT, which is similar to general purpose javascript-based
 //!   runtime such as node/deno.
 
+pub mod dev_null_writer;
+pub mod editor_writer;
+pub mod headless_writer;
+mod tui;
+
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use dev_null_writer::DevNullWriter;
 use editor_writer::EditorWriter;
 use headless_writer::HeadlessWriter;
-
-pub mod dev_null_writer;
-pub mod editor_writer;
-pub mod headless_writer;
-mod tui;
 
 pub trait StdoutWritable {
   /// Initialize STDOUT.
