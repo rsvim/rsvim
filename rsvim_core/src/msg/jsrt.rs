@@ -26,7 +26,7 @@ pub enum JsMessage {
 #[derive(Debug)]
 pub struct TimeoutResp {
   pub timer_id: JsFutureId,
-  pub duration: Duration,
+  pub expire_at: Duration,
 }
 
 #[derive(Debug)]

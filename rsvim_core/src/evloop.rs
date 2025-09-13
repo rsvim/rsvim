@@ -616,7 +616,7 @@ impl EventLoop {
             let _ = jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp {
                 timer_id: req.timer_id,
-                duration: req.expire_at,
+                expire_at: req.expire_at,
               }))
               .await;
           });
