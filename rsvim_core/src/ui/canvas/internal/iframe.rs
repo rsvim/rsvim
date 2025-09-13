@@ -5,6 +5,11 @@ use crate::ui::canvas::frame::cell::Cell;
 use geo::point;
 use std::ops::Range;
 
+#[cfg(test)]
+use compact_str::CompactString;
+#[cfg(test)]
+use compact_str::ToCompactString;
+
 #[derive(Debug, Clone)]
 /// Internal implementation for `Iframe`.
 pub struct Iframe {
@@ -290,9 +295,6 @@ impl Iframe {
   }
 }
 
-#[cfg(test)]
-use compact_str::CompactString;
-
 impl Iframe {
   #[cfg(test)]
   /// Get raw symbols of all cells.
@@ -323,7 +325,6 @@ impl Iframe {
         let idx = self.xy2idx(col as usize, row as usize);
         let s = self.cells[idx].symbol();
         row_symbols.push(if s.is_empty() {
-          use compact_str::ToCompactString;
           " ".to_compact_string()
         } else {
           s.clone()

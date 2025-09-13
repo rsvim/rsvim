@@ -664,7 +664,7 @@ fn sync_wrap_linebreak(
 }
 
 mod detail {
-  use crate::buf::text::Text;
+  use super::*;
 
   #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {

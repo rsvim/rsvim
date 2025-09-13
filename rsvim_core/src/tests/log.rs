@@ -3,11 +3,10 @@
 //! NOTE: This module should only be used in unit tests, not some where else.
 
 use crate::constant::RSVIM_LOG;
+use std::sync::Once;
 
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
-  use std::sync::Once;
-
   static INITIALIZED: Once = Once::new();
   INITIALIZED.call_once(|| {
     let filter = env_filter::Builder::from_env(RSVIM_LOG).build();

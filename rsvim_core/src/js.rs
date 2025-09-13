@@ -19,6 +19,9 @@ pub mod loader;
 pub mod module;
 pub mod transpiler;
 
+#[cfg(test)]
+mod module_tests;
+
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
@@ -54,9 +57,6 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
-
-#[cfg(test)]
-mod module_tests;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
