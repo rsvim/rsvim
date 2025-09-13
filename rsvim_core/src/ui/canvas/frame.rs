@@ -1,5 +1,11 @@
 //! Frame inside the canvas.
 
+pub mod cell;
+pub mod cursor;
+
+#[cfg(test)]
+mod cursor_tests;
+
 use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
@@ -7,11 +13,8 @@ use cursor::Cursor;
 use geo::point;
 use std::ops::Range;
 
-pub mod cell;
-pub mod cursor;
-
 #[cfg(test)]
-mod cursor_tests;
+use compact_str::CompactString;
 
 #[derive(Debug, Clone)]
 /// Logical frame for the canvas.
@@ -234,9 +237,6 @@ impl Frame {
     self.cursor = cursor;
   }
 }
-
-#[cfg(test)]
-use compact_str::CompactString;
 
 impl Frame {
   #[cfg(test)]

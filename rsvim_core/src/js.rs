@@ -10,6 +10,18 @@
 //!   - <https://github.com/denoland/deno_core/commit/b9b65142c74d88e9245dde2230727e537256d685>.
 //! - V8 API Reference: <https://v8docs.nodesource.com/node-24.1/index.html>.
 
+pub mod binding;
+pub mod command;
+pub mod err;
+pub mod exception;
+pub mod hook;
+pub mod loader;
+pub mod module;
+pub mod transpiler;
+
+#[cfg(test)]
+mod module_tests;
+
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
@@ -21,6 +33,8 @@ use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
+pub use boost::*;
+pub use build::*;
 use command::ExCommandsManagerArc;
 use compact_str::ToCompactString;
 use downcast_rs::Downcast;
@@ -43,21 +57,6 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
-// Re-export
-pub use boost::*;
-pub use build::*;
-
-pub mod binding;
-pub mod command;
-pub mod err;
-pub mod exception;
-pub mod hook;
-pub mod loader;
-pub mod module;
-pub mod transpiler;
-
-#[cfg(test)]
-mod module_tests;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING

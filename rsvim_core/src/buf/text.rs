@@ -1,22 +1,21 @@
 //! Text content backend for buffer.
 
+pub mod cidx;
+
+#[cfg(test)]
+mod cidx_tests;
+
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
+pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
-// Re-export
-pub use cidx::ColumnIndex;
-
-pub mod cidx;
-
-#[cfg(test)]
-mod cidx_tests;
 
 #[derive(Debug)]
 /// Text content backend.
@@ -119,8 +118,6 @@ impl Text {
   // library since we heavily rely on it, and cannot do anything without it. But anyway it works
   // great, so let's keep it.
   fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
-    // use crate::defaults::ascii::end_of_line as ascii_eol;
-
     let len_chars = line.len_chars();
 
     // The eol detection logic (NOTE: We don't check the file format option):
@@ -146,8 +143,6 @@ impl Text {
 
   // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
   fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
-    // use crate::defaults::ascii::end_of_line as ascii_eol;
-
     let r = &self.rope;
     let len_chars = r.len_chars();
 
@@ -628,8 +623,6 @@ impl Text {
   }
 
   fn _n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
-    // use crate::defaults::ascii::end_of_line as ascii_eol;
-
     debug_assert!(n > 0);
     let mut i = absolute_char_idx as isize;
     let mut acc = 0;

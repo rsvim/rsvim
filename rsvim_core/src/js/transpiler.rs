@@ -1,8 +1,5 @@
 //! Js module transpiler.
 
-// Re-export
-pub use typescript::TypeScript;
-
 // pub mod jsx;
 // pub mod tsx;
 pub mod typescript;
@@ -10,3 +7,5 @@ pub mod typescript;
 
 #[cfg(test)]
 mod typescript_tests;
+
+pub use typescript::TypeScript;

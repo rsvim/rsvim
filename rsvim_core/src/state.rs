@@ -10,6 +10,10 @@
 //! Besides, there're some other internal states which are not editing modes or visible to
 //! user, but help maintaining the internal state of the editor:
 
+pub mod fsm;
+pub mod mode;
+pub mod ops;
+
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::msg::JsMessage;
@@ -27,10 +31,6 @@ use fsm::SelectStateful;
 use fsm::TerminalStateful;
 use fsm::VisualStateful;
 use tokio::sync::mpsc::Sender;
-
-pub mod fsm;
-pub mod mode;
-pub mod ops;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.

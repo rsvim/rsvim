@@ -1,5 +1,14 @@
 //! Window.
 
+pub mod content;
+pub mod opt;
+pub mod root;
+
+#[cfg(test)]
+mod content_tests;
+#[cfg(test)]
+mod opt_tests;
+
 use crate::buf::BufferWk;
 use crate::inode_enum_dispatcher;
 use crate::inode_itree_impl;
@@ -18,15 +27,6 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
-
-pub mod content;
-pub mod opt;
-pub mod root;
-
-#[cfg(test)]
-mod content_tests;
-#[cfg(test)]
-mod opt_tests;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.

@@ -16,6 +16,13 @@ use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 
+#[cfg(test)]
+use crate::buf::text::Text;
+#[cfg(test)]
+use crate::ui::viewport::CursorViewport;
+#[cfg(test)]
+use crate::ui::viewport::ViewportSearchDirection;
+
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
 pub struct NormalStateful {}
@@ -244,13 +251,6 @@ impl NormalStateful {
     StateMachine::NormalMode(NormalStateful::default())
   }
 }
-
-#[cfg(test)]
-use crate::buf::text::Text;
-#[cfg(test)]
-use crate::ui::viewport::CursorViewport;
-#[cfg(test)]
-use crate::ui::viewport::ViewportSearchDirection;
 
 impl NormalStateful {
   #[cfg(test)]

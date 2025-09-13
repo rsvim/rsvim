@@ -1,5 +1,13 @@
 //! Command-line widget.
 
+pub mod indicator;
+pub mod input;
+pub mod message;
+pub mod root;
+
+#[cfg(test)]
+pub mod indicator_tests;
+
 use crate::content::TextContentsWk;
 use crate::geo_rect_as;
 use crate::inode_enum_dispatcher;
@@ -23,14 +31,6 @@ use input::Input;
 use message::Message;
 use root::RootContainer;
 use std::sync::Arc;
-
-pub mod indicator;
-pub mod input;
-pub mod message;
-pub mod root;
-
-#[cfg(test)]
-pub mod indicator_tests;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.

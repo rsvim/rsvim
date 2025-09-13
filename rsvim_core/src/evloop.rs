@@ -1,5 +1,7 @@
 //! Event loop.
 
+pub mod writer;
+
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
@@ -56,8 +58,6 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 #[cfg(test)]
 use crossterm::event::KeyModifiers;
-
-pub mod writer;
 
 #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop

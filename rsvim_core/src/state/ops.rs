@@ -1,9 +1,9 @@
 //! The low-level editor operations.
 
-use compact_str::CompactString;
-
 pub mod cmdline_ops;
 pub mod cursor_ops;
+
+use compact_str::CompactString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor

@@ -1,5 +1,16 @@
 //! Vim buffers.
 
+pub mod opt;
+pub mod text;
+pub mod unicode;
+
+#[cfg(test)]
+mod opt_tests;
+#[cfg(test)]
+mod text_tests;
+#[cfg(test)]
+mod unicode_tests;
+
 use crate::prelude::*;
 use opt::*;
 use path_absolutize::Absolutize;
@@ -14,17 +25,6 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 use text::Text;
-
-pub mod opt;
-pub mod text;
-pub mod unicode;
-
-#[cfg(test)]
-mod opt_tests;
-#[cfg(test)]
-mod text_tests;
-#[cfg(test)]
-mod unicode_tests;
 
 /// Buffer ID.
 pub type BufferId = i32;
