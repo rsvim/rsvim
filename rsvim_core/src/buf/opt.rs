@@ -1,13 +1,12 @@
 //! Vim buffer options.
 
-use crate::defaults;
-use derive_builder::Builder;
-// Re-export
-pub use file_encoding::*;
-pub use file_format::*;
-
 pub mod file_encoding;
 pub mod file_format;
+
+use crate::defaults;
+use derive_builder::Builder;
+pub use file_encoding::*;
+pub use file_format::*;
 
 #[cfg(test)]
 mod file_encoding_tests;
