@@ -20,8 +20,7 @@ use tokio::time::Instant;
 type JsTaskId = usize;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
-pub type TaskCallback =
-  Box<dyn FnMut() -> Option<AnyResult<Vec<u8>>> + 'static>;
+pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;
 
 /// Next timer task ID.
 ///

@@ -165,10 +165,9 @@ impl EsModule {
 }
 
 pub struct EsModuleFuture {
-  pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub source: AnyResult<String>,
+  pub source: Option<AnyResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
@@ -295,7 +294,6 @@ impl JsFuture for EsModuleFuture {
         let load_import_id = js::next_future_id();
 
         let load_import_cb = EsModuleFuture {
-          future_id: load_import_id,
           path: specifier.clone(),
           module: Rc::clone(&module),
           source: None,
