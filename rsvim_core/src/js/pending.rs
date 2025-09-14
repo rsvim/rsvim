@@ -77,6 +77,7 @@ impl PendingQueue {
     msg::sync_send_to_master(
       self.master_tx.clone(),
       MasterMessage::LoadImportReq(msg::LoadImportReq {
+        task_id,
         specifier: specifier.to_string(),
       }),
     );
