@@ -1,6 +1,7 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
 use crate::js::JsFutureId;
+use crate::js::JsTaskId;
 use crate::prelude::*;
 use compact_str::CompactString;
 use std::fmt::Debug;
@@ -44,14 +45,8 @@ impl ExCommandReq {
 
 #[derive(Debug)]
 pub struct LoadImportResp {
-  pub future_id: JsFutureId,
-  pub source: AnyResult<String>,
-}
-
-impl LoadImportResp {
-  pub fn new(future_id: JsFutureId, source: AnyResult<String>) -> Self {
-    Self { future_id, source }
-  }
+  pub task_id: JsTaskId,
+  pub maybe_source: Option<AnyResult<Vec<u8>>>,
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".

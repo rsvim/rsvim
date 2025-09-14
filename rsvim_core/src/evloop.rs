@@ -622,14 +622,20 @@ impl EventLoop {
           });
         }
         MasterMessage::LoadImportReq(req) => {
-          trace!("Recv LoadImportReq:{:?}", req.future_id);
+          trace!("Recv LoadImportReq:{:?}", req.task_id);
           let maybe_source = async_load_import(&req.specifier, false).await;
           let _ = self
             .jsrt_forwarder_tx
-            .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(
-              req.future_id,
-              maybe_source,
-            )))
+            .send(JsMessage::LoadImportResp(msg::LoadImportResp {
+              task_id: req.task_id,
+              maybe_source: match maybe_source {
+                Ok(source) => Some(Ok(
+                  bincode::encode_to_vec(source, bincode::config::standard())
+                    .unwrap(),
+                )),
+                Err(e) => Some(Err(e)),
+              },
+            }))
             .await;
         }
         MasterMessage::TickAgainReq => {

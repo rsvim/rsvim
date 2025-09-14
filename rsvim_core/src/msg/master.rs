@@ -1,8 +1,8 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
-use crate::js::JsFuture;
 use crate::js::JsFutureId;
+use crate::js::JsTaskId;
 use compact_str::CompactString;
 use std::fmt::Debug;
 use tokio::sync::mpsc::Sender;

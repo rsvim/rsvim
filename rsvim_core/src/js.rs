@@ -77,6 +77,7 @@ pub trait JsFuture: Downcast {
 impl_downcast!(JsFuture);
 
 pub type JsFutureId = i32;
+pub type JsTaskId = usize;
 
 /// Next future/task ID for js runtime.
 ///
@@ -707,7 +708,7 @@ pub mod boost {
                 state.pending_futures.remove(&resp.future_id).unwrap();
               let load_cb_impl =
                 load_cb.downcast_mut::<EsModuleFuture>().unwrap();
-              load_cb_impl.source = Some(resp.source);
+              load_cb_impl.source = Some(resp.maybe_source);
               futures.push(load_cb);
             }
             JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),

@@ -2,6 +2,7 @@
 
 use crate::js::JsFutureId;
 use crate::js::JsRuntimeStateRc;
+use crate::js::JsTaskId;
 use crate::js::module::EsModuleFuture;
 use crate::msg;
 use crate::msg::JsMessage;
@@ -16,8 +17,6 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use tokio::sync::mpsc::Sender;
 use tokio::time::Instant;
-
-pub type JsTaskId = usize;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
 pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;
@@ -121,7 +120,7 @@ impl PendingQueue {
           let mut load_cb =
             state.pending_futures.remove(&resp.future_id).unwrap();
           let load_cb_impl = load_cb.downcast_mut::<EsModuleFuture>().unwrap();
-          load_cb_impl.source = Some(resp.source);
+          load_cb_impl.source = Some(resp.maybe_source);
           self.futures.push(load_cb);
         }
         JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
