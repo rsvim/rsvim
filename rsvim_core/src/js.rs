@@ -26,7 +26,6 @@ mod module_tests;
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::module::EsModuleFuture;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
@@ -693,7 +692,7 @@ pub mod boost {
           }
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{:?}", req.future_id);
-            let mut state = state_rc.borrow();
+            let mut state = state_rc.borrow_mut();
             let commands = state.commands.clone();
             let commands = lock!(commands);
             if let Some(command_cb) = commands.parse(&req.payload) {
