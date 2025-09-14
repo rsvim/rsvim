@@ -50,7 +50,6 @@ use module::ModuleStatus;
 use module::fetch_module;
 use module::fetch_module_tree;
 use module::resolve_import;
-use pending::PendingQueue;
 use pending::TaskCallback;
 use pending::TimerCallback;
 use std::rc::Rc;
@@ -353,11 +352,10 @@ pub mod boost {
     pub context: v8::Global<v8::Context>,
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
-    /// Pending async tasks.
+    /// Pending timers.
     pub pending_timers: HashMap<JsFutureId, TimerCallback>,
+    /// Pending load import tasks.
     pub pending_imports: HashMap<JsTaskId, TaskCallback>,
-    /// Timeout handles, i.e. timer IDs.
-    pub timer_handles: HashSet<JsFutureId>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -464,9 +462,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: HashMap::new(),
         pending_imports: HashMap::new(),
-        timer_handles: HashSet::new(),
-        // interrupt_handle: event_loop.interrupt_handle(),
-        pending_futures: HashMap::new(),
+        pending_futures: vec![],
         // timeout_queue: BTreeMap::new(),
         startup_moment,
         time_origin,
@@ -541,9 +537,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: HashMap::new(),
         pending_imports: HashMap::new(),
-        timer_handles: HashSet::new(),
-        // interrupt_handle: event_loop.interrupt_handle(),
-        pending_futures: HashMap::new(),
+        pending_futures: vec![],
         // timeout_queue: BTreeMap::new(),
         startup_moment,
         time_origin,
