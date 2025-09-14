@@ -4,7 +4,6 @@
 use crate::js::JsFutureId;
 use crate::js::JsTaskId;
 use compact_str::CompactString;
-use std::fmt::Debug;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
 use tokio::time::Instant;
