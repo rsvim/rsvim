@@ -23,6 +23,7 @@ pub struct ExCommand {
 
 impl JsFuture for ExCommand {
   fn run(&mut self, scope: &mut v8::HandleScope) {
+    trace!("|ExCommand| run:{:?}", self.task_id);
     debug_assert!(self.is_builtin_js);
     let filename = format!("<command{}>", self.task_id);
 
