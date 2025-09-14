@@ -14,14 +14,14 @@ const JS_COMMAND_NAME: &str = "js";
 
 #[derive(Debug, Clone)]
 /// Ex command execution instance
-pub struct ExCommand {
+pub struct ExCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
   pub body: CompactString,
   pub is_builtin_js: bool,
 }
 
-impl JsFuture for ExCommand {
+impl JsFuture for ExCommandFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
     trace!("|ExCommand| run:{:?}", self.task_id);
     debug_assert!(self.is_builtin_js);
@@ -55,7 +55,7 @@ pub struct ExCommandsManager {
 arc_mutex_ptr!(ExCommandsManager);
 
 impl ExCommandsManager {
-  pub fn parse(&self, payload: &str) -> Option<ExCommand> {
+  pub fn parse(&self, payload: &str) -> Option<ExCommandFuture> {
     let (name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
@@ -73,14 +73,14 @@ impl ExCommandsManager {
     let task_id = pending::next_task_id();
     if is_builtin_js {
       debug_assert!(!self.commands.contains(&name));
-      Some(ExCommand {
+      Some(ExCommandFuture {
         task_id,
         name,
         body,
         is_builtin_js,
       })
     } else if self.commands.contains(&name) {
-      Some(ExCommand {
+      Some(ExCommandFuture {
         task_id,
         name,
         body,
