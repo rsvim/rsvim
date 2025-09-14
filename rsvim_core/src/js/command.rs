@@ -15,34 +15,15 @@ const JS_COMMAND_NAME: &str = "js";
 #[derive(Debug, Clone)]
 /// Ex command execution instance
 pub struct ExCommand {
-  future_id: JsFutureId,
-  name: CompactString,
-  body: CompactString,
-  is_builtin_js: bool,
-}
-
-impl ExCommand {
-  pub fn future_id(&self) -> JsFutureId {
-    self.future_id
-  }
-
-  pub fn name(&self) -> &str {
-    &self.name
-  }
-
-  pub fn body(&self) -> &str {
-    &self.body
-  }
-
-  pub fn is_builtin_js(&self) -> bool {
-    self.is_builtin_js
-  }
+  pub future_id: JsFutureId,
+  pub name: CompactString,
+  pub body: CompactString,
+  pub is_builtin_js: bool,
 }
 
 impl JsFuture for ExCommand {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    // For now only `:js` command is supported.
-    debug_assert!(self.is_builtin_js());
+    debug_assert!(self.is_builtin_js);
     let filename = format!("<command{}>", self.future_id);
 
     match execute_module(scope, &filename, Some(self.body().trim())) {
@@ -65,7 +46,7 @@ impl JsFuture for ExCommand {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ExCommandsManager {
   commands: HashSet<CompactString>,
 }
@@ -73,12 +54,6 @@ pub struct ExCommandsManager {
 arc_mutex_ptr!(ExCommandsManager);
 
 impl ExCommandsManager {
-  pub fn new() -> Self {
-    Self {
-      commands: HashSet::new(),
-    }
-  }
-
   pub fn parse(&self, payload: &str) -> Option<ExCommand> {
     let (name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
@@ -113,11 +88,5 @@ impl ExCommandsManager {
     } else {
       None
     }
-  }
-}
-
-impl Default for ExCommandsManager {
-  fn default() -> Self {
-    Self::new()
   }
 }
