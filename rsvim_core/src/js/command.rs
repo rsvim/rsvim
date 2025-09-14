@@ -6,7 +6,6 @@ use crate::js::JsTaskId;
 use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::next_task_id;
-use crate::js::pending;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
