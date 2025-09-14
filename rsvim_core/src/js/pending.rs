@@ -17,7 +17,7 @@ use std::sync::atomic::Ordering;
 use tokio::sync::mpsc::Sender;
 use tokio::time::Instant;
 
-type JsTaskId = usize;
+pub type JsTaskId = usize;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
 pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;

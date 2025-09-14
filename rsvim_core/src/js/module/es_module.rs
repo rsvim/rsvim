@@ -291,7 +291,7 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if not_seen_before {
-        let load_import_cb = {
+        let load_cb = {
           let state_rc = state_rc.clone();
           let specifier = specifier.clone();
           move |maybe_result: Option<AnyResult<Vec<u8>>>| {
@@ -304,8 +304,9 @@ impl JsFuture for EsModuleFuture {
             state.pending_futures.insert(0, Box::new(fut));
           }
         };
-        let load_import_cb = Box::new(load_import_cb);
-        state.pending_queue.load_import(&specifier, load_import_cb);
+        state
+          .pending_queue
+          .load_import(&specifier, Box::new(load_cb));
 
         state.module_map.seen.insert(specifier.clone(), status);
         trace!(

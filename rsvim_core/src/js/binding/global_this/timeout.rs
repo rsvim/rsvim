@@ -82,12 +82,10 @@ pub fn set_timeout(
       state.pending_futures.insert(0, Box::new(fut));
     }
   };
-  let timer_cb = Box::new(timer_cb);
-
   let timer_id = state_rc
     .borrow_mut()
     .pending_queue
-    .create_timer(expire_at, timer_cb);
+    .create_timer(expire_at, Box::new(timer_cb));
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }
