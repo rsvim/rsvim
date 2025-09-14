@@ -1,11 +1,12 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
-use crate::js::JsFutureId;
+use crate::js::JsTaskId;
+use crate::js::JsTimerId;
 use crate::prelude::*;
 use compact_str::CompactString;
-use std::time::Duration;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
+use tokio::time::Instant;
 
 #[derive(Debug)]
 /// Message sent to [`JsRuntime`](crate::js::JsRuntime).
@@ -25,41 +26,19 @@ pub enum JsMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub future_id: JsFutureId,
-  pub duration: Duration,
-}
-
-impl TimeoutResp {
-  pub fn new(future_id: JsFutureId, duration: Duration) -> Self {
-    Self {
-      future_id,
-      duration,
-    }
-  }
+  pub timer_id: JsTimerId,
+  pub expire_at: Instant,
 }
 
 #[derive(Debug)]
 pub struct ExCommandReq {
-  pub future_id: JsFutureId,
   pub payload: CompactString,
-}
-
-impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, payload: CompactString) -> Self {
-    ExCommandReq { future_id, payload }
-  }
 }
 
 #[derive(Debug)]
 pub struct LoadImportResp {
-  pub future_id: JsFutureId,
-  pub source: AnyResult<String>,
-}
-
-impl LoadImportResp {
-  pub fn new(future_id: JsFutureId, source: AnyResult<String>) -> Self {
-    Self { future_id, source }
-  }
+  pub task_id: JsTaskId,
+  pub maybe_source: Option<AnyResult<Vec<u8>>>,
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".

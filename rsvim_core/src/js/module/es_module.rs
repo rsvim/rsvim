@@ -1,8 +1,6 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsFutureId;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::err::JsError;
@@ -10,8 +8,7 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::create_origin;
 use crate::js::module::resolve_import;
-use crate::msg;
-use crate::msg::MasterMessage;
+use crate::js::pending;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
@@ -165,10 +162,9 @@ impl EsModule {
 }
 
 pub struct EsModuleFuture {
-  pub future_id: JsFutureId,
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub source: Option<AnyResult<String>>,
+  pub maybe_source: Option<AnyResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
@@ -189,6 +185,7 @@ impl EsModuleFuture {
 impl JsFuture for EsModuleFuture {
   /// Drives the future to completion.
   fn run(&mut self, scope: &mut v8::HandleScope) {
+    trace!("|EsModuleFuture run|");
     let state_rc = JsRuntime::state(scope);
     let mut state = state_rc.borrow_mut();
 
@@ -199,10 +196,14 @@ impl JsFuture for EsModuleFuture {
     }
 
     // Extract module's source code.
-    debug_assert!(self.source.is_some());
-    let source = self.source.take().unwrap();
-    let source = match source {
-      Ok(source) => source,
+    debug_assert!(self.maybe_source.is_some());
+    let source = self.maybe_source.take().unwrap();
+    let (source, _source_len) = match source {
+      Ok(source) => bincode::decode_from_slice::<
+        String,
+        bincode::config::Configuration,
+      >(&source, bincode::config::standard())
+      .unwrap(),
       Err(e) => {
         self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
         return;
@@ -292,30 +293,25 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if not_seen_before {
-        let load_import_id = js::next_future_id();
-
-        let load_import_cb = EsModuleFuture {
-          future_id: load_import_id,
-          path: specifier.clone(),
-          module: Rc::clone(&module),
-          source: None,
+        let loader_cb = {
+          let state_rc = state_rc.clone();
+          let specifier = specifier.clone();
+          move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+            let fut = EsModuleFuture {
+              path: specifier.clone(),
+              module: Rc::clone(&module),
+              maybe_source: maybe_result,
+            };
+            let mut state = state_rc.borrow_mut();
+            state.pending_futures.insert(0, Box::new(fut));
+          }
         };
-        state
-          .pending_futures
-          .insert(load_import_id, Box::new(load_import_cb));
+        pending::create_loader(&mut state, &specifier, Box::new(loader_cb));
 
         state.module_map.seen.insert(specifier.clone(), status);
         trace!(
           "|EsModuleFuture::run| ModuleMap seen {:?} {:?}",
           specifier, status
-        );
-
-        msg::sync_send_to_master(
-          state.master_tx.clone(),
-          MasterMessage::LoadImportReq(msg::LoadImportReq::new(
-            load_import_id,
-            specifier.clone(),
-          )),
         );
       }
     }

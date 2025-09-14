@@ -1,6 +1,5 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::js;
 use crate::js::JsRuntime;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -31,10 +30,9 @@ pub fn echo(
   } else {
     msg::sync_send_to_master(
       state.master_tx.clone(),
-      MasterMessage::PrintReq(msg::PrintReq::new(
-        js::next_future_id(),
-        message.to_compact_string(),
-      )),
+      MasterMessage::PrintReq(msg::PrintReq {
+        payload: message.to_compact_string(),
+      }),
     );
   }
 }

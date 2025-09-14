@@ -17,6 +17,7 @@ pub mod exception;
 pub mod hook;
 pub mod loader;
 pub mod module;
+pub mod pending;
 pub mod transpiler;
 
 #[cfg(test)]
@@ -25,7 +26,6 @@ mod module_tests;
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::module::EsModuleFuture;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
@@ -37,8 +37,6 @@ pub use boost::*;
 pub use build::*;
 use command::ExCommandsManagerArc;
 use compact_str::ToCompactString;
-use downcast_rs::Downcast;
-use downcast_rs::impl_downcast;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
@@ -50,9 +48,12 @@ use module::ModuleStatus;
 use module::fetch_module;
 use module::fetch_module_tree;
 use module::resolve_import;
+use pending::TaskCallback;
+use pending::TimerCallback;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
+use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
@@ -68,18 +69,21 @@ pub fn v8_version() -> &'static str {
 /// An abstract interface for javascript `Promise` and `async`.
 /// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
 /// the async task into tokio `spawn` API.
-pub trait JsFuture: Downcast {
+pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
 
-impl_downcast!(JsFuture);
+pub type JsTimerId = i32;
+pub type JsTaskId = usize;
 
-pub type JsFutureId = i32;
+/// Next task ID. It starts form 1.
+pub fn next_task_id() -> JsTaskId {
+  static VALUE: AtomicUsize = AtomicUsize::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
 
-/// Next future/task ID for js runtime.
-///
-/// NOTE: Start form 1.
-pub fn next_future_id() -> JsFutureId {
+/// Next timer ID. It starts form 1.
+pub fn next_timer_id() -> JsTimerId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
@@ -349,12 +353,12 @@ pub mod boost {
     pub context: v8::Global<v8::Context>,
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
-    /// Timeout handles, i.e. timer IDs.
-    pub timeout_handles: HashSet<JsFutureId>,
-    // /// A handle to the event-loop that can interrupt the poll-phase.
-    // pub interrupt_handle: LoopInterruptHandle,
+    /// Pending timers.
+    pub pending_timers: HashMap<JsTimerId, TimerCallback>,
+    /// Pending load import tasks.
+    pub pending_imports: HashMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
-    pub pending_futures: HashMap<JsFutureId, Box<dyn JsFuture>>,
+    pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
     pub startup_moment: Instant,
     /// Specifies the timestamp which the current process began in Unix time.
@@ -457,10 +461,9 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        timeout_handles: HashSet::new(),
-        // interrupt_handle: event_loop.interrupt_handle(),
-        pending_futures: HashMap::new(),
-        // timeout_queue: BTreeMap::new(),
+        pending_timers: HashMap::new(),
+        pending_imports: HashMap::new(),
+        pending_futures: vec![],
         startup_moment,
         time_origin,
         // next_tick_queue: Vec::new(),
@@ -532,10 +535,9 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        timeout_handles: HashSet::new(),
-        // interrupt_handle: event_loop.interrupt_handle(),
-        pending_futures: HashMap::new(),
-        // timeout_queue: BTreeMap::new(),
+        pending_timers: HashMap::new(),
+        pending_imports: HashMap::new(),
+        pending_futures: vec![],
         startup_moment,
         time_origin,
         // next_tick_queue: Vec::new(),
@@ -654,68 +656,62 @@ pub mod boost {
       let scope = &mut self.handle_scope();
       let state_rc = Self::state(scope);
 
-      let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
+      // Drain all pending messages
+      let mut messages: Vec<JsMessage> = vec![];
       {
         let mut state = state_rc.borrow_mut();
-
         while let Ok(msg) = state.jsrt_rx.try_recv() {
-          match msg {
-            JsMessage::TimeoutResp(resp) => {
-              trace!("Recv TimeResp:{:?}", resp.future_id);
-              let timeout_id_exists =
-                state.timeout_handles.remove(&resp.future_id);
-              trace!("TimeoutId exists:{timeout_id_exists:?}");
-
-              debug_assert!(
-                state.pending_futures.contains_key(&resp.future_id)
-              );
-              let timeout_cb =
-                state.pending_futures.remove(&resp.future_id).unwrap();
-
-              // Only execute 'timeout_cb' if timeout_id still exists,
-              // otherwise it means the 'timeout_cb' is been cleared by
-              // [`clear_timeout`](crate::js::binding::global_this::timeout::clear_timeout).
-              if timeout_id_exists {
-                futures.push(timeout_cb);
-              }
-            }
-            JsMessage::ExCommandReq(req) => {
-              trace!("Recv ExCommandReq:{:?}", req.future_id);
-              debug_assert!(
-                !state.pending_futures.contains_key(&req.future_id)
-              );
-              // For now only `:js` command is supported.
-              // debug_assert!(req.payload.trim().starts_with("js"));
-
-              let commands = state.commands.clone();
-              let commands = lock!(commands);
-              if let Some(command_cb) = commands.parse(&req.payload) {
-                futures.push(Box::new(command_cb));
-              } else {
-                // Print error message
-                let e = format!("Error: invalid command {:?}", req.payload);
-                report_js_error!(state, e);
-              }
-            }
-            JsMessage::LoadImportResp(resp) => {
-              trace!("Recv LoadImportResp:{:?}", resp.future_id);
-              debug_assert!(
-                state.pending_futures.contains_key(&resp.future_id)
-              );
-              let mut load_cb =
-                state.pending_futures.remove(&resp.future_id).unwrap();
-              let load_cb_impl =
-                load_cb.downcast_mut::<EsModuleFuture>().unwrap();
-              load_cb_impl.source = Some(resp.source);
-              futures.push(load_cb);
-            }
-            JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
-          }
+          messages.push(msg);
         }
-
-        // Drop borrowed `state` or it will panics when running these futures.
+        // Drop(state);
       }
 
+      for msg in messages {
+        match msg {
+          JsMessage::TimeoutResp(resp) => {
+            trace!("Recv TimeResp:{:?}", resp.timer_id);
+            let maybe_timer_cb =
+              state_rc.borrow_mut().pending_timers.remove(&resp.timer_id);
+            if let Some(mut timer_cb) = maybe_timer_cb {
+              timer_cb();
+            }
+            // Otherwise the 'timer_cb' is already been removed by the
+            // `clear_timeout` API.
+          }
+          JsMessage::ExCommandReq(req) => {
+            trace!("Recv ExCommandReq:{:?}", req.payload);
+            let mut state = state_rc.borrow_mut();
+            let commands = state.commands.clone();
+            let commands = lock!(commands);
+            if let Some(command_cb) = commands.parse(&req.payload) {
+              state.pending_futures.push(Box::new(command_cb));
+            } else {
+              // Print error message
+              let e = format!("Error: invalid command {:?}", req.payload);
+              report_js_error!(state, e);
+            }
+          }
+          JsMessage::LoadImportResp(resp) => {
+            trace!("Recv LoadImportResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc
+                .borrow()
+                .pending_imports
+                .contains_key(&resp.task_id)
+            );
+            let mut loader_cb = state_rc
+              .borrow_mut()
+              .pending_imports
+              .remove(&resp.task_id)
+              .unwrap();
+            loader_cb(resp.maybe_source);
+          }
+          JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+        }
+      }
+
+      let futures: Vec<Box<dyn JsFuture>> =
+        state_rc.borrow_mut().pending_futures.drain(..).collect();
       for mut fut in futures {
         fut.run(scope);
         if let Some(exception) = check_exceptions(scope) {

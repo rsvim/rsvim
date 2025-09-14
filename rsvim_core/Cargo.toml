@@ -60,10 +60,10 @@ smallvec = { workspace = true }
 litemap = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
-downcast-rs = { workspace = true }
 async-trait = { workspace = true }
 ringbuf = { workspace = true }
 serde_json = { workspace = true }
+bincode = { workspace = true }
 
 # NOTE: Javascript dependencies {
 

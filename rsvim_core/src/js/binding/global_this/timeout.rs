@@ -1,24 +1,21 @@
 //! Timeout APIs.
 
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsFutureId;
 use crate::js::JsRuntime;
-use crate::msg;
-use crate::msg::MasterMessage;
+use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
-use std::time::Duration;
+use tokio::time::Duration;
+use tokio::time::Instant;
 
 struct TimeoutFuture {
-  future_id: JsFutureId,
   cb: Rc<v8::Global<v8::Function>>,
   params: Rc<Vec<v8::Global<v8::Value>>>,
 }
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("TimeoutFuture run:{:?}", self.future_id);
+    trace!("|TimeoutFuture| run");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -71,28 +68,27 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let mut state = state_rc.borrow_mut();
   let params = Rc::new(params);
 
   // Return timeout's internal id.
-  let timer_id = js::next_future_id();
-  msg::sync_send_to_master(
-    state.master_tx.clone(),
-    MasterMessage::TimeoutReq(msg::TimeoutReq::new(
-      timer_id,
-      Duration::from_millis(millis),
-    )),
-  );
-
-  let timeout_cb = TimeoutFuture {
-    future_id: timer_id,
-    cb: Rc::clone(&callback),
-    params: Rc::clone(&params),
+  let expire_at = Instant::now() + Duration::from_millis(millis);
+  let timer_cb = {
+    let state_rc = state_rc.clone();
+    move || {
+      let fut = TimeoutFuture {
+        cb: Rc::clone(&callback),
+        params: Rc::clone(&params),
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.insert(0, Box::new(fut));
+    }
   };
-  state.pending_futures.insert(timer_id, Box::new(timeout_cb));
-  state.timeout_handles.insert(timer_id);
+
+  let mut state = state_rc.borrow_mut();
+  let timer_id =
+    pending::create_timer(&mut state, expire_at, Box::new(timer_cb));
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
-  trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
+  trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }
 
 /// Javascript `clearTimeout` API.
@@ -105,6 +101,7 @@ pub fn clear_timeout(
   let timer_id = args.get(0).int32_value(scope).unwrap();
   let state_rc = JsRuntime::state(scope);
 
-  state_rc.borrow_mut().timeout_handles.remove(&timer_id);
-  trace!("clear_timeout: {:?}", timer_id);
+  let mut state = state_rc.borrow_mut();
+  pending::remove_timer(&mut state, timer_id);
+  trace!("|clear_timeout| timer_id:{:?}", timer_id);
 }

@@ -1,6 +1,5 @@
 //! The command-line ex mode.
 
-use crate::js::next_future_id;
 use crate::msg;
 use crate::msg::ExCommandReq;
 use crate::msg::JsMessage;
@@ -107,10 +106,9 @@ impl CommandLineExStateful {
 
     msg::sync_send_to_js(
       data_access.jsrt_forwarder_tx.clone(),
-      JsMessage::ExCommandReq(ExCommandReq::new(
-        next_future_id(),
-        cmdline_input_content,
-      )),
+      JsMessage::ExCommandReq(ExCommandReq {
+        payload: cmdline_input_content,
+      }),
     );
 
     StateMachine::NormalMode(super::NormalStateful::default())

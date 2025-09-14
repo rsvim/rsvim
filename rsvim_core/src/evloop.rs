@@ -7,7 +7,6 @@ use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
-use crate::js;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
@@ -185,7 +184,7 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
     let ex_commands_manager =
-      ExCommandsManager::to_arc(ExCommandsManager::new());
+      ExCommandsManager::to_arc(ExCommandsManager::default());
 
     // State
     let state_machine = StateMachine::default();
@@ -415,10 +414,9 @@ impl EventLoop {
           // Send error message to command-line
           msg::sync_send_to_master(
             self.master_tx.clone(),
-            MasterMessage::PrintReq(msg::PrintReq::new(
-              js::next_future_id(),
-              e.to_compact_string(),
-            )),
+            MasterMessage::PrintReq(msg::PrintReq {
+              payload: e.to_compact_string(),
+            }),
           );
         }
       }
@@ -445,10 +443,9 @@ impl EventLoop {
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
             msg::sync_send_to_master(
               self.master_tx.clone(),
-              MasterMessage::PrintReq(msg::PrintReq::new(
-                js::next_future_id(),
-                e.to_compact_string(),
-              )),
+              MasterMessage::PrintReq(msg::PrintReq {
+                payload: e.to_compact_string(),
+              }),
             );
           }
         }
@@ -594,12 +591,12 @@ impl EventLoop {
     for message in messages {
       match message {
         MasterMessage::ExitReq(req) => {
-          trace!("Receive ExitReq:{:?}", req.future_id);
+          trace!("Recv ExitReq:{:?}", req.exit_code);
           self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }
         MasterMessage::PrintReq(req) => {
-          trace!("Receive PrintReq:{:?}", req.future_id);
+          trace!("Recv PrintReq:{:?}", req.payload);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
           cmdline_ops::cmdline_set_message(
@@ -609,31 +606,37 @@ impl EventLoop {
           );
         }
         MasterMessage::TimeoutReq(req) => {
-          trace!("Receive TimeoutReq:{:?}", req.future_id);
+          trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            tokio::time::sleep(req.duration).await;
+            tokio::time::sleep_until(req.expire_at).await;
             let _ = jsrt_forwarder_tx
-              .send(JsMessage::TimeoutResp(msg::TimeoutResp::new(
-                req.future_id,
-                req.duration,
-              )))
+              .send(JsMessage::TimeoutResp(msg::TimeoutResp {
+                timer_id: req.timer_id,
+                expire_at: req.expire_at,
+              }))
               .await;
           });
         }
         MasterMessage::LoadImportReq(req) => {
-          trace!("Receive LoadImportReq:{:?}", req.future_id);
+          trace!("Recv LoadImportReq:{:?}", req.task_id);
           let maybe_source = async_load_import(&req.specifier, false).await;
           let _ = self
             .jsrt_forwarder_tx
-            .send(JsMessage::LoadImportResp(msg::LoadImportResp::new(
-              req.future_id,
-              maybe_source,
-            )))
+            .send(JsMessage::LoadImportResp(msg::LoadImportResp {
+              task_id: req.task_id,
+              maybe_source: match maybe_source {
+                Ok(source) => Some(Ok(
+                  bincode::encode_to_vec(source, bincode::config::standard())
+                    .unwrap(),
+                )),
+                Err(e) => Some(Err(e)),
+              },
+            }))
             .await;
         }
         MasterMessage::TickAgainReq => {
-          trace!("Receive TickAgainReq");
+          trace!("Recv TickAgainReq");
           let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
         }
       }

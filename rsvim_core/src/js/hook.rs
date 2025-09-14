@@ -1,6 +1,5 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
-use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding::set_exception_code;
 use crate::js::binding::throw_type_error;
@@ -8,8 +7,7 @@ use crate::js::module::EsModuleFuture;
 use crate::js::module::ModuleGraph;
 use crate::js::module::ModuleStatus;
 use crate::js::module::resolve_import;
-use crate::msg;
-use crate::msg::MasterMessage;
+use crate::js::pending;
 use crate::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -254,25 +252,20 @@ pub fn host_import_module_dynamically_cb<'s>(
   );
 
   // Use the event-loop to asynchronously load the requested module.
-  let load_import_id = js::next_future_id();
-
-  let load_import_cb = EsModuleFuture {
-    future_id: load_import_id,
-    path: specifier.clone(),
-    module: graph_rc.borrow().root_rc(),
-    source: None,
+  let loader_cb = {
+    let state_rc = state_rc.clone();
+    let specifier = specifier.clone();
+    move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+      let fut = EsModuleFuture {
+        path: specifier.clone(),
+        module: graph_rc.borrow().root_rc(),
+        maybe_source: maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.insert(0, Box::new(fut));
+    }
   };
-  state
-    .pending_futures
-    .insert(load_import_id, Box::new(load_import_cb));
-
-  msg::sync_send_to_master(
-    state.master_tx.clone(),
-    MasterMessage::LoadImportReq(msg::LoadImportReq::new(
-      load_import_id,
-      specifier.clone(),
-    )),
-  );
+  pending::create_loader(&mut state, &specifier, Box::new(loader_cb));
 
   Some(promise)
 }
