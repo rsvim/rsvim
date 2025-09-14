@@ -15,13 +15,13 @@ pub type TimerCallback = Box<dyn FnMut() + 'static>;
 pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;
 
 /// Next task ID. It starts form 1.
-fn next_task_id() -> JsTaskId {
+pub fn next_task_id() -> JsTaskId {
   static VALUE: AtomicUsize = AtomicUsize::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
 /// Next timer ID. It starts form 1.
-fn next_timer_id() -> JsFutureId {
+pub fn next_timer_id() -> JsFutureId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }

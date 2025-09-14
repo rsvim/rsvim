@@ -6,6 +6,7 @@ use crate::js::JsFutureId;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::execute_module;
+use crate::js::pending;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -15,7 +16,7 @@ const JS_COMMAND_NAME: &str = "js";
 #[derive(Debug, Clone)]
 /// Ex command execution instance
 pub struct ExCommand {
-  pub future_id: JsFutureId,
+  pub task_id: JsFutureId,
   pub name: CompactString,
   pub body: CompactString,
   pub is_builtin_js: bool,
@@ -24,7 +25,7 @@ pub struct ExCommand {
 impl JsFuture for ExCommand {
   fn run(&mut self, scope: &mut v8::HandleScope) {
     debug_assert!(self.is_builtin_js);
-    let filename = format!("<command{}>", self.future_id);
+    let filename = format!("<command{}>", self.task_id);
 
     match execute_module(scope, &filename, Some(self.body.trim())) {
       Ok(_) => { /* do nothing */ }
@@ -69,18 +70,18 @@ impl ExCommandsManager {
     };
 
     let is_builtin_js = name == JS_COMMAND_NAME;
-    let future_id = js::next_future_id();
+    let task_id = pending::next_task_id();
     if is_builtin_js {
       debug_assert!(!self.commands.contains(&name));
       Some(ExCommand {
-        future_id,
+        task_id,
         name,
         body,
         is_builtin_js,
       })
     } else if self.commands.contains(&name) {
       Some(ExCommand {
-        future_id,
+        task_id,
         name,
         body,
         is_builtin_js,
