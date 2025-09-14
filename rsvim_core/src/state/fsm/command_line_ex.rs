@@ -1,6 +1,5 @@
 //! The command-line ex mode.
 
-use crate::js::next_future_id;
 use crate::msg;
 use crate::msg::ExCommandReq;
 use crate::msg::JsMessage;
