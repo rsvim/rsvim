@@ -164,7 +164,7 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub source: Option<AnyResult<Vec<u8>>>,
+  pub maybe_source: Option<AnyResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
@@ -196,8 +196,8 @@ impl JsFuture for EsModuleFuture {
     }
 
     // Extract module's source code.
-    debug_assert!(self.source.is_some());
-    let source = self.source.take().unwrap();
+    debug_assert!(self.maybe_source.is_some());
+    let source = self.maybe_source.take().unwrap();
     let (source, _source_len) = match source {
       Ok(source) => bincode::decode_from_slice::<
         String,
@@ -300,7 +300,7 @@ impl JsFuture for EsModuleFuture {
             let fut = EsModuleFuture {
               path: specifier.clone(),
               module: Rc::clone(&module),
-              source: maybe_result,
+              maybe_source: maybe_result,
             };
             let mut state = state_rc.borrow_mut();
             state.pending_futures.insert(0, Box::new(fut));

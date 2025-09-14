@@ -259,7 +259,7 @@ pub fn host_import_module_dynamically_cb<'s>(
       let fut = EsModuleFuture {
         path: specifier.clone(),
         module: graph_rc.borrow().root_rc(),
-        source: maybe_result,
+        maybe_source: maybe_result,
       };
       let mut state = state_rc.borrow_mut();
       state.pending_futures.insert(0, Box::new(fut));
