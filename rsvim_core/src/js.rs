@@ -52,6 +52,8 @@ use module::fetch_module;
 use module::fetch_module_tree;
 use module::resolve_import;
 use pending::PendingQueue;
+use pending::TaskCallback;
+use pending::TimerCallback;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
@@ -353,7 +355,8 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending async tasks.
-    pub pending_queue: PendingQueue,
+    pub pending_timers: HashMap<JsFutureId, TimerCallback>,
+    pub pending_imports: HashMap<JsTaskId, TaskCallback>,
     /// Timeout handles, i.e. timer IDs.
     pub timer_handles: HashSet<JsFutureId>,
     // /// A handle to the event-loop that can interrupt the poll-phase.
@@ -462,7 +465,8 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        pending_queue: PendingQueue::new(master_tx.clone()),
+        pending_timers: HashMap::new(),
+        pending_imports: HashMap::new(),
         timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),
@@ -538,7 +542,8 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        pending_queue: PendingQueue::new(master_tx.clone()),
+        pending_timers: HashMap::new(),
+        pending_imports: HashMap::new(),
         timer_handles: HashSet::new(),
         // interrupt_handle: event_loop.interrupt_handle(),
         pending_futures: HashMap::new(),
@@ -661,8 +666,61 @@ pub mod boost {
       let scope = &mut self.handle_scope();
       let state_rc = Self::state(scope);
 
-      let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
+      let mut messages: Vec<JsMessage> = vec![];
+
+      // Drain all pending messages
       {
+        let state = state_rc.borrow();
+        while let Ok(msg) = state.jsrt_rx.try_recv() {
+          messages.push(msg);
+        }
+        // Drop state
+      }
+
+      for msg in messages {
+        match msg {
+          JsMessage::TimeoutResp(resp) => {
+            trace!("Recv TimeResp:{:?}", resp.timer_id);
+            match self.timers.remove(&resp.timer_id) {
+              Some(mut timer_cb) => {
+                timer_cb();
+              }
+              None => {
+                // Only execute 'timeout_cb' if timer_id still exists,
+                // otherwise it means the 'timer_cb' is been cleared by
+                // `clear_timeout` API.
+              }
+            }
+          }
+          JsMessage::ExCommandReq(req) => {
+            trace!("Recv ExCommandReq:{:?}", req.future_id);
+            let mut state = state_rc.borrow();
+            let commands = state.commands.clone();
+            let commands = lock!(commands);
+            if let Some(command_cb) = commands.parse(&req.payload) {
+              state.pending_futures.push(Box::new(command_cb));
+            } else {
+              // Print error message
+              let e = format!("Error: invalid command {:?}", req.payload);
+              report_js_error!(state, e);
+            }
+          }
+          JsMessage::LoadImportResp(resp) => {
+            trace!("Recv LoadImportResp:{:?}", resp.task_id);
+            match self.load_imports.remove(&resp.task_id) {
+              Some(mut load_cb) => {
+                load_cb(resp.maybe_source);
+              }
+              None => unreachable!(),
+            }
+          }
+          JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+        }
+      }
+
+      {
+        state_rc.borrow_mut().pending_queue.prepare(state_rc);
+
         let mut state = state_rc.borrow_mut();
 
         while let Ok(msg) = state.jsrt_rx.try_recv() {
