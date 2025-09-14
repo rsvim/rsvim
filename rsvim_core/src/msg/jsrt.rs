@@ -32,14 +32,7 @@ pub struct TimeoutResp {
 
 #[derive(Debug)]
 pub struct ExCommandReq {
-  pub future_id: JsFutureId,
   pub payload: CompactString,
-}
-
-impl ExCommandReq {
-  pub fn new(future_id: JsFutureId, payload: CompactString) -> Self {
-    ExCommandReq { future_id, payload }
-  }
 }
 
 #[derive(Debug)]
