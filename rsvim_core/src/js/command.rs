@@ -26,7 +26,7 @@ impl JsFuture for ExCommand {
     debug_assert!(self.is_builtin_js);
     let filename = format!("<command{}>", self.future_id);
 
-    match execute_module(scope, &filename, Some(self.body().trim())) {
+    match execute_module(scope, &filename, Some(self.body.trim())) {
       Ok(_) => { /* do nothing */ }
       Err(e) => {
         // Capture exception if there's any error while loading/evaluating module.

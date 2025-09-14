@@ -184,7 +184,7 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
     let ex_commands_manager =
-      ExCommandsManager::to_arc(ExCommandsManager::new());
+      ExCommandsManager::to_arc(ExCommandsManager::default());
 
     // State
     let state_machine = StateMachine::default();
