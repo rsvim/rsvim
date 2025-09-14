@@ -34,7 +34,6 @@ pub struct ExitReq {
 
 #[derive(Debug)]
 pub struct PrintReq {
-  pub future_id: JsFutureId,
   pub payload: CompactString,
 }
 

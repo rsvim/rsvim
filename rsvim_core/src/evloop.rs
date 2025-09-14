@@ -415,10 +415,9 @@ impl EventLoop {
           // Send error message to command-line
           msg::sync_send_to_master(
             self.master_tx.clone(),
-            MasterMessage::PrintReq(msg::PrintReq::new(
-              js::next_future_id(),
-              e.to_compact_string(),
-            )),
+            MasterMessage::PrintReq(msg::PrintReq {
+              payload: e.to_compact_string(),
+            }),
           );
         }
       }
@@ -445,10 +444,9 @@ impl EventLoop {
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
             msg::sync_send_to_master(
               self.master_tx.clone(),
-              MasterMessage::PrintReq(msg::PrintReq::new(
-                js::next_future_id(),
-                e.to_compact_string(),
-              )),
+              MasterMessage::PrintReq(msg::PrintReq {
+                payload: e.to_compact_string(),
+              }),
             );
           }
         }
