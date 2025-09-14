@@ -597,7 +597,7 @@ impl EventLoop {
           self.cancellation_token.cancel();
         }
         MasterMessage::PrintReq(req) => {
-          trace!("Recv PrintReq:{:?}", req.future_id);
+          trace!("Recv PrintReq:{:?}", req.payload);
           let mut tree = lock!(self.tree);
           let mut contents = lock!(self.contents);
           cmdline_ops::cmdline_set_message(
