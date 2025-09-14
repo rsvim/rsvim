@@ -671,16 +671,11 @@ pub mod boost {
             trace!("Recv TimeResp:{:?}", resp.timer_id);
             let maybe_timer_cb =
               state_rc.borrow_mut().pending_timers.remove(&resp.timer_id);
-            match maybe_timer_cb {
-              Some(mut timer_cb) => {
-                timer_cb();
-              }
-              None => {
-                // Only execute 'timeout_cb' if timer_id still exists,
-                // otherwise it means the 'timer_cb' is been cleared by
-                // `clear_timeout` API.
-              }
+            if let Some(mut timer_cb) = maybe_timer_cb {
+              timer_cb();
             }
+            // Otherwise the 'timer_cb' is already been removed by the
+            // `clear_timeout` API.
           }
           JsMessage::ExCommandReq(req) => {
             trace!("Recv ExCommandReq:{:?}", req.future_id);
