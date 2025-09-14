@@ -674,7 +674,7 @@ pub mod boost {
             // `clear_timeout` API.
           }
           JsMessage::ExCommandReq(req) => {
-            trace!("Recv ExCommandReq:{:?}", req.future_id);
+            trace!("Recv ExCommandReq:{:?}", req.payload);
             let mut state = state_rc.borrow_mut();
             let commands = state.commands.clone();
             let commands = lock!(commands);
