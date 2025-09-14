@@ -594,7 +594,7 @@ impl EventLoop {
     for message in messages {
       match message {
         MasterMessage::ExitReq(req) => {
-          trace!("Recv ExitReq:{:?}", req.future_id);
+          trace!("Recv ExitReq:{:?}", req.exit_code);
           self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }

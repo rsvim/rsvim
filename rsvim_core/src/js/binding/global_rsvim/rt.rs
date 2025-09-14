@@ -1,6 +1,5 @@
 //! APIs for `Rsvim.rt` namespace.
 
-use crate::js;
 use crate::js::JsRuntime;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -26,6 +25,6 @@ pub fn exit(
 
   msg::sync_send_to_master(
     state.master_tx.clone(),
-    MasterMessage::ExitReq(msg::ExitReq::new(js::next_future_id(), exit_code)),
+    MasterMessage::ExitReq(msg::ExitReq { exit_code }),
   );
 }

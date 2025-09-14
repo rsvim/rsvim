@@ -29,29 +29,13 @@ pub enum MasterMessage {
 
 #[derive(Debug)]
 pub struct ExitReq {
-  pub future_id: JsFutureId,
   pub exit_code: i32,
-}
-
-impl ExitReq {
-  pub fn new(future_id: JsFutureId, exit_code: i32) -> Self {
-    Self {
-      future_id,
-      exit_code,
-    }
-  }
 }
 
 #[derive(Debug)]
 pub struct PrintReq {
   pub future_id: JsFutureId,
   pub payload: CompactString,
-}
-
-impl PrintReq {
-  pub fn new(future_id: JsFutureId, payload: CompactString) -> Self {
-    PrintReq { future_id, payload }
-  }
 }
 
 #[derive(Debug)]
