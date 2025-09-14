@@ -2,6 +2,8 @@
 
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
+use crate::js::pending::create_timer;
+use crate::js::pending::remove_timer;
 use crate::prelude::*;
 use std::rc::Rc;
 use tokio::time::Duration;
@@ -82,10 +84,9 @@ pub fn set_timeout(
       state.pending_futures.insert(0, Box::new(fut));
     }
   };
-  let timer_id = state_rc
-    .borrow_mut()
-    .pending_queue
-    .create_timer(expire_at, Box::new(timer_cb));
+
+  let mut state = state_rc.borrow_mut();
+  let timer_id = create_timer(&mut state, expire_at, Box::new(timer_cb));
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
 }
@@ -100,6 +101,7 @@ pub fn clear_timeout(
   let timer_id = args.get(0).int32_value(scope).unwrap();
   let state_rc = JsRuntime::state(scope);
 
-  state_rc.borrow_mut().timer_handles.remove(&timer_id);
+  let mut state = state_rc.borrow_mut();
+  remove_timer(&mut state, timer_id);
   trace!("|clear_timeout| timer_id:{:?}", timer_id);
 }

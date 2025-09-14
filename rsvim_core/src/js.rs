@@ -666,9 +666,8 @@ pub mod boost {
       let scope = &mut self.handle_scope();
       let state_rc = Self::state(scope);
 
-      let mut messages: Vec<JsMessage> = vec![];
-
       // Drain all pending messages
+      let mut messages: Vec<JsMessage> = vec![];
       {
         let state = state_rc.borrow();
         while let Ok(msg) = state.jsrt_rx.try_recv() {
