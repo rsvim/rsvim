@@ -7,7 +7,6 @@ use crate::buf::BuffersManagerArc;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
-use crate::js;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
