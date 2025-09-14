@@ -51,7 +51,7 @@ pub fn remove_timer(
   state.pending_timers.remove(&timer_id).map(|_| timer_id)
 }
 
-pub fn load_import(
+pub fn create_loader(
   state: &mut JsRuntimeState,
   specifier: &str,
   cb: TaskCallback,

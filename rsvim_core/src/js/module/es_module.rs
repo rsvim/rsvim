@@ -8,6 +8,7 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::create_origin;
 use crate::js::module::resolve_import;
+use crate::js::pending;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
@@ -291,7 +292,7 @@ impl JsFuture for EsModuleFuture {
       // If the module is newly seen, use the event-loop to load
       // the requested module.
       if not_seen_before {
-        let load_cb = {
+        let loader_cb = {
           let state_rc = state_rc.clone();
           let specifier = specifier.clone();
           move |maybe_result: Option<AnyResult<Vec<u8>>>| {
@@ -304,9 +305,7 @@ impl JsFuture for EsModuleFuture {
             state.pending_futures.insert(0, Box::new(fut));
           }
         };
-        state
-          .pending_queue
-          .load_import(&specifier, Box::new(load_cb));
+        pending::create_loader(&mut state, &specifier, Box::new(loader_cb));
 
         state.module_map.seen.insert(specifier.clone(), status);
         trace!(
