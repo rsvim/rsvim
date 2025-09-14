@@ -1,8 +1,8 @@
 //! Messages that are sent to [`EventLoop`](crate::evloop::EventLoop), here
 //! call it "master".
 
-use crate::js::JsFutureId;
 use crate::js::JsTaskId;
+use crate::js::JsTimerId;
 use compact_str::CompactString;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
@@ -39,7 +39,7 @@ pub struct PrintReq {
 
 #[derive(Debug)]
 pub struct TimeoutReq {
-  pub timer_id: JsFutureId,
+  pub timer_id: JsTimerId,
   pub expire_at: Instant,
 }
 

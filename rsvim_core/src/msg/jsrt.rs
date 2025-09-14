@@ -1,7 +1,7 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
-use crate::js::JsFutureId;
 use crate::js::JsTaskId;
+use crate::js::JsTimerId;
 use crate::prelude::*;
 use compact_str::CompactString;
 use tokio::sync::mpsc::Sender;
@@ -26,7 +26,7 @@ pub enum JsMessage {
 
 #[derive(Debug)]
 pub struct TimeoutResp {
-  pub timer_id: JsFutureId,
+  pub timer_id: JsTimerId,
   pub expire_at: Instant,
 }
 

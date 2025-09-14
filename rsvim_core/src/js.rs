@@ -53,6 +53,7 @@ use pending::TimerCallback;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
+use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
@@ -72,8 +73,20 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
 
-pub type JsFutureId = i32;
+pub type JsTimerId = i32;
 pub type JsTaskId = usize;
+
+/// Next task ID. It starts form 1.
+pub fn next_task_id() -> JsTaskId {
+  static VALUE: AtomicUsize = AtomicUsize::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
+/// Next timer ID. It starts form 1.
+pub fn next_timer_id() -> JsTimerId {
+  static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
 
 /// Snapshot data.
 pub struct SnapshotData {
@@ -341,7 +354,7 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending timers.
-    pub pending_timers: HashMap<JsFutureId, TimerCallback>,
+    pub pending_timers: HashMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_imports: HashMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
