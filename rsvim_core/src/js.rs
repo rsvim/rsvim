@@ -669,7 +669,6 @@ pub mod boost {
           match msg {
             JsMessage::TimeoutResp(resp) => {
               trace!("Recv TimeResp:{:?}", resp.timer_id);
-              debug_assert!(state.pending_futures.contains_key(&resp.timer_id));
               let timer_id_exists = state.timer_handles.remove(&resp.timer_id);
               let timer_cb =
                 state.pending_futures.remove(&resp.timer_id).unwrap();
@@ -700,12 +699,7 @@ pub mod boost {
               }
             }
             JsMessage::LoadImportResp(resp) => {
-              trace!("Recv LoadImportResp:{:?}", resp.future_id);
-              debug_assert!(
-                state.pending_futures.contains_key(&resp.future_id)
-              );
-              let mut load_cb =
-                state.pending_futures.remove(&resp.future_id).unwrap();
+              trace!("Recv LoadImportResp:{:?}", resp.task_id);
               let load_cb_impl =
                 load_cb.downcast_mut::<EsModuleFuture>().unwrap();
               load_cb_impl.source = Some(resp.maybe_source);

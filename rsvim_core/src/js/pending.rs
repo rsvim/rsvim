@@ -3,7 +3,6 @@
 use crate::js::JsFutureId;
 use crate::js::JsRuntimeStateRc;
 use crate::js::JsTaskId;
-use crate::js::module::EsModuleFuture;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
@@ -86,7 +85,18 @@ impl PendingQueue {
 
 impl PendingQueue {
   pub fn prepare(&mut self, state_rc: JsRuntimeStateRc) {
-    while let Ok(msg) = state_rc.borrow().jsrt_rx.try_recv() {
+    let mut messages: Vec<JsMessage> = vec![];
+
+    // Drain all pending messages
+    {
+      let state = state_rc.borrow();
+      while let Ok(msg) = state.jsrt_rx.try_recv() {
+        messages.push(msg);
+      }
+      // Drop state
+    }
+
+    for msg in messages {
       match msg {
         JsMessage::TimeoutResp(resp) => {
           trace!("Recv TimeResp:{:?}", resp.timer_id);
@@ -115,13 +125,13 @@ impl PendingQueue {
           }
         }
         JsMessage::LoadImportResp(resp) => {
-          trace!("Recv LoadImportResp:{:?}", resp.future_id);
-          debug_assert!(state.pending_futures.contains_key(&resp.future_id));
-          let mut load_cb =
-            state.pending_futures.remove(&resp.future_id).unwrap();
-          let load_cb_impl = load_cb.downcast_mut::<EsModuleFuture>().unwrap();
-          load_cb_impl.source = Some(resp.maybe_source);
-          self.futures.push(load_cb);
+          trace!("Recv LoadImportResp:{:?}", resp.task_id);
+          match self.load_imports.remove(&resp.task_id) {
+            Some(mut load_cb) => {
+              load_cb(resp.maybe_source);
+            }
+            None => unreachable!(),
+          }
         }
         JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
       }

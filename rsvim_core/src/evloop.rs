@@ -629,10 +629,16 @@ impl EventLoop {
             .send(JsMessage::LoadImportResp(msg::LoadImportResp {
               task_id: req.task_id,
               maybe_source: match maybe_source {
-                Ok(source) => Some(Ok(
-                  bincode::encode_to_vec(source, bincode::config::standard())
-                    .unwrap(),
-                )),
+                Ok(source) => {
+                  let mut buf: Vec<u8> = Vec::with_capacity(source.len());
+                  let _n = bincode::encode_into_slice(
+                    source,
+                    &mut buf,
+                    bincode::config::standard(),
+                  )
+                  .unwrap();
+                  Some(Ok(buf))
+                }
                 Err(e) => Some(Err(e)),
               },
             }))
