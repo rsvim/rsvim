@@ -1,9 +1,8 @@
 //! Vim ex commands.
 
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsFutureId;
 use crate::js::JsRuntime;
+use crate::js::JsTaskId;
 use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::pending;
@@ -16,7 +15,7 @@ const JS_COMMAND_NAME: &str = "js";
 #[derive(Debug, Clone)]
 /// Ex command execution instance
 pub struct ExCommand {
-  pub task_id: JsFutureId,
+  pub task_id: JsTaskId,
   pub name: CompactString,
   pub body: CompactString,
   pub is_builtin_js: bool,
