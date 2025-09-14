@@ -37,8 +37,6 @@ pub use boost::*;
 pub use build::*;
 use command::ExCommandsManagerArc;
 use compact_str::ToCompactString;
-use downcast_rs::Downcast;
-use downcast_rs::impl_downcast;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
@@ -70,11 +68,9 @@ pub fn v8_version() -> &'static str {
 /// An abstract interface for javascript `Promise` and `async`.
 /// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
 /// the async task into tokio `spawn` API.
-pub trait JsFuture: Downcast {
+pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
-
-impl_downcast!(JsFuture);
 
 pub type JsFutureId = i32;
 pub type JsTaskId = usize;
