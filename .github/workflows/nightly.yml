@@ -16,25 +16,16 @@ env:
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
   GH_TOKEN: ${{ github.token }}
-defaults:
-  run:
-    shell: bash
 jobs:
   prepare:
     name: Release Nightly
     runs-on: ubuntu-22.04
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: gh release delete nightly --cleanup-tag -y || true
-      # - uses: Swatinem/rust-cache@v2
-      # - name: Install Rust
-      #   run: |
-      #     rustup update --no-self-update stable
-      #     rustup default stable
-      #     rustup component add --toolchain stable rust-src clippy
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
@@ -43,7 +34,7 @@ jobs:
           name: nightly
           removeArtifacts: true
           tag: nightly
-          commit: main
+          commit: ${{ github.ref_name }}
           body: ""
           omitBody: true
   upload-assets:
