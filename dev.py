@@ -117,16 +117,15 @@ def list_test():
 
 
 def build(profile):
-    # Disable sccache when building, it will affect the 'build.rs'
-    # set_sccache()
+    set_sccache()
     set_rustflags()
 
     if profile == "release":
-        command = "cargo build --release -vv"
+        command = "cargo build --release"
     elif profile == "nightly":
-        command = "cargo build --profile nightly -vv"
+        command = "cargo build --profile nightly"
     else:
-        command = "cargo build -vv"
+        command = "cargo build"
 
     command = command.strip()
     logging.info(command)

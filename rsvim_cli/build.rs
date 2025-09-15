@@ -8,39 +8,41 @@ fn version() {
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
   let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
   eprintln!(
-    "[RSVIM] Var profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}"
+    "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
   );
 
-  let version =
-    if profile == "release" && (opt_level == "s" || opt_level == "z") {
-      format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
+  let version = if profile == "release"
+    && (opt_level == "s" || opt_level == "z")
+    && debug != "true"
+  {
+    format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
+  } else {
+    let profile = if profile == "release" {
+      "nightly".to_string()
     } else {
-      let profile = if profile == "release" {
-        "nightly".to_string()
-      } else {
-        profile
-      };
-      let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-      let maybe_git_commit = match Repository::open(repo_path) {
-        Ok(repo) => {
-          let head = repo.head().unwrap();
-          let oid = head.target().unwrap();
-          let commit = repo.find_commit(oid).unwrap();
-          let id = commit.id();
-          let id = id.to_string();
-          format!("+{}", &id[0..8])
-        }
-        Err(_) => "".to_string(),
-      };
-
-      format!(
-        "{}+{}{} (v8 {})",
-        env!("CARGO_PKG_VERSION"),
-        profile,
-        maybe_git_commit,
-        v8_version()
-      )
+      profile
     };
+    let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    let maybe_git_commit = match Repository::open(repo_path) {
+      Ok(repo) => {
+        let head = repo.head().unwrap();
+        let oid = head.target().unwrap();
+        let commit = repo.find_commit(oid).unwrap();
+        let id = commit.id();
+        let id = id.to_string();
+        format!("+{}", &id[0..8])
+      }
+      Err(_) => "".to_string(),
+    };
+
+    format!(
+      "{}+{}{} (v8 {})",
+      env!("CARGO_PKG_VERSION"),
+      profile,
+      maybe_git_commit,
+      v8_version()
+    )
+  };
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
