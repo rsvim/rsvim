@@ -15,32 +15,29 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
-defaults:
-  run:
-    shell: bash
 jobs:
-  release:
-    name: Release
+  prepare:
+    name: Prepare
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      # - uses: Swatinem/rust-cache@v2
-      # - name: Install Rust
-      #   run: |
-      #     rustup update --no-self-update stable
-      #     rustup default stable
-      #     rustup component add --toolchain stable rust-src clippy
       - uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true
+          makeLatest: true
           draft: true
           body: ""
           omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    needs: release
+    env:
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
+      RUSTFLAGS: >-
+        -Cdebuginfo=0 ${{ matrix.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE -Ctarget-feature=+crt-static ' || '' }}
+    needs: prepare
     strategy:
       matrix:
         include:
@@ -71,26 +68,56 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
-      # - uses: taiki-e/setup-cross-toolchain-action@v1
-      #   with:
-      #     target: ${{ matrix.target }}
-      #   if: matrix.target == 'aarch64-unknown-linux-gnu'
-      # - uses: taiki-e/install-action@cross
-      #   if: contains(matrix.target, '-musl')
-      - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
-        if: endsWith(matrix.target, 'windows-msvc')
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: rsvim
-          target: ${{ matrix.target }}
-          tar: all
-          zip: windows
-          token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,CHANGELOG.md,LICENSE.txt
-          checksum: sha256
-          profile: release
-          locked: true
-      - name: After Upload
+      - name: Cargo Build
         run: |
-          echo "ls -lah --color=always"
-          ls -lah --color=always
+          cargo build --release
+      - name: Create Artifact
+        if: ${{ matrix.os != 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/release/rsvim rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          cp CHANGELOG.md rsvim-${{ matrix.target }}
+          cp LICENSE.txt rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create Artifact (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/release/rsvim.exe rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          cp CHANGELOG.md rsvim-${{ matrix.target }}
+          cp LICENSE.txt rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+          7z a rsvim-${{ matrix.target }}.zip rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
+      - name: Create New Release
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os != 'windows-2022' }}
+        with:
+          allowUpdates: true
+          makeLatest: true
+          draft: true
+          removeArtifacts: false
+          body: ""
+          omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create New Release (Windows)
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os == 'windows-2022' }}
+        with:
+          allowUpdates: true
+          makeLatest: true
+          draft: true
+          removeArtifacts: false
+          body: ""
+          omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+            rsvim-${{ matrix.target }}.zip
+            rsvim-${{ matrix.target }}.zip.sha256

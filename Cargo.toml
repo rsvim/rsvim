@@ -118,12 +118,8 @@ opt-level = 1
 
 # Nightly
 [profile.nightly]
-inherits = "dev"
-lto = true
-strip = true
-incremental = true
-codegen-units = 1
-opt-level = 's'
+inherits = "release"
+debug = true
 
 # Release
 [profile.release]
@@ -131,3 +127,4 @@ lto = true
 strip = true
 incremental = true
 codegen-units = 1
+opt-level = "s"

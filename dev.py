@@ -21,6 +21,7 @@ SKIP_SCCACHE = False
 
 RUSTFLAGS = []
 
+
 def set_env(name, value):
     logging.info(f"Set env {name}={value}")
     os.environ[name] = value
