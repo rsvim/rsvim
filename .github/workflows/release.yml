@@ -33,6 +33,9 @@ jobs:
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    env:
+      RUSTFLAGS: >-
+        ${{ matrix.os == 'windows-2022' && '-Ctarget-feature=+crt-static ' || '' }}
     needs: prepare
     strategy:
       matrix:
@@ -64,25 +67,6 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
-      # - uses: taiki-e/setup-cross-toolchain-action@v1
-      #   with:
-      #     target: ${{ matrix.target }}
-      #   if: matrix.target == 'aarch64-unknown-linux-gnu'
-      # - uses: taiki-e/install-action@cross
-      #   if: contains(matrix.target, '-musl')
-      - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
-        if: endsWith(matrix.target, 'windows-msvc')
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: rsvim
-          target: ${{ matrix.target }}
-          tar: all
-          zip: windows
-          token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,CHANGELOG.md,LICENSE.txt
-          checksum: sha256
-          profile: release
-          locked: true
       - name: Cargo Build
         run: |
           cargo build --release
