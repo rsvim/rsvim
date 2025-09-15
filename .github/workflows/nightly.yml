@@ -73,7 +73,7 @@ jobs:
           rustup component add --toolchain stable rust-src clippy
       - name: Cargo Build
         run: |
-          cargo build --profile nightly --locked
+          cargo build --profile nightly
       - name: Create Artifact
         if: ${{ matrix.os != 'windows-2022' }}
         run: |
