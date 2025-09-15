@@ -21,6 +21,7 @@ SKIP_SCCACHE = False
 
 RUSTFLAGS = []
 
+
 def set_env(name, value):
     logging.info(f"Set env {name}={value}")
     os.environ[name] = value
@@ -116,7 +117,8 @@ def list_test():
 
 
 def build(profile):
-    set_sccache()
+    # Disable sccache when building, it will affect the 'build.rs'
+    # set_sccache()
     set_rustflags()
 
     if profile == "release":

@@ -6,6 +6,10 @@ use std::path::Path;
 fn version() {
   let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
+  let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
+  eprintln!(
+    "[RSVIM] Var profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}"
+  );
 
   let version =
     if profile == "release" && (opt_level == "s" || opt_level == "z") {
