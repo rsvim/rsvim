@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTFLAGS: >-
-        ${{ matrix.os == 'windows-2022' && '-Ctarget-feature=+crt-static' || '' }}
+        ${{ matrix.os == 'windows-2022' && '-Ctarget-feature=+crt-static ' || '' }}
     needs: release
     strategy:
       matrix:
