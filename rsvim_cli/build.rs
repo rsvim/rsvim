@@ -7,35 +7,36 @@ fn version() {
   let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
   let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
 
-  let version = if profile == "release" {
-    format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
-  } else {
-    let profile = if opt_level == "s" || opt_level == "z" {
-      "nightly".to_string()
+  let version =
+    if profile == "release" && (opt_level == "s" || opt_level == "z") {
+      format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
     } else {
-      profile
-    };
-    let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-    let maybe_git_commit = match Repository::open(repo_path) {
-      Ok(repo) => {
-        let head = repo.head().unwrap();
-        let oid = head.target().unwrap();
-        let commit = repo.find_commit(oid).unwrap();
-        let id = commit.id();
-        let id = id.to_string();
-        format!("+{}", &id[0..8])
-      }
-      Err(_) => "".to_string(),
-    };
+      let profile = if profile == "release" {
+        "nightly".to_string()
+      } else {
+        profile
+      };
+      let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+      let maybe_git_commit = match Repository::open(repo_path) {
+        Ok(repo) => {
+          let head = repo.head().unwrap();
+          let oid = head.target().unwrap();
+          let commit = repo.find_commit(oid).unwrap();
+          let id = commit.id();
+          let id = id.to_string();
+          format!("+{}", &id[0..8])
+        }
+        Err(_) => "".to_string(),
+      };
 
-    format!(
-      "{}+{}{} (v8 {})",
-      env!("CARGO_PKG_VERSION"),
-      profile,
-      maybe_git_commit,
-      v8_version()
-    )
-  };
+      format!(
+        "{}+{}{} (v8 {})",
+        env!("CARGO_PKG_VERSION"),
+        profile,
+        maybe_git_commit,
+        v8_version()
+      )
+    };
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
