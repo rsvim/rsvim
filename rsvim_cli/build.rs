@@ -10,7 +10,7 @@ fn version() {
   let version = if profile == "release" {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
-    let profile = if opt_level == "z" {
+    let profile = if opt_level == "s" || opt_level == "z" {
       "nightly".to_string()
     } else {
       profile
