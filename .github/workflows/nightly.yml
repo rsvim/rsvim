@@ -23,7 +23,6 @@ jobs:
     steps:
       - run: gh release delete nightly --cleanup-tag -y || true
       - uses: ncipollo/release-action@v1
-        if: ${{ matrix.os == 'windows-2022' }}
         with:
           allowUpdates: true
           prerelease: true
