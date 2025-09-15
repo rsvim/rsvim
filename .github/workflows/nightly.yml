@@ -82,7 +82,7 @@ jobs:
           cp target/nightly/rsvim rsvim-${{ matrix.target }}
           cp README.md rsvim-${{ matrix.target }}
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
-          shasum -a "sha256" rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
       - name: Create Artifact (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
@@ -90,9 +90,9 @@ jobs:
           cp target/nightly/rsvim.exe rsvim-${{ matrix.target }}
           cp README.md rsvim-${{ matrix.target }}
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
-          shasum -a "sha256" rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
           7z a rsvim-${{ matrix.target }}.zip rsvim-${{ matrix.target }}
-          shasum -a "sha256" rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
+          shasum -a 256 rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
       - name: Create New Release
         uses: ncipollo/release-action@v1
         if: ${{ matrix.os != 'windows-2022' }}
