@@ -34,8 +34,9 @@ jobs:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     env:
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        ${{ matrix.os == 'windows-2022' && '-Ctarget-feature=+crt-static ' || '' }}
+        -Cdebuginfo=0 ${{ matrix.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE -Ctarget-feature=+crt-static ' || '' }}
     needs: prepare
     strategy:
       matrix:
