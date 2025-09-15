@@ -76,8 +76,6 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
-      - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static -C debuginfo=0 -C link-arg=/DEBUG:NONE" >> "${GITHUB_ENV}"
-        if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: rsvim
