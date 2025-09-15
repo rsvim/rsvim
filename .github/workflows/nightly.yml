@@ -90,7 +90,3 @@ jobs:
           ref: refs/tags/nightly
           profile: nightly
           locked: true
-      - name: After Upload
-        run: |
-          echo "ls -lah --color=always"
-          ls -lah --color=always

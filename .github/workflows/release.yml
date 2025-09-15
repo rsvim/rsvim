@@ -82,7 +82,3 @@ jobs:
           checksum: sha256
           profile: release
           locked: true
-      - name: After Upload
-        run: |
-          echo "ls -lah --color=always"
-          ls -lah --color=always
