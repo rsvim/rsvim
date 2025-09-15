@@ -306,7 +306,11 @@ impl JsFuture for EsModuleFuture {
             state.pending_futures.insert(0, Box::new(fut));
           }
         };
-        pending::create_loader(&mut state, &specifier, Box::new(loader_cb));
+        pending::create_import_loader(
+          &mut state,
+          &specifier,
+          Box::new(loader_cb),
+        );
 
         state.module_map.seen.insert(specifier.clone(), status);
         trace!(

@@ -356,7 +356,7 @@ pub mod boost {
     /// Pending timers.
     pub pending_timers: HashMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
-    pub pending_imports: HashMap<JsTaskId, TaskCallback>,
+    pub pending_import_loaders: HashMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -462,7 +462,7 @@ pub mod boost {
         context,
         module_map: ModuleMap::new(),
         pending_timers: HashMap::new(),
-        pending_imports: HashMap::new(),
+        pending_import_loaders: HashMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -536,7 +536,7 @@ pub mod boost {
         context,
         module_map: ModuleMap::new(),
         pending_timers: HashMap::new(),
-        pending_imports: HashMap::new(),
+        pending_import_loaders: HashMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -594,14 +594,17 @@ pub mod boost {
       self.run_pending_futures();
 
       trace!(
-        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}",
+        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}, pending_imports_count:{:?}, has_pending_import_loaders:{:?}, pending_import_loaders_count:{:?}",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
+        self.pending_imports_count(),
+        self.has_pending_import_loaders(),
+        self.pending_import_loaders_count()
       );
       if self.has_promise_rejections()
         || self.isolate.has_pending_background_tasks()
-        || self.has_pending_imports()
+        || (self.has_pending_imports() && !self.has_pending_import_loaders())
       {
         msg::sync_send_to_master(
           self.get_state().borrow().master_tx.clone(),
@@ -696,12 +699,12 @@ pub mod boost {
             debug_assert!(
               state_rc
                 .borrow()
-                .pending_imports
+                .pending_import_loaders
                 .contains_key(&resp.task_id)
             );
             let mut loader_cb = state_rc
               .borrow_mut()
-              .pending_imports
+              .pending_import_loaders
               .remove(&resp.task_id)
               .unwrap();
             loader_cb(resp.maybe_source);
@@ -869,6 +872,27 @@ pub mod boost {
       let state_rc = self.get_state();
       let state = state_rc.borrow();
       !state.module_map.pending.is_empty()
+    }
+
+    /// Returns pending imports count.
+    pub fn pending_imports_count(&mut self) -> usize {
+      let state_rc = self.get_state();
+      let state = state_rc.borrow();
+      state.module_map.pending.len()
+    }
+
+    /// Returns if we are waiting for more import loaders.
+    pub fn has_pending_import_loaders(&mut self) -> bool {
+      let state_rc = self.get_state();
+      let state = state_rc.borrow();
+      !state.pending_import_loaders.is_empty()
+    }
+
+    /// Returns pending import loaders count.
+    pub fn pending_import_loaders_count(&mut self) -> usize {
+      let state_rc = self.get_state();
+      let state = state_rc.borrow();
+      state.pending_import_loaders.len()
     }
 
     // /// Returns if we have scheduled any next-tick callbacks.
