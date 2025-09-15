@@ -604,7 +604,7 @@ pub mod boost {
       );
       if self.has_promise_rejections()
         || self.isolate.has_pending_background_tasks()
-        || (self.has_pending_imports() && !self.has_pending_import_loaders())
+        || (self.pending_imports_count() > self.pending_import_loaders_count())
       {
         msg::sync_send_to_master(
           self.get_state().borrow().master_tx.clone(),
