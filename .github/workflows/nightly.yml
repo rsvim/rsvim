@@ -40,6 +40,10 @@ jobs:
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    env:
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
+      RUSTFLAGS: >-
+        -Cdebuginfo=0 ${{ matrix.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE -Ctarget-feature=+crt-static' || '' }}
     needs: prepare
     strategy:
       matrix:
@@ -71,12 +75,6 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
-      # - uses: taiki-e/setup-cross-toolchain-action@v1
-      #   with:
-      #     target: ${{ matrix.target }}
-      #   if: matrix.target == 'aarch64-unknown-linux-gnu'
-      # - uses: taiki-e/install-action@cross
-      #   if: contains(matrix.target, '-musl')
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static -C debuginfo=0 -C link-arg=/DEBUG:NONE" >> "${GITHUB_ENV}"
         if: endsWith(matrix.target, 'windows-msvc')
