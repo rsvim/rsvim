@@ -28,7 +28,7 @@ jobs:
           prerelease: true
           makeLatest: true
           name: nightly
-          removeArtifacts: false
+          removeArtifacts: true
           tag: nightly
           commit: ${{ github.ref_name }}
           body: ""
