@@ -17,11 +17,23 @@ env:
   RUSTUP_MAX_RETRIES: 3
   GH_TOKEN: ${{ github.token }}
 jobs:
-  delete-old-release:
-    name: Delete Old Release
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
     steps:
       - run: gh release delete nightly --cleanup-tag -y || true
+      - uses: ncipollo/release-action@v1
+        if: ${{ matrix.os == 'windows-2022' }}
+        with:
+          allowUpdates: true
+          prerelease: true
+          makeLatest: true
+          name: nightly
+          removeArtifacts: false
+          tag: nightly
+          commit: ${{ github.ref_name }}
+          body: ""
+          omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
@@ -60,26 +72,58 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
-      - uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: rsvim
-          target: ${{ matrix.target }}
-          tar: all
-          zip: windows
-          token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,CHANGELOG.md,LICENSE.txt
-          checksum: sha256
-          ref: refs/tags/nightly
-          profile: nightly
-          locked: true
-      - uses: ncipollo/release-action@v1
+      - name: Cargo Build
+        run: |
+          cargo build --profile nightly
+      - name: Create Artifact
+        if: ${{ matrix.os != 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/nightly/rsvim rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a "sha256" rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create Artifact (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/nightly/rsvim.exe rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a "sha256" rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+          7z a rsvim-${{ matrix.target }}.zip rsvim-${{ matrix.target }}
+          shasum -a "sha256" rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
+      - name: Create New Release
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os != 'windows-2022' }}
         with:
           allowUpdates: true
           prerelease: true
           makeLatest: true
           name: nightly
-          removeArtifacts: true
+          removeArtifacts: false
           tag: nightly
           commit: ${{ github.ref_name }}
           body: ""
           omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create New Release (Windows)
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os == 'windows-2022' }}
+        with:
+          allowUpdates: true
+          prerelease: true
+          makeLatest: true
+          name: nightly
+          removeArtifacts: false
+          tag: nightly
+          commit: ${{ github.ref_name }}
+          body: ""
+          omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+            rsvim-${{ matrix.target }}.zip
+            rsvim-${{ matrix.target }}.zip.sha256
