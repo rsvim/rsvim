@@ -75,7 +75,6 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy
-      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: rsvim
