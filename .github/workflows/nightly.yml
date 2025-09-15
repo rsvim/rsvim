@@ -17,32 +17,18 @@ env:
   RUSTUP_MAX_RETRIES: 3
   GH_TOKEN: ${{ github.token }}
 jobs:
-  prepare:
-    name: Release Nightly
-    runs-on: ubuntu-22.04
-    # if: ${{ github.ref == 'refs/heads/main' }}
+  delete-old-release:
+    name: Delete Old Release
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
       - run: gh release delete nightly --cleanup-tag -y || true
-      - uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          prerelease: true
-          makeLatest: true
-          name: nightly
-          removeArtifacts: true
-          tag: nightly
-          commit: ${{ github.ref_name }}
-          body: ""
-          omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     env:
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        ${{ matrix.os == 'windows-2022' && '-Ctarget-feature=+crt-static ' || '' }}
+        -Cdebuginfo=0 ${{ matrix.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE -Ctarget-feature=+crt-static ' || '' }}
     needs: prepare
     strategy:
       matrix:
@@ -86,3 +72,14 @@ jobs:
           ref: refs/tags/nightly
           profile: nightly
           locked: true
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          prerelease: true
+          makeLatest: true
+          name: nightly
+          removeArtifacts: true
+          tag: nightly
+          commit: ${{ github.ref_name }}
+          body: ""
+          omitBody: true
