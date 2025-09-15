@@ -37,13 +37,13 @@ pub fn remove_timer(
   state.pending_timers.remove(&timer_id).map(|_| timer_id)
 }
 
-pub fn create_loader(
+pub fn create_import_loader(
   state: &mut JsRuntimeState,
   specifier: &str,
   cb: TaskCallback,
 ) -> JsTaskId {
   let task_id = next_task_id();
-  state.pending_imports.insert(task_id, cb);
+  state.pending_import_loaders.insert(task_id, cb);
   msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::LoadImportReq(msg::LoadImportReq {

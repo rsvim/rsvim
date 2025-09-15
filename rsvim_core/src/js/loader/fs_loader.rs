@@ -92,9 +92,14 @@ mod sync_resolve {
       for pkg in PACKAGE_FILES {
         let pkg_path = path.join(pkg);
         if pkg_path.is_file() {
-          match std::fs::read_to_string(pkg_path) {
-            Ok(pkg_src) => {
-              match serde_json::from_str::<serde_json::Value>(&pkg_src) {
+          match std::fs::File::open(pkg_path) {
+            Ok(pkg_fp) => {
+              let pkg_reader = std::io::BufReader::new(pkg_fp);
+              match serde_json::from_reader::<
+                std::io::BufReader<std::fs::File>,
+                serde_json::Value,
+              >(pkg_reader)
+              {
                 Ok(pkg_json) => {
                   for field in ["exports", "main"] {
                     match pkg_json.get(field) {
