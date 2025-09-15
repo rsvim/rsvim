@@ -15,12 +15,9 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
-defaults:
-  run:
-    shell: bash
 jobs:
-  release:
-    name: Release
+  prepare:
+    name: Prepare
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
@@ -28,13 +25,15 @@ jobs:
           fetch-depth: 0
       - uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true
+          makeLatest: true
           draft: true
           body: ""
           omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    needs: release
+    needs: prepare
     strategy:
       matrix:
         include:
@@ -84,3 +83,56 @@ jobs:
           checksum: sha256
           profile: release
           locked: true
+      - name: Cargo Build
+        run: |
+          cargo build --release
+      - name: Create Artifact
+        if: ${{ matrix.os != 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/release/rsvim rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          cp CHANGELOG.md rsvim-${{ matrix.target }}
+          cp LICENSE.txt rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create Artifact (Windows)
+        if: ${{ matrix.os == 'windows-2022' }}
+        run: |
+          mkdir rsvim-${{ matrix.target }}
+          cp target/release/rsvim.exe rsvim-${{ matrix.target }}
+          cp README.md rsvim-${{ matrix.target }}
+          cp CHANGELOG.md rsvim-${{ matrix.target }}
+          cp LICENSE.txt rsvim-${{ matrix.target }}
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
+          7z a rsvim-${{ matrix.target }}.zip rsvim-${{ matrix.target }}
+          shasum -a 256 rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
+      - name: Create New Release
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os != 'windows-2022' }}
+        with:
+          allowUpdates: true
+          makeLatest: true
+          draft: true
+          removeArtifacts: false
+          body: ""
+          omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+      - name: Create New Release (Windows)
+        uses: ncipollo/release-action@v1
+        if: ${{ matrix.os == 'windows-2022' }}
+        with:
+          allowUpdates: true
+          makeLatest: true
+          draft: true
+          removeArtifacts: false
+          body: ""
+          omitBody: true
+          artifacts: |
+            rsvim-${{ matrix.target }}.tar.gz
+            rsvim-${{ matrix.target }}.tar.gz.sha256
+            rsvim-${{ matrix.target }}.zip
+            rsvim-${{ matrix.target }}.zip.sha256
