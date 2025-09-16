@@ -337,7 +337,7 @@ impl BuffersManager {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = fp.metadata().unwrap();
-        let mut data: Vec<u8> = Vec::with_capacity(metadata.len());
+        let mut data: Vec<u8> = Vec::with_capacity(metadata.len() as usize);
         let mut reader = std::io::BufReader::new(fp);
         let bytes = match reader.read_to_end(&mut data) {
           Ok(bytes) => bytes,
