@@ -137,7 +137,19 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        rust_version: [1.85.0, stable, beta]
+        include:
+          - rust_version: 1.85.0
+            features: ""
+          - rust_version: stable
+            features: ""
+          - rust_version: beta
+            features: ""
+          - rust_version: stable
+            features: "-F snmalloc"
+          - rust_version: stable
+            features: "-F mimalloc"
+          - rust_version: stable
+            features: "-F jemalloc"
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
@@ -152,13 +164,13 @@ jobs:
       - uses: actions/checkout@v5
       - name: Build Release
         run: |
-          cargo build --release
+          cargo build --release ${{ matrix.features }}
           ./target/release/rsvim --version
       - name: Build Debug
         run: |
-          cargo build
+          cargo build ${{ matrix.features }}
           ./target/debug/rsvim --version
       - name: Build Nightly
         run: |
-          cargo build --profile nightly
+          cargo build --profile nightly ${{ matrix.features }}
           ./target/nightly/rsvim --version
