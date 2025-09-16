@@ -14,6 +14,12 @@ categories.workspace = true
 exclude.workspace = true
 description = "The RSVIM text editor."
 
+[features]
+default = []
+snmalloc = ["dep:snmalloc-rs"]
+mimalloc = ["dep:mimalloc-safe"]
+jemalloc = ["dep:tikv-jemallocator"]
+
 [dependencies]
 rsvim_core = { workspace = true }
 log = { workspace = true, features = [
@@ -22,6 +28,11 @@ log = { workspace = true, features = [
 ] }
 tokio = { workspace = true, features = ["full"] }
 # zstd = { workspace = true }
+snmalloc-rs = { workspace = true, optional = true }
+mimalloc-safe = { workspace = true, optional = true }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = { workspace = true, optional = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }

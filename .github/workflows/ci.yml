@@ -116,7 +116,14 @@ jobs:
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
       - name: Clippy
-        run: cargo clippy --all-targets --all-features
+        run: |
+          cargo clippy --all-targets
+          cargo clippy --all-targets -F snmalloc
+          cargo clippy --all-targets -F mimalloc
+      - name: Clippy (not Windows)
+        if: ${{ matrix.os != 'windows-2022' }}
+        run: |
+          cargo clippy --all-targets -F jemalloc
       - name: Cargo test
         run: |
           cargo test --workspace
@@ -137,7 +144,19 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        rust_version: [1.85.0, stable, beta]
+        include:
+          - rust_version: 1.85.0
+            features: ""
+          - rust_version: stable
+            features: ""
+          - rust_version: beta
+            features: ""
+          - rust_version: stable
+            features: "-F snmalloc"
+          - rust_version: stable
+            features: "-F jemalloc"
+          - rust_version: stable
+            features: "-F mimalloc"
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
@@ -150,15 +169,8 @@ jobs:
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
       - uses: actions/checkout@v5
-      - name: Build Release
+      - name: Build
         run: |
-          cargo build --release
-          ./target/release/rsvim --version
-      - name: Build Debug
-        run: |
-          cargo build
-          ./target/debug/rsvim --version
-      - name: Build Nightly
-        run: |
-          cargo build --profile nightly
-          ./target/nightly/rsvim --version
+          cargo build --release ${{ matrix.features }}
+          cargo build --profile dev ${{ matrix.features }}
+          cargo build --profile nightly ${{ matrix.features }}

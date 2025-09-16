@@ -116,7 +116,7 @@ def list_test():
     os.system(command)
 
 
-def build(profile):
+def build(profile, verbose, features):
     set_sccache()
     set_rustflags()
 
@@ -126,6 +126,13 @@ def build(profile):
         command = "cargo build --profile nightly"
     else:
         command = "cargo build"
+
+    if verbose:
+        command = f"{command} -vv"
+
+    if isinstance(features, list) and len(features) > 0:
+        features = ",".join(features)
+        command = f"{command} --features {features}"
 
     command = command.strip()
     logging.info(command)
@@ -248,6 +255,12 @@ if __name__ == "__main__":
         help="Build debug/release target with `sccache`, by default is debug",
     )
     build_subparser.add_argument(
+        "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
+    )
+    build_subparser.add_argument(
+        "-F", "--features", action="append", help="Build with '--features' option"
+    )
+    build_subparser.add_argument(
         "-r", "--release", action="store_true", help="Build release target"
     )
     build_subparser.add_argument(
@@ -313,7 +326,7 @@ if __name__ == "__main__":
             profile = "release"
         elif parser.nightly:
             profile = "nightly"
-        build(profile)
+        build(profile, parser.verbose, parser.features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "fmt" or parser.subcommand == "f":
