@@ -594,17 +594,21 @@ pub mod boost {
       self.run_pending_futures();
 
       trace!(
-        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}, pending_imports_count:{:?}, has_pending_import_loaders:{:?}, pending_import_loaders_count:{:?}",
+        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}({:?}), has_pending_import_loaders:{:?}({:?}), has_unresolved_imports:{:?}({:?})",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
         self.pending_imports_count(),
         self.has_pending_import_loaders(),
-        self.pending_import_loaders_count()
+        self.pending_import_loaders_count(),
+        self.has_unresolved_imports(),
+        self.unresolved_imports_count(),
       );
       if self.has_promise_rejections()
         || self.isolate.has_pending_background_tasks()
-        || (self.pending_imports_count() > self.pending_import_loaders_count())
+        || (self.unresolved_imports_count()
+          > self.pending_import_loaders_count())
+        || (!self.has_unresolved_imports() && self.has_pending_imports())
       {
         msg::sync_send_to_master(
           self.get_state().borrow().master_tx.clone(),
@@ -861,7 +865,9 @@ pub mod boost {
       // to the event-loop.
       run_next_tick_callbacks(scope);
     }
+  }
 
+  impl JsRuntime {
     /// Returns if unhandled promise rejections where caught.
     pub fn has_promise_rejections(&mut self) -> bool {
       self.get_state().borrow().exceptions.has_promise_rejection()
@@ -879,6 +885,29 @@ pub mod boost {
       let state_rc = self.get_state();
       let state = state_rc.borrow();
       state.module_map.pending.len()
+    }
+
+    /// Returns unresolved imports count.
+    pub fn unresolved_imports_count(&mut self) -> usize {
+      let state_rc = self.get_state();
+      let state = state_rc.borrow();
+      state
+        .module_map
+        .seen
+        .iter()
+        .filter(|(_, v)| **v != ModuleStatus::Ready)
+        .count()
+    }
+
+    /// Returns if we have unresolved imports.
+    pub fn has_unresolved_imports(&mut self) -> bool {
+      let state_rc = self.get_state();
+      let state = state_rc.borrow();
+      state
+        .module_map
+        .seen
+        .iter()
+        .any(|(_, v)| *v != ModuleStatus::Ready)
     }
 
     /// Returns if we are waiting for more import loaders.
