@@ -30,6 +30,8 @@ tokio = { workspace = true, features = ["full"] }
 # zstd = { workspace = true }
 snmalloc-rs = { workspace = true, optional = true }
 mimalloc-safe = { workspace = true, optional = true }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 
 [build-dependencies]
