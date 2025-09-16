@@ -306,7 +306,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    print(parser)
+    # print(parser)
 
     if parser.recache:
         RECACHE_SCCACHE = True
