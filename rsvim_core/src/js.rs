@@ -865,7 +865,9 @@ pub mod boost {
       // to the event-loop.
       run_next_tick_callbacks(scope);
     }
+  }
 
+  impl JsRuntime {
     /// Returns if unhandled promise rejections where caught.
     pub fn has_promise_rejections(&mut self) -> bool {
       self.get_state().borrow().exceptions.has_promise_rejection()
