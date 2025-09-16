@@ -29,7 +29,7 @@ export function sayHello() {
     let expect = temp_dir.child("005_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -75,7 +75,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -123,7 +123,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -171,7 +171,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -213,7 +213,7 @@ export function sayHello() {
     let specifier = temp_dir.child("core/tests/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
     let specifier = transform(specifier.to_path_buf());
@@ -241,7 +241,7 @@ export function sayHello() {
       .child("006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -288,7 +288,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -336,7 +336,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -384,7 +384,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -431,7 +431,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -473,7 +473,7 @@ export function sayHello() {
     let specifier = temp_dir.child("core/tests/006_more_imports/");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -512,7 +512,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/lib/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -562,7 +562,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -628,7 +628,7 @@ export function sayHello() {
       .child("index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -693,7 +693,7 @@ export function sayHello() {
       .child("index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -758,7 +758,7 @@ export function sayHello() {
       .child("index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
@@ -795,7 +795,7 @@ export function sayHello() {
     let expect = temp_dir.child("005_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -843,7 +843,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -893,7 +893,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -943,7 +943,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -997,7 +997,7 @@ export function sayHello() {
       .child("006_more_imports.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1046,7 +1046,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1096,7 +1096,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1146,7 +1146,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1195,7 +1195,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1253,7 +1253,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/tests/006_more_imports/lib/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1305,7 +1305,7 @@ export function sayHello() {
     let expect = temp_dir.child("core/006_more_imports/index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1373,7 +1373,7 @@ export function sayHello() {
       .child("index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs
@@ -1440,7 +1440,7 @@ export function sayHello() {
       .child("index.js");
 
     // Run tests.
-    let loader = FsModuleLoader {};
+    let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
     // Prepare configs

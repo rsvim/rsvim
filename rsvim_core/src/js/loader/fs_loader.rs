@@ -14,8 +14,8 @@ use oxc_resolver::Resolver;
 use std::path::Path;
 use std::path::PathBuf;
 
-const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
-const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
+// const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
+// const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
 pub fn create_resolve_options() -> ResolveOptions {
   ResolveOptions {

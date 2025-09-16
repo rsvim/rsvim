@@ -130,13 +130,14 @@ pub fn create_origin<'s>(
 
 fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
   static CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
-  static FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
+  static FS_MODULE_LOADER: LazyLock<FsModuleLoader> =
+    LazyLock::new(FsModuleLoader::new);
 
   let is_core_module_import = CORE_MODULES.contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
   } else {
-    &FS_MODULE_LOADER
+    &*FS_MODULE_LOADER
   }
 }
 
