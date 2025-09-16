@@ -16,7 +16,9 @@ mod tests_sync {
   #[test]
   fn file_path1() {
     test_log_init();
-    let temp_dir = assert_fs::TempDir::new().unwrap();
+    let tp = TempPathCfg::create();
+
+    // let temp_dir = assert_fs::TempDir::new().unwrap();
 
     let src: &str = r#"
 export function sayHello() {
@@ -25,14 +27,16 @@ export function sayHello() {
 "#;
 
     let base: Option<&str> = None;
-    let specifier = temp_dir.child("005_more_imports.js");
-    let expect = temp_dir.child("005_more_imports.js");
+    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
+    let specifier = tp.xdg_config_home.child("rsvim").child("005_more_imports.js");
+    let expect = tp.xdg_config_home.child("rsvim").child("005_more_imports.js");
 
     // Run tests.
     let loader = FsModuleLoader::new();
 
     // Prepare configs
     {
+      entry.touch().unwrap();
       specifier.touch().unwrap();
       fs::write(specifier.path(), src).unwrap();
     }
@@ -40,8 +44,6 @@ export function sayHello() {
     let expect = transform(expect.to_path_buf());
 
     let actual = loader.resolve(base, &specifier);
-    assert!(actual.is_ok());
-    let actual = actual.unwrap();
     info!(
       "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
       specifier,
@@ -49,6 +51,8 @@ export function sayHello() {
       expect,
       expect.replace("/", "\\")
     );
+    assert!(actual.is_ok());
+    let actual = actual.unwrap();
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
       Path::new(&expect).normalize().unwrap()
