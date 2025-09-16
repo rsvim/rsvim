@@ -9,6 +9,7 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
+use oxc_resolver::ResolveOptions;
 use path_absolutize::Absolutize;
 use std::path::Path;
 use std::path::PathBuf;
@@ -18,7 +19,23 @@ const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
 #[derive(Default)]
 /// Fs (filesystem) module loader.
-pub struct FsModuleLoader;
+pub struct FsModuleLoader {
+  options: ResolveOptions,
+}
+
+pub fn create_resolve_options() -> ResolveOptions {
+  ResolveOptions {
+    extensions: vec![
+      ".js".into(),
+      ".ts".into(),
+      ".json".into(),
+      ".wasm".into(),
+    ],
+    enforce_extension: oxc_resolver::EnforceExtension::Enabled,
+    builtin_modules: false,
+    ..ResolveOptions::default()
+  }
+}
 
 macro_rules! path_not_found1 {
   ($path:expr) => {
@@ -223,9 +240,7 @@ impl ModuleLoader for FsModuleLoader {
     if specifier.starts_with('/')
       || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
     {
-      let path = Path::new(specifier).absolutize()?.to_path_buf();
-      return sync_resolve::resolve_file(path.as_path())
-        .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
+      return oxc_resolver;
     }
 
     // Relative file path.

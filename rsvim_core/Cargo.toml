@@ -64,6 +64,7 @@ async-trait = { workspace = true }
 ringbuf = { workspace = true }
 serde_json = { workspace = true }
 bincode = { workspace = true }
+oxc_resolver = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
