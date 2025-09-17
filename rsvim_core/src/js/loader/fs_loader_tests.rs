@@ -176,6 +176,7 @@ export function sayHello() {
   #[test]
   fn file_path4() {
     test_log_init();
+    let tp = TempPathCfg::create();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
     let src: &str = r#"
@@ -184,37 +185,37 @@ export function sayHello() {
 }
 "#;
 
-    let base = temp_dir.child("core/tests/005_more_imports.js");
-    let specifier = temp_dir.child("core/tests/006_more_imports.js");
-    let expect = temp_dir.child("core/tests/006_more_imports.js");
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - core/tests/006_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("core/tests/006_more_imports.js"), src),
+      ],
+    );
+
+    let base = transform(tp.xdg_config_home.child("core/tests/").to_path_buf());
+    let specifier = transform(
+      tp.xdg_config_home
+        .child("core/tests/006_more_imports.js")
+        .to_path_buf(),
+    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
 
-    // Prepare configs
-    {
-      base.touch().unwrap();
-      specifier.touch().unwrap();
-      fs::write(specifier.path(), src).unwrap();
-    }
-
-    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
-    let specifier = transform(specifier.to_path_buf());
-    let expect = transform(expect.to_path_buf());
-
-    let actual = loader.resolve(base, &specifier);
+    let actual = loader.resolve(Some(&base), &specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
-      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-      specifier,
-      actual,
-      expect,
-      expect.replace("/", "\\")
+      "base:{:?},specifier:{:?},actual:{:?}",
+      base, specifier, actual,
     );
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&specifier).normalize().unwrap()
     );
 
     let actual_module = loader.load(&actual);
