@@ -273,8 +273,9 @@ fn file_path_failed4() {
   assert!(actual.is_err());
 }
 
-#[test]
-fn file_path5() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn file_path5() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -305,6 +306,7 @@ export function sayHello() {
 
   // Run tests.
   let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader {};
 
   let actual = loader.resolve(None, specifier);
   assert!(actual.is_ok());
@@ -318,9 +320,13 @@ export function sayHello() {
     Path::new(&expect).normalize().unwrap()
   );
 
-  let actual_module = loader.load(&actual);
-  assert!(actual_module.is_ok());
-  assert_eq!(actual_module.unwrap(), src);
+  let actual_module1 = loader.load(&actual);
+  assert!(actual_module1.is_ok());
+  assert_eq!(actual_module1.unwrap(), src);
+
+  let actual_module2 = aloader.load(&actual).await;
+  assert!(actual_module2.is_ok());
+  assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[test]
