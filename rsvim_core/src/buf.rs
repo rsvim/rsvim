@@ -337,15 +337,33 @@ impl BuffersManager {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = fp.metadata().unwrap();
-        let mut data: Vec<u8> = Vec::with_capacity(metadata.len() as usize);
+        let mut data: Vec<u8> = Vec::with_capacity(8192);
+        let mut rope_builder = RopeBuilder::new();
+        let fencoding = self.global_local_options().file_encoding();
+        let mut bytes = 0_usize;
         let mut reader = std::io::BufReader::new(fp);
-        let bytes = match reader.read_to_end(&mut data) {
-          Ok(bytes) => bytes,
-          Err(e) => {
-            error!("Failed to read file {:?}:{:?}", filename, e);
-            return Err(e);
+        loop {
+          match reader.read(&mut data) {
+            Ok(readded) => {
+              if readded == 0 {
+                break;
+              }
+              bytes += readded;
+              let payload = match fencoding {
+                FileEncodingOption::Utf8 => {
+                  String::from_utf8_lossy(&data[0..readded]).into_owned()
+                }
+              };
+              rope_builder.append(&payload);
+            }
+            Err(e) => {
+              error!("Failed to read file {:?}:{:?}", filename, e);
+              return Err(e);
+            }
           }
-        };
+        }
+        let rope = rope_builder.finish();
+
         trace!(
           "Read {} bytes (data: {}) from file {:?}",
           bytes,
@@ -357,7 +375,7 @@ impl BuffersManager {
         Ok(Buffer::_new(
           *self.global_local_options(),
           canvas_size,
-          self.to_rope(&data, data.len()),
+          rope,
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
