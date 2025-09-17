@@ -14,9 +14,6 @@ use oxc_resolver::Resolver;
 use std::path::Path;
 use std::path::PathBuf;
 
-// const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
-// const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
-
 macro_rules! path_not_found1 {
   ($path:expr) => {
     anyhow::bail!(format!("Module path {:?} not found", $path))
