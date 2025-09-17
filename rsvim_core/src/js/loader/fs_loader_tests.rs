@@ -146,25 +146,23 @@ export function sayHello() {
       ],
     );
 
-    let base = temp_dir.child("core/tests/");
+    let base = transform(tp.xdg_config_home.child("core/tests/").to_path_buf());
     let specifier = "../006_more_imports.js";
-    let expect = temp_dir.child("core/006_more_imports.js");
+    let expect = transform(
+      tp.xdg_config_home
+        .child("core/006_more_imports.js")
+        .to_path_buf(),
+    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
 
-    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
-    let expect = transform(expect.to_path_buf());
-
-    let actual = loader.resolve(base, specifier);
+    let actual = loader.resolve(Some(&base), specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
-      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-      specifier,
-      actual,
-      expect,
-      expect.replace("/", "\\")
+      "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+      base, specifier, actual, expect,
     );
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
