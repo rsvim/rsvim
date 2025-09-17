@@ -2646,6 +2646,7 @@ dependencies = [
  "timezone_provider",
  "tokio",
  "tokio-util",
+ "tracing",
  "unicode-width 0.2.1",
  "v8",
 ]
