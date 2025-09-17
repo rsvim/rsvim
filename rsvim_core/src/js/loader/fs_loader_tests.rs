@@ -667,11 +667,8 @@ export function sayHello() {
     ],
   );
 
-  let specifier = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports/")
-      .to_path_buf(),
-  );
+  let specifier = tp.xdg_config_home.child("rsvim/core/006_more_imports/");
+  let specifier = paths::p2str(specifier.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
