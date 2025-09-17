@@ -125,7 +125,12 @@ impl FsModuleLoader {
       ..ResolveOptions::default()
     };
     let npm_resolver_opts = ResolveOptions {
-      extensions: vec![],
+      extensions: vec![
+        ".js".into(),
+        ".ts".into(),
+        ".json".into(),
+        ".wasm".into(),
+      ],
       enforce_extension: oxc_resolver::EnforceExtension::Enabled,
       builtin_modules: false,
       roots: vec![
