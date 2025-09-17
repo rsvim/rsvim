@@ -145,7 +145,8 @@ export function sayHello() {
       ],
     );
 
-    let base = transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
+    let base =
+      transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
     let specifier = "../006_more_imports.js";
     let expect = transform(
       tp.xdg_config_home
@@ -177,7 +178,6 @@ export function sayHello() {
   fn file_path4() {
     test_log_init();
     let tp = TempPathCfg::create();
-    let temp_dir = assert_fs::TempDir::new().unwrap();
 
     let src: &str = r#"
 export function sayHello() {
