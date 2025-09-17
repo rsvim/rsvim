@@ -321,7 +321,7 @@ impl BuffersManager {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = fp.metadata().unwrap();
-        let mut data: Vec<u8> = Vec::with_capacity(8192);
+        let mut data: [u8; 8192] = [0_u8; 8192];
         let mut rope_builder = RopeBuilder::new();
         let fencoding = self.global_local_options().file_encoding();
         let mut bytes = 0_usize;
