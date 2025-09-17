@@ -360,8 +360,9 @@ export function sayHello() {
   assert!(actual.is_err());
 }
 
-#[test]
-fn folder_path1() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn folder_path1() {
   test_log_init();
   let tp = TempPathCfg::create();
   let temp_dir = assert_fs::TempDir::new().unwrap();
