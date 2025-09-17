@@ -28,8 +28,14 @@ export function sayHello() {
 
     let base: Option<&str> = None;
     let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-    let specifier = tp.xdg_config_home.child("rsvim").child("005_more_imports.js");
-    let expect = tp.xdg_config_home.child("rsvim").child("005_more_imports.js");
+    let specifier = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("005_more_imports.js");
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("005_more_imports.js");
 
     // Run tests.
     let loader = FsModuleLoader::new();
