@@ -109,39 +109,20 @@ mod async_load {
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
   plain_resolver: Resolver,
-  npm_resolver: Resolver,
+  // npm_resolver: Resolver,
 }
 
 impl FsModuleLoader {
   pub fn new() -> Self {
     let plain_resolver_opts = ResolveOptions {
-      extensions: vec![],
-      enforce_extension: oxc_resolver::EnforceExtension::Enabled,
-      modules: vec![],
-      builtin_modules: false,
-      roots: vec![
-        Path::new(std::path::Component::RootDir.as_os_str()).to_path_buf(),
-      ],
+      extensions: vec![".js".into(), ".ts".into()],
+      extension_alias: vec![(".js".into(), vec![".js".into()]), (".ts".into(), vec![".ts".into()])],
+      // builtin_modules: false,
       ..ResolveOptions::default()
     };
-    let npm_resolver_opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
-      enforce_extension: oxc_resolver::EnforceExtension::Enabled,
-      builtin_modules: false,
-      roots: vec![
-        Path::new(std::path::Component::RootDir.as_os_str()).to_path_buf(),
-      ],
-      ..ResolveOptions::default()
-    };
-
     Self {
       plain_resolver: Resolver::new(plain_resolver_opts),
-      npm_resolver: Resolver::new(npm_resolver_opts),
+      // npm_resolver: Resolver::new(npm_resolver_opts),
     }
   }
 }

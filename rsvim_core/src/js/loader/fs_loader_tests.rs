@@ -74,7 +74,7 @@ export function sayHello() {
 }
 "#;
 
-    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let base = temp_dir.child("core/tests");
     let specifier = "./006_more_imports.js";
     let expect = temp_dir.child("core/tests/006_more_imports.js");
 
@@ -83,7 +83,7 @@ export function sayHello() {
 
     // Prepare configs
     {
-      base.touch().unwrap();
+      // base.touch().unwrap();
       expect.touch().unwrap();
       fs::write(expect.path(), src).unwrap();
     }
@@ -122,7 +122,7 @@ export function sayHello() {
 }
 "#;
 
-    let base = temp_dir.child("core/tests/005_more_imports.js");
+    let base = temp_dir.child("core/tests/");
     let specifier = "../006_more_imports.js";
     let expect = temp_dir.child("core/006_more_imports.js");
 
@@ -131,7 +131,7 @@ export function sayHello() {
 
     // Prepare configs
     {
-      base.touch().unwrap();
+      // base.touch().unwrap();
       expect.touch().unwrap();
       fs::write(expect.path(), src).unwrap();
     }
