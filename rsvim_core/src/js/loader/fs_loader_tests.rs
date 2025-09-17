@@ -485,22 +485,18 @@ export function sayHello() {
     ],
   );
 
-  let specifier = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports/")
-      .to_path_buf(),
-  );
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports/index.js")
-      .to_path_buf(),
-  );
+  let specifier = tp.xdg_config_home.child("rsvim/core/006_more_imports/");
+  let specifier = paths::p2str(specifier.path());
+  let expect = tp
+    .xdg_config_home
+    .child("rsvim/core/006_more_imports/index.js");
+  let expect = paths::p2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(None, &specifier);
+  let actual = loader.resolve(None, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
