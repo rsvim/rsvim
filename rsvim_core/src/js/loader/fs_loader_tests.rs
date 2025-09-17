@@ -365,7 +365,6 @@ export function sayHello() {
 async fn folder_path1() {
   test_log_init();
   let tp = TempPathCfg::create();
-  let temp_dir = assert_fs::TempDir::new().unwrap();
 
   let src: &str = r#"
 export function sayHello() {
