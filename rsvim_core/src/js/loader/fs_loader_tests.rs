@@ -374,7 +374,7 @@ export function sayHello() {
 
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
-  // - ./006_more_imports
+  // - core/tests/006_more_imports/index.js
   make_configs(
     &tp,
     vec![
@@ -421,10 +421,12 @@ export function sayHello() {
   assert_eq!(actual_module2.unwrap(), src);
 }
 
-#[test]
-fn folder_path2() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn folder_path2() {
   test_log_init();
   let temp_dir = assert_fs::TempDir::new().unwrap();
+  let tp = TempPathCfg::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -432,9 +434,22 @@ export function sayHello() {
 }
 "#;
 
-  let base = temp_dir.child("core/tests/005_more_imports.js");
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - core/006_more_imports/index.js
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new("core/006_more_imports/index.js"), src),
+    ],
+  );
+
+  let base = tp
+    .xdg_config_home
+    .child("rsvim/core/tests/005_more_imports.js");
   let specifier = "../006_more_imports/";
-  let expect = temp_dir.child("core/006_more_imports/index.js");
+  let expect = temp_dir.child("rsvim/core/006_more_imports/index.js");
 
   // Run tests.
   let loader = FsModuleLoader::new();
