@@ -5,7 +5,7 @@ use std::path::Path;
 
 /// Map path to its parent, or remain unchanged if there's no parent.
 ///
-pub fn parent_or_remain_unchanged<S: AsRef<OsStr> + ?Sized>(s: &S) -> &Path {
+pub fn parent_or_remain<S: AsRef<OsStr> + ?Sized>(s: &S) -> &Path {
   Path::new(s).parent().unwrap_or(Path::new(s))
 }
 
