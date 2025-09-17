@@ -67,6 +67,7 @@ export function sayHello() {
   #[test]
   fn file_path2() {
     test_log_init();
+    let tp = TempPathCfg::create();
     let temp_dir = assert_fs::TempDir::new().unwrap();
 
     let src: &str = r#"
@@ -74,6 +75,17 @@ export function sayHello() {
     console.log('Hello, World!');
 }
 "#;
+
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - 005_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("005_more_imports.js"), src),
+      ],
+    );
 
     let base = temp_dir.child("core/tests");
     let specifier = "./006_more_imports.js";

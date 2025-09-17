@@ -157,11 +157,8 @@ impl ModuleLoader for FsModuleLoader {
     specifier: &str,
   ) -> AnyResult<ModulePath> {
     let base = match base {
-      Some(base) => base.to_string(),
-      None => match PATH_CONFIG.config_home() {
-        Some(config_home) => transform(config_home.to_path_buf()),
-        None => path_not_found1!(specifier),
-      },
+      Some(base) => Path::new(base).to_path_buf(),
+      None => PATH_CONFIG.config_home().clone(),
     };
 
     // Full file path, start with '/' or 'C:\\'.

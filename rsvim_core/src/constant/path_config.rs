@@ -80,18 +80,18 @@ fn _home_dir(home_dir: &Path) -> PathBuf {
 fn get_config_home_and_entry(
   config_dir: &Path,
   home_dir: &Path,
-) -> Option<(
+) -> (
   /* config_home */ PathBuf,
-  /* config_entry */ PathBuf,
-)> {
+  /* config_entry */ Option<PathBuf>,
+) {
   for config_dir in [_xdg_config_dir(config_dir), _home_dir(home_dir)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
-      return Some((config_dir.to_path_buf(), ts_config));
+      return (config_dir.to_path_buf(), Some(ts_config));
     }
     let js_config = config_dir.join("rsvim.js");
     if js_config.as_path().exists() {
-      return Some((config_dir.to_path_buf(), js_config));
+      return (config_dir.to_path_buf(), Some(js_config));
     }
   }
 
@@ -103,11 +103,13 @@ fn get_config_home_and_entry(
   .iter()
   {
     if config_entry.exists() {
-      return Some((_home_dir(home_dir), config_entry.clone()));
+      return (_home_dir(home_dir), Some(config_entry.clone()));
     }
   }
 
-  None
+  // Config home fallback to `$HOME/.rsvim` even it doesn't exist, config entry
+  // fallback to `None`.
+  (_home_dir(home_dir), None)
 }
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
@@ -136,7 +138,7 @@ fn _xdg_data_dir(data_dir: &Path) -> PathBuf {
 /// File path related configs.
 pub struct PathConfig {
   config_entry: Option<PathBuf>,
-  config_home: Option<PathBuf>,
+  config_home: PathBuf,
   cache_home: PathBuf,
   data_home: PathBuf,
 }
@@ -151,8 +153,8 @@ impl PathConfig {
     let config_home_and_entry =
       get_config_home_and_entry(&config_dir, &home_dir);
     Self {
-      config_home: config_home_and_entry.as_ref().map(|c| c.0.clone()),
-      config_entry: config_home_and_entry.as_ref().map(|c| c.1.clone()),
+      config_home: config_home_and_entry.0,
+      config_entry: config_home_and_entry.1,
       cache_home: _xdg_cache_dir(&cache_dir),
       data_home: _xdg_data_dir(&data_dir),
     }
@@ -184,12 +186,12 @@ impl PathConfig {
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
   /// 2. `$HOME/.rsvim/`
-  pub fn config_home(&self) -> &Option<PathBuf> {
+  pub fn config_home(&self) -> &PathBuf {
     &self.config_home
   }
 
   #[cfg(test)]
-  pub fn config_home(&self) -> Option<PathBuf> {
+  pub fn config_home(&self) -> PathBuf {
     Self::new().config_home.clone()
   }
 
