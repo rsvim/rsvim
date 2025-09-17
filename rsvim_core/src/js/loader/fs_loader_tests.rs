@@ -598,8 +598,8 @@ export function sayHello() {
     ],
   );
 
-  let base =
-    transform(tp.xdg_config_home.child("rsvim/core/tests").to_path_buf());
+  let base = tp.xdg_config_home.child("rsvim/core/tests");
+  let base = paths::p2str(base.path());
   let specifier = "./006_more_imports";
 
   // Run tests.
