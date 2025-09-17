@@ -115,12 +115,7 @@ pub struct FsModuleLoader {
 impl FsModuleLoader {
   pub fn new() -> Self {
     let plain_resolver_opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
+      extensions: vec![],
       enforce_extension: oxc_resolver::EnforceExtension::Enabled,
       modules: vec![],
       builtin_modules: false,
@@ -130,12 +125,7 @@ impl FsModuleLoader {
       ..ResolveOptions::default()
     };
     let npm_resolver_opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
+      extensions: vec![],
       enforce_extension: oxc_resolver::EnforceExtension::Enabled,
       builtin_modules: false,
       roots: vec![
