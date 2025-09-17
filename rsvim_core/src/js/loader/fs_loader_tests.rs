@@ -941,8 +941,9 @@ export function sayHello() {
   assert_eq!(actual_module2.unwrap(), src);
 }
 
-#[test]
-fn npm_package5() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn npm_package5() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -952,60 +953,59 @@ export function sayHello() {
 }
 "#;
 
-  let pkg_src: &str = r#"
+  let pkg: &str = r#"
 {
   "exports": "./dist/index.js"
 }
 "#;
 
-  let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-  let pkg = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("node_modules")
-    .child("006_more_imports")
-    .child("package.json");
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - node_modules/006_more_imports/index.js
+  // - node_modules/006_more_imports/package.json
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (
+        Path::new("node_modules/006_more_imports/dist/index.js"),
+        src,
+      ),
+      (Path::new("node_modules/006_more_imports/package.json"), pkg),
+    ],
+  );
+
+  let base = transform(tp.xdg_config_home.child("rsvim/").to_path_buf());
   let specifier = "006_more_imports/";
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("node_modules")
-    .child("006_more_imports")
-    .child("dist")
-    .child("index.js");
+  let expect = transform(
+    tp.xdg_config_home
+      .child("rsvim/node_modules/006_more_imports/dist/index.js")
+      .to_path_buf(),
+  );
 
   // Run tests.
   let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader {};
 
-  // Prepare configs
-  {
-    entry.touch().unwrap();
-    expect.touch().unwrap();
-    fs::write(expect.path(), src).unwrap();
-    pkg.touch().unwrap();
-    fs::write(pkg.path(), pkg_src).unwrap();
-  }
-
-  let expect = transform(expect.to_path_buf());
-
-  let actual = loader.resolve(None, specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
-    "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-    specifier,
-    actual,
-    expect,
-    expect.replace("/", "\\")
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+    base, specifier, actual, expect,
   );
   assert_eq!(
     Path::new(&actual).normalize().unwrap(),
     Path::new(&expect).normalize().unwrap()
   );
 
-  let actual_module = loader.load(&actual);
-  assert!(actual_module.is_ok());
-  assert_eq!(actual_module.unwrap(), src);
+  let actual_module1 = loader.load(&actual);
+  assert!(actual_module1.is_ok());
+  assert_eq!(actual_module1.unwrap(), src);
+
+  let actual_module2 = aloader.load(&actual).await;
+  assert!(actual_module2.is_ok());
+  assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[test]
