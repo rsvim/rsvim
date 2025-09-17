@@ -1,3 +1,3 @@
 //! Common utils.
 
-pub mod path;
+pub mod paths;

@@ -9,8 +9,8 @@ use crate::js::module::ModuleStatus;
 use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::util::paths;
 use std::cell::RefCell;
-use std::path::Path;
 use std::rc::Rc;
 
 /// Called during `Module::instantiate_module`, see:
@@ -34,12 +34,7 @@ pub fn module_resolve_cb<'a>(
 
   let dependant = state.module_map.get_path(referrer);
   let dependant = dependant
-    .map(|dep| {
-      let dep = dep.clone();
-      let p = Path::new(&dep).to_path_buf();
-      p.parent().unwrap_or(p.as_path()).to_path_buf()
-    })
-    .map(|dep| dep.as_path().as_os_str().to_str().unwrap().to_string());
+    .map(|dep| paths::path2str(paths::parent_or_remain(&dep)).to_string());
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
@@ -111,8 +106,7 @@ fn import_meta_resolve(
   }
 
   let base = args.data().to_rust_string_lossy(scope);
-  let base = Path::new(&base).parent().unwrap_or(Path::new(&base));
-  let base = base.as_os_str().to_str().unwrap();
+  let base = paths::path2str(paths::parent_or_remain(&base));
   let specifier = args.get(0).to_rust_string_lossy(scope);
   trace!(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
@@ -180,8 +174,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
-  let base = Path::new(&base).parent().unwrap_or(Path::new(&base));
-  let base = base.as_os_str().to_str().unwrap();
+  let base = paths::path2str(paths::parent_or_remain(&base));
   let specifier = specifier.to_rust_string_lossy(scope);
   trace!(
     "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",
@@ -197,7 +190,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let specifier = match resolve_import(Some(&base), &specifier, import_map) {
+  let specifier = match resolve_import(Some(base), &specifier, import_map) {
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
