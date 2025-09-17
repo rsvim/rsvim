@@ -665,7 +665,7 @@ export function sayHello() {
 }
 
 #[test]
-fn folder_path3() {
+fn folder_path_failed7() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -682,18 +682,13 @@ export function sayHello() {
     &tp,
     vec![
       (Path::new("rsvim.js"), ""),
-      (Path::new("core/006_more_imports/index.js"), src),
+      (Path::new("core/006_more_imports/lib.js"), src),
     ],
   );
 
   let specifier = transform(
     tp.xdg_config_home
       .child("rsvim/core/006_more_imports/")
-      .to_path_buf(),
-  );
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports/index.js")
       .to_path_buf(),
   );
 
