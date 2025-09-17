@@ -326,12 +326,6 @@ export function sayHello() {
     );
 
     let specifier = "006_more_imports.js";
-    let expect = transform(
-      tp.xdg_config_home
-        .child("rsvim")
-        .child("006_more_imports.js")
-        .to_path_buf(),
-    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
