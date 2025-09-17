@@ -15,6 +15,7 @@ pub mod prelude;
 pub mod results;
 pub mod state;
 pub mod ui;
+pub mod util;
 
 // Only for unit test.
 #[cfg(test)]
