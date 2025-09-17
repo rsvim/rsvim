@@ -9,6 +9,6 @@ pub fn parent_or_remain<S: AsRef<OsStr> + ?Sized>(s: &S) -> &Path {
 }
 
 /// Convert path to string.
-pub fn path2str(path: &Path) -> &str {
+pub fn p2str(path: &Path) -> &str {
   path.as_os_str().to_str().unwrap()
 }

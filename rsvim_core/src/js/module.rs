@@ -285,7 +285,7 @@ pub fn fetch_module_tree<'a>(
     let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
     // Transform v8's ModuleRequest into Rust string.
-    let base = paths::path2str(paths::parent_or_remain(&filename));
+    let base = paths::p2str(paths::parent_or_remain(&filename));
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     // FIXME: Don't use `unwrap` for resolve import, handle the panics with
     // error message.
