@@ -823,6 +823,61 @@ export function sayHello() {
   assert_eq!(actual_module2.unwrap(), src);
 }
 
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn npm_package5() {
+  test_log_init();
+  let tp = TempPathCfg::create();
+
+  let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - node_modules/006_more_imports/index.js
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new("node_modules/006_more_imports/index.js"), src),
+    ],
+  );
+
+  let specifier = "006_more_imports";
+  let expect = transform(
+    tp.xdg_config_home
+      .child("rsvim/node_modules/006_more_imports/index.js")
+      .to_path_buf(),
+  );
+
+  // Run tests.
+  let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader {};
+
+  let actual = loader.resolve(None, specifier);
+  assert!(actual.is_ok());
+  let actual = actual.unwrap();
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+    base, specifier, actual, expect,
+  );
+  assert_eq!(
+    Path::new(&actual).normalize().unwrap(),
+    Path::new(&expect).normalize().unwrap()
+  );
+
+  let actual_module1 = loader.load(&actual);
+  assert!(actual_module1.is_ok());
+  assert_eq!(actual_module1.unwrap(), src);
+
+  let actual_module2 = aloader.load(&actual).await;
+  assert!(actual_module2.is_ok());
+  assert_eq!(actual_module2.unwrap(), src);
+}
+
 #[test]
 fn npm_package3() {
   test_log_init();
