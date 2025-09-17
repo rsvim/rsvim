@@ -39,8 +39,7 @@ pub fn init() {
       .with_level(true)
       .with_ansi(false)
       .with_env_filter(tracing_subscriber::EnvFilter::from_env(RUST_LOG))
-      .with_writer(std::io::stderr)
-      .without_time()
+      .with_writer(std::io::stdout)
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   });
