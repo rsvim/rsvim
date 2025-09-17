@@ -138,18 +138,6 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  // Config structure:
-  //
-  // ${RSVIM_CONFIG_HOME}
-  // |- rsvim.js
-  // |- node_modules/
-  //    |- utils/
-  //       |- package.json
-  //       |- lib/
-  //          |- index.js
-  //          |- echo.js
-  //          |- calc.js
-  //
   async fn no_side_effect3() -> IoResult<()> {
     test_log_init();
 
@@ -193,7 +181,16 @@ mod test_static_import {
 }
     "#;
 
-    // Prepare $RSVIM_CONFIG/rsvim.js
+    // Prepare $RSVIM_CONFIG:
+    // |- rsvim.js
+    // |- node_modules/
+    //    |- utils/
+    //       |- package.json
+    //       |- lib/
+    //          |- index.js
+    //          |- echo.js
+    //          |- calc.js
+    //
     make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
@@ -233,16 +230,6 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  // Config structure:
-  //
-  // ${RSVIM_CONFIG_HOME}
-  // |- rsvim.js
-  // |- utils/
-  //    |- a.js
-  //    |- b.js
-  //    |- c.js
-  //    |- d.js
-  //
   async fn no_side_effect5() -> IoResult<()> {
     test_log_init();
 
@@ -292,7 +279,14 @@ export function echoD(value) {
 }
     "#;
 
-    // Prepare $RSVIM_CONFIG/rsvim.js
+    // Prepare $RSVIM_CONFIG
+    // |- rsvim.js
+    // |- utils/
+    //    |- a.js
+    //    |- b.js
+    //    |- c.js
+    //    |- d.js
+    //
     make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
