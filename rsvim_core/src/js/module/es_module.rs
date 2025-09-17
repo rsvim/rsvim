@@ -12,9 +12,9 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
+use crate::util::paths;
 use compact_str::ToCompactString;
 use std::cell::RefCell;
-use std::path::Path;
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -261,10 +261,7 @@ impl JsFuture for EsModuleFuture {
       let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
       // Transform v8's ModuleRequest into Rust string.
-      let base = Path::new(base.as_str())
-        .parent()
-        .unwrap_or(Path::new(base.as_str()));
-      let base = base.as_os_str().to_str().unwrap();
+      let base = paths::path2str(paths::parent_or_remain(&base));
       let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
       let specifier =
         match resolve_import(Some(base), &specifier, import_map.clone()) {
