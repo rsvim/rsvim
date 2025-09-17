@@ -122,14 +122,16 @@ mod async_load {
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
-  resolver: Resolver,
+  folder_resolver: Resolver,
+  npm_resolver: Resolver,
 }
 
 impl FsModuleLoader {
   pub fn new() -> Self {
     let opts = create_resolve_options();
     Self {
-      resolver: Resolver::new(opts),
+      folder_resolver: Resolver::new(opts),
+      npm_resolver: Resolver::new(opts),
     }
   }
 }
@@ -163,7 +165,7 @@ impl ModuleLoader for FsModuleLoader {
     if specifier.starts_with('/')
       || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
     {
-      return match self.resolver.resolve(&base, specifier) {
+      return match self.folder_resolver.resolve(&base, specifier) {
         Ok(resolution) => Ok(transform(resolution.into_path_buf())),
         Err(e) => path_not_found2!(specifier, e),
       };
@@ -171,18 +173,18 @@ impl ModuleLoader for FsModuleLoader {
 
     // Relative file path.
     if specifier.starts_with("./") || specifier.starts_with("../") {
-      return match self.resolver.resolve(&base, specifier) {
+      return match self.folder_resolver.resolve(&base, specifier) {
         Ok(resolution) => Ok(transform(resolution.into_path_buf())),
         Err(e) => path_not_found2!(specifier, e),
       };
     }
 
     // Config home
-    match self.resolver.resolve(&base, specifier) {
+    match self.folder_resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(transform(resolution.into_path_buf())),
       Err(_) => {
         let base = Path::new(&base).join("node_modules");
-        match self.resolver.resolve(base, specifier) {
+        match self.folder_resolver.resolve(base, specifier) {
           Ok(resolution) => Ok(transform(resolution.into_path_buf())),
           Err(e) => path_not_found2!(specifier, e),
         }
