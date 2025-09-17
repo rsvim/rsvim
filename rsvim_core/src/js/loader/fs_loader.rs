@@ -161,11 +161,9 @@ impl ModuleLoader for FsModuleLoader {
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(transform(resolution.into_path_buf())),
       Err(e) => {
-        if PATH_CONFIG.config_home().join("node_modules").is_dir() {
-          match self
-            .resolver
-            .resolve(PATH_CONFIG.config_home().join("node_modules"), specifier)
-          {
+        let node_modules_home = PATH_CONFIG.config_home().join("node_modules");
+        if node_modules_home.is_dir() {
+          match self.resolver.resolve(node_modules_home, specifier) {
             Ok(resolution) => Ok(transform(resolution.into_path_buf())),
             Err(e) => path_not_found2!(specifier, e),
           }

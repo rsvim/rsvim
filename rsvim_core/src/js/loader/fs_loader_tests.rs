@@ -68,7 +68,6 @@ export function sayHello() {
   fn file_path2() {
     test_log_init();
     let tp = TempPathCfg::create();
-    let temp_dir = assert_fs::TempDir::new().unwrap();
 
     let src: &str = r#"
 export function sayHello() {
@@ -83,23 +82,21 @@ export function sayHello() {
       &tp,
       vec![
         (Path::new("rsvim.js"), ""),
-        (Path::new("005_more_imports.js"), src),
+        (Path::new("core/tests/005_more_imports.js"), src),
       ],
     );
 
-    let base = temp_dir.child("core/tests");
+    let base = tp.xdg_config_home.child("rsvim").child("core/tests");
     let specifier = "./006_more_imports.js";
-    let expect = temp_dir.child("core/tests/006_more_imports.js");
+    let expect = tp
+      .xdg_config_home
+      .child("rsvim")
+      .child("core")
+      .child("tests")
+      .child("006_more_imports.js");
 
     // Run tests.
     let loader = FsModuleLoader::new();
-
-    // Prepare configs
-    {
-      // base.touch().unwrap();
-      expect.touch().unwrap();
-      fs::write(expect.path(), src).unwrap();
-    }
 
     let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
     let expect = transform(expect.to_path_buf());
