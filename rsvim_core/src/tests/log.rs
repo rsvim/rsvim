@@ -38,7 +38,7 @@ pub fn init() {
       // .with_thread_names(true)
       .with_level(true)
       .with_ansi(false)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_env("RSVIM_LOG"))
+      .with_env_filter(tracing_subscriber::EnvFilter::from_env(RUST_LOG))
       .with_writer(std::io::stderr)
       .without_time()
       .finish();
