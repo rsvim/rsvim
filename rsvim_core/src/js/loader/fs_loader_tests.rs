@@ -779,7 +779,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(&base), specifier);
+  let actual = loader.resolve(Some(base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
