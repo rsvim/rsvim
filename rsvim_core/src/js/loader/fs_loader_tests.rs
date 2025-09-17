@@ -105,11 +105,8 @@ export function sayHello() {
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
-      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-      specifier,
-      actual,
-      expect,
-      expect.replace("/", "\\")
+      "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+      base, specifier, actual, expect
     );
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
