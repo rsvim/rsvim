@@ -311,6 +311,8 @@ impl BuffersManager {
 
 // Primitive APIs {
 
+const BUF_PAGE_SIZE: usize = 8192_usize;
+
 impl BuffersManager {
   fn edit_file(
     &self,
@@ -321,7 +323,7 @@ impl BuffersManager {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = fp.metadata().unwrap();
-        let mut data: [u8; 8192] = [0_u8; 8192];
+        let mut data: [u8; BUF_PAGE_SIZE] = [0_u8; BUF_PAGE_SIZE];
         let mut rope_builder = RopeBuilder::new();
         let fencoding = self.global_local_options().file_encoding();
         let mut bytes = 0_usize;
@@ -329,6 +331,7 @@ impl BuffersManager {
         loop {
           match reader.read(&mut data) {
             Ok(readded) => {
+              debug_assert!(readded <= BUF_PAGE_SIZE);
               if readded == 0 {
                 break;
               }
@@ -354,7 +357,6 @@ impl BuffersManager {
           data.len(),
           filename
         );
-        debug_assert!(bytes == data.len());
 
         Ok(Buffer::_new(
           *self.global_local_options(),
