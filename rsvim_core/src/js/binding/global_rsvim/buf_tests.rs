@@ -42,7 +42,7 @@ mod tests_current1 {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_single_file_config(&tp, src);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -108,7 +108,7 @@ mod tests_current1 {
       "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_single_file_config(&tp, src);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -175,7 +175,7 @@ mod tests_current1 {
       "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_single_file_config(&tp, src);
 
     // Open editor 1st time, f1 not exists, the `writeSync` will create new
     // file and write.

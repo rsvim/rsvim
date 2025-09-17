@@ -45,7 +45,7 @@ mod test_static_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -110,7 +110,7 @@ mod test_static_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -202,7 +202,7 @@ mod test_static_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
@@ -301,7 +301,7 @@ export function echoD(value) {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
@@ -396,7 +396,7 @@ export function echoD(value) {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
@@ -473,7 +473,7 @@ mod test_dynamic_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -543,7 +543,7 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -646,7 +646,7 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
@@ -733,10 +733,7 @@ try {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)],
-    );
+    make_configs(&tp, vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -835,7 +832,7 @@ export function echoD(value) {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
@@ -934,7 +931,7 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![
         (p1, src1),
@@ -1039,7 +1036,7 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_multi_file_configs(
+    make_configs(
       &tp,
       vec![
         (p1, src1),
