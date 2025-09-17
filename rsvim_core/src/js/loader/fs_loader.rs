@@ -122,7 +122,11 @@ impl FsModuleLoader {
         ".wasm".into(),
       ],
       enforce_extension: oxc_resolver::EnforceExtension::Enabled,
+      modules: vec![],
       builtin_modules: false,
+      roots: vec![
+        Path::new(std::path::Component::RootDir.as_os_str()).to_path_buf(),
+      ],
       ..ResolveOptions::default()
     };
     let npm_resolver_opts = ResolveOptions {
@@ -134,6 +138,9 @@ impl FsModuleLoader {
       ],
       enforce_extension: oxc_resolver::EnforceExtension::Enabled,
       builtin_modules: false,
+      roots: vec![
+        Path::new(std::path::Component::RootDir.as_os_str()).to_path_buf(),
+      ],
       ..ResolveOptions::default()
     };
 
