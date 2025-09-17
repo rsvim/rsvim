@@ -158,33 +158,19 @@ impl ModuleLoader for FsModuleLoader {
       Some(base) => Path::new(base).to_path_buf(),
       None => PATH_CONFIG.config_home().clone(),
     };
-
-    // Full file path, start with '/' or 'C:\\'.
-    if specifier.starts_with('/')
-      || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
-    {
-      return match self.resolver.resolve(&base, specifier) {
-        Ok(resolution) => Ok(transform(resolution.into_path_buf())),
-        Err(e) => path_not_found2!(specifier, e),
-      };
-    }
-
-    // Relative file path.
-    if specifier.starts_with("./") || specifier.starts_with("../") {
-      return match self.resolver.resolve(&base, specifier) {
-        Ok(resolution) => Ok(transform(resolution.into_path_buf())),
-        Err(e) => path_not_found2!(specifier, e),
-      };
-    }
-
-    // Config home
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(transform(resolution.into_path_buf())),
-      Err(_) => {
-        let base = Path::new(&base).join("node_modules");
-        match self.resolver.resolve(base, specifier) {
-          Ok(resolution) => Ok(transform(resolution.into_path_buf())),
-          Err(e) => path_not_found2!(specifier, e),
+      Err(e) => {
+        if PATH_CONFIG.config_home().join("node_modules").is_dir() {
+          match self
+            .resolver
+            .resolve(PATH_CONFIG.config_home().join("node_modules"), specifier)
+          {
+            Ok(resolution) => Ok(transform(resolution.into_path_buf())),
+            Err(e) => path_not_found2!(specifier, e),
+          }
+        } else {
+          path_not_found2!(specifier, e);
         }
       }
     }
