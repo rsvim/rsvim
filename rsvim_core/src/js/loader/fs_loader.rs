@@ -25,11 +25,6 @@ macro_rules! path_not_found2 {
   };
 }
 
-// Transforms `PathBuf` into `String`.
-pub fn transform(path: PathBuf) -> String {
-  path.into_os_string().into_string().unwrap()
-}
-
 /// Checks if path is a JSON file.
 fn is_json_import(path: &Path) -> bool {
   path
