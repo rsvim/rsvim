@@ -641,7 +641,7 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(Some(&base), &specifier);
+  let actual = loader.resolve(Some(base), specifier);
   assert!(actual.is_err());
 }
 
