@@ -122,8 +122,8 @@ impl FsModuleLoader {
         ".wasm".into(),
       ],
       extension_alias: vec![
-        (".js".into(), vec![".js".into(), ".mjs".into()]),
-        (".mjs".into(), vec![".js".into(), ".mjs".into()]),
+        (".js".into(), vec![".js".into()]),
+        (".mjs".into(), vec![".mjs".into()]),
         (".ts".into(), vec![".ts".into()]),
         (".json".into(), vec![".json".into()]),
         (".wasm".into(), vec![".wasm".into()]),
