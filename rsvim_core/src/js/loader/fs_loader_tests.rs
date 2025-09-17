@@ -481,10 +481,11 @@ export function sayHello() {
   assert_eq!(actual_module2.unwrap(), src);
 }
 
-#[test]
-fn folder_path3() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn folder_path3() {
   test_log_init();
-  let temp_dir = assert_fs::TempDir::new().unwrap();
+  let tp = TempPathCfg::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -492,23 +493,33 @@ export function sayHello() {
 }
 "#;
 
-  let base: Option<&str> = None;
-  let specifier = temp_dir.child("core/tests/006_more_imports/");
-  let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - core/tests/006_more_imports/index.js
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new("core/006_more_imports/index.js"), src),
+    ],
+  );
+
+  let specifier = transform(
+    tp.xdg_config_home
+      .child("rsvim/core/tests/006_more_imports/")
+      .to_path_buf(),
+  );
+  let expect = transform(
+    tp.xdg_config_home
+      .child("rsvim/core/tests/006_more_imports/index.js")
+      .to_path_buf(),
+  );
 
   // Run tests.
   let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader {};
 
-  // Prepare configs
-  {
-    expect.touch().unwrap();
-    fs::write(expect.path(), src).unwrap();
-  }
-
-  let specifier = transform(specifier.to_path_buf());
-  let expect = transform(expect.to_path_buf());
-
-  let actual = loader.resolve(base, &specifier);
+  let actual = loader.resolve(None, &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
