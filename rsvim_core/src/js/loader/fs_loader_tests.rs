@@ -429,14 +429,13 @@ export function sayHello() {
     ],
   );
 
-  let base =
-    transform(tp.xdg_config_home.child("rsvim/core/tests").to_path_buf());
+  let base = tp.xdg_config_home.child("rsvim/core/tests");
+  let base = paths::p2str(base.path());
   let specifier = "../006_more_imports/";
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports/index.js")
-      .to_path_buf(),
-  );
+  let expect = tp
+    .xdg_config_home
+    .child("rsvim/core/006_more_imports/index.js");
+  let expect = paths::p2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
