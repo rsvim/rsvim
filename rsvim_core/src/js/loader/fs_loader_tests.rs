@@ -363,6 +363,7 @@ export function sayHello() {
 #[test]
 fn folder_path1() {
   test_log_init();
+  let tp = TempPathCfg::create();
   let temp_dir = assert_fs::TempDir::new().unwrap();
 
   let src: &str = r#"
@@ -371,41 +372,53 @@ export function sayHello() {
 }
 "#;
 
-  let base = temp_dir.child("core/tests/005_more_imports.js");
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - ./006_more_imports
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new("core/tests/006_more_imports/index.js"), src),
+    ],
+  );
+
+  let base = transform(
+    tp.xdg_config_home
+      .child("rsvim")
+      .child("core/tests/")
+      .to_path_buf(),
+  );
   let specifier = "./006_more_imports";
-  let expect = temp_dir.child("core/tests/006_more_imports/index.js");
+  let expect = transform(
+    tp.xdg_config_home
+      .child("rsvim/core/tests/006_more_imports/index.js")
+      .to_path_buf(),
+  );
 
   // Run tests.
   let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader {};
 
-  // Prepare configs
-  {
-    base.touch().unwrap();
-    expect.touch().unwrap();
-    fs::write(expect.path(), src).unwrap();
-  }
-
-  let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
-  let expect = transform(expect.to_path_buf());
-
-  let actual = loader.resolve(base, specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
-    "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-    specifier,
-    actual,
-    expect,
-    expect.replace("/", "\\")
+    "base:{base:?},specifier:{:?},actual:{:?},expect:{:?}",
+    specifier, actual, expect,
   );
   assert_eq!(
     Path::new(&actual).normalize().unwrap(),
     Path::new(&expect).normalize().unwrap()
   );
 
-  let actual_module = loader.load(&actual);
-  assert!(actual_module.is_ok());
-  assert_eq!(actual_module.unwrap(), src);
+  let actual_module1 = loader.load(&actual);
+  assert!(actual_module1.is_ok());
+  assert_eq!(actual_module1.unwrap(), src);
+
+  let actual_module2 = aloader.load(&actual).await;
+  assert!(actual_module2.is_ok());
+  assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[test]
