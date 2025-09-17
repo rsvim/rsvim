@@ -5,9 +5,9 @@ use crate::prelude::*;
 use crate::tests::constant::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::util::paths;
 use assert_fs::prelude::*;
 use normpath::PathExt;
-use std::path::Path;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
@@ -33,18 +33,17 @@ export function sayHello() {
   );
 
   let base: Option<&str> = None;
-  let specifier = transform(
-    tp.xdg_config_home
-      .child("rsvim")
-      .child("005_more_imports.js")
-      .to_path_buf(),
-  );
+  let specifier = tp
+    .xdg_config_home
+    .child("rsvim")
+    .child("005_more_imports.js");
+  let specifier = paths::path2str(specifier.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(base, &specifier);
+  let actual = loader.resolve(base, specifier);
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
@@ -88,22 +87,20 @@ export function sayHello() {
     ],
   );
 
-  let base = transform(
-    tp.xdg_config_home
-      .child("rsvim")
-      .child("core")
-      .child("tests")
-      .to_path_buf(),
-  );
+  let base = tp
+    .xdg_config_home
+    .child("rsvim")
+    .child("core")
+    .child("tests");
+  let base = paths::path2str(base.path());
   let specifier = "./006_more_imports.js";
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim")
-      .child("core")
-      .child("tests")
-      .child("006_more_imports.js")
-      .to_path_buf(),
-  );
+  let expect = tp
+    .xdg_config_home
+    .child("rsvim")
+    .child("core")
+    .child("tests")
+    .child("006_more_imports.js");
+  let expect = paths::path2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
