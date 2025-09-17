@@ -5,6 +5,8 @@
 use crate::constant::RSVIM_LOG;
 use std::sync::Once;
 
+const RUST_LOG: &str = "RUST_LOG";
+
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
   static INITIALIZED: Once = Once::new();
