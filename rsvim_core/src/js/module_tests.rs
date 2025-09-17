@@ -152,14 +152,10 @@ fn fetch_tree3() {
   let path3 = path3.unwrap();
   // NOTE: On macOS, the `tp.xdg_config_home.join("rsvim/fetch3.js")` is `/var/folders/xxx`, while
   // oxc_resolver resolved path is `/private/var/folders/xxx`.
-  let path3_no_private = if path3.starts_with("/private") {
-    path3[8..].to_string()
-  } else {
-    path3.clone()
-  };
+  let path3_no_private = path3.strip_prefix("/private").unwrap_or(&path3);
   assert!(
     state.module_map.get(&path3).is_some()
-      || state.module_map.get(&path3_no_private).is_some()
+      || state.module_map.get(path3_no_private).is_some()
   );
 
   let path1 = resolve_import(
@@ -261,14 +257,11 @@ fn fetch_tree4() {
   );
   assert!(fetch3_path.is_ok());
   let fetch3_path = fetch3_path.unwrap();
-  let fetch3_path_no_private = if fetch3_path.starts_with("/private") {
-    fetch3_path[8..].to_string()
-  } else {
-    fetch3_path.clone()
-  };
+  let fetch3_path_no_private =
+    fetch3_path.strip_prefix("/private").unwrap_or(&fetch3_path);
   assert!(
     state.module_map.get(&fetch3_path).is_some()
-      || state.module_map.get(&fetch3_path_no_private).is_some()
+      || state.module_map.get(fetch3_path_no_private).is_some()
   );
 
   let fetch1_path = resolve_import(
