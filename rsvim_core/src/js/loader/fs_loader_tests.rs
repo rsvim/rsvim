@@ -141,7 +141,6 @@ export function sayHello() {
       &tp,
       vec![
         (Path::new("rsvim.js"), ""),
-        (Path::new("core/tests/005_more_imports.js"), ""),
         (Path::new("core/006_more_imports.js"), src),
       ],
     );
