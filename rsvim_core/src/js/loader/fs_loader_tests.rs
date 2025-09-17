@@ -3,6 +3,7 @@ use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use crate::tests::constant::*;
+use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::*;
 use normpath::PathExt;
@@ -24,42 +25,38 @@ export function sayHello() {
 }
 "#;
 
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - 005_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("005_more_imports.js"), src),
+      ],
+    );
+
     let base: Option<&str> = None;
-    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-    let specifier = tp
-      .xdg_config_home
-      .child("rsvim")
-      .child("005_more_imports.js");
-    let expect = tp
-      .xdg_config_home
-      .child("rsvim")
-      .child("005_more_imports.js");
+    let specifier = transform(
+      tp.xdg_config_home
+        .child("rsvim")
+        .child("005_more_imports.js")
+        .to_path_buf(),
+    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
 
-    // Prepare configs
-    {
-      entry.touch().unwrap();
-      specifier.touch().unwrap();
-      fs::write(specifier.path(), src).unwrap();
-    }
-    let specifier = transform(specifier.to_path_buf());
-    let expect = transform(expect.to_path_buf());
-
     let actual = loader.resolve(base, &specifier);
     info!(
-      "base:{base:?},specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-      specifier,
-      actual,
-      expect,
-      expect.replace("/", "\\")
+      "base:{:?},specifier:{:?},actual:{:?}",
+      base, specifier, actual,
     );
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
-      Path::new(&expect).normalize().unwrap()
+      Path::new(&specifier).normalize().unwrap()
     );
 
     let actual_module = loader.load(&actual);
