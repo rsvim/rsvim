@@ -288,12 +288,11 @@ export function sayHello() {
   );
 
   let specifier = "./006_more_imports.js";
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim")
-      .child("006_more_imports.js")
-      .to_path_buf(),
-  );
+  let expect = tp
+    .xdg_config_home
+    .child("rsvim")
+    .child("006_more_imports.js");
+  let expect = paths::p2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
