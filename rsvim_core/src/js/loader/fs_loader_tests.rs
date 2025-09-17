@@ -196,8 +196,7 @@ export function sayHello() {
       ],
     );
 
-    let base =
-      transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
+    let base = transform(tp.xdg_config_home.child("rsvim/").to_path_buf());
     let specifier = transform(
       tp.xdg_config_home
         .child("rsvim/core/tests/006_more_imports.js")
@@ -227,18 +226,30 @@ export function sayHello() {
   #[test]
   fn file_path_failed5() {
     test_log_init();
-    let temp_dir = assert_fs::TempDir::new().unwrap();
+    let tp = TempPathCfg::create();
 
-    let base = temp_dir.child("core/tests/005_more_imports.js");
-    let specifier = temp_dir.child("core/tests/006_more_imports.js");
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - core/tests/006_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("core/tests/006_more_imports.js"), ""),
+      ],
+    );
+
+    let base = transform(tp.xdg_config_home.child("core/tests/").to_path_buf());
+    let specifier = transform(
+      tp.xdg_config_home
+        .child("core/tests/006_more_imports.js")
+        .to_path_buf(),
+    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
 
-    let base: Option<&str> = Some(base.as_os_str().to_str().unwrap());
-    let specifier = transform(specifier.to_path_buf());
-
-    let actual = loader.resolve(base, &specifier);
+    let actual = loader.resolve(Some(&base), &specifier);
     assert!(actual.is_err());
   }
 
