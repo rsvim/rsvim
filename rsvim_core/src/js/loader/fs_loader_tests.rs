@@ -825,7 +825,7 @@ export function sayHello() {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn npm_package5() {
+async fn npm_package3() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -880,7 +880,7 @@ export function sayHello() {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn npm_package6() {
+async fn npm_package4() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -942,7 +942,7 @@ export function sayHello() {
 }
 
 #[test]
-fn npm_package3() {
+fn npm_package5() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -1009,7 +1009,7 @@ export function sayHello() {
 }
 
 #[test]
-fn npm_package4() {
+fn npm_package6() {
   test_log_init();
   let tp = TempPathCfg::create();
 
@@ -1074,7 +1074,7 @@ export function sayHello() {
 }
 
 #[test]
-fn npm_package_failed5() {
+fn npm_package_failed7() {
   test_log_init();
   let tp = TempPathCfg::create();
 
