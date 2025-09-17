@@ -312,22 +312,6 @@ impl BuffersManager {
 // Primitive APIs {
 
 impl BuffersManager {
-  fn to_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
-    let bufstr = self.to_str(buf, bufsize);
-    let mut block = RopeBuilder::new();
-    block.append(&bufstr.to_owned());
-    block.finish()
-  }
-
-  fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.global_local_options().file_encoding();
-    match fencoding {
-      FileEncodingOption::Utf8 => {
-        String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
-      }
-    }
-  }
-
   fn edit_file(
     &self,
     canvas_size: U16Size,
