@@ -326,18 +326,6 @@ export function echoD(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  // Config structure:
-  //
-  // ${RSVIM_CONFIG_HOME}
-  // |- rsvim.js
-  // |- node_modules/
-  //    |- utils/
-  //       |- package.json
-  //       |- lib/
-  //          |- index.js
-  //          |- echo.js
-  //          |- calc.js
-  //
   async fn side_effect1() -> IoResult<()> {
     test_log_init();
 
@@ -381,7 +369,16 @@ export function echoD(value) {
 }
     "#;
 
-    // Prepare $RSVIM_CONFIG/rsvim.js
+    // Prepare $RSVIM_CONFIG:
+    // |- rsvim.js
+    // |- node_modules/
+    //    |- utils/
+    //       |- package.json
+    //       |- lib/
+    //          |- index.js
+    //          |- echo.js
+    //          |- calc.js
+    //
     make_configs(
       &tp,
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
