@@ -224,7 +224,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file_path_failed5() {
+  fn file_path_failed4() {
     test_log_init();
     let tp = TempPathCfg::create();
 
@@ -254,7 +254,7 @@ export function sayHello() {
   }
 
   #[test]
-  fn file_path6() {
+  fn file_path5() {
     test_log_init();
     let tp = TempPathCfg::create();
 
@@ -264,34 +264,34 @@ export function sayHello() {
 }
 "#;
 
-    let entry = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-    let specifier = "006_more_imports.js";
-    let expect = tp
-      .xdg_config_home
-      .child("rsvim")
-      .child("006_more_imports.js");
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - 006_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("006_more_imports.js"), src),
+      ],
+    );
+
+    let specifier = "./006_more_imports.js";
+    let expect = transform(
+      tp.xdg_config_home
+        .child("rsvim")
+        .child("006_more_imports.js")
+        .to_path_buf(),
+    );
 
     // Run tests.
     let loader = FsModuleLoader::new();
-
-    // Prepare configs
-    {
-      entry.touch().unwrap();
-      expect.touch().unwrap();
-      fs::write(expect.path(), src).unwrap();
-    }
-
-    let expect = transform(expect.to_path_buf());
 
     let actual = loader.resolve(None, specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
-      "base:None,specifier:{:?},actual:{:?},expect:{:?},expect(\\):{:?}",
-      specifier,
-      actual,
-      expect,
-      expect.replace("/", "\\")
+      "base:None,specifier:{:?},actual:{:?},expect:{:?}",
+      specifier, actual, expect,
     );
     assert_eq!(
       Path::new(&actual).normalize().unwrap(),
@@ -301,6 +301,43 @@ export function sayHello() {
     let actual_module = loader.load(&actual);
     assert!(actual_module.is_ok());
     assert_eq!(actual_module.unwrap(), src);
+  }
+
+  #[test]
+  fn file_path_failed5() {
+    test_log_init();
+    let tp = TempPathCfg::create();
+
+    let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - 006_more_imports.js
+    make_configs(
+      &tp,
+      vec![
+        (Path::new("rsvim.js"), ""),
+        (Path::new("006_more_imports.js"), src),
+      ],
+    );
+
+    let specifier = "006_more_imports.js";
+    let expect = transform(
+      tp.xdg_config_home
+        .child("rsvim")
+        .child("006_more_imports.js")
+        .to_path_buf(),
+    );
+
+    // Run tests.
+    let loader = FsModuleLoader::new();
+
+    let actual = loader.resolve(None, specifier);
+    assert!(actual.is_err());
   }
 
   #[test]
