@@ -1,10 +1,12 @@
 use super::module::*;
 use crate::js::JsRuntime;
 use crate::prelude::*;
+use crate::tests::constant::TempPathCfg;
+use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
+use crate::util::paths;
 use assert_fs::TempDir;
-use assert_fs::prelude::*;
 use std::io::Write;
 
 #[test]
@@ -82,8 +84,7 @@ fn fetch2() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree3() {
   test_log_init();
-
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempPathCfg::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -106,27 +107,30 @@ fn fetch_tree3() {
   const result = addUtil.addPI(1.0, 2.5);
   "#;
 
-  let tmp_util_dir = tmpdir.child("util");
-  let fetch1 = tmp_util_dir.child("pi.js");
-  let fetch2 = tmp_util_dir.child("add.ts");
-  let fetch3 = tmpdir.child("fetch3.js");
+  let fetch1 = "./util/pi.js";
+  let fetch2 = "./util/add.ts";
+  let fetch3 = "./fetch3.js";
 
-  {
-    fetch1.touch().unwrap();
-    std::fs::write(fetch1.path(), src1).unwrap();
-
-    fetch2.touch().unwrap();
-    std::fs::write(fetch2.path(), src2).unwrap();
-
-    fetch3.touch().unwrap();
-    std::fs::write(fetch3.path(), src3).unwrap();
-  }
+  // Prepare $RSVIM_CONFIG
+  // - rsvim.js
+  // - fetch3.js
+  // - util/pi.js
+  // - util/add.ts
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new(fetch1), src1),
+      (Path::new(fetch2), src2),
+      (Path::new(fetch3), src3),
+    ],
+  );
 
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
-    fetch3.path().as_os_str().to_str().unwrap(),
+    paths::p2str(tp.xdg_config_home.join("rsvim/fetch3.js").as_path()),
     None,
   );
   assert!(actual1.is_some());
@@ -142,45 +146,53 @@ fn fetch_tree3() {
   let state_rc = JsRuntime::state(&scope);
   let state = state_rc.borrow();
 
-  let path3 = resolve_import(None, fetch3.path().to_str().unwrap(), None);
-  info!("fetch_tree3 path3:{:?}, fetch3:{:?}", path3, fetch3.path());
+  let path3 = resolve_import(None, fetch3, None);
+  info!("fetch_tree3 path3:{:?}, fetch3:{:?}", path3, fetch3);
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
-  assert!(state.module_map.get(&path3).is_some());
+  // NOTE: On macOS, the `tp.xdg_config_home.join("rsvim/fetch3.js")` is `/var/folders/xxx`, while
+  // oxc_resolver resolved path is `/private/var/folders/xxx`.
+  let path3_no_private = if path3.starts_with("/private") {
+    path3[8..].to_string()
+  } else {
+    path3.clone()
+  };
+  assert!(
+    state.module_map.get(&path3).is_some()
+      || state.module_map.get(&path3_no_private).is_some()
+  );
 
   let path1 = resolve_import(
-    Some(tmpdir.path().to_str().unwrap()),
-    fetch1.to_str().unwrap(),
+    Some(paths::p2str(tp.xdg_config_home.join("rsvim").as_path())),
+    fetch1,
     None,
   );
-  info!("fetch_tree3 path1:{:?}, fetch1:{:?}", path1, fetch1.path());
+  info!("fetch_tree3 path1:{:?}, fetch1:{:?}", path1, fetch1);
   assert!(path1.is_ok());
   let path1 = path1.unwrap();
   assert!(state.module_map.get(&path1).is_some());
 
-  let fetch2_without_ext =
-    fetch2.parent().unwrap().join(fetch2.file_stem().unwrap());
+  let fetch2_without_ext = "./util/add";
   info!(
     "fetch_tree3 fetch2:{:?},fetch2.file_stem:{:?},fetch2.without_extension:{:?}",
-    fetch2.path(),
-    fetch2.file_stem(),
+    fetch2,
+    Path::new(fetch2).file_stem(),
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(tmpdir.path().to_str().unwrap()),
-    fetch2_without_ext.to_str().unwrap(),
+    Some(paths::p2str(tp.xdg_config_home.join("rsvim").as_path())),
+    fetch2_without_ext,
     None,
   );
-  info!("fetch_tree3 path2:{:?}, fetch2:{:?}", path2, fetch2.path());
-  assert!(path2.is_err());
+  info!("fetch_tree3 path2:{:?}, fetch2:{:?}", path2, fetch2);
+  assert!(path2.is_ok());
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn fetch_tree4() {
   test_log_init();
-
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempPathCfg::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -203,30 +215,32 @@ fn fetch_tree4() {
   const result = addUtil.addPI(1.0, 2.5);
   "#;
 
-  let tmp_util_dir = tmpdir.join("util");
-  let fetch1 = tmp_util_dir.join("index.js");
-  let fetch2 = tmp_util_dir.join("add.ts");
-  let fetch3 = tmpdir.join("index.js");
+  let fetch1 = "./util/index.js";
+  let fetch2 = "./util/add.ts";
+  let fetch3 = "./index.js";
 
-  {
-    std::fs::create_dir_all(tmp_util_dir).unwrap();
-
-    let mut fp1 = std::fs::File::create(&fetch1).unwrap();
-    fp1.write_all(src1.as_bytes()).unwrap();
-    fp1.flush().unwrap();
-
-    let mut fp2 = std::fs::File::create(&fetch2).unwrap();
-    fp2.write_all(src2.as_bytes()).unwrap();
-    fp2.flush().unwrap();
-
-    let mut fp3 = std::fs::File::create(&fetch3).unwrap();
-    fp3.write_all(src3.as_bytes()).unwrap();
-    fp3.flush().unwrap();
-  }
+  // Prepare $RSVIM_CONFIG
+  // - rsvim.js
+  // - fetch3.js
+  // - util/pi.js
+  // - util/add.ts
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new(fetch1), src1),
+      (Path::new(fetch2), src2),
+      (Path::new(fetch3), src3),
+    ],
+  );
 
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
-  let actual1 = fetch_module_tree(&mut scope, fetch3.to_str().unwrap(), None);
+  let actual1 = fetch_module_tree(
+    &mut scope,
+    paths::p2str(tp.xdg_config_home.join("rsvim/index.js").as_path()),
+    None,
+  );
   assert!(actual1.is_some());
   let actual1 = actual1.unwrap();
   info!(
@@ -240,18 +254,26 @@ fn fetch_tree4() {
   let state = JsRuntime::state(&scope);
   let state = state.borrow();
 
-  let fetch3_path = resolve_import(None, fetch3.to_str().unwrap(), None);
+  let fetch3_path = resolve_import(None, fetch3, None);
   info!(
     "fetch_tree4 fetch3_path:{:?}, fetch3:{:?}",
     fetch3_path, fetch3
   );
   assert!(fetch3_path.is_ok());
   let fetch3_path = fetch3_path.unwrap();
-  assert!(state.module_map.get(&fetch3_path).is_some());
+  let fetch3_path_no_private = if fetch3_path.starts_with("/private") {
+    fetch3_path[8..].to_string()
+  } else {
+    fetch3_path.clone()
+  };
+  assert!(
+    state.module_map.get(&fetch3_path).is_some()
+      || state.module_map.get(&fetch3_path_no_private).is_some()
+  );
 
   let fetch1_path = resolve_import(
-    Some(tmpdir.to_str().unwrap()),
-    fetch1.to_str().unwrap(),
+    Some(paths::p2str(tp.xdg_config_home.join("rsvim").as_path())),
+    fetch1,
     None,
   );
   info!(
@@ -262,22 +284,19 @@ fn fetch_tree4() {
   let fetch1_path = fetch1_path.unwrap();
   assert!(state.module_map.get(&fetch1_path).is_some());
 
-  let fetch2_without_ext =
-    fetch2.parent().unwrap().join(fetch2.file_stem().unwrap());
+  let fetch2_without_ext = "./util/add";
   info!(
-    "fetch_tree4 fetch2:{:?},fetch2.file_stem:{:?},fetch2.without_extension:{:?}",
-    fetch2,
-    fetch2.file_stem(),
-    fetch2_without_ext
+    "fetch_tree4 fetch2:{:?},fetch2.without_extension:{:?}",
+    fetch2, fetch2_without_ext
   );
   let fetch2_path = resolve_import(
-    Some(tmpdir.to_str().unwrap()),
-    fetch2_without_ext.to_str().unwrap(),
+    Some(paths::p2str(tp.xdg_config_home.join("rsvim").as_path())),
+    fetch2_without_ext,
     None,
   );
   info!(
     "fetch_tree4 fetch2_path:{:?}, fetch2:{:?}",
     fetch2_path, fetch2
   );
-  assert!(fetch2_path.is_err());
+  assert!(fetch2_path.is_ok());
 }
