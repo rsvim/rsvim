@@ -673,7 +673,7 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(None, &specifier);
+  let actual = loader.resolve(None, specifier);
   assert!(actual.is_err());
 }
 
@@ -711,14 +711,13 @@ export function sayHello() {
     ],
   );
 
-  let base =
-    transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
+  let base = tp.xdg_config_home.child("rsvim/core/tests/");
+  let base = paths::p2str(base.path());
   let specifier = "./006_more_imports";
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/tests/006_more_imports/lib/index.js")
-      .to_path_buf(),
-  );
+  let expect = tp
+    .xdg_config_home
+    .child("rsvim/core/tests/006_more_imports/lib/index.js");
+  let expect = paths::p2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
