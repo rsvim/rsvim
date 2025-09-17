@@ -141,15 +141,16 @@ export function sayHello() {
       &tp,
       vec![
         (Path::new("rsvim.js"), ""),
+        (Path::new("core/tests/005_more_imports.js"), ""),
         (Path::new("core/006_more_imports.js"), src),
       ],
     );
 
-    let base = transform(tp.xdg_config_home.child("core/tests/").to_path_buf());
+    let base = transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
     let specifier = "../006_more_imports.js";
     let expect = transform(
       tp.xdg_config_home
-        .child("core/006_more_imports.js")
+        .child("rsvim/core/006_more_imports.js")
         .to_path_buf(),
     );
 
