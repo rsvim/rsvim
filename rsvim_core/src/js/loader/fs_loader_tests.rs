@@ -150,20 +150,17 @@ export function sayHello() {
     ],
   );
 
-  let base =
-    transform(tp.xdg_config_home.child("rsvim/core/tests/").to_path_buf());
+  let base = tp.xdg_config_home.child("rsvim/core/tests/");
+  let base = paths::path2str(base.path());
   let specifier = "../006_more_imports.js";
-  let expect = transform(
-    tp.xdg_config_home
-      .child("rsvim/core/006_more_imports.js")
-      .to_path_buf(),
-  );
+  let expect = tp.xdg_config_home.child("rsvim/core/006_more_imports.js");
+  let expect = paths::path2str(expect.path());
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(&base), specifier);
+  let actual = loader.resolve(Some(base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
