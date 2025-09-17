@@ -204,7 +204,8 @@ export function sayHello() {
     ],
   );
 
-  let base = transform(tp.xdg_config_home.child("rsvim/").to_path_buf());
+  let base = tp.xdg_config_home.child("rsvim/");
+  let base = paths::path2str(base.path());
   let specifier = transform(
     tp.xdg_config_home
       .child("rsvim/core/tests/006_more_imports.js")
