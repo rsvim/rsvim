@@ -17,20 +17,6 @@ use std::path::PathBuf;
 // const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
 // const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
 
-pub fn create_resolve_options() -> ResolveOptions {
-  ResolveOptions {
-    extensions: vec![
-      ".js".into(),
-      ".ts".into(),
-      ".json".into(),
-      ".wasm".into(),
-    ],
-    enforce_extension: oxc_resolver::EnforceExtension::Enabled,
-    builtin_modules: false,
-    ..ResolveOptions::default()
-  }
-}
-
 macro_rules! path_not_found1 {
   ($path:expr) => {
     anyhow::bail!(format!("Module path {:?} not found", $path))
@@ -128,10 +114,32 @@ pub struct FsModuleLoader {
 
 impl FsModuleLoader {
   pub fn new() -> Self {
-    let opts = create_resolve_options();
+    let plain_resolver_opts = ResolveOptions {
+      extensions: vec![
+        ".js".into(),
+        ".ts".into(),
+        ".json".into(),
+        ".wasm".into(),
+      ],
+      enforce_extension: oxc_resolver::EnforceExtension::Enabled,
+      builtin_modules: false,
+      ..ResolveOptions::default()
+    };
+    let npm_resolver_opts = ResolveOptions {
+      extensions: vec![
+        ".js".into(),
+        ".ts".into(),
+        ".json".into(),
+        ".wasm".into(),
+      ],
+      enforce_extension: oxc_resolver::EnforceExtension::Enabled,
+      builtin_modules: false,
+      ..ResolveOptions::default()
+    };
+
     Self {
-      plain_resolver: Resolver::new(opts.clone()),
-      npm_resolver: Resolver::new(opts),
+      plain_resolver: Resolver::new(plain_resolver_opts),
+      npm_resolver: Resolver::new(npm_resolver_opts),
     }
   }
 }
