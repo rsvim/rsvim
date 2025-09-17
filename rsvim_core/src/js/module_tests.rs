@@ -149,7 +149,7 @@ fn fetch_tree3() {
   assert!(state.module_map.get(&path3).is_some());
 
   let path1 = resolve_import(
-    Some(fetch3.path().to_str().unwrap()),
+    Some(tmpdir.path().to_str().unwrap()),
     fetch1.to_str().unwrap(),
     None,
   );
@@ -167,7 +167,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(fetch3.path().to_str().unwrap()),
+    Some(tmpdir.path().to_str().unwrap()),
     fetch2_without_ext.to_str().unwrap(),
     None,
   );
@@ -271,7 +271,7 @@ fn fetch_tree4() {
     fetch2_without_ext
   );
   let fetch2_path = resolve_import(
-    Some(fetch3.to_str().unwrap()),
+    Some(tmpdir.to_str().unwrap()),
     fetch2_without_ext.to_str().unwrap(),
     None,
   );
