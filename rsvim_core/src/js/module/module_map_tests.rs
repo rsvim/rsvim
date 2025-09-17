@@ -17,12 +17,6 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  // Config structure:
-  //
-  // ${RSVIM_CONFIG_HOME}
-  // |- rsvim.js
-  // |- util.js
-  //
   async fn no_side_effect1() -> IoResult<()> {
     test_log_init();
 
@@ -44,7 +38,9 @@ mod test_static_import {
     }
     "#;
 
-    // Prepare $RSVIM_CONFIG/rsvim.js
+    // Prepare $RSVIM_CONFIG:
+    // - rsvim.js
+    // - util.js
     make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop =
