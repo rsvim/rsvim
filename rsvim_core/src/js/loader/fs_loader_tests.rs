@@ -499,12 +499,12 @@ export function sayHello() {
 
   let specifier = transform(
     tp.xdg_config_home
-      .child("rsvim/core/tests/006_more_imports/")
+      .child("rsvim/core/006_more_imports/")
       .to_path_buf(),
   );
   let expect = transform(
     tp.xdg_config_home
-      .child("rsvim/core/tests/006_more_imports/index.js")
+      .child("rsvim/core/006_more_imports/index.js")
       .to_path_buf(),
   );
 
@@ -661,6 +661,46 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
 
   let actual = loader.resolve(Some(&base), &specifier);
+  assert!(actual.is_err());
+}
+
+#[test]
+fn folder_path3() {
+  test_log_init();
+  let tp = TempPathCfg::create();
+
+  let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - core/tests/006_more_imports/index.js
+  make_configs(
+    &tp,
+    vec![
+      (Path::new("rsvim.js"), ""),
+      (Path::new("core/006_more_imports/index.js"), src),
+    ],
+  );
+
+  let specifier = transform(
+    tp.xdg_config_home
+      .child("rsvim/core/006_more_imports/")
+      .to_path_buf(),
+  );
+  let expect = transform(
+    tp.xdg_config_home
+      .child("rsvim/core/006_more_imports/index.js")
+      .to_path_buf(),
+  );
+
+  // Run tests.
+  let loader = FsModuleLoader::new();
+
+  let actual = loader.resolve(None, &specifier);
   assert!(actual.is_err());
 }
 
