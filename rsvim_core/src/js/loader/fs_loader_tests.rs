@@ -975,7 +975,7 @@ export function sayHello() {
   );
 
   let base = transform(tp.xdg_config_home.child("rsvim/").to_path_buf());
-  let specifier = "006_more_imports/";
+  let specifier = "006_more_imports";
   let expect = transform(
     tp.xdg_config_home
       .child("rsvim/node_modules/006_more_imports/dist/index.js")
