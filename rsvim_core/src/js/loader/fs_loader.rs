@@ -155,6 +155,10 @@ impl ModuleLoader for FsModuleLoader {
       Some(base) => Path::new(base).to_path_buf(),
       None => PATH_CONFIG.config_home().clone(),
     };
+    trace!(
+      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
+      base, specifier
+    );
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(transform(resolution.into_path_buf())),
       Err(e) => {
