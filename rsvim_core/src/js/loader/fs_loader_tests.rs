@@ -183,7 +183,7 @@ export function sayHello() {
   assert!(actual_module1.is_ok());
   assert_eq!(actual_module1.unwrap(), src);
 
-  let actual_module2 = aloader.load(&actual);
+  let actual_module2 = aloader.load(&actual).await;
   assert!(actual_module2.is_ok());
   assert_eq!(actual_module2.unwrap(), src);
 }
