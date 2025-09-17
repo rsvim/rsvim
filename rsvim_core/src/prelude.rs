@@ -23,3 +23,5 @@ pub use log::warn;
 pub use paste::paste;
 pub use std::collections::BTreeMap;
 pub use std::collections::BTreeSet;
+pub use std::path::Path;
+pub use std::path::PathBuf;
