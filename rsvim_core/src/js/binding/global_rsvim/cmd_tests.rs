@@ -24,7 +24,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -78,7 +78,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -132,7 +132,7 @@ async fn test_echo3() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -185,7 +185,7 @@ async fn test_echo4() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());

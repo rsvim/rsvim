@@ -25,7 +25,7 @@ mod tests_wrap {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -76,7 +76,7 @@ mod tests_tab_stop {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -125,7 +125,7 @@ mod tests_tab_stop {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -185,7 +185,7 @@ mod tests_file_encoding {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -247,7 +247,7 @@ mod tests_file_encoding {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -313,7 +313,7 @@ mod tests_file_format {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -372,7 +372,7 @@ mod tests_file_format {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -438,7 +438,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -487,7 +487,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -547,7 +547,7 @@ mod tests_shift_width {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -599,7 +599,7 @@ mod tests_shift_width {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, src);
+    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());

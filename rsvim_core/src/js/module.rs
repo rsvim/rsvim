@@ -41,6 +41,7 @@ use crate::js::loader::CoreModuleLoader;
 use crate::js::loader::FsModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
+use crate::util::paths;
 use std::sync::LazyLock;
 // use url::Url;
 pub use es_module::*;
@@ -130,13 +131,14 @@ pub fn create_origin<'s>(
 
 fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
   static CORE_MODULE_LOADER: CoreModuleLoader = CoreModuleLoader {};
-  static FS_MODULE_LOADER: FsModuleLoader = FsModuleLoader {};
+  static FS_MODULE_LOADER: LazyLock<FsModuleLoader> =
+    LazyLock::new(FsModuleLoader::new);
 
   let is_core_module_import = CORE_MODULES.contains_key(specifier);
   if is_core_module_import {
     &CORE_MODULE_LOADER
   } else {
-    &FS_MODULE_LOADER
+    &*FS_MODULE_LOADER
   }
 }
 
@@ -283,10 +285,11 @@ pub fn fetch_module_tree<'a>(
     let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
     // Transform v8's ModuleRequest into Rust string.
+    let base = paths::parent_or_remain(&filename).to_string_lossy();
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     // FIXME: Don't use `unwrap` for resolve import, handle the panics with
     // error message.
-    let specifier = resolve_import(Some(filename), &specifier, None).unwrap();
+    let specifier = resolve_import(Some(&base), &specifier, None).unwrap();
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.

@@ -1,4 +1,5 @@
 use crate::cli::CliOptions;
+use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
@@ -22,7 +23,7 @@ async fn test_exit1() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
@@ -63,7 +64,7 @@ async fn test_exit2() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, src);
+  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());

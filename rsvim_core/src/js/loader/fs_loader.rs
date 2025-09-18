@@ -6,35 +6,16 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Jsx;
-// use crate::js::transpiler::Wasm;
+use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
-use path_absolutize::Absolutize;
-use std::path::Path;
-use std::path::PathBuf;
+use oxc_resolver::ResolveOptions;
+use oxc_resolver::Resolver;
 
-const FILE_EXTENSIONS: &[&str] = &["js", "ts", "json", "wasm"];
-const PACKAGE_FILES: &[&str] = &["package.json", "package.json5"];
-
-#[derive(Default)]
-/// Fs (filesystem) module loader.
-pub struct FsModuleLoader;
-
-macro_rules! path_not_found1 {
+macro_rules! path_not_found {
   ($path:expr) => {
-    anyhow::bail!(format!("Module path {:?} not found", $path))
+    anyhow::bail!(format!("Module path NotFound({:?})", $path))
   };
-}
-
-macro_rules! path_not_found2 {
-  ($path:expr, $e:expr) => {
-    anyhow::bail!(format!("Module path {:?} not found: {:?}", $path, $e))
-  };
-}
-
-// Transforms `PathBuf` into `String`.
-pub fn transform(path: PathBuf) -> String {
-  path.into_os_string().into_string().unwrap()
 }
 
 /// Checks if path is a JSON file.
@@ -48,100 +29,6 @@ fn is_json_import(path: &Path) -> bool {
 /// Wraps JSON data into an ES module (using v8's built in objects).
 fn wrap_json(source: &str) -> String {
   format!("export default JSON.parse(`{source}`);")
-}
-
-mod sync_resolve {
-  use super::*;
-
-  pub fn resolve_file(path: &Path) -> AnyResult<ModulePath> {
-    if path.is_file() {
-      return Ok(transform(path.to_path_buf()));
-    }
-
-    path_not_found1!(path)
-  }
-
-  macro_rules! _resolve_npm {
-    ($field:expr,$path:expr) => {
-      let json_path = $path.join(Path::new($field.as_str().unwrap()));
-      if json_path.is_file() {
-        return Ok(transform(json_path));
-      }
-    };
-  }
-
-  // Case-1: "exports" is plain string
-  //
-  // ```json
-  // {
-  //   "exports": "./index.js"
-  // }
-  // ```
-  //
-  // Case-2: "exports" is json object and use "." field
-  //
-  // ```json
-  // {
-  //   "exports": {
-  //     ".": "./index.js"
-  //   }
-  // }
-  // ```
-  pub fn resolve_node_module(path: &Path) -> AnyResult<ModulePath> {
-    if path.is_dir() {
-      for pkg in PACKAGE_FILES {
-        let pkg_path = path.join(pkg);
-        if pkg_path.is_file() {
-          match std::fs::File::open(pkg_path) {
-            Ok(pkg_fp) => {
-              let pkg_reader = std::io::BufReader::new(pkg_fp);
-              match serde_json::from_reader::<
-                std::io::BufReader<std::fs::File>,
-                serde_json::Value,
-              >(pkg_reader)
-              {
-                Ok(pkg_json) => {
-                  for field in ["exports", "main"] {
-                    match pkg_json.get(field) {
-                      Some(json_entry) => {
-                        if json_entry.is_string() {
-                          _resolve_npm!(json_entry, path);
-                        }
-
-                        if json_entry.is_object() {
-                          match json_entry.get(".") {
-                            Some(json_entry_cwd) => {
-                              if json_entry_cwd.is_string() {
-                                _resolve_npm!(json_entry_cwd, path);
-                              }
-                            }
-                            None => { /* do nothing */ }
-                          }
-                        }
-                      }
-                      None => { /* do nothing */ }
-                    }
-                  }
-                }
-                Err(e) => path_not_found2!(path, e),
-              }
-            }
-            Err(e) => path_not_found2!(path, e),
-          }
-        }
-      }
-
-      // Fallback to default `index.js`
-      for ext in FILE_EXTENSIONS {
-        let path = path.join(format!("index.{ext}"));
-        if path.is_file() {
-          return Ok(transform(path));
-        }
-      }
-    }
-
-    path_not_found1!(path)
-  }
 }
 
 mod sync_load {
@@ -169,7 +56,7 @@ mod sync_load {
       };
     }
 
-    path_not_found1!(path)
+    path_not_found!(path)
   }
 }
 
@@ -198,7 +85,39 @@ mod async_load {
       };
     }
 
-    path_not_found1!(path)
+    path_not_found!(path)
+  }
+}
+
+#[derive(Default)]
+/// Fs (filesystem) module loader.
+pub struct FsModuleLoader {
+  resolver: Resolver,
+}
+
+impl FsModuleLoader {
+  pub fn new() -> Self {
+    let opts = ResolveOptions {
+      extensions: vec![
+        ".js".into(),
+        ".ts".into(),
+        ".mjs".into(),
+        ".json".into(),
+        ".wasm".into(),
+      ],
+      extension_alias: vec![
+        (".js".into(), vec![".js".into()]),
+        (".mjs".into(), vec![".mjs".into()]),
+        (".ts".into(), vec![".ts".into()]),
+        (".json".into(), vec![".json".into()]),
+        (".wasm".into(), vec![".wasm".into()]),
+      ],
+      // builtin_modules: false,
+      ..ResolveOptions::default()
+    };
+    Self {
+      resolver: Resolver::new(opts),
+    }
   }
 }
 
@@ -219,48 +138,29 @@ impl ModuleLoader for FsModuleLoader {
     base: Option<&str>,
     specifier: &str,
   ) -> AnyResult<ModulePath> {
-    // Full file path, start with '/' or 'C:\\'.
-    if specifier.starts_with('/')
-      || WINDOWS_DRIVE_BEGIN_REGEX.is_match(specifier)
-    {
-      let path = Path::new(specifier).absolutize()?.to_path_buf();
-      return sync_resolve::resolve_file(path.as_path())
-        .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
-    }
-
-    // Relative file path.
-    if specifier.starts_with("./") || specifier.starts_with("../") {
-      let base = match base {
-        Some(value) => Path::new(value).parent().unwrap().to_path_buf(),
-        None => path_not_found1!(specifier),
-      };
-
-      let path = base.join(specifier).absolutize()?.to_path_buf();
-      return sync_resolve::resolve_file(path.as_path())
-        .or_else(|_| sync_resolve::resolve_node_module(path.as_path()));
-    }
-
-    // Config home
-    match PATH_CONFIG.config_home() {
-      Some(config_home) => {
-        // Simple path in config home directory `${config_home}`.
-        let simple_path =
-          config_home.join(specifier).absolutize()?.to_path_buf();
-        // let simple_path = simple_path.absolutize()?;
-        let maybe_path = sync_resolve::resolve_file(simple_path.as_path())
-          .or_else(|_| {
-            sync_resolve::resolve_node_module(simple_path.as_path())
-          });
-        if maybe_path.is_ok() {
-          return maybe_path;
+    let base = match base {
+      Some(base) => Path::new(base).to_path_buf(),
+      None => PATH_CONFIG.config_home().clone(),
+    };
+    trace!(
+      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
+      base, specifier
+    );
+    match self.resolver.resolve(&base, specifier) {
+      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
+      Err(e) => {
+        let node_modules_home = PATH_CONFIG.config_home().join("node_modules");
+        if node_modules_home.is_dir() {
+          match self.resolver.resolve(node_modules_home, specifier) {
+            Ok(resolution) => {
+              Ok(resolution.path().to_string_lossy().to_string())
+            }
+            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
+          }
+        } else {
+          anyhow::bail!(format!("Module path {:?}", e));
         }
-
-        // Npm module path in `${config_home}/node_modules`.
-        let npm_path = config_home.join("node_modules").join(specifier);
-        let npm_path = npm_path.absolutize()?;
-        sync_resolve::resolve_node_module(&npm_path)
       }
-      None => path_not_found1!(specifier),
     }
   }
 
@@ -275,12 +175,13 @@ impl ModuleLoader for FsModuleLoader {
       Err(e) => return Err(e),
     };
 
-    let path_extension = path.extension().unwrap().to_str().unwrap();
+    let path_extension =
+      path.extension().unwrap().to_string_lossy().to_string();
     let fname = path.to_str();
 
     // Use a preprocessor if necessary.
-    match path_extension {
-      // "wasm" => Ok(Wasm::parse(&source)),
+    match path_extension.as_str() {
+      "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
@@ -312,12 +213,13 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
       Err(e) => return Err(e),
     };
 
-    let path_extension = path.extension().unwrap().to_str().unwrap();
+    let path_extension =
+      path.extension().unwrap().to_string_lossy().to_string();
     let fname = path.to_str();
 
     // Use a preprocessor if necessary.
-    match path_extension {
-      // "wasm" => Ok(Wasm::parse(&source)),
+    match path_extension.as_str() {
+      "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())

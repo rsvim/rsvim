@@ -89,9 +89,9 @@ def test(name, miri, jobs):
             name = ""
         command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
     else:
-        log_var = os.getenv("RSVIM_LOG")
-        if isinstance(log_var, str):
-            set_env("RSVIM_LOG", log_var)
+        rsvim_log = os.getenv("RSVIM_LOG")
+        if isinstance(rsvim_log, str):
+            set_env("RSVIM_LOG", rsvim_log)
         else:
             set_env("RSVIM_LOG", "trace")
         set_sccache()

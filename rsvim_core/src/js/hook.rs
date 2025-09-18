@@ -9,6 +9,8 @@ use crate::js::module::ModuleStatus;
 use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::util::paths;
+use normpath::PathExt;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -32,6 +34,8 @@ pub fn module_resolve_cb<'a>(
   let referrer = v8::Global::new(scope, referrer);
 
   let dependant = state.module_map.get_path(referrer);
+  let dependant = dependant
+    .map(|dep| paths::parent_or_remain(&dep).to_string_lossy().to_string());
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
@@ -64,27 +68,39 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   // Make the module global.
   let module = v8::Global::new(scope, module);
 
-  let url = state.module_map.get_path(module).unwrap();
-  let is_main = state.module_map.main().clone() == Some(url.to_owned());
+  let filename = state.module_map.get_path(module).unwrap();
+  let is_main = state.module_map.main().clone() == Some(filename.to_owned());
   trace!(
     "|host_initialize_import_meta_object_cb| url:{:?}, is_main:{:?}",
-    url, is_main
+    filename, is_main
   );
 
-  // Setup import.url property.
+  // `import.meta.filename`
+  let key = v8::String::new(scope, "filename").unwrap();
+  let value = v8::String::new(scope, &filename).unwrap();
+  meta.create_data_property(scope, key.into(), value.into());
+
+  // `import.meta.dirname`
+  let filepath = Path::new(&filename).normalize().unwrap();
+  let dirname = paths::parent_or_remain(&filepath);
+  let key = v8::String::new(scope, "dirname").unwrap();
+  let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
+  meta.create_data_property(scope, key.into(), value.into());
+
+  // `import.meta.url`
+  let url = format!("file://{}", filepath.as_path().to_string_lossy());
   let key = v8::String::new(scope, "url").unwrap();
   let value = v8::String::new(scope, &url).unwrap();
   meta.create_data_property(scope, key.into(), value.into());
 
-  // Setup import.main property.
+  // `import.meta.main`
   let key = v8::String::new(scope, "main").unwrap();
   let value = v8::Boolean::new(scope, is_main);
   meta.create_data_property(scope, key.into(), value.into());
 
-  let url = v8::String::new(scope, &url).unwrap();
+  // `import.meta.resolve()`
+  let url = v8::String::new(scope, &filename).unwrap();
   let builder = v8::FunctionBuilder::new(import_meta_resolve).data(url.into());
-
-  // Setup import.resolve() method.
   let key = v8::String::new(scope, "resolve").unwrap();
   let value =
     v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
@@ -103,6 +119,7 @@ fn import_meta_resolve(
   }
 
   let base = args.data().to_rust_string_lossy(scope);
+  let base = paths::parent_or_remain(&base).to_string_lossy();
   let specifier = args.get(0).to_rust_string_lossy(scope);
   trace!(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
@@ -170,6 +187,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
+  let base = paths::parent_or_remain(&base).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
   trace!(
     "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",

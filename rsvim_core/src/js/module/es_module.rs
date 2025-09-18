@@ -12,6 +12,7 @@ use crate::js::pending;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
+use crate::util::paths;
 use compact_str::ToCompactString;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -260,16 +261,16 @@ impl JsFuture for EsModuleFuture {
       let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
 
       // Transform v8's ModuleRequest into Rust string.
-      let base = Some(base.as_str());
+      let base = paths::parent_or_remain(&base).to_string_lossy();
       let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
-      let specifier = match resolve_import(base, &specifier, import_map.clone())
-      {
-        Ok(specifier) => specifier,
-        Err(e) => {
-          self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
-          return;
-        }
-      };
+      let specifier =
+        match resolve_import(Some(&base), &specifier, import_map.clone()) {
+          Ok(specifier) => specifier,
+          Err(e) => {
+            self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+            return;
+          }
+        };
 
       // Check if requested module has been seen already.
       let (not_seen_before, status) =

@@ -19,13 +19,7 @@ use std::task::Poll;
 use std::task::Waker;
 use std::time::Duration;
 
-pub fn make_configs(tp: &TempPathCfg, src: &str) {
-  let path = tp.xdg_config_home.child("rsvim").child("rsvim.js");
-  path.touch().unwrap();
-  std::fs::write(path, src).unwrap();
-}
-
-pub fn make_multi_file_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
+pub fn make_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
   for (path, src) in sources.iter() {
     let path = tp.xdg_config_home.child("rsvim").child(path);
     path.touch().unwrap();

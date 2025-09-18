@@ -20,11 +20,7 @@ fn test1() {
   }
 
   let cfg = PathConfig::new();
-  assert!(cfg.config_home().is_some());
-  assert_eq!(
-    cfg.config_home().clone().unwrap(),
-    tp.xdg_config_home.join("rsvim")
-  );
+  assert_eq!(cfg.config_home(), tp.xdg_config_home.join("rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
@@ -61,11 +57,7 @@ fn test2() {
   }
 
   let cfg = PathConfig::new();
-  assert!(cfg.config_home().is_some());
-  assert_eq!(
-    cfg.config_home().clone().unwrap(),
-    tp.home_dir.join(".rsvim")
-  );
+  assert_eq!(cfg.config_home(), tp.home_dir.join(".rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
@@ -101,11 +93,7 @@ fn test3() {
   }
 
   let cfg = PathConfig::new();
-  assert!(cfg.config_home().is_some());
-  assert_eq!(
-    cfg.config_home().clone().unwrap(),
-    tp.home_dir.join(".rsvim")
-  );
+  assert_eq!(cfg.config_home(), tp.home_dir.join(".rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(

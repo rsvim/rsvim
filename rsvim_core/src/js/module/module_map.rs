@@ -215,6 +215,26 @@ impl ModuleMap {
     self.index.contains_key(key)
   }
 
+  #[cfg(test)]
+  /// Whether a v8 module already resolved, compare by key suffix.
+  pub fn get_by_suffix(
+    &self,
+    key: &str,
+  ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
+    use normpath::PathExt;
+
+    self.index.iter().find(|(k, _v)| {
+      Path::new(k)
+        .normalize()
+        .unwrap()
+        .ends_with(Path::new(key).normalize().unwrap())
+        || Path::new(key)
+          .normalize()
+          .unwrap()
+          .ends_with(Path::new(*k).normalize().unwrap())
+    })
+  }
+
   /// Returns a specifier by a v8 module ID.
   pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
     self

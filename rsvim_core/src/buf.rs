@@ -311,23 +311,9 @@ impl BuffersManager {
 
 // Primitive APIs {
 
+const BUF_PAGE_SIZE: usize = 8192_usize;
+
 impl BuffersManager {
-  fn to_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
-    let bufstr = self.to_str(buf, bufsize);
-    let mut block = RopeBuilder::new();
-    block.append(&bufstr.to_owned());
-    block.finish()
-  }
-
-  fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.global_local_options().file_encoding();
-    match fencoding {
-      FileEncodingOption::Utf8 => {
-        String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
-      }
-    }
-  }
-
   fn edit_file(
     &self,
     canvas_size: U16Size,
@@ -337,27 +323,45 @@ impl BuffersManager {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = fp.metadata().unwrap();
-        let mut data: Vec<u8> = Vec::with_capacity(metadata.len() as usize);
+        let mut data: [u8; BUF_PAGE_SIZE] = [0_u8; BUF_PAGE_SIZE];
+        let mut rope_builder = RopeBuilder::new();
+        let fencoding = self.global_local_options().file_encoding();
+        let mut bytes = 0_usize;
         let mut reader = std::io::BufReader::new(fp);
-        let bytes = match reader.read_to_end(&mut data) {
-          Ok(bytes) => bytes,
-          Err(e) => {
-            error!("Failed to read file {:?}:{:?}", filename, e);
-            return Err(e);
+        loop {
+          match reader.read(&mut data) {
+            Ok(readded) => {
+              debug_assert!(readded <= BUF_PAGE_SIZE);
+              if readded == 0 {
+                break;
+              }
+              bytes += readded;
+              let payload = match fencoding {
+                FileEncodingOption::Utf8 => {
+                  String::from_utf8_lossy(&data[0..readded]).into_owned()
+                }
+              };
+              rope_builder.append(&payload);
+            }
+            Err(e) => {
+              error!("Failed to read file {:?}:{:?}", filename, e);
+              return Err(e);
+            }
           }
-        };
+        }
+        let rope = rope_builder.finish();
+
         trace!(
           "Read {} bytes (data: {}) from file {:?}",
           bytes,
           data.len(),
           filename
         );
-        debug_assert!(bytes == data.len());
 
         Ok(Buffer::_new(
           *self.global_local_options(),
           canvas_size,
-          self.to_rope(&data, data.len()),
+          rope,
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
