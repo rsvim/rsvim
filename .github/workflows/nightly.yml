@@ -39,7 +39,7 @@ jobs:
     env:
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        -Cdebuginfo=0 ${{ matrix.os == 'windows-2022' && '-Clink-arg=/DEBUG:NONE -Ctarget-feature=+crt-static ' || '' }}
+        ${{ matrix.os == 'windows-2022' && '-Csymbol-mangling-version=v0 -Ctarget-feature=+crt-static ' || '' }}
     needs: prepare
     strategy:
       matrix:
