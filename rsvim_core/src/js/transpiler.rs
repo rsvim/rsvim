@@ -3,7 +3,7 @@
 // pub mod jsx;
 // pub mod tsx;
 pub mod typescript;
-// pub mod wasm;
+pub mod wasm;
 
 #[cfg(test)]
 mod typescript_tests;

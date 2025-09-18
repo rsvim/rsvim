@@ -6,7 +6,7 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Jsx;
-// use crate::js::transpiler::Wasm;
+use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
@@ -187,7 +187,7 @@ impl ModuleLoader for FsModuleLoader {
 
     // Use a preprocessor if necessary.
     match path_extension.as_str() {
-      // "wasm" => Ok(Wasm::parse(&source)),
+      "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
@@ -225,7 +225,7 @@ impl AsyncModuleLoader for AsyncFsModuleLoader {
 
     // Use a preprocessor if necessary.
     match path_extension.as_str() {
-      // "wasm" => Ok(Wasm::parse(&source)),
+      "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
