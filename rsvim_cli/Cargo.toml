@@ -3,6 +3,7 @@ name = "rsvim"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+resolver.workspace = true
 authors.workspace = true
 repository.workspace = true
 readme.workspace = true
