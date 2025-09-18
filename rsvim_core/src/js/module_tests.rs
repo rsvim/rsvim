@@ -297,7 +297,7 @@ fn fetch_tree4() {
     fetch2, fetch2_without_ext
   );
   let fetch2_path = resolve_import(
-    Some(paths::path2str(tp.xdg_config_home.join("rsvim").as_path())),
+    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
     fetch2_without_ext,
     None,
   );
