@@ -3,17 +3,34 @@
 use std::path::Path;
 use std::path::PathBuf;
 
+#[cfg(test)]
+use parking_lot::Mutex;
+#[cfg(test)]
+use std::sync::Arc;
+#[cfg(test)]
+use std::sync::LazyLock;
+
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
 pub const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
 pub const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
 #[cfg(test)]
+pub struct XdgVar {
+  pub home_dir: PathBuf,
+  pub xdg_config_home_dir: PathBuf,
+  pub xdg_cache_home_dir: PathBuf,
+  pub xdg_data_home_dir: PathBuf,
+}
+
+#[cfg(test)]
+pub static XDG_VAR: LazyLock<Arc<Mutex<Option<XdgVar>>>> =
+  LazyLock::new(|| Arc::new(Mutex::new(None)));
+
+#[cfg(test)]
 fn _dirs_config_dir() -> Option<PathBuf> {
-  match std::env::var(XDG_CONFIG_HOME) {
-    Ok(config_home) => Some(Path::new(&config_home).to_path_buf()),
-    Err(_) => None,
-  }
+  let var = (*XDG_VAR).lock();
+  var.as_ref().map(|var| var.xdg_config_home_dir.clone())
 }
 
 #[cfg(not(test))]
@@ -23,10 +40,8 @@ fn _dirs_config_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_home_dir() -> Option<PathBuf> {
-  match std::env::var(HOME) {
-    Ok(home) => Some(Path::new(&home).to_path_buf()),
-    Err(_) => None,
-  }
+  let var = (*XDG_VAR).lock();
+  var.as_ref().map(|var| var.home_dir.clone())
 }
 
 #[cfg(not(test))]
@@ -36,10 +51,8 @@ fn _dirs_home_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_cache_dir() -> Option<PathBuf> {
-  match std::env::var(XDG_CACHE_HOME) {
-    Ok(cache_home) => Some(Path::new(&cache_home).to_path_buf()),
-    Err(_) => None,
-  }
+  let var = (*XDG_VAR).lock();
+  var.as_ref().map(|var| var.xdg_cache_home_dir.clone())
 }
 
 #[cfg(not(test))]
@@ -49,10 +62,8 @@ fn _dirs_cache_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_data_dir() -> Option<PathBuf> {
-  match std::env::var(XDG_DATA_HOME) {
-    Ok(data_home) => Some(Path::new(&data_home).to_path_buf()),
-    Err(_) => None,
-  }
+  let var = (*XDG_VAR).lock();
+  var.as_ref().map(|var| var.xdg_data_home_dir.clone())
 }
 
 #[cfg(not(test))]
