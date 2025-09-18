@@ -7,8 +7,3 @@ use std::ffi::OsStr;
 pub fn parent_or_remain<S: AsRef<OsStr> + ?Sized>(s: &S) -> &Path {
   Path::new(s).parent().unwrap_or(Path::new(s))
 }
-
-/// Convert path to string.
-pub fn path2str(path: &Path) -> &str {
-  path.to_str().unwrap()
-}
