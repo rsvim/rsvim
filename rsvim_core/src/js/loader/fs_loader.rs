@@ -182,11 +182,12 @@ impl ModuleLoader for FsModuleLoader {
       Err(e) => return Err(e),
     };
 
-    let path_extension = path.extension().unwrap().to_str().unwrap();
+    let path_extension =
+      path.extension().unwrap().to_string_lossy().to_string();
     let fname = path.to_str();
 
     // Use a preprocessor if necessary.
-    match path_extension {
+    match &path_extension {
       // "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source),
       // "jsx" => {
