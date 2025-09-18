@@ -625,6 +625,13 @@ try {
   Rsvim.cmd.echo(e);
 }
 
+try {
+  const url3 = import.meta.resolve();
+  Rsvim.cmd.echo(url3);
+} catch(e) {
+  Rsvim.cmd.echo(e);
+}
+
 Rsvim.rt.exit();
     "#;
 
@@ -655,7 +662,7 @@ Rsvim.rt.exit();
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(2, contents.command_line_message_history().occupied_len());
+      assert_eq!(3, contents.command_line_message_history().occupied_len());
 
       let url1 = contents.command_line_message_history_mut().try_pop();
       assert!(url1.is_some());
@@ -666,6 +673,11 @@ Rsvim.rt.exit();
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
+
+      let url3 = contents.command_line_message_history_mut().try_pop();
+      assert!(url3.is_some());
+      let actual = url3.unwrap();
+      info!("url3:{:?}", actual);
     }
 
     Ok(())
