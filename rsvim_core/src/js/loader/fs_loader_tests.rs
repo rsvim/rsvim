@@ -5,7 +5,6 @@ use crate::prelude::*;
 use crate::tests::constant::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use crate::util::paths;
 use assert_fs::prelude::*;
 use normpath::PathExt;
 
