@@ -292,7 +292,7 @@ export function sayHello() {
     .xdg_config_home
     .child("rsvim")
     .child("006_more_imports.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
@@ -374,18 +374,18 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests/");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
   let expect = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -430,18 +430,18 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = "../006_more_imports/";
   let expect = tp
     .xdg_config_home
     .child("rsvim/core/006_more_imports/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -486,17 +486,17 @@ export function sayHello() {
   );
 
   let specifier = tp.xdg_config_home.child("rsvim/core/006_more_imports/");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
   let expect = tp
     .xdg_config_home
     .child("rsvim/core/006_more_imports/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(None, specifier);
+  let actual = loader.resolve(None, &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -541,21 +541,21 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports/");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
   let expect = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -599,13 +599,13 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_err());
 }
 
@@ -632,11 +632,11 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
@@ -668,12 +668,12 @@ export function sayHello() {
   );
 
   let specifier = tp.xdg_config_home.child("rsvim/core/006_more_imports/");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(None, specifier);
+  let actual = loader.resolve(None, &specifier);
   assert!(actual.is_err());
 }
 
@@ -712,7 +712,7 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/core/tests/");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
   let expect = tp
     .xdg_config_home
