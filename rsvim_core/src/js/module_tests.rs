@@ -36,8 +36,7 @@ fn fetch1() {
 
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
-  let actual1 =
-    fetch_module(&mut scope, fetch1.as_os_str().to_str().unwrap(), None);
+  let actual1 = fetch_module(&mut scope, &fetch1.to_string_lossy(), None);
   assert!(actual1.is_some());
   let actual1 = actual1.unwrap();
   info!(
@@ -74,8 +73,7 @@ fn fetch2() {
 
   let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
-  let actual2 =
-    fetch_module(&mut scope, fetch2.as_os_str().to_str().unwrap(), None);
+  let actual2 = fetch_module(&mut scope, &fetch2.to_string_lossy(), None);
   assert!(actual2.is_none());
 }
 
@@ -129,7 +127,7 @@ fn fetch_tree3() {
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
-    tp.xdg_config_home.join("rsvim/fetch3.js").to_str().unwrap(),
+    &tp.xdg_config_home.join("rsvim/fetch3.js").to_string_lossy(),
     None,
   );
   assert!(actual1.is_some());
@@ -161,7 +159,7 @@ fn fetch_tree3() {
   );
 
   let path1 = resolve_import(
-    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
+    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch1,
     None,
   );
@@ -181,7 +179,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
+    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch2_without_ext,
     None,
   );
@@ -239,7 +237,7 @@ fn fetch_tree4() {
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
-    tp.xdg_config_home.join("rsvim/index.js").to_str().unwrap(),
+    &tp.xdg_config_home.join("rsvim/index.js").to_string_lossy(),
     None,
   );
   assert!(actual1.is_some());
@@ -274,7 +272,7 @@ fn fetch_tree4() {
   );
 
   let fetch1_path = resolve_import(
-    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
+    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch1,
     None,
   );
@@ -296,7 +294,7 @@ fn fetch_tree4() {
     fetch2, fetch2_without_ext
   );
   let fetch2_path = resolve_import(
-    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
+    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch2_without_ext,
     None,
   );

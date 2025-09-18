@@ -106,7 +106,7 @@ fn import_meta_resolve(
   }
 
   let base = args.data().to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_string_lossy().to_string();
+  let base = paths::parent_or_remain(&base).to_string_lossy();
   let specifier = args.get(0).to_rust_string_lossy(scope);
   trace!(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
@@ -174,7 +174,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_string_lossy().to_string();
+  let base = paths::parent_or_remain(&base).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
   trace!(
     "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",
