@@ -278,14 +278,11 @@ fn fetch_tree4() {
     "fetch_tree4 fetch2:{:?},fetch2.without_extension:{:?}",
     fetch2, fetch2_without_ext
   );
-  let fetch2_path = resolve_import(
+  let path2 = resolve_import(
     Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch2_without_ext,
     None,
   );
-  info!(
-    "fetch_tree4 fetch2_path:{:?}, fetch2:{:?}",
-    fetch2_path, fetch2
-  );
-  assert!(fetch2_path.is_ok());
+  info!("fetch_tree4 fetch2_path:{:?}, fetch2:{:?}", path2, fetch2);
+  assert!(path2.is_ok());
 }
