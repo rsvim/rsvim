@@ -668,16 +668,25 @@ Rsvim.rt.exit();
       assert!(url1.is_some());
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
+      assert!(
+        actual.contains("TypeError: Module path NotFound")
+          && actual.contains("undefined")
+      );
 
       let url2 = contents.command_line_message_history_mut().try_pop();
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
+      assert!(
+        actual.contains("TypeError: Module path NotFound")
+          && actual.contains("null")
+      );
 
       let url3 = contents.command_line_message_history_mut().try_pop();
       assert!(url3.is_some());
       let actual = url3.unwrap();
       info!("url3:{:?}", actual);
+      assert!(actual.contains("TypeError: Not enough arguments specified."));
     }
 
     Ok(())
