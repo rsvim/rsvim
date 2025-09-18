@@ -224,7 +224,7 @@ impl ModuleMap {
     self
       .index
       .iter()
-      .find(|(k, _v)| k.ends_with(key) || key.ends_with(k))
+      .find(|(k, _v)| k.ends_with(key) || key.ends_with(*k))
   }
 
   /// Returns a specifier by a v8 module ID.
