@@ -8,7 +8,6 @@ use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Jsx;
 // use crate::js::transpiler::Wasm;
 use crate::prelude::*;
-use crate::util::paths;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
