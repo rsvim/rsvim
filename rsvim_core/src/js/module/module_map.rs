@@ -221,10 +221,18 @@ impl ModuleMap {
     &self,
     key: &str,
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
-    self
-      .index
-      .iter()
-      .find(|(k, _v)| k.ends_with(key) || key.ends_with(*k))
+    use normpath::PathExt;
+
+    self.index.iter().find(|(k, _v)| {
+      Path::new(k)
+        .normalize()
+        .unwrap()
+        .ends_with(Path::new(key).normalize().unwrap())
+        || Path::new(key)
+          .normalize()
+          .unwrap()
+          .ends_with(Path::new(*k).normalize().unwrap())
+    })
   }
 
   /// Returns a specifier by a v8 module ID.
