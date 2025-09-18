@@ -130,7 +130,7 @@ fn fetch_tree3() {
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
-    paths::path2str(tp.xdg_config_home.join("rsvim/fetch3.js").as_path()),
+    tp.xdg_config_home.join("rsvim/fetch3.js").to_str().unwrap(),
     None,
   );
   assert!(actual1.is_some());
@@ -162,7 +162,7 @@ fn fetch_tree3() {
   );
 
   let path1 = resolve_import(
-    Some(paths::path2str(tp.xdg_config_home.join("rsvim").as_path())),
+    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
     fetch1,
     None,
   );
@@ -182,7 +182,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(paths::path2str(tp.xdg_config_home.join("rsvim").as_path())),
+    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
     fetch2_without_ext,
     None,
   );
@@ -240,7 +240,7 @@ fn fetch_tree4() {
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
-    paths::path2str(tp.xdg_config_home.join("rsvim/index.js").as_path()),
+    tp.xdg_config_home.join("rsvim/index.js").to_str().unwrap(),
     None,
   );
   assert!(actual1.is_some());
@@ -275,7 +275,7 @@ fn fetch_tree4() {
   );
 
   let fetch1_path = resolve_import(
-    Some(paths::path2str(tp.xdg_config_home.join("rsvim").as_path())),
+    Some(tp.xdg_config_home.join("rsvim").to_str().unwrap()),
     fetch1,
     None,
   );
