@@ -205,17 +205,17 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim/");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports.js");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -253,14 +253,14 @@ fn file_path_failed4() {
   );
 
   let base = tp.xdg_config_home.child("core/tests/");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = tp.xdg_config_home.child("core/tests/006_more_imports.js");
-  let specifier = paths::path2str(specifier.path());
+  let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), &specifier);
   assert!(actual.is_err());
 }
 
