@@ -717,13 +717,13 @@ export function sayHello() {
   let expect = tp
     .xdg_config_home
     .child("rsvim/core/tests/006_more_imports/lib/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -768,18 +768,18 @@ export function sayHello() {
   );
 
   let base = tp.xdg_config_home.child("rsvim");
-  let base = paths::path2str(base.path());
+  let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports/";
   let expect = tp
     .xdg_config_home
     .child("rsvim/node_modules/006_more_imports/index.js");
-  let expect = paths::path2str(expect.path());
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(base), specifier);
+  let actual = loader.resolve(Some(&base), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
