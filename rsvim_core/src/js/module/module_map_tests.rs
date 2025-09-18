@@ -598,6 +598,78 @@ export function echoMain(value) {
 
     Ok(())
   }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn import_meta2() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let tp = TempPathCfg::create();
+
+    let p1 = Path::new("rsvim.js");
+    let src1: &str = r#"
+try {
+  const url1 = import.meta.resolve(undefined);
+  Rsvim.cmd.echo(url1);
+} catch(e) {
+  Rsvim.cmd.echo(e);
+}
+
+try {
+  const url2 = import.meta.resolve(null);
+  Rsvim.cmd.echo(url2);
+} catch(e) {
+  Rsvim.cmd.echo(e);
+}
+
+Rsvim.rt.exit();
+    "#;
+
+    // Prepare $RSVIM_CONFIG
+    // |- rsvim.js
+    //
+    make_configs(&tp, vec![(p1, src1)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let contents = lock!(event_loop.contents);
+      assert!(contents.command_line_message_history().is_empty());
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(2, contents.command_line_message_history().occupied_len());
+
+      let url1 = contents.command_line_message_history_mut().try_pop();
+      assert!(url1.is_some());
+      let actual = url1.unwrap();
+      info!("url1:{:?}", actual);
+
+      let url2 = contents.command_line_message_history_mut().try_pop();
+      assert!(url2.is_some());
+      let actual = url2.unwrap();
+      info!("url2:{:?}", actual);
+    }
+
+    Ok(())
+  }
 }
 
 #[cfg(test)]
