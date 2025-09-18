@@ -21,8 +21,6 @@ pub mod pending;
 pub mod transpiler;
 
 #[cfg(test)]
-mod hook_tests;
-#[cfg(test)]
 mod module_tests;
 
 use crate::buf::BuffersManagerArc;
