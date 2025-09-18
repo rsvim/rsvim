@@ -29,6 +29,7 @@ mod test_static_import {
     let src1: &str = r#"
   import * as util from "./util.js";
   util.echo(1);
+  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("util.js");
@@ -89,6 +90,7 @@ mod test_static_import {
     let src1: &str = r#"
   import util from "./util.js";
   util.echo(1);
+  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("util.js");
@@ -150,6 +152,7 @@ mod test_static_import {
     let src1: &str = r#"
   import utils from "utils";
   utils.echo(utils.add(1,2));
+  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -243,6 +246,7 @@ mod test_static_import {
 import { echoA } from './utils/a.js';
 
 echoA(5);
+Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -337,6 +341,7 @@ export function echoD(value) {
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
   import utils from "utils";
+  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -444,6 +449,7 @@ echoMain(isMain);
 
 const resolvedModulePath = import.meta.resolve("./utils/a.js");
 Rsvim.cmd.echo(resolvedModulePath);
+Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -964,6 +970,7 @@ Rsvim.rt.exit(0);
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import "./utils";
+    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/echo.js");
@@ -1054,6 +1061,7 @@ try {
 } catch (e) {
   console.log(`Failed to dynamic import:${e}`);
 }
+Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -1153,6 +1161,7 @@ export function echoD(value) {
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import utils from "utils";
+    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -1258,6 +1267,7 @@ export default {};
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import "utils";
+    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
