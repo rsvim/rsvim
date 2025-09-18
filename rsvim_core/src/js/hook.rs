@@ -34,7 +34,7 @@ pub fn module_resolve_cb<'a>(
 
   let dependant = state.module_map.get_path(referrer);
   let dependant = dependant
-    .map(|dep| paths::path2str(paths::parent_or_remain(&dep)).to_string());
+    .map(|dep| paths::parent_or_remain(&dep).to_str().unwrap().to_string());
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
