@@ -34,7 +34,7 @@ pub fn module_resolve_cb<'a>(
 
   let dependant = state.module_map.get_path(referrer);
   let dependant = dependant
-    .map(|dep| paths::parent_or_remain(&dep).to_str().unwrap().to_string());
+    .map(|dep| paths::parent_or_remain(&dep).to_string_lossy().to_string());
 
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier =
@@ -106,7 +106,7 @@ fn import_meta_resolve(
   }
 
   let base = args.data().to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_str().unwrap();
+  let base = paths::parent_or_remain(&base).to_string_lossy().to_string();
   let specifier = args.get(0).to_rust_string_lossy(scope);
   trace!(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
@@ -114,7 +114,7 @@ fn import_meta_resolve(
   );
   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
 
-  match resolve_import(Some(base), &specifier, import_map) {
+  match resolve_import(Some(&base), &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
     Err(e) => throw_type_error(scope, &e.to_string()),
   };
@@ -174,7 +174,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 ) -> Option<v8::Local<'s, v8::Promise>> {
   // Get module base and specifier as strings.
   let base = base.to_rust_string_lossy(scope);
-  let base = paths::parent_or_remain(&base).to_str().unwrap();
+  let base = paths::parent_or_remain(&base).to_string_lossy().to_string();
   let specifier = specifier.to_rust_string_lossy(scope);
   trace!(
     "|host_import_module_dynamically_cb| base:{:?}, specifier:{:?}",
@@ -190,7 +190,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let specifier = match resolve_import(Some(base), &specifier, import_map) {
+  let specifier = match resolve_import(Some(&base), &specifier, import_map) {
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
