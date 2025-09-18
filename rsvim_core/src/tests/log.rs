@@ -5,8 +5,6 @@
 use crate::constant::RSVIM_LOG;
 use std::sync::Once;
 
-const RUST_LOG: &str = "RUST_LOG";
-
 /// Initialize the logging prints to `stderr`.
 pub fn init() {
   static INITIALIZED: Once = Once::new();
@@ -38,7 +36,7 @@ pub fn init() {
       // .with_thread_names(true)
       .with_level(true)
       .with_ansi(false)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_env(RUST_LOG))
+      .with_env_filter(tracing_subscriber::EnvFilter::from_env(RSVIM_LOG))
       .with_writer(std::io::stdout)
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();

@@ -90,15 +90,10 @@ def test(name, miri, jobs):
         command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
     else:
         rsvim_log = os.getenv("RSVIM_LOG")
-        rust_log = os.getenv("RUST_LOG")
         if isinstance(rsvim_log, str):
             set_env("RSVIM_LOG", rsvim_log)
         else:
             set_env("RSVIM_LOG", "trace")
-        if isinstance(rust_log, str):
-            set_env("RUST_LOG", rust_log)
-        else:
-            set_env("RUST_LOG", "trace")
         set_sccache()
         set_rustflags()
         if name is None:
