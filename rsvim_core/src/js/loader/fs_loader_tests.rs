@@ -261,6 +261,7 @@ fn file_path_failed4() {
 
   let actual = loader.resolve(Some(&base), &specifier);
   assert!(actual.is_err());
+  info!("resolve error: {:?}", actual);
 }
 
 #[tokio::test]

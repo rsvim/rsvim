@@ -12,15 +12,9 @@ use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
 
-macro_rules! path_not_found1 {
+macro_rules! path_not_found {
   ($path:expr) => {
-    anyhow::bail!(format!("Module path {:?} not found", $path))
-  };
-}
-
-macro_rules! path_not_found2 {
-  ($path:expr, $e:expr) => {
-    anyhow::bail!(format!("Module path {:?} not found: {:?}", $path, $e))
+    anyhow::bail!(format!("Module path NotFound({:?})", $path))
   };
 }
 
@@ -62,7 +56,7 @@ mod sync_load {
       };
     }
 
-    path_not_found1!(path)
+    path_not_found!(path)
   }
 }
 
@@ -91,7 +85,7 @@ mod async_load {
       };
     }
 
-    path_not_found1!(path)
+    path_not_found!(path)
   }
 }
 
@@ -161,10 +155,10 @@ impl ModuleLoader for FsModuleLoader {
             Ok(resolution) => {
               Ok(resolution.path().to_string_lossy().to_string())
             }
-            Err(e) => path_not_found2!(specifier, e),
+            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
           }
         } else {
-          path_not_found2!(specifier, e);
+          anyhow::bail!(format!("Module path {:?}", e));
         }
       }
     }
