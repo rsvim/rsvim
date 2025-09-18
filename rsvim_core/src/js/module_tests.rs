@@ -148,15 +148,11 @@ fn fetch_tree3() {
   let path3 = path3.unwrap();
   // NOTE: On macOS, the `tp.xdg_config_home.join("rsvim/fetch3.js")` is `/var/folders/xxx`, while
   // oxc_resolver resolved path is `/private/var/folders/xxx`.
-  let path3_no_private = path3.strip_prefix("/private").unwrap_or(&path3);
   info!(
-    "fetch_tree3 path3:{:?}, path3_no_private:{:?}, module_map:{:?}",
-    path3, path3_no_private, state.module_map
+    "fetch_tree3 path3:{:?}, module_map:{:?}",
+    path3, state.module_map
   );
-  assert!(
-    state.module_map.get(&path3).is_some()
-      || state.module_map.get(path3_no_private).is_some()
-  );
+  assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
     Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
@@ -253,40 +249,29 @@ fn fetch_tree4() {
   let state = JsRuntime::state(&scope);
   let state = state.borrow();
 
-  let fetch3_path = resolve_import(None, fetch3, None);
+  let path3 = resolve_import(None, fetch3, None);
+  info!("fetch_tree4 path3:{:?}, fetch3:{:?}", path3, fetch3);
+  assert!(path3.is_ok());
+  let path3 = path3.unwrap();
   info!(
-    "fetch_tree4 fetch3_path:{:?}, fetch3:{:?}",
-    fetch3_path, fetch3
+    "fetch_tree4 path3:{:?}, module_map:{:?}",
+    path3, state.module_map
   );
-  assert!(fetch3_path.is_ok());
-  let fetch3_path = fetch3_path.unwrap();
-  let fetch3_path_no_private =
-    fetch3_path.strip_prefix("/private").unwrap_or(&fetch3_path);
-  info!(
-    "fetch_tree4 fetch3_path:{:?}, fetch3_path_no_private:{:?}, module_map:{:?}",
-    fetch3_path, fetch3_path_no_private, state.module_map
-  );
-  assert!(
-    state.module_map.get(&fetch3_path).is_some()
-      || state.module_map.get(fetch3_path_no_private).is_some()
-  );
+  assert!(state.module_map.get_by_suffix(&path3).is_some());
 
-  let fetch1_path = resolve_import(
+  let path1 = resolve_import(
     Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
     fetch1,
     None,
   );
+  info!("fetch_tree4 path1:{:?}, fetch1:{:?}", path1, fetch1);
+  assert!(path1.is_ok());
+  let path1 = path1.unwrap();
   info!(
-    "fetch_tree4 fetch1_path:{:?}, fetch1:{:?}",
-    fetch1_path, fetch1
+    "fetch_tree4 path1:{:?}, module_map:{:?}",
+    path1, state.module_map
   );
-  assert!(fetch1_path.is_ok());
-  let fetch1_path = fetch1_path.unwrap();
-  info!(
-    "fetch_tree4 fetch1_path:{:?}, module_map:{:?}",
-    fetch1_path, state.module_map
-  );
-  assert!(state.module_map.get(&fetch1_path).is_some());
+  assert!(state.module_map.get(&path1).is_some());
 
   let fetch2_without_ext = "./util/add";
   info!(
