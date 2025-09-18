@@ -430,17 +430,44 @@ export function echoD(value) {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-import { echo } from './utils/a.js';
+import { echoUrl, echoFileName, echoDirName, echoMain } from './utils/a.js';
 
 const url = import.meta.url;
-echo(url);
+echoUrl(url);
+
+const filename = import.meta.filename;
+echoFileName(filename);
+
+const dirname = import.meta.dirname;
+echoDirName(dirname);
+
+const isMain = import.meta.main;
+echoMain(isMain);
+
+const resolvedModulePath = import.meta.resolve("./utils/a.js");
+Rsvim.cmd.echo(resolvedModulePath);
     "#;
 
     let p2 = Path::new("utils/a.js");
     let src2: &str = r#"
-export function echo(value) {
+export function echoUrl(value) {
   const url = import.meta.url;
   Rsvim.cmd.echo(`${url}:${value}`);
+}
+
+export function echoFileName(value) {
+  const filename = import.meta.filename;
+  Rsvim.cmd.echo(`${filename}:${value}`);
+}
+
+export function echoDirName(value) {
+  const dirname = import.meta.dirname;
+  Rsvim.cmd.echo(`${dirname}:${value}`);
+}
+
+export function echoMain(value) {
+  const isMain = import.meta.main;
+  Rsvim.cmd.echo(`${isMain}:${value}`);
 }
     "#;
 
@@ -473,10 +500,56 @@ export function echo(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().occupied_len());
-      let actual = contents.command_line_message_history_mut().try_pop();
-      assert!(actual.is_some());
-      let actual = actual.unwrap();
+      assert_eq!(5, contents.command_line_message_history().occupied_len());
+
+      let resolved_module_path =
+        contents.command_line_message_history_mut().try_pop();
+      assert!(resolved_module_path.is_some());
+      let actual = resolved_module_path.unwrap();
+      info!("resolve:{:?}", actual);
+      assert!(
+        actual.contains(
+          &tp
+            .xdg_config_home
+            .child("rsvim")
+            .child("utils")
+            .child("a.js")
+            .to_string_lossy()
+            .to_string()
+        )
+      );
+
+      let is_main = contents.command_line_message_history_mut().try_pop();
+      assert!(is_main.is_some());
+      let actual = is_main.unwrap();
+      info!("main:{:?}", actual);
+      assert_eq!(actual, "false:true");
+
+      let dirname = contents.command_line_message_history_mut().try_pop();
+      assert!(dirname.is_some());
+      let actual = dirname.unwrap();
+      info!("dirname:{:?}", actual);
+      assert!(
+        actual.contains(
+          &tp
+            .xdg_config_home
+            .child("rsvim")
+            .to_string_lossy()
+            .to_string()
+        ) && actual.contains(
+          &tp
+            .xdg_config_home
+            .child("rsvim")
+            .child("utils")
+            .to_string_lossy()
+            .to_string()
+        )
+      );
+
+      let filename = contents.command_line_message_history_mut().try_pop();
+      assert!(filename.is_some());
+      let actual = filename.unwrap();
+      info!("filename:{:?}", actual);
       assert!(
         actual.contains(
           &tp
@@ -494,6 +567,34 @@ export function echo(value) {
             .to_string_lossy()
             .to_string()
         )
+      );
+
+      let url = contents.command_line_message_history_mut().try_pop();
+      assert!(url.is_some());
+      let actual = url.unwrap();
+      info!("url:{:?}", actual);
+      assert!(
+        actual.contains(
+          &tp
+            .xdg_config_home
+            .child("rsvim")
+            .child("rsvim.js")
+            .to_string_lossy()
+            .to_string()
+        ) && actual.contains(
+          &tp
+            .xdg_config_home
+            .child("rsvim")
+            .child("utils")
+            .child("a.js")
+            .to_string_lossy()
+            .to_string()
+        ) && actual
+          .match_indices("file://")
+          .map(|(i, _)| i)
+          .collect::<Vec<_>>()
+          .len()
+          == 2
       );
     }
 

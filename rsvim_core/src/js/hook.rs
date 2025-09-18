@@ -10,6 +10,7 @@ use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::util::paths;
+use normpath::PathExt;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -67,27 +68,39 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   // Make the module global.
   let module = v8::Global::new(scope, module);
 
-  let url = state.module_map.get_path(module).unwrap();
-  let is_main = state.module_map.main().clone() == Some(url.to_owned());
+  let filename = state.module_map.get_path(module).unwrap();
+  let is_main = state.module_map.main().clone() == Some(filename.to_owned());
   trace!(
     "|host_initialize_import_meta_object_cb| url:{:?}, is_main:{:?}",
-    url, is_main
+    filename, is_main
   );
 
-  // Setup import.url property.
+  // `import.meta.filename`
+  let key = v8::String::new(scope, "filename").unwrap();
+  let value = v8::String::new(scope, &filename).unwrap();
+  meta.create_data_property(scope, key.into(), value.into());
+
+  // `import.meta.dirname`
+  let filepath = Path::new(&filename).normalize().unwrap();
+  let dirname = paths::parent_or_remain(&filepath);
+  let key = v8::String::new(scope, "dirname").unwrap();
+  let value = v8::String::new(scope, &dirname.to_string_lossy()).unwrap();
+  meta.create_data_property(scope, key.into(), value.into());
+
+  // `import.meta.url`
+  let url = format!("file://{}", filepath.as_path().to_string_lossy());
   let key = v8::String::new(scope, "url").unwrap();
   let value = v8::String::new(scope, &url).unwrap();
   meta.create_data_property(scope, key.into(), value.into());
 
-  // Setup import.main property.
+  // `import.meta.main`
   let key = v8::String::new(scope, "main").unwrap();
   let value = v8::Boolean::new(scope, is_main);
   meta.create_data_property(scope, key.into(), value.into());
 
-  let url = v8::String::new(scope, &url).unwrap();
+  // `import.meta.resolve()`
+  let url = v8::String::new(scope, &filename).unwrap();
   let builder = v8::FunctionBuilder::new(import_meta_resolve).data(url.into());
-
-  // Setup import.resolve() method.
   let key = v8::String::new(scope, "resolve").unwrap();
   let value =
     v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
