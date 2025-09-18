@@ -9,3 +9,4 @@ pub mod wasm;
 mod typescript_tests;
 
 pub use typescript::TypeScript;
+pub use wasm::Wasm;
