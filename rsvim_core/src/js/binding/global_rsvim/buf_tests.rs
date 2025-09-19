@@ -204,7 +204,7 @@ mod tests_current1 {
 
       event_loop.initialize()?;
       event_loop
-        .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+        .run_with_mock_operations(MockOperationReader::new(mocked_ops.clone()))
         .await?;
       event_loop.shutdown()?;
 
