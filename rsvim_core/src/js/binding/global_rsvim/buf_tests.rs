@@ -27,7 +27,6 @@ mod tests_current1 {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
@@ -45,6 +44,8 @@ mod tests_current1 {
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -80,7 +81,6 @@ mod tests_current1 {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let src: &str = r#"
   setTimeout(() => {
@@ -116,6 +116,7 @@ mod tests_current1 {
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -154,7 +155,6 @@ mod tests_current1 {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let tp = TempPathCfg::create();
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let f1 = assert_fs::NamedTempFile::new("write_sync1.txt").unwrap();
 
@@ -176,6 +176,7 @@ mod tests_current1 {
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let mocked_ops = vec![
       MockOperation::Operation(Operation::GotoInsertMode(
