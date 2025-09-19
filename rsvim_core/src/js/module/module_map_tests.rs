@@ -356,7 +356,7 @@ import { echoA } from './utils/a.js';
 echoA(5);
     "#;
 
-    let p2 = Path::new("utils/a.js");
+    let p2 = Path::new(".rsvim/utils/a.js");
     let src2: &str = r#"
 export function echoA(value) {
   Rsvim.cmd.echo(`A:${value}`);
@@ -369,13 +369,7 @@ export function echoA(value) {
     //    |- utils/
     //       |- a.js
     //
-    let (_tp, path_cfg) = make_configs(vec![
-      (p1, src1),
-      (p2, src2),
-      (p3, src3),
-      (p4, src4),
-      (p5, src5),
-    ]);
+    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
