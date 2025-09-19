@@ -222,17 +222,6 @@ mod tests_current1 {
       assert!(actual.match_indices("Hello RSVIM!").count() == 1);
     }
 
-    let mocked_ops = vec![
-      MockOperation::Operation(Operation::GotoInsertMode(
-        GotoInsertModeVariant::Keep,
-      )),
-      MockOperation::Operation(Operation::CursorInsert(
-        CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
-      )),
-      MockOperation::Operation(Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(1000)),
-    ];
-
     // Open editor 2nd time, f1 already exists, the `writeSync` will overwrite
     // exist text contents.
     {
