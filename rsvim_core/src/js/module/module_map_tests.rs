@@ -357,7 +357,6 @@ export function echoD(value) {
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
   import utils from "utils";
-  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
