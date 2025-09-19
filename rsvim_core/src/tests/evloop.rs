@@ -57,6 +57,21 @@ pub fn make_configs(
   (tp, path_cfg)
 }
 
+pub fn make_home_configs(
+  sources: Vec<(&Path, &str)>,
+) -> (TempPathConfig, PathConfig) {
+  let tp = TempPathConfig::create();
+
+  for (path, src) in sources.iter() {
+    let path = tp.home_dir.child(path);
+    path.touch().unwrap();
+    std::fs::write(path, src).unwrap();
+  }
+
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  (tp, path_cfg)
+}
+
 pub fn make_event_loop(
   terminal_cols: u16,
   terminal_rows: u16,
