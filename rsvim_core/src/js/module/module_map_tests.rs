@@ -245,7 +245,7 @@ mod test_static_import {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -347,7 +347,7 @@ export function echoD(value) {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new(".rsvim.js");
     let src1: &str = r#"
