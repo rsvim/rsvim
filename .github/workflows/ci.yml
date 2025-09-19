@@ -141,21 +141,27 @@ jobs:
           verbose: true
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - rust_version: 1.85.0
+            os: ubuntu-22.04
             features: ""
           - rust_version: stable
+            os: ubuntu-22.04
             features: ""
           - rust_version: beta
+            os: ubuntu-22.04
             features: ""
           - rust_version: stable
+            os: ubuntu-22.04
             features: "-F snmalloc"
           - rust_version: stable
+            os: macos-14
             features: "-F jemalloc"
           - rust_version: stable
+            os: windows-2022
             features: "-F mimalloc"
     env:
       RUSTC_WRAPPER: "sccache"
