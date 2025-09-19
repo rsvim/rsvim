@@ -178,8 +178,12 @@ jobs:
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
       - uses: actions/checkout@v5
-      - name: Build
+      - name: Build Release
         run: |
           cargo build --release ${{ matrix.features }}
+      - name: Build Debug
+        run: |
           cargo build --profile dev ${{ matrix.features }}
+      - name: Build Nightly
+        run: |
           cargo build --profile nightly ${{ matrix.features }}
