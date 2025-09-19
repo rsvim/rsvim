@@ -13,10 +13,15 @@ pub const PATH_CONFIG_FILE: &str = ".test.path_config";
 
 #[cfg(test)]
 fn _dirs_config_dir() -> Option<PathBuf> {
+  use crate::prelude::*;
+
   std::fs::read_to_string(PATH_CONFIG_FILE)
     .unwrap()
     .split("\n")
-    .filter(|l| l.starts_with("xdg_config_home_dir="))
+    .filter(|l| {
+      info!("|_dirs_config_dir| line:{:?}", l);
+      l.starts_with("xdg_config_home_dir=")
+    })
     .map(|l| l[19..].to_string())
     .map(|l| Path::new(&l).to_path_buf())
     .next()
@@ -29,10 +34,15 @@ fn _dirs_config_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_home_dir() -> Option<PathBuf> {
+  use crate::prelude::*;
+
   std::fs::read_to_string(PATH_CONFIG_FILE)
     .unwrap()
     .split("\n")
-    .filter(|l| l.starts_with("home_dir="))
+    .filter(|l| {
+      info!("|_dirs_home_dir| line:{:?}", l);
+      l.starts_with("home_dir=")
+    })
     .map(|l| l[19..].to_string())
     .map(|l| Path::new(&l).to_path_buf())
     .next()
@@ -45,10 +55,15 @@ fn _dirs_home_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_cache_dir() -> Option<PathBuf> {
+  use crate::prelude::*;
+
   std::fs::read_to_string(PATH_CONFIG_FILE)
     .unwrap()
     .split("\n")
-    .filter(|l| l.starts_with("xdg_cache_home_dir="))
+    .filter(|l| {
+      info!("|_dirs_cache_dir| line:{:?}", l);
+      l.starts_with("xdg_cache_home_dir=")
+    })
     .map(|l| l[19..].to_string())
     .map(|l| Path::new(&l).to_path_buf())
     .next()
@@ -61,10 +76,15 @@ fn _dirs_cache_dir() -> Option<PathBuf> {
 
 #[cfg(test)]
 fn _dirs_data_dir() -> Option<PathBuf> {
+  use crate::prelude::*;
+
   std::fs::read_to_string(PATH_CONFIG_FILE)
     .unwrap()
     .split("\n")
-    .filter(|l| l.starts_with("xdg_data_home_dir="))
+    .filter(|l| {
+      info!("|_dirs_data_dir| line:{:?}", l);
+      l.starts_with("xdg_data_home_dir=")
+    })
     .map(|l| l[19..].to_string())
     .map(|l| Path::new(&l).to_path_buf())
     .next()

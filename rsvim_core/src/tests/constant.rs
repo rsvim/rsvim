@@ -1,4 +1,5 @@
 use crate::constant::path_config::PATH_CONFIG_FILE;
+use crate::prelude::*;
 use fslock::LockFile;
 use std::io::Write;
 
@@ -31,6 +32,7 @@ impl TempPathCfg {
       xdg_cache_home.path().to_string_lossy(),
       xdg_data_home.path().to_string_lossy()
     );
+    info!("TempPathCfg data:{:?}", data);
 
     let mut fp = std::fs::File::create(PATH_CONFIG_FILE).unwrap();
     fp.write_all(&data.into_bytes()).unwrap();
