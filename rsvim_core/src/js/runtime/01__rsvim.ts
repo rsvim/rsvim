@@ -42,7 +42,7 @@ export interface Rsvim {
 export class RsvimImpl implements Rsvim {
   buf = new RsvimBufImpl();
   cmd = new RsvimCmdImpl();
-  opt = new RsvimOpt();
+  opt = new RsvimOptImpl();
   rt = new RsvimRt();
 }
 
@@ -217,7 +217,7 @@ type FileFormatOption = "dos" | "unix" | "mac";
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimOpt {
+export interface RsvimOpt {
   /**
    * Get the _expand-tab_ option. Local to buffer.
    *
@@ -236,10 +236,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.expandTab;
    * ```
    */
-  get expandTab(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_expand_tab();
-  }
+  get expandTab(): boolean;
 
   /**
    * Set the _expand-tab_ option.
@@ -253,15 +250,7 @@ export class RsvimOpt {
    * Rsvim.opt.expandTab = true;
    * ```
    */
-  set expandTab(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
-  }
+  set expandTab(value: boolean);
 
   /**
    * Get the _file-encoding_ option. Local to buffer.
@@ -283,10 +272,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): FileEncodingOption {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_file_encoding();
-  }
+  get fileEncoding(): FileEncodingOption;
 
   /**
    * Set the _file-encoding_ option.
@@ -300,15 +286,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: FileEncodingOption) {
-    if (value !== "utf-8") {
-      throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-  }
+  set fileEncoding(value: FileEncodingOption);
 
   /**
    * Get the _file-format_ option. Local to buffer.
@@ -342,10 +320,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileFormat(): FileFormatOption {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_file_format();
-  }
+  get fileFormat(): FileFormatOption;
 
   /**
    * Set the _file-format_ option.
@@ -359,15 +334,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileFormat = "unix";
    * ```
    */
-  set fileFormat(value: FileFormatOption) {
-    if (value !== "dos" && value !== "unix" && value !== "mac") {
-      throw new Error(
-        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_file_format(value);
-  }
+  set fileFormat(value: FileFormatOption);
 
   /**
    * Get the _line-break_ option. This options is also known as
@@ -388,10 +355,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.lineBreak;
    * ```
    */
-  get lineBreak(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_line_break();
-  }
+  get lineBreak(): boolean;
 
   /**
    * Set the _line-break_ option.
@@ -405,15 +369,7 @@ export class RsvimOpt {
    * Rsvim.opt.lineBreak = true;
    * ```
    */
-  set lineBreak(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_line_break(value);
-  }
+  set lineBreak(value: boolean);
 
   /**
    * Get the _shift-width_ option. Local to buffer.
@@ -434,10 +390,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.shiftWidth;
    * ```
    */
-  get shiftWidth(): number {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_shift_width();
-  }
+  get shiftWidth(): number;
 
   /**
    * Set the _expand-tab_ option. This value should be between `[1,255]`.
@@ -452,15 +405,7 @@ export class RsvimOpt {
    * Rsvim.opt.shiftWidth = 4;
    * ```
    */
-  set shiftWidth(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
-      throw new Error(
-        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_shift_width(value);
-  }
+  set shiftWidth(value: number);
 
   /**
    * Get the _tab-stop_ option. This option is also known as
@@ -483,10 +428,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.tabStop;
    * ```
    */
-  get tabStop(): number {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_tab_stop();
-  }
+  get tabStop(): number;
 
   /**
    * Set the _tab-stop_ option.
@@ -500,15 +442,7 @@ export class RsvimOpt {
    * Rsvim.opt.tabStop = 4;
    * ```
    */
-  set tabStop(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
-      throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
-      );
-    }
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
-  }
+  set tabStop(value: number);
 
   /**
    * Get the _wrap_ option. This option is also known as
@@ -534,10 +468,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.wrap;
    * ```
    */
-  get wrap(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_wrap();
-  }
+  get wrap(): boolean;
 
   /**
    * Set the _wrap_ option.
@@ -551,6 +482,105 @@ export class RsvimOpt {
    * Rsvim.opt.wrap = true;
    * ```
    */
+  set wrap(value: boolean);
+}
+
+export class RsvimOptImpl implements RsvimOpt {
+  get expandTab(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_expand_tab();
+  }
+
+  set expandTab(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+  }
+
+  get fileEncoding(): FileEncodingOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+  }
+
+  set fileEncoding(value: FileEncodingOption) {
+    if (value !== "utf-8") {
+      throw new Error(
+        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+  }
+
+  get fileFormat(): FileFormatOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_format();
+  }
+
+  set fileFormat(value: FileFormatOption) {
+    if (value !== "dos" && value !== "unix" && value !== "mac") {
+      throw new Error(
+        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_format(value);
+  }
+
+  get lineBreak(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
+
+  set lineBreak(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
+
+  get shiftWidth(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_shift_width();
+  }
+
+  set shiftWidth(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
+      throw new Error(
+        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_shift_width(value);
+  }
+
+  get tabStop(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_tab_stop();
+  }
+
+  set tabStop(value: number) {
+    if (typeof value !== "number" || value < 1 || value > 255) {
+      throw new Error(
+        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
+  }
+
+  get wrap(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_wrap();
+  }
+
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
