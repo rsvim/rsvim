@@ -33,11 +33,18 @@
  * @category Global Object
  * @hideconstructor
  */
-export class Rsvim {
-  readonly buf: RsvimBuf = new RsvimBuf();
-  readonly cmd: RsvimCmd = new RsvimCmd();
-  readonly opt: RsvimOpt = new RsvimOpt();
-  readonly rt: RsvimRt = new RsvimRt();
+export interface Rsvim {
+  readonly buf: RsvimBuf;
+  readonly cmd: RsvimCmd;
+  readonly opt: RsvimOpt;
+  readonly rt: RsvimRt;
+}
+
+class RsvimImpl implements Rsvim {
+  buf = new RsvimBuf();
+  cmd = new RsvimCmd();
+  opt = new RsvimOpt();
+  rt = new RsvimRt();
 }
 
 /**
