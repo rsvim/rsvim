@@ -1240,18 +1240,13 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(
-      &tp,
-      vec![
-        (p1, src1),
-        (p2, src2),
-        (p3, src3),
-        (p4, src4),
-        (pkg5, pkg_src5),
-      ],
-    );
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (pkg5, pkg_src5),
+    ]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -1351,18 +1346,13 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(
-      &tp,
-      vec![
-        (p1, src1),
-        (p2, src2),
-        (p3, src3),
-        (p4, src4),
-        (pkg5, pkg_src5),
-      ],
-    );
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (pkg5, pkg_src5),
+    ]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
