@@ -155,7 +155,7 @@ fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
 ///
 /// It returns full path on local filesystem.
 pub fn resolve_import(
-  base: Option<&str>,
+  base: &str,
   specifier: &str,
   import_map: Option<ImportMap>,
 ) -> AnyResult<ModulePath> {
@@ -289,7 +289,7 @@ pub fn fetch_module_tree<'a>(
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     // FIXME: Don't use `unwrap` for resolve import, handle the panics with
     // error message.
-    let specifier = resolve_import(Some(&base), &specifier, None).unwrap();
+    let specifier = resolve_import(&base, &specifier, None).unwrap();
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.

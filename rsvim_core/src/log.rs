@@ -1,6 +1,6 @@
 //! Logging utils.
 
-use crate::constant::RSVIM_LOG;
+use crate::consts::RSVIM_LOG;
 
 /// Initialize file logging, always use file logging.
 ///

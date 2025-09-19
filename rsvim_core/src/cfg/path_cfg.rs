@@ -4,69 +4,25 @@ use std::path::Path;
 use std::path::PathBuf;
 
 #[cfg(test)]
-use parking_lot::Mutex;
-#[cfg(test)]
-use std::sync::Arc;
-#[cfg(test)]
-use std::sync::LazyLock;
+use crate::tests::evloop::TempPathConfig;
 
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
 pub const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
 pub const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
-#[cfg(test)]
-pub struct XdgVar {
-  pub home_dir: PathBuf,
-  pub xdg_config_home_dir: PathBuf,
-  pub xdg_cache_home_dir: PathBuf,
-  pub xdg_data_home_dir: PathBuf,
-}
-
-#[cfg(test)]
-pub static XDG_VAR: LazyLock<Arc<Mutex<Option<XdgVar>>>> =
-  LazyLock::new(|| Arc::new(Mutex::new(None)));
-
-#[cfg(test)]
-fn _dirs_config_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_config_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_config_dir() -> Option<PathBuf> {
   dirs::config_dir()
 }
 
-#[cfg(test)]
-fn _dirs_home_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_home_dir() -> Option<PathBuf> {
   dirs::home_dir()
 }
 
-#[cfg(test)]
-fn _dirs_cache_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_cache_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_cache_dir() -> Option<PathBuf> {
   dirs::cache_dir()
 }
 
-#[cfg(test)]
-fn _dirs_data_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_data_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_data_dir() -> Option<PathBuf> {
   dirs::data_dir()
 }
@@ -88,7 +44,7 @@ fn _home_dir(home_dir: &Path) -> PathBuf {
 ///    well.
 ///
 /// It returns `(Home, Entry)`.
-fn get_config_home_and_entry(
+fn find_config_home_and_entry(
   config_dir: &Path,
   home_dir: &Path,
 ) -> (
@@ -155,14 +111,14 @@ pub struct PathConfig {
 }
 
 impl PathConfig {
-  /// Make new path config.
-  pub fn new() -> Self {
-    let config_dir = _dirs_config_dir().unwrap();
-    let home_dir = _dirs_home_dir().unwrap();
-    let cache_dir = _dirs_cache_dir().unwrap();
-    let data_dir = _dirs_data_dir().unwrap();
+  fn _new_internal(
+    config_dir: PathBuf,
+    home_dir: PathBuf,
+    cache_dir: PathBuf,
+    data_dir: PathBuf,
+  ) -> Self {
     let config_home_and_entry =
-      get_config_home_and_entry(&config_dir, &home_dir);
+      find_config_home_and_entry(&config_dir, &home_dir);
     Self {
       config_home: config_home_and_entry.0,
       config_entry: config_home_and_entry.1,
@@ -171,7 +127,25 @@ impl PathConfig {
     }
   }
 
-  #[cfg(not(test))]
+  /// Make new path config.
+  pub fn new() -> Self {
+    let config_dir = _dirs_config_dir().unwrap();
+    let home_dir = _dirs_home_dir().unwrap();
+    let cache_dir = _dirs_cache_dir().unwrap();
+    let data_dir = _dirs_data_dir().unwrap();
+    Self::_new_internal(config_dir, home_dir, cache_dir, data_dir)
+  }
+
+  #[cfg(test)]
+  pub fn new_with_temp_dirs(tp: &TempPathConfig) -> Self {
+    Self::_new_internal(
+      tp.xdg_config_home.to_path_buf(),
+      tp.home_dir.to_path_buf(),
+      tp.xdg_cache_home.to_path_buf(),
+      tp.xdg_data_home.to_path_buf(),
+    )
+  }
+
   /// User config entry path, it can be either one of following files:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
@@ -183,49 +157,26 @@ impl PathConfig {
   /// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
   /// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
   ///    `$HOME/.rsvim`.
-  pub fn config_entry(&self) -> &Option<PathBuf> {
-    &self.config_entry
+  pub fn config_entry(&self) -> Option<&Path> {
+    self.config_entry.as_deref()
   }
 
-  #[cfg(test)]
-  pub fn config_entry(&self) -> Option<PathBuf> {
-    Self::new().config_entry.clone()
-  }
-
-  #[cfg(not(test))]
   /// User config home directory, it can be either one of following directories:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
   /// 2. `$HOME/.rsvim/`
-  pub fn config_home(&self) -> &PathBuf {
-    &self.config_home
+  pub fn config_home(&self) -> &Path {
+    self.config_home.as_path()
   }
 
-  #[cfg(test)]
-  pub fn config_home(&self) -> PathBuf {
-    Self::new().config_home.clone()
-  }
-
-  #[cfg(not(test))]
   /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
-  pub fn cache_home(&self) -> &PathBuf {
-    &self.cache_home
+  pub fn cache_home(&self) -> &Path {
+    self.cache_home.as_path()
   }
 
-  #[cfg(test)]
-  pub fn cache_home(&self) -> PathBuf {
-    Self::new().cache_home.clone()
-  }
-
-  #[cfg(not(test))]
   /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
-  pub fn data_home(&self) -> &PathBuf {
-    &self.data_home
-  }
-
-  #[cfg(test)]
-  pub fn data_home(&self) -> PathBuf {
-    Self::new().data_home.clone()
+  pub fn data_home(&self) -> &Path {
+    self.data_home.as_path()
   }
 }
 

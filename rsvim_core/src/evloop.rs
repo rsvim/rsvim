@@ -4,7 +4,9 @@ pub mod writer;
 
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
+use crate::consts::*;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::js::JsRuntime;
@@ -74,6 +76,8 @@ pub struct EventLoop {
 
   /// Command line options.
   pub cli_opts: CliOptions,
+  /// Path configs.
+  pub path_cfg: PathConfig,
 
   /// Stdout writer for editor mode TUI.
   pub writer: StdoutWriterValue,
@@ -278,6 +282,7 @@ impl EventLoop {
       (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(cols, rows)?;
 
+    let path_cfg = PathConfig::new();
     let writer = if cli_opts.headless() {
       StdoutWriterValue::headless()
     } else {
@@ -290,6 +295,7 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
+      path_cfg.clone(),
       master_tx.clone(),
       jsrt_rx,
       cli_opts.clone(),
@@ -303,6 +309,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opts,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -328,6 +335,7 @@ impl EventLoop {
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
+    path_cfg: PathConfig,
   ) -> IoResult<Self> {
     let (
       startup_moment,
@@ -354,6 +362,7 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
+      path_cfg.clone(),
       master_tx.clone(),
       jsrt_rx,
       cli_opts.clone(),
@@ -367,6 +376,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opts,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -404,10 +414,10 @@ impl EventLoop {
 
   /// Initialize user config file.
   fn _init_config(&mut self) -> IoResult<()> {
-    if let Some(config_entry) = PATH_CONFIG.config_entry() {
+    if let Some(config_entry) = self.path_cfg.config_entry() {
       match self
         .js_runtime
-        .execute_module(config_entry.to_str().unwrap(), None)
+        .execute_module(&config_entry.to_string_lossy(), None)
       {
         Ok(_) => { /* do nothing */ }
         Err(e) => {

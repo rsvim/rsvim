@@ -133,15 +133,8 @@ impl ModuleLoader for FsModuleLoader {
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(
-    &self,
-    base: Option<&str>,
-    specifier: &str,
-  ) -> AnyResult<ModulePath> {
-    let base = match base {
-      Some(base) => Path::new(base).to_path_buf(),
-      None => PATH_CONFIG.config_home().clone(),
-    };
+  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+    let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
@@ -149,7 +142,7 @@ impl ModuleLoader for FsModuleLoader {
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
       Err(e) => {
-        let node_modules_home = PATH_CONFIG.config_home().join("node_modules");
+        let node_modules_home = base.join("node_modules");
         if node_modules_home.is_dir() {
           match self.resolver.resolve(node_modules_home, specifier) {
             Ok(resolution) => {

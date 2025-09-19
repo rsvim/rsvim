@@ -1,11 +1,5 @@
 //! Global constants.
 
-pub mod path_config;
-
-#[cfg(test)]
-mod path_config_tests;
-
-use path_config::*;
 use regex::Regex;
 use std::sync::LazyLock;
 use std::time::Duration;
@@ -47,6 +41,3 @@ pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
 /// Http(s) url beginning regex, for example url begins with `http(s)?://`.
 pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
-
-/// Global path configuration
-pub static PATH_CONFIG: LazyLock<PathConfig> = LazyLock::new(PathConfig::new);

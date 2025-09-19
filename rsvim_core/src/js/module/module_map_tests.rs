@@ -2,10 +2,8 @@
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
-use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::path::Path;
@@ -13,6 +11,7 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
+
   use super::*;
 
   #[tokio::test]
@@ -23,7 +22,6 @@ mod test_static_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -42,10 +40,14 @@ mod test_static_import {
     // Prepare $RSVIM_CONFIG:
     // - rsvim.js
     // - util.js
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -84,7 +86,6 @@ mod test_static_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -104,10 +105,14 @@ mod test_static_import {
     // Prepare $RSVIM_CONFIG
     // - rsvim.js
     // - util.js
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -146,7 +151,6 @@ mod test_static_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -194,13 +198,20 @@ mod test_static_import {
     //          |- echo.js
     //          |- calc.js
     //
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -239,7 +250,6 @@ mod test_static_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -291,13 +301,20 @@ export function echoD(value) {
     //    |- c.js
     //    |- d.js
     //
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -336,7 +353,6 @@ export function echoD(value) {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -384,13 +400,20 @@ export function echoD(value) {
     //          |- echo.js
     //          |- calc.js
     //
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -429,27 +452,28 @@ export function echoD(value) {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
 import { echoUrl, echoFileName, echoDirName, echoMain } from './utils/a.js';
 
-const url = import.meta.url;
-echoUrl(url);
+setTimeout(() => {
+  const url = import.meta.url;
+  echoUrl(url);
 
-const filename = import.meta.filename;
-echoFileName(filename);
+  const filename = import.meta.filename;
+  echoFileName(filename);
 
-const dirname = import.meta.dirname;
-echoDirName(dirname);
+  const dirname = import.meta.dirname;
+  echoDirName(dirname);
 
-const isMain = import.meta.main;
-echoMain(isMain);
+  const isMain = import.meta.main;
+  echoMain(isMain);
 
-const resolvedModulePath = import.meta.resolve("./utils/a.js");
-Rsvim.cmd.echo(resolvedModulePath);
-Rsvim.rt.exit();
+  const resolvedModulePath = import.meta.resolve("./utils/a.js");
+  Rsvim.cmd.echo(resolvedModulePath);
+  Rsvim.rt.exit();
+}, 1);
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -480,10 +504,14 @@ export function echoMain(value) {
     // |- utils/
     //    |- a.js
     //
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg.clone(),
+    );
 
     // Before running
     {
@@ -510,20 +538,23 @@ export function echoMain(value) {
       assert!(url.is_some());
       let actual = url.unwrap();
       info!("url:{:?}", actual);
+      info!(
+        "path_cfg config_entry:{:?}, config_home:{:?}",
+        path_cfg.config_entry(),
+        path_cfg.config_home()
+      );
       assert!(
         actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("rsvim.js")
+          &path_cfg
+            .config_entry()
+            .unwrap()
             .to_string_lossy()
-            .to_string()
+            .to_string(),
         ) && actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("utils")
-            .child("a.js")
+          &path_cfg
+            .config_home()
+            .join("utils")
+            .join("a.js")
             .to_string_lossy()
             .to_string()
         ) && actual
@@ -540,18 +571,16 @@ export function echoMain(value) {
       info!("filename:{:?}", actual);
       assert!(
         actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("rsvim.js")
+          &path_cfg
+            .config_entry()
+            .unwrap()
             .to_string_lossy()
             .to_string()
         ) && actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("utils")
-            .child("a.js")
+          &path_cfg
+            .config_home()
+            .join("utils")
+            .join("a.js")
             .to_string_lossy()
             .to_string()
         )
@@ -562,20 +591,14 @@ export function echoMain(value) {
       let actual = dirname.unwrap();
       info!("dirname:{:?}", actual);
       assert!(
-        actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .to_string_lossy()
-            .to_string()
-        ) && actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("utils")
-            .to_string_lossy()
-            .to_string()
-        )
+        actual.contains(&path_cfg.config_home().to_string_lossy().to_string())
+          && actual.contains(
+            &path_cfg
+              .config_home()
+              .join("utils")
+              .to_string_lossy()
+              .to_string()
+          )
       );
 
       let is_main = contents.command_line_message_history_mut().try_pop();
@@ -591,11 +614,10 @@ export function echoMain(value) {
       info!("resolve:{:?}", actual);
       assert!(
         actual.contains(
-          &tp
-            .xdg_config_home
-            .child("rsvim")
-            .child("utils")
-            .child("a.js")
+          &path_cfg
+            .config_home()
+            .join("utils")
+            .join("a.js")
             .to_string_lossy()
             .to_string()
         )
@@ -613,41 +635,46 @@ export function echoMain(value) {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-try {
-  const url1 = import.meta.resolve(undefined);
-  Rsvim.cmd.echo(url1);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+setTimeout(() => {
+  try {
+    const url1 = import.meta.resolve(undefined);
+    Rsvim.cmd.echo(url1);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-try {
-  const url2 = import.meta.resolve(null);
-  Rsvim.cmd.echo(url2);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+  try {
+    const url2 = import.meta.resolve(null);
+    Rsvim.cmd.echo(url2);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-try {
-  const url3 = import.meta.resolve();
-  Rsvim.cmd.echo(url3);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+  try {
+    const url3 = import.meta.resolve();
+    Rsvim.cmd.echo(url3);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-Rsvim.rt.exit();
+  Rsvim.rt.exit();
+}, 1);
     "#;
 
     // Prepare $RSVIM_CONFIG
     // |- rsvim.js
     //
-    make_configs(&tp, vec![(p1, src1)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -717,7 +744,6 @@ mod test_dynamic_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -738,10 +764,14 @@ mod test_dynamic_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -786,7 +816,6 @@ mod test_dynamic_import {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -808,10 +837,14 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -867,7 +900,6 @@ Rsvim.rt.exit(0);
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -911,13 +943,20 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -965,7 +1004,6 @@ Rsvim.rt.exit(0);
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -999,10 +1037,15 @@ try {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(&tp, vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+    let (_tp, path_cfg) =
+      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -1051,7 +1094,6 @@ try {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -1099,13 +1141,20 @@ export function echoD(value) {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -1156,7 +1205,6 @@ export function echoD(value) {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -1199,19 +1247,20 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(
-      &tp,
-      vec![
-        (p1, src1),
-        (p2, src2),
-        (p3, src3),
-        (p4, src4),
-        (pkg5, pkg_src5),
-      ],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (pkg5, pkg_src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -1262,7 +1311,6 @@ export default {};
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
-    let tp = TempPathCfg::create();
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -1305,19 +1353,20 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    make_configs(
-      &tp,
-      vec![
-        (p1, src1),
-        (p2, src2),
-        (p3, src3),
-        (p4, src4),
-        (pkg5, pkg_src5),
-      ],
-    );
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (pkg5, pkg_src5),
+    ]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {

@@ -1,7 +1,7 @@
 use super::module::*;
+use crate::cfg::path_cfg::PathConfig;
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
@@ -34,7 +34,7 @@ fn fetch1() {
     fp.flush().unwrap();
   }
 
-  let mut jsrt = make_js_runtime();
+  let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module(&mut scope, &fetch1.to_string_lossy(), None);
   assert!(actual1.is_some());
@@ -71,7 +71,7 @@ fn fetch2() {
     fp.flush().unwrap();
   }
 
-  let mut jsrt = make_js_runtime();
+  let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
   let actual2 = fetch_module(&mut scope, &fetch2.to_string_lossy(), None);
   assert!(actual2.is_none());
@@ -81,7 +81,6 @@ fn fetch2() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree3() {
   test_log_init();
-  let tp = TempPathCfg::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -113,17 +112,14 @@ fn fetch_tree3() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new(fetch1), src1),
-      (Path::new(fetch2), src2),
-      (Path::new(fetch3), src3),
-    ],
-  );
+  let (tp, _path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new(fetch1), src1),
+    (Path::new(fetch2), src2),
+    (Path::new(fetch3), src3),
+  ]);
 
-  let mut jsrt = make_js_runtime();
+  let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
@@ -143,7 +139,11 @@ fn fetch_tree3() {
   let state_rc = JsRuntime::state(&scope);
   let state = state_rc.borrow();
 
-  let path3 = resolve_import(None, fetch3, None);
+  let path3 = resolve_import(
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
+    fetch3,
+    None,
+  );
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
   // NOTE: On macOS, the `tp.xdg_config_home.join("rsvim/fetch3.js")` is `/var/folders/xxx`, while
@@ -155,7 +155,7 @@ fn fetch_tree3() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
   );
@@ -175,7 +175,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch2_without_ext,
     None,
   );
@@ -187,7 +187,6 @@ fn fetch_tree3() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree4() {
   test_log_init();
-  let tp = TempPathCfg::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -219,17 +218,14 @@ fn fetch_tree4() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new(fetch1), src1),
-      (Path::new(fetch2), src2),
-      (Path::new(fetch3), src3),
-    ],
-  );
+  let (tp, _path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new(fetch1), src1),
+    (Path::new(fetch2), src2),
+    (Path::new(fetch3), src3),
+  ]);
 
-  let mut jsrt = make_js_runtime();
+  let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
@@ -249,7 +245,11 @@ fn fetch_tree4() {
   let state = JsRuntime::state(&scope);
   let state = state.borrow();
 
-  let path3 = resolve_import(None, fetch3, None);
+  let path3 = resolve_import(
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
+    fetch3,
+    None,
+  );
   info!("fetch_tree4 path3:{:?}, fetch3:{:?}", path3, fetch3);
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
@@ -260,7 +260,7 @@ fn fetch_tree4() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
   );
@@ -279,7 +279,7 @@ fn fetch_tree4() {
     fetch2, fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch2_without_ext,
     None,
   );

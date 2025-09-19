@@ -1,6 +1,5 @@
 use crate::cli::CliOptions;
 use crate::prelude::*;
-use crate::tests::constant::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use std::time::Duration;
@@ -12,7 +11,6 @@ async fn test_timeout1() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
@@ -24,10 +22,14 @@ async fn test_timeout1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before evaluating javascript configs
   {
@@ -63,7 +65,6 @@ async fn test_timeout2() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let tp = TempPathCfg::create();
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let src: &str = r#"
@@ -78,10 +79,14 @@ async fn test_timeout2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before evaluating javascript configs
   {
