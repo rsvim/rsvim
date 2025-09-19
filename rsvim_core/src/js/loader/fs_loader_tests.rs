@@ -474,7 +474,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path4() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -485,23 +484,18 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/tests/006_more_imports/index.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/tests/006_more_imports/index.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/core/tests");
+  let base = path_cfg.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
-  let specifier = tp
-    .xdg_config_home
-    .child("rsvim/core/tests/006_more_imports/");
+  let specifier = path_cfg.config_home().join("core/tests/006_more_imports/");
   let specifier = specifier.to_string_lossy().to_string();
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim/core/tests/006_more_imports/index.js");
+  let expect = path_cfg
+    .config_home()
+    .join("core/tests/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -532,7 +526,6 @@ export function sayHello() {
 #[test]
 fn folder_path_failed5() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -543,15 +536,12 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/006_more_imports/index.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/006_more_imports/index.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/core/tests");
+  let base = path_cfg.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
 
