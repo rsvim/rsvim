@@ -56,7 +56,6 @@ export class RsvimImpl implements Rsvim {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export interface RsvimBuf {
   /**
@@ -164,7 +163,6 @@ export class RsvimBufImpl implements RsvimBuf {
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export interface RsvimCmd {
   /**
@@ -215,7 +213,6 @@ type FileFormatOption = "dos" | "unix" | "mac";
  * ```
  *
  * @category Editor APIs
- * @hideconstructor
  */
 export interface RsvimOpt {
   /**
@@ -602,7 +599,6 @@ export class RsvimOptImpl implements RsvimOpt {
  * ```
  *
  * @category General APIs
- * @hideconstructor
  */
 export interface RsvimRt {
   /**
