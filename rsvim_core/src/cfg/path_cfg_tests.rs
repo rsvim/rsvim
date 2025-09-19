@@ -1,5 +1,5 @@
 use super::path_cfg::*;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
 
@@ -7,7 +7,7 @@ use std::io::Write;
 fn test1() {
   test_log_init();
 
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   // Prepare config home/entry
   {
@@ -53,7 +53,7 @@ fn test1() {
 fn test2() {
   test_log_init();
 
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   // Prepare config home/entry
   {
@@ -99,7 +99,7 @@ fn test2() {
 fn test3() {
   test_log_init();
 
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   // Prepare config home/entry
   {

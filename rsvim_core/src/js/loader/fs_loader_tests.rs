@@ -13,7 +13,7 @@ use normpath::PathExt;
 #[cfg_attr(miri, ignore)]
 async fn file_path1() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
@@ -70,7 +70,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path2() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -133,7 +133,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path3() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -187,7 +187,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path4() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -241,7 +241,7 @@ export function sayHello() {
 #[test]
 fn file_path_failed4() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
@@ -271,7 +271,7 @@ fn file_path_failed4() {
 #[cfg_attr(miri, ignore)]
 async fn file_path5() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -328,7 +328,7 @@ export function sayHello() {
 #[test]
 fn file_path_failed5() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -363,7 +363,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path1() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -419,7 +419,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path2() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -475,7 +475,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path3() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -533,7 +533,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path4() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -591,7 +591,7 @@ export function sayHello() {
 #[test]
 fn folder_path_failed5() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -624,7 +624,7 @@ export function sayHello() {
 #[test]
 fn folder_path_failed6() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -660,7 +660,7 @@ export function sayHello() {
 #[test]
 fn folder_path_failed7() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -696,7 +696,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package1() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -763,7 +763,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package2() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -819,7 +819,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package3() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -876,7 +876,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package4() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -941,7 +941,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package5() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -1008,7 +1008,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package6() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -1075,7 +1075,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn npm_package_failed7() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -1118,7 +1118,7 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn node_builtin_module1() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {

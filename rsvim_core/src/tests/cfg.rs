@@ -1,11 +1,11 @@
-pub struct TempPathCfg {
+pub struct TempPathConfig {
   pub home_dir: assert_fs::TempDir,
   pub xdg_config_home: assert_fs::TempDir,
   pub xdg_cache_home: assert_fs::TempDir,
   pub xdg_data_home: assert_fs::TempDir,
 }
 
-impl TempPathCfg {
+impl TempPathConfig {
   pub fn create() -> Self {
     let home_dir = assert_fs::TempDir::new().unwrap();
     let xdg_config_home = assert_fs::TempDir::new().unwrap();

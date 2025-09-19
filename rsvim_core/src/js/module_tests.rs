@@ -2,7 +2,7 @@ use super::module::*;
 use crate::cfg::path_cfg::PathConfig;
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
@@ -82,7 +82,7 @@ fn fetch2() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree3() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -192,7 +192,7 @@ fn fetch_tree3() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree4() {
   test_log_init();
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;

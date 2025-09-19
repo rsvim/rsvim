@@ -4,7 +4,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 #[cfg(test)]
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
@@ -137,7 +137,7 @@ impl PathConfig {
   }
 
   #[cfg(test)]
-  pub fn new_with_temp_dirs(tp: &TempPathCfg) -> Self {
+  pub fn new_with_temp_dirs(tp: &TempPathConfig) -> Self {
     Self::_new_internal(
       tp.xdg_config_home.to_path_buf(),
       tp.home_dir.to_path_buf(),

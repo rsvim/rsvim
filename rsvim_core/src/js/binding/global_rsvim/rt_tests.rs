@@ -2,7 +2,7 @@ use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use std::time::Duration;
@@ -15,7 +15,7 @@ async fn test_exit1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
   setTimeout(() => {
@@ -61,7 +61,7 @@ async fn test_exit2() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathCfg::create();
+  let tp = TempPathConfig::create();
 
   let src: &str = r#"
   setTimeout(() => {

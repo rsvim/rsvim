@@ -3,7 +3,7 @@ use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use assert_fs::prelude::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -20,7 +20,7 @@ use std::task::Poll;
 use std::task::Waker;
 use std::time::Duration;
 
-pub fn make_configs(tp: &TempPathCfg, sources: Vec<(&Path, &str)>) {
+pub fn make_configs(tp: &TempPathConfig, sources: Vec<(&Path, &str)>) {
   for (path, src) in sources.iter() {
     let path = tp.xdg_config_home.child("rsvim").child(path);
     path.touch().unwrap();

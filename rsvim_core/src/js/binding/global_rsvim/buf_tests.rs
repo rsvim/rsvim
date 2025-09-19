@@ -6,7 +6,7 @@ use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
@@ -26,7 +26,7 @@ mod tests_current1 {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
@@ -80,7 +80,7 @@ mod tests_current1 {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   setTimeout(() => {
@@ -154,7 +154,7 @@ mod tests_current1 {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let f1 = assert_fs::NamedTempFile::new("write_sync1.txt").unwrap();
 

@@ -2,7 +2,7 @@ use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::cfg::TempPathCfg;
+use crate::tests::cfg::TempPathConfig;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use std::time::Duration;
@@ -19,7 +19,7 @@ mod tests_wrap {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const val1 = Rsvim.opt.wrap;
@@ -76,7 +76,7 @@ mod tests_tab_stop {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v1 = Rsvim.opt.tabStop;
@@ -131,7 +131,7 @@ mod tests_tab_stop {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.tabStop = -1;
@@ -195,7 +195,7 @@ mod tests_file_encoding {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v2 = Rsvim.opt.fileEncoding;
@@ -263,7 +263,7 @@ mod tests_file_encoding {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.fileEncoding = "utf-16";
@@ -333,7 +333,7 @@ mod tests_file_format {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v3 = Rsvim.opt.fileFormat;
@@ -398,7 +398,7 @@ mod tests_file_format {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.fileFormat = "CRLF";
@@ -468,7 +468,7 @@ mod tests_expand_tab {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const value = Rsvim.opt.expandTab;
@@ -523,7 +523,7 @@ mod tests_expand_tab {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.expandTab = null;
@@ -587,7 +587,7 @@ mod tests_shift_width {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const value = Rsvim.opt.shiftWidth;
@@ -645,7 +645,7 @@ mod tests_shift_width {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathCfg::create();
+    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.shiftWidth = 10000;
