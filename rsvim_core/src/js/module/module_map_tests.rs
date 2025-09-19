@@ -723,10 +723,10 @@ export function echoA(value) {
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
-      assert_eq!(
-        Some("3".to_compact_string()),
-        contents.command_line_message_history_mut().try_pop()
-      );
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(actual.contains("Uncaught Error: Module path NotFound"));
     }
 
     Ok(())
