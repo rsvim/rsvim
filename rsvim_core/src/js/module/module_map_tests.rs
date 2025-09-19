@@ -11,7 +11,6 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
-
   use super::*;
 
   #[tokio::test]
@@ -27,7 +26,6 @@ mod test_static_import {
     let src1: &str = r#"
   import * as util from "./util.js";
   util.echo(1);
-  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("util.js");
@@ -91,7 +89,6 @@ mod test_static_import {
     let src1: &str = r#"
   import util from "./util.js";
   util.echo(1);
-  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("util.js");
@@ -156,7 +153,6 @@ mod test_static_import {
     let src1: &str = r#"
   import utils from "utils";
   utils.echo(utils.add(1,2));
-  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -256,7 +252,6 @@ mod test_static_import {
 import { echoA } from './utils/a.js';
 
 echoA(5);
-Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -357,7 +352,6 @@ export function echoD(value) {
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
   import utils from "utils";
-  Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -451,7 +445,7 @@ export function echoD(value) {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -634,7 +628,7 @@ export function echoMain(value) {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -1003,12 +997,11 @@ Rsvim.rt.exit(0);
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import "./utils";
-    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("utils/echo.js");
@@ -1204,12 +1197,11 @@ export function echoD(value) {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import utils from "utils";
-    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
@@ -1310,12 +1302,11 @@ export default {};
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
     import "utils";
-    Rsvim.rt.exit();
     "#;
 
     let p2 = Path::new("node_modules/utils/lib/echo.js");
