@@ -53,7 +53,8 @@ pub fn make_configs(
     std::fs::write(path, src).unwrap();
   }
 
-  (tp, PathConfig::new_with_temp_dirs(&tp))
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  (tp, path_cfg)
 }
 
 pub fn make_event_loop(
