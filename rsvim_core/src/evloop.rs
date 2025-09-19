@@ -407,7 +407,7 @@ impl EventLoop {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
       match self
         .js_runtime
-        .execute_module(config_entry.to_str().unwrap(), None)
+        .execute_module(&config_entry.to_string_lossy(), None)
       {
         Ok(_) => { /* do nothing */ }
         Err(e) => {
