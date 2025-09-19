@@ -240,7 +240,7 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn no_side_effect4() -> IoResult<()> {
+  async fn xdg_config_dir4() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -342,74 +342,7 @@ export function echoD(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn not_found1() -> IoResult<()> {
-    test_log_init();
-
-    let terminal_cols = 10_u16;
-    let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
-
-    let p1 = Path::new(".rsvim.js");
-    let src1: &str = r#"
-import { echoA } from './utils/a.js';
-
-echoA(5);
-    "#;
-
-    let p2 = Path::new(".rsvim/utils/a.js");
-    let src2: &str = r#"
-export function echoA(value) {
-  Rsvim.cmd.echo(`A:${value}`);
-}
-    "#;
-
-    // Prepare $HOME
-    // |- .rsvim.js
-    // |- .rsvim/
-    //    |- utils/
-    //       |- a.js
-    //
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
-
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
-
-    event_loop.initialize()?;
-    event_loop
-      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
-      .await?;
-    event_loop.shutdown()?;
-
-    // After running
-    {
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      info!("module_map:{:#?}", state.module_map);
-
-      let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().occupied_len());
-      let actual = contents.command_line_message_history_mut().try_pop();
-      assert!(actual.is_some());
-      let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path NotFound"));
-    }
-
-    Ok(())
-  }
-
-  #[tokio::test]
-  #[cfg_attr(miri, ignore)]
-  async fn side_effect1() -> IoResult<()> {
+  async fn xdg_config_dir5() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -500,6 +433,73 @@ export function echoA(value) {
         Some("9".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir_failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(500))];
+
+    let p1 = Path::new(".rsvim.js");
+    let src1: &str = r#"
+import { echoA } from './utils/a.js';
+
+echoA(5);
+    "#;
+
+    let p2 = Path::new(".rsvim/utils/a.js");
+    let src2: &str = r#"
+export function echoA(value) {
+  Rsvim.cmd.echo(`A:${value}`);
+}
+    "#;
+
+    // Prepare $HOME
+    // |- .rsvim.js
+    // |- .rsvim/
+    //    |- utils/
+    //       |- a.js
+    //
+    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
+
+    // Before running
+    {
+      let contents = lock!(event_loop.contents);
+      assert!(contents.command_line_message_history().is_empty());
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(1, contents.command_line_message_history().occupied_len());
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(actual.contains("Uncaught Error: Module path NotFound"));
     }
 
     Ok(())
