@@ -1,10 +1,10 @@
-export class Rsvim {
-    buf = new RsvimBuf();
-    cmd = new RsvimCmd();
-    opt = new RsvimOpt();
-    rt = new RsvimRt();
+class RsvimImpl {
+    buf = new RsvimBufImpl();
+    cmd = new RsvimCmdImpl();
+    opt = new RsvimOptImpl();
+    rt = new RsvimRtImpl();
 }
-export class RsvimBuf {
+class RsvimBufImpl {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
@@ -18,7 +18,7 @@ export class RsvimBuf {
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
 }
-export class RsvimCmd {
+class RsvimCmdImpl {
     echo(message) {
         if (message === undefined || message === null) {
             throw new Error('"Rsvim.cmd.echo" message parameter cannot be undefined or null');
@@ -26,7 +26,7 @@ export class RsvimCmd {
         __InternalRsvimGlobalObject.cmd_echo(message);
     }
 }
-export class RsvimOpt {
+class RsvimOptImpl {
     get expandTab() {
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
     }
@@ -91,7 +91,7 @@ export class RsvimOpt {
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }
 }
-export class RsvimRt {
+class RsvimRtImpl {
     exit(exitCode) {
         if (exitCode !== undefined && typeof exitCode !== "number") {
             throw new Error('"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined');
@@ -100,5 +100,6 @@ export class RsvimRt {
     }
 }
 (function (globalThis) {
-    globalThis.Rsvim = new Rsvim();
+    globalThis.Rsvim = new RsvimImpl();
 })(globalThis);
+export {};

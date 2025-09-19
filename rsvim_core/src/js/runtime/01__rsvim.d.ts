@@ -1,20 +1,20 @@
-export declare class Rsvim {
+export interface Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
-export declare class RsvimBuf {
+export interface RsvimBuf {
     current(): number | null;
     list(): number[];
     writeSync(bufId: number): number;
 }
-export declare class RsvimCmd {
+export interface RsvimCmd {
     echo(message: string): void;
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
-export declare class RsvimOpt {
+export interface RsvimOpt {
     get expandTab(): boolean;
     set expandTab(value: boolean);
     get fileEncoding(): FileEncodingOption;
@@ -30,7 +30,7 @@ export declare class RsvimOpt {
     get wrap(): boolean;
     set wrap(value: boolean);
 }
-export declare class RsvimRt {
+export interface RsvimRt {
     exit(exitCode?: number): void;
 }
 export {};
