@@ -2,7 +2,6 @@ use super::fs_loader::*;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
-use crate::tests::cfg::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::*;
@@ -12,7 +11,6 @@ use normpath::PathExt;
 #[cfg_attr(miri, ignore)]
 async fn file_path1() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -23,29 +21,21 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 005_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("005_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("005_more_imports.js"), src),
+  ]);
 
   let base: Option<&str> = None;
-  let specifier = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("005_more_imports.js");
+  let specifier = path_cfg.config_home().join("005_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(
-    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
-    &specifier,
-  );
+  let actual =
+    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
@@ -70,7 +60,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path2() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -81,27 +70,19 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/005_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/tests/006_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/tests/006_more_imports.js"), src),
+  ]);
 
-  let base = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("core")
-    .child("tests");
+  let base = path_cfg.config_home().join("core").join("tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports.js";
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("core")
-    .child("tests")
-    .child("006_more_imports.js");
+  let expect = path_cfg
+    .config_home()
+    .join("core")
+    .join("tests")
+    .join("006_more_imports.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -133,7 +114,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path3() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -144,18 +124,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/006_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/006_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/006_more_imports.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/core/tests/");
+  let base = path_cfg.config_home().join("core/tests/");
   let base = base.to_string_lossy().to_string();
   let specifier = "../006_more_imports.js";
-  let expect = tp.xdg_config_home.child("rsvim/core/006_more_imports.js");
+  let expect = path_cfg.config_home().join("core/006_more_imports.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -187,7 +164,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn file_path4() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -198,19 +174,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/tests/006_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/tests/006_more_imports.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/");
-  let base = base.to_string_lossy().to_string();
-  let specifier = tp
-    .xdg_config_home
-    .child("rsvim/core/tests/006_more_imports.js");
+  let base = path_cfg.config_home().to_string_lossy().to_string();
+  let specifier = path_cfg
+    .config_home()
+    .join("core/tests/006_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
@@ -241,22 +213,20 @@ export function sayHello() {
 #[test]
 fn file_path_failed4() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/tests/006_more_imports.js"), ""),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/tests/006_more_imports.js"), ""),
+  ]);
 
-  let base = tp.xdg_config_home.child("core/tests/");
+  let base = path_cfg.config_home().join("../core/tests/");
   let base = base.to_string_lossy().to_string();
-  let specifier = tp.xdg_config_home.child("core/tests/006_more_imports.js");
+  let specifier = path_cfg
+    .config_home()
+    .join("../core/tests/006_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
@@ -271,7 +241,6 @@ fn file_path_failed4() {
 #[cfg_attr(miri, ignore)]
 async fn file_path5() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -282,29 +251,21 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 006_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("006_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("006_more_imports.js"), src),
+  ]);
 
   let specifier = "./006_more_imports.js";
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim")
-    .child("006_more_imports.js");
+  let expect = path_cfg.config_home().join("006_more_imports.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(
-    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
-    specifier,
-  );
+  let actual =
+    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -328,7 +289,6 @@ export function sayHello() {
 #[test]
 fn file_path_failed5() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -339,23 +299,18 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 006_more_imports.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("006_more_imports.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("006_more_imports.js"), src),
+  ]);
 
   let specifier = "006_more_imports.js";
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(
-    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
-    specifier,
-  );
+  let actual =
+    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
   assert!(actual.is_err());
 }
 
@@ -363,7 +318,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path1() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -374,20 +328,17 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/tests/006_more_imports/index.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/tests/006_more_imports/index.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/core/tests/");
+  let base = path_cfg.config_home().join("core/tests/");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim/core/tests/006_more_imports/index.js");
+  let expect = path_cfg
+    .config_home()
+    .join("core/tests/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -419,7 +370,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path2() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -430,20 +380,17 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/006_more_imports/index.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/006_more_imports/index.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/006_more_imports/index.js"), src),
+  ]);
 
-  let base = tp.xdg_config_home.child("rsvim/core/tests");
+  let base = path_cfg.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "../006_more_imports/";
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim/core/006_more_imports/index.js");
+  let expect = path_cfg
+    .config_home()
+    .join("core/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -475,7 +422,6 @@ export function sayHello() {
 #[cfg_attr(miri, ignore)]
 async fn folder_path3() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
 export function sayHello() {
@@ -486,29 +432,24 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new("core/006_more_imports/index.js"), src),
-    ],
-  );
+  let (_tp, path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("core/006_more_imports/index.js"), src),
+  ]);
 
-  let specifier = tp.xdg_config_home.child("rsvim/core/006_more_imports/");
+  let specifier = path_cfg.config_home().join("core/006_more_imports/");
   let specifier = specifier.to_string_lossy().to_string();
-  let expect = tp
-    .xdg_config_home
-    .child("rsvim/core/006_more_imports/index.js");
+  let expect = path_cfg
+    .config_home()
+    .join("core/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(
-    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
-    &specifier,
-  );
+  let actual =
+    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
