@@ -32,8 +32,8 @@ impl TempPathCfg {
       xdg_data_home.path().to_string_lossy()
     );
 
-    let mut fp = std::fs::File::open(PATH_CONFIG_FILE).unwrap();
-    let _ = fp.write(&data.into_bytes()).unwrap();
+    let mut fp = std::fs::File::create(PATH_CONFIG_FILE).unwrap();
+    fp.write_all(&data.into_bytes()).unwrap();
     fp.flush().unwrap();
 
     std::thread::sleep(std::time::Duration::from_millis(BLOCKING_MILLIS));

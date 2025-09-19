@@ -32,3 +32,4 @@ RSVIM_VERSION.TXT
 
 # Tests/Benchmarks
 /tests_and_benchmarks
+.test.lock
