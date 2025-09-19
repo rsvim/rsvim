@@ -804,7 +804,7 @@ mod test_dynamic_import {
   // |- rsvim.js
   // |- util.js
   //
-  async fn no_side_effect1() -> IoResult<()> {
+  async fn xdg_config_dir1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -876,7 +876,7 @@ mod test_dynamic_import {
   // |- rsvim.js
   // |- util.js
   //
-  async fn no_side_effect2() -> IoResult<()> {
+  async fn xdg_config_dir2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -960,7 +960,7 @@ Rsvim.rt.exit(0);
   //          |- echo.js
   //          |- calc.js
   //
-  async fn no_side_effect3() -> IoResult<()> {
+  async fn xdg_config_dir3() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -1064,7 +1064,7 @@ Rsvim.rt.exit(0);
   //    |- echo.js
   //    |- calc.js
   //
-  async fn no_side_effect4() -> IoResult<()> {
+  async fn xdg_config_dir4() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -1153,7 +1153,7 @@ try {
   //    |- c.js
   //    |- d.js
   //
-  async fn no_side_effect5() -> IoResult<()> {
+  async fn xdg_config_dir5() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -1264,7 +1264,7 @@ export function echoD(value) {
   //          |- echo.js
   //          |- calc.js
   //
-  async fn side_effect1() -> IoResult<()> {
+  async fn xdg_config_dir6() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -1369,7 +1369,7 @@ export default {};
   //          |- echo.js
   //          |- calc.js
   //
-  async fn side_effect2() -> IoResult<()> {
+  async fn xdg_config_dir7() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
