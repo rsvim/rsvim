@@ -158,7 +158,7 @@ impl PathConfig {
   /// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
   ///    `$HOME/.rsvim`.
   pub fn config_entry(&self) -> Option<&Path> {
-    self.config_entry.as_ref().map(|e| e.as_path())
+    self.config_entry.as_deref()
   }
 
   /// User config home directory, it can be either one of following directories:
