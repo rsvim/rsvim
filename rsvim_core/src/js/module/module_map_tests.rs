@@ -504,10 +504,15 @@ export function echoA(value) {
 
     Ok(())
   }
+}
+
+#[cfg(test)]
+mod test_import_meta {
+  use super::*;
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn import_meta1() -> IoResult<()> {
+  async fn property1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -690,7 +695,7 @@ export function echoMain(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn import_meta2() -> IoResult<()> {
+  async fn resolve_failed1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
