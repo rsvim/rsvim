@@ -15,7 +15,7 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn no_side_effect1() -> IoResult<()> {
+  async fn xdg_config_dir1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -78,7 +78,7 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn no_side_effect2() -> IoResult<()> {
+  async fn xdg_config_dir2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -142,7 +142,7 @@ mod test_static_import {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn no_side_effect3() -> IoResult<()> {
+  async fn xdg_config_dir3() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
