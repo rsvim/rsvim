@@ -1,5 +1,5 @@
-use super::path_config::*;
-use crate::tests::constant::TempPathCfg;
+use super::path_cfg::*;
+use crate::tests::cfg::TempPathCfg;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
 
@@ -19,8 +19,8 @@ fn test1() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new();
-  assert_eq!(cfg.config_home(), tp.xdg_config_home.join("rsvim"));
+  let cfg = PathConfig::new_with_temp_dirs(&tp);
+  assert_eq!(*cfg.config_home(), tp.xdg_config_home.join("rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
@@ -56,8 +56,8 @@ fn test2() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new();
-  assert_eq!(cfg.config_home(), tp.home_dir.join(".rsvim"));
+  let cfg = PathConfig::new_with_temp_dirs(&tp);
+  assert_eq!(*cfg.config_home(), tp.home_dir.join(".rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
