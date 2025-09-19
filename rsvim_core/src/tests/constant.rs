@@ -1,8 +1,9 @@
-use crate::constant::path_config::XDG_VAR;
-use crate::constant::path_config::XdgVar;
+use crate::constant::path_config::PATH_CONFIG_FILE;
 use fslock::LockFile;
+use std::io::Write;
 
 const LOCK_FILE_NAME: &str = ".test.lock";
+const BLOCKING_MILLIS: u64 = 5;
 
 pub struct TempPathCfg {
   pub home_dir: assert_fs::TempDir,
@@ -16,21 +17,26 @@ impl TempPathCfg {
   pub fn create() -> Self {
     let mut lock_file = LockFile::open(LOCK_FILE_NAME).unwrap();
     lock_file.lock().unwrap();
-
-    std::thread::sleep(std::time::Duration::from_millis(5));
+    std::thread::sleep(std::time::Duration::from_millis(BLOCKING_MILLIS));
 
     let home_dir = assert_fs::TempDir::new().unwrap();
     let xdg_config_home = assert_fs::TempDir::new().unwrap();
     let xdg_cache_home = assert_fs::TempDir::new().unwrap();
     let xdg_data_home = assert_fs::TempDir::new().unwrap();
 
-    let mut var = (*XDG_VAR).lock();
-    *var = Some(XdgVar {
-      home_dir: home_dir.to_path_buf(),
-      xdg_config_home_dir: xdg_config_home.to_path_buf(),
-      xdg_cache_home_dir: xdg_cache_home.to_path_buf(),
-      xdg_data_home_dir: xdg_data_home.to_path_buf(),
-    });
+    let data = format!(
+      "home_dir={}\nxdg_config_home_dir={}\nxdg_cache_home_dir={}\nxdg_data_home_dir={}",
+      home_dir.path().to_string_lossy(),
+      xdg_config_home.path().to_string_lossy(),
+      xdg_cache_home.path().to_string_lossy(),
+      xdg_data_home.path().to_string_lossy()
+    );
+
+    let mut fp = std::fs::File::open(PATH_CONFIG_FILE).unwrap();
+    let _ = fp.write(&data.into_bytes()).unwrap();
+    fp.flush().unwrap();
+
+    std::thread::sleep(std::time::Duration::from_millis(BLOCKING_MILLIS));
 
     Self {
       home_dir,
@@ -44,10 +50,10 @@ impl TempPathCfg {
 
 impl Drop for TempPathCfg {
   fn drop(&mut self) {
-    let mut var = (*XDG_VAR).lock();
-    *var = None;
+    std::thread::sleep(std::time::Duration::from_millis(BLOCKING_MILLIS));
+    std::fs::remove_file(PATH_CONFIG_FILE).unwrap();
 
     self.lock_file.unlock().unwrap();
-    std::thread::sleep(std::time::Duration::from_millis(5));
+    std::thread::sleep(std::time::Duration::from_millis(BLOCKING_MILLIS));
   }
 }
