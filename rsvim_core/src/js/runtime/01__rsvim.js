@@ -1,4 +1,4 @@
-export class Rsvim {
+class RsvimImpl {
     buf = new RsvimBuf();
     cmd = new RsvimCmd();
     opt = new RsvimOpt();
@@ -100,5 +100,5 @@ export class RsvimRt {
     }
 }
 (function (globalThis) {
-    globalThis.Rsvim = new Rsvim();
+    globalThis.Rsvim = new RsvimImpl();
 })(globalThis);

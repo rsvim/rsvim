@@ -31,7 +31,6 @@
  * ```
  *
  * @category Global Object
- * @hideconstructor
  */
 export interface Rsvim {
   readonly buf: RsvimBuf;
@@ -598,5 +597,5 @@ export class RsvimRt {
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = new Rsvim();
+  globalThis.Rsvim = new RsvimImpl();
 })(globalThis as unknown as { Rsvim: Rsvim });
