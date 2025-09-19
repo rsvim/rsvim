@@ -39,9 +39,9 @@ export interface Rsvim {
   readonly rt: RsvimRt;
 }
 
-class RsvimImpl implements Rsvim {
+export class RsvimImpl implements Rsvim {
   buf = new RsvimBufImpl();
-  cmd = new RsvimCmd();
+  cmd = new RsvimCmdImpl();
   opt = new RsvimOpt();
   rt = new RsvimRt();
 }
@@ -126,7 +126,7 @@ export interface RsvimBuf {
   writeSync(bufId: number): number;
 }
 
-class RsvimBufImpl implements RsvimBuf {
+export class RsvimBufImpl implements RsvimBuf {
   current(): number | null {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
@@ -166,7 +166,7 @@ class RsvimBufImpl implements RsvimBuf {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimCmd {
+export interface RsvimCmd {
   /**
    * Echo message to the command-line.
    *
@@ -180,7 +180,11 @@ export class RsvimCmd {
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  public echo(message: string) {
+  echo(message: string): void;
+}
+
+export class RsvimCmdImpl implements RsvimCmd {
+  echo(message: string): void {
     if (message === undefined || message === null) {
       throw new Error(
         '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
