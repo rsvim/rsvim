@@ -170,7 +170,6 @@ mod tests_current1 {
     } catch (e) {
       Rsvim.cmd.echo(`Failed to save buffer ${buf1}, exception: ${e}`);
     }
-    Rsvim.rt.exit();
   }, 1);
       "#;
 
@@ -212,7 +211,7 @@ mod tests_current1 {
       // After running
       let contents = lock!(event_loop.contents);
       let payload = contents.command_line_message().rope().to_string();
-      info!("After payload:{payload:?}");
+      info!("After payload-1:{payload:?}");
       let payload = payload.trim();
       let expect =
         Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
@@ -220,6 +219,7 @@ mod tests_current1 {
       assert!(expect.is_match(payload) || payload.is_empty());
 
       let actual = std::fs::read_to_string(f1.path()).unwrap();
+      info!("f1-1:{actual:?}");
       assert!(actual.match_indices("Hello RSVIM!").count() == 1);
     }
 
@@ -246,11 +246,12 @@ mod tests_current1 {
       // After running
       let contents = lock!(event_loop.contents);
       let payload = contents.command_line_message().rope().to_string();
-      info!("After payload:{payload:?}");
+      info!("After payload-2:{payload:?}");
       let payload = payload.trim();
       assert!(payload.is_empty());
 
       let actual = std::fs::read_to_string(f1.path()).unwrap();
+      info!("f1-2:{actual:?}");
       assert!(actual.match_indices("Hello RSVIM!").count() == 2);
     }
 
