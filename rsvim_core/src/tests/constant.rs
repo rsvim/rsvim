@@ -1,7 +1,6 @@
 use crate::constant::path_config::XDG_VAR;
 use crate::constant::path_config::XdgVar;
 use fslock::LockFile;
-use std::sync::LazyLock;
 
 const LOCK_FILE_NAME: &str = ".test.fslock";
 
@@ -16,7 +15,7 @@ pub struct TempPathCfg {
 impl TempPathCfg {
   pub fn create() -> Self {
     let mut lock_file = LockFile::open(LOCK_FILE_NAME).unwrap();
-    let _ = lock_file.lock().unwrap();
+    lock_file.lock().unwrap();
 
     std::thread::sleep(std::time::Duration::from_millis(5));
 
@@ -48,7 +47,7 @@ impl Drop for TempPathCfg {
     let mut var = (*XDG_VAR).lock();
     *var = None;
 
-    let _ = self.lock_file.unlock().unwrap();
+    self.lock_file.unlock().unwrap();
     std::thread::sleep(std::time::Duration::from_millis(5));
   }
 }
