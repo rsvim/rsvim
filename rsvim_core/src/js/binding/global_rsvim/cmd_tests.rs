@@ -24,9 +24,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = TempPathConfig::create();
-  make_configs(vec![(Path::new("rsvim.js"), src)]);
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -83,9 +81,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = TempPathConfig::create();
-  make_configs(vec![(Path::new("rsvim.js"), src)]);
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -142,9 +138,7 @@ async fn test_echo3() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = TempPathConfig::create();
-  make_configs(vec![(Path::new("rsvim.js"), src)]);
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -200,9 +194,7 @@ async fn test_echo4() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = TempPathConfig::create();
-  make_configs(vec![(Path::new("rsvim.js"), src)]);
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
