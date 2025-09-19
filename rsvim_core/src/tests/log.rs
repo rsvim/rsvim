@@ -2,7 +2,7 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
-use crate::constant::RSVIM_LOG;
+use crate::consts::RSVIM_LOG;
 use std::sync::Once;
 
 /// Initialize the logging prints to `stderr`.
