@@ -19,7 +19,6 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo();
@@ -27,6 +26,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
 
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -78,7 +78,6 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo(null);
@@ -86,6 +85,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
 
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -134,7 +134,6 @@ async fn test_echo3() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo("");
@@ -145,6 +144,7 @@ async fn test_echo3() -> IoResult<()> {
 
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
@@ -190,7 +190,6 @@ async fn test_echo4() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
   setTimeout(() => {
@@ -203,6 +202,7 @@ async fn test_echo4() -> IoResult<()> {
 
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let mut event_loop = make_event_loop(
     terminal_cols,
