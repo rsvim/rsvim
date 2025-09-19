@@ -82,7 +82,6 @@ fn fetch2() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree3() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -114,6 +113,7 @@ fn fetch_tree3() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
+  let tp = TempPathConfig::create();
   make_configs(
     &tp,
     vec![
@@ -192,7 +192,6 @@ fn fetch_tree3() {
 #[cfg_attr(miri, ignore)]
 fn fetch_tree4() {
   test_log_init();
-  let tp = TempPathConfig::create();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -224,6 +223,7 @@ fn fetch_tree4() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
+  let tp = TempPathConfig::create();
   make_configs(
     &tp,
     vec![
