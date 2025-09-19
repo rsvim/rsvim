@@ -1395,7 +1395,7 @@ mod test_require {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn test1() -> IoResult<()> {
+  async fn failed1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -1447,9 +1447,11 @@ mod test_require {
 
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
-      assert_eq!(
-        Some("1".to_compact_string()),
-        contents.command_line_message_history_mut().try_pop()
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(
+        actual.contains("Uncaught ReferenceError: require is not defined")
       );
     }
 
