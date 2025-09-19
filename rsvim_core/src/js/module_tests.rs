@@ -1,7 +1,7 @@
 use super::module::*;
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::constant::TempPathCfg;
+use crate::tests::cfg::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
@@ -143,7 +143,11 @@ fn fetch_tree3() {
   let state_rc = JsRuntime::state(&scope);
   let state = state_rc.borrow();
 
-  let path3 = resolve_import(None, fetch3, None);
+  let path3 = resolve_import(
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
+    fetch3,
+    None,
+  );
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
   // NOTE: On macOS, the `tp.xdg_config_home.join("rsvim/fetch3.js")` is `/var/folders/xxx`, while
@@ -155,7 +159,7 @@ fn fetch_tree3() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
   );
