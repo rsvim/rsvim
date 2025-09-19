@@ -39,7 +39,7 @@ export interface Rsvim {
   readonly rt: RsvimRt;
 }
 
-export class RsvimImpl implements Rsvim {
+class RsvimImpl implements Rsvim {
   buf = new RsvimBufImpl();
   cmd = new RsvimCmdImpl();
   opt = new RsvimOptImpl();
@@ -125,7 +125,7 @@ export interface RsvimBuf {
   writeSync(bufId: number): number;
 }
 
-export class RsvimBufImpl implements RsvimBuf {
+class RsvimBufImpl implements RsvimBuf {
   current(): number | null {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
@@ -181,7 +181,7 @@ export interface RsvimCmd {
   echo(message: string): void;
 }
 
-export class RsvimCmdImpl implements RsvimCmd {
+class RsvimCmdImpl implements RsvimCmd {
   echo(message: string): void {
     if (message === undefined || message === null) {
       throw new Error(
@@ -482,7 +482,7 @@ export interface RsvimOpt {
   set wrap(value: boolean);
 }
 
-export class RsvimOptImpl implements RsvimOpt {
+class RsvimOptImpl implements RsvimOpt {
   get expandTab(): boolean {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_expand_tab();
@@ -626,7 +626,7 @@ export interface RsvimRt {
   exit(exitCode?: number): void;
 }
 
-export class RsvimRtImpl implements RsvimRt {
+class RsvimRtImpl implements RsvimRt {
   exit(exitCode?: number): void {
     if (exitCode !== undefined && typeof exitCode !== "number") {
       throw new Error(
