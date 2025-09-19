@@ -124,7 +124,7 @@ fn import_meta_resolve(
   );
   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
 
-  match resolve_import(Some(&base), &specifier, import_map) {
+  match resolve_import(&base, &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
     Err(e) => throw_type_error(scope, &e.to_string()),
   };
@@ -200,7 +200,7 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let specifier = match resolve_import(Some(&base), &specifier, import_map) {
+  let specifier = match resolve_import(&base, &specifier, import_map) {
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);

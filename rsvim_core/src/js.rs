@@ -24,6 +24,7 @@ pub mod transpiler;
 mod module_tests;
 
 use crate::buf::BuffersManagerArc;
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::msg;
@@ -323,6 +324,7 @@ pub mod build {
 /// initialize from the snapshot built by the "snapshot" versioned runtime,
 /// thus has the best startup performance.
 pub mod boost {
+
   use super::*;
 
   #[derive(Debug, Default, Clone)]
@@ -373,6 +375,7 @@ pub mod boost {
     // pub wake_event_queued: bool,
 
     // Data Access for RSVIM {
+    pub path_cfg: PathConfig,
     pub master_tx: Sender<MasterMessage>,
     pub jsrt_rx: Receiver<JsMessage>,
     pub cli_opts: CliOptions,
@@ -417,6 +420,7 @@ pub mod boost {
       snapshot: SnapshotData,
       startup_moment: Instant,
       time_origin: u128,
+      path_cfg: PathConfig,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opts: CliOptions,
@@ -470,6 +474,7 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
+        path_cfg,
         master_tx,
         jsrt_rx,
         cli_opts,
@@ -507,6 +512,7 @@ pub mod boost {
       options: JsRuntimeOptions,
       startup_moment: Instant,
       time_origin: u128,
+      path_cfg: PathConfig,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opt: CliOptions,
@@ -544,6 +550,7 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
+        path_cfg,
         master_tx,
         jsrt_rx,
         cli_opts: cli_opt,
@@ -977,7 +984,12 @@ pub fn execute_module(
   let path = if source.is_some() {
     filename.to_string()
   } else {
-    match resolve_import(None, filename, None) {
+    let base = JsRuntime::state(scope)
+      .borrow()
+      .path_cfg
+      .config_home()
+      .clone();
+    match resolve_import(&base.to_string_lossy(), filename, None) {
       Ok(specifier) => specifier,
       Err(e) => {
         // Returns the error directly.
