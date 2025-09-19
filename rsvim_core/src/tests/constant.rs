@@ -1,22 +1,23 @@
 use crate::constant::path_config::XDG_VAR;
 use crate::constant::path_config::XdgVar;
+use fslock::LockFile;
+use std::sync::LazyLock;
 
-use parking_lot::Mutex;
-use parking_lot::MutexGuard;
-
-static GLOBAL_SEQUENTIAL_LOCK: Mutex<()> = Mutex::new(());
+const LOCK_FILE_NAME: &str = ".test.fslock";
 
 pub struct TempPathCfg {
   pub home_dir: assert_fs::TempDir,
   pub xdg_config_home: assert_fs::TempDir,
   pub xdg_cache_home: assert_fs::TempDir,
   pub xdg_data_home: assert_fs::TempDir,
-  _sequential_guard: MutexGuard<'static, ()>,
+  lock_file: LockFile,
 }
 
 impl TempPathCfg {
   pub fn create() -> Self {
-    let _sequential_guard = GLOBAL_SEQUENTIAL_LOCK.lock();
+    let mut lock_file = LockFile::open(LOCK_FILE_NAME).unwrap();
+    let _ = lock_file.lock().unwrap();
+
     std::thread::sleep(std::time::Duration::from_millis(5));
 
     let home_dir = assert_fs::TempDir::new().unwrap();
@@ -37,7 +38,7 @@ impl TempPathCfg {
       xdg_config_home,
       xdg_cache_home,
       xdg_data_home,
-      _sequential_guard,
+      lock_file,
     }
   }
 }
@@ -47,6 +48,7 @@ impl Drop for TempPathCfg {
     let mut var = (*XDG_VAR).lock();
     *var = None;
 
+    let _ = self.lock_file.unlock().unwrap();
     std::thread::sleep(std::time::Duration::from_millis(5));
   }
 }
