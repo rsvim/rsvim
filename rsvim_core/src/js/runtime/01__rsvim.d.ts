@@ -4,7 +4,7 @@ export interface Rsvim {
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
-export declare class RsvimBuf {
+export interface RsvimBuf {
     current(): number | null;
     list(): number[];
     writeSync(bufId: number): number;

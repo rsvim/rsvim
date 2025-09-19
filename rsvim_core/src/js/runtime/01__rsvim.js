@@ -1,10 +1,10 @@
 class RsvimImpl {
-    buf = new RsvimBuf();
+    buf = new RsvimBufImpl();
     cmd = new RsvimCmd();
     opt = new RsvimOpt();
     rt = new RsvimRt();
 }
-export class RsvimBuf {
+class RsvimBufImpl {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
