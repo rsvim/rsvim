@@ -3,51 +3,26 @@
 use std::path::Path;
 use std::path::PathBuf;
 
+#[cfg(test)]
+use crate::tests::cfg::TempPathCfg;
+
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
 pub const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
 pub const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
 
-#[cfg(test)]
-fn _dirs_config_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_config_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_config_dir() -> Option<PathBuf> {
   dirs::config_dir()
 }
 
-#[cfg(test)]
-fn _dirs_home_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_home_dir() -> Option<PathBuf> {
   dirs::home_dir()
 }
 
-#[cfg(test)]
-fn _dirs_cache_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_cache_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_cache_dir() -> Option<PathBuf> {
   dirs::cache_dir()
 }
 
-#[cfg(test)]
-fn _dirs_data_dir() -> Option<PathBuf> {
-  let var = (*XDG_VAR).lock();
-  var.as_ref().map(|var| var.xdg_data_home_dir.clone())
-}
-
-#[cfg(not(test))]
 fn _dirs_data_dir() -> Option<PathBuf> {
   dirs::data_dir()
 }
@@ -136,12 +111,12 @@ pub struct PathConfig {
 }
 
 impl PathConfig {
-  /// Make new path config.
-  pub fn new() -> Self {
-    let config_dir = _dirs_config_dir().unwrap();
-    let home_dir = _dirs_home_dir().unwrap();
-    let cache_dir = _dirs_cache_dir().unwrap();
-    let data_dir = _dirs_data_dir().unwrap();
+  fn _new_internal(
+    config_dir: PathBuf,
+    home_dir: PathBuf,
+    cache_dir: PathBuf,
+    data_dir: PathBuf,
+  ) -> Self {
     let config_home_and_entry =
       find_config_home_and_entry(&config_dir, &home_dir);
     Self {
@@ -152,7 +127,25 @@ impl PathConfig {
     }
   }
 
-  #[cfg(not(test))]
+  /// Make new path config.
+  pub fn new() -> Self {
+    let config_dir = _dirs_config_dir().unwrap();
+    let home_dir = _dirs_home_dir().unwrap();
+    let cache_dir = _dirs_cache_dir().unwrap();
+    let data_dir = _dirs_data_dir().unwrap();
+    Self::_new_internal(config_dir, home_dir, cache_dir, data_dir)
+  }
+
+  #[cfg(test)]
+  pub fn new_with_temp_dirs(tp: &TempPathCfg) -> Self {
+    Self::_new_internal(
+      tp.xdg_config_home.to_path_buf(),
+      tp.home_dir.to_path_buf(),
+      tp.xdg_cache_home.to_path_buf(),
+      tp.xdg_data_home.to_path_buf(),
+    )
+  }
+
   /// User config entry path, it can be either one of following files:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
@@ -168,12 +161,6 @@ impl PathConfig {
     &self.config_entry
   }
 
-  #[cfg(test)]
-  pub fn config_entry(&self) -> Option<PathBuf> {
-    Self::new().config_entry.clone()
-  }
-
-  #[cfg(not(test))]
   /// User config home directory, it can be either one of following directories:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
@@ -182,31 +169,14 @@ impl PathConfig {
     &self.config_home
   }
 
-  #[cfg(test)]
-  pub fn config_home(&self) -> PathBuf {
-    Self::new().config_home.clone()
-  }
-
-  #[cfg(not(test))]
   /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
   pub fn cache_home(&self) -> &PathBuf {
     &self.cache_home
   }
 
-  #[cfg(test)]
-  pub fn cache_home(&self) -> PathBuf {
-    Self::new().cache_home.clone()
-  }
-
-  #[cfg(not(test))]
   /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
   pub fn data_home(&self) -> &PathBuf {
     &self.data_home
-  }
-
-  #[cfg(test)]
-  pub fn data_home(&self) -> PathBuf {
-    Self::new().data_home.clone()
   }
 }
 
