@@ -40,7 +40,7 @@ export interface Rsvim {
 }
 
 class RsvimImpl implements Rsvim {
-  buf = new RsvimBuf();
+  buf = new RsvimBufImpl();
   cmd = new RsvimCmd();
   opt = new RsvimOpt();
   rt = new RsvimRt();
@@ -58,7 +58,7 @@ class RsvimImpl implements Rsvim {
  * @category Editor APIs
  * @hideconstructor
  */
-export class RsvimBuf {
+export interface RsvimBuf {
   /**
    * Get current buffer's ID.
    *
@@ -80,10 +80,7 @@ export class RsvimBuf {
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  public current(): number | null {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_current();
-  }
+  current(): number | null;
 
   /**
    * List all buffers' IDs.
@@ -103,10 +100,7 @@ export class RsvimBuf {
    * const bufIds = Rsvim.buf.list();
    * ```
    */
-  public list(): number[] {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_list();
-  }
+  list(): number[];
 
   /**
    * Write (save) buffer's text contents to local filesystem synchronizely.
@@ -129,7 +123,21 @@ export class RsvimBuf {
    * }
    * ```
    */
-  public writeSync(bufId: number): number {
+  writeSync(bufId: number): number;
+}
+
+class RsvimBufImpl implements RsvimBuf {
+  current(): number | null {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_current();
+  }
+
+  list(): number[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_list();
+  }
+
+  writeSync(bufId: number): number {
     if (typeof bufId !== "number") {
       throw new Error(
         `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
