@@ -19,7 +19,6 @@ mod tests_wrap {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const val1 = Rsvim.opt.wrap;
@@ -27,6 +26,7 @@ mod tests_wrap {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -76,7 +76,6 @@ mod tests_tab_stop {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v1 = Rsvim.opt.tabStop;
@@ -84,6 +83,7 @@ mod tests_tab_stop {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -131,13 +131,13 @@ mod tests_tab_stop {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.tabStop = -1;
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -195,7 +195,6 @@ mod tests_file_encoding {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v2 = Rsvim.opt.fileEncoding;
@@ -203,6 +202,7 @@ mod tests_file_encoding {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -263,13 +263,13 @@ mod tests_file_encoding {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.fileEncoding = "utf-16";
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -333,7 +333,6 @@ mod tests_file_format {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const v3 = Rsvim.opt.fileFormat;
@@ -341,6 +340,7 @@ mod tests_file_format {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -398,13 +398,13 @@ mod tests_file_format {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.fileFormat = "CRLF";
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -468,7 +468,6 @@ mod tests_expand_tab {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const value = Rsvim.opt.expandTab;
@@ -476,6 +475,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -523,13 +523,13 @@ mod tests_expand_tab {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.expandTab = null;
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -587,7 +587,6 @@ mod tests_shift_width {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   const value = Rsvim.opt.shiftWidth;
@@ -595,6 +594,7 @@ mod tests_shift_width {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -645,13 +645,13 @@ mod tests_shift_width {
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-    let tp = TempPathConfig::create();
 
     let src: &str = r#"
   Rsvim.opt.shiftWidth = 10000;
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
+    let tp = TempPathConfig::create();
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 

@@ -15,7 +15,6 @@ async fn test_exit1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
   setTimeout(() => {
@@ -24,6 +23,7 @@ async fn test_exit1() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -61,7 +61,6 @@ async fn test_exit2() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
   setTimeout(() => {
@@ -70,6 +69,7 @@ async fn test_exit2() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
