@@ -1,8 +1,9 @@
 use super::fs_loader::*;
+use crate::cfg::path_cfg::PathConfig;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
-use crate::tests::constant::*;
+use crate::tests::cfg::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::*;
@@ -13,6 +14,7 @@ use normpath::PathExt;
 async fn file_path1() {
   test_log_init();
   let tp = TempPathCfg::create();
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
 export function sayHello() {
@@ -42,7 +44,8 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(base, &specifier);
+  let actual =
+    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
@@ -105,7 +108,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(&base), specifier);
+  let actual = loader.resolve(&base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -159,7 +162,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(Some(&base), specifier);
+  let actual = loader.resolve(&base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(

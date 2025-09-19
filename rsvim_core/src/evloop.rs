@@ -153,7 +153,6 @@ impl EventLoop {
   ) -> IoResult<(
     /* startup_moment */ Instant,
     /* startup_unix_epoch */ u128,
-    /* path_cfg */ PathConfig,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ StateMachine,
@@ -177,8 +176,6 @@ impl EventLoop {
       /* jsrt_rx */ Receiver<JsMessage>,
     ),
   )> {
-    let path_cfg = PathConfig::new();
-
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
     let canvas = Canvas::new(canvas_size);
@@ -248,7 +245,6 @@ impl EventLoop {
     Ok((
       startup_moment,
       startup_unix_epoch,
-      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -271,7 +267,6 @@ impl EventLoop {
     let (
       startup_moment,
       startup_unix_epoch,
-      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -287,6 +282,7 @@ impl EventLoop {
       (jsrt_tx, jsrt_rx),
     ) = Self::_internal_new(cols, rows)?;
 
+    let path_cfg = PathConfig::new();
     let writer = if cli_opts.headless() {
       StdoutWriterValue::headless()
     } else {
@@ -339,11 +335,11 @@ impl EventLoop {
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
+    path_cfg: PathConfig,
   ) -> IoResult<Self> {
     let (
       startup_moment,
       startup_unix_epoch,
-      path_cfg,
       canvas,
       tree,
       state_machine,
