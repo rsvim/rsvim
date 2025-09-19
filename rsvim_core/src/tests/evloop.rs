@@ -3,7 +3,6 @@ use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
-use crate::tests::cfg::TempPathConfig;
 use assert_fs::prelude::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -20,12 +19,43 @@ use std::task::Poll;
 use std::task::Waker;
 use std::time::Duration;
 
-pub fn make_configs(tp: &TempPathConfig, sources: Vec<(&Path, &str)>) {
+pub struct TempPathConfig {
+  pub home_dir: assert_fs::TempDir,
+  pub xdg_config_home: assert_fs::TempDir,
+  pub xdg_cache_home: assert_fs::TempDir,
+  pub xdg_data_home: assert_fs::TempDir,
+}
+
+impl TempPathConfig {
+  pub fn create() -> Self {
+    let home_dir = assert_fs::TempDir::new().unwrap();
+    let xdg_config_home = assert_fs::TempDir::new().unwrap();
+    let xdg_cache_home = assert_fs::TempDir::new().unwrap();
+    let xdg_data_home = assert_fs::TempDir::new().unwrap();
+
+    Self {
+      home_dir,
+      xdg_config_home,
+      xdg_cache_home,
+      xdg_data_home,
+    }
+  }
+}
+
+pub fn make_configs(
+  sources: Vec<(&Path, &str)>,
+) -> (TempPathConfig, PathConfig) {
+  let tp = TempPathConfig::create();
+
   for (path, src) in sources.iter() {
     let path = tp.xdg_config_home.child("rsvim").child(path);
     path.touch().unwrap();
     std::fs::write(path, src).unwrap();
   }
+
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+
+  (tp, path_cfg)
 }
 
 pub fn make_event_loop(

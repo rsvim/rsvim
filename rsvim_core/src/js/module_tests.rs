@@ -2,7 +2,6 @@ use super::module::*;
 use crate::cfg::path_cfg::PathConfig;
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::cfg::TempPathConfig;
 use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
