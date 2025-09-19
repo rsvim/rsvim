@@ -153,16 +153,6 @@ mod tests_current1 {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![
-      MockOperation::Operation(Operation::GotoInsertMode(
-        GotoInsertModeVariant::Keep,
-      )),
-      MockOperation::Operation(Operation::CursorInsert(
-        CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
-      )),
-      MockOperation::Operation(Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(30)),
-    ];
     let tp = TempPathCfg::create();
     let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -185,6 +175,17 @@ mod tests_current1 {
 
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+
+    let mocked_ops = vec![
+      MockOperation::Operation(Operation::GotoInsertMode(
+        GotoInsertModeVariant::Keep,
+      )),
+      MockOperation::Operation(Operation::CursorInsert(
+        CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
+      )),
+      MockOperation::Operation(Operation::GotoNormalMode),
+      MockOperation::SleepFor(Duration::from_millis(30)),
+    ];
 
     // Open editor 1st time, f1 not exists, the `writeSync` will create new
     // file and write.
@@ -216,6 +217,9 @@ mod tests_current1 {
           Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
             .unwrap();
         assert!(expect.is_match(payload) || payload.is_empty());
+
+        let actual = std::fs::read_to_string(f1.path()).unwrap();
+        assert!(actual.match_indices("Hello RSVIM!").count() == 1);
       }
     }
 
@@ -256,10 +260,10 @@ mod tests_current1 {
         let payload = contents.command_line_message().rope().to_string();
         info!("After payload:{payload:?}");
         let payload = payload.trim();
-        let expect =
-          Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
-            .unwrap();
-        assert!(expect.is_match(payload));
+        assert!(payload.is_empty());
+
+        let actual = std::fs::read_to_string(f1.path()).unwrap();
+        assert!(actual.match_indices("Hello RSVIM!").count() == 2);
       }
     }
 
