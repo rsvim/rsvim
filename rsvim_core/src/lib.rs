@@ -24,8 +24,6 @@ mod buf_tests;
 #[cfg(test)]
 mod cli_tests;
 #[cfg(test)]
-mod consts_tests;
-#[cfg(test)]
 mod coord_tests;
 #[cfg(test)]
 pub mod tests;
