@@ -1,5 +1,5 @@
 use super::path_cfg::*;
-use crate::tests::cfg::TempPathConfig;
+use crate::tests::evloop::TempPathConfig;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
 

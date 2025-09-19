@@ -4,7 +4,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 #[cfg(test)]
-use crate::tests::cfg::TempPathConfig;
+use crate::tests::evloop::TempPathConfig;
 
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
