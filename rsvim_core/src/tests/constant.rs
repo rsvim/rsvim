@@ -17,6 +17,7 @@ pub struct TempPathCfg {
 impl TempPathCfg {
   pub fn create() -> Self {
     let _sequential_guard = GLOBAL_SEQUENTIAL_LOCK.lock();
+    std::thread::sleep(std::time::Duration::from_millis(5));
 
     let home_dir = assert_fs::TempDir::new().unwrap();
     let xdg_config_home = assert_fs::TempDir::new().unwrap();
@@ -45,5 +46,7 @@ impl Drop for TempPathCfg {
   fn drop(&mut self) {
     let mut var = (*XDG_VAR).lock();
     *var = None;
+
+    std::thread::sleep(std::time::Duration::from_millis(5));
   }
 }
