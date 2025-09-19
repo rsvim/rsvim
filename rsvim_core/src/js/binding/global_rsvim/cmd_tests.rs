@@ -18,13 +18,13 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
     Rsvim.cmd.echo();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -77,13 +77,13 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
     Rsvim.cmd.echo(null);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -133,7 +133,6 @@ async fn test_echo3() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
     Rsvim.cmd.echo("");
@@ -143,6 +142,7 @@ async fn test_echo3() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
@@ -189,7 +189,6 @@ async fn test_echo4() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
-  let tp = TempPathConfig::create();
 
   let src: &str = r#"
   setTimeout(() => {
@@ -201,6 +200,7 @@ async fn test_echo4() -> IoResult<()> {
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = TempPathConfig::create();
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
   let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
