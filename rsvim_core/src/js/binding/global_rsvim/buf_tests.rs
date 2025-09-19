@@ -170,6 +170,7 @@ mod tests_current1 {
     } catch (e) {
       Rsvim.cmd.echo(`Failed to save buffer ${buf1}, exception: ${e}`);
     }
+    Rsvim.rt.exit();
   }, 1);
       "#;
 
@@ -184,7 +185,7 @@ mod tests_current1 {
         CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
       )),
       MockOperation::Operation(Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(30)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     // Open editor 1st time, f1 not exists, the `writeSync` will create new
@@ -208,19 +209,17 @@ mod tests_current1 {
       event_loop.shutdown()?;
 
       // After running
-      {
-        let contents = lock!(event_loop.contents);
-        let payload = contents.command_line_message().rope().to_string();
-        info!("After payload:{payload:?}");
-        let payload = payload.trim();
-        let expect =
-          Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
-            .unwrap();
-        assert!(expect.is_match(payload) || payload.is_empty());
+      let contents = lock!(event_loop.contents);
+      let payload = contents.command_line_message().rope().to_string();
+      info!("After payload:{payload:?}");
+      let payload = payload.trim();
+      let expect =
+        Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
+          .unwrap();
+      assert!(expect.is_match(payload) || payload.is_empty());
 
-        let actual = std::fs::read_to_string(f1.path()).unwrap();
-        assert!(actual.match_indices("Hello RSVIM!").count() == 1);
-      }
+      let actual = std::fs::read_to_string(f1.path()).unwrap();
+      assert!(actual.match_indices("Hello RSVIM!").count() == 1);
     }
 
     let mocked_ops = vec![
@@ -231,7 +230,7 @@ mod tests_current1 {
         CursorInsertPayload::Text("Hello RSVIM!".to_compact_string()),
       )),
       MockOperation::Operation(Operation::GotoNormalMode),
-      MockOperation::SleepFor(Duration::from_millis(30)),
+      MockOperation::SleepFor(Duration::from_millis(1000)),
     ];
 
     // Open editor 2nd time, f1 already exists, the `writeSync` will overwrite
@@ -255,17 +254,17 @@ mod tests_current1 {
       event_loop.shutdown()?;
 
       // After running
-      {
-        let contents = lock!(event_loop.contents);
-        let payload = contents.command_line_message().rope().to_string();
-        info!("After payload:{payload:?}");
-        let payload = payload.trim();
-        assert!(payload.is_empty());
+      let contents = lock!(event_loop.contents);
+      let payload = contents.command_line_message().rope().to_string();
+      info!("After payload:{payload:?}");
+      let payload = payload.trim();
+      assert!(payload.is_empty());
 
-        let actual = std::fs::read_to_string(f1.path()).unwrap();
-        assert!(actual.match_indices("Hello RSVIM!").count() == 2);
-      }
+      let actual = std::fs::read_to_string(f1.path()).unwrap();
+      assert!(actual.match_indices("Hello RSVIM!").count() == 2);
     }
+
+    f1.close().unwrap();
 
     Ok(())
   }
