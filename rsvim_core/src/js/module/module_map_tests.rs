@@ -757,9 +757,7 @@ mod test_dynamic_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -832,9 +830,7 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(p1, src1), (p2, src2)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -940,12 +936,13 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(
-      &tp,
-      vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
-    );
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p3, src3),
+      (p4, src4),
+      (p5, src5),
+    ]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
