@@ -112,16 +112,12 @@ fn fetch_tree3() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  let tp = TempPathConfig::create();
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new(fetch1), src1),
-      (Path::new(fetch2), src2),
-      (Path::new(fetch3), src3),
-    ],
-  );
+  let (tp, _path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new(fetch1), src1),
+    (Path::new(fetch2), src2),
+    (Path::new(fetch3), src3),
+  ]);
 
   let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
@@ -222,16 +218,12 @@ fn fetch_tree4() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  let tp = TempPathConfig::create();
-  make_configs(
-    &tp,
-    vec![
-      (Path::new("rsvim.js"), ""),
-      (Path::new(fetch1), src1),
-      (Path::new(fetch2), src2),
-      (Path::new(fetch3), src3),
-    ],
-  );
+  let (tp, _path_cfg) = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new(fetch1), src1),
+    (Path::new(fetch2), src2),
+    (Path::new(fetch3), src3),
+  ]);
 
   let mut jsrt = make_js_runtime(PathConfig::new());
   let mut scope = jsrt.handle_scope();
