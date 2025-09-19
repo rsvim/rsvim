@@ -4,12 +4,26 @@ export interface Rsvim {
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
+export declare class RsvimImpl implements Rsvim {
+    buf: RsvimBufImpl;
+    cmd: RsvimCmdImpl;
+    opt: RsvimOpt;
+    rt: RsvimRt;
+}
 export interface RsvimBuf {
     current(): number | null;
     list(): number[];
     writeSync(bufId: number): number;
 }
-export declare class RsvimCmd {
+export declare class RsvimBufImpl implements RsvimBuf {
+    current(): number | null;
+    list(): number[];
+    writeSync(bufId: number): number;
+}
+export interface RsvimCmd {
+    echo(message: string): void;
+}
+export declare class RsvimCmdImpl implements RsvimCmd {
     echo(message: string): void;
 }
 type FileEncodingOption = "utf-8";

@@ -1,10 +1,10 @@
-class RsvimImpl {
+export class RsvimImpl {
     buf = new RsvimBufImpl();
-    cmd = new RsvimCmd();
+    cmd = new RsvimCmdImpl();
     opt = new RsvimOpt();
     rt = new RsvimRt();
 }
-class RsvimBufImpl {
+export class RsvimBufImpl {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
@@ -18,7 +18,7 @@ class RsvimBufImpl {
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
 }
-export class RsvimCmd {
+export class RsvimCmdImpl {
     echo(message) {
         if (message === undefined || message === null) {
             throw new Error('"Rsvim.cmd.echo" message parameter cannot be undefined or null');
