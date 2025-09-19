@@ -461,7 +461,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
