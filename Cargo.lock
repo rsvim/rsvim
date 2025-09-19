@@ -2650,7 +2650,6 @@ dependencies = [
  "env_filter",
  "fern",
  "foldhash 0.2.0",
- "fslock",
  "futures",
  "geo",
  "icu",

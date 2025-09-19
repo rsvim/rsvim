@@ -124,4 +124,3 @@ tracing-subscriber = { workspace = true, features = [
   "parking_lot",
 ] }
 tracing-appender = { workspace = true, features = ["parking_lot"] }
-fslock = { workspace = true }
