@@ -2,7 +2,7 @@ export class RsvimImpl {
     buf = new RsvimBufImpl();
     cmd = new RsvimCmdImpl();
     opt = new RsvimOptImpl();
-    rt = new RsvimRt();
+    rt = new RsvimRtImpl();
 }
 export class RsvimBufImpl {
     current() {
@@ -91,7 +91,7 @@ export class RsvimOptImpl {
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }
 }
-export class RsvimRt {
+export class RsvimRtImpl {
     exit(exitCode) {
         if (exitCode !== undefined && typeof exitCode !== "number") {
             throw new Error('"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined');

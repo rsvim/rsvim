@@ -8,7 +8,7 @@ export declare class RsvimImpl implements Rsvim {
     buf: RsvimBufImpl;
     cmd: RsvimCmdImpl;
     opt: RsvimOptImpl;
-    rt: RsvimRt;
+    rt: RsvimRtImpl;
 }
 export interface RsvimBuf {
     current(): number | null;
@@ -60,7 +60,10 @@ export declare class RsvimOptImpl implements RsvimOpt {
     get wrap(): boolean;
     set wrap(value: boolean);
 }
-export declare class RsvimRt {
+export interface RsvimRt {
+    exit(exitCode?: number): void;
+}
+export declare class RsvimRtImpl implements RsvimRt {
     exit(exitCode?: number): void;
 }
 export {};
