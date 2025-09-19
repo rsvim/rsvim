@@ -35,6 +35,7 @@ pub mod module_map;
 mod module_map_tests;
 
 use crate::js::JsRuntime;
+use crate::js::binding;
 use crate::js::loader::AsyncFsModuleLoader;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::CoreModuleLoader;
@@ -287,9 +288,14 @@ pub fn fetch_module_tree<'a>(
     // Transform v8's ModuleRequest into Rust string.
     let base = paths::parent_or_remain(&filename).to_string_lossy();
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
-    // FIXME: Don't use `unwrap` for resolve import, handle the panics with
-    // error message.
-    let specifier = resolve_import(&base, &specifier, None).unwrap();
+
+    let specifier = match resolve_import(&base, &specifier, None) {
+      Ok(specifier) => specifier,
+      Err(e) => {
+        binding::throw_exception(scope, &e);
+        return None;
+      }
+    };
 
     // Resolve subtree of modules
     // If any dependency failed fetching, early returns `None`.
