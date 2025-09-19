@@ -1,7 +1,8 @@
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::constant::TempPathCfg;
+use crate::tests::cfg::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use std::time::Duration;
@@ -18,6 +19,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo();
@@ -26,8 +28,12 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before running
   {
@@ -72,6 +78,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo(null);
@@ -80,8 +87,12 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before running
   {
@@ -123,6 +134,7 @@ async fn test_echo3() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
     Rsvim.cmd.echo("");
@@ -134,8 +146,12 @@ async fn test_echo3() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before running
   {
@@ -174,6 +190,7 @@ async fn test_echo4() -> IoResult<()> {
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
   let tp = TempPathCfg::create();
+  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
   setTimeout(() => {
@@ -187,8 +204,12 @@ async fn test_echo4() -> IoResult<()> {
   // Prepare $RSVIM_CONFIG/rsvim.js
   make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
 
   // Before running
   {

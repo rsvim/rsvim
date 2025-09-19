@@ -1,3 +1,4 @@
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::cli::CliSpecialOptions;
 use crate::prelude::*;
@@ -5,7 +6,7 @@ use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
-use crate::tests::constant::TempPathCfg;
+use crate::tests::cfg::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
@@ -26,6 +27,7 @@ mod tests_current1 {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
@@ -44,8 +46,12 @@ mod tests_current1 {
     // Prepare $RSVIM_CONFIG/rsvim.js
     make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     event_loop.initialize()?;
     event_loop
@@ -74,6 +80,7 @@ mod tests_current1 {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let src: &str = r#"
   setTimeout(() => {
@@ -118,6 +125,7 @@ mod tests_current1 {
         vec![Path::new("README.md").to_path_buf()],
         true,
       ),
+      path_cfg,
     );
 
     event_loop.initialize()?;
@@ -156,6 +164,7 @@ mod tests_current1 {
       MockOperation::SleepFor(Duration::from_millis(30)),
     ];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let f1 = assert_fs::NamedTempFile::new("write_sync1.txt").unwrap();
 
@@ -188,6 +197,7 @@ mod tests_current1 {
           vec![f1.to_path_buf()],
           true,
         ),
+        path_cfg.clone(),
       );
 
       event_loop.initialize()?;
@@ -231,6 +241,7 @@ mod tests_current1 {
           vec![f1.to_path_buf()],
           true,
         ),
+        path_cfg,
       );
 
       event_loop.initialize()?;
