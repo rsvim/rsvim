@@ -1,7 +1,7 @@
 export class RsvimImpl {
     buf = new RsvimBufImpl();
     cmd = new RsvimCmdImpl();
-    opt = new RsvimOpt();
+    opt = new RsvimOptImpl();
     rt = new RsvimRt();
 }
 export class RsvimBufImpl {
@@ -26,7 +26,7 @@ export class RsvimCmdImpl {
         __InternalRsvimGlobalObject.cmd_echo(message);
     }
 }
-export class RsvimOpt {
+export class RsvimOptImpl {
     get expandTab() {
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
     }
