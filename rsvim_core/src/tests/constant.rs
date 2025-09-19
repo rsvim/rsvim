@@ -2,7 +2,7 @@ use crate::constant::path_config::XDG_VAR;
 use crate::constant::path_config::XdgVar;
 use fslock::LockFile;
 
-const LOCK_FILE_NAME: &str = ".test.fslock";
+const LOCK_FILE_NAME: &str = ".test.lock";
 
 pub struct TempPathCfg {
   pub home_dir: assert_fs::TempDir,
