@@ -457,21 +457,23 @@ export function echoD(value) {
     let src1: &str = r#"
 import { echoUrl, echoFileName, echoDirName, echoMain } from './utils/a.js';
 
-const url = import.meta.url;
-echoUrl(url);
+setTimeout(() => {
+  const url = import.meta.url;
+  echoUrl(url);
 
-const filename = import.meta.filename;
-echoFileName(filename);
+  const filename = import.meta.filename;
+  echoFileName(filename);
 
-const dirname = import.meta.dirname;
-echoDirName(dirname);
+  const dirname = import.meta.dirname;
+  echoDirName(dirname);
 
-const isMain = import.meta.main;
-echoMain(isMain);
+  const isMain = import.meta.main;
+  echoMain(isMain);
 
-const resolvedModulePath = import.meta.resolve("./utils/a.js");
-Rsvim.cmd.echo(resolvedModulePath);
-Rsvim.rt.exit();
+  const resolvedModulePath = import.meta.resolve("./utils/a.js");
+  Rsvim.cmd.echo(resolvedModulePath);
+  Rsvim.rt.exit();
+}, 1);
     "#;
 
     let p2 = Path::new("utils/a.js");
@@ -636,28 +638,30 @@ export function echoMain(value) {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-try {
-  const url1 = import.meta.resolve(undefined);
-  Rsvim.cmd.echo(url1);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+setTimeout(() => {
+  try {
+    const url1 = import.meta.resolve(undefined);
+    Rsvim.cmd.echo(url1);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-try {
-  const url2 = import.meta.resolve(null);
-  Rsvim.cmd.echo(url2);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+  try {
+    const url2 = import.meta.resolve(null);
+    Rsvim.cmd.echo(url2);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-try {
-  const url3 = import.meta.resolve();
-  Rsvim.cmd.echo(url3);
-} catch(e) {
-  Rsvim.cmd.echo(e);
-}
+  try {
+    const url3 = import.meta.resolve();
+    Rsvim.cmd.echo(url3);
+  } catch(e) {
+    Rsvim.cmd.echo(e);
+  }
 
-Rsvim.rt.exit();
+  Rsvim.rt.exit();
+}, 1);
     "#;
 
     // Prepare $RSVIM_CONFIG
