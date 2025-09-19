@@ -1,8 +1,9 @@
 // use super::module_map::*;
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::constant::TempPathCfg;
+use crate::tests::cfg::TempPathCfg;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::PathChild;
@@ -13,6 +14,7 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
+
   use super::*;
 
   #[tokio::test]
@@ -24,6 +26,7 @@ mod test_static_import {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -44,8 +47,12 @@ mod test_static_import {
     // - util.js
     make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -85,6 +92,7 @@ mod test_static_import {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -106,8 +114,12 @@ mod test_static_import {
     // - util.js
     make_configs(&tp, vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -147,6 +159,7 @@ mod test_static_import {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -199,8 +212,12 @@ mod test_static_import {
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -240,6 +257,7 @@ mod test_static_import {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(1000))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -296,8 +314,12 @@ export function echoD(value) {
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {
@@ -337,6 +359,7 @@ export function echoD(value) {
     let terminal_rows = 10_u16;
     let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
     let tp = TempPathCfg::create();
+    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
@@ -389,8 +412,12 @@ export function echoD(value) {
       vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4), (p5, src5)],
     );
 
-    let mut event_loop =
-      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
 
     // Before running
     {

@@ -1,8 +1,9 @@
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
-use crate::tests::constant::TempPathCfg;
+use crate::tests::cfg::TempPathCfg;
 use assert_fs::prelude::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -31,8 +32,9 @@ pub fn make_event_loop(
   terminal_cols: u16,
   terminal_rows: u16,
   cli_opts: CliOptions,
+  path_cfg: PathConfig,
 ) -> EventLoop {
-  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
+  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts, path_cfg).unwrap()
 }
 
 const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
