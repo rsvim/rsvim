@@ -92,8 +92,8 @@ fn test3() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new();
-  assert_eq!(cfg.config_home(), tp.home_dir.join(".rsvim"));
+  let cfg = PathConfig::new_with_temp_dirs(&tp);
+  assert_eq!(*cfg.config_home(), tp.home_dir.join(".rsvim"));
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
