@@ -56,6 +56,9 @@ def set_sccache():
 
 def clippy():
     append_rustflags("-Dwarnings")
+    if WINDOWS:
+        append_rustflags("-Csymbol-mangling-version=v0")
+
     set_rustflags()
     set_sccache()
 
@@ -79,6 +82,8 @@ def test(name, miri, jobs):
     else:
         jobs = f" -j {jobs[0]}"
 
+    if WINDOWS:
+        append_rustflags("-Csymbol-mangling-version=v0")
     set_env("RUST_BACKTRACE", "full")
     if miri:
         set_env(
