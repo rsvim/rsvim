@@ -503,7 +503,6 @@ export function echoMain(value) {
     //    |- a.js
     //
     let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
-    info!("path_cfg:{:#?}", path_cfg);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -537,6 +536,11 @@ export function echoMain(value) {
       assert!(url.is_some());
       let actual = url.unwrap();
       info!("url:{:?}", actual);
+      info!(
+        "path_cfg config_entry:{:?}, config_home:{:?}",
+        path_cfg.config_entry(),
+        path_cfg.config_home()
+      );
       assert!(
         actual.contains(
           &path_cfg
