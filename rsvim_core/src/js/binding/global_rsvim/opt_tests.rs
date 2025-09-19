@@ -26,9 +26,7 @@ mod tests_wrap {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -83,9 +81,7 @@ mod tests_tab_stop {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -137,9 +133,7 @@ mod tests_tab_stop {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -202,9 +196,7 @@ mod tests_file_encoding {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -269,9 +261,7 @@ mod tests_file_encoding {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -340,9 +330,7 @@ mod tests_file_format {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -404,9 +392,7 @@ mod tests_file_format {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -475,9 +461,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -529,9 +513,7 @@ mod tests_expand_tab {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let tp = TempPathConfig::create();
-    make_configs(&tp, vec![(Path::new("rsvim.js"), src)]);
-    let path_cfg = PathConfig::new_with_temp_dirs(&tp);
+    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
