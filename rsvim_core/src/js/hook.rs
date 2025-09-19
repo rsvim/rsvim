@@ -33,13 +33,10 @@ pub fn module_resolve_cb<'a>(
   let import_map = state.options.import_map.clone();
   let referrer = v8::Global::new(scope, referrer);
 
-  let dependant = state.module_map.get_path(referrer);
-  let dependant = dependant
-    .map(|dep| paths::parent_or_remain(&dep).to_string_lossy().to_string());
-
+  let dependant = state.module_map.get_path(referrer).unwrap();
+  let dependant = paths::parent_or_remain(&dependant).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
-  let specifier =
-    resolve_import(dependant.as_deref(), &specifier, import_map).unwrap();
+  let specifier = resolve_import(&dependant, &specifier, import_map).unwrap();
   trace!(
     "|module_resolve_cb| dependant:{:?}, specifier:{:?}",
     dependant, specifier

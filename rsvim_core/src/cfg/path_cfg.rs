@@ -3,29 +3,10 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-#[cfg(test)]
-use parking_lot::FairMutex;
-#[cfg(test)]
-use std::sync::Arc;
-#[cfg(test)]
-use std::sync::LazyLock;
-
 pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 pub const HOME: &str = "HOME";
 pub const XDG_CACHE_HOME: &str = "XDG_CACHE_HOME";
 pub const XDG_DATA_HOME: &str = "XDG_DATA_HOME";
-
-#[cfg(test)]
-pub struct XdgVar {
-  pub home_dir: PathBuf,
-  pub xdg_config_home_dir: PathBuf,
-  pub xdg_cache_home_dir: PathBuf,
-  pub xdg_data_home_dir: PathBuf,
-}
-
-#[cfg(test)]
-pub static XDG_VAR: LazyLock<Arc<FairMutex<Option<XdgVar>>>> =
-  LazyLock::new(|| Arc::new(FairMutex::new(None)));
 
 #[cfg(test)]
 fn _dirs_config_dir() -> Option<PathBuf> {
@@ -88,7 +69,7 @@ fn _home_dir(home_dir: &Path) -> PathBuf {
 ///    well.
 ///
 /// It returns `(Home, Entry)`.
-fn get_config_home_and_entry(
+fn find_config_home_and_entry(
   config_dir: &Path,
   home_dir: &Path,
 ) -> (
@@ -162,7 +143,7 @@ impl PathConfig {
     let cache_dir = _dirs_cache_dir().unwrap();
     let data_dir = _dirs_data_dir().unwrap();
     let config_home_and_entry =
-      get_config_home_and_entry(&config_dir, &home_dir);
+      find_config_home_and_entry(&config_dir, &home_dir);
     Self {
       config_home: config_home_and_entry.0,
       config_entry: config_home_and_entry.1,

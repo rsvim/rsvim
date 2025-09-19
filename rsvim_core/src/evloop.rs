@@ -4,6 +4,7 @@ pub mod writer;
 
 use crate::buf::BuffersManager;
 use crate::buf::BuffersManagerArc;
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
@@ -74,6 +75,8 @@ pub struct EventLoop {
 
   /// Command line options.
   pub cli_opts: CliOptions,
+  /// Path configs.
+  pub path_cfg: PathConfig,
 
   /// Stdout writer for editor mode TUI.
   pub writer: StdoutWriterValue,
@@ -149,6 +152,7 @@ impl EventLoop {
   ) -> IoResult<(
     /* startup_moment */ Instant,
     /* startup_unix_epoch */ u128,
+    /* path_cfg */ PathConfig,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ StateMachine,
@@ -172,6 +176,8 @@ impl EventLoop {
       /* jsrt_rx */ Receiver<JsMessage>,
     ),
   )> {
+    let path_cfg = PathConfig::new();
+
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
     let canvas = Canvas::new(canvas_size);
@@ -241,6 +247,7 @@ impl EventLoop {
     Ok((
       startup_moment,
       startup_unix_epoch,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -263,6 +270,7 @@ impl EventLoop {
     let (
       startup_moment,
       startup_unix_epoch,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -303,6 +311,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opts,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -332,6 +341,7 @@ impl EventLoop {
     let (
       startup_moment,
       startup_unix_epoch,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -367,6 +377,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       cli_opts,
+      path_cfg,
       canvas,
       tree,
       state_machine,
@@ -404,7 +415,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   fn _init_config(&mut self) -> IoResult<()> {
-    if let Some(config_entry) = PATH_CONFIG.config_entry() {
+    if let Some(config_entry) = self.path_cfg.config_entry() {
       match self
         .js_runtime
         .execute_module(&config_entry.to_string_lossy(), None)

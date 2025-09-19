@@ -1,8 +1,9 @@
 //! The core library for the [RSVIM](https://github.com/rsvim/rsvim) editor.
 
 pub mod buf;
+pub mod cfg;
 pub mod cli;
-pub mod constant;
+pub mod consts;
 pub mod content;
 pub mod coord;
 pub mod defaults;
@@ -23,7 +24,7 @@ mod buf_tests;
 #[cfg(test)]
 mod cli_tests;
 #[cfg(test)]
-mod constant_tests;
+mod consts_tests;
 #[cfg(test)]
 mod coord_tests;
 #[cfg(test)]
