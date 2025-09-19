@@ -1,4 +1,5 @@
 use crate::buf::BuffersManager;
+use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContents;
 use crate::js::JsRuntime;
@@ -11,7 +12,7 @@ use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::channel;
 
-pub fn make_js_runtime() -> JsRuntime {
+pub fn make_js_runtime(path_cfg: PathConfig) -> JsRuntime {
   let canvas_size = U16Size::new(10, 10);
   let (master_tx, _master_rx) = channel(1);
   let (_jsrt_tx, jsrt_rx) = channel(1);
@@ -35,6 +36,7 @@ pub fn make_js_runtime() -> JsRuntime {
     JsRuntimeOptions::default(),
     startup_moment,
     startup_unix_epoch,
+    path_cfg,
     master_tx,
     jsrt_rx,
     cli_opts,
