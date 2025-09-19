@@ -43,7 +43,7 @@ export class RsvimImpl implements Rsvim {
   buf = new RsvimBufImpl();
   cmd = new RsvimCmdImpl();
   opt = new RsvimOptImpl();
-  rt = new RsvimRt();
+  rt = new RsvimRtImpl();
 }
 
 /**
@@ -604,7 +604,7 @@ export class RsvimOptImpl implements RsvimOpt {
  * @category General APIs
  * @hideconstructor
  */
-export class RsvimRt {
+export interface RsvimRt {
   /**
    * Exit editor.
    *
@@ -627,7 +627,11 @@ export class RsvimRt {
    * Rsvim.rt.exit(-1);
    * ```
    */
-  public exit(exitCode?: number) {
+  exit(exitCode?: number): void;
+}
+
+export class RsvimRtImpl implements RsvimRt {
+  exit(exitCode?: number): void {
     if (exitCode !== undefined && typeof exitCode !== "number") {
       throw new Error(
         '"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined',
