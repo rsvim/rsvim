@@ -24,7 +24,7 @@ fn test1() {
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
-    cfg.config_entry().clone().unwrap(),
+    cfg.config_entry().map(|e| e.to_path_buf()).unwrap(),
     tp.xdg_config_home.join("rsvim").join("rsvim.js")
   );
 
@@ -61,7 +61,7 @@ fn test2() {
 
   assert!(cfg.config_entry().is_some());
   assert_eq!(
-    cfg.config_entry().clone().unwrap(),
+    cfg.config_entry().map(|e| e.to_path_buf()).unwrap(),
     tp.home_dir.join(".rsvim").join("rsvim.js")
   );
 

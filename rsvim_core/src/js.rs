@@ -988,7 +988,7 @@ pub fn execute_module(
       .borrow()
       .path_cfg
       .config_home()
-      .clone();
+      .to_path_buf();
     match resolve_import(&base.to_string_lossy(), filename, None) {
       Ok(specifier) => specifier,
       Err(e) => {
