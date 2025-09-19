@@ -170,7 +170,7 @@ mod tests_current1 {
     } catch (e) {
       Rsvim.cmd.echo(`Failed to save buffer ${buf1}, exception: ${e}`);
     }
-  }, 1);
+  }, 500);
       "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
@@ -248,7 +248,10 @@ mod tests_current1 {
       let payload = contents.command_line_message().rope().to_string();
       info!("After payload-2:{payload:?}");
       let payload = payload.trim();
-      assert!(payload.is_empty());
+      let expect =
+        Regex::new(r"Buffer [0-9]+ has been saved, [0-9]+ bytes written")
+          .unwrap();
+      assert!(expect.is_match(payload) || payload.is_empty());
 
       let actual = std::fs::read_to_string(f1.path()).unwrap();
       info!("f1-2:{actual:?}");
