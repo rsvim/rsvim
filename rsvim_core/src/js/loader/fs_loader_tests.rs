@@ -1,5 +1,4 @@
 use super::fs_loader::*;
-use crate::cfg::path_cfg::PathConfig;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
@@ -14,7 +13,6 @@ use normpath::PathExt;
 async fn file_path1() {
   test_log_init();
   let tp = TempPathConfig::create();
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
 
   let src: &str = r#"
 export function sayHello() {
@@ -44,8 +42,10 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+  let actual = loader.resolve(
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
+    &specifier,
+  );
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
