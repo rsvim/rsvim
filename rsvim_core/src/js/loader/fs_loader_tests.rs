@@ -1,5 +1,4 @@
 use super::fs_loader::*;
-use crate::cfg::path_cfg;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
