@@ -179,7 +179,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch2_without_ext,
     None,
   );
@@ -253,7 +253,11 @@ fn fetch_tree4() {
   let state = JsRuntime::state(&scope);
   let state = state.borrow();
 
-  let path3 = resolve_import(None, fetch3, None);
+  let path3 = resolve_import(
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
+    fetch3,
+    None,
+  );
   info!("fetch_tree4 path3:{:?}, fetch3:{:?}", path3, fetch3);
   assert!(path3.is_ok());
   let path3 = path3.unwrap();
@@ -264,7 +268,7 @@ fn fetch_tree4() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    Some(&tp.xdg_config_home.join("rsvim").to_string_lossy()),
+    &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
   );
