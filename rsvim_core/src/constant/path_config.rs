@@ -4,7 +4,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 #[cfg(test)]
-use parking_lot::Mutex;
+use parking_lot::FairMutex;
 #[cfg(test)]
 use std::sync::Arc;
 #[cfg(test)]
@@ -24,8 +24,8 @@ pub struct XdgVar {
 }
 
 #[cfg(test)]
-pub static XDG_VAR: LazyLock<Arc<Mutex<Option<XdgVar>>>> =
-  LazyLock::new(|| Arc::new(Mutex::new(None)));
+pub static XDG_VAR: LazyLock<Arc<FairMutex<Option<XdgVar>>>> =
+  LazyLock::new(|| Arc::new(FairMutex::new(None)));
 
 #[cfg(test)]
 fn _dirs_config_dir() -> Option<PathBuf> {
