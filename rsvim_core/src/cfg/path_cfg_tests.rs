@@ -76,13 +76,22 @@ fn test2() {
 
   if cfg!(target_os = "windows") {
     assert_eq!(
-      cfg.cache_home().clone(),
+      cfg.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
     );
-    assert_eq!(cfg.data_home().clone(), tp.xdg_data_home.join("rsvim-data"));
+    assert_eq!(
+      cfg.data_home().to_path_buf(),
+      tp.xdg_data_home.join("rsvim-data")
+    );
   } else {
-    assert_eq!(cfg.cache_home().clone(), tp.xdg_cache_home.join("rsvim"));
-    assert_eq!(cfg.data_home().clone(), tp.xdg_data_home.join("rsvim"));
+    assert_eq!(
+      cfg.cache_home().to_path_buf(),
+      tp.xdg_cache_home.join("rsvim")
+    );
+    assert_eq!(
+      cfg.data_home().to_path_buf(),
+      tp.xdg_data_home.join("rsvim")
+    );
   }
 }
 
