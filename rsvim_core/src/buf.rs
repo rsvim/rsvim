@@ -338,7 +338,7 @@ impl BuffersManager {
               bytes += readded;
               let payload = match fencoding {
                 FileEncodingOption::Utf8 => {
-                  String::from_utf8_lossy(&data[0..readded]).into_owned()
+                  String::from_utf8_lossy(&data[0..readded])
                 }
               };
               rope_builder.append(&payload);
