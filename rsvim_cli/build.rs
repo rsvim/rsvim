@@ -4,9 +4,9 @@ use rsvim_core::js::v8_version;
 use std::path::Path;
 
 fn version() {
-  let profile = std::env::var("PROFILE").unwrap_or("debug".to_string());
-  let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_string());
-  let debug = std::env::var("DEBUG").unwrap_or("0".to_string());
+  let profile = std::env::var("PROFILE").unwrap_or("debug".to_owned());
+  let opt_level = std::env::var("OPT_LEVEL").unwrap_or("0".to_owned());
+  let debug = std::env::var("DEBUG").unwrap_or("0".to_owned());
   eprintln!(
     "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
   );
@@ -18,7 +18,7 @@ fn version() {
     format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
   } else {
     let profile = if profile == "release" {
-      "nightly".to_string()
+      "nightly".to_owned()
     } else {
       profile
     };
@@ -32,7 +32,7 @@ fn version() {
         let id = id.to_string();
         format!("+{}", &id[0..8])
       }
-      Err(_) => "".to_string(),
+      Err(_) => "".to_owned(),
     };
 
     format!(
