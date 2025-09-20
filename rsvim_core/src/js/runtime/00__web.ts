@@ -70,6 +70,21 @@ export interface GlobalThis {
   let nextTimerId = 1;
   const activeTimers = new Map();
 
+  function clearInterval(id: number): void {
+    // Check parameter's type.
+    if (!Number.isInteger(id)) {
+      throw new Error(
+        `"clearInterval" id parameter must be an integer value, but found ${id} (${typeof id})`,
+      );
+    }
+
+    if (activeTimers.has(id)) {
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
+      activeTimers.delete(id);
+    }
+  }
+
   function clearTimeout(id: number): void {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
