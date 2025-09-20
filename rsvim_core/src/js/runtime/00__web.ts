@@ -30,13 +30,13 @@ export interface GlobalThis {
   /**
    * Set a repeated scheduler that calls a function, with a fixed time delay between each call. Also see {@link !setInterval}.
    *
-   * @param {Function} callback - A function to be executed when the timer elapses.
+   * @param {Function} callback - A function to be executed every `delay` milliseconds.
    * @param {number} delay - The milliseconds that the scheduler should wait before the function is executed.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !Error} if callback is not a function value.
    */
-  setTimeout(
+  setInterval(
     callback: (...args: any[]) => void,
     delay: number,
     ...args: any[]
