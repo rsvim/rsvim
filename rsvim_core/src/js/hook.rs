@@ -66,7 +66,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   let module = v8::Global::new(scope, module);
 
   let filename = state.module_map.get_path(module).unwrap();
-  let is_main = state.module_map.main().clone() == Some(filename.to_owned());
+  let is_main = state.module_map.main().as_ref() == Some(&filename);
   trace!(
     "|host_initialize_import_meta_object_cb| url:{:?}, is_main:{:?}",
     filename, is_main
