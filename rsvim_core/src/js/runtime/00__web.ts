@@ -28,6 +28,21 @@ export interface GlobalThis {
   clearTimeout(id: number): void;
 
   /**
+   * Schedules a repeated execution of `callback` function every `delay` milliseconds. Also see {@link !setInterval}.
+   *
+   * @param {Function} callback - A function to be executed after the timer expires.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
+   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @returns {number} The ID (integer) which identifies the timer created.
+   * @throws Throws {@link !Error} if callback is not a function value.
+   */
+  setTimeout(
+    callback: (...args: any[]) => void,
+    delay: number,
+    ...args: any[]
+  ): number;
+
+  /**
    * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
