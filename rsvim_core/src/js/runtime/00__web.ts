@@ -12,12 +12,35 @@
  */
 export interface GlobalThis {
   /**
+   * Cancel a repeated scheduler previously established by calling {@link setInterval}.
+   *
+   * @param {number} id - The ID (integer) which identifies the schedule.
+   * @throws Throws {@link !Error} if ID is not an integer value.
+   */
+  clearInterval(id: number): void;
+
+  /**
    * Cancel a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
    * @throws Throws {@link !Error} if ID is not an integer value.
    */
   clearTimeout(id: number): void;
+
+  /**
+   * Set a repeated scheduler that calls a function, with a fixed time delay between each call. Also see {@link !setInterval}.
+   *
+   * @param {Function} callback - A function to be executed every `delay` milliseconds.
+   * @param {number} delay - The milliseconds that the scheduler should delay in between execution of the function.
+   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @returns {number} The ID (integer) which identifies the scheduler created.
+   * @throws Throws {@link !Error} if callback is not a function value.
+   */
+  setInterval(
+    callback: (...args: any[]) => void,
+    delay: number,
+    ...args: any[]
+  ): number;
 
   /**
    * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
@@ -46,6 +69,21 @@ export interface GlobalThis {
   // See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
   let nextTimerId = 1;
   const activeTimers = new Map();
+
+  function clearInterval(id: number): void {
+    // Check parameter's type.
+    if (!Number.isInteger(id)) {
+      throw new Error(
+        `"clearInterval" id parameter must be an integer value, but found ${id} (${typeof id})`,
+      );
+    }
+
+    if (activeTimers.has(id)) {
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
+      activeTimers.delete(id);
+    }
+  }
 
   function clearTimeout(id: number): void {
     // Check parameter's type.
