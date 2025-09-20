@@ -12,7 +12,7 @@
  */
 export interface GlobalThis {
   /**
-   * Cancel a repeated schedule previously established by calling {@link setInterval}.
+   * Cancel a repeated scheduler previously established by calling {@link setInterval}.
    *
    * @param {number} id - The ID (integer) which identifies the schedule.
    * @throws Throws {@link !Error} if ID is not an integer value.
@@ -28,10 +28,10 @@ export interface GlobalThis {
   clearTimeout(id: number): void;
 
   /**
-   * Schedules a repeated execution of `callback` function every `delay` milliseconds. Also see {@link !setInterval}.
+   * Set a repeated scheduler that calls a function, with a fixed time delay between each call. Also see {@link !setInterval}.
    *
-   * @param {Function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
+   * @param {Function} callback - A function to be executed when the timer elapses.
+   * @param {number} delay - The milliseconds that the scheduler should wait before the function is executed.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !Error} if callback is not a function value.
