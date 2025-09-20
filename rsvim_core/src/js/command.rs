@@ -32,8 +32,7 @@ impl JsFuture for ExCommandFuture {
       Err(e) => {
         // Capture exception if there's any error while loading/evaluating module.
         trace!("Failed to execute module, filename:{filename:?}, error:{e:?}");
-        let message = e.to_string().to_owned();
-        let message = v8::String::new(scope, &message).unwrap();
+        let message = v8::String::new(scope, &e.to_string()).unwrap();
         let exception = v8::Exception::error(scope, message);
         binding::set_exception_code(scope, exception, &e);
         let exception = v8::Global::new(scope, exception);
