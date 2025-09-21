@@ -8,7 +8,7 @@
  */
 
 /**
- * The {@link !globalThis} global object.
+ * The [globalThis](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
 export interface GlobalThis {
   /**
