@@ -109,7 +109,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if failed to write buffer contents to file system.
+   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if the `bufId` parameter is not an integer, or [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if failed to write buffer contents to file system.
    *
    * @example
    * ```javascript
@@ -138,8 +138,8 @@ class RsvimBufImpl implements RsvimBuf {
 
   writeSync(bufId: number): number {
     if (typeof bufId !== "number") {
-      throw new Error(
-        `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
+      throw new TypeError(
+        `"Rsvim.buf.write" bufId must be an integer, but found ${typeof bufId}`,
       );
     }
     // @ts-ignore Ignore warning
