@@ -467,7 +467,7 @@ async fn test_interval3() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     assert_eq!(3, contents.command_line_message_history().occupied_len());
-    for i in 0..3 {
+    for _i in 0..3 {
       let actual = contents.command_line_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
