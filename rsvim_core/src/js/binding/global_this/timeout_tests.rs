@@ -205,10 +205,13 @@ async fn test_timeout4() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let src: &str = r#"
   // Set timeout to update global options.
-  const timerId = setTimeout(() => {
+  const timerId = setTimeout((arg1, arg2, arg3) => {
     Rsvim.opt.wrap = false;
     Rsvim.opt.lineBreak = true;
-  }, 100);
+    Rsvim.cmd.echo(arg1);
+    Rsvim.cmd.echo(arg2);
+    Rsvim.cmd.echo(arg3);
+  }, 100, 1,true,"Ok");
 
   // Cancel the timeout immediately
   clearTimeout(timerId);
@@ -248,6 +251,9 @@ async fn test_timeout4() -> IoResult<()> {
     let global_local_options = tree.global_local_options();
     assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
     assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+
+    let contents = lock!(event_loop.contents);
+    assert_eq!(0, contents.command_line_message_history().occupied_len());
   }
 
   Ok(())
