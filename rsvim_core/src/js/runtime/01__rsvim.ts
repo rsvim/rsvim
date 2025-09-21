@@ -490,8 +490,8 @@ class RsvimOptImpl implements RsvimOpt {
 
   set expandTab(value: boolean) {
     if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      throw new TypeError(
+        `"Rsvim.opt.expandTab" parameter must be a boolean, but found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
