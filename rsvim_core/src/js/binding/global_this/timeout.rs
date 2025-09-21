@@ -41,7 +41,7 @@ impl JsFuture for TimeoutFuture {
 }
 
 /// Javascript `setTimeout` API.
-pub fn set_timeout(
+pub fn create_timer(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
@@ -50,8 +50,10 @@ pub fn set_timeout(
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
 
-  // Get timer's expiration time in millis.
+  // Get timer's delay time in millis.
   let delay = args.get(1).int32_value(scope).unwrap() as u64;
+  // Get timer's repeated.
+  let repeated = args.get(2).boolean_value(scope);
 
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
@@ -83,13 +85,22 @@ pub fn set_timeout(
 
   let mut state = state_rc.borrow_mut();
   let timer_id = js::next_timer_id();
-  pending::create_timer(&mut state, timer_id, delay, false, Box::new(timer_cb));
+  pending::create_timer(
+    &mut state,
+    timer_id,
+    delay,
+    repeated,
+    Box::new(timer_cb),
+  );
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
-  trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, delay);
+  trace!(
+    "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
+    timer_id, delay, repeated
+  );
 }
 
 /// Javascript `clearTimeout` API.
-pub fn clear_timeout(
+pub fn clear_timer(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
@@ -100,5 +111,5 @@ pub fn clear_timeout(
 
   let mut state = state_rc.borrow_mut();
   pending::remove_timer(&mut state, timer_id);
-  trace!("|clear_timeout| timer_id:{:?}", timer_id);
+  trace!("|clear_timer| timer_id:{:?}", timer_id);
 }

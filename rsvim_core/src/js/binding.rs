@@ -67,13 +67,13 @@ pub fn create_new_context<'s>(
       scope,
       vim,
       "global_set_timeout",
-      global_this::timeout::set_timeout,
+      global_this::timeout::create_timer,
     );
     set_function_to(
       scope,
       vim,
       "global_clear_timeout",
-      global_this::timeout::clear_timeout,
+      global_this::timeout::clear_timer,
     );
   }
 
