@@ -31,14 +31,14 @@ export interface GlobalThis {
    * Set a repeated scheduler that calls a function, with a fixed time delay between each call. Also see {@link !setInterval}.
    *
    * @param {Function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - The milliseconds that the scheduler should delay in between execution of the function.
+   * @param {number} delay - The milliseconds that the scheduler should delay in between execution of the function. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the scheduler created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
    */
   setInterval(
     callback: (...args: any[]) => void,
-    delay: number,
+    delay?: number,
     ...args: any[]
   ): number;
 
@@ -46,14 +46,14 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !Error} if callback is not a function value.
    */
   setTimeout(
     callback: (...args: any[]) => void,
-    delay: number,
+    delay?: number,
     ...args: any[]
   ): number;
 }
@@ -105,6 +105,10 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number {
+    if (delay === undefined || delay === null) {
+      delay = 1;
+    }
+
     if (typeof delay !== "number") {
       throw new TypeError(
         `TypeError: "setTimeout" callback must be a function, but found ${typeof callback}`,
@@ -147,9 +151,19 @@ export interface GlobalThis {
 
   function setInterval(
     callback: (...args: any[]) => void,
-    delay: number,
+    delay?: number,
     ...args: any[]
   ): number {
+    if (delay === undefined || delay === null) {
+      delay = 1;
+    }
+
+    if (typeof delay !== "number") {
+      throw new TypeError(
+        `"setTimeout" delay must be a number, but found ${typeof callback}`,
+      );
+    }
+
     // Coalesce to number or NaN.
     delay *= 1;
 
