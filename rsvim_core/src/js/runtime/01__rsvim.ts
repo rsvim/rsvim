@@ -239,7 +239,7 @@ export interface RsvimOpt {
    * Set the _expand-tab_ option.
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if value is not a boolean.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -275,7 +275,7 @@ export interface RsvimOpt {
    * Set the _file-encoding_ option.
    *
    * @param {FileEncodingOption} value - The _file-encoding_ option.
-   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if value is invalid.
+   * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
    * ```javascript
@@ -323,7 +323,7 @@ export interface RsvimOpt {
    * Set the _file-format_ option.
    *
    * @param {FileFormatOption} value - The _file-format_ option.
-   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if value is invalid.
+   * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
    * ```javascript
@@ -358,7 +358,7 @@ export interface RsvimOpt {
    * Set the _line-break_ option.
    *
    * @param {boolean} value - The _line-break_ option.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if value is not a boolean.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -471,7 +471,7 @@ export interface RsvimOpt {
    * Set the _wrap_ option.
    *
    * @param {boolean} value - The _wrap_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -580,8 +580,8 @@ class RsvimOptImpl implements RsvimOpt {
 
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`,
+      throw new TypeError(
+        `"Rsvim.opt.wrap" parameter must be a boolean, but found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
