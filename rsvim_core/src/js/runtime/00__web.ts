@@ -63,7 +63,7 @@ export interface GlobalThis {
 
   const TIMEOUT_MAX = Math.pow(2, 31) - 1;
   // In javascript side, `nextTimerId` and `activeTimers` maps to the internal
-  // timeout ID returned from rust `global_set_timeout` api. This is mostly for
+  // timeout ID returned from rust `global_create_timer` api. This is mostly for
   // being compatible with web api standard, as the standard requires the returned
   // value need to be within the range of 1 to 2,147,483,647.
   // See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
@@ -80,7 +80,7 @@ export interface GlobalThis {
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
+      __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
       activeTimers.delete(id);
     }
   }
@@ -95,7 +95,7 @@ export interface GlobalThis {
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
+      __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
       activeTimers.delete(id);
     }
   }
@@ -124,10 +124,14 @@ export interface GlobalThis {
     const id = nextTimerId++;
 
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-    const timer = __InternalRsvimGlobalObject.global_set_timeout(() => {
-      callback(...args);
-      activeTimers.delete(id);
-    }, delay);
+    const timer = __InternalRsvimGlobalObject.global_create_timer(
+      () => {
+        callback(...args);
+        activeTimers.delete(id);
+      },
+      delay,
+      false,
+    );
 
     // Update `activeTimers` map.
     activeTimers.set(id, timer);
