@@ -41,7 +41,7 @@ class RsvimOptImpl {
     }
     set fileEncoding(value) {
         if (value !== "utf-8") {
-            throw new Error(`"Rsvim.opt.fileEncoding" parameter is invalid: ${typeof value}`);
+            throw new Error(`"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
     }
@@ -50,7 +50,7 @@ class RsvimOptImpl {
     }
     set fileFormat(value) {
         if (value !== "dos" && value !== "unix" && value !== "mac") {
-            throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${typeof value}`);
+            throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_file_format(value);
     }
