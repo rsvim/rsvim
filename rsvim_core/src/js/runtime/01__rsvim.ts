@@ -431,7 +431,7 @@ export interface RsvimOpt {
    * Set the _tab-stop_ option.
    *
    * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not a positive integer that between `[1,255]`.
    *
    * @example
    * ```javascript
