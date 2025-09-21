@@ -239,7 +239,7 @@ export interface RsvimOpt {
    * Set the _expand-tab_ option.
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if value is not a boolean.
    *
    * @example
    * ```javascript
