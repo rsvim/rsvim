@@ -15,7 +15,7 @@ export interface GlobalThis {
    * Cancel a repeated scheduler previously established by calling {@link setInterval}.
    *
    * @param {number} id - The ID (integer) which identifies the schedule.
-   * @throws Throws {@link !Error} if ID is not an integer value.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
    */
   clearInterval(id: number): void;
 
@@ -23,7 +23,7 @@ export interface GlobalThis {
    * Cancel a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
-   * @throws Throws {@link !Error} if ID is not an integer value.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
    */
   clearTimeout(id: number): void;
 
@@ -73,8 +73,8 @@ export interface GlobalThis {
   function clearInterval(id: number): void {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
-      throw new Error(
-        `"clearInterval" id parameter must be an integer value, but found ${id} (${typeof id})`,
+      throw new TypeError(
+        `"clearInterval" id must be an integer, but found ${typeof id}`,
       );
     }
 
@@ -88,8 +88,8 @@ export interface GlobalThis {
   function clearTimeout(id: number): void {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
-      throw new Error(
-        `"clearTimeout" id parameter must be an integer value, but found ${id} (${typeof id})`,
+      throw new TypeError(
+        `"clearTimeout" id must be an integer, but found ${typeof id}`,
       );
     }
 
