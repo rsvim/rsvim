@@ -34,7 +34,7 @@ export interface GlobalThis {
    * @param {number} delay - The milliseconds that the scheduler should delay in between execution of the function.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the scheduler created.
-   * @throws Throws {@link !Error} if callback is not a function value.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
    */
   setInterval(
     callback: (...args: any[]) => void,
