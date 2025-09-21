@@ -572,7 +572,7 @@ class RsvimOptImpl implements RsvimOpt {
 
   set tabStop(value: number) {
     if (typeof value !== "number") {
-      throw new Error(
+      throw new TypeError(
         `"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`,
       );
     }
