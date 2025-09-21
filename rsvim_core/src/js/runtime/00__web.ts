@@ -85,6 +85,52 @@ export interface GlobalThis {
     }
   }
 
+  function setInterval(
+    callback: (...args: any[]) => void,
+    delay?: number,
+    ...args: any[]
+  ): number {
+    if (delay === undefined || delay === null) {
+      delay = 1;
+    } else if (typeof delay !== "number") {
+      throw new TypeError(
+        `"setInterval" delay must be a number, but found ${typeof delay}`,
+      );
+    }
+
+    // Coalesce to number or NaN.
+    delay *= 1;
+
+    // Check delay's boundaries.
+    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
+      delay = 1;
+    }
+
+    // Check if callback is a valid function.
+    if (typeof callback !== "function") {
+      throw new Error(
+        `"setTimeout" callback must be a function, but found ${typeof callback}`,
+      );
+    }
+
+    // Pin down the correct ID value.
+    const id = nextTimerId++;
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    const timer = __InternalRsvimGlobalObject.global_create_timer(
+      () => {
+        callback(...args);
+      },
+      delay,
+      true,
+    );
+
+    // Update `activeTimers` map.
+    activeTimers.set(id, timer);
+
+    return id;
+  }
+
   function clearTimeout(id: number): void {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
@@ -147,52 +193,6 @@ export interface GlobalThis {
     return id;
   }
 
-  function setInterval(
-    callback: (...args: any[]) => void,
-    delay?: number,
-    ...args: any[]
-  ): number {
-    if (delay === undefined || delay === null) {
-      delay = 1;
-    } else if (typeof delay !== "number") {
-      throw new TypeError(
-        `"setInterval" delay must be a number, but found ${typeof delay}`,
-      );
-    }
-
-    // Coalesce to number or NaN.
-    delay *= 1;
-
-    // Check delay's boundaries.
-    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-      delay = 1;
-    }
-
-    // Check if callback is a valid function.
-    if (typeof callback !== "function") {
-      throw new Error(
-        `"setTimeout" callback must be a function, but found ${typeof callback}`,
-      );
-    }
-
-    // Pin down the correct ID value.
-    const id = nextTimerId++;
-
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-    const timer = __InternalRsvimGlobalObject.global_create_timer(
-      () => {
-        callback(...args);
-      },
-      delay,
-      true,
-    );
-
-    // Update `activeTimers` map.
-    activeTimers.set(id, timer);
-
-    return id;
-  }
-
   // Timer API }
 
   // const { $$queueMicrotask, reportError } = globalThis;
@@ -217,4 +217,6 @@ export interface GlobalThis {
 
   globalThis.clearTimeout = clearTimeout;
   globalThis.setTimeout = setTimeout;
+  globalThis.clearInterval = clearInterval;
+  globalThis.setInterval = setInterval;
 })(globalThis as unknown as GlobalThis);
