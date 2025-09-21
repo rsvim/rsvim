@@ -171,14 +171,14 @@ export interface RsvimCmd {
    * @param {message} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
    *
-   * @throws Throws {@link !TypeError} if no parameter provided, or the parameter is `null` or `undefined`.
+   * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
    *
    * @example
    * ```javascript
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  echo(message: string): void;
+  echo(message: any): void;
 }
 
 class RsvimCmdImpl implements RsvimCmd {
