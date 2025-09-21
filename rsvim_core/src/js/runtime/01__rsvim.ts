@@ -358,7 +358,7 @@ export interface RsvimOpt {
    * Set the _line-break_ option.
    *
    * @param {boolean} value - The _line-break_ option.
-   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if value is not a boolean.
+   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if value is not a boolean.
    *
    * @example
    * ```javascript
