@@ -40,6 +40,8 @@ use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::channel;
+use tokio::time::Duration;
+use tokio::time::Instant;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
@@ -619,11 +621,14 @@ impl EventLoop {
           trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            tokio::time::sleep_until(req.expire_at).await;
+            let expire_at = req.start_at + Duration::from_millis(req.delay);
+            tokio::time::sleep_until(expire_at).await;
             let _ = jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp {
                 timer_id: req.timer_id,
-                expire_at: req.expire_at,
+                expire_at,
+                delay: req.delay,
+                repeated: req.repeated,
               }))
               .await;
           });

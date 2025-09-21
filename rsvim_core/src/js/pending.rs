@@ -8,7 +8,6 @@ use crate::js::next_timer_id;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
-use tokio::time::Duration;
 use tokio::time::Instant;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
@@ -22,12 +21,12 @@ pub fn create_timer(
 ) -> JsTimerId {
   let timer_id = next_timer_id();
   state.pending_timers.insert(timer_id, cb);
-  let expire_at = Instant::now() + Duration::from_millis(delay);
+  let start_at = Instant::now();
   msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
-      expire_at,
+      start_at,
       delay,
       repeated,
     }),

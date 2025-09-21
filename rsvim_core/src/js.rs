@@ -27,6 +27,7 @@ use crate::buf::BuffersManagerArc;
 use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
+use crate::js::binding::global_this::timeout::create_timeout;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
@@ -688,6 +689,15 @@ pub mod boost {
               state_rc.borrow_mut().pending_timers.remove(&resp.timer_id);
             if let Some(mut timer_cb) = maybe_timer_cb {
               timer_cb();
+              if resp.repeated {
+                let mut state = state_rc.borrow_mut();
+                pending::create_timer(
+                  &mut state,
+                  resp.delay,
+                  resp.repeated,
+                  timer_cb,
+                );
+              }
             }
             // Otherwise the 'timer_cb' is already been removed by the
             // `clear_timeout` API.

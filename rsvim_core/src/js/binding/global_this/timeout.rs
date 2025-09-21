@@ -2,11 +2,11 @@
 
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
+use crate::js::JsRuntimeStateRc;
+use crate::js::JsTimerId;
 use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
-use tokio::time::Duration;
-use tokio::time::Instant;
 
 struct TimeoutFuture {
   cb: Rc<v8::Global<v8::Function>>,
@@ -67,10 +67,9 @@ pub fn set_timeout(
     Err(_) => vec![],
   };
 
-  let state_rc = JsRuntime::state(scope);
   let params = Rc::new(params);
 
-  // Return timeout's internal id.
+  let state_rc = JsRuntime::state(scope);
   let timer_cb = {
     let state_rc = state_rc.clone();
     move || {
