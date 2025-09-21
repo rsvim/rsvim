@@ -107,9 +107,7 @@ export interface GlobalThis {
   ): number {
     if (delay === undefined || delay === null) {
       delay = 1;
-    }
-
-    if (typeof delay !== "number") {
+    } else if (typeof delay !== "number") {
       throw new TypeError(
         `TypeError: "setTimeout" callback must be a function, but found ${typeof callback}`,
       );
@@ -160,7 +158,7 @@ export interface GlobalThis {
 
     if (typeof delay !== "number") {
       throw new TypeError(
-        `"setTimeout" delay must be a number, but found ${typeof callback}`,
+        `"setInterval" delay must be a number, but found ${typeof callback}`,
       );
     }
 
