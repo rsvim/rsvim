@@ -323,7 +323,7 @@ export interface RsvimOpt {
    * Set the _file-format_ option.
    *
    * @param {FileFormatOption} value - The _file-format_ option.
-   * @throws Throws {@link !Error} if value is not a valid option.
+   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if value is invalid.
    *
    * @example
    * ```javascript
@@ -521,7 +521,7 @@ class RsvimOptImpl implements RsvimOpt {
   set fileFormat(value: FileFormatOption) {
     if (value !== "dos" && value !== "unix" && value !== "mac") {
       throw new Error(
-        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.fileFormat" parameter is invalid: ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
