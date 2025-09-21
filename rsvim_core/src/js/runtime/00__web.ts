@@ -15,7 +15,7 @@ export interface GlobalThis {
    * Cancel a repeated timer previously established by calling {@link setInterval}.
    *
    * @param {number} id - The ID (integer) which identifies the schedule.
-   * @throws Throws {@link !TypeError} if ID is not an integer.
+   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if ID is not an integer.
    */
   clearInterval(id: number): void;
 
