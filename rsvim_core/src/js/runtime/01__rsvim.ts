@@ -109,7 +109,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if the `bufId` parameter is not an integer, or [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if failed to write buffer contents to file system.
+   * @throws Throws {@link !TypeError} if the `bufId` parameter is not an integer, or {@link !Error} if failed to write buffer contents to file system.
    *
    * @example
    * ```javascript
@@ -171,7 +171,7 @@ export interface RsvimCmd {
    * @param {message} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
    *
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if no parameter provided, or the parameter is `null` or `undefined`.
+   * @throws Throws {@link !TypeError} if no parameter provided, or the parameter is `null` or `undefined`.
    *
    * @example
    * ```javascript
