@@ -102,6 +102,51 @@ export interface GlobalThis {
 
   function setTimeout(
     callback: (...args: any[]) => void,
+    delay?: number,
+    ...args: any[]
+  ): number {
+    if (typeof delay !== "number") {
+      throw new TypeError(
+        `TypeError: "setTimeout" callback must be a function, but found ${typeof callback}`,
+      );
+    }
+
+    // Coalesce to number or NaN.
+    delay *= 1;
+
+    // Check delay's boundaries.
+    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
+      delay = 1;
+    }
+
+    // Check if callback is a valid function.
+    if (typeof callback !== "function") {
+      throw new Error(
+        `"setTimeout" callback parameter must be a function, but found ${callback} (${typeof callback})`,
+      );
+    }
+
+    // Pin down the correct ID value.
+    const id = nextTimerId++;
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    const timer = __InternalRsvimGlobalObject.global_create_timer(
+      () => {
+        callback(...args);
+        activeTimers.delete(id);
+      },
+      delay,
+      false,
+    );
+
+    // Update `activeTimers` map.
+    activeTimers.set(id, timer);
+
+    return id;
+  }
+
+  function setInterval(
+    callback: (...args: any[]) => void,
     delay: number,
     ...args: any[]
   ): number {
