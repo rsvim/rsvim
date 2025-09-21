@@ -431,7 +431,7 @@ export interface RsvimOpt {
    * Set the _tab-stop_ option.
    *
    * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !TypeError} if value is not a positive integer that between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !Error} if not a positive integer between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -564,11 +564,18 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
+    if (typeof value !== "number") {
       throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+        `"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`,
       );
     }
+
+    if (value < 1 || value > 255) {
+      throw new Error(
+        `"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`,
+      );
+    }
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
