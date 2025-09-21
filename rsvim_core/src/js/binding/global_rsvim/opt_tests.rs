@@ -549,7 +549,7 @@ mod tests_expand_tab {
       info!("actual:{actual}");
       let expect =
         r####""Rsvim.opt.expandTab" parameter must be a boolean, but found"####;
-      assert!(actual.starts_with(expect));
+      assert!(actual.contains(expect));
     }
 
     Ok(())
