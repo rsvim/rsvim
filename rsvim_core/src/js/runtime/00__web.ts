@@ -15,7 +15,7 @@ export interface GlobalThis {
    * Cancel a repeated timer previously established by calling {@link setInterval}.
    *
    * @param {number} id - The ID (integer) which identifies the schedule.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if ID is not an integer.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
    */
   clearInterval(id: number): void;
 
@@ -23,7 +23,7 @@ export interface GlobalThis {
    * Cancel a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if ID is not an integer.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
    */
   clearTimeout(id: number): void;
 
@@ -34,7 +34,7 @@ export interface GlobalThis {
    * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
    */
   setInterval(
     callback: (...args: any[]) => void,
@@ -49,7 +49,7 @@ export interface GlobalThis {
    * @param {number} delay - The milliseconds that the timer should wait before the function is executed. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
    */
   setTimeout(
     callback: (...args: any[]) => void,
