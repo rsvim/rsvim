@@ -394,7 +394,7 @@ export interface RsvimOpt {
    *
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !Error} if value is not between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -549,11 +549,18 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
+    if (typeof value !== "number") {
+      throw new TypeError(
+        `"Rsvim.opt.shiftWidth" parameter must be an integer, but found ${typeof value}`,
+      );
+    }
+
+    if (value < 1 || value > 255) {
       throw new Error(
         `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
       );
     }
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
