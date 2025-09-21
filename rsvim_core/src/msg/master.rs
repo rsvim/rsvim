@@ -41,6 +41,8 @@ pub struct PrintReq {
 pub struct TimeoutReq {
   pub timer_id: JsTimerId,
   pub expire_at: Instant,
+  pub delay: u64,
+  pub repeated: bool,
 }
 
 #[derive(Debug)]
