@@ -1,5 +1,6 @@
 //! ECMAScript (ES) module, i.e. the module specified by keyword `import`.
 
+use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
@@ -307,8 +308,10 @@ impl JsFuture for EsModuleFuture {
             state.pending_futures.insert(0, Box::new(fut));
           }
         };
+        let task_id = js::next_task_id();
         pending::create_import_loader(
           &mut state,
+          task_id,
           &specifier,
           Box::new(loader_cb),
         );

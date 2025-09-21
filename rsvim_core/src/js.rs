@@ -692,6 +692,7 @@ pub mod boost {
                 let mut state = state_rc.borrow_mut();
                 pending::create_timer(
                   &mut state,
+                  resp.timer_id,
                   resp.delay,
                   resp.repeated,
                   timer_cb,

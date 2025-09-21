@@ -1,5 +1,6 @@
 //! Timeout APIs.
 
+use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::pending;
@@ -81,8 +82,8 @@ pub fn set_timeout(
   };
 
   let mut state = state_rc.borrow_mut();
-  let timer_id =
-    pending::create_timer(&mut state, delay, false, Box::new(timer_cb));
+  let timer_id = js::next_timer_id();
+  pending::create_timer(&mut state, timer_id, delay, false, Box::new(timer_cb));
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
   trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, delay);
 }
