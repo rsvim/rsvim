@@ -40,7 +40,7 @@ impl JsFuture for TimeoutFuture {
   }
 }
 
-/// Javascript `setTimeout` API.
+/// Javascript `setTimeout`/`setInterval` API.
 pub fn create_timer(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
@@ -99,7 +99,7 @@ pub fn create_timer(
   );
 }
 
-/// Javascript `clearTimeout` API.
+/// Javascript `clearTimeout`/`clearInterval` API.
 pub fn clear_timer(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
