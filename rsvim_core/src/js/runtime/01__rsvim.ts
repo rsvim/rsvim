@@ -506,7 +506,7 @@ class RsvimOptImpl implements RsvimOpt {
   set fileEncoding(value: FileEncodingOption) {
     if (value !== "utf-8") {
       throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter is invalid, found ${typeof value}`,
+        `"Rsvim.opt.fileEncoding" parameter is invalid: ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
