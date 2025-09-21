@@ -520,9 +520,7 @@ class RsvimOptImpl implements RsvimOpt {
 
   set fileFormat(value: FileFormatOption) {
     if (value !== "dos" && value !== "unix" && value !== "mac") {
-      throw new Error(
-        `"Rsvim.opt.fileFormat" parameter is invalid: ${typeof value}`,
-      );
+      throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
