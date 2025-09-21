@@ -182,7 +182,7 @@ export interface RsvimCmd {
 }
 
 class RsvimCmdImpl implements RsvimCmd {
-  echo(message: string): void {
+  echo(message: any): void {
     if (message === undefined || message === null) {
       throw new TypeError(
         '"Rsvim.cmd.echo" message cannot be undefined or null',
