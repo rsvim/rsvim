@@ -3,7 +3,6 @@
 use crate::js::JsRuntimeState;
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
-use crate::js::next_task_id;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
