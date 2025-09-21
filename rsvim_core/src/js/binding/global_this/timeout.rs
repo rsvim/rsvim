@@ -52,7 +52,7 @@ pub fn set_timeout(
   let callback = Rc::new(v8::Global::new(scope, callback));
 
   // Get timer's expiration time in millis.
-  let millis = args.get(1).int32_value(scope).unwrap() as u64;
+  let delay = args.get(1).int32_value(scope).unwrap() as u64;
 
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
@@ -71,7 +71,6 @@ pub fn set_timeout(
   let params = Rc::new(params);
 
   // Return timeout's internal id.
-  let expire_at = Instant::now() + Duration::from_millis(millis);
   let timer_cb = {
     let state_rc = state_rc.clone();
     move || {
@@ -86,9 +85,9 @@ pub fn set_timeout(
 
   let mut state = state_rc.borrow_mut();
   let timer_id =
-    pending::create_timer(&mut state, expire_at, Box::new(timer_cb));
+    pending::create_timer(&mut state, delay, false, Box::new(timer_cb));
   rv.set(v8::Integer::new(scope, timer_id as i32).into());
-  trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, millis);
+  trace!("|set_timeout| timer_id:{:?}, millis:{:?}", timer_id, delay);
 }
 
 /// Javascript `clearTimeout` API.
