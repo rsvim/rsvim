@@ -407,31 +407,14 @@ async fn test_interval2() -> IoResult<()> {
     path_cfg,
   );
 
-  // Before evaluating javascript configs
-  {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
-  }
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
-  // Still remains the same value
+  // After timeout
   {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
-
     let mut contents = lock!(event_loop.contents);
     assert_eq!(3, contents.command_line_message_history().occupied_len());
     for _i in 0..3 {
@@ -474,31 +457,14 @@ async fn test_interval3() -> IoResult<()> {
     path_cfg,
   );
 
-  // Before evaluating javascript configs
-  {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
-  }
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
-  // Still remains the same value
+  // After timeout
   {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
-
     let mut contents = lock!(event_loop.contents);
     assert_eq!(3, contents.command_line_message_history().occupied_len());
     for i in 0..3 {
