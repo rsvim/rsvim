@@ -109,7 +109,7 @@ export interface GlobalThis {
       delay = 1;
     } else if (typeof delay !== "number") {
       throw new TypeError(
-        `TypeError: "setTimeout" callback must be a function, but found ${typeof callback}`,
+        `"setTimeout" delay must be a number, but found ${typeof delay}`,
       );
     }
 
