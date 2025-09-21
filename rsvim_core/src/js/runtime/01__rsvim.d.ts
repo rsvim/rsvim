@@ -10,7 +10,7 @@ export interface RsvimBuf {
     writeSync(bufId: number): number;
 }
 export interface RsvimCmd {
-    echo(message: string): void;
+    echo(message: any): void;
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
