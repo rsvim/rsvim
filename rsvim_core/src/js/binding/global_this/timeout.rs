@@ -2,8 +2,6 @@
 
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::JsRuntimeStateRc;
-use crate::js::JsTimerId;
 use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
