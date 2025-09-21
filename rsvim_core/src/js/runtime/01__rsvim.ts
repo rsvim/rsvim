@@ -109,7 +109,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws {@link !Error} if failed to write buffer contents to file system.
+   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if failed to write buffer contents to file system.
    *
    * @example
    * ```javascript
@@ -171,7 +171,7 @@ export interface RsvimCmd {
    * @param {message} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
    *
-   * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
+   * @throws Throws [TypeError](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypeError) if no parameter provided, or the parameter is `null` or `undefined`.
    *
    * @example
    * ```javascript
@@ -184,8 +184,8 @@ export interface RsvimCmd {
 class RsvimCmdImpl implements RsvimCmd {
   echo(message: string): void {
     if (message === undefined || message === null) {
-      throw new Error(
-        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+      throw new TypeError(
+        '"Rsvim.cmd.echo" message cannot be undefined or null',
       );
     }
     // @ts-ignore Ignore warning
