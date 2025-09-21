@@ -124,7 +124,7 @@ export interface GlobalThis {
     // Check if callback is a valid function.
     if (typeof callback !== "function") {
       throw new Error(
-        `"setTimeout" callback parameter must be a function, but found ${callback} (${typeof callback})`,
+        `"setTimeout" callback must be a function, but found ${typeof callback}`,
       );
     }
 
