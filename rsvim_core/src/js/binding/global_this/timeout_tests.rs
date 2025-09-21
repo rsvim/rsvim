@@ -312,3 +312,216 @@ async fn test_timeout5() -> IoResult<()> {
 
   Ok(())
 }
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_interval1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let src: &str = r#"
+  var a = 1;
+  const timerId = setInterval(() => {
+    Rsvim.cmd.echo(a);
+    a += 1;
+    if (a > 3) {
+      clearInterval(timerId);
+    }
+  });
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
+
+  // Before evaluating javascript configs
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+  }
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After timeout, it changes to new value
+  {
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert!(!global_local_options.wrap());
+    assert!(global_local_options.line_break());
+
+    let mut contents = lock!(event_loop.contents);
+    assert_eq!(4, contents.command_line_message_history().occupied_len());
+    let actual1 = contents.command_line_message_history_mut().try_pop();
+    assert!(actual1.is_some());
+    let actual1 = actual1.unwrap();
+    assert_eq!(actual1, "1");
+
+    let actual2 = contents.command_line_message_history_mut().try_pop();
+    assert!(actual2.is_some());
+    let actual2 = actual2.unwrap();
+    assert_eq!(actual2, "2");
+
+    let actual3 = contents.command_line_message_history_mut().try_pop();
+    assert!(actual3.is_some());
+    let actual3 = actual3.unwrap();
+    assert_eq!(actual3, "3");
+
+    let actual4 = contents.command_line_message_history_mut().try_pop();
+    assert!(actual4.is_some());
+    let actual4 = actual4.unwrap();
+    assert_eq!(actual4, "4");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_interval2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
+  let src: &str = r#"
+  const timerId = setInterval(() => {
+    Rsvim.cmd.echo("a");
+  }, 3);
+
+  setTimeout(() => {
+    clearInterval(timerId);
+  }, 10);
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
+
+  // Before evaluating javascript configs
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+  }
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // Still remains the same value
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+
+    let mut contents = lock!(event_loop.contents);
+    assert_eq!(3, contents.command_line_message_history().occupied_len());
+    for i in 0..3 {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert_eq!(actual, "a");
+    }
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_interval3() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
+  let src: &str = r#"
+  const timerId = setInterval(() => {
+    Rsvim.cmd.echo("a");
+  }, 3);
+
+  setTimeout(() => {
+    clearTimeout(timerId);
+  }, 10);
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop = make_event_loop(
+    terminal_cols,
+    terminal_rows,
+    CliOptions::empty(),
+    path_cfg,
+  );
+
+  // Before evaluating javascript configs
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+  }
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // Still remains the same value
+  {
+    use crate::defaults;
+
+    let tree = lock!(event_loop.tree);
+    let global_local_options = tree.global_local_options();
+    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+
+    let mut contents = lock!(event_loop.contents);
+    assert_eq!(3, contents.command_line_message_history().occupied_len());
+    for i in 0..3 {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert_eq!(actual, "a");
+    }
+  }
+
+  Ok(())
+}
