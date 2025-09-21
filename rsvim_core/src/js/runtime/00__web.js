@@ -11,6 +11,27 @@
             activeTimers.delete(id);
         }
     }
+    function setInterval(callback, delay, ...args) {
+        if (delay === undefined || delay === null) {
+            delay = 1;
+        }
+        else if (typeof delay !== "number") {
+            throw new TypeError(`"setInterval" delay must be a number, but found ${typeof delay}`);
+        }
+        delay *= 1;
+        if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
+            delay = 1;
+        }
+        if (typeof callback !== "function") {
+            throw new Error(`"setTimeout" callback must be a function, but found ${typeof callback}`);
+        }
+        const id = nextTimerId++;
+        const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
+            callback(...args);
+        }, delay, true);
+        activeTimers.set(id, timer);
+        return id;
+    }
     function clearTimeout(id) {
         if (!Number.isInteger(id)) {
             throw new TypeError(`"clearTimeout" id must be an integer, but found ${typeof id}`);
@@ -42,28 +63,9 @@
         activeTimers.set(id, timer);
         return id;
     }
-    function setInterval(callback, delay, ...args) {
-        if (delay === undefined || delay === null) {
-            delay = 1;
-        }
-        else if (typeof delay !== "number") {
-            throw new TypeError(`"setInterval" delay must be a number, but found ${typeof delay}`);
-        }
-        delay *= 1;
-        if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-            delay = 1;
-        }
-        if (typeof callback !== "function") {
-            throw new Error(`"setTimeout" callback must be a function, but found ${typeof callback}`);
-        }
-        const id = nextTimerId++;
-        const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
-            callback(...args);
-        }, delay, true);
-        activeTimers.set(id, timer);
-        return id;
-    }
     globalThis.clearTimeout = clearTimeout;
     globalThis.setTimeout = setTimeout;
+    globalThis.clearInterval = clearInterval;
+    globalThis.setInterval = setInterval;
 })(globalThis);
 export {};
