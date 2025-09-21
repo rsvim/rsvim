@@ -27,7 +27,6 @@ use crate::buf::BuffersManagerArc;
 use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
-use crate::js::binding::global_this::timeout::create_timeout;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
