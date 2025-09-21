@@ -557,7 +557,7 @@ class RsvimOptImpl implements RsvimOpt {
 
     if (value < 1 || value > 255) {
       throw new Error(
-        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+        `"Rsvim.opt.shiftWidth" parameter must be between [1,255], but found ${value}`,
       );
     }
 
