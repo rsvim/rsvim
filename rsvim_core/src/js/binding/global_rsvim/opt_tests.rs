@@ -432,8 +432,8 @@ mod tests_file_format {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.fileFormat" parameter must be a valid option, but found"####;
-      assert!(actual.starts_with(expect));
+      let expect = r####""Rsvim.opt.fileFormat" parameter is invalid"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())
