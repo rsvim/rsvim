@@ -547,7 +547,8 @@ mod tests_expand_tab {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.expandTab" parameter must be a boolean value, but found"####;
+      let expect =
+        r####""Rsvim.opt.expandTab" parameter must be a boolean, but found"####;
       assert!(actual.starts_with(expect));
     }
 
