@@ -324,7 +324,8 @@ async fn test_interval1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
   var a = 1;
-  const timerId = setInterval(() => {
+  var timerId;
+  timerId = setInterval(() => {
     Rsvim.cmd.echo(a);
     a += 1;
     if (a > 3) {
