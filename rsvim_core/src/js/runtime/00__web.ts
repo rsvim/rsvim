@@ -12,7 +12,7 @@
  */
 export interface GlobalThis {
   /**
-   * Cancel a repeated timer previously established by calling {@link setInterval}.
+   * Cancel a repeated timer previously established by calling {@linkcode setInterval}.
    *
    * @param {number} id - The ID (integer) which identifies the schedule.
    * @throws Throws {@link !TypeError} if ID is not an integer.
@@ -20,7 +20,7 @@ export interface GlobalThis {
   clearInterval(id: number): void;
 
   /**
-   * Cancel a timeout previously established by calling {@link setTimeout}.
+   * Cancel a timeout previously established by calling {@linkcode setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
    * @throws Throws {@link !TypeError} if ID is not an integer.
