@@ -2,13 +2,13 @@
  * The [WinterTC](https://wintertc.org/) compatible web platform APIs.
  *
  * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintertc.org/)
- * @see [MDN | Web APIs](https://developer.mozilla.org/en-US/docs/Web/API)
+ * @see [MDN | Web APIs](https://developer.mozilla.org/docs/Web/API)
  *
  * @packageDocumentation
  */
 
 /**
- * The [globalThis](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
+ * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
 export interface GlobalThis {
   /**
