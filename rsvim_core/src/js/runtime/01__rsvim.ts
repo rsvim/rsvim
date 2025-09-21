@@ -275,7 +275,7 @@ export interface RsvimOpt {
    * Set the _file-encoding_ option.
    *
    * @param {FileEncodingOption} value - The _file-encoding_ option.
-   * @throws Throws {@link !Error} if value is not a valid option.
+   * @throws Throws [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error) if value is invalid.
    *
    * @example
    * ```javascript
@@ -506,7 +506,7 @@ class RsvimOptImpl implements RsvimOpt {
   set fileEncoding(value: FileEncodingOption) {
     if (value !== "utf-8") {
       throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.fileEncoding" parameter is invalid, found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
