@@ -182,10 +182,9 @@ export interface GlobalThis {
     const timer = __InternalRsvimGlobalObject.global_create_timer(
       () => {
         callback(...args);
-        activeTimers.delete(id);
       },
       delay,
-      false,
+      true,
     );
 
     // Update `activeTimers` map.
