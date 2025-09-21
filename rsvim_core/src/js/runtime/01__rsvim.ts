@@ -394,7 +394,7 @@ export interface RsvimOpt {
    *
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !Error} if value is not between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if value is not between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -431,7 +431,7 @@ export interface RsvimOpt {
    * Set the _tab-stop_ option.
    *
    * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !Error} if not a positive integer between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if not a positive integer between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -556,7 +556,7 @@ class RsvimOptImpl implements RsvimOpt {
     }
 
     if (value < 1 || value > 255) {
-      throw new Error(
+      throw new RangeError(
         `"Rsvim.opt.shiftWidth" parameter must be between [1,255], but found ${value}`,
       );
     }
@@ -578,7 +578,7 @@ class RsvimOptImpl implements RsvimOpt {
     }
 
     if (value < 1 || value > 255) {
-      throw new Error(
+      throw new RangeError(
         `"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`,
       );
     }
