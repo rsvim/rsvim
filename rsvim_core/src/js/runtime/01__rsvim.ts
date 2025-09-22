@@ -109,7 +109,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws {@link !Error} if failed to write buffer contents to file system.
+   * @throws Throws {@link !TypeError} if the `bufId` parameter is not an integer, or {@link !Error} if failed to write buffer contents to file system.
    *
    * @example
    * ```javascript
@@ -138,8 +138,8 @@ class RsvimBufImpl implements RsvimBuf {
 
   writeSync(bufId: number): number {
     if (typeof bufId !== "number") {
-      throw new Error(
-        `"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`,
+      throw new TypeError(
+        `"Rsvim.buf.write" bufId must be an integer, but found ${typeof bufId}`,
       );
     }
     // @ts-ignore Ignore warning
@@ -171,21 +171,21 @@ export interface RsvimCmd {
    * @param {message} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
    *
-   * @throws Throws {@link !Error} if no parameter provided, or the parameter is `null` or `undefined`.
+   * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
    *
    * @example
    * ```javascript
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  echo(message: string): void;
+  echo(message: any): void;
 }
 
 class RsvimCmdImpl implements RsvimCmd {
-  echo(message: string): void {
+  echo(message: any): void {
     if (message === undefined || message === null) {
-      throw new Error(
-        '"Rsvim.cmd.echo" message parameter cannot be undefined or null',
+      throw new TypeError(
+        '"Rsvim.cmd.echo" message cannot be undefined or null',
       );
     }
     // @ts-ignore Ignore warning
@@ -239,7 +239,7 @@ export interface RsvimOpt {
    * Set the _expand-tab_ option.
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -275,7 +275,7 @@ export interface RsvimOpt {
    * Set the _file-encoding_ option.
    *
    * @param {FileEncodingOption} value - The _file-encoding_ option.
-   * @throws Throws {@link !Error} if value is not a valid option.
+   * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
    * ```javascript
@@ -323,7 +323,7 @@ export interface RsvimOpt {
    * Set the _file-format_ option.
    *
    * @param {FileFormatOption} value - The _file-format_ option.
-   * @throws Throws {@link !Error} if value is not a valid option.
+   * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
    * ```javascript
@@ -358,7 +358,7 @@ export interface RsvimOpt {
    * Set the _line-break_ option.
    *
    * @param {boolean} value - The _line-break_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -394,7 +394,7 @@ export interface RsvimOpt {
    *
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if value is not between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -431,7 +431,7 @@ export interface RsvimOpt {
    * Set the _tab-stop_ option.
    *
    * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !Error} if value is not a positive integer that between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if not a positive integer between `[1,255]`.
    *
    * @example
    * ```javascript
@@ -471,7 +471,7 @@ export interface RsvimOpt {
    * Set the _wrap_ option.
    *
    * @param {boolean} value - The _wrap_ option.
-   * @throws Throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !TypeError} if value is not a boolean.
    *
    * @example
    * ```javascript
@@ -490,8 +490,8 @@ class RsvimOptImpl implements RsvimOpt {
 
   set expandTab(value: boolean) {
     if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`,
+      throw new TypeError(
+        `"Rsvim.opt.expandTab" parameter must be a boolean, but found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
@@ -506,7 +506,7 @@ class RsvimOptImpl implements RsvimOpt {
   set fileEncoding(value: FileEncodingOption) {
     if (value !== "utf-8") {
       throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`,
       );
     }
     // @ts-ignore Ignore warning
@@ -520,9 +520,7 @@ class RsvimOptImpl implements RsvimOpt {
 
   set fileFormat(value: FileFormatOption) {
     if (value !== "dos" && value !== "unix" && value !== "mac") {
-      throw new Error(
-        `"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`,
-      );
+      throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
     }
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
@@ -535,8 +533,8 @@ class RsvimOptImpl implements RsvimOpt {
 
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
+      throw new TypeError(
+        `"Rsvim.opt.lineBreak" parameter must be a boolean, but found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning
@@ -549,11 +547,18 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
-      throw new Error(
-        `"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+    if (typeof value !== "number") {
+      throw new TypeError(
+        `"Rsvim.opt.shiftWidth" parameter must be an integer, but found ${typeof value}`,
       );
     }
+
+    if (value < 1 || value > 255) {
+      throw new RangeError(
+        `"Rsvim.opt.shiftWidth" parameter must be between [1,255], but found ${value}`,
+      );
+    }
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
@@ -564,11 +569,18 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    if (typeof value !== "number" || value < 1 || value > 255) {
-      throw new Error(
-        `"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`,
+    if (typeof value !== "number") {
+      throw new TypeError(
+        `"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`,
       );
     }
+
+    if (value < 1 || value > 255) {
+      throw new RangeError(
+        `"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`,
+      );
+    }
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
@@ -580,8 +592,8 @@ class RsvimOptImpl implements RsvimOpt {
 
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
-      throw new Error(
-        `"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`,
+      throw new TypeError(
+        `"Rsvim.opt.wrap" parameter must be a boolean, but found ${typeof value}`,
       );
     }
     // @ts-ignore Ignore warning

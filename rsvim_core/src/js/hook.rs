@@ -1,5 +1,6 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
+use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding::set_exception_code;
 use crate::js::binding::throw_type_error;
@@ -280,7 +281,13 @@ pub fn host_import_module_dynamically_cb<'s>(
       state.pending_futures.insert(0, Box::new(fut));
     }
   };
-  pending::create_import_loader(&mut state, &specifier, Box::new(loader_cb));
+  let task_id = js::next_task_id();
+  pending::create_import_loader(
+    &mut state,
+    task_id,
+    &specifier,
+    Box::new(loader_cb),
+  );
 
   Some(promise)
 }

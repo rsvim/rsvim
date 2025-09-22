@@ -3,8 +3,6 @@
 use crate::js::JsRuntimeState;
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
-use crate::js::next_task_id;
-use crate::js::next_timer_id;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
@@ -15,19 +13,22 @@ pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;
 
 pub fn create_timer(
   state: &mut JsRuntimeState,
-  expire_at: Instant,
+  timer_id: JsTimerId,
+  delay: u64,
+  repeated: bool,
   cb: TimerCallback,
-) -> JsTimerId {
-  let timer_id = next_timer_id();
+) {
   state.pending_timers.insert(timer_id, cb);
+  let start_at = Instant::now();
   msg::sync_send_to_master(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
-      expire_at,
+      start_at,
+      delay,
+      repeated,
     }),
   );
-  timer_id
 }
 
 pub fn remove_timer(
@@ -39,10 +40,10 @@ pub fn remove_timer(
 
 pub fn create_import_loader(
   state: &mut JsRuntimeState,
+  task_id: JsTaskId,
   specifier: &str,
   cb: TaskCallback,
-) -> JsTaskId {
-  let task_id = next_task_id();
+) {
   state.pending_import_loaders.insert(task_id, cb);
   msg::sync_send_to_master(
     state.master_tx.clone(),
@@ -51,5 +52,4 @@ pub fn create_import_loader(
       specifier: specifier.to_string(),
     }),
   );
-  task_id
 }

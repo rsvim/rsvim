@@ -13,7 +13,7 @@ class RsvimBufImpl {
     }
     writeSync(bufId) {
         if (typeof bufId !== "number") {
-            throw new Error(`"Rsvim.buf.write" bufId parameter must be a integer value, but found ${bufId} (${typeof bufId})`);
+            throw new TypeError(`"Rsvim.buf.write" bufId must be an integer, but found ${typeof bufId}`);
         }
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
@@ -21,7 +21,7 @@ class RsvimBufImpl {
 class RsvimCmdImpl {
     echo(message) {
         if (message === undefined || message === null) {
-            throw new Error('"Rsvim.cmd.echo" message parameter cannot be undefined or null');
+            throw new TypeError('"Rsvim.cmd.echo" message cannot be undefined or null');
         }
         __InternalRsvimGlobalObject.cmd_echo(message);
     }
@@ -32,7 +32,7 @@ class RsvimOptImpl {
     }
     set expandTab(value) {
         if (typeof value !== "boolean") {
-            throw new Error(`"Rsvim.opt.expandTab" parameter must be a boolean value, but found ${value} (${typeof value})`);
+            throw new TypeError(`"Rsvim.opt.expandTab" parameter must be a boolean, but found ${typeof value}`);
         }
         __InternalRsvimGlobalObject.opt_set_expand_tab(value);
     }
@@ -41,7 +41,7 @@ class RsvimOptImpl {
     }
     set fileEncoding(value) {
         if (value !== "utf-8") {
-            throw new Error(`"Rsvim.opt.fileEncoding" parameter must be a valid option, but found ${value} (${typeof value})`);
+            throw new Error(`"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_file_encoding(value);
     }
@@ -50,7 +50,7 @@ class RsvimOptImpl {
     }
     set fileFormat(value) {
         if (value !== "dos" && value !== "unix" && value !== "mac") {
-            throw new Error(`"Rsvim.opt.fileFormat" parameter must be a valid option, but found ${value} (${typeof value})`);
+            throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_file_format(value);
     }
@@ -59,7 +59,7 @@ class RsvimOptImpl {
     }
     set lineBreak(value) {
         if (typeof value !== "boolean") {
-            throw new Error(`"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`);
+            throw new TypeError(`"Rsvim.opt.lineBreak" parameter must be a boolean, but found ${typeof value}`);
         }
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
@@ -67,8 +67,11 @@ class RsvimOptImpl {
         return __InternalRsvimGlobalObject.opt_get_shift_width();
     }
     set shiftWidth(value) {
-        if (typeof value !== "number" || value < 1 || value > 255) {
-            throw new Error(`"Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`);
+        if (typeof value !== "number") {
+            throw new TypeError(`"Rsvim.opt.shiftWidth" parameter must be an integer, but found ${typeof value}`);
+        }
+        if (value < 1 || value > 255) {
+            throw new RangeError(`"Rsvim.opt.shiftWidth" parameter must be between [1,255], but found ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_shift_width(value);
     }
@@ -76,8 +79,11 @@ class RsvimOptImpl {
         return __InternalRsvimGlobalObject.opt_get_tab_stop();
     }
     set tabStop(value) {
-        if (typeof value !== "number" || value < 1 || value > 255) {
-            throw new Error(`"Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found ${value} (${typeof value})`);
+        if (typeof value !== "number") {
+            throw new TypeError(`"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`);
+        }
+        if (value < 1 || value > 255) {
+            throw new RangeError(`"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`);
         }
         __InternalRsvimGlobalObject.opt_set_tab_stop(value);
     }
@@ -86,7 +92,7 @@ class RsvimOptImpl {
     }
     set wrap(value) {
         if (typeof value !== "boolean") {
-            throw new Error(`"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`);
+            throw new TypeError(`"Rsvim.opt.wrap" parameter must be a boolean, but found ${typeof value}`);
         }
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }

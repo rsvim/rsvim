@@ -167,8 +167,8 @@ mod tests_tab_stop {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.tabStop" parameter must be a positive integer between [1,255], but found"####;
-      assert!(actual.starts_with(expect));
+      let expect = r####""Rsvim.opt.tabStop" parameter must be between [1,255], but found"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())
@@ -301,8 +301,8 @@ mod tests_file_encoding {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.fileEncoding" parameter must be a valid option, but found"####;
-      assert!(actual.starts_with(expect));
+      let expect = r####""Rsvim.opt.fileEncoding" parameter is invalid"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())
@@ -432,8 +432,8 @@ mod tests_file_format {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.fileFormat" parameter must be a valid option, but found"####;
-      assert!(actual.starts_with(expect));
+      let expect = r####""Rsvim.opt.fileFormat" parameter is invalid"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())
@@ -547,8 +547,9 @@ mod tests_expand_tab {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.expandTab" parameter must be a boolean value, but found"####;
-      assert!(actual.starts_with(expect));
+      let expect =
+        r####""Rsvim.opt.expandTab" parameter must be a boolean, but found"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())
@@ -671,8 +672,8 @@ mod tests_shift_width {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####"Uncaught Error: "Rsvim.opt.shiftWidth" parameter must be a positive integer between [1,255], but found"####;
-      assert!(actual.starts_with(expect));
+      let expect = r####""Rsvim.opt.shiftWidth" parameter must be between [1,255], but found"####;
+      assert!(actual.contains(expect));
     }
 
     Ok(())

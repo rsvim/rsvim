@@ -688,6 +688,16 @@ pub mod boost {
               state_rc.borrow_mut().pending_timers.remove(&resp.timer_id);
             if let Some(mut timer_cb) = maybe_timer_cb {
               timer_cb();
+              if resp.repeated {
+                let mut state = state_rc.borrow_mut();
+                pending::create_timer(
+                  &mut state,
+                  resp.timer_id,
+                  resp.delay,
+                  resp.repeated,
+                  timer_cb,
+                );
+              }
             }
             // Otherwise the 'timer_cb' is already been removed by the
             // `clear_timeout` API.
