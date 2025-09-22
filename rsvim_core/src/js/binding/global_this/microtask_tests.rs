@@ -7,7 +7,7 @@ use std::time::Duration;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn test_timeout1() -> IoResult<()> {
+async fn test_queue_microtask1() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;
@@ -15,11 +15,9 @@ async fn test_timeout1() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  // Set timeout to update global options.
-  const timerId = setTimeout(() => {
-    Rsvim.opt.wrap = false;
-    Rsvim.opt.lineBreak = true;
-  }, 1);
+  queueMicrotask(() => {
+    Rsvim.cmd.echo(1);
+  });
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -32,28 +30,21 @@ async fn test_timeout1() -> IoResult<()> {
     path_cfg,
   );
 
-  // Before evaluating javascript configs
-  {
-    use crate::defaults;
-
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
-  }
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
-  // After timeout, it changes to new value
+  // After
   {
-    let tree = lock!(event_loop.tree);
-    let global_local_options = tree.global_local_options();
-    assert!(!global_local_options.wrap());
-    assert!(global_local_options.line_break());
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert!(n == 1);
+    let actual = contents.command_line_message_history_mut().try_pop();
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "1");
   }
 
   Ok(())
