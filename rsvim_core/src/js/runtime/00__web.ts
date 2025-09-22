@@ -40,7 +40,7 @@ export interface GlobalThis {
   /**
    * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
    *
-   * @param {any} error - Anything to be thrown. This API will not throw any exception, if `error` is not provided, then it will be set to "unknown".
+   * @param {any} error - Anything to be thrown.
    */
   reportError(error: any): void;
 
