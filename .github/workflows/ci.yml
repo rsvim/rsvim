@@ -37,8 +37,6 @@ jobs:
           tsc
           git diff --exit-code HEAD
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: "$HOME/.cache/sccache"
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
