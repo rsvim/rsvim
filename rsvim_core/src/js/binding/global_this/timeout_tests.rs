@@ -1,5 +1,3 @@
-use ringbuf::traits::Consumer;
-
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
@@ -375,12 +373,15 @@ async fn test_interval2() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let src: &str = r#"
+  var n = 0;
   const timerId = setInterval(() => {
     Rsvim.cmd.echo("a");
+    n += 1;
   }, 3);
 
   setTimeout(() => {
     clearInterval(timerId);
+    Rsvim.cmd.echo(n);
   }, 20);
 "#;
 
@@ -404,12 +405,16 @@ async fn test_interval2() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert!(n >= 1);
-    for _i in 0..n {
+    assert!(n >= 2);
+    for i in 0..n {
       let actual = contents.command_line_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert_eq!(actual, "a");
+      if i < n - 1 {
+        assert_eq!(actual, "a");
+      } else {
+        assert_eq!(actual, i.to_string());
+      }
     }
   }
 
@@ -426,12 +431,15 @@ async fn test_interval3() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
   let src: &str = r#"
+  var n = 0;
   const timerId = setInterval(() => {
     Rsvim.cmd.echo("a");
+    n += 1;
   }, 3);
 
   setTimeout(() => {
     clearTimeout(timerId);
+    Rsvim.cmd.echo(n);
   }, 20);
 "#;
 
@@ -455,12 +463,16 @@ async fn test_interval3() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert!(n >= 1);
-    for _i in 0..n {
+    assert!(n >= 2);
+    for i in 0..n {
       let actual = contents.command_line_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert_eq!(actual, "a");
+      if i < n - 1 {
+        assert_eq!(actual, "a");
+      } else {
+        assert_eq!(actual, i.to_string());
+      }
     }
   }
 

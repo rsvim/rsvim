@@ -37,7 +37,6 @@ use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
 use command::ExCommandsManagerArc;
-use compact_str::ToCompactString;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
@@ -628,39 +627,6 @@ pub mod boost {
     // pub fn poll_inspect_session(&mut self) {
     //   if let Some(inspector) = self.inspector.as_mut() {
     //     inspector.borrow_mut().poll_session();
-    //   }
-    // }
-
-    // /// Runs the event-loop until no more pending events exists.
-    // pub fn run_event_loop(&mut self) {
-    //   // Check for pending devtools messages.
-    //   self.poll_inspect_session();
-    //   // Run callbacks/promises from next-tick and micro-task queues.
-    //   run_next_tick_callbacks(&mut self.handle_scope());
-    //
-    //   while self.event_loop.has_pending_events()
-    //     || self.has_promise_rejections()
-    //     || self.isolate.has_pending_background_tasks()
-    //     || self.has_pending_imports()
-    //     || self.has_next_tick_callbacks()
-    //   {
-    //     // Check for pending devtools messages.
-    //     self.poll_inspect_session();
-    //     // Tick the event-loop one cycle.
-    //     self.tick_event_loop();
-    //
-    //     // Report any unhandled promise rejections.
-    //     if let Some(error) = check_exceptions(&mut self.handle_scope()) {
-    //       report_and_exit(error);
-    //     }
-    //   }
-    //
-    //   // We can now notify debugger that the program has finished running
-    //   // and we're ready to exit the process.
-    //   if let Some(inspector) = self.inspector() {
-    //     let context = self.context();
-    //     let scope = &mut self.handle_scope();
-    //     inspector.borrow_mut().context_destroyed(scope, context);
     //   }
     // }
 

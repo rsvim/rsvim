@@ -148,7 +148,7 @@ impl PathConfig {
 
   /// User config entry path, it can be either one of following files:
   ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}` or `$HOME/.config/rsvim/rsvim.{ts.js}`.
+  /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}`
   /// 2. `$HOME/.rsvim/rsvim.{ts.js}`
   /// 3. `$HOME/.rsvim.{ts.js}`
   ///
@@ -163,7 +163,7 @@ impl PathConfig {
 
   /// User config home directory, it can be either one of following directories:
   ///
-  /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
+  /// 1. `$XDG_CONFIG_HOME/rsvim/`
   /// 2. `$HOME/.rsvim/`
   pub fn config_home(&self) -> &Path {
     self.config_home.as_path()

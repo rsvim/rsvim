@@ -681,6 +681,8 @@ impl EventLoop {
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> IoResult<()> {
+    self.js_runtime.tick_event_loop();
+
     let mut reader = EventStream::new();
     loop {
       let mut master_messages: Vec<MasterMessage> = vec![];
@@ -725,6 +727,8 @@ impl EventLoop {
     &mut self,
     mut reader: MockEventReader,
   ) -> IoResult<()> {
+    self.js_runtime.tick_event_loop();
+
     loop {
       let mut master_messages: Vec<MasterMessage> = vec![];
       let mut js_messages: Vec<JsMessage> = vec![];
@@ -768,6 +772,8 @@ impl EventLoop {
     &mut self,
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
+    self.js_runtime.tick_event_loop();
+
     loop {
       let mut master_messages: Vec<MasterMessage> = vec![];
       let mut js_messages: Vec<JsMessage> = vec![];

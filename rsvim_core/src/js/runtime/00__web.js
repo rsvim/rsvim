@@ -63,9 +63,27 @@
         activeTimers.set(id, timer);
         return id;
     }
+    function queueMicrotask(callback) {
+        if (typeof callback !== "function") {
+            throw new TypeError(`The "callback" argument must be a function.`);
+        }
+        __InternalRsvimGlobalObject.global_queue_microtask(() => {
+            try {
+                callback();
+            }
+            catch (err) {
+                reportError(err);
+            }
+        });
+    }
+    function reportError(error) {
+        __InternalRsvimGlobalObject.global_report_error(error);
+    }
     globalThis.clearTimeout = clearTimeout;
     globalThis.setTimeout = setTimeout;
     globalThis.clearInterval = clearInterval;
     globalThis.setInterval = setInterval;
+    globalThis.queueMicrotask = queueMicrotask;
+    globalThis.reportError = reportError;
 })(globalThis);
 export {};

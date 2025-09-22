@@ -45,6 +45,8 @@ jobs:
           rustup component add --toolchain stable rust-src clippy rustfmt
       - name: Rustfmt
         run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --all-targets
       - uses: taiki-e/install-action@cargo-binstall
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -115,13 +117,6 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
-      - name: Clippy
-        run: |
-          cargo clippy --all-targets
-      - name: Build
-        run: |
-          cargo build --release
-          cargo build --profile nightly
       - name: Test
         run: |
           cargo test --workspace
@@ -137,3 +132,26 @@ jobs:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        rust_version: [1.85.0, stable, beta]
+    env:
+      RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update ${{ matrix.rust_version }}
+          rustup default ${{ matrix.rust_version }}
+          rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
+      - uses: actions/checkout@v5
+      - name: Build Release
+        run: |
+          cargo build --release
+      - name: Build Nightly
+        run: cargo build --profile nightly
