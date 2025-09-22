@@ -35,6 +35,11 @@ export interface GlobalThis {
   queueMicrotask(callback: () => void): void;
 
   /**
+   * Dispatch an uncaught exception.
+   */
+  reportError(error: any): void;
+
+  /**
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {Function} callback - A function to be executed every `delay` milliseconds.
