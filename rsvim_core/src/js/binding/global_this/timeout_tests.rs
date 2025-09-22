@@ -381,7 +381,7 @@ async fn test_interval2() -> IoResult<()> {
 
   setTimeout(() => {
     clearInterval(timerId);
-  }, 10);
+  }, 20);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -432,7 +432,7 @@ async fn test_interval3() -> IoResult<()> {
 
   setTimeout(() => {
     clearTimeout(timerId);
-  }, 10);
+  }, 20);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
