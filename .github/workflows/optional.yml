@@ -17,7 +17,6 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
-  SCCACHE_DIR: .cache/sccache
 jobs:
   check:
     name: Check
@@ -45,8 +44,6 @@ jobs:
       SCCACHE_GHA_ENABLED: "false"
     steps:
       - uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: $SCCACHE_DIR
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
@@ -58,7 +55,9 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Build 'current' branch
-        run: cargo build --release
+        run: |
+          echo "SCCACHE_DIR:$SCCACHE_DIR"
+          cargo build --release
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
       - name: Run Bloaty on 'current' branch
