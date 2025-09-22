@@ -35,7 +35,7 @@ export interface GlobalThis {
   queueMicrotask(callback: () => void): void;
 
   /**
-   * Dispatch an uncaught exception. Similar to `setTimeout(() => {throw error;}, 0);`.
+   * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
    */
   reportError(error: Error): void;
 
