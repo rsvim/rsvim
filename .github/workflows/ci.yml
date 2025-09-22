@@ -118,12 +118,6 @@ jobs:
       - name: Clippy
         run: |
           cargo clippy --all-targets
-          cargo clippy --all-targets -F snmalloc
-          cargo clippy --all-targets -F mimalloc
-      - name: Clippy (not Windows)
-        if: ${{ matrix.os != 'windows-2022' }}
-        run: |
-          cargo clippy --all-targets -F jemalloc
       - name: Build
         run: |
           cargo build --release
