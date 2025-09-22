@@ -1,6 +1,6 @@
 //! Global constants.
 
-use regex::Regex;
+// use regex::Regex;
 use std::sync::LazyLock;
 use std::time::Duration;
 
