@@ -365,6 +365,8 @@ pub mod boost {
     pub startup_moment: Instant,
     /// Specifies the timestamp which the current process began in Unix time.
     pub time_origin: u128,
+    // /// Holds callbacks scheduled by nextTick.
+    // pub next_tick_queue: NextTickQueue,
     /// Stores and manages uncaught exceptions.
     pub exceptions: ExceptionState,
     /// Runtime options.
@@ -468,6 +470,7 @@ pub mod boost {
         pending_futures: vec![],
         startup_moment,
         time_origin,
+        // next_tick_queue: Vec::new(),
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
@@ -543,6 +546,7 @@ pub mod boost {
         pending_futures: vec![],
         startup_moment,
         time_origin,
+        // next_tick_queue: Vec::new(),
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
@@ -903,6 +907,11 @@ pub mod boost {
       let state = state_rc.borrow();
       state.pending_import_loaders.len()
     }
+
+    // /// Returns if we have scheduled any next-tick callbacks.
+    // pub fn has_next_tick_callbacks(&mut self) -> bool {
+    //   !self.get_state().borrow().next_tick_queue.is_empty()
+    // }
   }
 
   // State management specific methods.
