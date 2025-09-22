@@ -244,4 +244,6 @@ export interface GlobalThis {
   globalThis.setTimeout = setTimeout;
   globalThis.clearInterval = clearInterval;
   globalThis.setInterval = setInterval;
+  globalThis.queueMicrotask = queueMicrotask;
+  globalThis.reportError = reportError;
 })(globalThis as unknown as GlobalThis);
