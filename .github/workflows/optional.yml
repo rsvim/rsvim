@@ -69,7 +69,9 @@ jobs:
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
-        run: cargo build --release
+        run: |
+          echo "SCCACHE_DIR:$SCCACHE_DIR"
+          cargo build --release
       - name: Run Bloaty to compare both output files
         id: bloaty-comparison
         uses: carlosperate/bloaty-action@v1
