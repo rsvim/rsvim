@@ -7,7 +7,7 @@ use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
 use compact_str::ToCompactString;
 
-fn report_error(
+pub fn report_error(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
@@ -26,7 +26,7 @@ fn report_error(
 }
 
 // This method queues a microtask to invoke callback.
-fn queue_microtask(
+pub fn queue_microtask(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,

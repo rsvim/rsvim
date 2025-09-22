@@ -75,6 +75,18 @@ pub fn create_new_context<'s>(
       "global_clear_timer",
       global_this::timeout::clear_timer,
     );
+    set_function_to(
+      scope,
+      vim,
+      "global_queue_microtask",
+      global_this::microtask::queue_microtask,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_report_error",
+      global_this::microtask::report_error,
+    );
   }
 
   // For `Rsvim.buf`
