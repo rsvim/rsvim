@@ -1,11 +1,11 @@
 //! Microtask Queue APIs.
 
 use crate::js;
-use crate::js::JsFuture;
 use crate::js::JsRuntime;
-use crate::js::pending;
 use crate::prelude::*;
-use std::rc::Rc;
+use crate::report_js_error;
+use crate::state::ops::cmdline_ops;
+use compact_str::ToCompactString;
 
 fn report_error(
   scope: &mut v8::HandleScope,
@@ -19,8 +19,9 @@ fn report_error(
   state.exceptions.capture_exception(exception);
   drop(state);
 
-  if let Some(error) = check_exceptions(scope) {
-    report_and_exit(error);
+  if let Some(error) = js::check_exceptions(scope) {
+    let state = state_rc.borrow();
+    report_js_error!(state, error);
   }
 }
 
