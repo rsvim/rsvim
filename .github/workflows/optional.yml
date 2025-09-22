@@ -56,7 +56,6 @@ jobs:
           fetch-depth: '0'
       - name: Build 'current' branch
         run: |
-          echo "SCCACHE_DIR:$SCCACHE_DIR"
           cargo build --release
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
@@ -70,7 +69,6 @@ jobs:
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
         run: |
-          echo "SCCACHE_DIR:$SCCACHE_DIR"
           cargo build --release
       - name: Run Bloaty to compare both output files
         id: bloaty-comparison
