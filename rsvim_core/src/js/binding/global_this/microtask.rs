@@ -5,7 +5,6 @@ use crate::js::JsRuntime;
 use crate::prelude::*;
 use crate::report_js_error;
 use crate::state::ops::cmdline_ops;
-use compact_str::ToCompactString;
 
 pub fn report_error(
   scope: &mut v8::HandleScope,
