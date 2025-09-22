@@ -17,6 +17,7 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
+  SCCACHE_DIR: "$HOME/.cache/sccache"
 jobs:
   check:
     name: Check
@@ -41,9 +42,11 @@ jobs:
     if: ${{ github.event.pull_request }}
     env:
       RUSTC_WRAPPER: "sccache"
-      SCCACHE_GHA_ENABLED: "true"
+      SCCACHE_GHA_ENABLED: "false"
     steps:
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: $SCCACHE_DIR
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
@@ -74,14 +77,14 @@ jobs:
         with:
           bloaty-args: ./target/release/original.elf -- ./target/release/rsvim
           output-to-summary: true
-      # - name: Add a PR comment with summary and diff
-      #   continue-on-error: true
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
-      #       })
+    # - name: Add a PR comment with summary and diff
+    #   continue-on-error: true
+    #   uses: actions/github-script@v6
+    #   with:
+    #     script: |
+    #       github.rest.issues.createComment({
+    #         issue_number: context.issue.number,
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
+    #       })
