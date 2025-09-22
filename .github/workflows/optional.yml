@@ -55,7 +55,8 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Build 'current' branch
-        run: cargo build --release
+        run: |
+          cargo build --release
       - name: Save 'current' branch binary
         run: cp ./target/release/rsvim ./target/release/original.elf
       - name: Run Bloaty on 'current' branch
@@ -67,21 +68,22 @@ jobs:
       - name: Checkout 'main' branch
         run: git checkout ${{ github.event.pull_request.base.sha }}
       - name: Rebuild 'main' branch
-        run: cargo build --release
+        run: |
+          cargo build --release
       - name: Run Bloaty to compare both output files
         id: bloaty-comparison
         uses: carlosperate/bloaty-action@v1
         with:
           bloaty-args: ./target/release/original.elf -- ./target/release/rsvim
           output-to-summary: true
-      # - name: Add a PR comment with summary and diff
-      #   continue-on-error: true
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
-      #       })
+    # - name: Add a PR comment with summary and diff
+    #   continue-on-error: true
+    #   uses: actions/github-script@v6
+    #   with:
+    #     script: |
+    #       github.rest.issues.createComment({
+    #         issue_number: context.issue.number,
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         body: '## Bloaty output\n```\n${{ steps.bloaty-step.outputs.bloaty-output-encoded }}```\n## PR build size diff\n```\n${{ steps.bloaty-comparison.outputs.bloaty-output-encoded }}```\n'
+    #       })
