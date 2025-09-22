@@ -28,6 +28,14 @@ export interface GlobalThis {
   clearTimeout(id: number): void;
 
   /**
+   * A microtask is a short function which is executed after the function or module which created it exits and
+   * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
+   * to drive the script's execution environment.
+   * This event loop may be either the main event loop or the event loop driving a web worker.
+   */
+  queueMicrotask(callback: () => void): void;
+
+  /**
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {Function} callback - A function to be executed every `delay` milliseconds.
