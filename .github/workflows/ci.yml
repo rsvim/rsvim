@@ -45,6 +45,8 @@ jobs:
           rustup component add --toolchain stable rust-src clippy rustfmt
       - name: Rustfmt
         run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --all-targets
       - uses: taiki-e/install-action@cargo-binstall
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -115,13 +117,6 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
-      - name: Clippy
-        run: |
-          cargo clippy --all-targets
-      - name: Build
-        run: |
-          cargo build --release
-          cargo build --profile nightly
       - name: Test
         run: |
           cargo test --workspace
