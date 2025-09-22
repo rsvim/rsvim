@@ -31,18 +31,23 @@ export interface GlobalThis {
    * A microtask is a short function which is executed after the function or module which created it exits and
    * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
    * to drive the script's execution environment.
+   *
+   * @param {function} callback - A function to be executed.
+   * @throws Throws {@link !TypeError} if callback is not a function.
    */
   queueMicrotask(callback: () => void): void;
 
   /**
    * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
+   *
+   * @param {any} error - Anything to be thrown. This API will not throw any exception, if `error` is not provided, then it will be set to "unknown".
    */
-  reportError(error: Error): void;
+  reportError(error: any): void;
 
   /**
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
-   * @param {Function} callback - A function to be executed every `delay` milliseconds.
+   * @param {function} callback - A function to be executed every `delay` milliseconds.
    * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
@@ -57,7 +62,7 @@ export interface GlobalThis {
   /**
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
-   * @param {Function} callback - A function to be executed after the timer expires.
+   * @param {function} callback - A function to be executed after the timer expires.
    * @param {number} delay - The milliseconds that the timer should wait before the function is executed. By default 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
@@ -207,25 +212,33 @@ export interface GlobalThis {
 
   // Timer API }
 
-  // const { $$queueMicrotask, reportError } = globalThis;
-  //
-  // // Note: We wrap `queueMicrotask` and manually emit the exception because
-  // // v8 doesn't provide any mechanism to handle callback exceptions during
-  // // the microtask_checkpoint phase.
-  // function queueMicrotask(callback) {
-  //   // Check if the callback argument is a valid type.
-  //   if (typeof callback !== "function") {
-  //     throw new TypeError(`The "callback" argument must be a function.`);
-  //   }
-  //
-  //   $$queueMicrotask(() => {
-  //     try {
-  //       callback();
-  //     } catch (err) {
-  //       reportError(err);
-  //     }
-  //   });
-  // }
+  // Note: We wrap `queueMicrotask` and manually emit the exception because
+  // v8 doesn't provide any mechanism to handle callback exceptions during
+  // the microtask_checkpoint phase.
+  function queueMicrotask(callback: () => void): void {
+    // Check if the callback argument is a valid type.
+    if (typeof callback !== "function") {
+      throw new TypeError(`The "callback" argument must be a function.`);
+    }
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    __InternalRsvimGlobalObject.global_queue_microtask(() => {
+      try {
+        callback();
+      } catch (err) {
+        reportError(err);
+      }
+    });
+  }
+
+  function reportError(error: any): void {
+    if (error === null || error === undefined) {
+      error = "Unknown error";
+    }
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    __InternalRsvimGlobalObject.global_report_error(error);
+  }
 
   globalThis.clearTimeout = clearTimeout;
   globalThis.setTimeout = setTimeout;
