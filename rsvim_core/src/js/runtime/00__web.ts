@@ -232,10 +232,6 @@ export interface GlobalThis {
   }
 
   function reportError(error: any): void {
-    if (error === null || error === undefined) {
-      error = "Unknown error";
-    }
-
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     __InternalRsvimGlobalObject.global_report_error(error);
   }

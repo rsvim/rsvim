@@ -163,13 +163,25 @@ impl std::fmt::Debug for JsError {
 /// Report unhandled exceptions to command-line message.
 macro_rules! report_js_error {
   ($state:expr,$e:expr) => {
+    use compact_str::ToCompactString;
+    use $crate::msg;
+
     trace!("report js error:{:?}", $e);
     let mut tree = lock!($state.tree);
     let mut contents = lock!($state.contents);
-    cmdline_ops::cmdline_set_message(
-      &mut tree,
-      &mut contents,
-      $e.to_compact_string(),
-    );
+    if tree.command_line_id().is_some() {
+      cmdline_ops::cmdline_set_message(
+        &mut tree,
+        &mut contents,
+        $e.to_compact_string(),
+      );
+    } else {
+      msg::sync_send_to_master(
+        $state.master_tx.clone(),
+        msg::MasterMessage::PrintReq(msg::PrintReq {
+          payload: $e.to_compact_string(),
+        }),
+      );
+    }
   };
 }

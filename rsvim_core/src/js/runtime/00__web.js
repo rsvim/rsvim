@@ -77,9 +77,6 @@
         });
     }
     function reportError(error) {
-        if (error === null || error === undefined) {
-            error = "Unknown error";
-        }
         __InternalRsvimGlobalObject.global_report_error(error);
     }
     globalThis.clearTimeout = clearTimeout;
