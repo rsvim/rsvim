@@ -37,7 +37,6 @@ use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
 use command::ExCommandsManagerArc;
-use compact_str::ToCompactString;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
