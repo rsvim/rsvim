@@ -45,7 +45,6 @@ parking_lot = { workspace = true }
 dirs = { workspace = true }
 anyhow = { workspace = true }
 # thiserror = { workspace = true }
-regex = { workspace = true }
 foldhash = { workspace = true }
 # url = { workspace = true }
 path-absolutize = { workspace = true }
@@ -124,3 +123,4 @@ tracing-subscriber = { workspace = true, features = [
   "parking_lot",
 ] }
 tracing-appender = { workspace = true, features = ["parking_lot"] }
+regex = { workspace = true }

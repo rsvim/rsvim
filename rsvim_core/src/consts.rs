@@ -1,6 +1,6 @@
 //! Global constants.
 
-use regex::Regex;
+// use regex::Regex;
 use std::sync::LazyLock;
 use std::time::Duration;
 
@@ -34,10 +34,10 @@ pub static CHANNEL_BUF_SIZE: LazyLock<usize> = LazyLock::new(|| {
     .unwrap_or(default_buf_size)
 });
 
-/// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
-pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
-  LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\").unwrap());
-
-/// Http(s) url beginning regex, for example url begins with `http(s)?://`.
-pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
-  LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
+// /// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
+// pub static WINDOWS_DRIVE_BEGIN_REGEX: LazyLock<Regex> =
+//   LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\").unwrap());
+//
+// /// Http(s) url beginning regex, for example url begins with `http(s)?://`.
+// pub static HTTP_URL_BEGIN_REGEX: LazyLock<Regex> =
+//   LazyLock::new(|| Regex::new(r"^(http|https)://").unwrap());
