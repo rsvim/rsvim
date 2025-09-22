@@ -127,16 +127,7 @@ jobs:
       - name: Build
         run: |
           cargo build --release
-          cargo build --release -F mimalloc
-          cargo build --release -F snmalloc
           cargo build --profile nightly
-          cargo build --profile nightly -F mimalloc
-          cargo build --profile nightly -F snmalloc
-      - name: Build (not Windows)
-        if: ${{ matrix.os != 'windows-2022' }}
-        run: |
-          cargo build --release -F jemalloc
-          cargo build --profile nightly -F jemalloc
       - name: Test
         run: |
           cargo test --workspace
