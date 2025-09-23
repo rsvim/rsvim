@@ -23,7 +23,12 @@ pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
   /// Resolve module path by its specifier.
-  fn resolve(&self, _base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(
+    &self,
+    _config_home: &Path,
+    _base: &str,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
     assert!(CORE_MODULES.contains_key(specifier));
     Ok(specifier.to_string())
   }

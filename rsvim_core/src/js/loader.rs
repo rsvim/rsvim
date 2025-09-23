@@ -32,7 +32,12 @@ pub trait ModuleLoader {
   ///
   /// NOTE: This API (and all 3 loaders) are synchronized, include the url module loader's
   /// downloading process.
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath>;
+  fn resolve(
+    &self,
+    config_home: &Path,
+    base: &str,
+    specifier: &str,
+  ) -> AnyResult<ModulePath>;
 
   /// Load the module source by its module path.
   ///

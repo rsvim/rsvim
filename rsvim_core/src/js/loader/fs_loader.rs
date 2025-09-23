@@ -97,26 +97,8 @@ pub struct FsModuleLoader {
 
 impl FsModuleLoader {
   pub fn new() -> Self {
-    let opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".mjs".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
-      extension_alias: vec![
-        (".js".into(), vec![".js".into()]),
-        (".mjs".into(), vec![".mjs".into()]),
-        (".ts".into(), vec![".ts".into()]),
-        (".json".into(), vec![".json".into()]),
-        (".wasm".into(), vec![".wasm".into()]),
-      ],
-      // builtin_modules: false,
-      ..ResolveOptions::default()
-    };
     Self {
-      resolver: Resolver::new(opts),
+      resolver: RefCell::new(None),
     }
   }
 }

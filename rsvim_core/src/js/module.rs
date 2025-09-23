@@ -156,6 +156,7 @@ fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
 ///
 /// It returns full path on local filesystem.
 pub fn resolve_import(
+  config_home: &Path,
   base: &str,
   specifier: &str,
   import_map: Option<ImportMap>,
@@ -169,7 +170,7 @@ pub fn resolve_import(
   // Look the params and choose a loader, then resolve module.
   let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
 
-  resolver.resolve(base, &specifier)
+  resolver.resolve(config_home, base, &specifier)
 }
 
 /// Loads module source by its module path.
