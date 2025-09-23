@@ -440,7 +440,7 @@ export function echoD(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn xdg_config_dir6() -> IoResult<()> {
+  async fn home_dir3() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -474,13 +474,14 @@ export function echoD(value) {
     }
     "#;
 
-    // Prepare $RSVIM_CONFIG_HOME:
-    // |- rsvim.js
-    // |- a/index.js
-    // |- b/index.js
-    // |- util/index.js
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- a/index.js
+    //    |- b/index.js
+    //    |- util/index.js
     let (_tp, path_cfg) =
-      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
