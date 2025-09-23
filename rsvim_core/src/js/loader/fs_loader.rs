@@ -10,7 +10,6 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
-use parking_lot::Mutex;
 
 macro_rules! path_not_found {
   ($path:expr) => {
@@ -92,13 +91,40 @@ mod async_load {
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
-  resolver: Mutex<Option<Resolver>>,
+  resolver: Resolver,
 }
 
 impl FsModuleLoader {
   pub fn new() -> Self {
+    let opts = ResolveOptions {
+      extensions: vec![
+        ".js".into(),
+        ".ts".into(),
+        ".mjs".into(),
+        ".json".into(),
+        ".wasm".into(),
+      ],
+      extension_alias: vec![
+        (".js".into(), vec![".js".into()]),
+        (".mjs".into(), vec![".mjs".into()]),
+        (".ts".into(), vec![".ts".into()]),
+        (".json".into(), vec![".json".into()]),
+        (".wasm".into(), vec![".wasm".into()]),
+      ],
+      modules: vec![
+        PATH_CONFIG.config_home().to_string_lossy().to_string(),
+        PATH_CONFIG
+          .config_home()
+          .join("node_modules")
+          .to_string_lossy()
+          .to_string(),
+        "node_modules".to_string(),
+      ],
+      // builtin_modules: false,
+      ..ResolveOptions::default()
+    };
     Self {
-      resolver: Mutex::new(None),
+      resolver: Resolver::new(opts),
     }
   }
 }
@@ -116,51 +142,13 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
-    {
-      let mut resolver = self.resolver.lock();
-      if resolver.is_none() {
-        let opts = ResolveOptions {
-          extensions: vec![
-            ".js".into(),
-            ".ts".into(),
-            ".mjs".into(),
-            ".json".into(),
-            ".wasm".into(),
-          ],
-          extension_alias: vec![
-            (".js".into(), vec![".js".into()]),
-            (".mjs".into(), vec![".mjs".into()]),
-            (".ts".into(), vec![".ts".into()]),
-            (".json".into(), vec![".json".into()]),
-            (".wasm".into(), vec![".wasm".into()]),
-          ],
-          modules: vec![
-            PATH_CONFIG.config_home().to_string_lossy().to_string(),
-            PATH_CONFIG
-              .config_home()
-              .join("node_modules")
-              .to_string_lossy()
-              .to_string(),
-            "node_modules".to_string(),
-          ],
-          // builtin_modules: false,
-          ..ResolveOptions::default()
-        };
-        *resolver = Some(Resolver::new(opts));
-      }
-      // drop(resolver);
-    }
-
     let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
     );
 
-    let resolver = self.resolver.lock();
-    let resolver = resolver.as_ref().unwrap();
-
-    match resolver.resolve(&base, specifier) {
+    match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
       Err(_) => path_not_found!(specifier),
     }

@@ -99,7 +99,6 @@ def test(name, miri, jobs):
             set_env("RSVIM_LOG", rsvim_log)
         else:
             set_env("RSVIM_LOG", "trace")
-        set_sccache()
         set_rustflags()
         if name is None:
             name = "--all"
