@@ -10,10 +10,10 @@ pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
 #[cfg(test)]
 /// Indicate the unit test is running inside GitHub Actions
-pub const GITHUB_ACTION: &str = "GITHUB_ACTION";
+pub const GITHUB_ACTIONS: &str = "GITHUB_ACTIONS";
 #[cfg(test)]
 /// Indicate the temp directory inside GitHub Actions
-pub const GITHUB_ACTION_RUNNER_TEMP: &str = "RUNNER_TEMP";
+pub const GITHUB_ACTIONS_RUNNER_TEMP: &str = "RUNNER_TEMP";
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
