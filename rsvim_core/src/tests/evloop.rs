@@ -13,6 +13,7 @@ use jiff::Zoned;
 use parking_lot::Mutex;
 use std::path::Path;
 use std::sync::Arc;
+use std::sync::LazyLock;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::channel;
 use std::task::Poll;
@@ -25,6 +26,16 @@ pub struct TempPathConfig {
   pub xdg_cache_home: assert_fs::TempDir,
   pub xdg_data_home: assert_fs::TempDir,
 }
+
+static TEMP_PATH_CONFIG: LazyLock<Arc<Mutex<TempPathConfig>>> =
+  LazyLock::new(|| {
+    Arc::new(Mutex::new(TempPathConfig {
+      home_dir: assert_fs::TempDir::new().unwrap(),
+      xdg_config_home: assert_fs::TempDir::new().unwrap(),
+      xdg_cache_home: assert_fs::TempDir::new().unwrap(),
+      xdg_data_home: assert_fs::TempDir::new().unwrap(),
+    }))
+  });
 
 impl TempPathConfig {
   pub fn create() -> Self {
