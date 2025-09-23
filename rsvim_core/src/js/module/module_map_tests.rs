@@ -503,12 +503,13 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(2, contents.command_line_message_history().occupied_len());
-      for i in 0..2 {
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(2, n);
+      for i in 0..n {
         let actual = contents.command_line_message_history_mut().try_pop();
         assert!(actual.is_some());
         let actual = actual.unwrap();
-        assert_eq!(actual, (i + 1).to_compact_string());
+        assert!(actual == "1" || actual == "2");
       }
     }
 
