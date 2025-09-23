@@ -158,14 +158,14 @@ impl PathConfig {
   /// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
   /// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
   ///    `$HOME/.rsvim`.
-  pub fn config_entry(&self) -> Option<&Path> {
-    self.config_entry.as_deref()
+  pub fn config_entry(&self) -> &Option<PathBuf> {
+    &self.config_entry
   }
 
   #[cfg(test)]
-  pub fn config_entry(&self) -> Option<&Path> {
+  pub fn config_entry(&self) -> Option<PathBuf> {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_entry())
+    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_entry().clone())
   }
 
   #[cfg(not(test))]
@@ -173,38 +173,38 @@ impl PathConfig {
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/`
   /// 2. `$HOME/.rsvim/`
-  pub fn config_home(&self) -> &Path {
-    self.config_home.as_path()
+  pub fn config_home(&self) -> &PathBuf {
+    &self.config_home
   }
 
   #[cfg(test)]
-  pub fn config_home(&self) -> &Path {
+  pub fn config_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_home())
+    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_home().clone())
   }
 
   #[cfg(not(test))]
   /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
-  pub fn cache_home(&self) -> &Path {
-    self.cache_home.as_path()
+  pub fn cache_home(&self) -> &PathBuf {
+    &self.cache_home
   }
 
   #[cfg(test)]
-  pub fn cache_home(&self) -> &Path {
+  pub fn cache_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().cache_home())
+    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().cache_home().clone())
   }
 
   #[cfg(not(test))]
   /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
-  pub fn data_home(&self) -> &Path {
-    self.data_home.as_path()
+  pub fn data_home(&self) -> &PathBuf {
+    &self.data_home
   }
 
   #[cfg(test)]
-  pub fn data_home(&self) -> &Path {
+  pub fn data_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().data_home())
+    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().data_home().clone())
   }
 }
 
