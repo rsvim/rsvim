@@ -214,7 +214,12 @@ pub fn host_import_module_dynamically_cb<'s>(
 
   let import_map = state.options.import_map.clone();
 
-  let specifier = match resolve_import(&base, &specifier, import_map) {
+  let specifier = match resolve_import(
+    state.path_cfg.config_home(),
+    &base,
+    &specifier,
+    import_map,
+  ) {
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
