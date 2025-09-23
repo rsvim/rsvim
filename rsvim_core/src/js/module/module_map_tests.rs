@@ -764,7 +764,7 @@ export function echoD(value) {
     let p2_2 = Path::new(".rsvim/a/package.json");
     let src2_2: &str = r#"
     {
-      "exports": "./index.js",
+      "exports": "./index.js"
     }
     "#;
 
@@ -777,7 +777,7 @@ export function echoD(value) {
     let p3_2 = Path::new(".rsvim/b/package.json");
     let src3_2: &str = r#"
     {
-      "exports": "./index.js",
+      "exports": "./index.js"
     }
     "#;
 
@@ -791,7 +791,7 @@ export function echoD(value) {
     let p4_2 = Path::new(".rsvim/util/package.json");
     let src4_2: &str = r#"
     {
-      "exports": "./index.js",
+      "exports": "./index.js"
     }
     "#;
 
@@ -922,17 +922,35 @@ export function echoA(value) {
     import {echo} from "util";
     export default { echo };
     "#;
+    let p2_2 = Path::new(".rsvim/a/package.json");
+    let src2_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
 
     let p3 = Path::new(".rsvim/node_modules/b/index.js");
     let src3: &str = r#"
     import {echo} from "util";
     export default { echo };
     "#;
+    let p3_2 = Path::new(".rsvim/node_modules/b/package.json");
+    let src3_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
 
     let p4 = Path::new(".rsvim/util/index.js");
     let src4: &str = r#"
     export function echo(value) {
         Rsvim.cmd.echo(value);
+    }
+    "#;
+    let p4_2 = Path::new(".rsvim/util/package.json");
+    let src4_2: &str = r#"
+    {
+      "exports": "./index.js"
     }
     "#;
 
@@ -943,8 +961,15 @@ export function echoA(value) {
     //       |- a/index.js
     //       |- b/index.js
     //       |- util/index.js
-    let _tp =
-      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+    let _tp = make_home_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p2_2, src2_2),
+      (p3, src3),
+      (p3_2, src3_2),
+      (p4, src4),
+      (p4_2, src4_2),
+    ]);
 
     let mut event_loop =
       make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());

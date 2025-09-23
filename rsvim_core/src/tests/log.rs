@@ -41,6 +41,6 @@ pub fn init() {
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
-    log::info!("GITHUB_ACTIONS:{:?}", std::env::var("GITHUB_ACTIONS"));
+    // log::info!("GITHUB_ACTIONS:{:?}", std::env::var("GITHUB_ACTIONS"));
   });
 }
