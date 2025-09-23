@@ -10,7 +10,7 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
-use std::cell::RefCell;
+use parking_lot::Mutex;
 
 macro_rules! path_not_found {
   ($path:expr) => {
@@ -92,13 +92,13 @@ mod async_load {
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
-  resolver: RefCell<Option<Resolver>>,
+  resolver: Mutex<Option<Resolver>>,
 }
 
 impl FsModuleLoader {
   pub fn new() -> Self {
     Self {
-      resolver: RefCell::new(None),
+      resolver: Mutex::new(None),
     }
   }
 }
@@ -122,7 +122,7 @@ impl ModuleLoader for FsModuleLoader {
     specifier: &str,
   ) -> AnyResult<ModulePath> {
     {
-      let mut resolver = self.resolver.borrow_mut();
+      let mut resolver = self.resolver.lock();
       if resolver.is_none() {
         let opts = ResolveOptions {
           extensions: vec![
@@ -152,7 +152,7 @@ impl ModuleLoader for FsModuleLoader {
       // drop(resolver);
     }
 
-    let resolver = self.resolver.borrow();
+    let resolver = self.resolver.lock();
     let resolver = resolver.as_ref().unwrap();
 
     let base = Path::new(base).to_path_buf();
