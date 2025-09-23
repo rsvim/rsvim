@@ -1,4 +1,5 @@
 use super::path_cfg::*;
+use crate::prelude::*;
 use crate::tests::evloop::TempPathConfig;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
@@ -19,31 +20,30 @@ fn test1() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new_with_temp_dirs(&tp);
-  assert_eq!(*cfg.config_home(), tp.xdg_config_home.join("rsvim"));
+  assert_eq!(*PATH_CONFIG.config_home(), tp.xdg_config_home.join("rsvim"));
 
-  assert!(cfg.config_entry().is_some());
+  assert!(PATH_CONFIG.config_entry().is_some());
   assert_eq!(
-    cfg.config_entry().map(|e| e.to_path_buf()).unwrap(),
+    PATH_CONFIG.config_entry().map(|e| e.to_path_buf()).unwrap(),
     tp.xdg_config_home.join("rsvim").join("rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim-data")
     );
   } else {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim")
     );
   }
@@ -65,31 +65,30 @@ fn test2() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new_with_temp_dirs(&tp);
-  assert_eq!(*cfg.config_home(), tp.home_dir.join(".rsvim"));
+  assert_eq!(*PATH_CONFIG.config_home(), tp.home_dir.join(".rsvim"));
 
-  assert!(cfg.config_entry().is_some());
+  assert!(PATH_CONFIG.config_entry().is_some());
   assert_eq!(
-    cfg.config_entry().map(|e| e.to_path_buf()).unwrap(),
+    PATH_CONFIG.config_entry().map(|e| e.to_path_buf()).unwrap(),
     tp.home_dir.join(".rsvim").join("rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim-data")
     );
   } else {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim")
     );
   }
@@ -110,31 +109,30 @@ fn test3() {
     config_entry.flush().unwrap();
   }
 
-  let cfg = PathConfig::new_with_temp_dirs(&tp);
-  assert_eq!(*cfg.config_home(), tp.home_dir.join(".rsvim"));
+  assert_eq!(*PATH_CONFIG.config_home(), tp.home_dir.join(".rsvim"));
 
-  assert!(cfg.config_entry().is_some());
+  assert!(PATH_CONFIG.config_entry().is_some());
   assert_eq!(
-    cfg.config_entry().map(|e| e.to_path_buf()).unwrap(),
+    PATH_CONFIG.config_entry().map(|e| e.to_path_buf()).unwrap(),
     tp.home_dir.join(".rsvim.js")
   );
 
   if cfg!(target_os = "windows") {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim-data")
     );
   } else {
     assert_eq!(
-      cfg.cache_home().to_path_buf(),
+      PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim")
     );
     assert_eq!(
-      cfg.data_home().to_path_buf(),
+      PATH_CONFIG.data_home().to_path_buf(),
       tp.xdg_data_home.join("rsvim")
     );
   }
