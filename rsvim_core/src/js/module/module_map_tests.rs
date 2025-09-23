@@ -610,7 +610,8 @@ export function echoD(value) {
     //    |- util/index.js
     //    |- node_modules/
     //       |- b/index.js
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+    let (_tp, path_cfg) =
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
