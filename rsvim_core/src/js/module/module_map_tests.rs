@@ -11,6 +11,8 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
+  use std::slice::ChunksExactMut;
+
   use super::*;
 
   #[tokio::test]
@@ -620,30 +622,26 @@ export function echoD(value) {
       path_cfg,
     );
 
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
-
     event_loop.initialize()?;
     event_loop
       .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
-    // After running
+    // After
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().occupied_len());
-      assert_eq!(
-        Some("1".to_compact_string()),
-        contents.command_line_message_history_mut().try_pop()
-      );
+      assert_eq!(2, contents.command_line_message_history().occupied_len());
+      for i in 0..2 {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert_eq!(actual, (i + 1).to_compact_string());
+      }
     }
 
     Ok(())
