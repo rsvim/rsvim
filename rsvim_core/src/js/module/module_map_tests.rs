@@ -519,167 +519,6 @@ export function echoD(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn home_dir4() -> IoResult<()> {
-    test_log_init();
-
-    let terminal_cols = 10_u16;
-    let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
-
-    let p1 = Path::new(".rsvim/rsvim.js");
-    let src1: &str = r#"
-  import a from "a";
-  import b from "b";
-  a.echo(1);
-  b.echo(2);
-    "#;
-
-    let p2 = Path::new(".rsvim/a/index.js");
-    let src2: &str = r#"
-    import {echo} from "util";
-    export default { echo };
-    "#;
-
-    let p3 = Path::new(".rsvim/node_modules/b/index.js");
-    let src3: &str = r#"
-    import {echo} from "util";
-    export default { echo };
-    "#;
-
-    let p4 = Path::new(".rsvim/util/index.js");
-    let src4: &str = r#"
-    export function echo(value) {
-        Rsvim.cmd.echo(value);
-    }
-    "#;
-
-    // Prepare $HOME:
-    // |- .rsvim/
-    //    |- rsvim.js
-    //    |- node_modules/
-    //       |- a/index.js
-    //       |- b/index.js
-    //       |- util/index.js
-    let (_tp, path_cfg) =
-      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
-
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    event_loop.initialize()?;
-    event_loop
-      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
-      .await?;
-    event_loop.shutdown()?;
-
-    // After
-    {
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      info!("module_map:{:#?}", state.module_map);
-
-      let mut contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
-      info!("xdg_config_dir8 n:{:?}", n);
-      assert_eq!(2, n);
-      for i in 0..n {
-        let actual = contents.command_line_message_history_mut().try_pop();
-        info!("xdg_config_dir8 i:{:?},actual:{:?}", i, actual);
-        assert!(actual.is_some());
-        let actual = actual.unwrap();
-        assert!(actual == "1" || actual == "2");
-      }
-    }
-
-    Ok(())
-  }
-
-  #[tokio::test]
-  #[cfg_attr(miri, ignore)]
-  async fn xdg_config_dir9() -> IoResult<()> {
-    test_log_init();
-
-    let terminal_cols = 10_u16;
-    let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
-
-    let p1 = Path::new(".rsvim/rsvim.js");
-    let src1: &str = r#"
-  import a from "a";
-  import b from "b";
-  a.echo(1);
-  b.echo(2);
-    "#;
-
-    let p2 = Path::new(".rsvim/node_modules/a/index.js");
-    let src2: &str = r#"
-    import {echo} from "util";
-    export default { echo };
-    "#;
-
-    let p3 = Path::new(".rsvim/b/index.js");
-    let src3: &str = r#"
-    import {echo} from "util";
-    export default { echo };
-    "#;
-
-    let p4 = Path::new(".rsvim/node_modules/util/index.js");
-    let src4: &str = r#"
-    export function echo(value) {
-        Rsvim.cmd.echo(value);
-    }
-    "#;
-
-    // Prepare $RSVIM_CONFIG_HOME:
-    // |- rsvim.js
-    // |- node_modules/
-    //    |- a/index.js
-    //    |- b/index.js
-    //    |- util/index.js
-    let (_tp, path_cfg) =
-      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
-
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    event_loop.initialize()?;
-    event_loop
-      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
-      .await?;
-    event_loop.shutdown()?;
-
-    // After
-    {
-      let state_rc = event_loop.js_runtime.get_state();
-      let state = state_rc.borrow();
-      info!("module_map:{:#?}", state.module_map);
-
-      let mut contents = lock!(event_loop.contents);
-      let n = contents.command_line_message_history().occupied_len();
-      info!("xdg_config_dir9 n:{:?}", n);
-      assert_eq!(2, n);
-      for i in 0..n {
-        let actual = contents.command_line_message_history_mut().try_pop();
-        info!("xdg_config_dir9 i:{:?},actual:{:?}", i, actual);
-        assert!(actual.is_some());
-        let actual = actual.unwrap();
-        assert!(actual == "1" || actual == "2");
-      }
-    }
-
-    Ok(())
-  }
-
-  #[tokio::test]
-  #[cfg_attr(miri, ignore)]
   async fn home_dir1() -> IoResult<()> {
     test_log_init();
 
@@ -944,6 +783,168 @@ export function echoA(value) {
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(actual.contains("Uncaught Error: Module path NotFound"));
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir4() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p3 = Path::new(".rsvim/node_modules/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p4 = Path::new(".rsvim/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- node_modules/
+    //       |- a/index.js
+    //       |- b/index.js
+    //       |- util/index.js
+    let (_tp, path_cfg) =
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      info!("xdg_config_dir8 n:{:?}", n);
+      assert_eq!(2, n);
+      for i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        info!("xdg_config_dir8 i:{:?},actual:{:?}", i, actual);
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir5() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/node_modules/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p3 = Path::new(".rsvim/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p4 = Path::new(".rsvim/node_modules/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- node_modules/
+    //       |- a/index.js
+    //       |- b/index.js
+    //       |- util/index.js
+    let (_tp, path_cfg) =
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop = make_event_loop(
+      terminal_cols,
+      terminal_rows,
+      CliOptions::empty(),
+      path_cfg,
+    );
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      info!("xdg_config_dir9 n:{:?}", n);
+      assert_eq!(2, n);
+      for i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        info!("xdg_config_dir9 i:{:?},actual:{:?}", i, actual);
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
     }
 
     Ok(())
