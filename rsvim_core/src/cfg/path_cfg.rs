@@ -166,7 +166,8 @@ impl PathConfig {
   #[cfg(test)]
   pub fn config_entry(&self) -> Option<PathBuf> {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_entry().clone())
+    TEMP_PATH_CONFIG
+      .with(|p| p.borrow().as_ref().unwrap().config_entry().clone())
   }
 
   #[cfg(not(test))]
@@ -181,7 +182,8 @@ impl PathConfig {
   #[cfg(test)]
   pub fn config_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().config_home().clone())
+    TEMP_PATH_CONFIG
+      .with(|p| p.borrow().as_ref().unwrap().config_home().clone())
   }
 
   #[cfg(not(test))]
@@ -193,7 +195,7 @@ impl PathConfig {
   #[cfg(test)]
   pub fn cache_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().cache_home().clone())
+    TEMP_PATH_CONFIG.with(|p| p.borrow().as_ref().unwrap().cache_home().clone())
   }
 
   #[cfg(not(test))]
@@ -205,7 +207,7 @@ impl PathConfig {
   #[cfg(test)]
   pub fn data_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    TEMP_PATH_CONFIG.with_borrow(|p| p.as_ref().unwrap().data_home().clone())
+    TEMP_PATH_CONFIG.with(|p| p.borrow().as_ref().unwrap().data_home().clone())
   }
 }
 
