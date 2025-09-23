@@ -1065,8 +1065,11 @@ export function sayHello() {
     let loader = FsModuleLoader::new();
     let aloader = AsyncFsModuleLoader {};
 
-    let actual =
-      loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+    let actual = loader.resolve(
+      path_cfg.config_home(),
+      &path_cfg.config_home().to_string_lossy(),
+      specifier,
+    );
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
