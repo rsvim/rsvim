@@ -39,14 +39,10 @@ mod tests_current1 {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -108,7 +104,7 @@ mod tests_current1 {
       "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -118,7 +114,6 @@ mod tests_current1 {
         vec![Path::new("README.md").to_path_buf()],
         true,
       ),
-      path_cfg,
     );
 
     event_loop.initialize()?;
@@ -165,7 +160,7 @@ mod tests_current1 {
       "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
     let mocked_ops = vec![
       MockOperation::Operation(Operation::GotoInsertMode(
@@ -189,7 +184,6 @@ mod tests_current1 {
           vec![f1.to_path_buf()],
           true,
         ),
-        path_cfg.clone(),
       );
 
       event_loop.initialize()?;
@@ -224,7 +218,6 @@ mod tests_current1 {
           vec![f1.to_path_buf()],
           true,
         ),
-        path_cfg,
       );
 
       event_loop.initialize()?;
