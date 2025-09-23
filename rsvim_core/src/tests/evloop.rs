@@ -43,8 +43,8 @@ impl TempPathConfig {
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
-    TEMP_XDG_DIRS.set(Some(temp_dirs));
     TEMP_PATH_CONFIG.set(Some(PathConfig::_new_with_temp_dirs(&temp_dirs)));
+    TEMP_XDG_DIRS.set(Some(temp_dirs));
   }
 }
 
