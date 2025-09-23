@@ -474,14 +474,13 @@ export function echoD(value) {
     }
     "#;
 
-    // Prepare $HOME:
-    // |- .rsvim/
-    //    |- rsvim.js
-    //    |- a/index.js
-    //    |- b/index.js
-    //    |- util/index.js
+    // Prepare $RSVIM_CONFIG_HOME:
+    // |- rsvim.js
+    // |- a/index.js
+    // |- b/index.js
+    // |- util/index.js
     let (_tp, path_cfg) =
-      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
@@ -633,15 +632,14 @@ export function echoD(value) {
     }
     "#;
 
-    // Prepare $HOME:
-    // |- .rsvim/
-    //    |- rsvim.js
-    //    |- node_modules/
-    //       |- a/index.js
-    //       |- b/index.js
-    //       |- util/index.js
+    // Prepare $RSVIM_CONFIG_HOME:
+    // |- rsvim.js
+    // |- node_modules/
+    //    |- a/index.js
+    //    |- b/index.js
+    //    |- util/index.js
     let (_tp, path_cfg) =
-      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
     let mut event_loop = make_event_loop(
       terminal_cols,
