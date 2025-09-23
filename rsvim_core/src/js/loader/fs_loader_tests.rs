@@ -319,6 +319,12 @@ export function sayHello() {
     &path_cfg.config_home().to_string_lossy(),
     specifier,
   );
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?},expect:None",
+    path_cfg.config_home(),
+    path_cfg.config_home().to_string_lossy(),
+    actual,
+  );
   assert!(actual.is_err());
 }
 
