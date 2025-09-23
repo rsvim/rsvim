@@ -168,20 +168,6 @@ impl ModuleLoader for FsModuleLoader {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
       Err(_) => path_not_found!(specifier),
     }
-
-    // if let Ok(resolution) = resolution {
-    //   return Ok(resolution.path().to_string_lossy().to_string());
-    // }
-    //
-    // let node_modules_home = base.join("node_modules");
-    // if node_modules_home.is_dir() {
-    //   let resolution = resolver.resolve(node_modules_home, specifier);
-    //   if let Ok(resolution) = resolution {
-    //     return Ok(resolution.path().to_string_lossy().to_string());
-    //   }
-    // }
-    //
-    // path_not_found!(specifier);
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
