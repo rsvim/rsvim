@@ -156,7 +156,6 @@ fn _choose_module_loader(specifier: &str) -> &dyn ModuleLoader {
 ///
 /// It returns full path on local filesystem.
 pub fn resolve_import(
-  config_home: &Path,
   base: &str,
   specifier: &str,
   import_map: Option<ImportMap>,
@@ -170,7 +169,7 @@ pub fn resolve_import(
   // Look the params and choose a loader, then resolve module.
   let resolver: &dyn ModuleLoader = _choose_module_loader(specifier.as_str());
 
-  resolver.resolve(config_home, base, &specifier)
+  resolver.resolve(base, &specifier)
 }
 
 /// Loads module source by its module path.
@@ -290,12 +289,7 @@ pub fn fetch_module_tree<'a>(
     let base = paths::parent_or_remain(&filename).to_string_lossy();
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
 
-    let specifier = match resolve_import(
-      state_rc.borrow().path_cfg.config_home(),
-      &base,
-      &specifier,
-      None,
-    ) {
+    let specifier = match resolve_import(&base, &specifier, None) {
       Ok(specifier) => specifier,
       Err(e) => {
         binding::throw_exception(scope, &e);

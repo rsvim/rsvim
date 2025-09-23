@@ -965,7 +965,7 @@ pub fn execute_module(
       .path_cfg
       .config_home()
       .to_path_buf();
-    match resolve_import(&base, &base.to_string_lossy(), filename, None) {
+    match resolve_import(&base.to_string_lossy(), filename, None) {
       Ok(specifier) => specifier,
       Err(e) => {
         // Returns the error directly.

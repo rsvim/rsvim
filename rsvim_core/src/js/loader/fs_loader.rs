@@ -115,12 +115,7 @@ impl ModuleLoader for FsModuleLoader {
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(
-    &self,
-    config_home: &Path,
-    base: &str,
-    specifier: &str,
-  ) -> AnyResult<ModulePath> {
+  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
     {
       let mut resolver = self.resolver.lock();
       if resolver.is_none() {
@@ -140,8 +135,9 @@ impl ModuleLoader for FsModuleLoader {
             (".wasm".into(), vec![".wasm".into()]),
           ],
           modules: vec![
-            config_home.to_string_lossy().to_string(),
-            config_home
+            PATH_CONFIG.config_home().to_string_lossy().to_string(),
+            PATH_CONFIG
+              .config_home()
               .join("node_modules")
               .to_string_lossy()
               .to_string(),
