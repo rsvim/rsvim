@@ -29,10 +29,10 @@ pub struct TempPathConfig {
 impl TempPathConfig {
   pub fn create() -> Self {
     let (home_dir, xdg_config_home, xdg_cache_home, xdg_data_home) = (
-      assert_fs::TempDir::new_in(".").unwrap(),
-      assert_fs::TempDir::new_in(".").unwrap(),
-      assert_fs::TempDir::new_in(".").unwrap(),
-      assert_fs::TempDir::new_in(".").unwrap(),
+      assert_fs::TempDir::new().unwrap(),
+      assert_fs::TempDir::new().unwrap(),
+      assert_fs::TempDir::new().unwrap(),
+      assert_fs::TempDir::new().unwrap(),
     );
 
     Self {
