@@ -766,7 +766,7 @@ export function echoA(value) {
       .await?;
     event_loop.shutdown()?;
 
-    // After running
+    // After
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
@@ -859,7 +859,7 @@ export function echoA(value) {
       .await?;
     event_loop.shutdown()?;
 
-    // After running
+    // After
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
