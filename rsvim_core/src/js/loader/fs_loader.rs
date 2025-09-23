@@ -143,22 +143,35 @@ impl ModuleLoader for FsModuleLoader {
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
     );
-    match self.resolver.resolve(&base, specifier) {
-      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => {
-        let node_modules_home = base.join("node_modules");
-        if node_modules_home.is_dir() {
-          match self.resolver.resolve(node_modules_home, specifier) {
-            Ok(resolution) => {
-              Ok(resolution.path().to_string_lossy().to_string())
-            }
-            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
-          }
-        } else {
-          anyhow::bail!(format!("Module path {:?}", e));
-        }
+
+    let resolution = self.resolver.resolve(&base, specifier);
+    if let Ok(resolution) = resolution {
+      return Ok(resolution.path().to_string_lossy().to_string());
+    }
+    let node_modules_home = base.join("node_modules");
+    if node_modules_home.is_dir() {
+      let resolution = self.resolver.resolve(node_modules_home, specifier);
+      if let Ok(resolution) = resolution {
+        return Ok(resolution.path().to_string_lossy().to_string());
       }
     }
+
+    if config_home.is_dir() {
+      let resolution = self.resolver.resolve(config_home, specifier);
+      if let Ok(resolution) = resolution {
+        return Ok(resolution.path().to_string_lossy().to_string());
+      }
+    }
+
+    let config_node_modules_home = config_home.join("node_modules");
+    if config_node_modules_home.is_dir() {
+      let resolution = self.resolver.resolve(config_home, specifier);
+      if let Ok(resolution) = resolution {
+        return Ok(resolution.path().to_string_lossy().to_string());
+      }
+    }
+
+    path_not_found!(specifier);
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
