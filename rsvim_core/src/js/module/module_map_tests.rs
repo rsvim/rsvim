@@ -995,15 +995,11 @@ export function echoA(value) {
     //       |- a/index.js
     //       |- b/index.js
     //       |- util/index.js
-    let (_tp, path_cfg) =
+    let _tp =
       make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1085,7 +1081,7 @@ export function echoA(value) {
     //          |- echo.js
     //          |- calc.js
     //
-    let (_tp, path_cfg) = make_home_configs(vec![
+    let _tp = make_home_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1093,12 +1089,8 @@ export function echoA(value) {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1189,20 +1181,10 @@ export function echoMain(value) {
     // |- utils/
     //    |- a.js
     //
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg.clone(),
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
