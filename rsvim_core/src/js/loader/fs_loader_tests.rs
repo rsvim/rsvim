@@ -33,8 +33,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    &specifier,
+  );
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
@@ -88,7 +91,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -138,7 +141,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -188,7 +191,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, &specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -231,7 +234,7 @@ fn file_path_failed4() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(&base, &specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, &specifier);
   assert!(actual.is_err());
   info!("resolve error: {:?}", actual);
 }
@@ -263,8 +266,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    specifier,
+  );
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -308,8 +314,11 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    specifier,
+  );
   assert!(actual.is_err());
 }
 
@@ -344,7 +353,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -396,7 +405,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -447,8 +456,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    &specifier,
+  );
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -501,7 +513,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, &specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -547,7 +559,7 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_err());
 }
 
@@ -577,7 +589,7 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual = loader.resolve(&base, &specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, &specifier);
   assert!(actual.is_err());
 }
 
@@ -605,8 +617,11 @@ export function sayHello() {
   // Run tests.
   let loader = FsModuleLoader::new();
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    &specifier,
+  );
   assert!(actual.is_err());
 }
 
@@ -652,7 +667,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -704,7 +719,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual = loader.resolve(&base, specifier);
+  let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -754,8 +769,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    specifier,
+  );
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -813,8 +831,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
   let aloader = AsyncFsModuleLoader {};
 
-  let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+  let actual = loader.resolve(
+    path_cfg.config_home(),
+    &path_cfg.config_home().to_string_lossy(),
+    specifier,
+  );
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
