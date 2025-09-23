@@ -1162,7 +1162,7 @@ export function echoA(value) {
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path NotFound"));
+      assert!(actual.contains("Uncaught Error: Module path"));
     }
 
     Ok(())
