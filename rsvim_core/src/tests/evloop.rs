@@ -11,6 +11,7 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
+use parking_lot::ReentrantMutex;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::LazyLock;
@@ -27,9 +28,9 @@ pub struct TempPathConfig {
   pub xdg_data_home: assert_fs::TempDir,
 }
 
-static TEMP_PATH_CONFIG: LazyLock<Arc<Mutex<TempPathConfig>>> =
+static TEMP_PATH_CONFIG: LazyLock<Mutex<Arc<TempPathConfig>>> =
   LazyLock::new(|| {
-    Arc::new(Mutex::new(TempPathConfig {
+    Mutex::new(Arc::new(TempPathConfig {
       home_dir: assert_fs::TempDir::new().unwrap(),
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
@@ -38,20 +39,16 @@ static TEMP_PATH_CONFIG: LazyLock<Arc<Mutex<TempPathConfig>>> =
   });
 
 impl TempPathConfig {
-  pub fn create() -> Self {
-    let (home_dir, xdg_config_home, xdg_cache_home, xdg_data_home) = (
-      assert_fs::TempDir::new().unwrap(),
-      assert_fs::TempDir::new().unwrap(),
-      assert_fs::TempDir::new().unwrap(),
-      assert_fs::TempDir::new().unwrap(),
-    );
+  pub fn create() -> Arc<TempPathConfig> {
+    let mut cfg = (*TEMP_PATH_CONFIG).lock();
+    *cfg = Arc::new(TempPathConfig {
+      home_dir: assert_fs::TempDir::new().unwrap(),
+      xdg_config_home: assert_fs::TempDir::new().unwrap(),
+      xdg_cache_home: assert_fs::TempDir::new().unwrap(),
+      xdg_data_home: assert_fs::TempDir::new().unwrap(),
+    });
 
-    Self {
-      home_dir,
-      xdg_config_home,
-      xdg_cache_home,
-      xdg_data_home,
-    }
+    cfg.clone()
   }
 }
 
