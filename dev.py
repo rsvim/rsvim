@@ -100,6 +100,7 @@ def test(name, miri, jobs):
         else:
             set_env("RSVIM_LOG", "trace")
         set_rustflags()
+        set_sccache()
         if name is None:
             name = "--all"
         command = f"cargo nextest run{jobs} --no-capture {name}"
