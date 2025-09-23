@@ -150,7 +150,7 @@ impl ModuleLoader for FsModuleLoader {
 
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(_) => path_not_found!(specifier),
+      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
     }
   }
 
