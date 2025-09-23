@@ -241,7 +241,7 @@ fn file_path_failed4() {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn file_path5() {
+async fn file_path5_1() {
   test_log_init();
 
   let src: &str = r#"
@@ -292,7 +292,7 @@ export function sayHello() {
 }
 
 #[test]
-fn file_path_failed5() {
+fn file_path5_2() {
   test_log_init();
 
   let src: &str = r#"
