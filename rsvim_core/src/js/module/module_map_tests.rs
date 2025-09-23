@@ -769,14 +769,10 @@ export function echoA(value) {
     //    |- utils/
     //       |- a.js
     //
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
