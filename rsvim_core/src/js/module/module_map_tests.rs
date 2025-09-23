@@ -457,13 +457,13 @@ export function echoD(value) {
 
     let p2 = Path::new(".rsvim/a/index.js");
     let src2: &str = r#"
-    import echo from "util";
+    import {echo} from "util";
     export default { echo };
     "#;
 
     let p3 = Path::new(".rsvim/b/index.js");
     let src3: &str = r#"
-    import echo from "util";
+    import {echo} from "util";
     export default { echo };
     "#;
 
