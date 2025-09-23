@@ -11,15 +11,13 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
-use std::cell::RefCell;
 use std::path::Path;
-use std::rc::Rc;
 use std::sync::Arc;
+use std::sync::LazyLock;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::channel;
 use std::task::Poll;
 use std::task::Waker;
-use std::thread_local;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -30,9 +28,8 @@ pub struct TempPathConfig {
   pub xdg_data_home: assert_fs::TempDir,
 }
 
-thread_local! {
-  pub static TEMP_PATH_CONFIG: Rc<RefCell<Option<PathConfig>>> = Rc::new(RefCell::new(None));
-}
+pub static TEMP_PATH_CONFIG: LazyLock<Mutex<PathConfig>> =
+  LazyLock::new(|| Mutex::new(PathConfig::new()));
 
 impl TempPathConfig {
   pub fn create() -> Self {
@@ -43,10 +40,8 @@ impl TempPathConfig {
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
 
-    TEMP_PATH_CONFIG.with(|p| {
-      let mut p = p.borrow_mut();
-      *p = Some(PathConfig::_new_with_temp_dirs(&temp_dirs));
-    });
+    let mut temp = (*TEMP_PATH_CONFIG).lock();
+    *temp = PathConfig::_new_with_temp_dirs(&temp_dirs);
 
     temp_dirs
   }
