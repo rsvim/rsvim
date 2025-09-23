@@ -11,6 +11,7 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
+use std::rc::Rc;
 use std::cell::RefCell;
 use std::path::Path;
 use std::sync::Arc;
@@ -30,7 +31,7 @@ pub struct TempPathConfig {
 }
 
 thread_local! {
-  pub static TEMP_PATH_CONFIG: RefCell<Option<PathConfig>> = const{ RefCell::new(None) };
+  pub static TEMP_PATH_CONFIG: Rc<RefCell<Option<PathConfig>>> = const{ Rc::new(RefCell::new(None)) };
 }
 
 impl TempPathConfig {
