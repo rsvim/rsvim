@@ -449,7 +449,11 @@ export function echoD(value) {
 
     let p1 = Path::new("rsvim.js");
     let src1: &str = r#"
-  import utils from "utils";
+  import a from "a";
+  import b from "b";
+
+  a.echo(6);
+  b.echo(6);
     "#;
 
     let p2 = Path::new("node_modules/utils/index.js");
@@ -503,11 +507,13 @@ export function echoD(value) {
       info!("module_map:{:#?}", state.module_map);
 
       let mut contents = lock!(event_loop.contents);
-      assert_eq!(1, contents.command_line_message_history().occupied_len());
-      assert_eq!(
-        Some("9".to_compact_string()),
-        contents.command_line_message_history_mut().try_pop()
-      );
+      assert_eq!(2, contents.command_line_message_history().occupied_len());
+      for _i in 0..2 {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert_eq!(actual, "6");
+      }
     }
 
     Ok(())
