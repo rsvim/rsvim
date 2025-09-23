@@ -162,7 +162,19 @@ impl ModuleLoader for FsModuleLoader {
     );
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
+      Err(e) => {
+        let node_modules_home = base.join("node_modules");
+        if node_modules_home.is_dir() {
+          match resolver.resolve(node_modules_home, specifier) {
+            Ok(resolution) => {
+              Ok(resolution.path().to_string_lossy().to_string())
+            }
+            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
+          }
+        } else {
+          anyhow::bail!(format!("Module path {:?}", e));
+        }
+      }
     }
   }
 
