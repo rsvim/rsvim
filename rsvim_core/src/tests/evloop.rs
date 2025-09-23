@@ -58,9 +58,7 @@ pub fn make_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
   tp
 }
 
-pub fn make_home_configs(
-  sources: Vec<(&Path, &str)>,
-) -> (TempPathConfig, PathConfig) {
+pub fn make_home_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
   let tp = TempPathConfig::create();
 
   for (path, src) in sources.iter() {
@@ -69,17 +67,15 @@ pub fn make_home_configs(
     std::fs::write(path, src).unwrap();
   }
 
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
-  (tp, path_cfg)
+  tp
 }
 
 pub fn make_event_loop(
   terminal_cols: u16,
   terminal_rows: u16,
   cli_opts: CliOptions,
-  path_cfg: PathConfig,
 ) -> EventLoop {
-  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts, path_cfg).unwrap()
+  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
 const INTERVAL_MILLIS: Duration = Duration::from_millis(2);
