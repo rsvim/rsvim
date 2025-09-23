@@ -10,6 +10,7 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
+use parking_lot::Mutex;
 
 macro_rules! path_not_found {
   ($path:expr) => {
@@ -91,31 +92,13 @@ mod async_load {
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
-  resolver: Resolver,
+  resolver: Mutex<Option<Resolver>>,
 }
 
 impl FsModuleLoader {
   pub fn new() -> Self {
-    let opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".mjs".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
-      extension_alias: vec![
-        (".js".into(), vec![".js".into()]),
-        (".mjs".into(), vec![".mjs".into()]),
-        (".ts".into(), vec![".ts".into()]),
-        (".json".into(), vec![".json".into()]),
-        (".wasm".into(), vec![".wasm".into()]),
-      ],
-      // builtin_modules: false,
-      ..ResolveOptions::default()
-    };
     Self {
-      resolver: Resolver::new(opts),
+      resolver: Mutex::new(None),
     }
   }
 }
@@ -138,40 +121,69 @@ impl ModuleLoader for FsModuleLoader {
     base: &str,
     specifier: &str,
   ) -> AnyResult<ModulePath> {
+    {
+      let mut resolver = self.resolver.lock();
+      if resolver.is_none() {
+        let opts = ResolveOptions {
+          extensions: vec![
+            ".js".into(),
+            ".ts".into(),
+            ".mjs".into(),
+            ".json".into(),
+            ".wasm".into(),
+          ],
+          extension_alias: vec![
+            (".js".into(), vec![".js".into()]),
+            (".mjs".into(), vec![".mjs".into()]),
+            (".ts".into(), vec![".ts".into()]),
+            (".json".into(), vec![".json".into()]),
+            (".wasm".into(), vec![".wasm".into()]),
+          ],
+          modules: vec![
+            config_home.to_string_lossy().to_string(),
+            config_home
+              .join("node_modules")
+              .to_string_lossy()
+              .to_string(),
+            "node_modules".to_string(),
+          ],
+          // builtin_modules: false,
+          ..ResolveOptions::default()
+        };
+        *resolver = Some(Resolver::new(opts));
+      }
+      // drop(resolver);
+    }
+
     let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
     );
 
-    let resolution = self.resolver.resolve(&base, specifier);
-    if let Ok(resolution) = resolution {
-      return Ok(resolution.path().to_string_lossy().to_string());
-    }
-    let node_modules_home = base.join("node_modules");
-    if node_modules_home.is_dir() {
-      let resolution = self.resolver.resolve(node_modules_home, specifier);
-      if let Ok(resolution) = resolution {
-        return Ok(resolution.path().to_string_lossy().to_string());
+    let resolver = self.resolver.lock();
+    let resolver = resolver.as_ref().unwrap();
+
+    match resolver.resolve(&base, specifier) {
+      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
+      Err(e) => {
+        anyhow::bail!(format!("Module path {:?}", e));
       }
     }
 
-    if config_home.is_dir() {
-      let resolution = self.resolver.resolve(config_home, specifier);
-      if let Ok(resolution) = resolution {
-        return Ok(resolution.path().to_string_lossy().to_string());
-      }
-    }
-
-    let config_node_modules_home = config_home.join("node_modules");
-    if config_node_modules_home.is_dir() {
-      let resolution = self.resolver.resolve(config_home, specifier);
-      if let Ok(resolution) = resolution {
-        return Ok(resolution.path().to_string_lossy().to_string());
-      }
-    }
-
-    path_not_found!(specifier);
+    // if let Ok(resolution) = resolution {
+    //   return Ok(resolution.path().to_string_lossy().to_string());
+    // }
+    //
+    // let node_modules_home = base.join("node_modules");
+    // if node_modules_home.is_dir() {
+    //   let resolution = resolver.resolve(node_modules_home, specifier);
+    //   if let Ok(resolution) = resolution {
+    //     return Ok(resolution.path().to_string_lossy().to_string());
+    //   }
+    // }
+    //
+    // path_not_found!(specifier);
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
