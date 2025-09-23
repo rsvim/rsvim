@@ -440,7 +440,7 @@ export function echoD(value) {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn xdg_config_dir7() -> IoResult<()> {
+  async fn xdg_config_dir6() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
