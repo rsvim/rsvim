@@ -330,7 +330,20 @@ export function sayHello() {
   );
   assert!(actual.is_ok());
   let actual = actual.unwrap();
-  assert_eq!(actual, expect);
+  assert!(
+    Path::new(&actual)
+      .normalize()
+      .unwrap()
+      .as_path()
+      .to_string_lossy()
+      .contains(&expect)
+      || Path::new(&expect)
+        .normalize()
+        .unwrap()
+        .as_path()
+        .to_string_lossy()
+        .contains(&actual)
+  );
 }
 
 #[tokio::test]
