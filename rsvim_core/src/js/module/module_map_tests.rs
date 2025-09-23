@@ -775,6 +775,7 @@ export function echoA(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
       assert!(actual.contains("Uncaught Error: Module path NotFound"));
