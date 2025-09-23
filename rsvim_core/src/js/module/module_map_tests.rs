@@ -538,7 +538,7 @@ export function echoD(value) {
     export default { echo };
     "#;
 
-    let p3 = Path::new(".rsvim/b/index.js");
+    let p3 = Path::new(".rsvim/node_modules/b/index.js");
     let src3: &str = r#"
     import echo from "util";
     export default { echo };
@@ -554,10 +554,10 @@ export function echoD(value) {
     // Prepare $HOME:
     // |- .rsvim/
     //    |- rsvim.js
-    //    |- a/index.js
-    //    |- util/index.js
     //    |- node_modules/
+    //       |- a/index.js
     //       |- b/index.js
+    //       |- util/index.js
     let (_tp, path_cfg) =
       make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
