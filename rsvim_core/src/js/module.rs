@@ -290,7 +290,12 @@ pub fn fetch_module_tree<'a>(
     let base = paths::parent_or_remain(&filename).to_string_lossy();
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
 
-    let specifier = match resolve_import(&base, &specifier, None) {
+    let specifier = match resolve_import(
+      state_rc.borrow().path_cfg.config_home(),
+      &base,
+      &specifier,
+      None,
+    ) {
       Ok(specifier) => specifier,
       Err(e) => {
         binding::throw_exception(scope, &e);
