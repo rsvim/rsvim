@@ -1,7 +1,6 @@
 use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::consts::GITHUB_ACTIONS;
-use crate::consts::GITHUB_ACTIONS_RUNNER_TEMP;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
@@ -34,12 +33,11 @@ impl TempPathConfig {
       match std::env::var(GITHUB_ACTIONS) {
         Ok(_) => {
           // Is running inside GitHub Action
-          let runner_temp = std::env::var(GITHUB_ACTIONS_RUNNER_TEMP).unwrap();
           (
-            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
-            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
-            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
-            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
+            assert_fs::TempDir::new_in(".").unwrap(),
+            assert_fs::TempDir::new_in(".").unwrap(),
+            assert_fs::TempDir::new_in(".").unwrap(),
+            assert_fs::TempDir::new_in(".").unwrap(),
           )
         }
         Err(_) => {
