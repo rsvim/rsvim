@@ -606,7 +606,10 @@ export function echoD(value) {
     // Prepare $HOME:
     // |- .rsvim.js
     // |- .rsvim/
-    //    |- util.js
+    //    |- a/index.js
+    //    |- util/index.js
+    //    |- node_modules/
+    //       |- b/index.js
     let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
     let mut event_loop = make_event_loop(
