@@ -8,10 +8,6 @@ pub const RSVIM_LOG: &str = "RSVIM_LOG";
 pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
 pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
-#[cfg(test)]
-/// Indicate the unit test is running inside GitHub Actions
-pub const GITHUB_ACTIONS: &str = "GITHUB_ACTIONS";
-
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
 /// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS`

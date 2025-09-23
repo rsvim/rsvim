@@ -1,6 +1,5 @@
 use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
-use crate::consts::GITHUB_ACTIONS;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
