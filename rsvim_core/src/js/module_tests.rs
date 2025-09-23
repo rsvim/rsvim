@@ -140,7 +140,7 @@ fn fetch_tree3() {
   let state = state_rc.borrow();
 
   let path3 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch3,
     None,
@@ -156,7 +156,7 @@ fn fetch_tree3() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
@@ -177,7 +177,7 @@ fn fetch_tree3() {
     fetch2_without_ext
   );
   let path2 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch2_without_ext,
     None,
@@ -249,7 +249,7 @@ fn fetch_tree4() {
   let state = state.borrow();
 
   let path3 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch3,
     None,
@@ -264,7 +264,7 @@ fn fetch_tree4() {
   assert!(state.module_map.get_by_suffix(&path3).is_some());
 
   let path1 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch1,
     None,
@@ -284,7 +284,7 @@ fn fetch_tree4() {
     fetch2, fetch2_without_ext
   );
   let path2 = resolve_import(
-    &tp.xdg_config_home.join("rsvim").as_path(),
+    tp.xdg_config_home.join("rsvim").as_path(),
     &tp.xdg_config_home.join("rsvim").to_string_lossy(),
     fetch2_without_ext,
     None,
