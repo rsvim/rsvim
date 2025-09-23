@@ -21,14 +21,10 @@ async fn test_queue_microtask1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -68,14 +64,10 @@ async fn test_queue_microtask2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -113,14 +105,10 @@ async fn test_queue_microtask_failed3() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -160,14 +148,10 @@ async fn test_queue_microtask_failed4() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -203,14 +187,10 @@ async fn test_report_error1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -248,14 +228,10 @@ async fn test_report_error2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
