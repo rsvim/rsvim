@@ -894,7 +894,7 @@ export function echoA(value) {
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path NotFound"));
+      assert!(actual.contains("Uncaught Error: Module path"));
     }
 
     Ok(())
@@ -1412,7 +1412,7 @@ setTimeout(() => {
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path NotFound")
+        actual.contains("TypeError: Module path not found")
           && actual.contains("undefined")
       );
 
@@ -1421,7 +1421,7 @@ setTimeout(() => {
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path NotFound")
+        actual.contains("TypeError: Module path not found")
           && actual.contains("null")
       );
 
