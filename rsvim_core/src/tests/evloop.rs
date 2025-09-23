@@ -46,9 +46,7 @@ impl TempPathConfig {
   }
 }
 
-pub fn make_configs(
-  sources: Vec<(&Path, &str)>,
-) -> (TempPathConfig, PathConfig) {
+pub fn make_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
   let tp = TempPathConfig::create();
 
   for (path, src) in sources.iter() {
@@ -57,8 +55,7 @@ pub fn make_configs(
     std::fs::write(path, src).unwrap();
   }
 
-  let path_cfg = PathConfig::new_with_temp_dirs(&tp);
-  (tp, path_cfg)
+  tp
 }
 
 pub fn make_home_configs(
