@@ -11,6 +11,9 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
+use parking_lot::RwLock;
+use parking_lot::RwLockReadGuard;
+use std::cell::RefCell;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::LazyLock;
@@ -18,8 +21,10 @@ use std::sync::mpsc::Receiver;
 use std::sync::mpsc::channel;
 use std::task::Poll;
 use std::task::Waker;
+use std::thread_local;
 use std::time::Duration;
 
+#[derive(Debug)]
 pub struct TempPathConfig {
   pub home_dir: assert_fs::TempDir,
   pub xdg_config_home: assert_fs::TempDir,
@@ -27,27 +32,20 @@ pub struct TempPathConfig {
   pub xdg_data_home: assert_fs::TempDir,
 }
 
-static TEMP_PATH_CONFIG: LazyLock<Mutex<Arc<TempPathConfig>>> =
-  LazyLock::new(|| {
-    Mutex::new(Arc::new(TempPathConfig {
-      home_dir: assert_fs::TempDir::new().unwrap(),
-      xdg_config_home: assert_fs::TempDir::new().unwrap(),
-      xdg_cache_home: assert_fs::TempDir::new().unwrap(),
-      xdg_data_home: assert_fs::TempDir::new().unwrap(),
-    }))
-  });
+thread_local! {
+  pub static TEMP_XDG_DIRS: RefCell<Option<TempPathConfig>> = RefCell::new(None);
+  pub static TEMP_PATH_CONFIG:
+}
 
 impl TempPathConfig {
-  pub fn create() -> Arc<TempPathConfig> {
-    let mut cfg = (*TEMP_PATH_CONFIG).lock();
-    *cfg = Arc::new(TempPathConfig {
+  pub fn create() {
+    let cfg = Some(TempPathConfig {
       home_dir: assert_fs::TempDir::new().unwrap(),
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     });
-
-    cfg.clone()
+    TEMP_XDG_DIRS.set(cfg);
   }
 }
 
