@@ -12,7 +12,8 @@ use std::io::Write;
 fn fetch1() {
   test_log_init();
 
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempConfigDir::create();
+  let tmpdir = tp.xdg_config_home.to_path_buf();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -52,7 +53,8 @@ fn fetch1() {
 fn fetch2() {
   test_log_init();
 
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempConfigDir::create();
+  let tmpdir = tp.xdg_config_home.to_path_buf();
 
   // Actually it's rust code...
   let src2: &str = r#"
