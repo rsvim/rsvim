@@ -5,12 +5,12 @@ use crate::js::loader::ModuleLoader;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::transpiler::TypeScript;
-// use crate::js::transpiler::Jsx;
 use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
+use std::cell::RefCell;
 
 macro_rules! path_not_found {
   ($path:expr) => {
@@ -92,7 +92,7 @@ mod async_load {
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
-  resolver: Resolver,
+  resolver: RefCell<Option<Resolver>>,
 }
 
 impl FsModuleLoader {
@@ -133,27 +133,54 @@ impl ModuleLoader for FsModuleLoader {
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(
+    &self,
+    config_home: &Path,
+    base: &str,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
+    {
+      let mut resolver = self.resolver.borrow_mut();
+      if resolver.is_none() {
+        let opts = ResolveOptions {
+          extensions: vec![
+            ".js".into(),
+            ".ts".into(),
+            ".mjs".into(),
+            ".json".into(),
+            ".wasm".into(),
+          ],
+          extension_alias: vec![
+            (".js".into(), vec![".js".into()]),
+            (".mjs".into(), vec![".mjs".into()]),
+            (".ts".into(), vec![".ts".into()]),
+            (".json".into(), vec![".json".into()]),
+            (".wasm".into(), vec![".wasm".into()]),
+          ],
+          modules: vec![
+            config_home.to_string_lossy().to_string(),
+            config_home.join("rsvim").to_string_lossy().to_string(),
+            "node_modules".to_string(),
+          ],
+          // builtin_modules: false,
+          ..ResolveOptions::default()
+        };
+        *resolver = Some(Resolver::new(opts));
+      }
+      // drop(resolver);
+    }
+
+    let resolver = self.resolver.borrow();
+    let resolver = resolver.as_ref().unwrap();
+
     let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
     );
-    match self.resolver.resolve(&base, specifier) {
+    match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => {
-        let node_modules_home = base.join("node_modules");
-        if node_modules_home.is_dir() {
-          match self.resolver.resolve(node_modules_home, specifier) {
-            Ok(resolution) => {
-              Ok(resolution.path().to_string_lossy().to_string())
-            }
-            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
-          }
-        } else {
-          anyhow::bail!(format!("Module path {:?}", e));
-        }
-      }
+      Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
     }
   }
 
