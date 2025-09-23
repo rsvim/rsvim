@@ -734,10 +734,6 @@ export function sayHello() {
   let base = path_cfg.config_home();
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
-  let expect = path_cfg
-    .config_home()
-    .join("node_modules/006_more_imports/index.js");
-  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
@@ -768,10 +764,6 @@ export function sayHello() {
   let base = path_cfg.config_home();
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports/";
-  let expect = path_cfg
-    .config_home()
-    .join("node_modules/006_more_imports/index.js");
-  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
