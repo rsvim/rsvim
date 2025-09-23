@@ -101,16 +101,13 @@ fn _xdg_data_dir(data_dir: &Path) -> PathBuf {
   data_dir.join(folder).to_path_buf()
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 /// File path related configs.
 pub struct PathConfig {
-  #[allow(dead_code)]
   config_entry: Option<PathBuf>,
-  #[allow(dead_code)]
   config_home: PathBuf,
-  #[allow(dead_code)]
   cache_home: PathBuf,
-  #[allow(dead_code)]
   data_home: PathBuf,
 }
 
