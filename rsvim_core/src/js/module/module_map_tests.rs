@@ -1853,7 +1853,7 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1861,18 +1861,8 @@ export default {};
       (pkg5, pkg_src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
