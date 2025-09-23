@@ -29,27 +29,12 @@ pub struct TempPathConfig {
 
 impl TempPathConfig {
   pub fn create() -> Self {
-    let (home_dir, xdg_config_home, xdg_cache_home, xdg_data_home) =
-      match std::env::var(GITHUB_ACTIONS) {
-        Ok(_) => {
-          // Is running inside GitHub Action
-          (
-            assert_fs::TempDir::new_in(".").unwrap(),
-            assert_fs::TempDir::new_in(".").unwrap(),
-            assert_fs::TempDir::new_in(".").unwrap(),
-            assert_fs::TempDir::new_in(".").unwrap(),
-          )
-        }
-        Err(_) => {
-          // Is running on local machine
-          (
-            assert_fs::TempDir::new().unwrap(),
-            assert_fs::TempDir::new().unwrap(),
-            assert_fs::TempDir::new().unwrap(),
-            assert_fs::TempDir::new().unwrap(),
-          )
-        }
-      };
+    let (home_dir, xdg_config_home, xdg_cache_home, xdg_data_home) = (
+      assert_fs::TempDir::new_in(".").unwrap(),
+      assert_fs::TempDir::new_in(".").unwrap(),
+      assert_fs::TempDir::new_in(".").unwrap(),
+      assert_fs::TempDir::new_in(".").unwrap(),
+    );
 
     Self {
       home_dir,
