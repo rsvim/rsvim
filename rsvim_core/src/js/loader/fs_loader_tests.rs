@@ -769,16 +769,34 @@ export function sayHello() {
   let base = path_cfg.config_home();
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports/";
+  let expect = path_cfg
+    .config_home()
+    .join("node_modules/006_more_imports/index.js");
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
+  let aloader = AsyncFsModuleLoader::new();
 
   let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   info!(
-    "base:{:?},specifier:{:?},actual:{:?}",
-    base, specifier, actual
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+    base, specifier, actual, expect
   );
-  assert!(actual.is_err());
+  assert!(actual.is_ok());
+  let actual = actual.unwrap();
+  assert_eq!(
+    Path::new(&actual).normalize().unwrap(),
+    Path::new(&expect).normalize().unwrap()
+  );
+
+  let actual_module1 = loader.load(&actual);
+  assert!(actual_module1.is_ok());
+  assert_eq!(actual_module1.unwrap(), src);
+
+  let actual_module2 = aloader.load(&actual).await;
+  assert!(actual_module2.is_ok());
+  assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[tokio::test]
