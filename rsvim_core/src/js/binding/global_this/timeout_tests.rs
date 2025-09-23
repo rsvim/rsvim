@@ -23,14 +23,10 @@ async fn test_timeout1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before evaluating javascript configs
   {
@@ -80,14 +76,10 @@ async fn test_timeout2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before evaluating javascript configs
   {
@@ -139,14 +131,10 @@ async fn test_timeout3() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before evaluating javascript configs
   {
@@ -216,14 +204,10 @@ async fn test_timeout4() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before evaluating javascript configs
   {
@@ -275,14 +259,10 @@ async fn test_timeout5() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   // Before evaluating javascript configs
   {
@@ -333,14 +313,10 @@ async fn test_interval1() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -386,14 +362,10 @@ async fn test_interval2() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop
@@ -444,14 +416,10 @@ async fn test_interval3() -> IoResult<()> {
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let (_tp, path_cfg) = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
-  let mut event_loop = make_event_loop(
-    terminal_cols,
-    terminal_rows,
-    CliOptions::empty(),
-    path_cfg,
-  );
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
   event_loop.initialize()?;
   event_loop

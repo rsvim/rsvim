@@ -24,7 +24,6 @@ pub mod transpiler;
 mod module_tests;
 
 use crate::buf::BuffersManagerArc;
-use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::content::TextContentsArc;
 use crate::msg;
@@ -374,7 +373,6 @@ pub mod boost {
     // pub wake_event_queued: bool,
 
     // Data Access for RSVIM {
-    pub path_cfg: PathConfig,
     pub master_tx: Sender<MasterMessage>,
     pub jsrt_rx: Receiver<JsMessage>,
     pub cli_opts: CliOptions,
@@ -419,7 +417,6 @@ pub mod boost {
       snapshot: SnapshotData,
       startup_moment: Instant,
       time_origin: u128,
-      path_cfg: PathConfig,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opts: CliOptions,
@@ -473,7 +470,6 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
-        path_cfg,
         master_tx,
         jsrt_rx,
         cli_opts,
@@ -511,7 +507,6 @@ pub mod boost {
       options: JsRuntimeOptions,
       startup_moment: Instant,
       time_origin: u128,
-      path_cfg: PathConfig,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opt: CliOptions,
@@ -549,7 +544,6 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
-        path_cfg,
         master_tx,
         jsrt_rx,
         cli_opts: cli_opt,
@@ -960,11 +954,7 @@ pub fn execute_module(
   let path = if source.is_some() {
     filename.to_string()
   } else {
-    let base = JsRuntime::state(scope)
-      .borrow()
-      .path_cfg
-      .config_home()
-      .to_path_buf();
+    let base = PATH_CONFIG.config_home().to_path_buf();
     match resolve_import(&base.to_string_lossy(), filename, None) {
       Ok(specifier) => specifier,
       Err(e) => {

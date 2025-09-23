@@ -5,7 +5,6 @@ use crate::js::loader::ModuleLoader;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::transpiler::TypeScript;
-// use crate::js::transpiler::Jsx;
 use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
@@ -112,6 +111,15 @@ impl FsModuleLoader {
         (".json".into(), vec![".json".into()]),
         (".wasm".into(), vec![".wasm".into()]),
       ],
+      modules: vec![
+        PATH_CONFIG.config_home().to_string_lossy().to_string(),
+        PATH_CONFIG
+          .config_home()
+          .join("node_modules")
+          .to_string_lossy()
+          .to_string(),
+        "node_modules".to_string(),
+      ],
       // builtin_modules: false,
       ..ResolveOptions::default()
     };
@@ -139,21 +147,10 @@ impl ModuleLoader for FsModuleLoader {
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
       base, specifier
     );
+
     match self.resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => {
-        let node_modules_home = base.join("node_modules");
-        if node_modules_home.is_dir() {
-          match self.resolver.resolve(node_modules_home, specifier) {
-            Ok(resolution) => {
-              Ok(resolution.path().to_string_lossy().to_string())
-            }
-            Err(e) => anyhow::bail!(format!("Module path {:?}", e)),
-          }
-        } else {
-          anyhow::bail!(format!("Module path {:?}", e));
-        }
-      }
+      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
     }
   }
 

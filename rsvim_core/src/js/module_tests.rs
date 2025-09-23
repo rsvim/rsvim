@@ -1,11 +1,9 @@
 use super::module::*;
-use crate::cfg::path_cfg::PathConfig;
 use crate::js::JsRuntime;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
-use assert_fs::TempDir;
 use std::io::Write;
 
 #[test]
@@ -13,7 +11,8 @@ use std::io::Write;
 fn fetch1() {
   test_log_init();
 
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempConfigDir::create();
+  let tmpdir = tp.xdg_config_home.to_path_buf();
 
   let src1: &str = r#"
   export const PI = 3.14159;
@@ -34,7 +33,7 @@ fn fetch1() {
     fp.flush().unwrap();
   }
 
-  let mut jsrt = make_js_runtime(PathConfig::new());
+  let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module(&mut scope, &fetch1.to_string_lossy(), None);
   assert!(actual1.is_some());
@@ -53,7 +52,8 @@ fn fetch1() {
 fn fetch2() {
   test_log_init();
 
-  let tmpdir = TempDir::new().unwrap();
+  let tp = TempConfigDir::create();
+  let tmpdir = tp.xdg_config_home.to_path_buf();
 
   // Actually it's rust code...
   let src2: &str = r#"
@@ -71,7 +71,7 @@ fn fetch2() {
     fp.flush().unwrap();
   }
 
-  let mut jsrt = make_js_runtime(PathConfig::new());
+  let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual2 = fetch_module(&mut scope, &fetch2.to_string_lossy(), None);
   assert!(actual2.is_none());
@@ -112,14 +112,14 @@ fn fetch_tree3() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  let (tp, _path_cfg) = make_configs(vec![
+  let tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new(fetch1), src1),
     (Path::new(fetch2), src2),
     (Path::new(fetch3), src3),
   ]);
 
-  let mut jsrt = make_js_runtime(PathConfig::new());
+  let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,
@@ -218,14 +218,14 @@ fn fetch_tree4() {
   // - fetch3.js
   // - util/pi.js
   // - util/add.ts
-  let (tp, _path_cfg) = make_configs(vec![
+  let tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new(fetch1), src1),
     (Path::new(fetch2), src2),
     (Path::new(fetch3), src3),
   ]);
 
-  let mut jsrt = make_js_runtime(PathConfig::new());
+  let mut jsrt = make_js_runtime();
   let mut scope = jsrt.handle_scope();
   let actual1 = fetch_module_tree(
     &mut scope,

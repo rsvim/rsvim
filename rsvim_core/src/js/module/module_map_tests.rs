@@ -38,14 +38,10 @@ mod test_static_import {
     // Prepare $RSVIM_CONFIG:
     // - rsvim.js
     // - util.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     // Before running
     {
@@ -102,20 +98,10 @@ mod test_static_import {
     // Prepare $RSVIM_CONFIG
     // - rsvim.js
     // - util.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -194,7 +180,7 @@ mod test_static_import {
     //          |- echo.js
     //          |- calc.js
     //
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -202,18 +188,8 @@ mod test_static_import {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -296,7 +272,7 @@ export function echoD(value) {
     //    |- c.js
     //    |- d.js
     //
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -304,18 +280,8 @@ export function echoD(value) {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -394,7 +360,7 @@ export function echoD(value) {
     //          |- echo.js
     //          |- calc.js
     //
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -402,18 +368,8 @@ export function echoD(value) {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -433,6 +389,160 @@ export function echoD(value) {
         Some("9".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn xdg_config_dir6() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+
+    let p1 = Path::new("rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+
+  a.echo(6);
+  b.echo(6);
+    "#;
+
+    let p2 = Path::new("node_modules/utils/index.js");
+    let src2: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    let p3 = Path::new("node_modules/a/index.js");
+    let src3: &str = r#"
+    import {echo} from "utils";
+
+    export default { echo };
+    "#;
+
+    let p4 = Path::new("b/index.js");
+    let src4: &str = r#"
+    import {echo} from "utils";
+
+    export default {echo};
+    "#;
+
+    // Prepare $RSVIM_CONFIG:
+    // |- rsvim.js
+    // |- b/index.js
+    // |- node_modules/
+    //    |- utils/index.js
+    //    |- a/index.js
+    //
+    let _tp =
+      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(2, contents.command_line_message_history().occupied_len());
+      for _i in 0..2 {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert_eq!(actual, "6");
+      }
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn xdg_config_dir7() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+
+    let p1 = Path::new("rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+
+  a.echo(6);
+  b.echo(6);
+    "#;
+
+    let p2 = Path::new("utils/index.js");
+    let src2: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    let p3 = Path::new("a/index.js");
+    let src3: &str = r#"
+    import {echo} from "utils";
+
+    export default { echo };
+    "#;
+
+    let p4 = Path::new("node_modules/b/index.js");
+    let src4: &str = r#"
+    import {echo} from "utils";
+
+    export default {echo};
+    "#;
+
+    // Prepare $RSVIM_CONFIG:
+    // |- rsvim.js
+    // |- b/index.js
+    // |- node_modules/
+    //    |- utils/index.js
+    //    |- a/index.js
+    //
+    let _tp =
+      make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      assert_eq!(2, contents.command_line_message_history().occupied_len());
+      for _i in 0..2 {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert_eq!(actual, "6");
+      }
     }
 
     Ok(())
@@ -464,14 +574,10 @@ export function echoD(value) {
     // |- .rsvim/
     //    |- rsvim.js
     //    |- util.js
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     // Before running
     {
@@ -529,20 +635,10 @@ export function echoD(value) {
     // |- .rsvim.js
     // |- .rsvim/
     //    |- util.js
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -562,6 +658,185 @@ export function echoD(value) {
         Some("1".to_compact_string()),
         contents.command_line_message_history_mut().try_pop()
       );
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir3() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/node_modules/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p3 = Path::new(".rsvim/node_modules/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p4 = Path::new(".rsvim/node_modules/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- node_modules/
+    //       |- a/index.js
+    //       |- b/index.js
+    //       |- util/index.js
+    let _tp =
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(2, n);
+      for _i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir4() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p2_2 = Path::new(".rsvim/a/package.json");
+    let src2_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    let p3 = Path::new(".rsvim/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p3_2 = Path::new(".rsvim/b/package.json");
+    let src3_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    let p4 = Path::new(".rsvim/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    let p4_2 = Path::new(".rsvim/util/package.json");
+    let src4_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- a/index.js
+    //    |- b/index.js
+    //    |- util/index.js
+    let _tp = make_home_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p2_2, src2_2),
+      (p3, src3),
+      (p3_2, src3_2),
+      (p4, src4),
+      (p4_2, src4_2),
+    ]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      info!("home_dir3 n:{:?}", n);
+      assert_eq!(2, n);
+      for i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        info!("home_dir3 i:{:?},actual:{:?}", i, actual);
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
     }
 
     Ok(())
@@ -596,20 +871,10 @@ export function echoA(value) {
     //    |- utils/
     //       |- a.js
     //
-    let (_tp, path_cfg) = make_home_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_home_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -617,7 +882,7 @@ export function echoA(value) {
       .await?;
     event_loop.shutdown()?;
 
-    // After running
+    // After
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
@@ -626,9 +891,189 @@ export function echoA(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path NotFound"));
+      assert!(actual.contains("Uncaught Error: Module path"));
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir5() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+    let p2_2 = Path::new(".rsvim/a/package.json");
+    let src2_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    let p3 = Path::new(".rsvim/node_modules/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+    let p3_2 = Path::new(".rsvim/node_modules/b/package.json");
+    let src3_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    let p4 = Path::new(".rsvim/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+    let p4_2 = Path::new(".rsvim/util/package.json");
+    let src4_2: &str = r#"
+    {
+      "exports": "./index.js"
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- util/index.js
+    //    |- node_modules/
+    //       |- a/index.js
+    //       |- b/index.js
+    let _tp = make_home_configs(vec![
+      (p1, src1),
+      (p2, src2),
+      (p2_2, src2_2),
+      (p3, src3),
+      (p3_2, src3_2),
+      (p4, src4),
+      (p4_2, src4_2),
+    ]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      info!("home_dir4 n:{:?}", n);
+      assert_eq!(2, n);
+      for i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        info!("home_dir4 i:{:?},actual:{:?}", i, actual);
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn home_dir6() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
+
+    let p1 = Path::new(".rsvim/rsvim.js");
+    let src1: &str = r#"
+  import a from "a";
+  import b from "b";
+  a.echo(1);
+  b.echo(2);
+    "#;
+
+    let p2 = Path::new(".rsvim/node_modules/a/index.js");
+    let src2: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p3 = Path::new(".rsvim/b/index.js");
+    let src3: &str = r#"
+    import {echo} from "util";
+    export default { echo };
+    "#;
+
+    let p4 = Path::new(".rsvim/node_modules/util/index.js");
+    let src4: &str = r#"
+    export function echo(value) {
+        Rsvim.cmd.echo(value);
+    }
+    "#;
+
+    // Prepare $HOME:
+    // |- .rsvim/
+    //    |- rsvim.js
+    //    |- node_modules/
+    //       |- a/index.js
+    //       |- b/index.js
+    //       |- util/index.js
+    let _tp =
+      make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After
+    {
+      let state_rc = event_loop.js_runtime.get_state();
+      let state = state_rc.borrow();
+      info!("module_map:{:#?}", state.module_map);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      info!("home_dir5 n:{:?}", n);
+      assert_eq!(2, n);
+      for i in 0..n {
+        let actual = contents.command_line_message_history_mut().try_pop();
+        info!("home_dir5 i:{:?},actual:{:?}", i, actual);
+        assert!(actual.is_some());
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
+      }
     }
 
     Ok(())
@@ -688,7 +1133,7 @@ export function echoA(value) {
     //          |- echo.js
     //          |- calc.js
     //
-    let (_tp, path_cfg) = make_home_configs(vec![
+    let _tp = make_home_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -696,18 +1141,8 @@ export function echoA(value) {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -715,7 +1150,7 @@ export function echoA(value) {
       .await?;
     event_loop.shutdown()?;
 
-    // After running
+    // After
     {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
@@ -724,9 +1159,10 @@ export function echoA(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path NotFound"));
+      assert!(actual.contains("Uncaught Error: Module path"));
     }
 
     Ok(())
@@ -797,20 +1233,10 @@ export function echoMain(value) {
     // |- utils/
     //    |- a.js
     //
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg.clone(),
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -833,18 +1259,18 @@ export function echoMain(value) {
       info!("url:{:?}", actual);
       info!(
         "path_cfg config_entry:{:?}, config_home:{:?}",
-        path_cfg.config_entry(),
-        path_cfg.config_home()
+        PATH_CONFIG.config_entry(),
+        PATH_CONFIG.config_home()
       );
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_entry()
             .unwrap()
             .to_string_lossy()
             .to_string(),
         ) && actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -864,13 +1290,13 @@ export function echoMain(value) {
       info!("filename:{:?}", actual);
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_entry()
             .unwrap()
             .to_string_lossy()
             .to_string()
         ) && actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -884,9 +1310,10 @@ export function echoMain(value) {
       let actual = dirname.unwrap();
       info!("dirname:{:?}", actual);
       assert!(
-        actual.contains(&path_cfg.config_home().to_string_lossy().to_string())
+        actual
+          .contains(&PATH_CONFIG.config_home().to_string_lossy().to_string())
           && actual.contains(
-            &path_cfg
+            &PATH_CONFIG
               .config_home()
               .join("utils")
               .to_string_lossy()
@@ -907,7 +1334,7 @@ export function echoMain(value) {
       info!("resolve:{:?}", actual);
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -960,20 +1387,10 @@ setTimeout(() => {
     // Prepare $RSVIM_CONFIG
     // |- rsvim.js
     //
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1)]);
+    let _tp = make_configs(vec![(p1, src1)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -995,7 +1412,7 @@ setTimeout(() => {
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path NotFound")
+        actual.contains("TypeError: Module path not found")
           && actual.contains("undefined")
       );
 
@@ -1004,7 +1421,7 @@ setTimeout(() => {
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path NotFound")
+        actual.contains("TypeError: Module path not found")
           && actual.contains("null")
       );
 
@@ -1057,20 +1474,10 @@ mod test_dynamic_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1130,20 +1537,10 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1236,7 +1633,7 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1244,18 +1641,8 @@ Rsvim.rt.exit(0);
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1329,21 +1716,11 @@ try {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) =
+    let _tp =
       make_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1433,7 +1810,7 @@ export function echoD(value) {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1441,18 +1818,8 @@ export function echoD(value) {
       (p5, src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1538,7 +1905,7 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1546,18 +1913,8 @@ export default {};
       (pkg5, pkg_src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1643,7 +2000,7 @@ export default {};
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![
+    let _tp = make_configs(vec![
       (p1, src1),
       (p2, src2),
       (p3, src3),
@@ -1651,18 +2008,8 @@ export default {};
       (pkg5, pkg_src5),
     ]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1717,20 +2064,10 @@ mod test_require {
     // Prepare $RSVIM_CONFIG:
     // - rsvim.js
     // - util.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop

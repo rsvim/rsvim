@@ -116,6 +116,8 @@ fn import_meta_resolve(
     return;
   }
 
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
   let base = args.data().to_rust_string_lossy(scope);
   let base = paths::parent_or_remain(&base).to_string_lossy();
   let specifier = args.get(0).to_rust_string_lossy(scope);
@@ -123,7 +125,7 @@ fn import_meta_resolve(
     "|import_meta_resolve| base:{:?}, specifier:{:?}",
     base, specifier
   );
-  let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
+  let import_map = state.options.import_map.clone();
 
   match resolve_import(&base, &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),

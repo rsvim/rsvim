@@ -117,12 +117,12 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
-      - name: Test
-        run: |
-          cargo test --workspace
+      # - name: Test
+      #   run: |
+      #     cargo test --workspace
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Nextest with code coverage
+      - name: Test with code coverage
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info

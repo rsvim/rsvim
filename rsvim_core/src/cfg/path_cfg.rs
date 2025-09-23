@@ -137,15 +137,16 @@ impl PathConfig {
   }
 
   #[cfg(test)]
-  pub fn new_with_temp_dirs(tp: &TempPathConfig) -> Self {
+  pub fn _new_with_temp_path(tp: &TempPathConfig) -> Self {
     Self::_new_internal(
-      tp.xdg_config_home.to_path_buf(),
-      tp.home_dir.to_path_buf(),
-      tp.xdg_cache_home.to_path_buf(),
-      tp.xdg_data_home.to_path_buf(),
+      tp.xdg_config_home.clone(),
+      tp.home_dir.clone(),
+      tp.xdg_cache_home.clone(),
+      tp.xdg_data_home.clone(),
     )
   }
 
+  #[cfg(not(test))]
   /// User config entry path, it can be either one of following files:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}`
@@ -157,26 +158,69 @@ impl PathConfig {
   /// 2. The detect priority is from higher to lower: 1st > 2nd > 3rd.
   /// 3. The 1st config home is `$XDG_CONFIG_HOME/rsvim`, the 2nd and 3rd config home is
   ///    `$HOME/.rsvim`.
-  pub fn config_entry(&self) -> Option<&Path> {
-    self.config_entry.as_deref()
+  pub fn config_entry(&self) -> &Option<PathBuf> {
+    &self.config_entry
   }
 
+  #[cfg(test)]
+  pub fn config_entry(&self) -> Option<PathBuf> {
+    use crate::tests::evloop::TEMP_PATH_CONFIG;
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .config_entry
+        .clone()
+    })
+  }
+
+  #[cfg(not(test))]
   /// User config home directory, it can be either one of following directories:
   ///
   /// 1. `$XDG_CONFIG_HOME/rsvim/`
   /// 2. `$HOME/.rsvim/`
-  pub fn config_home(&self) -> &Path {
-    self.config_home.as_path()
+  pub fn config_home(&self) -> &PathBuf {
+    &self.config_home
   }
 
+  #[cfg(test)]
+  pub fn config_home(&self) -> PathBuf {
+    use crate::tests::evloop::TEMP_PATH_CONFIG;
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .config_home
+        .clone()
+    })
+  }
+
+  #[cfg(not(test))]
   /// Cache home directory, i.e. `$XDG_CACHE_HOME/rsvim`.
-  pub fn cache_home(&self) -> &Path {
-    self.cache_home.as_path()
+  pub fn cache_home(&self) -> &PathBuf {
+    &self.cache_home
   }
 
+  #[cfg(test)]
+  pub fn cache_home(&self) -> PathBuf {
+    use crate::tests::evloop::TEMP_PATH_CONFIG;
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .cache_home
+        .clone()
+    })
+  }
+
+  #[cfg(not(test))]
   /// Data home directory, i.e. `$XDG_DATA_HOME/rsvim`.
-  pub fn data_home(&self) -> &Path {
-    self.data_home.as_path()
+  pub fn data_home(&self) -> &PathBuf {
+    &self.data_home
+  }
+
+  #[cfg(test)]
+  pub fn data_home(&self) -> PathBuf {
+    use crate::tests::evloop::TEMP_PATH_CONFIG;
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .data_home
+        .clone()
+    })
   }
 }
 

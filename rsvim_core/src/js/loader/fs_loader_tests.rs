@@ -20,13 +20,13 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 005_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("005_more_imports.js"), src),
   ]);
 
   let base: Option<&str> = None;
-  let specifier = path_cfg.config_home().join("005_more_imports.js");
+  let specifier = PATH_CONFIG.config_home().join("005_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
@@ -34,7 +34,7 @@ export function sayHello() {
   let aloader = AsyncFsModuleLoader {};
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), &specifier);
   info!(
     "base:{:?},specifier:{:?},actual:{:?}",
     base, specifier, actual,
@@ -69,15 +69,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/005_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core").join("tests");
+  let base = PATH_CONFIG.config_home().join("core").join("tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports.js";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core")
     .join("tests")
@@ -123,15 +123,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/006_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests/");
+  let base = PATH_CONFIG.config_home().join("core/tests/");
   let base = base.to_string_lossy().to_string();
   let specifier = "../006_more_imports.js";
-  let expect = path_cfg.config_home().join("core/006_more_imports.js");
+  let expect = PATH_CONFIG.config_home().join("core/006_more_imports.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -173,13 +173,13 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports.js"), src),
   ]);
 
-  let base = path_cfg.config_home().to_string_lossy().to_string();
-  let specifier = path_cfg
+  let base = PATH_CONFIG.config_home().to_string_lossy().to_string();
+  let specifier = PATH_CONFIG
     .config_home()
     .join("core/tests/006_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
@@ -216,14 +216,14 @@ fn file_path_failed4() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports.js"), ""),
   ]);
 
-  let base = path_cfg.config_home().join("../core/tests/");
+  let base = PATH_CONFIG.config_home().join("../core/tests/");
   let base = base.to_string_lossy().to_string();
-  let specifier = path_cfg
+  let specifier = PATH_CONFIG
     .config_home()
     .join("../core/tests/006_more_imports.js");
   let specifier = specifier.to_string_lossy().to_string();
@@ -250,13 +250,13 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 006_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("006_more_imports.js"), src),
   ]);
 
   let specifier = "./006_more_imports.js";
-  let expect = path_cfg.config_home().join("006_more_imports.js");
+  let expect = PATH_CONFIG.config_home().join("006_more_imports.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
@@ -264,7 +264,7 @@ export function sayHello() {
   let aloader = AsyncFsModuleLoader {};
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -286,7 +286,7 @@ export function sayHello() {
 }
 
 #[test]
-fn file_path_failed5() {
+fn file_path6() {
   test_log_init();
 
   let src: &str = r#"
@@ -298,19 +298,43 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 006_more_imports.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("006_more_imports.js"), src),
   ]);
 
   let specifier = "006_more_imports.js";
+  let expect = PATH_CONFIG.config_home().join("006_more_imports.js");
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
-  assert!(actual.is_err());
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+    PATH_CONFIG.config_home(),
+    specifier,
+    actual,
+    expect
+  );
+  assert!(actual.is_ok());
+  let actual = actual.unwrap();
+  assert!(
+    Path::new(&actual)
+      .normalize()
+      .unwrap()
+      .as_path()
+      .to_string_lossy()
+      .contains(&expect)
+      || Path::new(&expect)
+        .normalize()
+        .unwrap()
+        .as_path()
+        .to_string_lossy()
+        .contains(&actual)
+  );
 }
 
 #[tokio::test]
@@ -327,15 +351,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests/");
+  let base = PATH_CONFIG.config_home().join("core/tests/");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core/tests/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -379,15 +403,15 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests");
+  let base = PATH_CONFIG.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "../006_more_imports/";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -431,14 +455,14 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports/index.js"), src),
   ]);
 
-  let specifier = path_cfg.config_home().join("core/006_more_imports/");
+  let specifier = PATH_CONFIG.config_home().join("core/006_more_imports/");
   let specifier = specifier.to_string_lossy().to_string();
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -448,7 +472,7 @@ export function sayHello() {
   let aloader = AsyncFsModuleLoader {};
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), &specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -483,16 +507,18 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests");
+  let base = PATH_CONFIG.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
-  let specifier = path_cfg.config_home().join("core/tests/006_more_imports/");
+  let specifier = PATH_CONFIG
+    .config_home()
+    .join("core/tests/006_more_imports/");
   let specifier = specifier.to_string_lossy().to_string();
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core/tests/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -535,12 +561,12 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests");
+  let base = PATH_CONFIG.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
 
@@ -564,14 +590,16 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests");
+  let base = PATH_CONFIG.config_home().join("core/tests");
   let base = base.to_string_lossy().to_string();
-  let specifier = path_cfg.config_home().join("core/tests/006_more_imports");
+  let specifier = PATH_CONFIG
+    .config_home()
+    .join("core/tests/006_more_imports");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
@@ -594,19 +622,19 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/006_more_imports/lib.js"), src),
   ]);
 
-  let specifier = path_cfg.config_home().join("core/006_more_imports/");
+  let specifier = PATH_CONFIG.config_home().join("core/006_more_imports/");
   let specifier = specifier.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), &specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), &specifier);
   assert!(actual.is_err());
 }
 
@@ -631,7 +659,7 @@ export function sayHello() {
   // - rsvim.js
   // - core/tests/006_more_imports/lib/index.js
   // - core/tests/006_more_imports/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports/lib/index.js"), src),
     (
@@ -640,10 +668,10 @@ export function sayHello() {
     ),
   ]);
 
-  let base = path_cfg.config_home().join("core/tests/");
+  let base = PATH_CONFIG.config_home().join("core/tests/");
   let base = base.to_string_lossy().to_string();
   let specifier = "./006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("core/tests/006_more_imports/lib/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -675,7 +703,7 @@ export function sayHello() {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn npm_package2() {
+async fn npm_package_failed2_1() {
   test_log_init();
 
   let src: &str = r#"
@@ -687,42 +715,94 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - node_modules/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("node_modules/006_more_imports/index.js"), src),
   ]);
 
-  let base = path_cfg.config_home();
+  let base = PATH_CONFIG.config_home();
   let base = base.to_string_lossy().to_string();
-  let specifier = "./006_more_imports/";
-  let expect = path_cfg
+  let specifier = "./006_more_imports";
+  let expect = PATH_CONFIG
     .config_home()
     .join("node_modules/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
-  let aloader = AsyncFsModuleLoader {};
+  // let aloader = AsyncFsModuleLoader {};
 
   let actual = loader.resolve(&base, specifier);
-  assert!(actual.is_ok());
-  let actual = actual.unwrap();
   info!(
     "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
-    base, specifier, actual, expect,
+    base, specifier, actual, expect
   );
-  assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
+  assert!(actual.is_err());
+  // let actual = actual.unwrap();
+  // assert_eq!(
+  //   Path::new(&actual).normalize().unwrap(),
+  //   Path::new(&expect).normalize().unwrap()
+  // );
+  //
+  // let actual_module1 = loader.load(&actual);
+  // assert!(actual_module1.is_ok());
+  // assert_eq!(actual_module1.unwrap(), src);
+  //
+  // let actual_module2 = aloader.load(&actual).await;
+  // assert!(actual_module2.is_ok());
+  // assert_eq!(actual_module2.unwrap(), src);
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn npm_package_failed2_2() {
+  test_log_init();
+
+  let src: &str = r#"
+export function sayHello() {
+    console.log('Hello, World!');
+}
+"#;
+
+  // Prepare $RSVIM_CONFIG:
+  // - rsvim.js
+  // - node_modules/006_more_imports/index.js
+  let _tp = make_configs(vec![
+    (Path::new("rsvim.js"), ""),
+    (Path::new("node_modules/006_more_imports/index.js"), src),
+  ]);
+
+  let base = PATH_CONFIG.config_home();
+  let base = base.to_string_lossy().to_string();
+  let specifier = "./006_more_imports/";
+  let expect = PATH_CONFIG
+    .config_home()
+    .join("node_modules/006_more_imports/index.js");
+  let expect = expect.to_string_lossy().to_string();
+
+  // Run tests.
+  let loader = FsModuleLoader::new();
+  // let aloader = AsyncFsModuleLoader {};
+
+  let actual = loader.resolve(&base, specifier);
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
+    base, specifier, actual, expect
   );
-
-  let actual_module1 = loader.load(&actual);
-  assert!(actual_module1.is_ok());
-  assert_eq!(actual_module1.unwrap(), src);
-
-  let actual_module2 = aloader.load(&actual).await;
-  assert!(actual_module2.is_ok());
-  assert_eq!(actual_module2.unwrap(), src);
+  assert!(actual.is_err());
+  // let actual = actual.unwrap();
+  // assert_eq!(
+  //   Path::new(&actual).normalize().unwrap(),
+  //   Path::new(&expect).normalize().unwrap()
+  // );
+  //
+  // let actual_module1 = loader.load(&actual);
+  // assert!(actual_module1.is_ok());
+  // assert_eq!(actual_module1.unwrap(), src);
+  //
+  // let actual_module2 = aloader.load(&actual).await;
+  // assert!(actual_module2.is_ok());
+  // assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[tokio::test]
@@ -739,13 +819,13 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - node_modules/006_more_imports/index.js
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("node_modules/006_more_imports/index.js"), src),
   ]);
 
   let specifier = "006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("node_modules/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -755,7 +835,7 @@ export function sayHello() {
   let aloader = AsyncFsModuleLoader {};
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -797,14 +877,14 @@ export function sayHello() {
   // - rsvim.js
   // - node_modules/006_more_imports/index.js
   // - node_modules/006_more_imports/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("node_modules/006_more_imports/index.js"), src),
     (Path::new("node_modules/006_more_imports/package.json"), pkg),
   ]);
 
   let specifier = "006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("node_modules/006_more_imports/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -814,7 +894,7 @@ export function sayHello() {
   let aloader = AsyncFsModuleLoader {};
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!(
@@ -856,7 +936,7 @@ export function sayHello() {
   // - rsvim.js
   // - node_modules/006_more_imports/dist/index.js
   // - node_modules/006_more_imports/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (
       Path::new("node_modules/006_more_imports/dist/index.js"),
@@ -865,10 +945,10 @@ export function sayHello() {
     (Path::new("node_modules/006_more_imports/package.json"), pkg),
   ]);
 
-  let base = path_cfg.config_home();
+  let base = PATH_CONFIG.config_home();
   let base = base.to_string_lossy().to_string();
   let specifier = "006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("node_modules/006_more_imports/dist/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -919,7 +999,7 @@ export function sayHello() {
   // - rsvim.js
   // - node_modules/006_more_imports/dist/index.js
   // - node_modules/006_more_imports/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (
       Path::new("node_modules/006_more_imports/dist/index.js"),
@@ -928,10 +1008,10 @@ export function sayHello() {
     (Path::new("node_modules/006_more_imports/package.json"), pkg),
   ]);
 
-  let base = path_cfg.config_home().join("node_modules");
+  let base = PATH_CONFIG.config_home().join("node_modules");
   let base = base.to_string_lossy().to_string();
   let specifier = "006_more_imports";
-  let expect = path_cfg
+  let expect = PATH_CONFIG
     .config_home()
     .join("node_modules/006_more_imports/dist/index.js");
   let expect = expect.to_string_lossy().to_string();
@@ -982,7 +1062,7 @@ export function sayHello() {
   // - rsvim.js
   // - node_modules/006_more_imports/index.js
   // - node_modules/006_more_imports/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("node_modules/006_more_imports/index.js"), src),
     (Path::new("node_modules/006_more_imports/package.json"), pkg),
@@ -994,7 +1074,7 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
 
   let actual =
-    loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+    loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
   assert!(actual.is_err());
 }
 
@@ -1019,7 +1099,7 @@ export function sayHello() {
   // - rsvim.js
   // - node_modules/os/index.js
   // - node_modules/os/package.json
-  let (_tp, path_cfg) = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("node_modules/os/index.js"), src),
     (Path::new("node_modules/os/package.json"), pkg),
@@ -1034,7 +1114,7 @@ export function sayHello() {
   // os
   {
     let specifier = "os";
-    let expect = path_cfg.config_home().join("node_modules/os/index.js");
+    let expect = PATH_CONFIG.config_home().join("node_modules/os/index.js");
     let expect = expect.to_string_lossy().to_string();
 
     // Run tests.
@@ -1042,7 +1122,7 @@ export function sayHello() {
     let aloader = AsyncFsModuleLoader {};
 
     let actual =
-      loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+      loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
@@ -1066,7 +1146,7 @@ export function sayHello() {
   // fs
   {
     let specifier = "fs";
-    let expect = path_cfg.config_home().join("node_modules/fs/index.js");
+    let expect = PATH_CONFIG.config_home().join("node_modules/fs/index.js");
     let expect = expect.to_string_lossy().to_string();
 
     // Run tests.
@@ -1074,7 +1154,7 @@ export function sayHello() {
     let aloader = AsyncFsModuleLoader {};
 
     let actual =
-      loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+      loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
@@ -1098,7 +1178,7 @@ export function sayHello() {
   // net
   {
     let specifier = "net";
-    let expect = path_cfg.config_home().join("node_modules/net/index.js");
+    let expect = PATH_CONFIG.config_home().join("node_modules/net/index.js");
     let expect = expect.to_string_lossy().to_string();
 
     // Run tests.
@@ -1106,7 +1186,7 @@ export function sayHello() {
     let aloader = AsyncFsModuleLoader {};
 
     let actual =
-      loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+      loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
@@ -1130,7 +1210,7 @@ export function sayHello() {
   // path
   {
     let specifier = "path";
-    let expect = path_cfg.config_home().join("node_modules/path/index.js");
+    let expect = PATH_CONFIG.config_home().join("node_modules/path/index.js");
     let expect = expect.to_string_lossy().to_string();
 
     // Run tests.
@@ -1138,7 +1218,7 @@ export function sayHello() {
     let aloader = AsyncFsModuleLoader {};
 
     let actual =
-      loader.resolve(&path_cfg.config_home().to_string_lossy(), specifier);
+      loader.resolve(&PATH_CONFIG.config_home().to_string_lossy(), specifier);
     assert!(actual.is_ok());
     let actual = actual.unwrap();
     info!(
