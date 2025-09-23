@@ -11,8 +11,6 @@ use std::time::Duration;
 
 #[cfg(test)]
 mod test_static_import {
-  use std::slice::ChunksExactMut;
-
   use super::*;
 
   #[tokio::test]
