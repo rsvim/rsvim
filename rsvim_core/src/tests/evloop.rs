@@ -44,7 +44,7 @@ impl TempPathConfig {
     };
 
     TEMP_PATH_CONFIG.with(|p| {
-      let p = p.borrow_mut();
+      let mut p = p.borrow_mut();
       *p = Some(PathConfig::_new_with_temp_dirs(&temp_dirs));
     });
 
