@@ -639,7 +639,7 @@ export function echoD(value) {
         let actual = contents.command_line_message_history_mut().try_pop();
         info!("home_dir3 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
-        let actual = actual.unwrap();
+        // let actual = actual.unwrap();
         // assert!(actual == "1" || actual == "2");
       }
     }
