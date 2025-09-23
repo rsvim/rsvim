@@ -20,7 +20,7 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - 005_more_imports.js
-  let tp = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("005_more_imports.js"), src),
   ]);
@@ -69,7 +69,7 @@ export function sayHello() {
   // Prepare $RSVIM_CONFIG:
   // - rsvim.js
   // - core/tests/005_more_imports.js
-  let tp = make_configs(vec![
+  let _tp = make_configs(vec![
     (Path::new("rsvim.js"), ""),
     (Path::new("core/tests/006_more_imports.js"), src),
   ]);
