@@ -1,5 +1,7 @@
 use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
+use crate::consts::GITHUB_ACTION;
+use crate::consts::GITHUB_ACTION_RUNNER_TEMP;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
@@ -28,10 +30,28 @@ pub struct TempPathConfig {
 
 impl TempPathConfig {
   pub fn create() -> Self {
-    let home_dir = assert_fs::TempDir::new().unwrap();
-    let xdg_config_home = assert_fs::TempDir::new().unwrap();
-    let xdg_cache_home = assert_fs::TempDir::new().unwrap();
-    let xdg_data_home = assert_fs::TempDir::new().unwrap();
+    let (home_dir, xdg_config_home, xdg_cache_home, xdg_data_home) =
+      match std::env::var(GITHUB_ACTION) {
+        Ok(_) => {
+          // Is running inside GitHub Action
+          let runner_temp = std::env::var(GITHUB_ACTION_RUNNER_TEMP).unwrap();
+          (
+            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
+            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
+            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
+            assert_fs::TempDir::new_in(&runner_temp).unwrap(),
+          )
+        }
+        Err(_) => {
+          // Is running on local machine
+          (
+            assert_fs::TempDir::new().unwrap(),
+            assert_fs::TempDir::new().unwrap(),
+            assert_fs::TempDir::new().unwrap(),
+            assert_fs::TempDir::new().unwrap(),
+          )
+        }
+      };
 
     Self {
       home_dir,
