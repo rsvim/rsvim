@@ -168,7 +168,7 @@ impl PathConfig {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
     TEMP_PATH_CONFIG.with_borrow(|tp| {
       Self::_new_with_temp_path(tp.as_ref().unwrap())
-        .config_entry()
+        .config_entry
         .clone()
     })
   }
@@ -187,7 +187,7 @@ impl PathConfig {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
     TEMP_PATH_CONFIG.with_borrow(|tp| {
       Self::_new_with_temp_path(tp.as_ref().unwrap())
-        .config_home()
+        .config_home
         .clone()
     })
   }
@@ -203,7 +203,7 @@ impl PathConfig {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
     TEMP_PATH_CONFIG.with_borrow(|tp| {
       Self::_new_with_temp_path(tp.as_ref().unwrap())
-        .cache_home()
+        .cache_home
         .clone()
     })
   }
@@ -219,7 +219,7 @@ impl PathConfig {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
     TEMP_PATH_CONFIG.with_borrow(|tp| {
       Self::_new_with_temp_path(tp.as_ref().unwrap())
-        .data_home()
+        .data_home
         .clone()
     })
   }
