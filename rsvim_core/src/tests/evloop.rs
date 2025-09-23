@@ -11,7 +11,6 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
-use parking_lot::ReentrantMutex;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::LazyLock;
