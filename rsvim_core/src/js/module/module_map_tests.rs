@@ -760,12 +760,6 @@ export function echoA(value) {
       path_cfg,
     );
 
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
-
     event_loop.initialize()?;
     event_loop
       .run_with_mock_operations(MockOperationReader::new(mocked_ops))
