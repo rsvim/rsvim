@@ -681,7 +681,7 @@ export function echoD(value) {
 
     let terminal_cols = 10_u16;
     let terminal_rows = 10_u16;
-    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(100))];
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(300))];
 
     let p1 = Path::new(".rsvim/rsvim.js");
     let src1: &str = r#"
