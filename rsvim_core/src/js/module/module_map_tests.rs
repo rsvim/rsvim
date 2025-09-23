@@ -505,7 +505,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       let n = contents.command_line_message_history().occupied_len();
       assert_eq!(2, n);
-      for i in 0..n {
+      for _i in 0..n {
         let actual = contents.command_line_message_history_mut().try_pop();
         assert!(actual.is_some());
         let actual = actual.unwrap();
