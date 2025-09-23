@@ -1207,18 +1207,18 @@ export function echoMain(value) {
       info!("url:{:?}", actual);
       info!(
         "path_cfg config_entry:{:?}, config_home:{:?}",
-        path_cfg.config_entry(),
-        path_cfg.config_home()
+        PATH_CONFIG.config_entry(),
+        PATH_CONFIG.config_home()
       );
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_entry()
             .unwrap()
             .to_string_lossy()
             .to_string(),
         ) && actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -1238,13 +1238,13 @@ export function echoMain(value) {
       info!("filename:{:?}", actual);
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_entry()
             .unwrap()
             .to_string_lossy()
             .to_string()
         ) && actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -1258,9 +1258,10 @@ export function echoMain(value) {
       let actual = dirname.unwrap();
       info!("dirname:{:?}", actual);
       assert!(
-        actual.contains(&path_cfg.config_home().to_string_lossy().to_string())
+        actual
+          .contains(&PATH_CONFIG.config_home().to_string_lossy().to_string())
           && actual.contains(
-            &path_cfg
+            &PATH_CONFIG
               .config_home()
               .join("utils")
               .to_string_lossy()
@@ -1281,7 +1282,7 @@ export function echoMain(value) {
       info!("resolve:{:?}", actual);
       assert!(
         actual.contains(
-          &path_cfg
+          &PATH_CONFIG
             .config_home()
             .join("utils")
             .join("a.js")
@@ -1334,20 +1335,10 @@ setTimeout(() => {
     // Prepare $RSVIM_CONFIG
     // |- rsvim.js
     //
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1)]);
+    let _tp = make_configs(vec![(p1, src1)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1431,20 +1422,10 @@ mod test_dynamic_import {
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -1504,20 +1485,10 @@ Rsvim.rt.exit(0);
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
-    let (_tp, path_cfg) = make_configs(vec![(p1, src1), (p2, src2)]);
+    let _tp = make_configs(vec![(p1, src1), (p2, src2)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
-
-    // Before running
-    {
-      let contents = lock!(event_loop.contents);
-      assert!(contents.command_line_message_history().is_empty());
-    }
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
