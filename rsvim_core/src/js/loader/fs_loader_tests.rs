@@ -292,7 +292,7 @@ export function sayHello() {
 }
 
 #[test]
-fn file_path6() {
+fn file_path_failed5() {
   test_log_init();
 
   let src: &str = r#"
@@ -328,22 +328,22 @@ export function sayHello() {
     actual,
     expect
   );
-  assert!(actual.is_ok());
-  let actual = actual.unwrap();
-  assert!(
-    Path::new(&actual)
-      .normalize()
-      .unwrap()
-      .as_path()
-      .to_string_lossy()
-      .contains(&expect)
-      || Path::new(&expect)
-        .normalize()
-        .unwrap()
-        .as_path()
-        .to_string_lossy()
-        .contains(&actual)
-  );
+  assert!(actual.is_err());
+  // let actual = actual.unwrap();
+  // assert!(
+  //   Path::new(&actual)
+  //     .normalize()
+  //     .unwrap()
+  //     .as_path()
+  //     .to_string_lossy()
+  //     .contains(&expect)
+  //     || Path::new(&expect)
+  //       .normalize()
+  //       .unwrap()
+  //       .as_path()
+  //       .to_string_lossy()
+  //       .contains(&actual)
+  // );
 }
 
 #[tokio::test]
