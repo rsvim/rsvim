@@ -34,18 +34,20 @@ pub struct TempPathConfig {
 
 thread_local! {
   pub static TEMP_XDG_DIRS: RefCell<Option<TempPathConfig>> = RefCell::new(None);
-  pub static TEMP_PATH_CONFIG:
+
+  pub static TEMP_PATH_CONFIG: RefCell<Option<PathConfig>> = RefCell::new(None);
 }
 
 impl TempPathConfig {
   pub fn create() {
-    let cfg = Some(TempPathConfig {
+    let temp_dirs = TempPathConfig {
       home_dir: assert_fs::TempDir::new().unwrap(),
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
-    });
-    TEMP_XDG_DIRS.set(cfg);
+    };
+    TEMP_XDG_DIRS.set(Some(temp_dirs));
+    TEMP_PATH_CONFIG.set(Some(PathConfig::_new_with_temp_dirs(&temp_dirs)));
   }
 }
 
