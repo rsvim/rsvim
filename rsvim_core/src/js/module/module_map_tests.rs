@@ -918,15 +918,11 @@ export function echoA(value) {
     //       |- a/index.js
     //       |- b/index.js
     //       |- util/index.js
-    let (_tp, path_cfg) =
+    let _tp =
       make_home_configs(vec![(p1, src1), (p2, src2), (p3, src3), (p4, src4)]);
 
-    let mut event_loop = make_event_loop(
-      terminal_cols,
-      terminal_rows,
-      CliOptions::empty(),
-      path_cfg,
-    );
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
     event_loop.initialize()?;
     event_loop
@@ -935,9 +931,7 @@ export function echoA(value) {
     event_loop.shutdown()?;
 
     // After
-    // FIXME: I have no idea why this test would always fail on GitHub Actions,
-    // I have to skip it now! Somebody help me fix it!
-    if !is_github_actions() {
+    {
       let state_rc = event_loop.js_runtime.get_state();
       let state = state_rc.borrow();
       info!("module_map:{:#?}", state.module_map);
