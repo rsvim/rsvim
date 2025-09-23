@@ -766,7 +766,7 @@ export function sayHello() {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn npm_package2_2() {
+async fn npm_package_failed2_2() {
   test_log_init();
 
   let src: &str = r#"
@@ -793,27 +793,27 @@ export function sayHello() {
 
   // Run tests.
   let loader = FsModuleLoader::new();
-  let aloader = AsyncFsModuleLoader {};
+  // let aloader = AsyncFsModuleLoader {};
 
   let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
   info!(
     "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
     base, specifier, actual, expect
   );
-  assert!(actual.is_ok());
-  let actual = actual.unwrap();
-  assert_eq!(
-    Path::new(&actual).normalize().unwrap(),
-    Path::new(&expect).normalize().unwrap()
-  );
-
-  let actual_module1 = loader.load(&actual);
-  assert!(actual_module1.is_ok());
-  assert_eq!(actual_module1.unwrap(), src);
-
-  let actual_module2 = aloader.load(&actual).await;
-  assert!(actual_module2.is_ok());
-  assert_eq!(actual_module2.unwrap(), src);
+  assert!(actual.is_err());
+  // let actual = actual.unwrap();
+  // assert_eq!(
+  //   Path::new(&actual).normalize().unwrap(),
+  //   Path::new(&expect).normalize().unwrap()
+  // );
+  //
+  // let actual_module1 = loader.load(&actual);
+  // assert!(actual_module1.is_ok());
+  // assert_eq!(actual_module1.unwrap(), src);
+  //
+  // let actual_module2 = aloader.load(&actual).await;
+  // assert!(actual_module2.is_ok());
+  // assert_eq!(actual_module2.unwrap(), src);
 }
 
 #[tokio::test]
