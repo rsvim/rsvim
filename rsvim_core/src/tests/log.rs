@@ -42,11 +42,11 @@ pub fn init() {
       .with_writer(std::io::stdout)
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
-  });
 
-  log::info!(
-    "GITHUB_ACTION:{:?},RUNNER_TEMP:{:?}",
-    std::env::var(GITHUB_ACTION),
-    std::env::var(GITHUB_ACTION_RUNNER_TEMP)
-  );
+    log::info!(
+      "GITHUB_ACTION:{:?},RUNNER_TEMP:{:?}",
+      std::env::var(GITHUB_ACTION),
+      std::env::var(GITHUB_ACTION_RUNNER_TEMP)
+    );
+  });
 }
