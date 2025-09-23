@@ -30,7 +30,7 @@ pub struct TempPathConfig {
 }
 
 thread_local! {
-  pub static TEMP_PATH_CONFIG: RefCell<Option<PathConfig>> = RefCell::new(None);
+  pub static TEMP_PATH_CONFIG: RefCell<Option<PathConfig>> = const{ RefCell::new(None) };
 }
 
 impl TempPathConfig {
