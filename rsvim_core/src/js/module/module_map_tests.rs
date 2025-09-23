@@ -634,13 +634,13 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       let n = contents.command_line_message_history().occupied_len();
       info!("home_dir3 n:{:?}", n);
-      // assert_eq!(2, n);
+      assert_eq!(2, n);
       for i in 0..n {
         let actual = contents.command_line_message_history_mut().try_pop();
         info!("home_dir3 i:{:?},actual:{:?}", i, actual);
         assert!(actual.is_some());
-        // let actual = actual.unwrap();
-        // assert!(actual == "1" || actual == "2");
+        let actual = actual.unwrap();
+        assert!(actual == "1" || actual == "2");
       }
     }
 

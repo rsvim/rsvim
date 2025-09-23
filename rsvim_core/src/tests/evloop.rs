@@ -19,6 +19,10 @@ use std::task::Poll;
 use std::task::Waker;
 use std::time::Duration;
 
+pub fn is_github_actions() -> bool {
+  std::env::var("GITHUB_ACTIONS").is_ok()
+}
+
 pub struct TempPathConfig {
   pub home_dir: assert_fs::TempDir,
   pub xdg_config_home: assert_fs::TempDir,
