@@ -1,6 +1,6 @@
 // use super::path_cfg::*;
 use crate::prelude::*;
-use crate::tests::evloop::TempPathConfig;
+use crate::tests::evloop::TempConfigDir;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
 
@@ -8,7 +8,7 @@ use std::io::Write;
 fn test1() {
   test_log_init();
 
-  let tp = TempPathConfig::create();
+  let tp = TempConfigDir::create();
 
   // Prepare config home/entry
   {
@@ -53,7 +53,7 @@ fn test1() {
 fn test2() {
   test_log_init();
 
-  let tp = TempPathConfig::create();
+  let tp = TempConfigDir::create();
 
   // Prepare config home/entry
   {
@@ -98,7 +98,7 @@ fn test2() {
 fn test3() {
   test_log_init();
 
-  let tp = TempPathConfig::create();
+  let tp = TempConfigDir::create();
 
   // Prepare config home/entry
   {

@@ -138,12 +138,12 @@ impl PathConfig {
   }
 
   #[cfg(test)]
-  pub fn _new_with_temp_dirs(tp: &TempPathConfig) -> Self {
+  pub fn _new_with_temp_path(tp: &TempPathConfig) -> Self {
     Self::_new_internal(
-      tp.xdg_config_home.to_path_buf(),
-      tp.home_dir.to_path_buf(),
-      tp.xdg_cache_home.to_path_buf(),
-      tp.xdg_data_home.to_path_buf(),
+      tp.xdg_config_home.clone(),
+      tp.home_dir.clone(),
+      tp.xdg_cache_home.clone(),
+      tp.xdg_data_home.clone(),
     )
   }
 
@@ -166,7 +166,11 @@ impl PathConfig {
   #[cfg(test)]
   pub fn config_entry(&self) -> Option<PathBuf> {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    (*TEMP_PATH_CONFIG).lock().config_entry().clone()
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .config_entry()
+        .clone()
+    })
   }
 
   #[cfg(not(test))]
@@ -181,7 +185,11 @@ impl PathConfig {
   #[cfg(test)]
   pub fn config_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    (*TEMP_PATH_CONFIG).lock().config_home().clone()
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .config_home()
+        .clone()
+    })
   }
 
   #[cfg(not(test))]
@@ -193,7 +201,11 @@ impl PathConfig {
   #[cfg(test)]
   pub fn cache_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    (*TEMP_PATH_CONFIG).lock().cache_home().clone()
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .cache_home()
+        .clone()
+    })
   }
 
   #[cfg(not(test))]
@@ -205,7 +217,11 @@ impl PathConfig {
   #[cfg(test)]
   pub fn data_home(&self) -> PathBuf {
     use crate::tests::evloop::TEMP_PATH_CONFIG;
-    (*TEMP_PATH_CONFIG).lock().data_home().clone()
+    TEMP_PATH_CONFIG.with_borrow(|tp| {
+      Self::_new_with_temp_path(tp.as_ref().unwrap())
+        .data_home()
+        .clone()
+    })
   }
 }
 

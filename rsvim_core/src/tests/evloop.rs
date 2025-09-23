@@ -1,4 +1,4 @@
-use crate::cfg::path_cfg::PathConfig;
+// use crate::cfg::path_cfg::PathConfig;
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
@@ -11,44 +11,60 @@ use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use jiff::Zoned;
 use parking_lot::Mutex;
+use std::cell::RefCell;
 use std::path::Path;
 use std::sync::Arc;
-use std::sync::LazyLock;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::channel;
 use std::task::Poll;
 use std::task::Waker;
+use std::thread_local;
 use std::time::Duration;
 
 #[derive(Debug)]
-pub struct TempPathConfig {
+pub struct TempConfigDir {
   pub home_dir: assert_fs::TempDir,
   pub xdg_config_home: assert_fs::TempDir,
   pub xdg_cache_home: assert_fs::TempDir,
   pub xdg_data_home: assert_fs::TempDir,
 }
 
-pub static TEMP_PATH_CONFIG: LazyLock<Mutex<PathConfig>> =
-  LazyLock::new(|| Mutex::new(PathConfig::new()));
+#[derive(Debug, Clone)]
+pub struct TempPathConfig {
+  pub home_dir: PathBuf,
+  pub xdg_config_home: PathBuf,
+  pub xdg_cache_home: PathBuf,
+  pub xdg_data_home: PathBuf,
+}
 
-impl TempPathConfig {
+thread_local! {
+  pub static TEMP_PATH_CONFIG: RefCell<Option<TempPathConfig>> = const { RefCell::new(None) };
+}
+
+impl TempConfigDir {
   pub fn create() -> Self {
-    let temp_dirs = TempPathConfig {
+    let temp_dirs = TempConfigDir {
       home_dir: assert_fs::TempDir::new().unwrap(),
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
 
-    let mut temp = (*TEMP_PATH_CONFIG).lock();
-    *temp = PathConfig::_new_with_temp_dirs(&temp_dirs);
+    let temp_path = TempPathConfig {
+      home_dir: temp_dirs.home_dir.to_path_buf(),
+      xdg_config_home: temp_dirs.xdg_config_home.to_path_buf(),
+      xdg_cache_home: temp_dirs.xdg_cache_home.to_path_buf(),
+      xdg_data_home: temp_dirs.xdg_data_home.to_path_buf(),
+    };
+
+    TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
 
     temp_dirs
   }
 }
 
-pub fn make_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
-  let tp = TempPathConfig::create();
+pub fn make_configs(sources: Vec<(&Path, &str)>) -> TempConfigDir {
+  let tp = TempConfigDir::create();
 
   for (path, src) in sources.iter() {
     let path = tp.xdg_config_home.child("rsvim").child(path);
@@ -59,8 +75,8 @@ pub fn make_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
   tp
 }
 
-pub fn make_home_configs(sources: Vec<(&Path, &str)>) -> TempPathConfig {
-  let tp = TempPathConfig::create();
+pub fn make_home_configs(sources: Vec<(&Path, &str)>) -> TempConfigDir {
+  let tp = TempConfigDir::create();
 
   for (path, src) in sources.iter() {
     let path = tp.home_dir.child(path);
