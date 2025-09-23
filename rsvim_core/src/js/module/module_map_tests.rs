@@ -957,10 +957,10 @@ export function echoA(value) {
     // Prepare $HOME:
     // |- .rsvim/
     //    |- rsvim.js
+    //    |- util/index.js
     //    |- node_modules/
     //       |- a/index.js
     //       |- b/index.js
-    //       |- util/index.js
     let _tp = make_home_configs(vec![
       (p1, src1),
       (p2, src2),
