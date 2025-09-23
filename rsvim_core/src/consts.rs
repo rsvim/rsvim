@@ -8,8 +8,10 @@ pub const RSVIM_LOG: &str = "RSVIM_LOG";
 pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
 pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
+#[cfg(test)]
 /// GitHub Actions
 pub const GITHUB_ACTION: &str = "GITHUB_ACTION";
+#[cfg(test)]
 pub const GITHUB_ACTION_RUNNER_TEMP: &str = "RUNNER_TEMP";
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
