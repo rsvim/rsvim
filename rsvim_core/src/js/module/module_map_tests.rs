@@ -475,8 +475,8 @@ export function echoD(value) {
     "#;
 
     // Prepare $HOME:
-    // |- .rsvim.js
     // |- .rsvim/
+    //    |- rsvim.js
     //    |- a/index.js
     //    |- b/index.js
     //    |- util/index.js
@@ -552,8 +552,8 @@ export function echoD(value) {
     "#;
 
     // Prepare $HOME:
-    // |- .rsvim.js
     // |- .rsvim/
+    //    |- rsvim.js
     //    |- a/index.js
     //    |- util/index.js
     //    |- node_modules/
