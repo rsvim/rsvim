@@ -292,7 +292,7 @@ export function sayHello() {
 }
 
 #[test]
-fn file_path_failed5() {
+fn file_path6() {
   test_log_init();
 
   let src: &str = r#"
@@ -310,6 +310,8 @@ export function sayHello() {
   ]);
 
   let specifier = "006_more_imports.js";
+  let expect = path_cfg.config_home().join("006_more_imports.js");
+  let expect = expect.to_string_lossy().to_string();
 
   // Run tests.
   let loader = FsModuleLoader::new();
@@ -320,12 +322,15 @@ export function sayHello() {
     specifier,
   );
   info!(
-    "base:{:?},specifier:{:?},actual:{:?},expect:None",
+    "base:{:?},specifier:{:?},actual:{:?},expect:{:?}",
     path_cfg.config_home(),
     path_cfg.config_home().to_string_lossy(),
     actual,
+    expect
   );
-  assert!(actual.is_err());
+  assert!(actual.is_ok());
+  let actual = actual.unwrap();
+  assert_eq!(actual, expect);
 }
 
 #[tokio::test]
