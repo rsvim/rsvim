@@ -2,6 +2,8 @@
 //!
 //! NOTE: This module should only be used in unit tests, not some where else.
 
+use crate::consts::GITHUB_ACTION;
+use crate::consts::GITHUB_ACTION_RUNNER_TEMP;
 use crate::consts::RSVIM_LOG;
 use std::sync::Once;
 
@@ -41,4 +43,10 @@ pub fn init() {
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   });
+
+  log::info!(
+    "GITHUB_ACTION:{:?},RUNNER_TEMP:{:?}",
+    std::env::var(GITHUB_ACTION),
+    std::env::var(GITHUB_ACTION_RUNNER_TEMP)
+  );
 }
