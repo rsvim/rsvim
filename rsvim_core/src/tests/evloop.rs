@@ -31,7 +31,7 @@ pub struct TempPathConfig {
 }
 
 thread_local! {
-  pub static TEMP_PATH_CONFIG: Rc<RefCell<Option<PathConfig>>> = const{ Rc::new(RefCell::new(None)) };
+  pub static TEMP_PATH_CONFIG: Rc<RefCell<Option<PathConfig>>> = Rc::new(RefCell::new(None));
 }
 
 impl TempPathConfig {
@@ -42,7 +42,12 @@ impl TempPathConfig {
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
-    TEMP_PATH_CONFIG.set(Some(PathConfig::_new_with_temp_dirs(&temp_dirs)));
+
+    TEMP_PATH_CONFIG.with(|p| {
+      let p = p.borrow_mut();
+      *p = Some(PathConfig::_new_with_temp_dirs(&temp_dirs));
+    });
+
     temp_dirs
   }
 }
