@@ -166,9 +166,7 @@ impl ModuleLoader for FsModuleLoader {
 
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => {
-        anyhow::bail!(format!("Module path {:?}", e));
-      }
+      Err(_) => path_not_found!(specifier),
     }
 
     // if let Ok(resolution) = resolution {
