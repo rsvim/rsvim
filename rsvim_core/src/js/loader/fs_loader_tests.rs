@@ -739,6 +739,11 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
 
   let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?}",
+    base, specifier, actual
+  );
+
   assert!(actual.is_err());
 }
 
@@ -769,6 +774,10 @@ export function sayHello() {
   let loader = FsModuleLoader::new();
 
   let actual = loader.resolve(path_cfg.config_home(), &base, specifier);
+  info!(
+    "base:{:?},specifier:{:?},actual:{:?}",
+    base, specifier, actual
+  );
   assert!(actual.is_err());
 }
 
