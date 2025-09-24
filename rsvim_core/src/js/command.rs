@@ -12,7 +12,7 @@ use compact_str::ToCompactString;
 
 const JS_COMMAND_NAME: &str = "js";
 pub type ExCommandCallback =
-  (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
+  v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
 
 #[derive(Debug, Clone)]
 /// Ex command execution instance
@@ -20,13 +20,11 @@ pub struct BuiltinExCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
   pub body: CompactString,
-  pub is_builtin_js: bool,
 }
 
 impl JsFuture for BuiltinExCommandFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("|ExCommand| run:{:?}", self.task_id);
-    debug_assert!(self.is_builtin_js);
+    trace!("|BuiltinExCommandFuture| run:{:?}", self.task_id);
     let filename = format!("<command{}>", self.task_id);
 
     match execute_module(scope, &filename, Some(self.body.trim())) {
@@ -53,8 +51,7 @@ impl JsFuture for BuiltinExCommandFuture {
 pub struct UserExCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub body: ExCommandCallback,
-  pub is_builtin_js: bool,
+  pub cb: v8::Global<v8::Function>,
 }
 
 #[derive(Debug, Default)]
@@ -87,14 +84,12 @@ impl ExCommandsManager {
         task_id,
         name,
         body,
-        is_builtin_js,
       })
     } else if self.commands.contains_key(&name) {
       Some(BuiltinExCommandFuture {
         task_id,
         name,
         body,
-        is_builtin_js,
       })
     } else {
       None

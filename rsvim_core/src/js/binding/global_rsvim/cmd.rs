@@ -36,3 +36,19 @@ pub fn echo(
   let state = state_rc.borrow();
   send_cmdline_message(&state, message.to_compact_string());
 }
+
+/// `Rsvim.cmd.create` API.
+pub fn create(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  mut _rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  let name = args.get(0).to_rust_string_lossy(scope);
+  let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
+  // trace!("echo: {:?}", message);
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow();
+  send_cmdline_message(&state, message.to_compact_string());
+}
