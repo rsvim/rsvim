@@ -46,11 +46,11 @@ impl JsFuture for BuiltinExCommandFuture {
   }
 }
 
-pub type JsCommand = (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
+pub type ExCommand = (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
 
 #[derive(Debug, Default)]
 pub struct ExCommandsManager {
-  commands: FoldMap<CompactString, JsCommand>,
+  commands: FoldMap<CompactString, ExCommand>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
