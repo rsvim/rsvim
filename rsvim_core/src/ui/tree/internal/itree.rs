@@ -16,20 +16,20 @@ pub struct Relationships {
   root_id: TreeNodeId,
 
   // Maps node id => its parent node id.
-  parent_id: HashMap<TreeNodeId, TreeNodeId>,
+  parent_id: FoldMap<TreeNodeId, TreeNodeId>,
 
   // Maps node id => all its children node ids.
-  children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>>,
+  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 }
 
 impl Relationships {
   pub fn new(root_id: TreeNodeId) -> Self {
-    let mut children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>> = HashMap::new();
+    let mut children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>> = FoldMap::new();
     children_ids.insert(root_id, Vec::new());
 
     Self {
       root_id,
-      parent_id: HashMap::new(),
+      parent_id: FoldMap::new(),
       children_ids,
     }
   }
