@@ -51,7 +51,7 @@ impl JsFuture for BuiltinExCommandFuture {
 pub struct UserExCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub cb: v8::Global<v8::Function>,
+  pub cb: Rc<v8::Global<v8::Function>>,
 }
 
 #[derive(Debug, Default)]

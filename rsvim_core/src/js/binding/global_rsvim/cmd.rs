@@ -30,7 +30,7 @@ pub fn echo(
 ) {
   debug_assert!(args.length() == 1);
   let message = args.get(0).to_rust_string_lossy(scope);
-  // trace!("echo: {:?}", message);
+  trace!("Rsvim.cmd.echo:{:?}", message);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
@@ -46,7 +46,8 @@ pub fn create(
   debug_assert!(args.length() == 2);
   let name = args.get(0).to_rust_string_lossy(scope);
   let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
-  // trace!("echo: {:?}", message);
+  let callback = Rc::new(v8::Global::new(scope, callback));
+  trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
