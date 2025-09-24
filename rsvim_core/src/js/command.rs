@@ -46,9 +46,11 @@ impl JsFuture for ExCommandFuture {
   }
 }
 
+pub type JsCommand = (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
+
 #[derive(Debug, Default)]
 pub struct ExCommandsManager {
-  commands: FoldSet<CompactString>,
+  commands: FoldMap<CompactString, JsCommand>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
@@ -71,14 +73,14 @@ impl ExCommandsManager {
     let is_builtin_js = name == JS_COMMAND_NAME;
     let task_id = next_task_id();
     if is_builtin_js {
-      debug_assert!(!self.commands.contains(&name));
+      debug_assert!(!self.commands.contains_key(&name));
       Some(ExCommandFuture {
         task_id,
         name,
         body,
         is_builtin_js,
       })
-    } else if self.commands.contains(&name) {
+    } else if self.commands.contains_key(&name) {
       Some(ExCommandFuture {
         task_id,
         name,
