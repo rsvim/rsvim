@@ -64,14 +64,14 @@ impl Mode {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 /// The modes collection.
 pub struct Modes {
-  values: HashSet<Mode>,
+  values: FoldSet<Mode>,
 }
 
 impl Modes {
   /// Make a new modes collection with no mode inside.
   pub fn new() -> Self {
     Modes {
-      values: HashSet::new(),
+      values: FoldSet::new(),
     }
   }
 
@@ -121,7 +121,7 @@ impl Modes {
 
   /// Get the iterator of current collection.
   ///
-  /// NOTE: The internal collection is [`HashSet`] and the iterator is non-ordered.
+  /// NOTE: The internal collection is [`FoldSet`] and the iterator is non-ordered.
   pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Mode> {
     self.values.iter()
   }
@@ -130,7 +130,7 @@ impl Modes {
 impl From<Mode> for Modes {
   /// Create a collection from a mode.
   fn from(mode: Mode) -> Self {
-    let mut values = HashSet::new();
+    let mut values = FoldSet::new();
     values.insert(mode);
     Modes { values }
   }
@@ -139,7 +139,7 @@ impl From<Mode> for Modes {
 impl From<Vec<Mode>> for Modes {
   /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
-    let mut values = HashSet::new();
+    let mut values = FoldSet::new();
     for m in modes.iter() {
       values.insert(*m);
     }

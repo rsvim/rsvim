@@ -354,9 +354,9 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending timers.
-    pub pending_timers: HashMap<JsTimerId, TimerCallback>,
+    pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
-    pub pending_import_loaders: HashMap<JsTaskId, TaskCallback>,
+    pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -461,8 +461,8 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        pending_timers: HashMap::new(),
-        pending_import_loaders: HashMap::new(),
+        pending_timers: FoldMap::new(),
+        pending_import_loaders: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -535,8 +535,8 @@ pub mod boost {
       let state = JsRuntimeState::to_rc(JsRuntimeState {
         context,
         module_map: ModuleMap::new(),
-        pending_timers: HashMap::new(),
-        pending_import_loaders: HashMap::new(),
+        pending_timers: FoldMap::new(),
+        pending_import_loaders: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,

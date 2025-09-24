@@ -24,7 +24,7 @@ use std::ffi::c_void;
 // type BindingInitFn = fn(&mut v8::HandleScope<'_>) -> v8::Global<v8::Object>;
 //
 // lazy_static! {
-//   pub static ref BINDINGS: HashMap<&'static str, BindingInitFn> = {
+//   pub static ref BINDINGS: FoldMap<&'static str, BindingInitFn> = {
 //     let bindings: Vec<(&'static str, BindingInitFn)> = vec![
 //       ("stdio", stdio::initialize),
 //       ("timers", timers::initialize),
@@ -37,7 +37,7 @@ use std::ffi::c_void;
 //       ("signals", signals::initialize),
 //       ("exceptions", exceptions::initialize),
 //     ];
-//     HashMap::from_iter(bindings.into_iter())
+//     FoldMap::from_iter(bindings.into_iter())
 //   };
 // }
 

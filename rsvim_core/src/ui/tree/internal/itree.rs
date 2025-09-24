@@ -16,20 +16,20 @@ pub struct Relationships {
   root_id: TreeNodeId,
 
   // Maps node id => its parent node id.
-  parent_id: HashMap<TreeNodeId, TreeNodeId>,
+  parent_id: FoldMap<TreeNodeId, TreeNodeId>,
 
   // Maps node id => all its children node ids.
-  children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>>,
+  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 }
 
 impl Relationships {
   pub fn new(root_id: TreeNodeId) -> Self {
-    let mut children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>> = HashMap::new();
+    let mut children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>> = FoldMap::new();
     children_ids.insert(root_id, Vec::new());
 
     Self {
       root_id,
-      parent_id: HashMap::new(),
+      parent_id: FoldMap::new(),
       children_ids,
     }
   }
@@ -101,7 +101,7 @@ impl Relationships {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
     child_zindex: usize,
-    nodes: &HashMap<TreeNodeId, T>,
+    nodes: &FoldMap<TreeNodeId, T>,
   ) where
     T: Inodeable,
   {
@@ -207,7 +207,7 @@ where
   T: Inodeable,
 {
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<TreeNodeId, T>,
+  nodes: FoldMap<TreeNodeId, T>,
 
   // Maps parent and children edges. The parent edge weight is negative, children edges are
   // positive. The edge weight of each child is increased with the order when they are inserted,
@@ -273,7 +273,7 @@ where
 {
   pub fn new(root_node: T) -> Self {
     let root_id = root_node.id();
-    let mut nodes = HashMap::new();
+    let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
     let relationships = RefCell::new(Relationships::new(root_id));
     Itree {
@@ -316,7 +316,7 @@ where
         children_ids
           .iter()
           .cloned()
-          .collect::<HashSet<TreeNodeId>>()
+          .collect::<FoldSet<TreeNodeId>>()
           .len()
       );
       for c in children_ids {
