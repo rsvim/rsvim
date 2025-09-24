@@ -88,48 +88,73 @@ mod async_load {
   }
 }
 
+#[allow(dead_code)]
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
   resolver: Resolver,
 }
 
+fn create_resolve_opts() -> ResolveOptions {
+  ResolveOptions {
+    extensions: vec![
+      ".js".into(),
+      ".ts".into(),
+      ".mjs".into(),
+      ".json".into(),
+      ".wasm".into(),
+    ],
+    extension_alias: vec![
+      (".js".into(), vec![".js".into()]),
+      (".mjs".into(), vec![".mjs".into()]),
+      (".ts".into(), vec![".ts".into()]),
+      (".json".into(), vec![".json".into()]),
+      (".wasm".into(), vec![".wasm".into()]),
+    ],
+    modules: vec![
+      PATH_CONFIG.config_home().to_string_lossy().to_string(),
+      PATH_CONFIG
+        .config_home()
+        .join("node_modules")
+        .to_string_lossy()
+        .to_string(),
+      "node_modules".to_string(),
+    ],
+    // builtin_modules: false,
+    ..ResolveOptions::default()
+  }
+}
+
 impl FsModuleLoader {
   pub fn new() -> Self {
-    let opts = ResolveOptions {
-      extensions: vec![
-        ".js".into(),
-        ".ts".into(),
-        ".mjs".into(),
-        ".json".into(),
-        ".wasm".into(),
-      ],
-      extension_alias: vec![
-        (".js".into(), vec![".js".into()]),
-        (".mjs".into(), vec![".mjs".into()]),
-        (".ts".into(), vec![".ts".into()]),
-        (".json".into(), vec![".json".into()]),
-        (".wasm".into(), vec![".wasm".into()]),
-      ],
-      modules: vec![
-        PATH_CONFIG.config_home().to_string_lossy().to_string(),
-        PATH_CONFIG
-          .config_home()
-          .join("node_modules")
-          .to_string_lossy()
-          .to_string(),
-        "node_modules".to_string(),
-      ],
-      // builtin_modules: false,
-      ..ResolveOptions::default()
-    };
     Self {
-      resolver: Resolver::new(opts),
+      resolver: Resolver::new(create_resolve_opts()),
+    }
+  }
+}
+
+impl FsModuleLoader {
+  fn resolve_impl(
+    &self,
+    resolver: &Resolver,
+    base: &str,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
+    let base = Path::new(base).to_path_buf();
+    trace!(
+      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
+      base, specifier
+    );
+
+    match resolver.resolve(&base, specifier) {
+      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
+      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
     }
   }
 }
 
 impl ModuleLoader for FsModuleLoader {
+  #[cfg(not(test))]
   /// Resolve module path by specifier in local filesystem.
   ///
   /// It tries to resolve npm packages, thus we can directly use npm registry to maintain plugins.
@@ -142,16 +167,13 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
-    let base = Path::new(base).to_path_buf();
-    trace!(
-      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
-      base, specifier
-    );
+    self.resolve_impl(&self.resolver, base, specifier)
+  }
 
-    match self.resolver.resolve(&base, specifier) {
-      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
-    }
+  #[cfg(test)]
+  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+    let resolver = Resolver::new(create_resolve_opts());
+    self.resolve_impl(&resolver, base, specifier)
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.

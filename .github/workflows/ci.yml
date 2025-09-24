@@ -117,9 +117,9 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy llvm-tools
       - uses: actions/checkout@v5
-      # - name: Test
-      #   run: |
-      #     cargo test --workspace
+      - name: Test
+        run: |
+          cargo test --workspace
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
       - name: Test with code coverage
