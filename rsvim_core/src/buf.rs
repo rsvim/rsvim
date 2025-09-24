@@ -151,7 +151,7 @@ pub struct BuffersManager {
   buffers: BTreeMap<BufferId, BufferArc>,
 
   // Buffers maps by absolute file path.
-  buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
+  buffers_by_path: FoldMap<Option<PathBuf>, BufferArc>,
 
   // Global-local options for buffers.
   global_local_options: BufferOptions,
@@ -170,7 +170,7 @@ impl BuffersManager {
   pub fn new() -> Self {
     BuffersManager {
       buffers: BTreeMap::new(),
-      buffers_by_path: HashMap::new(),
+      buffers_by_path: FoldMap::new(),
       global_local_options: BufferOptionsBuilder::default().build().unwrap(),
     }
   }
