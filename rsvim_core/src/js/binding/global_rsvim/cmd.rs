@@ -3,6 +3,7 @@
 use crate::js::{JsRuntime, JsRuntimeState};
 use crate::msg;
 use crate::msg::MasterMessage;
+use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use compact_str::{CompactString, ToCompactString};
@@ -16,7 +17,7 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: CompactString) {
   } else {
     msg::sync_send_to_master(
       state.master_tx.clone(),
-      msg::MasterMessage::PrintReq(msg::PrintReq { payload }),
+      MasterMessage::PrintReq(PrintReq { payload }),
     );
   }
 }
