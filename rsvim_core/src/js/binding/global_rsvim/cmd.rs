@@ -46,12 +46,20 @@ pub fn create(
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 4);
+  debug_assert!(args.length() >= 2);
   let name = args.get(0).to_rust_string_lossy(scope);
   let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
-  // let attr = args.get(2).to_rust_string_lossy(scope);
-  // let opts = args.get(3).to_rust_string_lossy(scope);
+  let attrs: Option<v8::Local<v8::Value>> = if args.length() >= 3 {
+    Some(args.get(2))
+  } else {
+    None
+  };
+  let opts: Option<v8::Local<v8::Value>> = if args.length() >= 4 {
+    Some(args.get(3))
+  } else {
+    None
+  };
   trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
