@@ -50,7 +50,7 @@ impl ImportMap {
   //     return Err(anyhow::anyhow!("Import map's 'imports' must be an object"));
   //   }
   //
-  //   let map: HashMap<String, String> = serde_json::from_value(imports)?;
+  //   let map: FoldMap<String, String> = serde_json::from_value(imports)?;
   //   let mut map: Vec<ImportMapEntry> = Vec::from_iter(map);
   //
   //   // Note: We're sorting the imports because we need to support "Packages"
