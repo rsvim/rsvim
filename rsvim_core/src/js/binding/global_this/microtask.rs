@@ -2,9 +2,7 @@
 
 use crate::js;
 use crate::js::JsRuntime;
-use crate::prelude::*;
 use crate::report_js_error;
-use crate::state::ops::cmdline_ops;
 
 pub fn report_error(
   scope: &mut v8::HandleScope,
