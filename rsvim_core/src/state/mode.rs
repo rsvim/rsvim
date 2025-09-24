@@ -52,26 +52,6 @@ pub enum Mode {
   Terminal,
 }
 
-impl Display for Mode {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    match self {
-      Mode::Normal => write!(f, "Normal"),
-      Mode::Visual => write!(f, "Visual"),
-      Mode::Select => write!(f, "Select"),
-      Mode::OperatorPending => write!(f, "Operator-pending"),
-      Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineEx => write!(f, "Command-line (ex)"),
-      Mode::CommandLineSearchForward => {
-        write!(f, "Command-line (search forward)")
-      }
-      Mode::CommandLineSearchBackward => {
-        write!(f, "Command-line (search backward)")
-      }
-      Mode::Terminal => write!(f, "Terminal"),
-    }
-  }
-}
-
 impl Mode {
   /// Get all modes.
   pub fn all() -> Vec<Mode> {
