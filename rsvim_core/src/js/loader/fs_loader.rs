@@ -88,6 +88,7 @@ mod async_load {
   }
 }
 
+#[allow(dead_code)]
 #[derive(Default)]
 /// Fs (filesystem) module loader.
 pub struct FsModuleLoader {
