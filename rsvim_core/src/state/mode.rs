@@ -149,8 +149,8 @@ impl From<Vec<Mode>> for Modes {
   /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
     let mut values = FoldSet::new();
-    for m in modes.iter() {
-      values.insert(*m);
+    for m in modes {
+      values.insert(m);
     }
     Modes { values }
   }
