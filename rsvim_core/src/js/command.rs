@@ -26,7 +26,7 @@ pub type JsCallback = Rc<v8::Global<v8::Function>>;
 pub struct BuiltinCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub body: CompactString,
+  pub payload: CompactString,
 }
 
 impl JsFuture for BuiltinCommandFuture {
@@ -34,7 +34,7 @@ impl JsFuture for BuiltinCommandFuture {
     trace!("|BuiltinCommandFuture| run:{:?}", self.task_id);
     let filename = format!("<command-js:{}>", self.task_id);
 
-    match execute_module(scope, &filename, Some(self.body.trim())) {
+    match execute_module(scope, &filename, Some(self.payload.trim())) {
       Ok(_) => { /* do nothing */ }
       Err(e) => {
         // Capture exception if there's any error while loading/evaluating module.
@@ -139,13 +139,13 @@ impl CommandsManager {
       Some(BuiltinCommandFuture {
         task_id,
         name,
-        body,
+        payload: body,
       })
     } else if self.commands.contains_key(&name) {
       Some(BuiltinCommandFuture {
         task_id,
         name,
-        body,
+        payload: body,
       })
     } else {
       None
