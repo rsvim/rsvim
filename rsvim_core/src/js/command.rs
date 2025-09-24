@@ -81,6 +81,14 @@ impl ExCommandsManager {
     self.commands.remove(name)
   }
 
+  pub fn insert(
+    &mut self,
+    name: CompactString,
+    cb: Rc<v8::Global<v8::Function>>,
+  ) -> Option<ExCommandCallback> {
+    self.commands.insert(name, cb)
+  }
+
   pub fn get(&self, name: &str) -> Option<ExCommandCallback> {
     self.commands.get(name).map(|cmd| cmd.clone())
   }
