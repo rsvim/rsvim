@@ -99,7 +99,7 @@ pub static CORE_MODULES: LazyLock<FoldMap<&'static str, &'static str>> =
       // ("@web/clone", include_str!("./js/structured-clone.js")),
       // ("@web/fetch", include_str!("./js/fetch.js")),
     ];
-    HashMap::from_iter(modules)
+    FoldMap::from_iter(modules)
   });
 
 /// Creates v8 script origins, see:
