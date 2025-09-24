@@ -12,23 +12,27 @@ use compact_str::ToCompactString;
 use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
-pub type ExCommandCallback = Rc<v8::Global<v8::Function>>;
+
 pub const BANG: &str = "bang";
 pub const MODS: &str = "mods";
 pub const NARGS: &str = "nargs";
 
+pub struct Attributes {}
+
+pub type JsCallback = Rc<v8::Global<v8::Function>>;
+
 #[derive(Debug, Clone)]
-/// Ex command execution instance
-pub struct BuiltinExCommandFuture {
+/// Builtin `:js` command
+pub struct BuiltinCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
   pub body: CompactString,
 }
 
-impl JsFuture for BuiltinExCommandFuture {
+impl JsFuture for BuiltinCommandFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    trace!("|BuiltinExCommandFuture| run:{:?}", self.task_id);
-    let filename = format!("<command{}>", self.task_id);
+    trace!("|BuiltinCommandFuture| run:{:?}", self.task_id);
+    let filename = format!("<command-js:{}>", self.task_id);
 
     match execute_module(scope, &filename, Some(self.body.trim())) {
       Ok(_) => { /* do nothing */ }
@@ -50,26 +54,26 @@ impl JsFuture for BuiltinExCommandFuture {
 }
 
 #[derive(Debug, Clone)]
-/// Ex command execution instance
-pub struct UserExCommandFuture {
+/// User command
+pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub cb: ExCommandCallback,
+  pub cb: JsCallback,
 }
 
 #[derive(Debug, Default)]
 pub struct ExCommandsManager {
-  commands: FoldMap<CompactString, ExCommandCallback>,
+  commands: FoldMap<CompactString, (JsCallback)>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
 
 pub type ExCommandsManagerKeys<'a> =
-  std::collections::hash_map::Keys<'a, CompactString, ExCommandCallback>;
+  std::collections::hash_map::Keys<'a, CompactString, JsCallback>;
 pub type ExCommandsManagerValues<'a> =
-  std::collections::hash_map::Values<'a, CompactString, ExCommandCallback>;
+  std::collections::hash_map::Values<'a, CompactString, JsCallback>;
 pub type ExCommandsManagerIter<'a> =
-  std::collections::hash_map::Iter<'a, CompactString, ExCommandCallback>;
+  std::collections::hash_map::Iter<'a, CompactString, JsCallback>;
 
 impl ExCommandsManager {
   pub fn is_empty(&self) -> bool {
@@ -80,7 +84,7 @@ impl ExCommandsManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<ExCommandCallback> {
+  pub fn remove(&mut self, name: &str) -> Option<JsCallback> {
     self.commands.remove(name)
   }
 
@@ -88,11 +92,11 @@ impl ExCommandsManager {
     &mut self,
     name: CompactString,
     cb: Rc<v8::Global<v8::Function>>,
-  ) -> Option<ExCommandCallback> {
+  ) -> Option<JsCallback> {
     self.commands.insert(name, cb)
   }
 
-  pub fn get(&self, name: &str) -> Option<ExCommandCallback> {
+  pub fn get(&self, name: &str) -> Option<JsCallback> {
     self.commands.get(name).cloned()
   }
 
@@ -114,7 +118,7 @@ impl ExCommandsManager {
 }
 
 impl ExCommandsManager {
-  pub fn parse(&self, payload: &str) -> Option<BuiltinExCommandFuture> {
+  pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     let (name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
@@ -132,13 +136,13 @@ impl ExCommandsManager {
     let task_id = next_task_id();
     if is_builtin_js {
       debug_assert!(!self.commands.contains_key(&name));
-      Some(BuiltinExCommandFuture {
+      Some(BuiltinCommandFuture {
         task_id,
         name,
         body,
       })
     } else if self.commands.contains_key(&name) {
-      Some(BuiltinExCommandFuture {
+      Some(BuiltinCommandFuture {
         task_id,
         name,
         body,
