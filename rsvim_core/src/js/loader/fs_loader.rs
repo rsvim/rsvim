@@ -132,6 +132,26 @@ impl FsModuleLoader {
   }
 }
 
+impl FsModuleLoader {
+  fn resolve_impl(
+    &self,
+    resolver: &Resolver,
+    base: &str,
+    specifier: &str,
+  ) -> AnyResult<ModulePath> {
+    let base = Path::new(base).to_path_buf();
+    trace!(
+      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
+      base, specifier
+    );
+
+    match resolver.resolve(&base, specifier) {
+      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
+      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
+    }
+  }
+}
+
 impl ModuleLoader for FsModuleLoader {
   #[cfg(not(test))]
   /// Resolve module path by specifier in local filesystem.
@@ -146,30 +166,13 @@ impl ModuleLoader for FsModuleLoader {
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
   fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
-    let base = Path::new(base).to_path_buf();
-    trace!(
-      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
-      base, specifier
-    );
-
-    match self.resolver.resolve(&base, specifier) {
-      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
-    }
+    self.resolve_impl(&self.resolver, base, specifier)
   }
 
   #[cfg(test)]
   fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
-    let base = Path::new(base).to_path_buf();
-    trace!(
-      "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
-      base, specifier
-    );
-
-    match self.resolver.resolve(&base, specifier) {
-      Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
-    }
+    let resolver = Resolver::new(create_resolve_opts());
+    self.resolve_impl(&self.resolver, base, specifier)
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
