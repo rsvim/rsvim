@@ -87,17 +87,21 @@ impl Modes {
   }
 
   /// Make a new modes collection with all of current modes, and with a new mode.
-  pub fn with(&self, mode: Mode) -> Self {
-    let mut values = self.values.clone();
-    values.insert(mode);
-    Modes { values }
+  pub fn with(&mut self, mode: Mode) -> &Self {
+    self.values.insert(mode);
+    self
   }
 
   /// Make a new modes collection with all of current modes, but without the specified mode.
-  pub fn without(&self, mode: Mode) -> Self {
-    let mut values = self.values.clone();
-    values.remove(&mode);
-    Modes { values }
+  pub fn without(&mut self, mode: Mode) -> &Self {
+    self.values.remove(&mode);
+    self
+  }
+
+  /// Add/set all the specified modes.
+  pub fn extend(&mut self, modes: Modes) -> &Self {
+    self.values.extend(modes.values.iter());
+    self
   }
 
   /// Add/set the specified mode.
@@ -108,11 +112,6 @@ impl Modes {
   /// Remove/unset the specified mode.
   pub fn unset(&mut self, mode: Mode) -> bool {
     self.values.remove(&mode)
-  }
-
-  /// Add/set all the specified modes.
-  pub fn extend(&mut self, modes: Modes) {
-    self.values.extend(modes.values.iter())
   }
 
   /// Whether current collection is empty.
