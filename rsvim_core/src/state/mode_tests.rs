@@ -31,4 +31,26 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("command-line"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("cmdline"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("c"), Ok(Mode::CommandLineEx));
+
+  assert_eq!(
+    format!("{}", Mode::CommandLineSearchForward),
+    "command-line-search-forward"
+  );
+  assert_eq!(
+    Mode::from_str("command-line-search-forward"),
+    Ok(Mode::CommandLineSearchForward)
+  );
+
+  assert_eq!(
+    format!("{}", Mode::CommandLineSearchBackward),
+    "command-line-search-backward"
+  );
+  assert_eq!(
+    Mode::from_str("command-line-search-backward"),
+    Ok(Mode::CommandLineSearchBackward)
+  );
+
+  assert_eq!(format!("{}", Mode::Terminal), "terminal");
+  assert_eq!(Mode::from_str("terminal"), Ok(Mode::Terminal));
+  assert_eq!(Mode::from_str("t"), Ok(Mode::Terminal));
 }
