@@ -172,7 +172,7 @@ impl ModuleLoader for FsModuleLoader {
   #[cfg(test)]
   fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
     let resolver = Resolver::new(create_resolve_opts());
-    self.resolve_impl(&self.resolver, base, specifier)
+    self.resolve_impl(&resolver, base, specifier)
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
