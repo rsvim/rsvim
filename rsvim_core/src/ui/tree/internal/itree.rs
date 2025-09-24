@@ -316,7 +316,7 @@ where
         children_ids
           .iter()
           .cloned()
-          .collect::<HashSet<TreeNodeId>>()
+          .collect::<FoldSet<TreeNodeId>>()
           .len()
       );
       for c in children_ids {
