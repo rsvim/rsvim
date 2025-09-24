@@ -50,5 +50,6 @@ pub fn create(
   trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
-  let state = state_rc.borrow();
+  let mut state = state_rc.borrow_mut();
+  let commands = lock!(state.commands);
 }

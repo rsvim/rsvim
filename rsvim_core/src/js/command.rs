@@ -9,10 +9,10 @@ use crate::js::next_task_id;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
-pub type ExCommandCallback =
-  v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
+pub type ExCommandCallback = Rc<v8::Global<v8::Function>>;
 
 #[derive(Debug, Clone)]
 /// Ex command execution instance
@@ -51,7 +51,7 @@ impl JsFuture for BuiltinExCommandFuture {
 pub struct UserExCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub cb: Rc<v8::Global<v8::Function>>,
+  pub cb: ExCommandCallback,
 }
 
 #[derive(Debug, Default)]
@@ -60,6 +60,47 @@ pub struct ExCommandsManager {
 }
 
 arc_mutex_ptr!(ExCommandsManager);
+
+pub type ExCommandsManagerKeys<'a> =
+  std::collections::hash_map::Keys<'a, CompactString, ExCommandCallback>;
+pub type ExCommandsManagerValues<'a> =
+  std::collections::hash_map::Values<'a, CompactString, ExCommandCallback>;
+pub type ExCommandsManagerIter<'a> =
+  std::collections::hash_map::Iter<'a, CompactString, ExCommandCallback>;
+
+impl ExCommandsManager {
+  pub fn is_empty(&self) -> bool {
+    self.commands.is_empty()
+  }
+
+  pub fn len(&self) -> usize {
+    self.commands.len()
+  }
+
+  pub fn remove(&mut self, name: &str) -> Option<ExCommandCallback> {
+    self.commands.remove(name)
+  }
+
+  pub fn get(&self, name: &str) -> Option<ExCommandCallback> {
+    self.commands.get(name).map(|cmd| cmd.clone())
+  }
+
+  pub fn contains_key(&self, name: &str) -> bool {
+    self.commands.contains_key(name)
+  }
+
+  pub fn keys(&self) -> ExCommandsManagerKeys<'_> {
+    self.commands.keys()
+  }
+
+  pub fn values(&self) -> ExCommandsManagerValues<'_> {
+    self.commands.values()
+  }
+
+  pub fn iter(&self) -> ExCommandsManagerIter<'_> {
+    self.commands.iter()
+  }
+}
 
 impl ExCommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinExCommandFuture> {
