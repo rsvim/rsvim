@@ -1,11 +1,25 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::js::JsRuntime;
+use crate::js::{JsRuntime, JsRuntimeState};
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
-use compact_str::ToCompactString;
+use compact_str::{CompactString, ToCompactString};
+
+pub fn send_cmdline_message(state: &JsRuntimeState, payload: CompactString) {
+  trace!("|cmd| send_cmdline_message:{:?}", payload);
+  let mut tree = lock!(state.tree);
+  let mut contents = lock!(state.contents);
+  if tree.command_line_id().is_some() {
+    cmdline_ops::cmdline_set_message(&mut tree, &mut contents, payload);
+  } else {
+    msg::sync_send_to_master(
+      state.master_tx.clone(),
+      msg::MasterMessage::PrintReq(msg::PrintReq { payload }),
+    );
+  }
+}
 
 /// `Rsvim.cmd.echo` API.
 pub fn echo(
@@ -19,20 +33,5 @@ pub fn echo(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  let mut tree = lock!(state.tree);
-  let mut contents = lock!(state.contents);
-  if tree.command_line_id().is_some() {
-    cmdline_ops::cmdline_set_message(
-      &mut tree,
-      &mut contents,
-      message.to_compact_string(),
-    );
-  } else {
-    msg::sync_send_to_master(
-      state.master_tx.clone(),
-      MasterMessage::PrintReq(msg::PrintReq {
-        payload: message.to_compact_string(),
-      }),
-    );
-  }
+  send_cmdline_message(&state, message.to_compact_string());
 }

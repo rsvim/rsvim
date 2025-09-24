@@ -11,6 +11,8 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 const JS_COMMAND_NAME: &str = "js";
+pub type ExCommandCallback =
+  (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
 
 #[derive(Debug, Clone)]
 /// Ex command execution instance
@@ -46,11 +48,18 @@ impl JsFuture for BuiltinExCommandFuture {
   }
 }
 
-pub type ExCommand = (v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>);
+#[derive(Debug, Clone)]
+/// Ex command execution instance
+pub struct UserExCommandFuture {
+  pub task_id: JsTaskId,
+  pub name: CompactString,
+  pub body: ExCommandCallback,
+  pub is_builtin_js: bool,
+}
 
 #[derive(Debug, Default)]
 pub struct ExCommandsManager {
-  commands: FoldMap<CompactString, ExCommand>,
+  commands: FoldMap<CompactString, ExCommandCallback>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
