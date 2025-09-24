@@ -131,8 +131,6 @@ impl Modes {
   }
 
   /// Get the iterator of current collection.
-  ///
-  /// NOTE: The internal collection is [`FoldSet`] and the iterator is non-ordered.
   pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Mode> {
     self.values.iter()
   }
