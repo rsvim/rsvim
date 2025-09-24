@@ -273,7 +273,7 @@ where
 {
   pub fn new(root_node: T) -> Self {
     let root_id = root_node.id();
-    let mut nodes = HashMap::new();
+    let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
     let relationships = RefCell::new(Relationships::new(root_id));
     Itree {
