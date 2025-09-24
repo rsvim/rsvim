@@ -1,7 +1,6 @@
 //! Vim editing mode.
 
 use crate::prelude::*;
-use std::fmt::Display;
 
 #[derive(
   Debug,
@@ -27,7 +26,11 @@ pub enum Mode {
   /// Select mode.
   Select,
 
-  #[strum(serialize = "operator-pending", serialize = "o")]
+  #[strum(
+    serialize = "operator-pending",
+    serialize = "op-pending",
+    serialize = "o"
+  )]
   /// Operator-pending mode.
   OperatorPending,
 
@@ -62,6 +65,8 @@ impl Mode {
       Mode::OperatorPending,
       Mode::Insert,
       Mode::CommandLineEx,
+      Mode::CommandLineSearchForward,
+      Mode::CommandLineSearchBackward,
       Mode::Terminal,
     ]
   }
