@@ -71,13 +71,6 @@ pub struct CommandsManager {
 
 arc_mutex_ptr!(CommandsManager);
 
-pub type CommandsManagerKeys<'a> =
-  std::collections::hash_map::Keys<'a, CompactString, CommandCallback>;
-pub type CommandsManagerValues<'a> =
-  std::collections::hash_map::Values<'a, CompactString, CommandCallback>;
-pub type CommandsManagerIter<'a> =
-  std::collections::hash_map::Iter<'a, CompactString, CommandCallback>;
-
 impl CommandsManager {
   pub fn is_empty(&self) -> bool {
     self.commands.is_empty()
@@ -107,15 +100,22 @@ impl CommandsManager {
     self.commands.contains_key(name)
   }
 
-  pub fn keys(&self) -> CommandsManagerKeys<'_> {
+  pub fn keys(
+    &self,
+  ) -> std::collections::hash_map::Keys<'_, CompactString, CommandCallback> {
     self.commands.keys()
   }
 
-  pub fn values(&self) -> CommandsManagerValues<'_> {
+  pub fn values(
+    &self,
+  ) -> std::collections::hash_map::Values<'_, CompactString, CommandCallback>
+  {
     self.commands.values()
   }
 
-  pub fn iter(&self) -> CommandsManagerIter<'_> {
+  pub fn iter(
+    &self,
+  ) -> std::collections::hash_map::Iter<'_, CompactString, CommandCallback> {
     self.commands.iter()
   }
 }
