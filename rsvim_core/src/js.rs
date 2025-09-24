@@ -354,7 +354,7 @@ pub mod boost {
     /// Holds information about resolved ES modules.
     pub module_map: ModuleMap,
     /// Pending timers.
-    pub pending_timers: HashMap<JsTimerId, TimerCallback>,
+    pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_import_loaders: HashMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
