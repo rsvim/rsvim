@@ -62,20 +62,20 @@ pub struct UserCommandFuture {
 }
 
 #[derive(Debug, Default)]
-pub struct ExCommandsManager {
+pub struct CommandsManager {
   commands: FoldMap<CompactString, (JsCallback)>,
 }
 
-arc_mutex_ptr!(ExCommandsManager);
+arc_mutex_ptr!(CommandsManager);
 
-pub type ExCommandsManagerKeys<'a> =
+pub type CommandsManagerKeys<'a> =
   std::collections::hash_map::Keys<'a, CompactString, JsCallback>;
-pub type ExCommandsManagerValues<'a> =
+pub type CommandsManagerValues<'a> =
   std::collections::hash_map::Values<'a, CompactString, JsCallback>;
-pub type ExCommandsManagerIter<'a> =
+pub type CommandsManagerIter<'a> =
   std::collections::hash_map::Iter<'a, CompactString, JsCallback>;
 
-impl ExCommandsManager {
+impl CommandsManager {
   pub fn is_empty(&self) -> bool {
     self.commands.is_empty()
   }
@@ -104,20 +104,20 @@ impl ExCommandsManager {
     self.commands.contains_key(name)
   }
 
-  pub fn keys(&self) -> ExCommandsManagerKeys<'_> {
+  pub fn keys(&self) -> CommandsManagerKeys<'_> {
     self.commands.keys()
   }
 
-  pub fn values(&self) -> ExCommandsManagerValues<'_> {
+  pub fn values(&self) -> CommandsManagerValues<'_> {
     self.commands.values()
   }
 
-  pub fn iter(&self) -> ExCommandsManagerIter<'_> {
+  pub fn iter(&self) -> CommandsManagerIter<'_> {
     self.commands.iter()
   }
 }
 
-impl ExCommandsManager {
+impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     let (name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {

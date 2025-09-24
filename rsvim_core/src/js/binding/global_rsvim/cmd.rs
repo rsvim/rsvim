@@ -52,6 +52,7 @@ pub fn create(
   let callback = Rc::new(v8::Global::new(scope, callback));
   let attrs = args.get(2).to_object(scope).unwrap();
   let opts = args.get(3).to_object(scope).unwrap();
+  let parsed_args = {};
   trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);

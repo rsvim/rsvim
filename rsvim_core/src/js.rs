@@ -34,7 +34,7 @@ use crate::report_js_error;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
-use command::ExCommandsManagerArc;
+use command::CommandsManagerArc;
 use err::JsError;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
@@ -378,7 +378,7 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
     pub contents: TextContentsArc,
-    pub commands: ExCommandsManagerArc,
+    pub commands: CommandsManagerArc,
     // Data Access for RSVIM }
   }
 
@@ -422,7 +422,7 @@ pub mod boost {
       tree: TreeArc,
       buffers: BuffersManagerArc,
       contents: TextContentsArc,
-      commands: ExCommandsManagerArc,
+      commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -512,7 +512,7 @@ pub mod boost {
       tree: TreeArc,
       buffers: BuffersManagerArc,
       contents: TextContentsArc,
-      commands: ExCommandsManagerArc,
+      commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
