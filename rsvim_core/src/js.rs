@@ -31,7 +31,6 @@ use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
 use crate::report_js_error;
-use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
