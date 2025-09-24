@@ -12,7 +12,6 @@ use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::report_js_error;
-use crate::state::ops::cmdline_ops;
 use crate::util::paths;
 use std::cell::RefCell;
 use std::rc::Rc;
