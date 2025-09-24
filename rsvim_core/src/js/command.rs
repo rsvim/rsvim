@@ -90,7 +90,7 @@ impl ExCommandsManager {
   }
 
   pub fn get(&self, name: &str) -> Option<ExCommandCallback> {
-    self.commands.get(name).map(|cmd| cmd.clone())
+    self.commands.get(name).cloned()
   }
 
   pub fn contains_key(&self, name: &str) -> bool {

@@ -50,8 +50,8 @@ pub fn create(
   let name = args.get(0).to_rust_string_lossy(scope);
   let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
-  let attrs: v8::Local<v8::Value> = args.get(2);
-  let opts: v8::Local<v8::Value> = args.get(3);
+  let attrs = args.get(2).to_object(scope).unwrap();
+  let opts = args.get(3).to_object(scope).unwrap();
   trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
