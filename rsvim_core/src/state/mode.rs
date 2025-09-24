@@ -3,25 +3,51 @@
 use crate::prelude::*;
 use std::fmt::Display;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  Hash,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
 /// Editing mode.
 pub enum Mode {
+  #[strum(serialize = "normal", serialize = "n")]
   /// Normal mode.
   Normal,
+
+  #[strum(serialize = "visual", serialize = "v")]
   /// Visual mode.
   Visual,
+
+  #[strum(serialize = "select", serialize = "s")]
   /// Select mode.
   Select,
+
+  #[strum(serialize = "operator-pending", serialize = "o")]
   /// Operator-pending mode.
   OperatorPending,
+
+  #[strum(serialize = "insert", serialize = "i")]
   /// Insert mode.
   Insert,
+
+  #[strum(serialize = "command-line", serialize = "cmdline", serialize = "c")]
   /// Command-line mode, ex-command variant.
   CommandLineEx,
+
+  #[strum(serialize = "command-line-search-forward")]
   /// Command-line mode, search forward variant.
   CommandLineSearchForward,
+
+  #[strum(serialize = "command-line-search-backward")]
   /// Command-line mode, search backward variant.
   CommandLineSearchBackward,
+
+  #[strum(serialize = "terminal", serialize = "t")]
   /// Terminal mode.
   Terminal,
 }

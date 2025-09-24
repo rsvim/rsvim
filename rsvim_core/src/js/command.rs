@@ -17,9 +17,12 @@ pub const BANG: &str = "bang";
 pub const MODS: &str = "mods";
 pub const NARGS: &str = "nargs";
 
-pub struct Attributes {}
+#[derive(Debug, Clone)]
+pub struct CommandAttributes {
+  pub bang: bool,
+}
 
-pub type JsCallback = Rc<v8::Global<v8::Function>>;
+pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
@@ -58,22 +61,22 @@ impl JsFuture for BuiltinCommandFuture {
 pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub cb: JsCallback,
+  pub cb: CommandCallback,
 }
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
-  commands: FoldMap<CompactString, (JsCallback)>,
+  commands: FoldMap<CompactString, (CommandCallback)>,
 }
 
 arc_mutex_ptr!(CommandsManager);
 
 pub type CommandsManagerKeys<'a> =
-  std::collections::hash_map::Keys<'a, CompactString, JsCallback>;
+  std::collections::hash_map::Keys<'a, CompactString, CommandCallback>;
 pub type CommandsManagerValues<'a> =
-  std::collections::hash_map::Values<'a, CompactString, JsCallback>;
+  std::collections::hash_map::Values<'a, CompactString, CommandCallback>;
 pub type CommandsManagerIter<'a> =
-  std::collections::hash_map::Iter<'a, CompactString, JsCallback>;
+  std::collections::hash_map::Iter<'a, CompactString, CommandCallback>;
 
 impl CommandsManager {
   pub fn is_empty(&self) -> bool {
@@ -84,7 +87,7 @@ impl CommandsManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<JsCallback> {
+  pub fn remove(&mut self, name: &str) -> Option<CommandCallback> {
     self.commands.remove(name)
   }
 
@@ -92,11 +95,11 @@ impl CommandsManager {
     &mut self,
     name: CompactString,
     cb: Rc<v8::Global<v8::Function>>,
-  ) -> Option<JsCallback> {
+  ) -> Option<CommandCallback> {
     self.commands.insert(name, cb)
   }
 
-  pub fn get(&self, name: &str) -> Option<JsCallback> {
+  pub fn get(&self, name: &str) -> Option<CommandCallback> {
     self.commands.get(name).cloned()
   }
 
