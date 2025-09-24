@@ -13,6 +13,9 @@ use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 pub type ExCommandCallback = Rc<v8::Global<v8::Function>>;
+pub const BANG: &str = "bang";
+pub const MODS: &str = "mods";
+pub const NARGS: &str = "nargs";
 
 #[derive(Debug, Clone)]
 /// Ex command execution instance
