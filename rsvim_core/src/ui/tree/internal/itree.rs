@@ -101,7 +101,7 @@ impl Relationships {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
     child_zindex: usize,
-    nodes: &HashMap<TreeNodeId, T>,
+    nodes: &FoldMap<TreeNodeId, T>,
   ) where
     T: Inodeable,
   {
@@ -207,7 +207,7 @@ where
   T: Inodeable,
 {
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<TreeNodeId, T>,
+  nodes: FoldMap<TreeNodeId, T>,
 
   // Maps parent and children edges. The parent edge weight is negative, children edges are
   // positive. The edge weight of each child is increased with the order when they are inserted,
