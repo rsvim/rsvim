@@ -48,7 +48,7 @@ impl JsFuture for ExCommandFuture {
 
 #[derive(Debug, Default)]
 pub struct ExCommandsManager {
-  commands: HashSet<CompactString>,
+  commands: FoldSet<CompactString>,
 }
 
 arc_mutex_ptr!(ExCommandsManager);
