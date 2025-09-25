@@ -2,6 +2,9 @@
 
 pub mod attr;
 
+#[cfg(test)]
+mod attr_tests;
+
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsTaskId;
