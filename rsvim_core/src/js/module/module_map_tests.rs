@@ -64,7 +64,7 @@ mod test_static_import {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -118,7 +118,7 @@ mod test_static_import {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -206,7 +206,7 @@ mod test_static_import {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("3".to_compact_string()),
+        Some("3".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -298,7 +298,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("D:C:B:A:5".to_compact_string()),
+        Some("D:C:B:A:5".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -386,7 +386,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("9".to_compact_string()),
+        Some("9".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -600,7 +600,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -655,7 +655,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1494,7 +1494,7 @@ mod test_dynamic_import {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1562,7 +1562,7 @@ Rsvim.rt.exit(0);
       );
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("1".to_compact_string()),
+        Some("1".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1659,7 +1659,7 @@ Rsvim.rt.exit(0);
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("7".to_compact_string()),
+        Some("7".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1737,7 +1737,7 @@ try {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("9".to_compact_string()),
+        Some("9".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1836,7 +1836,7 @@ export function echoD(value) {
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("D:C:B:A:5".to_compact_string()),
+        Some("D:C:B:A:5".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -1931,7 +1931,7 @@ export default {};
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("9".to_compact_string()),
+        Some("9".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
@@ -2026,7 +2026,7 @@ export default {};
       let mut contents = lock!(event_loop.contents);
       assert_eq!(1, contents.command_line_message_history().occupied_len());
       assert_eq!(
-        Some("9".to_compact_string()),
+        Some("9".to_string()),
         contents.command_line_message_history_mut().try_pop()
       );
     }
