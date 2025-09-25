@@ -178,7 +178,7 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CreateCommandOptions} attr - The command options, it controls how a command is created, such as `force`, etc. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CreateCommandOptions}.
    * @returns {undefined | {attr:RsvimCmd.CommandAttributes,opts:RsvimCmd.CreateCommandOptions,callback:RsvimCmd.CommandCallback}} It returns `undefined` is the command is newly created, or an object with `attr`, `opts` and `callback`fields that was defined the same command name previously.
    *
-   * @throws Throws {@link !TypeError} if name is not a `null` or `undefined` or no parameter provided.
+   * @throws Throws {@link !TypeError} if any parameters are invalid.
    *
    * @example
    * ```javascript
