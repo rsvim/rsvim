@@ -253,16 +253,6 @@ export namespace RsvimCmd {
 }
 
 /**
- * @inline
- */
-type FileEncodingOption = "utf-8";
-
-/**
- * @inline
- */
-type FileFormatOption = "dos" | "unix" | "mac";
-
-/**
  * The `Rsvim.opt` global object for global editor options.
  *
  * @example
@@ -318,7 +308,7 @@ export interface RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {FileEncodingOption}
+   * @returns {RsvimOpt.FileEncodingOption}
    *
    * @defaultValue `"utf-8"`
    *
@@ -328,12 +318,12 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): FileEncodingOption;
+  get fileEncoding(): RsvimOpt.FileEncodingOption;
 
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {FileEncodingOption} value - The _file-encoding_ option.
+   * @param {RsvimOpt.FileEncodingOption} value - The _file-encoding_ option.
    * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
@@ -342,7 +332,7 @@ export interface RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: FileEncodingOption);
+  set fileEncoding(value: RsvimOpt.FileEncodingOption);
 
   /**
    * Get the _file-format_ option. Local to buffer.
@@ -366,7 +356,7 @@ export interface RsvimOpt {
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end.
    *
-   * @returns {FileFormatOption}
+   * @returns {RsvimOpt.FileFormatOption}
    *
    * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
@@ -376,12 +366,12 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileFormat(): FileFormatOption;
+  get fileFormat(): RsvimOpt.FileFormatOption;
 
   /**
    * Set the _file-format_ option.
    *
-   * @param {FileFormatOption} value - The _file-format_ option.
+   * @param {RsvimOpt.FileFormatOption} value - The _file-format_ option.
    * @throws Throws {@link !Error} if value is invalid.
    *
    * @example
@@ -390,7 +380,7 @@ export interface RsvimOpt {
    * Rsvim.opt.fileFormat = "unix";
    * ```
    */
-  set fileFormat(value: FileFormatOption);
+  set fileFormat(value: RsvimOpt.FileFormatOption);
 
   /**
    * Get the _line-break_ option. This options is also known as
@@ -557,12 +547,12 @@ class RsvimOptImpl implements RsvimOpt {
     __InternalRsvimGlobalObject.opt_set_expand_tab(value);
   }
 
-  get fileEncoding(): FileEncodingOption {
+  get fileEncoding(): RsvimOpt.FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
 
-  set fileEncoding(value: FileEncodingOption) {
+  set fileEncoding(value: RsvimOpt.FileEncodingOption) {
     if (value !== "utf-8") {
       throw new Error(
         `"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`,
@@ -572,12 +562,12 @@ class RsvimOptImpl implements RsvimOpt {
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
   }
 
-  get fileFormat(): FileFormatOption {
+  get fileFormat(): RsvimOpt.FileFormatOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_format();
   }
 
-  set fileFormat(value: FileFormatOption) {
+  set fileFormat(value: RsvimOpt.FileFormatOption) {
     if (value !== "dos" && value !== "unix" && value !== "mac") {
       throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
     }
@@ -658,6 +648,18 @@ class RsvimOptImpl implements RsvimOpt {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
+}
+
+export namespace RsvimOpt {
+  /**
+   * File encoding option.
+   */
+  export type FileEncodingOption = "utf-8";
+
+  /**
+   * File format option.
+   */
+  export type FileFormatOption = "dos" | "unix" | "mac";
 }
 
 /**
