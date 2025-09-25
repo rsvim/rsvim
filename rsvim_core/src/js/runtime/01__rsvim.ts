@@ -182,7 +182,15 @@ export interface RsvimCmd {
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.echo("Hello Rsvim!");
+   * function write(ctx: any): void {
+   *   try {
+   *     const bytes = Rsvim.buf.writeSync(bufId);
+   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   *   } catch (e) {
+   *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
+   *   }
+   * }
+   * Rsvim.cmd.create("write", write);
    * ```
    */
   create(
