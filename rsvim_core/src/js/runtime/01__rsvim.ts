@@ -192,7 +192,7 @@ export interface RsvimCmd {
    * :::
    *
    * @param {string} name - The command name that is going to create. Only letters (both lowercase `a-z` and uppercase `A-Z`), digits (`0-9`) and underscore (`_`) are allowed to be used as a command name. And a command name must begin with either a letter or underscore, digit is not allowed.
-   * @param {CreateCommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that is been passed to when Rsvim is calling this callback function, contains all the information that a command needs to know.
+   * @param {CreateCommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, `args`, `range`, etc.
    *
    * @throws Throws {@link !TypeError} if name is not a `null` or `undefined` or no parameter provided.
    *
