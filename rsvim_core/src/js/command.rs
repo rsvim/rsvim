@@ -1,5 +1,7 @@
 //! Vim ex commands.
 
+pub mod attr;
+
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsTaskId;
@@ -22,6 +24,7 @@ pub const NARGS: &str = "nargs";
 pub struct CommandAttributes {
   pub bang: bool,
   pub mods: Modes,
+  pub nargs: 
 }
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
