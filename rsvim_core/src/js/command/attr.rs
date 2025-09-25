@@ -30,6 +30,6 @@ pub enum Nargs {
   OneOrMore,
 
   #[strum(serialize = "*")]
-  /// 0 or 1 argument
+  /// Any arguments
   Any,
 }
