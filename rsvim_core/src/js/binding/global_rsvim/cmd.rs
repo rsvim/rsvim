@@ -9,7 +9,6 @@ use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 

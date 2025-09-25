@@ -10,7 +10,7 @@ use ringbuf::traits::RingBuffer;
 pub fn cmdline_set_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
-  payload: CompactString,
+  payload: String,
 ) {
   debug_assert!(tree.command_line().is_some());
 
