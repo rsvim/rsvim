@@ -58,3 +58,9 @@ pub struct Attributes {
   #[builder(default = BUFFER_VALUE)]
   pub buffer: Option<BufferId>,
 }
+
+impl<'a> From<v8::Local<'a, v8::Object>> for Attributes {
+  fn from<'b>(value: v8::Local<'b, v8::Object>) -> Self {
+    AttributesBuilder::default().build().unwrap()
+  }
+}
