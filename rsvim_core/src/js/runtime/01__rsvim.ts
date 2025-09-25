@@ -262,7 +262,7 @@ export namespace RsvimCmd {
      *
      * By default is `"0"`
 ,    */
-    nargs?: "0" | "1" | "?" | "+" | "?";
+    nargs?: "0" | "1" | "*" | "+" | "?";
   };
 
   /**
