@@ -187,8 +187,7 @@ export interface RsvimCmd {
   /**
    * Create a user EX command.
    *
-   * @param {message} message - It accepts string and other primitive types, except `null`
-   * and `undefined`.
+   * @param {string} name - The command name that is going to create.
    *
    * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
    *
@@ -207,7 +206,7 @@ export interface RsvimCmd {
   /**
    * Echo message to the command-line.
    *
-   * @param {message} message - It accepts string and other primitive types, except `null`
+   * @param {any} message - It accepts string and other primitive types, except `null`
    * and `undefined`.
    *
    * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
