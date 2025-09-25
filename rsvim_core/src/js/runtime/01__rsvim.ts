@@ -174,7 +174,7 @@ export interface RsvimCmd {
    *
    * @param {string} name - The command name that is going to create. Only letters (both lowercase `a-z` and uppercase `A-Z`), digits (`0-9`) and underscore (`_`) are allowed to be used as a command name. And a command name must begin with either a letter or underscore, digit is not allowed.
    * @param {RsvimCmd.CommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, arguments, buffer ID, etc.
-   * @param {RsvimCmd.CommandAttributes} attr - The command attributes, it controls the command related behavior, such as `bang`, `nargs`, etc.
+   * @param {RsvimCmd.CommandAttributes} attr - The command attributes, it controls the command related behavior, such as `bang`, `nargs`, etc. This parameter can be omitted, it will use the default attributes, please see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CreateCommandOptions} attr - The command options, it controls how a command is created, such as `force`, etc.
    * @returns {undefined | RsvimCmd.CommandCallback}
    *
@@ -236,23 +236,29 @@ export namespace RsvimCmd {
   export type CommandAttributes = {
     /**
      * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
+     *
+     * By default is `false`.
 ,    */
     bang?: boolean;
 
     /**
      * Whether The command can take any arguments, and how many it can take:
      *
-     * - "0": No arguments are allowed.
-     * - "1": Exactly 1 argument is required.
-     * - "*": Any number of arguments are allowed, i.e. 0, 1 or more.
-     * - "?": 0 or 1 arguments are allowed.
-     * - "+": At least 1 arguments are required.
+     * - `0`: No arguments are allowed.
+     * - `1`: Exactly 1 argument is required.
+     * - `*`: Any number of arguments are allowed, i.e. 0, 1 or more.
+     * - `?`: 0 or 1 arguments are allowed.
+     * - `+`: At least 1 arguments are required.
+     *
+     * By default is `"0"`.
 ,    */
     nargs?: "0" | "1" | "?" | "+" | "?";
   };
 
   /**
    * Command options when creating a command.
+   *
+   * By default is `true`.
    */
   export type CreateCommandOptions = {
     force?: boolean;
