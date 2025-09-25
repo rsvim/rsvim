@@ -3,7 +3,6 @@
 
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
-use compact_str::CompactString;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinHandle;
 use tokio::time::Instant;
@@ -34,7 +33,7 @@ pub struct ExitReq {
 
 #[derive(Debug)]
 pub struct PrintReq {
-  pub payload: CompactString,
+  pub payload: String,
 }
 
 #[derive(Debug)]
