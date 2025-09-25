@@ -1,7 +1,6 @@
 //! Ex command attributes.
 
 use crate::buf::BufferId;
-// use crate::prelude::*;
 
 pub const BANG: &str = "bang";
 pub const NARGS: &str = "nargs";
@@ -46,14 +45,4 @@ pub struct Attributes {
   pub bang: bool,
   pub nargs: Nargs,
   pub buffer: Option<BufferId>,
-}
-
-impl Default for Attributes {
-  fn default() -> Self {
-    Self {
-      bang: false,
-      nargs: Nargs::Zero,
-      buffer: None,
-    }
-  }
 }
