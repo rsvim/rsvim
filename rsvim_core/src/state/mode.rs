@@ -46,8 +46,8 @@ pub enum Mode {
   Select,
 
   #[strum(
-    to_string = "op-pending",
-    serialize = "operator-pending",
+    to_string = "operator-pending",
+    serialize = "op-pending",
     serialize = "o"
   )]
   /// Operator-pending mode.
@@ -57,7 +57,7 @@ pub enum Mode {
   /// Insert mode.
   Insert,
 
-  #[strum(to_string = "cmdline", serialize = "command-line", serialize = "c")]
+  #[strum(to_string = "command-line", serialize = "cmdline", serialize = "c")]
   /// Command-line mode, ex-command variant.
   CommandLineEx,
 
@@ -76,9 +76,9 @@ impl Mode {
       Mode::Normal => NORMAL,
       Mode::Visual => VISUAL,
       Mode::Select => SELECT,
-      Mode::OperatorPending => OP_PENDING,
+      Mode::OperatorPending => OPERATOR_PENDING,
       Mode::Insert => INSERT,
-      Mode::CommandLineEx => CMDLINE,
+      Mode::CommandLineEx => COMMAND_LINE,
       Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
       Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
     }
