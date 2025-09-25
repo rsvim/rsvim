@@ -27,7 +27,7 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("insert"), Ok(Mode::Insert));
   assert_eq!(Mode::from_str("i"), Ok(Mode::Insert));
 
-  assert_eq!(format!("{}", Mode::CommandLineEx), "comline");
+  assert_eq!(format!("{}", Mode::CommandLineEx), "cmdline");
   assert_eq!(Mode::from_str("command-line"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("cmdline"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("c"), Ok(Mode::CommandLineEx));
