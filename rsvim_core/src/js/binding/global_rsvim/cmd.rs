@@ -38,7 +38,7 @@ pub fn echo(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
-  send_cmdline_message(&state, message.to_compact_string());
+  send_cmdline_message(&state, message);
 }
 
 /// `Rsvim.cmd.create` API.
