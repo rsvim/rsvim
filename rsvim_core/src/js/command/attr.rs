@@ -80,8 +80,8 @@ impl Attributes {
     let nargs_name = v8::String::new(scope, NARGS_NAME).unwrap();
     match value.get(scope, nargs_name.into()) {
       Some(nargs_value) => {
-        let nargs_value = nargs_value.to_rust_string_lossy(scope);
-        if let Ok(nargs) = Nargs::from_str(&nargs_value) {
+        let nargs = nargs_value.to_rust_string_lossy(scope);
+        if let Ok(nargs) = Nargs::from_str(&nargs) {
           builder.nargs(nargs);
         }
       }
