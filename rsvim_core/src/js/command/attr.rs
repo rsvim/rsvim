@@ -1,7 +1,6 @@
 //! Ex command attributes.
 
 pub const BANG: &str = "bang";
-pub const MODS: &str = "mods";
 pub const NARGS: &str = "nargs";
 
 #[derive(
