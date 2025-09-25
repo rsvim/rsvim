@@ -63,6 +63,6 @@ impl<'a> From<v8::Local<'a, v8::Object>> for Attributes {
   fn from<'b>(value: v8::Local<'b, v8::Object>) -> Self {
     let mut builder = AttributesBuilder::default();
 
-    builder.build()
+    builder.build().unwrap()
   }
 }
