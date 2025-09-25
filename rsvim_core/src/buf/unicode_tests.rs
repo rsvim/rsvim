@@ -1,7 +1,6 @@
 use super::unicode::*;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
-use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ascii::AsciiChar;
