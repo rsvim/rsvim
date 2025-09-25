@@ -1,11 +1,11 @@
 //! Ex command attributes.
 
-use crate::{buf::BufferId, js::build};
+use crate::buf::BufferId;
 
 /// Command attribute name.
-pub const BANG: &str = "bang";
-pub const NARGS: &str = "nargs";
-pub const BUFFER: &str = "buffer";
+pub const BANG_NAME: &str = "bang";
+pub const NARGS_NAME: &str = "nargs";
+pub const BUFFER_NAME: &str = "buffer";
 
 /// Default command attributes.
 pub const NARGS_VALUE: Nargs = Nargs::Zero;
@@ -67,7 +67,17 @@ impl Attributes {
     let mut builder = AttributesBuilder::default();
 
     // bang
-    let bang_name = v8::String::new(scope, BANG).unwrap();
+    let bang_name = v8::String::new(scope, BANG_NAME).unwrap();
+    match value.get(scope, bang_name.into()) {
+      Some(bang_value) => {
+        let bang_value = bang_value.to_boolean(scope).boolean_value(scope);
+        builder.bang(bang_value);
+      }
+      None => { /* do nothing */ }
+    }
+
+    // nargs
+    let nargs_name = v8::String::new(scope, NARGS_NAME).unwrap();
     match value.get(scope, bang_name.into()) {
       Some(bang_value) => {
         let bang_value = bang_value.to_boolean(scope).boolean_value(scope);
