@@ -1,6 +1,7 @@
 //! Vim ex commands.
 
 pub mod attr;
+pub mod opt;
 
 #[cfg(test)]
 mod attr_tests;

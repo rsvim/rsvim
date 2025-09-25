@@ -1,6 +1,10 @@
 //! Ex command options.
 
-pub const FORCE: &str = "force";
+/// Command option names.
+pub const FORCE_NAME: &str = "force";
+
+/// Default command options.
+pub const FORCE_VALUE: bool = true;
 
 #[derive(Debug, Clone)]
 pub struct CommandOptions {
