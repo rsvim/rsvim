@@ -246,7 +246,7 @@ export namespace RsvimCmd {
      * - "1": Exactly 1 argument is required.
      * - "*": Any number of arguments are allowed, i.e. 0, 1 or more.
      * - "?": 0 or 1 arguments are allowed.
-     * - "+": At least 1 arguments are allowed.
+     * - "+": At least 1 arguments are required.
 ,    */
     nargs?: "0" | "1" | "?" | "+" | "?";
     bufId?: number;
