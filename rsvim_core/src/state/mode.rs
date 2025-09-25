@@ -8,6 +8,8 @@ use crate::prelude::*;
   Clone,
   PartialEq,
   Eq,
+  PartialOrd,
+  Ord,
   Hash,
   strum_macros::Display,
   strum_macros::EnumString,
@@ -75,14 +77,14 @@ impl Mode {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 /// The modes collection.
 pub struct Modes {
-  values: FoldSet<Mode>,
+  values: BTreeSet<Mode>,
 }
 
 impl Modes {
   /// Make a new modes collection with no mode inside.
   pub fn new() -> Self {
     Modes {
-      values: FoldSet::new(),
+      values: BTreeSet::new(),
     }
   }
 
@@ -130,7 +132,7 @@ impl Modes {
   }
 
   /// Get the iterator of current collection.
-  pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Mode> {
+  pub fn iter(&self) -> std::collections::btree_set::Iter<'_, Mode> {
     self.values.iter()
   }
 }
@@ -138,7 +140,7 @@ impl Modes {
 impl From<Mode> for Modes {
   /// Create a collection from a mode.
   fn from(mode: Mode) -> Self {
-    let mut values = FoldSet::new();
+    let mut values = BTreeSet::new();
     values.insert(mode);
     Modes { values }
   }
@@ -147,7 +149,7 @@ impl From<Mode> for Modes {
 impl From<Vec<Mode>> for Modes {
   /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
-    let mut values = FoldSet::new();
+    let mut values = BTreeSetSet::new();
     for m in modes {
       values.insert(m);
     }
