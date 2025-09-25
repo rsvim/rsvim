@@ -12,6 +12,9 @@ fn test_nargs() {
   assert_eq!(format!("{}", Nargs::Optional), "?");
   assert_eq!(Nargs::from_str("?"), Ok(Nargs::Optional));
 
-  assert_eq!(format!("{}", Nargs::Optional), "?");
-  assert_eq!(Nargs::from_str("?"), Ok(Nargs::Optional));
+  assert_eq!(format!("{}", Nargs::More), "+");
+  assert_eq!(Nargs::from_str("+"), Ok(Nargs::More));
+
+  assert_eq!(format!("{}", Nargs::Any), "*");
+  assert_eq!(Nargs::from_str("*"), Ok(Nargs::Any));
 }
