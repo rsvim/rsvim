@@ -1,3 +1,3 @@
 //! Ex command options.
 
-pub const OVERRIDE: &str = "override";
+pub const FORCE: &str = "force";
