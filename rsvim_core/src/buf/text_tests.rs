@@ -1,7 +1,7 @@
 use super::text::*;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
-use crate::coord::U16Size;
+use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ropey::Rope;
 
