@@ -30,12 +30,12 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
-use crate::report_js_error;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
 use command::CommandsManagerArc;
 use err::JsError;
+use err::report_js_error;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
 use hook::module_resolve_cb;
@@ -670,8 +670,9 @@ pub mod boost {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message
-              let e = format!("Error: invalid command {:?}", req.payload);
-              report_js_error!(state, e);
+              let e =
+                anyhow::anyhow!("Error: invalid command {:?}", req.payload);
+              report_js_error(&state, e);
             }
           }
           JsMessage::LoadImportResp(resp) => {
@@ -700,7 +701,7 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let state = state_rc.borrow();
-          report_js_error!(state, exception.to_string());
+          report_js_error!(state, exception);
         }
         run_next_tick_callbacks(scope);
       }
@@ -818,7 +819,7 @@ pub mod boost {
 
           if let Some(error) = check_exceptions(tc_scope) {
             let state = state_rc.borrow();
-            report_js_error!(state, error);
+            report_js_error(&state, error.into());
             continue;
           }
         }
