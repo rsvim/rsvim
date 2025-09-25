@@ -16,12 +16,13 @@ use crate::prelude::*;
 use attr::Attributes;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use opt::CommandOptions;
 use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
-pub type CommandDefinition = (CommandCallback, Attributes);
+pub type CommandDefinition = (CommandCallback, Attributes, CommandOptions);
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command

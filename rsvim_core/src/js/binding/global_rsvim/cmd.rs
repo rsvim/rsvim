@@ -61,5 +61,5 @@ pub fn create(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  commands.insert(name.to_compact_string(), callback);
+  commands.insert(name.to_compact_string(), (callback, attrs, opts));
 }
