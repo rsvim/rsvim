@@ -60,7 +60,7 @@ pub struct Attributes {
 }
 
 impl Attributes {
-  fn from<'a>(
+  pub fn from_object<'a>(
     scope: &mut v8::HandleScope,
     value: v8::Local<'a, v8::Object>,
   ) -> Self {
