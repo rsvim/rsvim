@@ -4,7 +4,7 @@ use crate::content::TextContents;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::Viewport;
-use compact_str::CompactString;
+use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
 
 pub fn cmdline_set_message(
@@ -16,7 +16,7 @@ pub fn cmdline_set_message(
 
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
-  message_text.insert_at(0, 0, payload.clone());
+  message_text.insert_at(0, 0, payload.to_compact_string());
 
   let cmdline = tree.command_line_mut().unwrap();
   let opts = *cmdline.options();
