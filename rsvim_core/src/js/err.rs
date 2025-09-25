@@ -163,10 +163,9 @@ impl std::fmt::Debug for JsError {
 /// Report unhandled exceptions to command-line message.
 macro_rules! report_js_error {
   ($state:expr,$e:expr) => {
-    use compact_str::ToCompactString;
     $crate::js::binding::global_rsvim::cmd::send_cmdline_message(
       &$state,
-      $e.to_compact_string(),
+      $e.to_string(),
     );
   };
 }
