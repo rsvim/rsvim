@@ -19,6 +19,9 @@ class RsvimBufImpl {
     }
 }
 class RsvimCmdImpl {
+    create(name, callback, attr, opts) {
+        return undefined;
+    }
     echo(message) {
         if (message === undefined || message === null) {
             throw new TypeError('"Rsvim.cmd.echo" message cannot be undefined or null');
