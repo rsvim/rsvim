@@ -161,6 +161,10 @@ type CreateCommandAttributes = {
 type CreateCommandOptions = {
   force?: boolean;
 };
+/**
+ * @inline
+ */
+type CreateCommandCallback = (ctx: any, ...args: any[]) => void;
 
 /**
  * The `Rsvim.cmd` global object for Ex commands.
@@ -198,7 +202,7 @@ export interface RsvimCmd {
     callback: (ctx: any, ...args: any[]) => void,
     attr?: CreateCommandAttributes,
     opts?: CreateCommandOptions,
-  ): (ctx: any, ...args: any[]) => void;
+  ): undefined | (ctx: any, ...args: any[]) => void;
 
   /**
    * Echo message to the command-line.
