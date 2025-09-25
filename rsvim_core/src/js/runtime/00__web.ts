@@ -48,7 +48,7 @@ export interface GlobalThis {
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. By default 1.
+   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
@@ -63,7 +63,7 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
    * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. By default 1.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
