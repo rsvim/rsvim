@@ -11,7 +11,6 @@ pub const BUFFER_NAME: &str = "buffer";
 pub const NARGS_VALUE: Nargs = Nargs::Zero;
 pub const BANG_VALUE: bool = false;
 pub const BUFFER_VALUE: Option<BufferId> = None;
-pub const FORCE_VALUE: bool = true;
 
 #[derive(
   Debug,
@@ -70,18 +69,20 @@ impl Attributes {
     let bang_name = v8::String::new(scope, BANG_NAME).unwrap();
     match value.get(scope, bang_name.into()) {
       Some(bang_value) => {
-        let bang_value = bang_value.to_boolean(scope).boolean_value(scope);
-        builder.bang(bang_value);
+        let bang = bang_value.to_boolean(scope).boolean_value(scope);
+        builder.bang(bang);
       }
       None => { /* do nothing */ }
     }
 
     // nargs
     let nargs_name = v8::String::new(scope, NARGS_NAME).unwrap();
-    match value.get(scope, bang_name.into()) {
-      Some(bang_value) => {
-        let bang_value = bang_value.to_boolean(scope).boolean_value(scope);
-        builder.bang(bang_value);
+    match value.get(scope, nargs_name.into()) {
+      Some(nargs_value) => {
+        let nargs_value = nargs_value.to_rust_string_lossy(scope);
+        if let Ok(nargs) = Nargs::try_from(nargs_value) {
+          builder.nargs(nargs);
+        }
       }
       None => { /* do nothing */ }
     }
