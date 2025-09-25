@@ -61,6 +61,6 @@ pub struct Attributes {
 
 impl<'a> From<v8::Local<'a, v8::Object>> for Attributes {
   fn from<'b>(value: v8::Local<'b, v8::Object>) -> Self {
-    AttributesBuilder::default().build().unwrap()
+    let mut builder = AttributesBuilder::default();
   }
 }
