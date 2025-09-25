@@ -1,12 +1,11 @@
 //! Ex command attributes.
 
 use crate::buf::BufferId;
-use derive_builder::Builder;
 
 /// Command attribute name.
-pub const BANG_NAME: &str = "bang";
-pub const NARGS_NAME: &str = "nargs";
-pub const BUFFER_NAME: &str = "buffer";
+pub const BANG: &str = "bang";
+pub const NARGS: &str = "nargs";
+pub const BUFFER: &str = "buffer";
 
 /// Default command attributes.
 pub const NARGS_VALUE: Nargs = Nargs::Zero;
