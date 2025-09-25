@@ -660,6 +660,7 @@ class RsvimOptImpl implements RsvimOpt {
 
 export namespace RsvimOpt {
   /**
+   * @inline
    * File encoding option.
    *
    * @see {@link RsvimOpt.fileEncoding}
@@ -667,6 +668,7 @@ export namespace RsvimOpt {
   export type FileEncodingOption = "utf-8";
 
   /**
+   * @inline
    * File format option.
    *
    * @see {@link RsvimOpt.fileFormat}
