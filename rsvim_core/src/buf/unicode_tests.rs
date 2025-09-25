@@ -10,6 +10,15 @@ use icu::properties::props::EastAsianWidth;
 use unicode_width::UnicodeWidthChar;
 
 #[test]
+fn ascii_display1() {
+  for i in 0_u32..32_u32 {
+    let ac = AsciiChar::from_ascii(i).unwrap();
+    let fmt = AsciiControlCodeFormatter::from(ac);
+    println!("{i}:{fmt}");
+  }
+}
+
+#[test]
 fn char_width1() {
   test_log_init();
 
