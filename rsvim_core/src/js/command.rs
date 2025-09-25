@@ -16,10 +16,6 @@ use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 
-pub const BANG: &str = "bang";
-pub const MODS: &str = "mods";
-pub const NARGS: &str = "nargs";
-
 #[derive(Debug, Clone)]
 pub struct CommandAttributes {
   pub bang: bool,

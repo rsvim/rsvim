@@ -1,5 +1,11 @@
 //! Ex command attributes.
 
+use crate::state::mode::Modes;
+
+pub const BANG: &str = "bang";
+pub const MODS: &str = "mods";
+pub const NARGS: &str = "nargs";
+
 #[derive(
   Debug,
   Copy,
@@ -32,4 +38,11 @@ pub enum Nargs {
   #[strum(serialize = "*")]
   /// Any arguments
   Any,
+}
+
+#[derive(Debug, Clone)]
+pub struct Attributes {
+  pub bang: bool,
+  pub mods: Modes,
+  pub nargs: Nargs,
 }
