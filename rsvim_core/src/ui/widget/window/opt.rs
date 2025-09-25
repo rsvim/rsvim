@@ -3,6 +3,10 @@
 use crate::defaults;
 use derive_builder::Builder;
 
+pub const WRAP: bool = true;
+pub const LINE_BREAK: bool = false;
+pub const SCROLL_OFF: u16 = 0_u16;
+
 #[derive(Debug, Copy, Clone, Builder)]
 /// Window local options.
 pub struct WindowOptions {
