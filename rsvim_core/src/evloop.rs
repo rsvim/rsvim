@@ -444,7 +444,7 @@ impl EventLoop {
             msg::sync_send_to_master(
               self.master_tx.clone(),
               MasterMessage::PrintReq(msg::PrintReq {
-                payload: e.to_compact_string(),
+                payload: e.to_string(),
               }),
             );
           }
