@@ -317,6 +317,8 @@ export interface RsvimOpt {
    * // Get the 'file-encoding' option.
    * const value = Rsvim.opt.fileEncoding;
    * ```
+   *
+   * @see {@link FileEncodingOption}
    */
   get fileEncoding(): RsvimOpt.FileEncodingOption;
 
@@ -331,6 +333,8 @@ export interface RsvimOpt {
    * // Set the 'file-encoding' option.
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
+   *
+   * @see {@link FileEncodingOption}
    */
   set fileEncoding(value: RsvimOpt.FileEncodingOption);
 
@@ -365,6 +369,8 @@ export interface RsvimOpt {
    * // Get the 'file-format' option.
    * const value = Rsvim.opt.fileFormat;
    * ```
+   *
+   * @see {@link FileFormatOption}
    */
   get fileFormat(): RsvimOpt.FileFormatOption;
 
@@ -379,6 +385,8 @@ export interface RsvimOpt {
    * // Set the 'file-format' option.
    * Rsvim.opt.fileFormat = "unix";
    * ```
+   *
+   * @see {@link FileFormatOption}
    */
   set fileFormat(value: RsvimOpt.FileFormatOption);
 
@@ -653,11 +661,15 @@ class RsvimOptImpl implements RsvimOpt {
 export namespace RsvimOpt {
   /**
    * File encoding option.
+   *
+   * @see {@link fileEncoding}
    */
   export type FileEncodingOption = "utf-8";
 
   /**
    * File format option.
+   *
+   * @see {@link fileFormat}
    */
   export type FileFormatOption = "dos" | "unix" | "mac";
 }
