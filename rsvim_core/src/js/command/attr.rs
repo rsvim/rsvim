@@ -2,7 +2,7 @@
 
 pub const BANG: &str = "bang";
 pub const NARGS: &str = "nargs";
-pub const BUF: &str = "buffer";
+pub const BUFFER: &str = "buffer";
 
 #[derive(
   Debug,
