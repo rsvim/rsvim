@@ -15,7 +15,7 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("select"), Ok(Mode::Select));
   assert_eq!(Mode::from_str("s"), Ok(Mode::Select));
 
-  assert_eq!(format!("{}", Mode::OperatorPending), "operator-pending");
+  assert_eq!(format!("{}", Mode::OperatorPending), "op-pending");
   assert_eq!(
     Mode::from_str("operator-pending"),
     Ok(Mode::OperatorPending)
@@ -27,7 +27,7 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("insert"), Ok(Mode::Insert));
   assert_eq!(Mode::from_str("i"), Ok(Mode::Insert));
 
-  assert_eq!(format!("{}", Mode::CommandLineEx), "command-line");
+  assert_eq!(format!("{}", Mode::CommandLineEx), "comline");
   assert_eq!(Mode::from_str("command-line"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("cmdline"), Ok(Mode::CommandLineEx));
   assert_eq!(Mode::from_str("c"), Ok(Mode::CommandLineEx));
@@ -49,8 +49,4 @@ fn test_mode1() {
     Mode::from_str("command-line-search-backward"),
     Ok(Mode::CommandLineSearchBackward)
   );
-
-  assert_eq!(format!("{}", Mode::Terminal), "terminal");
-  assert_eq!(Mode::from_str("terminal"), Ok(Mode::Terminal));
-  assert_eq!(Mode::from_str("t"), Ok(Mode::Terminal));
 }
