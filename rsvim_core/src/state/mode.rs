@@ -149,7 +149,7 @@ impl From<Mode> for Modes {
 impl From<Vec<Mode>> for Modes {
   /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
-    let mut values = BTreeSetSet::new();
+    let mut values = BTreeSet::new();
     for m in modes {
       values.insert(m);
     }
