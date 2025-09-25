@@ -30,9 +30,9 @@ pub enum Nargs {
   /// No arguments
   Zero,
 
-  #[strum(serialize = "{0}")]
-  /// N arguments
-  Count(u8),
+  #[strum(serialize = "1")]
+  /// 1 argument
+  One,
 
   #[strum(serialize = "?")]
   /// 0 or 1 argument
