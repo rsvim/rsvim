@@ -33,39 +33,39 @@ pub const COMMAND_LINE_SEARCH_BACKWARD: &str = "command-line-search-backward";
 )]
 /// Editing mode.
 pub enum Mode {
-  #[strum(serialize = "normal", serialize = "n")]
+  #[strum(to_string = "normal", serialize = "n")]
   /// Normal mode.
   Normal,
 
-  #[strum(serialize = "visual", serialize = "v")]
+  #[strum(to_string = "visual", serialize = "v")]
   /// Visual mode.
   Visual,
 
-  #[strum(serialize = "select", serialize = "s")]
+  #[strum(to_string = "select", serialize = "s")]
   /// Select mode.
   Select,
 
   #[strum(
+    to_string = "op-pending",
     serialize = "operator-pending",
-    serialize = "op-pending",
     serialize = "o"
   )]
   /// Operator-pending mode.
   OperatorPending,
 
-  #[strum(serialize = "insert", serialize = "i")]
+  #[strum(to_string = "insert", serialize = "i")]
   /// Insert mode.
   Insert,
 
-  #[strum(serialize = "command-line", serialize = "cmdline", serialize = "c")]
+  #[strum(to_string = "cmdline", serialize = "command-line", serialize = "c")]
   /// Command-line mode, ex-command variant.
   CommandLineEx,
 
-  #[strum(serialize = "command-line-search-forward")]
+  #[strum(to_string = "command-line-search-forward")]
   /// Command-line mode, search forward variant.
   CommandLineSearchForward,
 
-  #[strum(serialize = "command-line-search-backward")]
+  #[strum(to_string = "command-line-search-backward")]
   /// Command-line mode, search backward variant.
   CommandLineSearchBackward,
 }
