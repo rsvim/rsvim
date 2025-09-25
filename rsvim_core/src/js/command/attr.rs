@@ -21,7 +21,7 @@ pub enum Nargs {
   /// 0 or 1 argument
   Optional,
 
-  #[strum(serialize = "?")]
+  #[strum(serialize = "*")]
   /// 0 or 1 argument
   Any,
 }
