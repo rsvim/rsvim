@@ -150,7 +150,7 @@ class RsvimBufImpl implements RsvimBuf {
 /**
  * @inline
  */
-type CreateCommandAttributes = {
+type CommandAttributes = {
   bang?: boolean;
   nargs?: "0" | "1" | "?" | "+" | "?";
   bufId?: number;
@@ -158,13 +158,13 @@ type CreateCommandAttributes = {
 /**
  * @inline
  */
-type CreateCommandOptions = {
+type CommandOptions = {
   force?: boolean;
 };
 /**
  * @inline
  */
-type CreateCommandCallback = (ctx: any) => void;
+type CommandCallback = (ctx: any) => void;
 
 /**
  * The `Rsvim.cmd` global object for Ex commands.
@@ -192,8 +192,9 @@ export interface RsvimCmd {
    * :::
    *
    * @param {string} name - The command name that is going to create. Only letters (both lowercase `a-z` and uppercase `A-Z`), digits (`0-9`) and underscore (`_`) are allowed to be used as a command name. And a command name must begin with either a letter or underscore, digit is not allowed.
-   * @param {CreateCommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, `args`, `range`, etc.
-   * @param {CreateCommandAttributes} attr - The command attributes.
+   * @param {CommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, `args`, `range`, etc.
+   * @param {CommandAttributes} attr - The command attributes.
+   * @param {CommandOptions} attr - The command options.
    *
    * @throws Throws {@link !TypeError} if name is not a `null` or `undefined` or no parameter provided.
    *
@@ -204,10 +205,10 @@ export interface RsvimCmd {
    */
   create(
     name: string,
-    callback: CreateCommandCallback,
-    attr?: CreateCommandAttributes,
-    opts?: CreateCommandOptions,
-  ): undefined | CreateCommandCallback;
+    callback: CommandCallback,
+    attr?: CommandAttributes,
+    opts?: CommandOptions,
+  ): undefined | CommandCallback;
 
   /**
    * Echo message to the command-line.
@@ -228,10 +229,10 @@ export interface RsvimCmd {
 class RsvimCmdImpl implements RsvimCmd {
   create(
     name: string,
-    callback: CreateCommandCallback,
-    attr?: CreateCommandAttributes,
-    opts?: CreateCommandOptions,
-  ): undefined | CreateCommandCallback {
+    callback: CommandCallback,
+    attr?: CommandAttributes,
+    opts?: CommandOptions,
+  ): undefined | CommandCallback {
     return undefined;
   }
 
