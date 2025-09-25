@@ -147,14 +147,19 @@ class RsvimBufImpl implements RsvimBuf {
   }
 }
 
-
 /**
  * @inline
  */
 type CreateCommandAttributes = {
-  bang?: boolean,
-  nargs?: '0' | '1' | '?' | '+' | '?',
-  bufId?: number,
+  bang?: boolean;
+  nargs?: "0" | "1" | "?" | "+" | "?";
+  bufId?: number;
+};
+/**
+ * @inline
+ */
+type CreateCommandOptions = {
+  force?: boolean;
 };
 
 /**
@@ -188,7 +193,12 @@ export interface RsvimCmd {
    * Rsvim.cmd.echo("Hello Rsvim!");
    * ```
    */
-  create(name: string, callback: (ctx:any, ...args:any[]) => void, attr:): (ctx:any, ...args:any[]) => void;
+  create(
+    name: string,
+    callback: (ctx: any, ...args: any[]) => void,
+    attr?: CreateCommandAttributes,
+    opts?: CreateCommandOptions,
+  ): (ctx: any, ...args: any[]) => void;
 
   /**
    * Echo message to the command-line.
