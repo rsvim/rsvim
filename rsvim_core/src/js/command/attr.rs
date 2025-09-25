@@ -43,6 +43,14 @@ pub enum Nargs {
 #[derive(Debug, Clone)]
 pub struct Attributes {
   pub bang: bool,
-  pub mods: Modes,
   pub nargs: Nargs,
+}
+
+impl Default for Attributes {
+  fn default() -> Self {
+    Self {
+      bang: false,
+      nargs: Nargs::Zero,
+    }
+  }
 }
