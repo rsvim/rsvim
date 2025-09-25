@@ -247,7 +247,7 @@ export namespace RsvimCmd {
     /**
      * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
      *
-     * By default is `false`.
+     * By default is `false`
 ,    */
     bang?: boolean;
 
@@ -260,7 +260,7 @@ export namespace RsvimCmd {
      * - `?`: 0 or 1 arguments are allowed.
      * - `+`: At least 1 arguments are required.
      *
-     * By default is `"0"`.
+     * By default is `"0"`
 ,    */
     nargs?: "0" | "1" | "?" | "+" | "?";
   };
@@ -274,7 +274,7 @@ export namespace RsvimCmd {
     /**
      * Whether force override the command if there's already an existing one.
      *
-     * By default is `true`.
+     * By default is `true`
      */
     force?: boolean;
   };
