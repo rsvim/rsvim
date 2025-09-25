@@ -2,6 +2,7 @@ use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::widget::window::opt::*;
 use ringbuf::traits::*;
 use std::time::Duration;
 
@@ -30,12 +31,10 @@ async fn test_timeout1() -> IoResult<()> {
 
   // Before evaluating javascript configs
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   event_loop.initialize()?;
@@ -83,12 +82,10 @@ async fn test_timeout2() -> IoResult<()> {
 
   // Before evaluating javascript configs
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   event_loop.initialize()?;
@@ -99,12 +96,10 @@ async fn test_timeout2() -> IoResult<()> {
 
   // Still remains the same value
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   Ok(())
@@ -138,12 +133,10 @@ async fn test_timeout3() -> IoResult<()> {
 
   // Before evaluating javascript configs
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   event_loop.initialize()?;
@@ -211,12 +204,10 @@ async fn test_timeout4() -> IoResult<()> {
 
   // Before evaluating javascript configs
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   event_loop.initialize()?;
@@ -227,12 +218,10 @@ async fn test_timeout4() -> IoResult<()> {
 
   // Still remains the same value
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
 
     let contents = lock!(event_loop.contents);
     assert_eq!(0, contents.command_line_message_history().occupied_len());
@@ -266,12 +255,10 @@ async fn test_timeout5() -> IoResult<()> {
 
   // Before evaluating javascript configs
   {
-    use crate::defaults;
-
     let tree = lock!(event_loop.tree);
     let global_local_options = tree.global_local_options();
-    assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
-    assert_eq!(global_local_options.line_break(), defaults::win::LINE_BREAK);
+    assert_eq!(global_local_options.wrap(), WRAP);
+    assert_eq!(global_local_options.line_break(), LINE_BREAK);
   }
 
   event_loop.initialize()?;
