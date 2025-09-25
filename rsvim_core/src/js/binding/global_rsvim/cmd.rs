@@ -13,7 +13,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
-pub fn send_cmdline_message(state: &JsRuntimeState, payload: CompactString) {
+pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
   let mut tree = lock!(state.tree);
   let mut contents = lock!(state.contents);
