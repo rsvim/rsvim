@@ -8,7 +8,6 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use derive_builder::Builder;
 pub use file_encoding::*;
 pub use file_format::*;
 
@@ -22,7 +21,7 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_os = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
-#[derive(Debug, Copy, Clone, Builder)]
+#[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = TAB_STOP)]

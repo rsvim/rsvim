@@ -1,6 +1,7 @@
 //! Ex command attributes.
 
 use crate::buf::BufferId;
+use derive_builder::Builder;
 
 /// Command attribute name.
 pub const BANG_NAME: &str = "bang";
@@ -47,9 +48,14 @@ pub enum Nargs {
   Any,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone, derive_builder::Builder)]
 pub struct Attributes {
+  #[builder(default = BANG_VALUE)]
   pub bang: bool,
+
+  #[builder(default = NARGS_VALUE)]
   pub nargs: Nargs,
+
+  #[builder(default = BUFFER_VALUE)]
   pub buffer: Option<BufferId>,
 }
