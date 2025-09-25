@@ -147,6 +147,16 @@ class RsvimBufImpl implements RsvimBuf {
   }
 }
 
+
+/**
+ * @inline
+ */
+type CreateCommandAttributes = {
+  bang?: boolean,
+  nargs?: '0' | '1' | '?' | '+' | '?',
+  bufId?: number,
+};
+
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
@@ -165,6 +175,21 @@ class RsvimBufImpl implements RsvimBuf {
  * @category Editor APIs
  */
 export interface RsvimCmd {
+  /**
+   * Create a user EX command.
+   *
+   * @param {message} message - It accepts string and other primitive types, except `null`
+   * and `undefined`.
+   *
+   * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.echo("Hello Rsvim!");
+   * ```
+   */
+  create(name: string, callback: (ctx:any, ...args:any[]) => void, attr:): (ctx:any, ...args:any[]) => void;
+
   /**
    * Echo message to the command-line.
    *

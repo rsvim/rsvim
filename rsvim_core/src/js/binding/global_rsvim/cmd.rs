@@ -2,7 +2,7 @@
 
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
-use crate::js::command::attr::Attributes;
+use crate::js::command::attr::CommandAttributes;
 use crate::js::command::opt::CommandOptions;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -52,7 +52,7 @@ pub fn create(
   let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
   let attrs = args.get(2).to_object(scope).unwrap();
-  let attrs = Attributes::from_object(scope, attrs);
+  let attrs = CommandAttributes::from_object(scope, attrs);
   let opts = args.get(3).to_object(scope).unwrap();
   let opts = CommandOptions::from_object(scope, opts);
   trace!("Rsvim.cmd.create:{:?}", name);

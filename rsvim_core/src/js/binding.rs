@@ -103,6 +103,7 @@ pub fn create_new_context<'s>(
 
   // For `Rsvim.cmd`
   {
+    set_function_to(scope, vim, "cmd_create", global_rsvim::cmd::create);
     set_function_to(scope, vim, "cmd_echo", global_rsvim::cmd::echo);
   }
 

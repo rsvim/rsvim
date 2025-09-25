@@ -48,7 +48,7 @@ pub enum Nargs {
 }
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
-pub struct Attributes {
+pub struct CommandAttributes {
   #[builder(default = BANG_VALUE)]
   pub bang: bool,
 
@@ -59,12 +59,12 @@ pub struct Attributes {
   pub buffer: Option<BufferId>,
 }
 
-impl Attributes {
+impl CommandAttributes {
   pub fn from_object<'a>(
     scope: &mut v8::HandleScope,
     value: v8::Local<'a, v8::Object>,
   ) -> Self {
-    let mut builder = AttributesBuilder::default();
+    let mut builder = CommandAttributesBuilder::default();
 
     // bang
     let bang_name = v8::String::new(scope, BANG_NAME).unwrap();
