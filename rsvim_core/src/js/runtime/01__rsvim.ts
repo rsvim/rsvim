@@ -148,25 +148,6 @@ class RsvimBufImpl implements RsvimBuf {
 }
 
 /**
- * @inline
- */
-type CommandAttributes = {
-  bang?: boolean;
-  nargs?: "0" | "1" | "?" | "+" | "?";
-  bufId?: number;
-};
-/**
- * @inline
- */
-type CreateCommandOptions = {
-  force?: boolean;
-};
-/**
- * @inline
- */
-type CommandCallback = (ctx: any) => void;
-
-/**
  * The `Rsvim.cmd` global object for Ex commands.
  *
  * :::tip
@@ -185,16 +166,17 @@ type CommandCallback = (ctx: any) => void;
  */
 export interface RsvimCmd {
   /**
-   * Create a user EX command with a callback function.
+   * Create a user ex command with a callback function.
    *
    * :::warning
    * The only builtin command from Rsvim is the `js` command, which cannot be override.
    * :::
    *
    * @param {string} name - The command name that is going to create. Only letters (both lowercase `a-z` and uppercase `A-Z`), digits (`0-9`) and underscore (`_`) are allowed to be used as a command name. And a command name must begin with either a letter or underscore, digit is not allowed.
-   * @param {CommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, arguments, buffer ID, etc.
-   * @param {CommandAttributes} attr - The command attributes, it controls the command related behavior, such as `bang`, `nargs`, `bufId`, etc.
-   * @param {CreateCommandOptions} attr - The command options, it controls how a command is created, such as `force`, etc.
+   * @param {RsvimCmd.CommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, arguments, buffer ID, etc.
+   * @param {RsvimCmd.CommandAttributes} attr - The command attributes, it controls the command related behavior, such as `bang`, `nargs`, `bufId`, etc.
+   * @param {RsvimCmd.CreateCommandOptions} attr - The command options, it controls how a command is created, such as `force`, etc.
+   * @returns {undefined | RsvimCmd.CommandCallback}
    *
    * @throws Throws {@link !TypeError} if name is not a `null` or `undefined` or no parameter provided.
    *
@@ -205,10 +187,10 @@ export interface RsvimCmd {
    */
   create(
     name: string,
-    callback: CommandCallback,
-    attr?: CommandAttributes,
-    opts?: CreateCommandOptions,
-  ): undefined | CommandCallback;
+    callback: RsvimCmd.CommandCallback,
+    attr?: RsvimCmd.CommandAttributes,
+    opts?: RsvimCmd.CreateCommandOptions,
+  ): undefined | RsvimCmd.CommandCallback;
 
   /**
    * Echo message to the command-line.
@@ -229,10 +211,10 @@ export interface RsvimCmd {
 class RsvimCmdImpl implements RsvimCmd {
   create(
     name: string,
-    callback: CommandCallback,
-    attr?: CommandAttributes,
-    opts?: CreateCommandOptions,
-  ): undefined | CommandCallback {
+    callback: RsvimCmd.CommandCallback,
+    attr?: RsvimCmd.CommandAttributes,
+    opts?: RsvimCmd.CreateCommandOptions,
+  ): undefined | RsvimCmd.CommandCallback {
     return undefined;
   }
 
@@ -245,6 +227,29 @@ class RsvimCmdImpl implements RsvimCmd {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
+}
+
+export namespace RsvimCmd {
+  /**
+   * Command attributes.
+   */
+  export type CommandAttributes = {
+    bang?: boolean;
+    nargs?: "0" | "1" | "?" | "+" | "?";
+    bufId?: number;
+  };
+
+  /**
+   * Command options when creating a command.
+   */
+  export type CreateCommandOptions = {
+    force?: boolean;
+  };
+
+  /**
+   * Command callback function, this is the backend logic that implements a user ex command.
+,  */
+  export type CommandCallback = (ctx: any) => void;
 }
 
 /**
