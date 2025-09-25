@@ -232,6 +232,8 @@ class RsvimCmdImpl implements RsvimCmd {
 export namespace RsvimCmd {
   /**
    * Command attributes.
+   *
+   * @see {@link RsvimCmd.create}
    */
   export type CommandAttributes = {
     /**
@@ -258,9 +260,14 @@ export namespace RsvimCmd {
   /**
    * Command options when creating a command.
    *
-   * By default is `true`.
+   * @see {@link RsvimCmd.create}
    */
   export type CreateCommandOptions = {
+    /**
+     * Whether force override the command if there's already an existing one.
+     *
+     * By default is `true`.
+     */
     force?: boolean;
   };
 
