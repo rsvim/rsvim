@@ -17,13 +17,17 @@ pub enum Nargs {
   /// No arguments
   Zero,
 
+  #[strum(serialize = "n")]
+  /// N arguments
+  Count(u32),
+
   #[strum(serialize = "?")]
   /// 0 or 1 argument
   Optional,
 
   #[strum(serialize = "+")]
   /// 1 or more arguments
-  AtLeast1,
+  OneOrMore,
 
   #[strum(serialize = "*")]
   /// 0 or 1 argument
