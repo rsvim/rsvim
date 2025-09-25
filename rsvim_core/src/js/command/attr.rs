@@ -1,7 +1,5 @@
 //! Ex command attributes.
 
-use crate::state::mode::Modes;
-
 pub const BANG: &str = "bang";
 pub const MODS: &str = "mods";
 pub const NARGS: &str = "nargs";
