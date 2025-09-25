@@ -59,9 +59,22 @@ pub struct Attributes {
   pub buffer: Option<BufferId>,
 }
 
-impl<'a> From<v8::Local<'a, v8::Object>> for Attributes {
-  fn from<'b>(value: v8::Local<'b, v8::Object>) -> Self {
+impl Attributes {
+  fn from<'a>(
+    scope: &mut v8::HandleScope,
+    value: v8::Local<'a, v8::Object>,
+  ) -> Self {
     let mut builder = AttributesBuilder::default();
+
+    // bang
+    let bang_name = v8::String::new(scope, BANG).unwrap();
+    match value.get(scope, bang_name.into()) {
+      Some(bang_value) => {
+        let bang_value = bang_value.to_boolean(scope).boolean_value(scope);
+        builder.bang(bang_value);
+      }
+      None => { /* do nothing */ }
+    }
 
     builder.build().unwrap()
   }
