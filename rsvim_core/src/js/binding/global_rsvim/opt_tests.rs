@@ -1,8 +1,10 @@
+use crate::buf::opt::*;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::widget::window::opt::*;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -31,11 +33,9 @@ mod tests_wrap {
 
     // Before running
     {
-      use crate::defaults;
-
       let tree = lock!(event_loop.tree);
       let global_local_options = tree.global_local_options();
-      assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+      assert_eq!(global_local_options.wrap(), WRAP);
     }
 
     event_loop.initialize()?;
@@ -82,11 +82,9 @@ mod tests_tab_stop {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
 
     event_loop.initialize()?;
@@ -130,11 +128,9 @@ mod tests_tab_stop {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
 
     event_loop.initialize()?;
@@ -145,11 +141,9 @@ mod tests_tab_stop {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
@@ -189,19 +183,11 @@ mod tests_file_encoding {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;
@@ -250,14 +236,9 @@ mod tests_file_encoding {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
     }
 
     event_loop.initialize()?;
@@ -268,14 +249,9 @@ mod tests_file_encoding {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
@@ -315,19 +291,11 @@ mod tests_file_format {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;

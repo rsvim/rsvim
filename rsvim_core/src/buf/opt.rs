@@ -8,27 +8,36 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use crate::defaults;
 use derive_builder::Builder;
 pub use file_encoding::*;
 pub use file_format::*;
 
+/// Buffer default options.
+pub const TAB_STOP: u16 = 8;
+pub const EXPAND_TAB: bool = false;
+pub const SHIFT_WIDTH: u16 = 8;
+pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
+#[cfg(target_os = "windows")]
+pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
+#[cfg(not(target_os = "windows"))]
+pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
+
 #[derive(Debug, Copy, Clone, Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
-  #[builder(default = defaults::buf::TAB_STOP)]
+  #[builder(default = TAB_STOP)]
   tab_stop: u16,
 
-  #[builder(default = defaults::buf::EXPAND_TAB)]
+  #[builder(default = EXPAND_TAB)]
   expand_tab: bool,
 
-  #[builder(default = defaults::buf::SHIFT_WIDTH)]
+  #[builder(default = SHIFT_WIDTH)]
   shift_width: u16,
 
-  #[builder(default = defaults::buf::FILE_ENCODING)]
+  #[builder(default = FILE_ENCODING)]
   file_encoding: FileEncodingOption,
 
-  #[builder(default = defaults::buf::FILE_FORMAT)]
+  #[builder(default = FILE_FORMAT)]
   file_format: FileFormatOption,
 }
 
