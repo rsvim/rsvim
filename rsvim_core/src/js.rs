@@ -792,7 +792,7 @@ pub mod boost {
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
           let state = state_rc.borrow();
-          report_js_error!(state, exception);
+          report_js_error(&state, exception.into());
           continue;
         }
 
