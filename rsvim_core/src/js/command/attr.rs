@@ -2,9 +2,16 @@
 
 use crate::buf::BufferId;
 
-pub const BANG: &str = "bang";
-pub const NARGS: &str = "nargs";
-pub const BUFFER: &str = "buffer";
+/// Command attribute name.
+pub const BANG_NAME: &str = "bang";
+pub const NARGS_NAME: &str = "nargs";
+pub const BUFFER_NAME: &str = "buffer";
+
+/// Default command attributes.
+pub const NARGS_VALUE: Nargs = Nargs::Zero;
+pub const BANG_VALUE: bool = false;
+pub const BUFFER_VALUE: Option<BufferId> = None;
+pub const FORCE_VALUE: bool = true;
 
 #[derive(
   Debug,

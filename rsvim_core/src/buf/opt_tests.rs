@@ -1,5 +1,4 @@
 use super::opt::*;
-use crate::defaults;
 
 #[test]
 fn default1() {
