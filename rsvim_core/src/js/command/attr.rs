@@ -25,7 +25,7 @@ pub enum Nargs {
 
   #[strum(serialize = "{0}")]
   /// N arguments
-  Count(std::num::NonZeroU8),
+  Count(u8),
 
   #[strum(serialize = "?")]
   /// 0 or 1 argument
@@ -33,7 +33,7 @@ pub enum Nargs {
 
   #[strum(serialize = "+")]
   /// 1 or more arguments
-  OneOrMore,
+  More,
 
   #[strum(serialize = "*")]
   /// Any arguments
