@@ -175,7 +175,7 @@ export interface RsvimCmd {
    * @param {string} name - The command name that is going to create. Only letters (both lowercase `a-z` and uppercase `A-Z`), digits (`0-9`) and underscore (`_`) are allowed to be used as a command name. And a command name must begin with either a letter or underscore, digit is not allowed.
    * @param {RsvimCmd.CommandCallback} callback - The backend function that implements the command logic. It accepts an `ctx` parameter that contains all the information when user is running the command, such as `bang`, arguments, buffer ID, etc. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attr - The command attributes, it controls the command related behavior, such as `bang`, `nargs`, etc. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CreateCommandOptions} attr - The command options, it controls how a command is created, such as `force`, etc. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CreateCommandOptions}.
+   * @param {RsvimCmd.CreateCommandOptions} opts - The command options, it controls how a command is created, such as `force`, etc. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CreateCommandOptions}.
    * @returns {undefined | {attr:RsvimCmd.CommandAttributes,opts:RsvimCmd.CreateCommandOptions,callback:RsvimCmd.CommandCallback}} It returns `undefined` is the command is newly created, or an object with `attr`, `opts` and `callback`fields that was defined the same command name previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid.
