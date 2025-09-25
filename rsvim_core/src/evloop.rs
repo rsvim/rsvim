@@ -27,7 +27,6 @@ use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
