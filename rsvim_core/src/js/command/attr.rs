@@ -88,6 +88,19 @@ impl Attributes {
       None => { /* do nothing */ }
     }
 
+    // buffer
+    let buffer_name = v8::String::new(scope, BUFFER_NAME).unwrap();
+    match value.get(scope, buffer_name.into()) {
+      Some(buffer_value) => {
+        if let Some(buffer) = buffer_value.to_integer(scope) {
+          if let Some(buffer) = buffer.integer_value(scope) {
+            builder.buffer(Some(buffer as BufferId));
+          }
+        }
+      }
+      None => { /* do nothing */ }
+    }
+
     builder.build().unwrap()
   }
 }
