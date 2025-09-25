@@ -2,6 +2,23 @@
 
 use crate::prelude::*;
 
+pub const NORMAL: &str = "normal";
+pub const N: &str = "n";
+pub const VISUAL: &str = "visual";
+pub const V: &str = "v";
+pub const SELECT: &str = "select";
+pub const S: &str = "s";
+pub const OPERATOR_PENDING: &str = "operator-pending";
+pub const OP_PENDING: &str = "op-pending";
+pub const O: &str = "o";
+pub const INSERT: &str = "insert";
+pub const I: &str = "i";
+pub const COMMAND_LINE: &str = "command-line";
+pub const CMDLINE: &str = "cmdline";
+pub const C: &str = "c";
+pub const COMMAND_LINE_SEARCH_FORWARD: &str = "command-line-search-forward";
+pub const COMMAND_LINE_SEARCH_BACKWARD: &str = "command-line-search-backward";
+
 #[derive(
   Debug,
   Copy,
@@ -29,8 +46,8 @@ pub enum Mode {
   Select,
 
   #[strum(
-    serialize = "operator-pending",
     serialize = "op-pending",
+    serialize = "operator-pending",
     serialize = "o"
   )]
   /// Operator-pending mode.
@@ -40,7 +57,7 @@ pub enum Mode {
   /// Insert mode.
   Insert,
 
-  #[strum(serialize = "command-line", serialize = "cmdline", serialize = "c")]
+  #[strum(serialize = "cmdline", serialize = "command-line", serialize = "c")]
   /// Command-line mode, ex-command variant.
   CommandLineEx,
 
@@ -51,10 +68,34 @@ pub enum Mode {
   #[strum(serialize = "command-line-search-backward")]
   /// Command-line mode, search backward variant.
   CommandLineSearchBackward,
+}
 
-  #[strum(serialize = "terminal", serialize = "t")]
-  /// Terminal mode.
-  Terminal,
+impl Mode {
+  pub fn name(&self) -> &str {
+    match self {
+      Mode::Normal => NORMAL,
+      Mode::Visual => VISUAL,
+      Mode::Select => SELECT,
+      Mode::OperatorPending => OP_PENDING,
+      Mode::Insert => INSERT,
+      Mode::CommandLineEx => CMDLINE,
+      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+    }
+  }
+
+  pub fn short_name(&self) -> &str {
+    match self {
+      Mode::Normal => N,
+      Mode::Visual => V,
+      Mode::Select => S,
+      Mode::OperatorPending => O,
+      Mode::Insert => I,
+      Mode::CommandLineEx => C,
+      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+    }
+  }
 }
 
 impl Mode {
@@ -69,7 +110,6 @@ impl Mode {
       Mode::CommandLineEx,
       Mode::CommandLineSearchForward,
       Mode::CommandLineSearchBackward,
-      Mode::Terminal,
     ]
   }
 }
