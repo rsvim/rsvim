@@ -7,6 +7,7 @@ use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
+use crate::state::mode::Modes;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
@@ -20,6 +21,7 @@ pub const NARGS: &str = "nargs";
 #[derive(Debug, Clone)]
 pub struct CommandAttributes {
   pub bang: bool,
+  pub mods: Modes,
 }
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
