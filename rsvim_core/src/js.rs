@@ -701,7 +701,7 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let state = state_rc.borrow();
-          report_js_error!(state, exception);
+          report_js_error(&state, exception.into());
         }
         run_next_tick_callbacks(scope);
       }
