@@ -234,6 +234,9 @@ export namespace RsvimCmd {
    * Command attributes.
    */
   export type CommandAttributes = {
+    /*
+     * The command can take a `!` modifier, for example: `:w!`, `:qall!`.
+,    */
     bang?: boolean;
     nargs?: "0" | "1" | "?" | "+" | "?";
     bufId?: number;
