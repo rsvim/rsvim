@@ -341,14 +341,9 @@ mod tests_file_format {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;
@@ -359,14 +354,9 @@ mod tests_file_format {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
@@ -406,11 +396,9 @@ mod tests_expand_tab {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
 
     event_loop.initialize()?;
@@ -454,11 +442,9 @@ mod tests_expand_tab {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
 
     event_loop.initialize()?;
@@ -469,11 +455,9 @@ mod tests_expand_tab {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
@@ -514,14 +498,9 @@ mod tests_shift_width {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
 
     event_loop.initialize()?;
@@ -565,14 +544,9 @@ mod tests_shift_width {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
 
     event_loop.initialize()?;
@@ -583,14 +557,9 @@ mod tests_shift_width {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
