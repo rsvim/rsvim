@@ -81,7 +81,7 @@ impl Attributes {
     match value.get(scope, nargs_name.into()) {
       Some(nargs_value) => {
         let nargs_value = nargs_value.to_rust_string_lossy(scope);
-        if let Ok(nargs) = Nargs::from_str(nargs_value) {
+        if let Ok(nargs) = Nargs::from_str(&nargs_value) {
           builder.nargs(nargs);
         }
       }
