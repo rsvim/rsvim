@@ -23,9 +23,9 @@ pub enum Nargs {
   /// No arguments
   Zero,
 
-  #[strum(serialize = "n")]
+  #[strum(serialize = "{0}")]
   /// N arguments
-  Count(u32),
+  Count(std::num::NonZeroU8),
 
   #[strum(serialize = "?")]
   /// 0 or 1 argument
