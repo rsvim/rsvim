@@ -9,21 +9,15 @@ use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
-use crate::state::mode::Modes;
+use attr::Attributes;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 
-#[derive(Debug, Clone)]
-pub struct CommandAttributes {
-  pub bang: bool,
-  pub mods: Modes,
-  pub nargs: 
-}
-
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
+pub type CommandDefinition = (CommandCallback, Attributes);
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
@@ -62,12 +56,12 @@ impl JsFuture for BuiltinCommandFuture {
 pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub cb: CommandCallback,
+  pub definition: CommandDefinition,
 }
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
-  commands: FoldMap<CompactString, (CommandCallback)>,
+  commands: FoldMap<CompactString, CommandDefinition>,
 }
 
 arc_mutex_ptr!(CommandsManager);
@@ -81,19 +75,19 @@ impl CommandsManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<CommandCallback> {
+  pub fn remove(&mut self, name: &str) -> Option<CommandDefinition> {
     self.commands.remove(name)
   }
 
   pub fn insert(
     &mut self,
     name: CompactString,
-    cb: Rc<v8::Global<v8::Function>>,
-  ) -> Option<CommandCallback> {
-    self.commands.insert(name, cb)
+    definition: CommandDefinition,
+  ) -> Option<CommandDefinition> {
+    self.commands.insert(name, definition)
   }
 
-  pub fn get(&self, name: &str) -> Option<CommandCallback> {
+  pub fn get(&self, name: &str) -> Option<CommandDefinition> {
     self.commands.get(name).cloned()
   }
 
@@ -103,20 +97,22 @@ impl CommandsManager {
 
   pub fn keys(
     &self,
-  ) -> std::collections::hash_map::Keys<'_, CompactString, CommandCallback> {
+  ) -> std::collections::hash_map::Keys<'_, CompactString, CommandDefinition>
+  {
     self.commands.keys()
   }
 
   pub fn values(
     &self,
-  ) -> std::collections::hash_map::Values<'_, CompactString, CommandCallback>
+  ) -> std::collections::hash_map::Values<'_, CompactString, CommandDefinition>
   {
     self.commands.values()
   }
 
   pub fn iter(
     &self,
-  ) -> std::collections::hash_map::Iter<'_, CompactString, CommandCallback> {
+  ) -> std::collections::hash_map::Iter<'_, CompactString, CommandDefinition>
+  {
     self.commands.iter()
   }
 }
