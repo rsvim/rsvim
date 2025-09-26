@@ -318,6 +318,7 @@ class RsvimCmdImpl implements RsvimCmd {
       },
       `"Rsvim.cmd.create" attributes`,
     );
+
     if (options === undefined) {
       options = {};
     }
