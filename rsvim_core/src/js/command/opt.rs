@@ -1,15 +1,22 @@
 //! Ex command options.
 
+use crate::buf::BufferId;
+
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
+pub const BUFFER_NAME: &str = "buffer";
 
 /// Default command options.
 pub const FORCE_VALUE: bool = true;
+pub const BUFFER_VALUE: Option<BufferId> = None;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 pub struct CommandOptions {
   #[builder(default = FORCE_VALUE)]
   pub force: bool,
+
+  #[builder(default = BUFFER_VALUE)]
+  pub buffer: Option<BufferId>,
 }
 
 impl CommandOptions {
@@ -25,6 +32,18 @@ impl CommandOptions {
       Some(force_value) => {
         let force = force_value.to_boolean(scope).boolean_value(scope);
         builder.force(force);
+      }
+      None => { /* do nothing */ }
+    }
+
+    // buffer
+    let buffer_name = v8::String::new(scope, BUFFER_NAME).unwrap();
+    match value.get(scope, buffer_name.into()) {
+      Some(buffer_value) => {
+        if buffer_value.is_int32() {
+          let buf_id = buffer_value.to_int32(scope).unwrap().value();
+          builder.buffer(Some(buf_id));
+        }
       }
       None => { /* do nothing */ }
     }
