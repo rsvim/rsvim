@@ -22,8 +22,13 @@ use std::rc::Rc;
 const JS_COMMAND_NAME: &str = "js";
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
-pub type CommandDefinition =
-  (CommandCallback, CommandAttributes, CommandOptions);
+
+#[derive(Debug, Clone)]
+pub struct CommandDefinition {
+  pub callback: CommandCallback,
+  pub attributes: CommandAttributes,
+  pub options: CommandOptions,
+}
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
