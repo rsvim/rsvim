@@ -109,6 +109,12 @@ function checkIsBoolean(arg: any, msg: string) {
   }
 }
 
+function checkIsFunction(arg: any, msg: string) {
+  if (typeof arg !== "function") {
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+  }
+}
+
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -153,7 +159,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     delay?: number,
     ...args: any[]
   ): number {
-    if (delay === undefined || delay === null) {
+    if (delay === undefined) {
       delay = 1;
     }
     checkIsNumber(delay, `"setInterval" delay`);
