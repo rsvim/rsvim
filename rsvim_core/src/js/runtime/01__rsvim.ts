@@ -326,6 +326,7 @@ class RsvimCmdImpl implements RsvimCmd {
       },
       `"Rsvim.cmd.create" options`,
     );
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_create(
       name,
