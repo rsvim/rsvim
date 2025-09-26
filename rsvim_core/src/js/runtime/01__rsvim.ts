@@ -690,18 +690,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    if (typeof value !== "number") {
-      throw new TypeError(
-        `"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`,
-      );
-    }
-
-    if (value < 1 || value > 255) {
-      throw new RangeError(
-        `"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`,
-      );
-    }
-
+    checkBetweenIntegersInclusive(value, [1, 255], `"Rsvim.opt.tapStop" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
@@ -712,11 +701,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set wrap(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.wrap" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.wrap" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
