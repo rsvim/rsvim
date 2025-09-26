@@ -314,6 +314,8 @@ export interface RsvimCmd {
    * @param {string} name - The command name to be removed.
    * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
    *
+   * @throws Throws {@link !TypeError} if name is not a string.
+   *
    * @example
    * ```javascript
    * Rsvim.cmd.list().forEach((cmd) => {
