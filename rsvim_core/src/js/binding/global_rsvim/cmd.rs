@@ -9,7 +9,6 @@ use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
@@ -76,17 +75,20 @@ pub fn list(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
-  let command_names = commands
-    .iter()
-    .map(|(name, def)| name.to_string())
-    .collect::<Vec<String>>();
 
-  let names = v8::Array::new(scope, command_names.len() as i32);
-  for (i, name) in command_names.iter().enumerate() {
-    let v = v8::String::new(scope, name);
-    names.set_index(scope, i as u32, v.into());
+  let cmds = v8::Array::new(scope, commands.len() as i32);
+  for (i, (name, def)) in commands.iter().enumerate() {
+    let cmd = v8::Object::new(scope);
+
+    // name
+    let name_field = v8::String::new(scope, "name").unwrap();
+    let name_value = v8::String::new(scope, name.as_ref()).unwrap();
+    cmd.set(scope, name_field.into(), name_value.into());
+
+    cmds.set_index(scope, i as u32, cmd.into());
   }
-  rv.set(v8::Local::new(scope, names).into());
+
+  rv.set(v8::Local::new(scope, cmds).into());
 }
 
 /// `Rsvim.cmd.remove` API.
