@@ -96,6 +96,21 @@ function checkIsOptions(arg: any, options: any[], msg: string) {
   }
 }
 
+function checkObjectContains(
+  arg: any,
+  fieldCheckers: { [index: string]: (arg: any, msg: string) => void },
+  msg: string,
+) {
+  if (typeof arg !== "object") {
+    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+  }
+  Object.entries(fieldCheckers).forEach(([field, checker]) => {
+    if (Object.hasOwn(arg, field)) {
+      checker(arg[field], msg);
+    }
+  });
+}
+
 function boundByIntegers(arg: any, bound: [number, number]) {
   if (arg < bound[0]) {
     return bound[0];
