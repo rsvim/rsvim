@@ -256,6 +256,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let actual = contents.command_line_message_history_mut().try_pop();
     assert!(actual.is_some());
     let actual = actual.unwrap();
+    assert!(actual.contains("Previous command:undefined"));
   }
 
   Ok(())
