@@ -25,10 +25,36 @@ function checkIsBoolean(arg, msg) {
         throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
     }
 }
+function checkIsString(arg, msg) {
+    if (typeof arg !== "string") {
+        throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+    }
+}
+function checkMatchPattern(arg, pat, msg) {
+    checkIsString(arg, msg);
+    if (!pat.test(arg)) {
+        throw new Error(`${msg} is invalid pattern: ${arg}"`);
+    }
+}
+function checkIsFunction(arg, msg) {
+    if (typeof arg !== "function") {
+        throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
         throw new RangeError(`${msg} is invalid option: ${arg}`);
     }
+}
+function checkObjectContains(arg, fieldCheckers, msg) {
+    if (typeof arg !== "object") {
+        throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+    }
+    Object.entries(fieldCheckers).forEach(([field, checker]) => {
+        if (Object.hasOwn(arg, field)) {
+            checker(arg[field], msg);
+        }
+    });
 }
 function boundByIntegers(arg, bound) {
     if (arg < bound[0]) {
@@ -53,11 +79,33 @@ class RsvimBufImpl {
 }
 class RsvimCmdImpl {
     create(name, callback, attributes, options) {
-        return undefined;
+        checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]+$/, `"Rsvim.cmd.create" name`);
+        checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
+        if (attributes === undefined) {
+            attributes = {};
+        }
+        checkObjectContains(attributes, {
+            bang: checkIsBoolean,
+            nargs: (arg, msg) => checkIsOptions(arg, ["0", "1", "?", "+", "*"], msg),
+        }, `"Rsvim.cmd.create" attributes`);
+        if (options === undefined) {
+            options = {};
+        }
+        checkObjectContains(options, {
+            force: checkIsBoolean,
+        }, `"Rsvim.cmd.create" options`);
+        return __InternalRsvimGlobalObject.cmd_create(name, callback, attributes, options);
     }
     echo(message) {
         checkNotNull(message, `"Rsvim.cmd.echo" message`);
         __InternalRsvimGlobalObject.cmd_echo(message);
+    }
+    list() {
+        return __InternalRsvimGlobalObject.cmd_list();
+    }
+    remove(name) {
+        checkIsString(name, `"Rsvim.cmd.remove" name`);
+        return __InternalRsvimGlobalObject.cmd_remove(name);
     }
 }
 class RsvimOptImpl {
