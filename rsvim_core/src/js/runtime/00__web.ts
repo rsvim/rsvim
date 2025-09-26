@@ -75,6 +75,55 @@ export interface GlobalThis {
   ): number;
 }
 
+function checkNotNull(arg: any, msg: string) {
+  if (arg === undefined || arg === null) {
+    throw new TypeError(`${msg} cannot be undefined or null`);
+  }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  if (typeof arg !== "number") {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+  if (!Number.isInteger(arg)) {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+}
+
+function checkIsOptionalInteger(arg: any, msg: string) {
+  if (arg !== undefined && typeof arg !== "number") {
+    throw new TypeError(
+      `${msg} must be an integer or undefined, but found ${typeof arg}`,
+    );
+  }
+  checkIsInteger(arg, msg);
+}
+
+function checkIsBoolean(arg: any, msg: string) {
+  if (typeof arg !== "boolean") {
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+  }
+}
+
+function checkIsOptions(arg: any, options: any[], msg: string) {
+  if (!options.includes(arg)) {
+    throw new RangeError(`${msg} is invalid option: ${arg}`);
+  }
+}
+
+function checkBetweenIntegersInclusive(
+  arg: any,
+  bound: [number, number],
+  msg: string,
+) {
+  checkIsInteger(arg, msg);
+  if (arg < bound[0] || arg > bound[1]) {
+    throw new RangeError(
+      `${msg} must be between [${bound[0]},${bound[1]}], but found ${arg}`,
+    );
+  }
+}
+
 ((globalThis: GlobalThis) => {
   // Timer API {
 
@@ -89,11 +138,7 @@ export interface GlobalThis {
 
   function clearInterval(id: number): void {
     // Check parameter's type.
-    if (!Number.isInteger(id)) {
-      throw new TypeError(
-        `"clearInterval" id must be an integer, but found ${typeof id}`,
-      );
-    }
+    checkIsInteger(id, `"clearInterval" ID`);
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
