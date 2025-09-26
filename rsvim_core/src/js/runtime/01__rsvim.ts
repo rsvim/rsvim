@@ -303,6 +303,7 @@ class RsvimCmdImpl implements RsvimCmd {
       /^[A-Za-z_!][A-Za-z0-9_!]+$/,
       `"Rsvim.cmd.create" name`,
     );
+
     checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
 
     if (attributes === undefined) {
