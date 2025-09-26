@@ -18,7 +18,7 @@ pub struct CommandDefinition {
 }
 
 impl CommandDefinition {
-  pub fn from_v8_object<'a>(
+  pub fn from_v8_object(
     scope: &mut v8::HandleScope,
     args: v8::FunctionCallbackArguments,
   ) -> Self {
