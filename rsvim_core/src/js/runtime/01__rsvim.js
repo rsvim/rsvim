@@ -107,7 +107,7 @@ class RsvimOptImpl {
         return __InternalRsvimGlobalObject.opt_get_tab_stop();
     }
     set tabStop(value) {
-        checkIsInteger(value, `"Rsvim.opt.tapStop" value`);
+        checkIsInteger(value, `"Rsvim.opt.tabStop" value`);
         value = boundByIntegers(value, [1, 255]);
         __InternalRsvimGlobalObject.opt_set_tab_stop(value);
     }
