@@ -63,7 +63,9 @@ function checkIsInteger(arg: any, msg: string) {
 
 function checkIsOptionalInteger(arg: any, msg: string) {
   if (arg !== undefined && typeof arg !== "number") {
-    throw new Error(`${msg} must be an integer or undefined`);
+    throw new Error(
+      `${msg} must be an integer or undefined, but found ${typeof arg}`,
+    );
   }
   checkIsInteger(arg, msg);
 }
