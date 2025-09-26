@@ -89,6 +89,11 @@ pub fn list(
     let attr_field = v8::String::new(scope, "attribute").unwrap();
     let attr_value = v8::Object::new(scope);
 
+    // attribute.bang
+    let attr_bang_field = v8::String::new(scope, "bang").unwrap();
+    let attr_bang_value = v8::Boolean::new(scope, def.1.bang);
+    attr_value.set(scope, attr_bang_field, attr_bang_value);
+
     cmds.set_index(scope, i as u32, cmd.into());
   }
 
