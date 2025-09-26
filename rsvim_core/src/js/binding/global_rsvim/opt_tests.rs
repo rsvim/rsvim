@@ -198,6 +198,7 @@ mod tests_tab_stop {
       let actual = contents.command_line_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
+      info!("actual:{:?}", actual);
       assert!(actual.contains(
         r####""Rsvim.opt.tabStop" value must be an integer, but found"####
       ));
