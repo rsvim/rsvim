@@ -272,9 +272,7 @@ class RsvimCmdImpl implements RsvimCmd {
   ): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.create" name`);
     if (!/^[A-Za-z_!][A-Za-z0-9_!]+$/.test(name)) {
-      throw new Error(
-        `"Rsvim.cmd.create" name contains invalid characters: ${name}"`,
-      );
+      throw new Error(`"Rsvim.cmd.create" name is invalid pattern: ${name}"`);
     }
     return undefined;
   }
