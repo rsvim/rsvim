@@ -58,7 +58,10 @@ pub fn create(
   let removed = commands.insert(def.name.to_compact_string(), def);
 
   match removed {
-    Some(removed) => {}
+    Some(removed) => {
+      let obj = removed.into_v8_object(scope);
+      rv.set(obj.into());
+    }
     None => rv.set_undefined(),
   }
 }
