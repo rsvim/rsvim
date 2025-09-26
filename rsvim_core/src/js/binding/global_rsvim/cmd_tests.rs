@@ -257,6 +257,10 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous command:undefined"));
+
+    let state_rc = event_loop.js_runtime.get_state();
+    let state = state_rc.borrow();
+    let commands = lock!(state.commands);
   }
 
   Ok(())
