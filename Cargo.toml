@@ -119,7 +119,7 @@ swc_sourcemap = "=9.3.4"
 swc_trace_macro = "=2.0.2"
 swc_visit = "=2.0.1"
 
-v8 = { workspace = true, default-features = false, features = [
+v8 = { version = "=140.0.0", default-features = false, features = [
   "use_custom_libcxx",
 ] }
 # Pin this version, see: https://github.com/denoland/rusty_v8/issues/1849
