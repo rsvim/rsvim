@@ -166,7 +166,7 @@ class RsvimBufImpl implements RsvimBuf {
  */
 export interface RsvimCmd {
   /**
-   * Create a user ex command with a callback function.
+   * Create a ex command with a callback function.
    *
    * :::warning
    * The only builtin command from Rsvim is the `js` command, which cannot be override.
