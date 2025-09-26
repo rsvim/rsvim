@@ -288,6 +288,8 @@ export interface RsvimCmd {
 
   /**
    * List all registered ex commands. Note: The builtin `js` command will not be listed here.
+   *
+   * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
    */
   list(): RsvimCmd.CommandDefinition[];
 }
