@@ -63,16 +63,13 @@ impl CommandOptions {
     obj.set(scope, force_field.into(), force_value.into());
 
     // buffer
-    let buffer_field = v8::String::new(scope, "buffer").unwrap();
     match self.buffer {
       Some(buf_id) => {
+        let buffer_field = v8::String::new(scope, "buffer").unwrap();
         let buffer_value = v8::Integer::new(scope, buf_id);
         obj.set(scope, buffer_field.into(), buffer_value.into());
       }
-      None => {
-        let buffer_value = v8::undefined(scope);
-        obj.set(scope, buffer_field.into(), buffer_value.into());
-      }
+      None => { /* do nothing */ }
     }
 
     obj
