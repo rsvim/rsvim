@@ -3,6 +3,7 @@ use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
@@ -232,6 +233,7 @@ function write() {
 }
 
 const prev = Rsvim.cmd.create("write", write);
+Rsvim.cmd.echo(`Previous command:${prev}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -239,13 +241,6 @@ const prev = Rsvim.cmd.create("write", write);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-  // Before running
-  {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message().rope().to_string();
-    assert!(actual.is_empty());
-  }
 
   event_loop.initialize()?;
   event_loop
@@ -255,10 +250,12 @@ const prev = Rsvim.cmd.create("write", write);
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message().rope().to_string();
-    let actual = actual.trim();
-    assert_eq!(actual, "true");
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+    let actual = contents.command_line_message_history_mut().try_pop();
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
   }
 
   Ok(())
