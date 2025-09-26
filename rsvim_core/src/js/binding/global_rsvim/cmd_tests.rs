@@ -261,6 +261,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.commands);
+    assert_eq!(commands.len(), 1);
   }
 
   Ok(())

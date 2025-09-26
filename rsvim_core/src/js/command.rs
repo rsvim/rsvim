@@ -116,6 +116,16 @@ impl CommandsManager {
   {
     self.commands.iter()
   }
+
+  pub fn first_key_value(
+    &self,
+  ) -> Option<(&CompactString, &CommandDefinition)> {
+    self.commands.first_key_value()
+  }
+
+  pub fn last_key_value(&self) -> Option<(&CompactString, &CommandDefinition)> {
+    self.commands.last_key_value()
+  }
 }
 
 impl CommandsManager {
