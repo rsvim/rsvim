@@ -77,6 +77,13 @@ function checkIsString(arg: any, msg: string) {
   }
 }
 
+function checkIsRegex(arg: any, pat: RegExp, msg: string) {
+  checkIsString(arg, msg);
+  if (!pat.test(arg)) {
+    throw new Error(`${msg} is invalid pattern: ${arg}"`);
+  }
+}
+
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
