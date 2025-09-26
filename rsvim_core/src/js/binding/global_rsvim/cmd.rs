@@ -69,6 +69,21 @@ pub fn list(
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
+  debug_assert!(args.length() == 0);
+  trace!("Rsvim.cmd.list");
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow_mut();
+  let mut commands = lock!(state.commands);
+  commands.insert(name.to_compact_string(), (callback, attrs, opts));
+}
+
+/// `Rsvim.cmd.remove` API.
+pub fn remove(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  mut _rv: v8::ReturnValue,
+) {
   debug_assert!(args.length() == 4);
   let name = args.get(0).to_rust_string_lossy(scope);
   let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
