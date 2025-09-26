@@ -2,17 +2,13 @@
 
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
-use crate::js::command::attr::CommandAttributes;
-use crate::js::command::def::CommandCallback;
 use crate::js::command::def::CommandDefinition;
-use crate::js::command::opt::CommandOptions;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use compact_str::ToCompactString;
-use std::rc::Rc;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
