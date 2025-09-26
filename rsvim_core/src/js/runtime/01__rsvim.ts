@@ -289,6 +289,7 @@ export interface RsvimCmd {
   /**
    * List all registered ex commands. Note: The builtin `js` command will not be listed here.
    */
+  list(): RsvimCmd.CommandDefinition[];
 }
 
 class RsvimCmdImpl implements RsvimCmd {
@@ -344,6 +345,10 @@ class RsvimCmdImpl implements RsvimCmd {
 
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.cmd_echo(message);
+  }
+
+  list(): RsvimCmd.CommandDefinition[] {
+    return [];
   }
 }
 
