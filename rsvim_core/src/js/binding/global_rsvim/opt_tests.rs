@@ -423,7 +423,7 @@ mod tests_expand_tab {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn failed1() -> IoResult<()> {
+  async fn success2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -464,7 +464,7 @@ mod tests_expand_tab {
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect =
-        r####""Rsvim.opt.expandTab" parameter must be a boolean, but found"####;
+        r####""Rsvim.opt.expandTab" value must be a boolean, but found"####;
       assert!(actual.contains(expect));
     }
 
