@@ -66,8 +66,7 @@ impl CommandOptions {
     let buffer_field = v8::String::new(scope, "buffer").unwrap();
     match self.buffer {
       Some(buf_id) => {
-        let buffer_value =
-          v8::Integer::new(scope, self.buffer.unwrap()).unwrap();
+        let buffer_value = v8::Integer::new(scope, self.buffer.unwrap());
         obj.set(scope, buffer_field.into(), buffer_value.into());
       }
       None => {
