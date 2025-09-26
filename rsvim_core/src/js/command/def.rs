@@ -2,6 +2,7 @@
 
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
+use std::fmt::Debug;
 use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
@@ -32,5 +33,15 @@ impl CommandDefinition {
       attributes,
       options,
     }
+  }
+}
+
+impl Debug for CommandDefinition {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("CommandDefinition")
+      .field("attributes", &self.attributes)
+      .field("options", &self.options)
+      .field("callback", "v8::Global<v8::Function>")
+      .finish()
   }
 }
