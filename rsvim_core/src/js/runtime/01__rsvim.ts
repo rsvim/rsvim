@@ -176,7 +176,7 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
-   * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined the same command name previously.
+   * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid.
    *
