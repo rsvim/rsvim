@@ -230,6 +230,8 @@ function write() {
     Rsvim.cmd.echo(`Failed to save buffer ${bufId}: ${e}`);
   }
 }
+
+const prev = Rsvim.cmd.create("write", write);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
