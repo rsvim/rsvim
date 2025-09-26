@@ -697,7 +697,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    checkIsInteger(value, `"Rsvim.opt.tapStop" value`);
+    checkIsInteger(value, `"Rsvim.opt.tabStop" value`);
     value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
