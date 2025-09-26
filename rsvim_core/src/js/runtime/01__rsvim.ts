@@ -86,17 +86,15 @@ function checkIsOptions(arg: any, options: any[], msg: string) {
   }
 }
 
-function checkBetweenIntegersInclusive(
-  arg: any,
-  bound: [number, number],
-  msg: string,
-) {
+function boundByIntegers(arg: any, bound: [number, number], msg: string) {
   checkIsInteger(arg, msg);
-  if (arg < bound[0] || arg > bound[1]) {
-    throw new RangeError(
-      `${msg} must be between [${bound[0]},${bound[1]}], but found ${arg}`,
-    );
+  if (arg < bound[0]) {
+    return bound[0];
   }
+  if (arg > bound[1]) {
+    return bound[1];
+  }
+  return arg;
 }
 
 /**
@@ -541,11 +539,11 @@ export interface RsvimOpt {
   get shiftWidth(): number;
 
   /**
-   * Set the _expand-tab_ option. This value should be between `[1,255]`.
+   * Set the _expand-tab_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
    *
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if value is out of range.
+   * @throws Throws {@link !TypeError} if value is not an integer.
    *
    * @example
    * ```javascript
@@ -688,11 +686,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
-    checkBetweenIntegersInclusive(
-      value,
-      [1, 255],
-      `"Rsvim.opt.shiftWidth" value`,
-    );
+    boundByIntegers(value, [1, 255], `"Rsvim.opt.shiftWidth" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
@@ -703,7 +697,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    checkBetweenIntegersInclusive(value, [1, 255], `"Rsvim.opt.tapStop" value`);
+    boundByIntegers(value, [1, 255], `"Rsvim.opt.tapStop" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
