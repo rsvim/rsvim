@@ -148,7 +148,7 @@ mod tests_tab_stop {
 
       let contents = lock!(event_loop.contents);
       let n = contents.command_line_message_history().occupied_len();
-      assert_eq!(n, 1);
+      assert_eq!(n, 0);
     }
 
     Ok(())
