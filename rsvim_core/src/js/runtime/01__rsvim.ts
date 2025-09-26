@@ -198,7 +198,7 @@ export interface RsvimCmd {
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
     options?: RsvimCmd.CommandOptions,
-  ): undefined | RsvimCmd.CommandCallback;
+  ): RsvimCmd.CommandDefinition?;
 
   /**
    * Echo message to the command-line.
