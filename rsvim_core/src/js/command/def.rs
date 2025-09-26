@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CommandDefinition {
   pub name: String,
   pub callback: CommandCallback,
@@ -64,16 +64,5 @@ impl CommandDefinition {
     obj.set(scope, opts_field.into(), opts_value.into());
 
     obj
-  }
-}
-
-impl Debug for CommandDefinition {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("CommandDefinition")
-      .field("name", &self.name)
-      .field("attributes", &self.attributes)
-      .field("options", &self.options)
-      .field("callback", &"v8::Global<v8::Function>")
-      .finish()
   }
 }
