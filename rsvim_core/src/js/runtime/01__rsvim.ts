@@ -379,6 +379,10 @@ class RsvimCmdImpl implements RsvimCmd {
   list(): RsvimCmd.CommandDefinition[] {
     return [];
   }
+
+  remove(name: string): RsvimCmd.CommandDefinition | undefined {
+    return undefined;
+  }
 }
 
 export namespace RsvimCmd {
