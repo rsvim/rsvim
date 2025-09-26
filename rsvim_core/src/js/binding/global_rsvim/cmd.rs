@@ -3,6 +3,7 @@
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::command::attr::CommandAttributes;
+use crate::js::command::def::CommandCallback;
 use crate::js::command::def::CommandDefinition;
 use crate::js::command::opt::CommandOptions;
 use crate::msg;
@@ -80,14 +81,7 @@ pub fn create(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  let removed = commands.insert(
-    name.to_compact_string(),
-    CommandDefinition {
-      callback,
-      attributes,
-      options,
-    },
-  );
+  let removed = commands.insert(name.to_compact_string(), def);
 
   match removed {
     Some(removed) => {}
