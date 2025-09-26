@@ -98,23 +98,8 @@ pub fn list(
 
     // attribute
     let attr_field = v8::String::new(scope, "attribute").unwrap();
-    let attr_value = v8::Object::new(scope);
-
-    // attribute.xxx
-    {
-      // bang
-      let attr_bang_field = v8::String::new(scope, "bang").unwrap();
-      let attr_bang_value = v8::Boolean::new(scope, def.1.bang);
-      attr_value.set(scope, attr_bang_field.into(), attr_bang_value.into());
-
-      // nargs
-      let attr_nargs_field = v8::String::new(scope, "nargs").unwrap();
-      let attr_nargs_value =
-        v8::String::new(scope, &def.1.nargs.to_string()).unwrap();
-      attr_value.set(scope, attr_nargs_field.into(), attr_nargs_value.into());
-    }
-
-    cmds.set_index(scope, i as u32, cmd.into());
+    let attr_value = def.attributes.into_v8_object(scope);
+    cmds.set(scope, attr_field.into(), attr_value.into());
   }
 
   rv.set(v8::Local::new(scope, cmds).into());

@@ -87,7 +87,7 @@ impl CommandAttributes {
 
   pub fn into_v8_object<'a>(
     &self,
-    scope: &mut v8::HandleScope,
+    scope: &mut v8::HandleScope<'a>,
   ) -> v8::Local<'a, v8::Object> {
     // obj
     let obj = v8::Object::new(scope);
