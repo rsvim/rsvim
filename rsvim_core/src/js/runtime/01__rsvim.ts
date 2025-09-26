@@ -176,7 +176,7 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
-   * @returns {undefined | {attr:RsvimCmd.CommandAttributes,opts:RsvimCmd.CommandOptions,callback:RsvimCmd.CommandCallback}} It returns `undefined` is the command is newly created, or an object with `attr`, `opts` and `callback`fields that was defined the same command name previously.
+   * @returns {undefined | {name:string,attributes:RsvimCmd.CommandAttributes,options:RsvimCmd.CommandOptions,callback:RsvimCmd.CommandCallback}} It returns `undefined` is the command is newly created, or an object with `attr`, `opts` and `callback`fields that was defined the same command name previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid.
    *
@@ -285,6 +285,16 @@ export namespace RsvimCmd {
    * @see {@link RsvimCmd.create}
 ,  */
   export type CommandCallback = (ctx: any) => void;
+
+  /**
+   * Command definition.
+   */
+  export type CommandDefinition = {
+    name: string;
+    callback: CommandCallback;
+    attributes: CommandAttributes;
+    options: CommandOptions;
+  };
 }
 
 /**
