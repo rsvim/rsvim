@@ -46,7 +46,7 @@ pub fn echo(
 pub fn create(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  mut _rv: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 4);
   let name = args.get(0).to_rust_string_lossy(scope);
@@ -64,7 +64,7 @@ pub fn create(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  commands.insert(
+  let removed = commands.insert(
     name.to_compact_string(),
     CommandDefinition {
       callback,
@@ -72,6 +72,11 @@ pub fn create(
       options,
     },
   );
+
+  match removed {
+    Some(removed) => {}
+    None => rv.set_undefined(),
+  }
 }
 
 /// `Rsvim.cmd.list` API.
@@ -88,23 +93,30 @@ pub fn list(
   let commands = lock!(state.commands);
 
   let cmds = v8::Array::new(scope, commands.len() as i32);
-  for (name, def) in commands.iter() {
-    let cmd = v8::Object::new(scope);
 
-    // name
-    let name_field = v8::String::new(scope, "name").unwrap();
-    let name_value = v8::String::new(scope, name.as_ref()).unwrap();
-    cmd.set(scope, name_field.into(), name_value.into());
+  for (i, (name, def)) in commands.iter().enumerate() {
+    let cmd = {
+      let obj = v8::Object::new(scope);
 
-    // attributes
-    let attr_field = v8::String::new(scope, "attributes").unwrap();
-    let attr_value = def.attributes.into_v8_object(scope);
-    cmds.set(scope, attr_field.into(), attr_value.into());
+      // name
+      let name_field = v8::String::new(scope, "name").unwrap();
+      let name_value = v8::String::new(scope, name.as_ref()).unwrap();
+      obj.set(scope, name_field.into(), name_value.into());
 
-    // options
-    let opts_field = v8::String::new(scope, "options").unwrap();
-    let opts_value = def.options.into_v8_object(scope);
-    cmds.set(scope, opts_field.into(), opts_value.into());
+      // attributes
+      let attr_field = v8::String::new(scope, "attributes").unwrap();
+      let attr_value = def.attributes.into_v8_object(scope);
+      obj.set(scope, attr_field.into(), attr_value.into());
+
+      // options
+      let opts_field = v8::String::new(scope, "options").unwrap();
+      let opts_value = def.options.into_v8_object(scope);
+      obj.set(scope, opts_field.into(), opts_value.into());
+
+      obj
+    };
+
+    cmds.set_index(scope, i as u32, cmd.into());
   }
 
   rv.set(v8::Local::new(scope, cmds).into());
@@ -116,15 +128,9 @@ pub fn remove(
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 4);
+  debug_assert!(args.length() == 1);
   let name = args.get(0).to_rust_string_lossy(scope);
-  let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
-  let callback = Rc::new(v8::Global::new(scope, callback));
-  let attrs = args.get(2).to_object(scope).unwrap();
-  let attrs = CommandAttributes::from_v8_object(scope, attrs);
-  let opts = args.get(3).to_object(scope).unwrap();
-  let opts = CommandOptions::from_v8_object(scope, opts);
-  trace!("Rsvim.cmd.create:{:?}", name);
+  trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
