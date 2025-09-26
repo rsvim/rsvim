@@ -66,20 +66,20 @@ export interface RsvimBuf {
    *
    * :::warning
    * When the editor is not initialized, i.e. there's no buffer/window created. It
-   * will return `null`. Once the editor is initialized, there will always have a
+   * will return `undefined`. Once the editor is initialized, there will always have a
    * valid buffer binded to the "current" window (where your cursor is). It will return
    * the valid buffer ID.
    * :::
    *
-   * @returns {number | null} It returns a valid buffer ID if the editor is initialized.
-   * Otherwise it returns `null` if the editor is not initialized.
+   * @returns {number | undefined} It returns a valid buffer ID if the editor is initialized.
+   * Otherwise it returns `undefined` if the editor is not initialized.
    *
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  current(): number | null;
+  current(): number | undefined;
 
   /**
    * List all buffers' IDs.
@@ -126,7 +126,7 @@ export interface RsvimBuf {
 }
 
 class RsvimBufImpl implements RsvimBuf {
-  current(): number | null {
+  current(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
   }
