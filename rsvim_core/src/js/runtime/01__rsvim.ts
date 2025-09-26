@@ -387,6 +387,7 @@ class RsvimCmdImpl implements RsvimCmd {
   }
 
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
+    checkIsString(name, `"Rsvim.cmd.remove" name`);
     return undefined;
   }
 }
