@@ -110,7 +110,7 @@ mod tests_tab_stop {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn failed1() -> IoResult<()> {
+  async fn success2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -119,6 +119,52 @@ mod tests_tab_stop {
 
     let src: &str = r#"
   Rsvim.opt.tabStop = -1;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.tab_stop(), 1);
+
+      let contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 1);
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.tabStop = undefined;
     "#;
 
     // Prepare $RSVIM_CONFIG/rsvim.js
