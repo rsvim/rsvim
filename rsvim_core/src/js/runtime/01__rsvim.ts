@@ -46,6 +46,33 @@ class RsvimImpl implements Rsvim {
   rt = new RsvimRtImpl();
 }
 
+function checkNotNull(arg: any, msg: string) {
+  if (arg === undefined || arg === null) {
+    throw new TypeError(`${msg} cannot be undefined or null`);
+  }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  if (typeof arg !== "number") {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+  if (!Number.isInteger(arg)) {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+}
+
+function checkIsBoolean(arg: any, msg: string) {
+  if (typeof arg !== "boolean") {
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+  }
+}
+
+function checkOptions(arg: any, options: any[], msg: string) {
+  if (!options.includes(arg)) {
+    throw new RangeError(`${msg} is invalid option: ${arg}`);
+  }
+}
+
 /**
  * The `Rsvim.buf` global object for Vim buffers.
  *
@@ -109,7 +136,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws {@link !TypeError} if the `bufId` parameter is not an integer, or {@link !Error} if failed to write buffer contents to file system.
+   * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer contents to file system.
    *
    * @example
    * ```javascript
@@ -137,11 +164,8 @@ class RsvimBufImpl implements RsvimBuf {
   }
 
   writeSync(bufId: number): number {
-    if (typeof bufId !== "number") {
-      throw new TypeError(
-        `"Rsvim.buf.write" bufId must be an integer, but found ${typeof bufId}`,
-      );
-    }
+    checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_write_sync(bufId);
   }
@@ -227,11 +251,8 @@ class RsvimCmdImpl implements RsvimCmd {
   }
 
   echo(message: any): void {
-    if (message === undefined || message === null) {
-      throw new TypeError(
-        '"Rsvim.cmd.echo" message cannot be undefined or null',
-      );
-    }
+    checkNotNull(message, `"Rsvim.cmd.echo" message`);
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
@@ -379,7 +400,7 @@ export interface RsvimOpt {
    * Set the _file-encoding_ option.
    *
    * @param {FileEncodingOption} value - The _file-encoding_ option.
-   * @throws Throws {@link !Error} if value is invalid.
+   * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
    * ```javascript
@@ -427,7 +448,7 @@ export interface RsvimOpt {
    * Set the _file-format_ option.
    *
    * @param {FileFormatOption} value - The _file-format_ option.
-   * @throws Throws {@link !Error} if value is invalid.
+   * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
    * ```javascript
@@ -593,11 +614,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set expandTab(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.expandTab" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_expand_tab(value);
   }
@@ -608,11 +625,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileEncoding(value: FileEncodingOption) {
-    if (value !== "utf-8") {
-      throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`,
-      );
-    }
+    checkOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
   }
@@ -623,9 +636,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileFormat(value: FileFormatOption) {
-    if (value !== "dos" && value !== "unix" && value !== "mac") {
-      throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
-    }
+    checkOptions(value, ["dos", "unix", "mac"], `"Rsvim.opt.fileFormat" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
   }
