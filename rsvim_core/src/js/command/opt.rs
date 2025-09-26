@@ -60,6 +60,13 @@ impl CommandOptions {
     let force_value = v8::Boolean::new(scope, self.force);
     obj.set(scope, force_field.into(), force_value.into());
 
+    // alias
+    if let Some(alias) = self.alias {
+      let alias_field = v8::String::new(scope, "alias").unwrap();
+      let alias_value = v8::String::new(scope, &alias);
+      obj.set(scope, alias_field.into(), alias_value.into());
+    }
+
     obj
   }
 }
