@@ -54,7 +54,7 @@ function checkNotNull(arg: any, msg: string) {
 
 function checkIsNumber(arg: any, msg: string) {
   if (typeof arg !== "number") {
-    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+    throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
   }
 }
 
