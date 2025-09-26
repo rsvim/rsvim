@@ -559,7 +559,7 @@ mod tests_shift_width {
     {
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+      assert_eq!(global_local_options.shift_width(), 255);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
