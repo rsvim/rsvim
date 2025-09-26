@@ -1,4 +1,5 @@
 use crate::cli::CliOptions;
+use crate::js::command::attr::Nargs;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::evloop::*;
@@ -267,6 +268,10 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
+    assert!(!command_def.attributes.bang);
+    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert!(command_def.options.force);
+    assert_eq!(command_def.options.nargs, Nargs::Zero);
   }
 
   Ok(())

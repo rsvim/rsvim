@@ -2,9 +2,11 @@
 
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
+pub const ALIAS_NAME: &str = "alias";
 
 /// Default command options.
 pub const FORCE_VALUE: bool = true;
+pub const ALIAS_VALUE: Option<String> = None;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 pub struct CommandOptions {
