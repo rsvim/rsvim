@@ -304,6 +304,7 @@ class RsvimCmdImpl implements RsvimCmd {
       `"Rsvim.cmd.create" name`,
     );
     checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
+
     if (attributes === undefined) {
       attributes = {};
     }
