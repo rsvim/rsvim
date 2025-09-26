@@ -262,6 +262,9 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let state = state_rc.borrow();
     let commands = lock!(state.commands);
     assert_eq!(commands.len(), 1);
+    let first_command = commands.first_key_value();
+    assert!(first_command.is_some());
+    let (command_name, command_def) = first_command;
   }
 
   Ok(())
