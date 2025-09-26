@@ -266,6 +266,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(first_command.is_some());
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
+    assert_eq!(command_def.name, "write");
   }
 
   Ok(())
