@@ -88,7 +88,7 @@ pub fn list(
   let commands = lock!(state.commands);
 
   let cmds = v8::Array::new(scope, commands.len() as i32);
-  for (i, (name, def)) in commands.iter().enumerate() {
+  for (name, def) in commands.iter() {
     let cmd = v8::Object::new(scope);
 
     // name
@@ -102,9 +102,9 @@ pub fn list(
     cmds.set(scope, attr_field.into(), attr_value.into());
 
     // options
-    let attr_field = v8::String::new(scope, "attributes").unwrap();
-    let attr_value = def.attributes.into_v8_object(scope);
-    cmds.set(scope, attr_field.into(), attr_value.into());
+    let opts_field = v8::String::new(scope, "options").unwrap();
+    let opts_value = def.options.into_v8_object(scope);
+    cmds.set(scope, opts_field.into(), opts_value.into());
   }
 
   rv.set(v8::Local::new(scope, cmds).into());
