@@ -200,7 +200,7 @@ mod tests_tab_stop {
       let actual = actual.unwrap();
       info!("actual:{:?}", actual);
       assert!(actual.contains(
-        r####""Rsvim.opt.tabStop" value must be an integer, but found"####
+        r####""Rsvim.opt.tabStop" value must be a number, but found"####
       ));
     }
 
