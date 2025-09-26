@@ -5,12 +5,12 @@ export interface Rsvim {
     readonly rt: RsvimRt;
 }
 export interface RsvimBuf {
-    current(): number | null;
+    current(): number | undefined;
     list(): number[];
     writeSync(bufId: number): number;
 }
 export interface RsvimCmd {
-    create(name: string, callback: RsvimCmd.CommandCallback, attr?: RsvimCmd.CommandAttributes, opts?: RsvimCmd.CommandOptions): undefined | RsvimCmd.CommandCallback;
+    create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     echo(message: any): void;
 }
 export declare namespace RsvimCmd {
@@ -22,6 +22,12 @@ export declare namespace RsvimCmd {
         force?: boolean;
     };
     type CommandCallback = (ctx: any) => void;
+    type CommandDefinition = {
+        name: string;
+        callback: CommandCallback;
+        attributes: CommandAttributes;
+        options: CommandOptions;
+    };
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
