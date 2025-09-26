@@ -1,17 +1,22 @@
 //! Ex command options.
 
+use compact_str::CompactString;
+
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
 pub const ALIAS_NAME: &str = "alias";
 
 /// Default command options.
 pub const FORCE_VALUE: bool = true;
-pub const ALIAS_VALUE: Option<String> = None;
+pub const ALIAS_VALUE: Option<CompactString> = None;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 pub struct CommandOptions {
   #[builder(default = FORCE_VALUE)]
   pub force: bool,
+
+  #[builder(default = ALIAS_VALUE)]
+  pub alias: Option<CompactString>,
 }
 
 impl CommandOptions {
