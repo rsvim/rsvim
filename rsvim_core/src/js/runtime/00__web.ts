@@ -162,10 +162,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     delay *= 1;
 
     // Check delay's boundaries.
-    boundByIntegers();
-    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-      delay = 1;
-    }
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
     // Check if callback is a valid function.
     if (typeof callback !== "function") {

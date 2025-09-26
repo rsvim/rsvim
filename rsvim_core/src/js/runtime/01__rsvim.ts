@@ -686,7 +686,7 @@ class RsvimOptImpl implements RsvimOpt {
 
   set shiftWidth(value: number) {
     checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
-    boundByIntegers(value, [1, 255]);
+    value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
@@ -698,7 +698,7 @@ class RsvimOptImpl implements RsvimOpt {
 
   set tabStop(value: number) {
     checkIsInteger(value, `"Rsvim.opt.tapStop" value`);
-    boundByIntegers(value, [1, 255]);
+    value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
