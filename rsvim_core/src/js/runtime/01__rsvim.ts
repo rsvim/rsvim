@@ -307,6 +307,15 @@ class RsvimCmdImpl implements RsvimCmd {
     if (attributes === undefined) {
       attributes = {};
     }
+    checkObjectContains(
+      attributes,
+      {
+        bang: checkIsBoolean,
+        nargs: (arg: any, msg: string): void =>
+          checkIsOptions(arg, ["0", "1", "?", "+", "*"], msg),
+      },
+      `"Rsvim.cmd.create" attributes`,
+    );
     if (options === undefined) {
       options = {};
     }
