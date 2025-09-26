@@ -11,7 +11,7 @@ function checkNotNull(arg, msg) {
 }
 function checkIsNumber(arg, msg) {
     if (typeof arg !== "number") {
-        throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+        throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
     }
 }
 function checkIsInteger(arg, msg) {
@@ -19,12 +19,6 @@ function checkIsInteger(arg, msg) {
     if (!Number.isInteger(arg)) {
         throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
     }
-}
-function checkIsOptionalInteger(arg, msg) {
-    if (arg !== undefined && typeof arg !== "number") {
-        throw new TypeError(`${msg} must be an integer or undefined, but found ${typeof arg}`);
-    }
-    checkIsInteger(arg, msg);
 }
 function checkIsBoolean(arg, msg) {
     if (typeof arg !== "boolean") {
@@ -121,7 +115,10 @@ class RsvimOptImpl {
 }
 class RsvimRtImpl {
     exit(exitCode) {
-        checkIsOptionalInteger(exitCode, `"Rsvim.rt.exit" exit code`);
+        if (exitCode === undefined) {
+            exitCode = 0;
+        }
+        checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
         __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
 }
