@@ -51,7 +51,7 @@ export interface GlobalThis {
    * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
   setInterval(
     callback: (...args: any[]) => void,
@@ -66,7 +66,7 @@ export interface GlobalThis {
    * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
   setTimeout(
     callback: (...args: any[]) => void,
@@ -247,9 +247,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
   // the microtask_checkpoint phase.
   function queueMicrotask(callback: () => void): void {
     // Check if the callback argument is a valid type.
-    if (typeof callback !== "function") {
-      throw new TypeError(`The "callback" argument must be a function.`);
-    }
+    checkIsFunction(callback, `"queueMicrotask" callback`);
 
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     __InternalRsvimGlobalObject.global_queue_microtask(() => {
