@@ -159,7 +159,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer contents to file system.
+   * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer to file system.
    *
    * @example
    * ```javascript
