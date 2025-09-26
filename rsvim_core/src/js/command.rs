@@ -14,22 +14,11 @@ use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
-use attr::CommandAttributes;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use opt::CommandOptions;
-use std::rc::Rc;
+use def::CommandDefinition;
 
 const JS_COMMAND_NAME: &str = "js";
-
-pub type CommandCallback = Rc<v8::Global<v8::Function>>;
-
-#[derive(Debug, Clone)]
-pub struct CommandDefinition {
-  pub callback: CommandCallback,
-  pub attributes: CommandAttributes,
-  pub options: CommandOptions,
-}
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
