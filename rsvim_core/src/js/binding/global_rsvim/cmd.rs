@@ -50,12 +50,12 @@ pub fn create(
   mut rv: v8::ReturnValue,
 ) {
   let def = CommandDefinition::from_v8_object(scope, args);
-  trace!("Rsvim.cmd.create, name:{:?}, def:{:?}", name, def);
+  trace!("Rsvim.cmd.create:{:?}", def);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  let removed = commands.insert(name.to_compact_string(), def);
+  let removed = commands.insert(def.name.to_compact_string(), def);
 
   match removed {
     Some(removed) => {}
