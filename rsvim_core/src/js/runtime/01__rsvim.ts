@@ -383,7 +383,8 @@ class RsvimCmdImpl implements RsvimCmd {
   }
 
   list(): RsvimCmd.CommandDefinition[] {
-    return [];
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_list();
   }
 
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
