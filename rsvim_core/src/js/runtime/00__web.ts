@@ -193,11 +193,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 
   function clearTimeout(id: number): void {
     // Check parameter's type.
-    if (!Number.isInteger(id)) {
-      throw new TypeError(
-        `"clearTimeout" id must be an integer, but found ${typeof id}`,
-      );
-    }
+    checkIsInteger(id, `"clearTimeout" ID`);
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
