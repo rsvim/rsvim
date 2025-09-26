@@ -52,10 +52,14 @@ function checkNotNull(arg: any, msg: string) {
   }
 }
 
-function checkIsInteger(arg: any, msg: string) {
+function checkIsNumber(arg: any, msg: string) {
   if (typeof arg !== "number") {
     throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
   }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  checkIsNumber(arg, msg);
   if (!Number.isInteger(arg)) {
     throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
   }

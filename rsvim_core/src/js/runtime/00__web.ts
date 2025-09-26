@@ -81,10 +81,14 @@ function checkNotNull(arg: any, msg: string) {
   }
 }
 
-function checkIsInteger(arg: any, msg: string) {
+function checkIsNumber(arg: any, msg: string) {
   if (typeof arg !== "number") {
     throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
   }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  checkIsNumber(arg, msg);
   if (!Number.isInteger(arg)) {
     throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
   }
@@ -154,11 +158,8 @@ function checkBetweenIntegersInclusive(
   ): number {
     if (delay === undefined || delay === null) {
       delay = 1;
-    } else if (typeof delay !== "number") {
-      throw new TypeError(
-        `"setInterval" delay must be a number, but found ${typeof delay}`,
-      );
     }
+    checkIsNumber(delay, `"setInterval" delay`);
 
     // Coalesce to number or NaN.
     delay *= 1;
