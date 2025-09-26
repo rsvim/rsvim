@@ -241,7 +241,7 @@ export interface RsvimCmd {
    * Create a ex command with a callback function.
    *
    * :::warning
-   * The only builtin command is the `js` command, it cannot be override.
+   * The only builtin command `js` cannot be override.
    * :::
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
@@ -292,6 +292,18 @@ export interface RsvimCmd {
    * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
    */
   list(): RsvimCmd.CommandDefinition[];
+
+  /**
+   * Remove an ex command by name.
+   *
+   * :::warning
+   * The only builtin command `js` cannot be removed.
+   * :::
+   *
+   * @param {string} name - The command name to be removed.
+   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed command definition, or `undefined` if no command is been removed.
+   */
+  remove(name: string): RsvimCmd.CommandDefinition | undefined;
 }
 
 class RsvimCmdImpl implements RsvimCmd {
