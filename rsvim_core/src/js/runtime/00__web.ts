@@ -94,15 +94,6 @@ function checkIsInteger(arg: any, msg: string) {
   }
 }
 
-function checkIsOptionalInteger(arg: any, msg: string) {
-  if (arg !== undefined && typeof arg !== "number") {
-    throw new TypeError(
-      `${msg} must be an integer or undefined, but found ${typeof arg}`,
-    );
-  }
-  checkIsInteger(arg, msg);
-}
-
 function checkIsBoolean(arg: any, msg: string) {
   if (typeof arg !== "boolean") {
     throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
