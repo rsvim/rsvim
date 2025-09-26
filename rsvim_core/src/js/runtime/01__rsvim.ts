@@ -61,6 +61,13 @@ function checkIsInteger(arg: any, msg: string) {
   }
 }
 
+function checkIsIntegerOrUndefined(arg: any, msg: string) {
+  if (arg !== undefined && typeof arg !== "number") {
+    throw new Error(`${msg} must be a valid integer or undefined`);
+  }
+  checkIsInteger(arg, msg);
+}
+
 function checkIsBoolean(arg: any, msg: string) {
   if (typeof arg !== "boolean") {
     throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
