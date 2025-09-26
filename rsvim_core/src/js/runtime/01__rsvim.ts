@@ -86,8 +86,7 @@ function checkIsOptions(arg: any, options: any[], msg: string) {
   }
 }
 
-function boundByIntegers(arg: any, bound: [number, number], msg: string) {
-  checkIsInteger(arg, msg);
+function boundByIntegers(arg: any, bound: [number, number]) {
   if (arg < bound[0]) {
     return bound[0];
   }
@@ -686,7 +685,8 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
-    boundByIntegers(value, [1, 255], `"Rsvim.opt.shiftWidth" value`);
+    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
+    boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
@@ -697,7 +697,8 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    boundByIntegers(value, [1, 255], `"Rsvim.opt.tapStop" value`);
+    checkIsInteger(value, `"Rsvim.opt.tapStop" value`);
+    boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }

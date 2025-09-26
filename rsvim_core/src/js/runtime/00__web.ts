@@ -115,17 +115,14 @@ function checkIsOptions(arg: any, options: any[], msg: string) {
   }
 }
 
-function checkBetweenIntegersInclusive(
-  arg: any,
-  bound: [number, number],
-  msg: string,
-) {
-  checkIsInteger(arg, msg);
-  if (arg < bound[0] || arg > bound[1]) {
-    throw new RangeError(
-      `${msg} must be between [${bound[0]},${bound[1]}], but found ${arg}`,
-    );
+function boundByIntegers(arg: any, bound: [number, number]) {
+  if (arg < bound[0]) {
+    return bound[0];
   }
+  if (arg > bound[1]) {
+    return bound[1];
+  }
+  return arg;
 }
 
 ((globalThis: GlobalThis) => {
@@ -165,6 +162,7 @@ function checkBetweenIntegersInclusive(
     delay *= 1;
 
     // Check delay's boundaries.
+    boundByIntegers();
     if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
       delay = 1;
     }
