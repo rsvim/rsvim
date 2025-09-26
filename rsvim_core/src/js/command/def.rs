@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct CommandDefinition {
   pub callback: CommandCallback,
   pub attributes: CommandAttributes,
@@ -41,7 +41,7 @@ impl Debug for CommandDefinition {
     f.debug_struct("CommandDefinition")
       .field("attributes", &self.attributes)
       .field("options", &self.options)
-      .field("callback", "v8::Global<v8::Function>")
+      .field("callback", &"v8::Global<v8::Function>")
       .finish()
   }
 }
