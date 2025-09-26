@@ -12,7 +12,6 @@ pub const BANG_VALUE: bool = false;
 
 #[derive(
   Debug,
-  Copy,
   Clone,
   PartialEq,
   Eq,
