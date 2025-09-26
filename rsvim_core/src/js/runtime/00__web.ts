@@ -111,7 +111,7 @@ function checkIsBoolean(arg: any, msg: string) {
 
 function checkIsFunction(arg: any, msg: string) {
   if (typeof arg !== "function") {
-    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+    throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
   }
 }
 
@@ -171,11 +171,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
     // Check if callback is a valid function.
-    if (typeof callback !== "function") {
-      throw new Error(
-        `"setTimeout" callback must be a function, but found ${typeof callback}`,
-      );
-    }
+    checkIsFunction(callback, `"setInterval" callback`);
 
     // Pin down the correct ID value.
     const id = nextTimerId++;
@@ -215,28 +211,19 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     delay?: number,
     ...args: any[]
   ): number {
-    if (delay === undefined || delay === null) {
+    if (delay === undefined) {
       delay = 1;
-    } else if (typeof delay !== "number") {
-      throw new TypeError(
-        `"setTimeout" delay must be a number, but found ${typeof delay}`,
-      );
     }
+    checkIsNumber(delay, `"setTimeout" delay`);
 
     // Coalesce to number or NaN.
     delay *= 1;
 
     // Check delay's boundaries.
-    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-      delay = 1;
-    }
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
     // Check if callback is a valid function.
-    if (typeof callback !== "function") {
-      throw new Error(
-        `"setTimeout" callback must be a function, but found ${typeof callback}`,
-      );
-    }
+    checkIsFunction(callback, `"setTimeout" callback`);
 
     // Pin down the correct ID value.
     const id = nextTimerId++;
