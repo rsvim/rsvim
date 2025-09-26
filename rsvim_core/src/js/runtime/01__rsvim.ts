@@ -253,7 +253,7 @@ export interface RsvimCmd {
   echo(message: any): void;
 
   /**
-   * List all registered ex commands. Note: The builtin `js` command is not listed here.
+   * List all registered ex commands. Note: The builtin `js` command will not be listed here.
    */
 }
 
