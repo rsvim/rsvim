@@ -616,7 +616,9 @@ mod tests_shift_width {
       let actual = contents.command_line_message_history_mut().try_pop();
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains(r####""Rsvim.opt.shiftWidth" value "####));
+      assert!(actual.contains(
+        r####""Rsvim.opt.shiftWidth" value must be an integer, but found"####
+      ));
     }
 
     Ok(())
