@@ -1,6 +1,6 @@
 //! Ex command options.
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
@@ -32,6 +32,16 @@ impl CommandOptions {
       Some(force_value) => {
         let force = force_value.to_boolean(scope).boolean_value(scope);
         builder.force(force);
+      }
+      None => { /* do nothing */ }
+    }
+
+    // alias
+    let alias_name = v8::String::new(scope, ALIAS_NAME).unwrap();
+    match value.get(scope, alias_name.into()) {
+      Some(alias_value) => {
+        let alias = alias_value.to_rust_string_lossy(scope);
+        builder.alias(Some(alias.to_compact_string()));
       }
       None => { /* do nothing */ }
     }
