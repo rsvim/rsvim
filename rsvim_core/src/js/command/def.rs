@@ -2,6 +2,8 @@
 
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::fmt::Debug;
 use std::rc::Rc;
 
@@ -9,7 +11,7 @@ pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
 #[derive(Debug, Clone)]
 pub struct CommandDefinition {
-  pub name: String,
+  pub name: CompactString,
   pub callback: CommandCallback,
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
@@ -30,7 +32,7 @@ impl CommandDefinition {
     let options = CommandOptions::from_v8_object(scope, options);
 
     Self {
-      name,
+      name: name.to_compact_string(),
       callback,
       attributes,
       options,
