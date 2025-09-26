@@ -93,7 +93,7 @@ pub fn list(
 pub fn remove(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  mut _rv: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let name = args.get(0).to_rust_string_lossy(scope);
@@ -102,5 +102,11 @@ pub fn remove(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  commands.insert(name.to_compact_string(), (callback, attrs, opts));
+  match commands.remove(&name) {
+    Some(removed) => {
+      let obj = removed.into_v8_object(scope);
+      rv.set(obj.into());
+    }
+    None => rv.set_undefined(),
+  }
 }
