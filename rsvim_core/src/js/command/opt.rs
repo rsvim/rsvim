@@ -63,7 +63,7 @@ impl CommandOptions {
     // alias
     if let Some(alias) = self.alias {
       let alias_field = v8::String::new(scope, "alias").unwrap();
-      let alias_value = v8::String::new(scope, &alias);
+      let alias_value = v8::String::new(scope, &alias).unwrap();
       obj.set(scope, alias_field.into(), alias_value.into());
     }
 
