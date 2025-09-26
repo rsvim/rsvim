@@ -84,6 +84,12 @@ function checkMatchPattern(arg: any, pat: RegExp, msg: string) {
   }
 }
 
+function checkIsFunction(arg: any, msg: string) {
+  if (typeof arg !== "function") {
+    throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+  }
+}
+
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -282,6 +288,7 @@ class RsvimCmdImpl implements RsvimCmd {
       /^[A-Za-z_!][A-Za-z0-9_!]+$/,
       `"Rsvim.cmd.create" name`,
     );
+    checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
     return undefined;
   }
 
