@@ -89,22 +89,17 @@ impl CommandAttributes {
     &self,
     scope: &mut v8::HandleScope<'a>,
   ) -> v8::Local<'a, v8::Object> {
-    // obj
     let obj = v8::Object::new(scope);
 
-    // internal fields
-    {
-      // bang
-      let attr_bang_field = v8::String::new(scope, "bang").unwrap();
-      let attr_bang_value = v8::Boolean::new(scope, self.bang);
-      obj.set(scope, attr_bang_field.into(), attr_bang_value.into());
+    // bang
+    let bang_field = v8::String::new(scope, "bang").unwrap();
+    let bang_value = v8::Boolean::new(scope, self.bang);
+    obj.set(scope, bang_field.into(), bang_value.into());
 
-      // nargs
-      let attr_nargs_field = v8::String::new(scope, "nargs").unwrap();
-      let attr_nargs_value =
-        v8::String::new(scope, &self.nargs.to_string()).unwrap();
-      obj.set(scope, attr_nargs_field.into(), attr_nargs_value.into());
-    }
+    // nargs
+    let nargs_field = v8::String::new(scope, "nargs").unwrap();
+    let nargs_value = v8::String::new(scope, &self.nargs.to_string()).unwrap();
+    obj.set(scope, nargs_field.into(), nargs_value.into());
 
     obj
   }

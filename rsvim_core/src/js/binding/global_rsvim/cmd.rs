@@ -55,7 +55,7 @@ pub fn create(
   let attributes = args.get(2).to_object(scope).unwrap();
   let attributes = CommandAttributes::from_v8_object(scope, attributes);
   let options = args.get(3).to_object(scope).unwrap();
-  let options = CommandOptions::from_object(scope, options);
+  let options = CommandOptions::from_v8_object(scope, options);
   trace!(
     "Rsvim.cmd.create, name:{:?}, attr:{:?}, opts:{:?}",
     name, attributes, options
@@ -96,8 +96,13 @@ pub fn list(
     let name_value = v8::String::new(scope, name.as_ref()).unwrap();
     cmd.set(scope, name_field.into(), name_value.into());
 
-    // attribute
-    let attr_field = v8::String::new(scope, "attribute").unwrap();
+    // attributes
+    let attr_field = v8::String::new(scope, "attributes").unwrap();
+    let attr_value = def.attributes.into_v8_object(scope);
+    cmds.set(scope, attr_field.into(), attr_value.into());
+
+    // options
+    let attr_field = v8::String::new(scope, "attributes").unwrap();
     let attr_value = def.attributes.into_v8_object(scope);
     cmds.set(scope, attr_field.into(), attr_value.into());
   }
@@ -118,7 +123,7 @@ pub fn remove(
   let attrs = args.get(2).to_object(scope).unwrap();
   let attrs = CommandAttributes::from_v8_object(scope, attrs);
   let opts = args.get(3).to_object(scope).unwrap();
-  let opts = CommandOptions::from_object(scope, opts);
+  let opts = CommandOptions::from_v8_object(scope, opts);
   trace!("Rsvim.cmd.create:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);

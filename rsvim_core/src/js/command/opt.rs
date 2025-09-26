@@ -20,7 +20,7 @@ pub struct CommandOptions {
 }
 
 impl CommandOptions {
-  pub fn from_object<'a>(
+  pub fn from_v8_object<'a>(
     scope: &mut v8::HandleScope,
     value: v8::Local<'a, v8::Object>,
   ) -> Self {
@@ -49,5 +49,28 @@ impl CommandOptions {
     }
 
     builder.build().unwrap()
+  }
+
+  pub fn into_v8_object<'a>(
+    &self,
+    scope: &mut v8::HandleScope<'a>,
+  ) -> v8::Local<'a, v8::Object> {
+    let obj = v8::Object::new(scope);
+
+    // internal fields
+    {
+      // bang
+      let attr_bang_field = v8::String::new(scope, "bang").unwrap();
+      let attr_bang_value = v8::Boolean::new(scope, self.bang);
+      obj.set(scope, attr_bang_field.into(), attr_bang_value.into());
+
+      // nargs
+      let attr_nargs_field = v8::String::new(scope, "nargs").unwrap();
+      let attr_nargs_value =
+        v8::String::new(scope, &self.nargs.to_string()).unwrap();
+      obj.set(scope, attr_nargs_field.into(), attr_nargs_value.into());
+    }
+
+    obj
   }
 }
