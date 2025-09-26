@@ -251,6 +251,10 @@ export interface RsvimCmd {
    * ```
    */
   echo(message: any): void;
+
+  /**
+   * List all registered ex commands.
+   */
 }
 
 class RsvimCmdImpl implements RsvimCmd {
