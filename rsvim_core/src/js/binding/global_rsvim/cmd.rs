@@ -56,7 +56,10 @@ pub fn create(
   let attributes = CommandAttributes::from_object(scope, attributes);
   let options = args.get(3).to_object(scope).unwrap();
   let options = CommandOptions::from_object(scope, options);
-  trace!("Rsvim.cmd.create:{:?}", name);
+  trace!(
+    "Rsvim.cmd.create, name:{:?}, attr:{:?}, opts:{:?}",
+    name, attributes, options
+  );
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
