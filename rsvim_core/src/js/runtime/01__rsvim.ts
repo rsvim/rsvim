@@ -290,6 +290,13 @@ export interface RsvimCmd {
    * List all registered ex commands. Note: The builtin `js` command will not be listed here.
    *
    * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((cmd) => {
+   *   Rsvim.cmd.echo(`Command: ${cmd.name}`);
+   * });
+   * ```
    */
   list(): RsvimCmd.CommandDefinition[];
 
@@ -302,6 +309,14 @@ export interface RsvimCmd {
    *
    * @param {string} name - The command name to be removed.
    * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((cmd) => {
+   *   // Remove all registered commands.
+   *   Rsvim.cmd.remove(cmd.name);
+   * });
+   * ```
    */
   remove(name: string): RsvimCmd.CommandDefinition | undefined;
 }
