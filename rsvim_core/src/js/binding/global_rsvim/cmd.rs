@@ -9,6 +9,7 @@ use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
@@ -67,15 +68,25 @@ pub fn create(
 pub fn list(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
-  mut _rv: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 0);
   trace!("Rsvim.cmd.list");
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-  let mut commands = lock!(state.commands);
-  commands.insert(name.to_compact_string(), (callback, attrs, opts));
+  let commands = lock!(state.commands);
+  let command_names = commands
+    .iter()
+    .map(|(name, def)| name.to_string())
+    .collect::<Vec<String>>();
+
+  let names = v8::Array::new(scope, command_names.len() as i32);
+  for (i, name) in command_names.iter().enumerate() {
+    let v = v8::String::new(scope, name);
+    names.set_index(scope, i as u32, v.into());
+  }
+  rv.set(v8::Local::new(scope, names).into());
 }
 
 /// `Rsvim.cmd.remove` API.

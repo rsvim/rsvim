@@ -42,13 +42,13 @@ pub fn list(
   trace!("Rsvim.buf.list: {:?}", buffers.keys());
   let buf_ids = buffers.keys().copied().collect::<Vec<BufferId>>();
 
-  let buf_ids_array = v8::Array::new(scope, buf_ids.len() as i32);
+  let ids = v8::Array::new(scope, buf_ids.len() as i32);
   for (i, buf_id) in buf_ids.iter().enumerate() {
     let v = v8::Integer::new(scope, *buf_id);
     // let v = v8::Local::new(scope, v);
-    buf_ids_array.set_index(scope, i as u32, v.into());
+    ids.set_index(scope, i as u32, v.into());
   }
-  rv.set(v8::Local::new(scope, buf_ids_array).into());
+  rv.set(v8::Local::new(scope, ids).into());
 }
 
 /// `Rsvim.buf.writeSync` API.

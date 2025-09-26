@@ -67,7 +67,7 @@ pub struct UserCommandFuture {
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
-  commands: FoldMap<CompactString, CommandDefinition>,
+  commands: BTreeMap<CompactString, CommandDefinition>,
 }
 
 arc_mutex_ptr!(CommandsManager);
@@ -103,21 +103,21 @@ impl CommandsManager {
 
   pub fn keys(
     &self,
-  ) -> std::collections::hash_map::Keys<'_, CompactString, CommandDefinition>
+  ) -> std::collections::btree_map::Keys<'_, CompactString, CommandDefinition>
   {
     self.commands.keys()
   }
 
   pub fn values(
     &self,
-  ) -> std::collections::hash_map::Values<'_, CompactString, CommandDefinition>
+  ) -> std::collections::btree_map::Values<'_, CompactString, CommandDefinition>
   {
     self.commands.values()
   }
 
   pub fn iter(
     &self,
-  ) -> std::collections::hash_map::Iter<'_, CompactString, CommandDefinition>
+  ) -> std::collections::btree_map::Iter<'_, CompactString, CommandDefinition>
   {
     self.commands.iter()
   }
