@@ -86,7 +86,8 @@ pub fn list(
     cmd.set(scope, name_field.into(), name_value.into());
 
     // attribute
-    let attr = v8::Object::new(scope);
+    let attr_field = v8::String::new(scope, "attribute").unwrap();
+    let attr_value = v8::Object::new(scope);
 
     cmds.set_index(scope, i as u32, cmd.into());
   }
