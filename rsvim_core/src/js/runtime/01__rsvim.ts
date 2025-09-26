@@ -77,7 +77,7 @@ function checkIsString(arg: any, msg: string) {
   }
 }
 
-function checkIsRegex(arg: any, pat: RegExp, msg: string) {
+function checkMatchPattern(arg: any, pat: RegExp, msg: string) {
   checkIsString(arg, msg);
   if (!pat.test(arg)) {
     throw new Error(`${msg} is invalid pattern: ${arg}"`);
@@ -277,10 +277,11 @@ class RsvimCmdImpl implements RsvimCmd {
     attributes?: RsvimCmd.CommandAttributes,
     options?: RsvimCmd.CommandOptions,
   ): RsvimCmd.CommandDefinition | undefined {
-    checkIsString(name, `"Rsvim.cmd.create" name`);
-    if (!/^[A-Za-z_!][A-Za-z0-9_!]+$/.test(name)) {
-      throw new Error(`"Rsvim.cmd.create" name is invalid pattern: ${name}"`);
-    }
+    checkMatchPattern(
+      name,
+      /^[A-Za-z_!][A-Za-z0-9_!]+$/,
+      `"Rsvim.cmd.create" name`,
+    );
     return undefined;
   }
 
