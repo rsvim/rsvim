@@ -192,12 +192,15 @@ mod tests_tab_stop {
       let global_local_options = buffers.global_local_options();
       assert_eq!(global_local_options.tab_stop(), TAB_STOP);
 
-      let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
-      let actual = actual.trim();
-      info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.tabStop" parameter must be between [1,255], but found"####;
-      assert!(actual.contains(expect));
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 1);
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(actual.contains(
+        r####""Rsvim.opt.tabStop" value must be an integer, but found"####
+      ));
     }
 
     Ok(())
