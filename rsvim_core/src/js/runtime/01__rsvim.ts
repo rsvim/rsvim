@@ -71,6 +71,12 @@ function checkIsBoolean(arg: any, msg: string) {
   }
 }
 
+function checkIsString(arg: any, msg: string) {
+  if (typeof arg !== "string") {
+    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+  }
+}
+
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -264,6 +270,7 @@ class RsvimCmdImpl implements RsvimCmd {
     attributes?: RsvimCmd.CommandAttributes,
     options?: RsvimCmd.CommandOptions,
   ): RsvimCmd.CommandDefinition | undefined {
+    checkIsString(name, `"Rsvim.cmd.create" name`);
     return undefined;
   }
 
