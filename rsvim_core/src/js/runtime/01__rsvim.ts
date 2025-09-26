@@ -198,7 +198,7 @@ export interface RsvimCmd {
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
     options?: RsvimCmd.CommandOptions,
-  ): RsvimCmd.CommandDefinition?;
+  ): RsvimCmd.CommandDefinition | undefined;
 
   /**
    * Echo message to the command-line.
@@ -222,7 +222,7 @@ class RsvimCmdImpl implements RsvimCmd {
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
     options?: RsvimCmd.CommandOptions,
-  ): undefined | RsvimCmd.CommandCallback {
+  ): RsvimCmd.CommandDefinition | undefined {
     return undefined;
   }
 
