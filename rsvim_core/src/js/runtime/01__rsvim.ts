@@ -67,9 +67,22 @@ function checkIsBoolean(arg: any, msg: string) {
   }
 }
 
-function checkOptions(arg: any, options: any[], msg: string) {
+function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
+  }
+}
+
+function checkBetweenIntegersInclusive(
+  arg: any,
+  bound: [number, number],
+  msg: string,
+) {
+  checkIsInteger(arg, msg);
+  if (arg < bound[0] || arg > bound[1]) {
+    throw new RangeError(
+      `${msg} must be between [${bound[0]},${bound[1]}], but found ${arg}`,
+    );
   }
 }
 
@@ -625,7 +638,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileEncoding(value: FileEncodingOption) {
-    checkOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
+    checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
   }
@@ -636,7 +649,11 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileFormat(value: FileFormatOption) {
-    checkOptions(value, ["dos", "unix", "mac"], `"Rsvim.opt.fileFormat" value`);
+    checkIsOptions(
+      value,
+      ["dos", "unix", "mac"],
+      `"Rsvim.opt.fileFormat" value`,
+    );
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
   }
@@ -647,11 +664,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set lineBreak(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.lineBreak" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_line_break(value);
   }
@@ -662,6 +675,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
+    checkIsBoolean(value, `"Rsvim.opt.shiftWidth" value`);
     if (typeof value !== "number") {
       throw new TypeError(
         `"Rsvim.opt.shiftWidth" parameter must be an integer, but found ${typeof value}`,
