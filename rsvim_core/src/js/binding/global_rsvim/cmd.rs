@@ -42,6 +42,30 @@ pub fn echo(
   send_cmdline_message(&state, message);
 }
 
+fn command_def_to_v8_obj<'a>(
+  scope: &mut v8::HandleScope<'a>,
+  cmd_def: CommandDefinition,
+) -> v8::Local<'a, v8::Object> {
+  let cmd = v8::Object::new(scope);
+
+  // name
+  let name_field = v8::String::new(scope, "name").unwrap();
+  let name_value = v8::String::new(scope, name.as_ref()).unwrap();
+  cmd.set(scope, name_field.into(), name_value.into());
+
+  // attributes
+  let attr_field = v8::String::new(scope, "attributes").unwrap();
+  let attr_value = def.attributes.into_v8_object(scope);
+  cmd.set(scope, attr_field.into(), attr_value.into());
+
+  // options
+  let opts_field = v8::String::new(scope, "options").unwrap();
+  let opts_value = def.options.into_v8_object(scope);
+  cmd.set(scope, opts_field.into(), opts_value.into());
+
+  cmd
+}
+
 /// `Rsvim.cmd.create` API.
 pub fn create(
   scope: &mut v8::HandleScope,
