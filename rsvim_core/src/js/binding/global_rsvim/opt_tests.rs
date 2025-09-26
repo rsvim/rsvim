@@ -257,7 +257,7 @@ mod tests_file_encoding {
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.fileEncoding" parameter is invalid"####;
+      let expect = r####""Rsvim.opt.fileEncoding" value is invalid"####;
       assert!(actual.contains(expect));
     }
 
