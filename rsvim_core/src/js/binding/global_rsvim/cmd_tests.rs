@@ -271,7 +271,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(!command_def.attributes.bang);
     assert_eq!(command_def.attributes.nargs, Nargs::Zero);
     assert!(command_def.options.force);
-    assert_eq!(command_def.options.nargs, Nargs::Zero);
+    assert_eq!(command_def.options.alias, None);
   }
 
   Ok(())
