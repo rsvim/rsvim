@@ -54,26 +54,26 @@ function checkNotNull(arg: any, msg: string) {
 
 function checkIsNumber(arg: any, msg: string) {
   if (typeof arg !== "number") {
-    throw new TypeError(`${msg} must be a number: ${typeof arg}`);
+    throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
   }
 }
 
 function checkIsInteger(arg: any, msg: string) {
   checkIsNumber(arg, msg);
   if (!Number.isInteger(arg)) {
-    throw new TypeError(`${msg} must be an integer: ${typeof arg}`);
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
   }
 }
 
 function checkIsBoolean(arg: any, msg: string) {
   if (typeof arg !== "boolean") {
-    throw new TypeError(`${msg} must be a boolean: ${typeof arg}`);
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
   }
 }
 
 function checkIsString(arg: any, msg: string) {
   if (typeof arg !== "string") {
-    throw new TypeError(`${msg} must be a string: ${typeof arg}`);
+    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
   }
 }
 
@@ -86,7 +86,7 @@ function checkMatchPattern(arg: any, pat: RegExp, msg: string) {
 
 function checkIsFunction(arg: any, msg: string) {
   if (typeof arg !== "function") {
-    throw new TypeError(`${msg} must be a function: ${typeof arg}`);
+    throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
   }
 }
 
@@ -102,7 +102,7 @@ function checkObjectContains(
   msg: string,
 ) {
   if (typeof arg !== "object") {
-    throw new TypeError(`${msg} must be an object: ${typeof arg}`);
+    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
   }
   Object.entries(fieldCheckers).forEach(([field, checker]) => {
     if (Object.hasOwn(arg, field)) {
