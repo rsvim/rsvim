@@ -63,7 +63,7 @@ function checkIsInteger(arg: any, msg: string) {
 
 function checkIsOptionalInteger(arg: any, msg: string) {
   if (arg !== undefined && typeof arg !== "number") {
-    throw new Error(
+    throw new TypeError(
       `${msg} must be an integer or undefined, but found ${typeof arg}`,
     );
   }
@@ -739,7 +739,7 @@ export interface RsvimRt {
    * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
    * by default it uses `0` to indicate no error happens.
    *
-   * @throws Throws {@link !Error} if `exitCode` parameter is neither a integer nor `undefined`.
+   * @throws Throws {@link !TypeError} if `exitCode` is neither an integer nor `undefined`.
    *
    * @example
    * ```javascript
@@ -755,11 +755,7 @@ export interface RsvimRt {
 
 class RsvimRtImpl implements RsvimRt {
   exit(exitCode?: number): void {
-    if (exitCode !== undefined && typeof exitCode !== "number") {
-      throw new Error(
-        '"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined',
-      );
-    }
+    checkIsOptionalInteger(exitCode, `"Rsvim.rt.exit" exit code`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
