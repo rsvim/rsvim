@@ -301,7 +301,7 @@ export interface RsvimCmd {
    * :::
    *
    * @param {string} name - The command name to be removed.
-   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed command definition, or `undefined` if no command is been removed.
+   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
    */
   remove(name: string): RsvimCmd.CommandDefinition | undefined;
 }
