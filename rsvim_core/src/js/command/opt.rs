@@ -44,6 +44,7 @@ impl CommandOptions {
     match value.get(scope, alias_name.into()) {
       Some(alias_value) => {
         let alias = alias_value.to_rust_string_lossy(scope);
+        trace!("|from_v8_object| alias:{:?}", alias);
         builder.alias(Some(alias.to_compact_string()));
       }
       None => { /* do nothing */ }
