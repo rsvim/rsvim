@@ -150,7 +150,7 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number {
-    if (delay === undefined) {
+    if (delay === undefined || delay === null) {
       delay = 1;
     }
     checkIsNumber(delay, `"setInterval" delay`);
@@ -198,7 +198,7 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number {
-    if (delay === undefined) {
+    if (delay === undefined || delay === null) {
       delay = 1;
     }
     checkIsNumber(delay, `"setTimeout" delay`);
