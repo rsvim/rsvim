@@ -309,9 +309,12 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 1);
     let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Previous command:undefined"));
+    assert!(actual.contains(
+      r####""Rsvim.cmd.create" name must be a string, but found"####
+    ));
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
