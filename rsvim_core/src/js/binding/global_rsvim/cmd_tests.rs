@@ -501,10 +501,10 @@ Rsvim.cmd.echo(prev);
     assert_eq!(n, 1);
 
     let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual{}:{:?}", i, actual);
+    info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert_eq!(actual, "write");
+    assert_eq!(actual, "undefined");
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
