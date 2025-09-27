@@ -46,16 +46,6 @@ function checkIsOptions(arg, options, msg) {
         throw new RangeError(`${msg} is invalid option: ${arg}`);
     }
 }
-function checkObjectContains(arg, fieldCheckers, msg) {
-    if (typeof arg !== "object") {
-        throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
-    }
-    Object.entries(fieldCheckers).forEach(([field, checker]) => {
-        if (Object.hasOwn(arg, field)) {
-            checker(arg[field], msg);
-        }
-    });
-}
 function boundByIntegers(arg, bound) {
     if (arg < bound[0]) {
         return bound[0];
@@ -90,19 +80,18 @@ class RsvimCmdImpl {
         if (!Object.hasOwn(attributes, "nargs")) {
             attributes.nargs = "0";
         }
-        checkObjectContains(attributes, {
-            bang: checkIsBoolean,
-            nargs: (arg, msg) => checkIsOptions(arg, ["0", "1", "?", "+", "*"], msg),
-        }, `"Rsvim.cmd.create" attributes`);
+        checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
+        checkIsOptions(attributes.nargs, ["0", "1", "?", "+", "*"], `"Rsvim.cmd.create" attributes.nargs`);
         if (options === undefined) {
             options = {};
         }
         if (!Object.hasOwn(options, "force")) {
             options.force = true;
         }
-        checkObjectContains(options, {
-            force: checkIsBoolean,
-        }, `"Rsvim.cmd.create" options`);
+        checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
+        if (options.alias !== undefined) {
+            checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
+        }
         return __InternalRsvimGlobalObject.cmd_create(name, callback, attributes, options);
     }
     echo(message) {
