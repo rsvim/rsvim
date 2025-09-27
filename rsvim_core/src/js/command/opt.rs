@@ -1,6 +1,8 @@
 //! Ex command options.
 
-use compact_str::{CompactString, ToCompactString};
+use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
@@ -31,6 +33,7 @@ impl CommandOptions {
     match value.get(scope, force_name.into()) {
       Some(force_value) => {
         let force = force_value.to_boolean(scope).boolean_value(scope);
+        trace!("|from_v8_object| nargs:{:?}", nargs);
         builder.force(force);
       }
       None => { /* do nothing */ }

@@ -1,5 +1,6 @@
 //! Ex command attributes.
 
+use crate::prelude::*;
 use std::str::FromStr;
 
 /// Command attribute name.
@@ -64,6 +65,7 @@ impl CommandAttributes {
     match value.get(scope, bang_name.into()) {
       Some(bang_value) => {
         let bang = bang_value.to_boolean(scope).boolean_value(scope);
+        trace!("|from_v8_object| bang:{:?}", bang);
         builder.bang(bang);
       }
       None => { /* do nothing */ }
@@ -74,6 +76,7 @@ impl CommandAttributes {
     match value.get(scope, nargs_name.into()) {
       Some(nargs_value) => {
         let nargs = nargs_value.to_rust_string_lossy(scope);
+        trace!("|from_v8_object| nargs:{:?}", nargs);
         if let Ok(nargs) = Nargs::from_str(&nargs) {
           builder.nargs(nargs);
         }
