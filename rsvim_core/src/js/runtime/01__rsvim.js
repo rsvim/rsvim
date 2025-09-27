@@ -41,6 +41,11 @@ function checkIsFunction(arg, msg) {
         throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
     }
 }
+function checkIsObject(arg, msg) {
+    if (typeof arg !== "object") {
+        throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
         throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -74,6 +79,7 @@ class RsvimCmdImpl {
         if (attributes === undefined) {
             attributes = {};
         }
+        checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
         if (!Object.hasOwn(attributes, "bang")) {
             attributes.bang = false;
         }
@@ -85,6 +91,7 @@ class RsvimCmdImpl {
         if (options === undefined) {
             options = {};
         }
+        checkIsObject(options, `"Rsvim.cmd.create" options`);
         if (!Object.hasOwn(options, "force")) {
             options.force = true;
         }
