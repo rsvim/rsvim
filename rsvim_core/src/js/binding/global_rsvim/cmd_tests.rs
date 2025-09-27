@@ -291,7 +291,7 @@ const prev1 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(1));
 Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
 
 const prev2 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(2));
-Rsvim.cmd.echo(`Previous-2 command:${prev2()}`);
+Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2()}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
