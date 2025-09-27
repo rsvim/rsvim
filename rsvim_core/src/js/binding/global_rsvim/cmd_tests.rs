@@ -575,7 +575,7 @@ async fn test_create_failed7() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
 
   let src: &str = r#"
-const prev = Rsvim.cmd.create("abc", () => {}, {nargs:"a"});
+const prev = Rsvim.cmd.create("abc", () => {}, "a");
 Rsvim.cmd.echo(`Previous command:${prev}`);
     "#;
 
