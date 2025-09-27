@@ -65,7 +65,7 @@ impl CommandAttributes {
     match value.get(scope, bang_name.into()) {
       Some(bang_value) => {
         if bang_value.is_boolean() || bang_value.is_boolean_object() {
-          let bang = bang_value.to_boolean(scope).boolean_value(scope);
+          let bang = bang_value.boolean_value(scope);
           trace!("|from_v8_object| bang:{:?}", bang);
           builder.bang(bang);
         }
