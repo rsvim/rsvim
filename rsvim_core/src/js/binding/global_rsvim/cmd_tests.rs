@@ -287,18 +287,11 @@ async fn test_recreate1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
 
   let src: &str = r#"
-function write() {
-  try {
-    const bufId = Rsvim.cmd.current();
-    const n = Rsvim.buf.writeSync(bufId);
-    Rsvim.cmd.echo(`Buffer ${bufId} saved, written ${n} bytes`);
-  } catch (e) {
-    Rsvim.cmd.echo(`Failed to save buffer ${bufId}: ${e}`);
-  }
-}
+const prev1 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(1));
+Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
 
-const prev = Rsvim.cmd.create("write", write);
-Rsvim.cmd.echo(`Previous command:${prev}`);
+const prev2 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(2));
+Rsvim.cmd.echo(`Previous-2 command:${prev2}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
