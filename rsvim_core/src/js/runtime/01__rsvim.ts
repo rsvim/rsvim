@@ -336,6 +336,7 @@ class RsvimCmdImpl implements RsvimCmd {
     if (attributes === undefined) {
       attributes = {};
     }
+    checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
     if (!Object.hasOwn(attributes, "bang")) {
       attributes.bang = false;
     }
@@ -352,6 +353,7 @@ class RsvimCmdImpl implements RsvimCmd {
     if (options === undefined) {
       options = {};
     }
+    checkIsObject(options, `"Rsvim.cmd.create" options`);
     if (!Object.hasOwn(options, "force")) {
       options.force = true;
     }
