@@ -469,6 +469,54 @@ Rsvim.cmd.echo(prev.name);
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
+async fn test_remove2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+
+  let src: &str = r#"
+Rsvim.cmd.create("write", () => {});
+const prev = Rsvim.cmd.remove("w");
+Rsvim.cmd.echo(prev);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual{}:{:?}", i, actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "write");
+
+    let state_rc = event_loop.js_runtime.get_state();
+    let state = state_rc.borrow();
+    let commands = lock!(state.commands);
+    assert!(commands.is_empty());
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_create_failed1() -> IoResult<()> {
   test_log_init();
 
