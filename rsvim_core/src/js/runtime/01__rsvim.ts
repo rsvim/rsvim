@@ -871,7 +871,7 @@ export interface RsvimRt {
 
 class RsvimRtImpl implements RsvimRt {
   exit(exitCode?: number): void {
-    if (exitCode === undefined) {
+    if (exitCode === undefined || exitCode === null) {
       exitCode = 0;
     }
     checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
