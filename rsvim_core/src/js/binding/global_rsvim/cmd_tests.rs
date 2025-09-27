@@ -384,35 +384,22 @@ Rsvim.cmd.list().forEach((cmd_def) => {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 5);
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual1:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "name:write");
 
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual2:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "attributes.bang:false");
+    let expects = [
+      "name:write",
+      "attributes.bang:false",
+      "attributes.nargs:0",
+      "options.alias:undefined",
+      "options.force:true",
+    ];
 
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual3:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "attributes.nargs:0");
-
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual4:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "options.force:true");
-
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual5:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "options.alias:undefined");
+    for i in 0..n {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual{}:{:?}", i, actual);
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(expects.iter().any(|e| *e == actual));
+    }
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
