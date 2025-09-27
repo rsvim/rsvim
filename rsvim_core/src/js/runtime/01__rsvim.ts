@@ -90,6 +90,12 @@ function checkIsFunction(arg: any, msg: string) {
   }
 }
 
+function checkIsObject(arg: any, msg: string) {
+  if (typeof arg !== "object") {
+    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+  }
+}
+
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
