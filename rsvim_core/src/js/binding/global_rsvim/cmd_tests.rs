@@ -456,9 +456,9 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(
-      actual.contains(r####""Rsvim.cmd.create" name is invalid pattern"####)
-    );
+    assert!(actual.contains(
+      r####""Rsvim.cmd.create" callback must be a function, but found"####
+    ));
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
