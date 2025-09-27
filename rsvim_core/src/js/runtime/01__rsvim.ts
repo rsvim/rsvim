@@ -365,6 +365,9 @@ class RsvimCmdImpl implements RsvimCmd {
     if (options === undefined) {
       options = {};
     }
+    if (!Object.hasOwn(options, "force")) {
+      options.force = true;
+    }
     checkObjectContains(
       options,
       {
@@ -442,6 +445,13 @@ export namespace RsvimCmd {
      * By default is `true`
      */
     force?: boolean;
+
+    /**
+     * Command alias, i.e. short name.
+     *
+     * For example, the `w` is alias for `write`.
+     */
+    alias?: string;
   };
 
   /**
