@@ -312,11 +312,13 @@ Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2()}`);
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 2);
     let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-1 command:undefined"));
 
     let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-2 command:function, 1"));
