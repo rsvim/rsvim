@@ -43,9 +43,11 @@ impl CommandOptions {
     let alias_name = v8::String::new(scope, ALIAS_NAME).unwrap();
     match value.get(scope, alias_name.into()) {
       Some(alias_value) => {
-        let alias = alias_value.to_rust_string_lossy(scope);
-        trace!("|from_v8_object| alias:{:?}", alias);
-        builder.alias(Some(alias.to_compact_string()));
+        if alias_value.is_string() || alias_value.is_string_object() {
+          let alias = alias_value.to_rust_string_lossy(scope);
+          trace!("|from_v8_object| alias:{:?}", alias);
+          builder.alias(Some(alias.to_compact_string()));
+        }
       }
       None => { /* do nothing */ }
     }
