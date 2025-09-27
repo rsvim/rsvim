@@ -453,7 +453,7 @@ Rsvim.cmd.echo(prev.name);
     assert_eq!(n, 1);
 
     let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual{}:{:?}", i, actual);
+    info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert_eq!(actual, "write");
