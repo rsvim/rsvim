@@ -351,15 +351,11 @@ class RsvimCmdImpl implements RsvimCmd {
     if (!Object.hasOwn(attributes, "nargs")) {
       attributes.nargs = "0";
     }
-
-    checkObjectContains(
-      attributes,
-      {
-        bang: checkIsBoolean,
-        nargs: (arg: any, msg: string): void =>
-          checkIsOptions(arg, ["0", "1", "?", "+", "*"], msg),
-      },
-      `"Rsvim.cmd.create" attributes`,
+    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
+    checkIsOptions(
+      attributes.nargs,
+      ["0", "1", "?", "+", "*"],
+      `"Rsvim.cmd.create" attributes.nargs`,
     );
 
     if (options === undefined) {
