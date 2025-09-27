@@ -96,16 +96,10 @@ swc_sourcemap = { workspace = true }
 swc_trace_macro = { workspace = true }
 swc_visit = { workspace = true }
 
+v8 = { workspace = true, default-features = false, features = [
+  "use_custom_libcxx",
+] }
 timezone_provider = { workspace = true }
-[target.'cfg(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64")))'.dependencies]
-v8 = { workspace = true, default-features = false, features = [
-  "use_custom_libcxx",
-  "v8_enable_pointer_compression",
-] }
-[target.'cfg(not(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64"))))'.dependencies]
-v8 = { workspace = true, default-features = false, features = [
-  "use_custom_libcxx",
-] }
 
 # NOTE: Javascript dependencies }
 

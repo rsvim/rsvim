@@ -30,13 +30,12 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
-use crate::report_js_error;
-use crate::state::ops::cmdline_ops;
 use crate::ui::tree::TreeArc;
 pub use boost::*;
 pub use build::*;
-use command::ExCommandsManagerArc;
+use command::CommandsManagerArc;
 use err::JsError;
+use err::report_js_error;
 use exception::ExceptionState;
 use exception::PromiseRejectionEntry;
 use hook::module_resolve_cb;
@@ -379,7 +378,7 @@ pub mod boost {
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
     pub contents: TextContentsArc,
-    pub commands: ExCommandsManagerArc,
+    pub commands: CommandsManagerArc,
     // Data Access for RSVIM }
   }
 
@@ -423,7 +422,7 @@ pub mod boost {
       tree: TreeArc,
       buffers: BuffersManagerArc,
       contents: TextContentsArc,
-      commands: ExCommandsManagerArc,
+      commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -513,7 +512,7 @@ pub mod boost {
       tree: TreeArc,
       buffers: BuffersManagerArc,
       contents: TextContentsArc,
-      commands: ExCommandsManagerArc,
+      commands: CommandsManagerArc,
     ) -> Self {
       // Fire up the v8 engine.
       init_v8_platform(false, Some(&options.v8_flags));
@@ -671,8 +670,9 @@ pub mod boost {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message
-              let e = format!("Error: invalid command {:?}", req.payload);
-              report_js_error!(state, e);
+              let e =
+                anyhow::anyhow!("Error: invalid command {:?}", req.payload);
+              report_js_error(&state, e);
             }
           }
           JsMessage::LoadImportResp(resp) => {
@@ -701,7 +701,7 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let state = state_rc.borrow();
-          report_js_error!(state, exception);
+          report_js_error(&state, exception.into());
         }
         run_next_tick_callbacks(scope);
       }
@@ -792,7 +792,7 @@ pub mod boost {
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
           let state = state_rc.borrow();
-          report_js_error!(state, exception);
+          report_js_error(&state, exception.into());
           continue;
         }
 
@@ -819,7 +819,7 @@ pub mod boost {
 
           if let Some(error) = check_exceptions(tc_scope) {
             let state = state_rc.borrow();
-            report_js_error!(state, error);
+            report_js_error(&state, error.into());
             continue;
           }
         }

@@ -1,11 +1,49 @@
+function checkNotNull(arg, msg) {
+    if (arg === undefined || arg === null) {
+        throw new TypeError(`${msg} cannot be undefined or null`);
+    }
+}
+function checkIsNumber(arg, msg) {
+    if (typeof arg !== "number") {
+        throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
+    }
+}
+function checkIsInteger(arg, msg) {
+    checkIsNumber(arg, msg);
+    if (!Number.isInteger(arg)) {
+        throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+    }
+}
+function checkIsBoolean(arg, msg) {
+    if (typeof arg !== "boolean") {
+        throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+    }
+}
+function checkIsFunction(arg, msg) {
+    if (typeof arg !== "function") {
+        throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+    }
+}
+function checkIsOptions(arg, options, msg) {
+    if (!options.includes(arg)) {
+        throw new RangeError(`${msg} is invalid option: ${arg}`);
+    }
+}
+function boundByIntegers(arg, bound) {
+    if (arg < bound[0]) {
+        return bound[0];
+    }
+    if (arg > bound[1]) {
+        return bound[1];
+    }
+    return arg;
+}
 ((globalThis) => {
     const TIMEOUT_MAX = Math.pow(2, 31) - 1;
     let nextTimerId = 1;
     const activeTimers = new Map();
     function clearInterval(id) {
-        if (!Number.isInteger(id)) {
-            throw new TypeError(`"clearInterval" id must be an integer, but found ${typeof id}`);
-        }
+        checkIsInteger(id, `"clearInterval" ID`);
         if (activeTimers.has(id)) {
             __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
             activeTimers.delete(id);
@@ -15,16 +53,10 @@
         if (delay === undefined || delay === null) {
             delay = 1;
         }
-        else if (typeof delay !== "number") {
-            throw new TypeError(`"setInterval" delay must be a number, but found ${typeof delay}`);
-        }
+        checkIsNumber(delay, `"setInterval" delay`);
         delay *= 1;
-        if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-            delay = 1;
-        }
-        if (typeof callback !== "function") {
-            throw new Error(`"setTimeout" callback must be a function, but found ${typeof callback}`);
-        }
+        delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+        checkIsFunction(callback, `"setInterval" callback`);
         const id = nextTimerId++;
         const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
             callback(...args);
@@ -33,9 +65,7 @@
         return id;
     }
     function clearTimeout(id) {
-        if (!Number.isInteger(id)) {
-            throw new TypeError(`"clearTimeout" id must be an integer, but found ${typeof id}`);
-        }
+        checkIsInteger(id, `"clearTimeout" ID`);
         if (activeTimers.has(id)) {
             __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
             activeTimers.delete(id);
@@ -45,16 +75,10 @@
         if (delay === undefined || delay === null) {
             delay = 1;
         }
-        else if (typeof delay !== "number") {
-            throw new TypeError(`"setTimeout" delay must be a number, but found ${typeof delay}`);
-        }
+        checkIsNumber(delay, `"setTimeout" delay`);
         delay *= 1;
-        if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-            delay = 1;
-        }
-        if (typeof callback !== "function") {
-            throw new Error(`"setTimeout" callback must be a function, but found ${typeof callback}`);
-        }
+        delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+        checkIsFunction(callback, `"setTimeout" callback`);
         const id = nextTimerId++;
         const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
             callback(...args);
@@ -64,9 +88,7 @@
         return id;
     }
     function queueMicrotask(callback) {
-        if (typeof callback !== "function") {
-            throw new TypeError(`The "callback" argument must be a function.`);
-        }
+        checkIsFunction(callback, `"queueMicrotask" callback`);
         __InternalRsvimGlobalObject.global_queue_microtask(() => {
             try {
                 callback();

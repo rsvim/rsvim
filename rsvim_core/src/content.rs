@@ -3,7 +3,6 @@
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
-use compact_str::CompactString;
 use ringbuf::HeapRb;
 use ropey::Rope;
 use std::fmt::Debug;
@@ -12,7 +11,7 @@ use std::fmt::Debug;
 pub struct TextContents {
   command_line_input: Text,
   command_line_message: Text,
-  command_line_message_history: HeapRb<CompactString>,
+  command_line_message_history: HeapRb<String>,
 }
 
 arc_mutex_ptr!(TextContents);
@@ -56,14 +55,12 @@ impl TextContents {
   }
 
   /// Get "command line" message history
-  pub fn command_line_message_history(&self) -> &HeapRb<CompactString> {
+  pub fn command_line_message_history(&self) -> &HeapRb<String> {
     &self.command_line_message_history
   }
 
   /// Get mutable "command line" message history
-  pub fn command_line_message_history_mut(
-    &mut self,
-  ) -> &mut HeapRb<CompactString> {
+  pub fn command_line_message_history_mut(&mut self) -> &mut HeapRb<String> {
     &mut self.command_line_message_history
   }
 }

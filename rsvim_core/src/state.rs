@@ -14,6 +14,9 @@ pub mod fsm;
 pub mod mode;
 pub mod ops;
 
+#[cfg(test)]
+mod mode_tests;
+
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::msg::JsMessage;

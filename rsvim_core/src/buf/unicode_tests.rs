@@ -1,13 +1,21 @@
 use super::unicode::*;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
-use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use ascii::AsciiChar;
 use icu::properties::CodePointMapData;
 use icu::properties::props::EastAsianWidth;
 use unicode_width::UnicodeWidthChar;
+
+#[test]
+fn ascii_display1() {
+  for i in 0_u32..32_u32 {
+    let ac = AsciiChar::from_ascii(i).unwrap();
+    let fmt = AsciiControlCodeFormatter::from(ac);
+    println!("{i}:{fmt}");
+  }
+}
 
 #[test]
 fn char_width1() {

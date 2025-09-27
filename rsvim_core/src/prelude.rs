@@ -13,8 +13,6 @@ pub use foldhash::HashMapExt;
 pub use foldhash::HashSet as FoldSet;
 pub use foldhash::HashSetExt;
 pub use foldhash::fast::RandomState;
-pub use geo::Point;
-pub use geo::Rect;
 pub use log::debug;
 pub use log::error;
 pub use log::info;

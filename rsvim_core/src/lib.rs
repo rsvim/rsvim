@@ -6,7 +6,6 @@ pub mod cli;
 pub mod consts;
 pub mod content;
 pub mod coord;
-pub mod defaults;
 pub mod evloop;
 pub mod js;
 pub mod lock;

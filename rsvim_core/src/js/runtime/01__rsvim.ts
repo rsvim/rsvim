@@ -46,6 +46,72 @@ class RsvimImpl implements Rsvim {
   rt = new RsvimRtImpl();
 }
 
+function checkNotNull(arg: any, msg: string) {
+  if (arg === undefined || arg === null) {
+    throw new TypeError(`${msg} cannot be undefined or null`);
+  }
+}
+
+function checkIsNumber(arg: any, msg: string) {
+  if (typeof arg !== "number") {
+    throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
+  }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  checkIsNumber(arg, msg);
+  if (!Number.isInteger(arg)) {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+}
+
+function checkIsBoolean(arg: any, msg: string) {
+  if (typeof arg !== "boolean") {
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+  }
+}
+
+function checkIsString(arg: any, msg: string) {
+  if (typeof arg !== "string") {
+    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+  }
+}
+
+function checkMatchPattern(arg: any, pat: RegExp, msg: string) {
+  checkIsString(arg, msg);
+  if (!pat.test(arg)) {
+    throw new Error(`${msg} is invalid pattern: ${arg}"`);
+  }
+}
+
+function checkIsFunction(arg: any, msg: string) {
+  if (typeof arg !== "function") {
+    throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+  }
+}
+
+function checkIsObject(arg: any, msg: string) {
+  if (typeof arg !== "object") {
+    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+  }
+}
+
+function checkIsOptions(arg: any, options: any[], msg: string) {
+  if (!options.includes(arg)) {
+    throw new RangeError(`${msg} is invalid option: ${arg}`);
+  }
+}
+
+function boundByIntegers(arg: any, bound: [number, number]) {
+  if (arg < bound[0]) {
+    return bound[0];
+  }
+  if (arg > bound[1]) {
+    return bound[1];
+  }
+  return arg;
+}
+
 /**
  * The `Rsvim.buf` global object for Vim buffers.
  *
@@ -66,20 +132,20 @@ export interface RsvimBuf {
    *
    * :::warning
    * When the editor is not initialized, i.e. there's no buffer/window created. It
-   * will return `null`. Once the editor is initialized, there will always have a
+   * will return `undefined`. Once the editor is initialized, there will always have a
    * valid buffer binded to the "current" window (where your cursor is). It will return
    * the valid buffer ID.
    * :::
    *
-   * @returns {number | null} It returns a valid buffer ID if the editor is initialized.
-   * Otherwise it returns `null` if the editor is not initialized.
+   * @returns {number | undefined} It returns a valid buffer ID if the editor is initialized.
+   * Otherwise it returns `undefined` if the editor is not initialized.
    *
    * @example
    * ```javascript
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  current(): number | null;
+  current(): number | undefined;
 
   /**
    * List all buffers' IDs.
@@ -109,7 +175,7 @@ export interface RsvimBuf {
    * @returns {number} It returns a positive integer to indicate how many bytes
    * have been written to the file, if written successfully.
    *
-   * @throws Throws {@link !TypeError} if the `bufId` parameter is not an integer, or {@link !Error} if failed to write buffer contents to file system.
+   * @throws Throws {@link !TypeError} if the parameter is invalid, or {@link !Error} if failed to write buffer to file system.
    *
    * @example
    * ```javascript
@@ -126,7 +192,7 @@ export interface RsvimBuf {
 }
 
 class RsvimBufImpl implements RsvimBuf {
-  current(): number | null {
+  current(): number | undefined {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_current();
   }
@@ -137,11 +203,8 @@ class RsvimBufImpl implements RsvimBuf {
   }
 
   writeSync(bufId: number): number {
-    if (typeof bufId !== "number") {
-      throw new TypeError(
-        `"Rsvim.buf.write" bufId must be an integer, but found ${typeof bufId}`,
-      );
-    }
+    checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.buf_write_sync(bufId);
   }
@@ -166,10 +229,44 @@ class RsvimBufImpl implements RsvimBuf {
  */
 export interface RsvimCmd {
   /**
+   * Create a ex command with a callback function.
+   *
+   * :::warning
+   * The only builtin command `js` cannot be override.
+   * :::
+   *
+   * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
+   * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
+   * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
+   * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined previously.
+   *
+   * @throws Throws {@link !TypeError} if any parameters are invalid.
+   *
+   * @example
+   * ```javascript
+   * function write(ctx: any): void {
+   *   try {
+   *     const bytes = Rsvim.buf.writeSync(bufId);
+   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   *   } catch (e) {
+   *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
+   *   }
+   * }
+   * Rsvim.cmd.create("write", write);
+   * ```
+   */
+  create(
+    name: string,
+    callback: RsvimCmd.CommandCallback,
+    attributes?: RsvimCmd.CommandAttributes,
+    options?: RsvimCmd.CommandOptions,
+  ): RsvimCmd.CommandDefinition | undefined;
+
+  /**
    * Echo message to the command-line.
    *
-   * @param {message} message - It accepts string and other primitive types, except `null`
-   * and `undefined`.
+   * @param {any} message - It accepts string and other primitive types, except `null` and `undefined`.
    *
    * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
    *
@@ -179,18 +276,188 @@ export interface RsvimCmd {
    * ```
    */
   echo(message: any): void;
+
+  /**
+   * List all registered ex commands.
+   *
+   * :::warning
+   * The builtin `js` command will not be listed here.
+   * :::
+   *
+   * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((cmd) => {
+   *   Rsvim.cmd.echo(`Command: ${cmd.name}`);
+   * });
+   * ```
+   */
+  list(): RsvimCmd.CommandDefinition[];
+
+  /**
+   * Remove an ex command by name.
+   *
+   * :::warning
+   * The only builtin command `js` cannot be removed.
+   * :::
+   *
+   * @param {string} name - The command name to be removed.
+   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
+   *
+   * @throws Throws {@link !TypeError} if name is not a string.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((cmd) => {
+   *   // Remove all registered commands.
+   *   Rsvim.cmd.remove(cmd.name);
+   * });
+   * ```
+   */
+  remove(name: string): RsvimCmd.CommandDefinition | undefined;
 }
 
 class RsvimCmdImpl implements RsvimCmd {
-  echo(message: any): void {
-    if (message === undefined || message === null) {
-      throw new TypeError(
-        '"Rsvim.cmd.echo" message cannot be undefined or null',
-      );
+  create(
+    name: string,
+    callback: RsvimCmd.CommandCallback,
+    attributes?: RsvimCmd.CommandAttributes,
+    options?: RsvimCmd.CommandOptions,
+  ): RsvimCmd.CommandDefinition | undefined {
+    checkMatchPattern(
+      name,
+      /^[A-Za-z_!][A-Za-z0-9_!]*$/,
+      `"Rsvim.cmd.create" name`,
+    );
+
+    checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
+
+    if (attributes === undefined || attributes === null) {
+      attributes = {};
     }
+    checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
+    if (!Object.hasOwn(attributes, "bang")) {
+      attributes.bang = false;
+    }
+    if (!Object.hasOwn(attributes, "nargs")) {
+      attributes.nargs = "0";
+    }
+    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
+    checkIsOptions(
+      attributes.nargs,
+      ["0", "1", "?", "+", "*"],
+      `"Rsvim.cmd.create" attributes.nargs`,
+    );
+
+    if (options === undefined || options === null) {
+      options = {};
+    }
+    checkIsObject(options, `"Rsvim.cmd.create" options`);
+    if (!Object.hasOwn(options, "force")) {
+      options.force = true;
+    }
+    checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
+    if (options.alias !== undefined) {
+      checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
+    }
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_create(
+      name,
+      callback,
+      attributes,
+      options,
+    );
+  }
+
+  echo(message: any): void {
+    checkNotNull(message, `"Rsvim.cmd.echo" message`);
+
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
+
+  list(): RsvimCmd.CommandDefinition[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_list();
+  }
+
+  remove(name: string): RsvimCmd.CommandDefinition | undefined {
+    checkIsString(name, `"Rsvim.cmd.remove" name`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_remove(name);
+  }
+}
+
+export namespace RsvimCmd {
+  /**
+   * Command attributes.
+   *
+   * @see {@link RsvimCmd.create}
+   */
+  export type CommandAttributes = {
+    /**
+     * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
+     *
+     * @defaultValue `false`
+,    */
+    bang?: boolean;
+
+    /**
+     * Whether The command can take any arguments, and how many it can take:
+     *
+     * - `0`: No arguments are allowed.
+     * - `1`: Exactly 1 argument is required.
+     * - `*`: Any number of arguments are allowed, i.e. 0, 1 or more.
+     * - `?`: 0 or 1 arguments are allowed.
+     * - `+`: At least 1 arguments are required.
+     *
+     * @defaultValue `0`
+,    */
+    nargs?: "0" | "1" | "*" | "+" | "?";
+  };
+
+  /**
+   * Command options when creating a command.
+   *
+   * @see {@link RsvimCmd.create}
+   */
+  export type CommandOptions = {
+    /**
+     * Whether force override the command if there's already an existing one.
+     *
+     * @defaultValue `true`
+     */
+    force?: boolean;
+
+    /**
+     * Command alias, i.e. short name.
+     *
+     * For example, the `w` is alias for `write`.
+     *
+     * @defaultValue `undefined`
+     */
+    alias?: string;
+  };
+
+  /**
+   * Command callback function, this is the backend logic that implements a user ex command.
+   *
+   * @see {@link RsvimCmd.create}
+,  */
+  export type CommandCallback = (ctx: any) => void;
+
+  /**
+   * Command definition.
+   */
+  export type CommandDefinition = {
+    name: string;
+    callback: CommandCallback;
+    attributes: CommandAttributes;
+    options: CommandOptions;
+  };
 }
 
 /**
@@ -275,7 +542,7 @@ export interface RsvimOpt {
    * Set the _file-encoding_ option.
    *
    * @param {FileEncodingOption} value - The _file-encoding_ option.
-   * @throws Throws {@link !Error} if value is invalid.
+   * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
    * ```javascript
@@ -323,7 +590,7 @@ export interface RsvimOpt {
    * Set the _file-format_ option.
    *
    * @param {FileFormatOption} value - The _file-format_ option.
-   * @throws Throws {@link !Error} if value is invalid.
+   * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
    * ```javascript
@@ -390,11 +657,11 @@ export interface RsvimOpt {
   get shiftWidth(): number;
 
   /**
-   * Set the _expand-tab_ option. This value should be between `[1,255]`.
+   * Set the _expand-tab_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
    *
    *
    * @param {boolean} value - The _expand-tab_ option.
-   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if value is not between `[1,255]`.
+   * @throws Throws {@link !TypeError} if value is not an integer.
    *
    * @example
    * ```javascript
@@ -428,10 +695,10 @@ export interface RsvimOpt {
   get tabStop(): number;
 
   /**
-   * Set the _tab-stop_ option.
+   * Set the _tab-stop_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
    *
-   * @param {number} value - The _tab-stop_ option. It only accepts an integer between `[1,255]`.
-   * @throws Throws {@link !TypeError} if value is not an integer, or {@link !RangeError} if not a positive integer between `[1,255]`.
+   * @param {number} value - The _tab-stop_ option.
+   * @throws Throws {@link !TypeError} if value is not an integer.
    *
    * @example
    * ```javascript
@@ -489,11 +756,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set expandTab(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.expandTab" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_expand_tab(value);
   }
@@ -504,11 +767,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileEncoding(value: FileEncodingOption) {
-    if (value !== "utf-8") {
-      throw new Error(
-        `"Rsvim.opt.fileEncoding" parameter is invalid: ${value}`,
-      );
-    }
+    checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
   }
@@ -519,9 +778,11 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set fileFormat(value: FileFormatOption) {
-    if (value !== "dos" && value !== "unix" && value !== "mac") {
-      throw new Error(`"Rsvim.opt.fileFormat" parameter is invalid: ${value}`);
-    }
+    checkIsOptions(
+      value,
+      ["dos", "unix", "mac"],
+      `"Rsvim.opt.fileFormat" value`,
+    );
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_format(value);
   }
@@ -532,11 +793,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set lineBreak(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.lineBreak" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_line_break(value);
   }
@@ -547,18 +804,8 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set shiftWidth(value: number) {
-    if (typeof value !== "number") {
-      throw new TypeError(
-        `"Rsvim.opt.shiftWidth" parameter must be an integer, but found ${typeof value}`,
-      );
-    }
-
-    if (value < 1 || value > 255) {
-      throw new RangeError(
-        `"Rsvim.opt.shiftWidth" parameter must be between [1,255], but found ${value}`,
-      );
-    }
-
+    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
+    value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_shift_width(value);
   }
@@ -569,18 +816,8 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set tabStop(value: number) {
-    if (typeof value !== "number") {
-      throw new TypeError(
-        `"Rsvim.opt.tabStop" parameter must be an integer, but found ${typeof value}`,
-      );
-    }
-
-    if (value < 1 || value > 255) {
-      throw new RangeError(
-        `"Rsvim.opt.tabStop" parameter must be between [1,255], but found ${value}`,
-      );
-    }
-
+    checkIsInteger(value, `"Rsvim.opt.tabStop" value`);
+    value = boundByIntegers(value, [1, 255]);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_tab_stop(value);
   }
@@ -591,11 +828,7 @@ class RsvimOptImpl implements RsvimOpt {
   }
 
   set wrap(value: boolean) {
-    if (typeof value !== "boolean") {
-      throw new TypeError(
-        `"Rsvim.opt.wrap" parameter must be a boolean, but found ${typeof value}`,
-      );
-    }
+    checkIsBoolean(value, `"Rsvim.opt.wrap" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
@@ -622,9 +855,9 @@ export interface RsvimRt {
    * :::
    *
    * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
-   * by default it uses `0` to indicate no error happens.
+   * by default uses `0` to indicate no error.
    *
-   * @throws Throws {@link !Error} if `exitCode` parameter is neither a integer nor `undefined`.
+   * @throws Throws {@link !TypeError} if `exitCode` is neither an integer nor `undefined`.
    *
    * @example
    * ```javascript
@@ -640,11 +873,10 @@ export interface RsvimRt {
 
 class RsvimRtImpl implements RsvimRt {
   exit(exitCode?: number): void {
-    if (exitCode !== undefined && typeof exitCode !== "number") {
-      throw new Error(
-        '"Rsvim.rt.exit" exit code parameter must be a valid integer or undefined',
-      );
+    if (exitCode === undefined || exitCode === null) {
+      exitCode = 0;
     }
+    checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
   }

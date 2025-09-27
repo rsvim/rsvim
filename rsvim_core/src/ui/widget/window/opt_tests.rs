@@ -1,5 +1,4 @@
 use super::opt::*;
-use crate::defaults;
 
 #[test]
 pub fn options1() {
@@ -14,7 +13,7 @@ pub fn options1() {
   assert_eq!(opt1.scroll_off(), 3);
 
   let opt2 = WindowOptionsBuilder::default().build().unwrap();
-  assert_eq!(opt2.wrap(), defaults::win::WRAP);
-  assert_eq!(opt2.line_break(), defaults::win::LINE_BREAK);
-  assert_eq!(opt2.scroll_off(), defaults::win::SCROLL_OFF);
+  assert_eq!(opt2.wrap(), WRAP);
+  assert_eq!(opt2.line_break(), LINE_BREAK);
+  assert_eq!(opt2.scroll_off(), SCROLL_OFF);
 }

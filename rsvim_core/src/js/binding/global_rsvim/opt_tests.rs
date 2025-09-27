@@ -1,8 +1,11 @@
+use crate::buf::opt::*;
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::widget::window::opt::*;
+use ringbuf::traits::*;
 use std::time::Duration;
 
 #[cfg(test)]
@@ -31,11 +34,9 @@ mod tests_wrap {
 
     // Before running
     {
-      use crate::defaults;
-
       let tree = lock!(event_loop.tree);
       let global_local_options = tree.global_local_options();
-      assert_eq!(global_local_options.wrap(), defaults::win::WRAP);
+      assert_eq!(global_local_options.wrap(), WRAP);
     }
 
     event_loop.initialize()?;
@@ -82,11 +83,9 @@ mod tests_tab_stop {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
 
     event_loop.initialize()?;
@@ -111,7 +110,7 @@ mod tests_tab_stop {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn failed1() -> IoResult<()> {
+  async fn success2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -130,11 +129,9 @@ mod tests_tab_stop {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
     }
 
     event_loop.initialize()?;
@@ -145,18 +142,66 @@ mod tests_tab_stop {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
+      assert_eq!(global_local_options.tab_stop(), 1);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
-      let actual = actual.trim();
-      info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.tabStop" parameter must be between [1,255], but found"####;
-      assert!(actual.contains(expect));
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 0);
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.tabStop = undefined;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 1);
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      info!("actual:{:?}", actual);
+      assert!(actual.contains(
+        r####""Rsvim.opt.tabStop" value must be a number, but found"####
+      ));
     }
 
     Ok(())
@@ -189,19 +234,11 @@ mod tests_file_encoding {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;
@@ -250,14 +287,9 @@ mod tests_file_encoding {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
     }
 
     event_loop.initialize()?;
@@ -268,20 +300,15 @@ mod tests_file_encoding {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.fileEncoding" parameter is invalid"####;
+      let expect = r####""Rsvim.opt.fileEncoding" value is invalid"####;
       assert!(actual.contains(expect));
     }
 
@@ -315,19 +342,11 @@ mod tests_file_format {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.tab_stop(), defaults::buf::TAB_STOP);
-      assert_eq!(
-        global_local_options.file_encoding(),
-        defaults::buf::FILE_ENCODING
-      );
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.tab_stop(), TAB_STOP);
+      assert_eq!(global_local_options.file_encoding(), FILE_ENCODING);
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;
@@ -373,14 +392,9 @@ mod tests_file_format {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
     }
 
     event_loop.initialize()?;
@@ -391,20 +405,15 @@ mod tests_file_format {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.file_format(),
-        defaults::buf::FILE_FORMAT
-      );
+      assert_eq!(global_local_options.file_format(), FILE_FORMAT);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.fileFormat" parameter is invalid"####;
+      let expect = r####""Rsvim.opt.fileFormat" value is invalid option"####;
       assert!(actual.contains(expect));
     }
 
@@ -438,11 +447,9 @@ mod tests_expand_tab {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
 
     event_loop.initialize()?;
@@ -467,7 +474,7 @@ mod tests_expand_tab {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn failed1() -> IoResult<()> {
+  async fn success2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -486,11 +493,9 @@ mod tests_expand_tab {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
     }
 
     event_loop.initialize()?;
@@ -501,18 +506,16 @@ mod tests_expand_tab {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(global_local_options.expand_tab(), defaults::buf::EXPAND_TAB);
+      assert_eq!(global_local_options.expand_tab(), EXPAND_TAB);
 
       let contents = lock!(event_loop.contents);
       let actual = contents.command_line_message().rope().to_string();
       let actual = actual.trim();
       info!("actual:{actual}");
       let expect =
-        r####""Rsvim.opt.expandTab" parameter must be a boolean, but found"####;
+        r####""Rsvim.opt.expandTab" value must be a boolean, but found"####;
       assert!(actual.contains(expect));
     }
 
@@ -522,6 +525,8 @@ mod tests_expand_tab {
 
 #[cfg(test)]
 mod tests_shift_width {
+  use ringbuf::traits::Observer;
+
   use super::*;
 
   #[tokio::test]
@@ -546,14 +551,9 @@ mod tests_shift_width {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
 
     event_loop.initialize()?;
@@ -578,7 +578,7 @@ mod tests_shift_width {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn failed1() -> IoResult<()> {
+  async fn success2() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -597,14 +597,9 @@ mod tests_shift_width {
 
     // Before running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
     }
 
     event_loop.initialize()?;
@@ -615,21 +610,65 @@ mod tests_shift_width {
 
     // After running
     {
-      use crate::defaults;
-
       let buffers = lock!(event_loop.buffers);
       let global_local_options = buffers.global_local_options();
-      assert_eq!(
-        global_local_options.shift_width(),
-        defaults::buf::SHIFT_WIDTH
-      );
+      assert_eq!(global_local_options.shift_width(), 255);
 
       let contents = lock!(event_loop.contents);
-      let actual = contents.command_line_message().rope().to_string();
-      let actual = actual.trim();
-      info!("actual:{actual}");
-      let expect = r####""Rsvim.opt.shiftWidth" parameter must be between [1,255], but found"####;
-      assert!(actual.contains(expect));
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 0);
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  #[cfg_attr(miri, ignore)]
+  async fn failed1() -> IoResult<()> {
+    test_log_init();
+
+    let terminal_cols = 10_u16;
+    let terminal_rows = 10_u16;
+    let mocked_ops = vec![MockOperation::SleepFor(Duration::from_millis(30))];
+
+    let src: &str = r#"
+  Rsvim.opt.shiftWidth = 1.123;
+    "#;
+
+    // Prepare $RSVIM_CONFIG/rsvim.js
+    let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+    let mut event_loop =
+      make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+    // Before running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+    }
+
+    event_loop.initialize()?;
+    event_loop
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+      .await?;
+    event_loop.shutdown()?;
+
+    // After running
+    {
+      let buffers = lock!(event_loop.buffers);
+      let global_local_options = buffers.global_local_options();
+      assert_eq!(global_local_options.shift_width(), SHIFT_WIDTH);
+
+      let mut contents = lock!(event_loop.contents);
+      let n = contents.command_line_message_history().occupied_len();
+      assert_eq!(n, 1);
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(actual.contains(
+        r####""Rsvim.opt.shiftWidth" value must be an integer, but found"####
+      ));
     }
 
     Ok(())

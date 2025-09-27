@@ -1,5 +1,9 @@
 //! Js error.
 
+use crate::js::JsRuntimeState;
+use crate::js::binding::global_rsvim::cmd::send_cmdline_message;
+use crate::prelude::AnyErr;
+
 /// Represents an exception coming from V8.
 #[derive(Eq, PartialEq, Clone, Default)]
 pub struct JsError {
@@ -159,29 +163,6 @@ impl std::fmt::Debug for JsError {
   }
 }
 
-#[macro_export]
-/// Report unhandled exceptions to command-line message.
-macro_rules! report_js_error {
-  ($state:expr,$e:expr) => {
-    use compact_str::ToCompactString;
-    use $crate::msg;
-
-    trace!("report js error:{:?}", $e);
-    let mut tree = lock!($state.tree);
-    let mut contents = lock!($state.contents);
-    if tree.command_line_id().is_some() {
-      cmdline_ops::cmdline_set_message(
-        &mut tree,
-        &mut contents,
-        $e.to_compact_string(),
-      );
-    } else {
-      msg::sync_send_to_master(
-        $state.master_tx.clone(),
-        msg::MasterMessage::PrintReq(msg::PrintReq {
-          payload: $e.to_compact_string(),
-        }),
-      );
-    }
-  };
+pub fn report_js_error(state: &JsRuntimeState, e: AnyErr) {
+  send_cmdline_message(state, e.to_string());
 }

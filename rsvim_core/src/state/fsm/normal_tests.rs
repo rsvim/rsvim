@@ -7456,7 +7456,7 @@ mod tests_goto_command_line_ex_mode {
       cmdline_ops::cmdline_set_message(
         &mut tree,
         &mut contents,
-        CompactString::new("Test echo"),
+        "Test echo".to_string(),
       );
     }
 
@@ -7893,7 +7893,7 @@ mod tests_goto_insert_mode {
       cmdline_ops::cmdline_set_message(
         &mut tree,
         &mut contents,
-        CompactString::new("Test echo"),
+        "Test echo".to_string(),
       );
     }
 

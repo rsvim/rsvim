@@ -7,6 +7,53 @@
  * @packageDocumentation
  */
 
+function checkNotNull(arg: any, msg: string) {
+  if (arg === undefined || arg === null) {
+    throw new TypeError(`${msg} cannot be undefined or null`);
+  }
+}
+
+function checkIsNumber(arg: any, msg: string) {
+  if (typeof arg !== "number") {
+    throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
+  }
+}
+
+function checkIsInteger(arg: any, msg: string) {
+  checkIsNumber(arg, msg);
+  if (!Number.isInteger(arg)) {
+    throw new TypeError(`${msg} must be an integer, but found ${typeof arg}`);
+  }
+}
+
+function checkIsBoolean(arg: any, msg: string) {
+  if (typeof arg !== "boolean") {
+    throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
+  }
+}
+
+function checkIsFunction(arg: any, msg: string) {
+  if (typeof arg !== "function") {
+    throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+  }
+}
+
+function checkIsOptions(arg: any, options: any[], msg: string) {
+  if (!options.includes(arg)) {
+    throw new RangeError(`${msg} is invalid option: ${arg}`);
+  }
+}
+
+function boundByIntegers(arg: any, bound: [number, number]) {
+  if (arg < bound[0]) {
+    return bound[0];
+  }
+  if (arg > bound[1]) {
+    return bound[1];
+  }
+  return arg;
+}
+
 /**
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
@@ -48,10 +95,10 @@ export interface GlobalThis {
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. By default 1.
+   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
   setInterval(
     callback: (...args: any[]) => void,
@@ -63,10 +110,10 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
    * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. By default 1.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is not a number.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
   setTimeout(
     callback: (...args: any[]) => void,
@@ -89,11 +136,7 @@ export interface GlobalThis {
 
   function clearInterval(id: number): void {
     // Check parameter's type.
-    if (!Number.isInteger(id)) {
-      throw new TypeError(
-        `"clearInterval" id must be an integer, but found ${typeof id}`,
-      );
-    }
+    checkIsInteger(id, `"clearInterval" ID`);
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
@@ -109,26 +152,17 @@ export interface GlobalThis {
   ): number {
     if (delay === undefined || delay === null) {
       delay = 1;
-    } else if (typeof delay !== "number") {
-      throw new TypeError(
-        `"setInterval" delay must be a number, but found ${typeof delay}`,
-      );
     }
+    checkIsNumber(delay, `"setInterval" delay`);
 
     // Coalesce to number or NaN.
     delay *= 1;
 
     // Check delay's boundaries.
-    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-      delay = 1;
-    }
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
     // Check if callback is a valid function.
-    if (typeof callback !== "function") {
-      throw new Error(
-        `"setTimeout" callback must be a function, but found ${typeof callback}`,
-      );
-    }
+    checkIsFunction(callback, `"setInterval" callback`);
 
     // Pin down the correct ID value.
     const id = nextTimerId++;
@@ -150,11 +184,7 @@ export interface GlobalThis {
 
   function clearTimeout(id: number): void {
     // Check parameter's type.
-    if (!Number.isInteger(id)) {
-      throw new TypeError(
-        `"clearTimeout" id must be an integer, but found ${typeof id}`,
-      );
-    }
+    checkIsInteger(id, `"clearTimeout" ID`);
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
@@ -170,26 +200,17 @@ export interface GlobalThis {
   ): number {
     if (delay === undefined || delay === null) {
       delay = 1;
-    } else if (typeof delay !== "number") {
-      throw new TypeError(
-        `"setTimeout" delay must be a number, but found ${typeof delay}`,
-      );
     }
+    checkIsNumber(delay, `"setTimeout" delay`);
 
     // Coalesce to number or NaN.
     delay *= 1;
 
     // Check delay's boundaries.
-    if (!(delay >= 1 && delay <= TIMEOUT_MAX)) {
-      delay = 1;
-    }
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
     // Check if callback is a valid function.
-    if (typeof callback !== "function") {
-      throw new Error(
-        `"setTimeout" callback must be a function, but found ${typeof callback}`,
-      );
-    }
+    checkIsFunction(callback, `"setTimeout" callback`);
 
     // Pin down the correct ID value.
     const id = nextTimerId++;
@@ -217,9 +238,7 @@ export interface GlobalThis {
   // the microtask_checkpoint phase.
   function queueMicrotask(callback: () => void): void {
     // Check if the callback argument is a valid type.
-    if (typeof callback !== "function") {
-      throw new TypeError(`The "callback" argument must be a function.`);
-    }
+    checkIsFunction(callback, `"queueMicrotask" callback`);
 
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     __InternalRsvimGlobalObject.global_queue_microtask(() => {

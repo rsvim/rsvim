@@ -1,47 +1,99 @@
 //! Vim editing mode.
 
 use crate::prelude::*;
-use std::fmt::Display;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub const NORMAL: &str = "normal";
+pub const N: &str = "n";
+pub const VISUAL: &str = "visual";
+pub const V: &str = "v";
+pub const SELECT: &str = "select";
+pub const S: &str = "s";
+pub const OPERATOR_PENDING: &str = "operator-pending";
+pub const OP_PENDING: &str = "op-pending";
+pub const O: &str = "o";
+pub const INSERT: &str = "insert";
+pub const I: &str = "i";
+pub const COMMAND_LINE: &str = "command-line";
+pub const CMDLINE: &str = "cmdline";
+pub const C: &str = "c";
+pub const COMMAND_LINE_SEARCH_FORWARD: &str = "command-line-search-forward";
+pub const COMMAND_LINE_SEARCH_BACKWARD: &str = "command-line-search-backward";
+
+#[derive(
+  Debug,
+  Copy,
+  Clone,
+  PartialEq,
+  Eq,
+  PartialOrd,
+  Ord,
+  Hash,
+  strum_macros::Display,
+  strum_macros::EnumString,
+)]
 /// Editing mode.
 pub enum Mode {
+  #[strum(to_string = "normal", serialize = "n")]
   /// Normal mode.
   Normal,
+
+  #[strum(to_string = "visual", serialize = "v")]
   /// Visual mode.
   Visual,
+
+  #[strum(to_string = "select", serialize = "s")]
   /// Select mode.
   Select,
+
+  #[strum(
+    to_string = "operator-pending",
+    serialize = "op-pending",
+    serialize = "o"
+  )]
   /// Operator-pending mode.
   OperatorPending,
+
+  #[strum(to_string = "insert", serialize = "i")]
   /// Insert mode.
   Insert,
+
+  #[strum(to_string = "command-line", serialize = "cmdline", serialize = "c")]
   /// Command-line mode, ex-command variant.
   CommandLineEx,
+
+  #[strum(to_string = "command-line-search-forward")]
   /// Command-line mode, search forward variant.
   CommandLineSearchForward,
+
+  #[strum(to_string = "command-line-search-backward")]
   /// Command-line mode, search backward variant.
   CommandLineSearchBackward,
-  /// Terminal mode.
-  Terminal,
 }
 
-impl Display for Mode {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Mode {
+  pub fn name(&self) -> &str {
     match self {
-      Mode::Normal => write!(f, "Normal"),
-      Mode::Visual => write!(f, "Visual"),
-      Mode::Select => write!(f, "Select"),
-      Mode::OperatorPending => write!(f, "Operator-pending"),
-      Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineEx => write!(f, "Command-line (ex)"),
-      Mode::CommandLineSearchForward => {
-        write!(f, "Command-line (search forward)")
-      }
-      Mode::CommandLineSearchBackward => {
-        write!(f, "Command-line (search backward)")
-      }
-      Mode::Terminal => write!(f, "Terminal"),
+      Mode::Normal => NORMAL,
+      Mode::Visual => VISUAL,
+      Mode::Select => SELECT,
+      Mode::OperatorPending => OPERATOR_PENDING,
+      Mode::Insert => INSERT,
+      Mode::CommandLineEx => COMMAND_LINE,
+      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+    }
+  }
+
+  pub fn short_name(&self) -> &str {
+    match self {
+      Mode::Normal => N,
+      Mode::Visual => V,
+      Mode::Select => S,
+      Mode::OperatorPending => O,
+      Mode::Insert => I,
+      Mode::CommandLineEx => C,
+      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
     }
   }
 }
@@ -56,7 +108,8 @@ impl Mode {
       Mode::OperatorPending,
       Mode::Insert,
       Mode::CommandLineEx,
-      Mode::Terminal,
+      Mode::CommandLineSearchForward,
+      Mode::CommandLineSearchBackward,
     ]
   }
 }
@@ -64,29 +117,33 @@ impl Mode {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 /// The modes collection.
 pub struct Modes {
-  values: FoldSet<Mode>,
+  values: BTreeSet<Mode>,
 }
 
 impl Modes {
   /// Make a new modes collection with no mode inside.
   pub fn new() -> Self {
     Modes {
-      values: FoldSet::new(),
+      values: BTreeSet::new(),
     }
   }
 
   /// Make a new modes collection with all of current modes, and with a new mode.
-  pub fn with(&self, mode: Mode) -> Self {
-    let mut values = self.values.clone();
-    values.insert(mode);
-    Modes { values }
+  pub fn with(&mut self, mode: Mode) -> &Self {
+    self.values.insert(mode);
+    self
   }
 
   /// Make a new modes collection with all of current modes, but without the specified mode.
-  pub fn without(&self, mode: Mode) -> Self {
-    let mut values = self.values.clone();
-    values.remove(&mode);
-    Modes { values }
+  pub fn without(&mut self, mode: Mode) -> &Self {
+    self.values.remove(&mode);
+    self
+  }
+
+  /// Add/set all the specified modes.
+  pub fn extend(&mut self, modes: Modes) -> &Self {
+    self.values.extend(modes.values.iter());
+    self
   }
 
   /// Add/set the specified mode.
@@ -97,11 +154,6 @@ impl Modes {
   /// Remove/unset the specified mode.
   pub fn unset(&mut self, mode: Mode) -> bool {
     self.values.remove(&mode)
-  }
-
-  /// Add/set all the specified modes.
-  pub fn extend(&mut self, modes: Modes) {
-    self.values.extend(modes.values.iter())
   }
 
   /// Whether current collection is empty.
@@ -120,9 +172,7 @@ impl Modes {
   }
 
   /// Get the iterator of current collection.
-  ///
-  /// NOTE: The internal collection is [`FoldSet`] and the iterator is non-ordered.
-  pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Mode> {
+  pub fn iter(&self) -> std::collections::btree_set::Iter<'_, Mode> {
     self.values.iter()
   }
 }
@@ -130,7 +180,7 @@ impl Modes {
 impl From<Mode> for Modes {
   /// Create a collection from a mode.
   fn from(mode: Mode) -> Self {
-    let mut values = FoldSet::new();
+    let mut values = BTreeSet::new();
     values.insert(mode);
     Modes { values }
   }
@@ -139,9 +189,9 @@ impl From<Mode> for Modes {
 impl From<Vec<Mode>> for Modes {
   /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
-    let mut values = FoldSet::new();
-    for m in modes.iter() {
-      values.insert(*m);
+    let mut values = BTreeSet::new();
+    for m in modes {
+      values.insert(m);
     }
     Modes { values }
   }

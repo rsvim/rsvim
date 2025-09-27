@@ -5,14 +5,13 @@ use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::err::JsError;
+use crate::js::err::report_js_error;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::create_origin;
 use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
-use crate::report_js_error;
-use crate::state::ops::cmdline_ops;
 use crate::util::paths;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -179,7 +178,7 @@ impl EsModuleFuture {
     }
 
     // In static imports, throw error to command-line.
-    report_js_error!(state, e);
+    report_js_error(state, e);
   }
 }
 

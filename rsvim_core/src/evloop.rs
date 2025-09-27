@@ -10,8 +10,8 @@ use crate::content::TextContentsArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
-use crate::js::command::ExCommandsManager;
-use crate::js::command::ExCommandsManagerArc;
+use crate::js::command::CommandsManager;
+use crate::js::command::CommandsManagerArc;
 use crate::js::module::async_load_import;
 use crate::msg;
 use crate::msg::JsMessage;
@@ -27,7 +27,6 @@ use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -154,7 +153,7 @@ impl EventLoop {
     /* state_machine */ StateMachine,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
-    /* commands */ ExCommandsManagerArc,
+    /* commands */ CommandsManagerArc,
     /* cancellation_token */ CancellationToken,
     /* detached_tracker */ TaskTracker,
     /* blocked_tracker */ TaskTracker,
@@ -184,7 +183,7 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
     let ex_commands_manager =
-      ExCommandsManager::to_arc(ExCommandsManager::default());
+      CommandsManager::to_arc(CommandsManager::default());
 
     // State
     let state_machine = StateMachine::default();
@@ -415,7 +414,7 @@ impl EventLoop {
           msg::sync_send_to_master(
             self.master_tx.clone(),
             MasterMessage::PrintReq(msg::PrintReq {
-              payload: e.to_compact_string(),
+              payload: e.to_string(),
             }),
           );
         }
@@ -444,7 +443,7 @@ impl EventLoop {
             msg::sync_send_to_master(
               self.master_tx.clone(),
               MasterMessage::PrintReq(msg::PrintReq {
-                payload: e.to_compact_string(),
+                payload: e.to_string(),
               }),
             );
           }
