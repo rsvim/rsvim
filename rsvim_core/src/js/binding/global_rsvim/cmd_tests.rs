@@ -479,7 +479,7 @@ async fn test_remove2() -> IoResult<()> {
   let src: &str = r#"
 Rsvim.cmd.create("write", () => {});
 const prev = Rsvim.cmd.remove("w");
-Rsvim.cmd.echo(prev);
+Rsvim.cmd.echo(`${prev}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
