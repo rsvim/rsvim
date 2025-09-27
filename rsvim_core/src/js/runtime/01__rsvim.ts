@@ -333,7 +333,7 @@ class RsvimCmdImpl implements RsvimCmd {
 
     checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
 
-    if (attributes === undefined) {
+    if (attributes === undefined || attributes === null) {
       attributes = {};
     }
     checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
@@ -350,7 +350,7 @@ class RsvimCmdImpl implements RsvimCmd {
       `"Rsvim.cmd.create" attributes.nargs`,
     );
 
-    if (options === undefined) {
+    if (options === undefined || options === null) {
       options = {};
     }
     checkIsObject(options, `"Rsvim.cmd.create" options`);
