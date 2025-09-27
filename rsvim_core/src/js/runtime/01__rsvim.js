@@ -76,7 +76,7 @@ class RsvimCmdImpl {
     create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
-        if (attributes === undefined) {
+        if (attributes === undefined || attributes === null) {
             attributes = {};
         }
         checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
@@ -88,7 +88,7 @@ class RsvimCmdImpl {
         }
         checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
         checkIsOptions(attributes.nargs, ["0", "1", "?", "+", "*"], `"Rsvim.cmd.create" attributes.nargs`);
-        if (options === undefined) {
+        if (options === undefined || options === null) {
             options = {};
         }
         checkIsObject(options, `"Rsvim.cmd.create" options`);
@@ -168,7 +168,7 @@ class RsvimOptImpl {
 }
 class RsvimRtImpl {
     exit(exitCode) {
-        if (exitCode === undefined) {
+        if (exitCode === undefined || exitCode === null) {
             exitCode = 0;
         }
         checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);

@@ -50,7 +50,7 @@ function boundByIntegers(arg, bound) {
         }
     }
     function setInterval(callback, delay, ...args) {
-        if (delay === undefined) {
+        if (delay === undefined || delay === null) {
             delay = 1;
         }
         checkIsNumber(delay, `"setInterval" delay`);
@@ -72,7 +72,7 @@ function boundByIntegers(arg, bound) {
         }
     }
     function setTimeout(callback, delay, ...args) {
-        if (delay === undefined) {
+        if (delay === undefined || delay === null) {
             delay = 1;
         }
         checkIsNumber(delay, `"setTimeout" delay`);
