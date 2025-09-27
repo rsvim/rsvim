@@ -297,9 +297,10 @@ impl CursorViewport {
 ///
 /// There are several factors affecting the final display effects when a window showing a buffer:
 ///
-/// 1. Window (display) options (such as ['wrap'](crate::defaults::win),
-///    ['line-break'](crate::defaults::win)), they decide how does the line in the buffer renders
-///    in the window.
+/// 1. Window (display) options (such as
+///    ['wrap'](crate::ui::widget::window::opt::WindowOptions),
+///    ['line-break'](crate::ui::widget::window::opt::WindowOptions)), they
+///    decide how does the line in the buffer renders in the window.
 /// 2. ASCII control codes and unicode, they decide how does a character renders in the window.
 ///
 /// ## Case-1: Line-wrap and word-wrap
