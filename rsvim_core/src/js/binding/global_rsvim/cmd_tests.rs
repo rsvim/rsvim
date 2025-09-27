@@ -358,6 +358,13 @@ async fn test_list1() -> IoResult<()> {
 
   let src: &str = r#"
 Rsvim.cmd.create("write", () => {});
+Rsvim.cmd.list().forEach((cmd_def) => {
+  Rsvim.cmd.echo(`name:${cmd_def.name}`);
+  Rsvim.cmd.echo(`attributes.bang:${cmd_def.attributes.bang}`);
+  Rsvim.cmd.echo(`attributes.nargs:${cmd_def.attributes.nargs}`);
+  Rsvim.cmd.echo(`options.force:${cmd_def.options.force}`);
+  Rsvim.cmd.echo(`options.alias:${cmd_def.options.alias}`);
+});
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -376,24 +383,36 @@ Rsvim.cmd.create("write", () => {});
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 3);
+    assert_eq!(n, 5);
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Previous-1 command:undefined"));
+    assert_eq!(actual, "name:write");
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert_eq!(actual, "1");
+    assert_eq!(actual, "attributes.bang:false");
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Previous-2 command:object, 1"));
+    assert_eq!(actual, "attributes.nargs:0");
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual4:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "options.force:true");
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual5:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "optionw.alias:undefined");
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
