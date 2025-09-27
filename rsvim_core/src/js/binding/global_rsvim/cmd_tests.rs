@@ -509,7 +509,16 @@ Rsvim.cmd.echo(prev);
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.commands);
-    assert!(commands.is_empty());
+    assert_eq!(commands.len(), 1);
+    let first_command = commands.first_key_value();
+    assert!(first_command.is_some());
+    let (command_name, command_def) = first_command.unwrap();
+    assert_eq!(command_name, "write");
+    assert_eq!(command_def.name, "write");
+    assert!(!command_def.attributes.bang);
+    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert!(command_def.options.force);
+    assert_eq!(command_def.options.alias, None);
   }
 
   Ok(())
