@@ -96,21 +96,6 @@ function checkIsOptions(arg: any, options: any[], msg: string) {
   }
 }
 
-function checkObjectContains(
-  arg: any,
-  fieldCheckers: { [index: string]: (arg: any, msg: string) => void },
-  msg: string,
-) {
-  if (typeof arg !== "object") {
-    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
-  }
-  Object.entries(fieldCheckers).forEach(([field, checker]) => {
-    if (Object.hasOwn(arg, field)) {
-      checker(arg[field], msg);
-    }
-  });
-}
-
 function boundByIntegers(arg: any, bound: [number, number]) {
   if (arg < bound[0]) {
     return bound[0];
@@ -364,13 +349,10 @@ class RsvimCmdImpl implements RsvimCmd {
     if (!Object.hasOwn(options, "force")) {
       options.force = true;
     }
-    checkObjectContains(
-      options,
-      {
-        force: checkIsBoolean,
-      },
-      `"Rsvim.cmd.create" options`,
-    );
+    checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
+    if (options.alias !== undefined) {
+      checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
+    }
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_create(
