@@ -321,7 +321,7 @@ class RsvimCmdImpl implements RsvimCmd {
   ): RsvimCmd.CommandDefinition | undefined {
     checkMatchPattern(
       name,
-      /^[A-Za-z_!][A-Za-z0-9_!]+$/,
+      /^[A-Za-z_!][A-Za-z0-9_!]*$/,
       `"Rsvim.cmd.create" name`,
     );
 
