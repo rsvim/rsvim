@@ -412,7 +412,7 @@ Rsvim.cmd.list().forEach((cmd_def) => {
     info!("actual5:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert_eq!(actual, "optionw.alias:undefined");
+    assert_eq!(actual, "options.alias:undefined");
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
