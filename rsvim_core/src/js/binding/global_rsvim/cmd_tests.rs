@@ -310,7 +310,7 @@ Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 2);
+    assert_eq!(n, 3);
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
@@ -319,6 +319,12 @@ Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual2:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "1");
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Previous-2 command:object, 1"));
