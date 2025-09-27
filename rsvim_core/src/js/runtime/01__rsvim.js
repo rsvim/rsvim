@@ -84,12 +84,21 @@ class RsvimCmdImpl {
         if (attributes === undefined) {
             attributes = {};
         }
+        if (!Object.hasOwn(attributes, "bang")) {
+            attributes.bang = false;
+        }
+        if (!Object.hasOwn(attributes, "nargs")) {
+            attributes.nargs = "0";
+        }
         checkObjectContains(attributes, {
             bang: checkIsBoolean,
             nargs: (arg, msg) => checkIsOptions(arg, ["0", "1", "?", "+", "*"], msg),
         }, `"Rsvim.cmd.create" attributes`);
         if (options === undefined) {
             options = {};
+        }
+        if (!Object.hasOwn(options, "force")) {
+            options.force = true;
         }
         checkObjectContains(options, {
             force: checkIsBoolean,

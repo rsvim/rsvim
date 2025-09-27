@@ -22,6 +22,7 @@ export declare namespace RsvimCmd {
     };
     type CommandOptions = {
         force?: boolean;
+        alias?: string;
     };
     type CommandCallback = (ctx: any) => void;
     type CommandDefinition = {
