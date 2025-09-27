@@ -9,12 +9,23 @@ use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct CommandDefinition {
   pub name: CompactString,
   pub callback: CommandCallback,
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
+}
+
+impl Debug for CommandDefinition {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("CommandDefinition")
+      .field("name", &self.name)
+      .field("callback", &"Rc<v8::Global<v8::Function>>")
+      .field("attributes", &self.attributes)
+      .field("options", &self.options)
+      .finish()
+  }
 }
 
 impl CommandDefinition {
