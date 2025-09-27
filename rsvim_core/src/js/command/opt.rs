@@ -33,7 +33,7 @@ impl CommandOptions {
     match value.get(scope, force_name.into()) {
       Some(force_value) => {
         let force = force_value.to_boolean(scope).boolean_value(scope);
-        trace!("|from_v8_object| nargs:{:?}", nargs);
+        trace!("|from_v8_object| force:{:?}", force);
         builder.force(force);
       }
       None => { /* do nothing */ }
