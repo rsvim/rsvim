@@ -479,7 +479,7 @@ async fn test_create_failed5() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
 
   let src: &str = r#"
-const prev = Rsvim.cmd.create("abc", () => {}, {}, {});
+const prev = Rsvim.cmd.create("abc", () => {}, {bang:1}, {});
 Rsvim.cmd.echo(`Previous command:${prev}`);
     "#;
 
@@ -505,7 +505,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains(
-      r####""Rsvim.cmd.create" callback must be a function, but found"####
+      r####""Rsvim.cmd.create" attributes.bang must be a boolean, but found"####
     ));
 
     let state_rc = event_loop.js_runtime.get_state();
