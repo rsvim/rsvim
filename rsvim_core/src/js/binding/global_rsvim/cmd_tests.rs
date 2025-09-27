@@ -291,7 +291,7 @@ const prev1 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(1));
 Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
 
 const prev2 = Rsvim.cmd.create("write", () => Rsvim.cmd.echo(2));
-Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2()}`);
+Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -321,7 +321,7 @@ Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2()}`);
     info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Previous-2 command:function, 1"));
+    assert!(actual.contains("Previous-2 command:object, 1"));
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
