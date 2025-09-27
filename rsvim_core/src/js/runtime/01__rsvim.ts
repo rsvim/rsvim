@@ -345,6 +345,13 @@ class RsvimCmdImpl implements RsvimCmd {
     if (attributes === undefined) {
       attributes = {};
     }
+    if (!Object.hasOwn(attributes, "bang")) {
+      attributes.bang = false;
+    }
+    if (!Object.hasOwn(attributes, "nargs")) {
+      attributes.nargs = "0";
+    }
+
     checkObjectContains(
       attributes,
       {
