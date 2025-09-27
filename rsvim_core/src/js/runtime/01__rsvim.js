@@ -69,7 +69,7 @@ class RsvimBufImpl {
 }
 class RsvimCmdImpl {
     create(name, callback, attributes, options) {
-        checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]+$/, `"Rsvim.cmd.create" name`);
+        checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
         if (attributes === undefined) {
             attributes = {};
