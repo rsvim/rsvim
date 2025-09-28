@@ -70,7 +70,7 @@ pub fn v8_version() -> &'static str {
 /// An abstract interface for javascript `Promise` and `async`. Since
 /// everything in V8 needs the `&mut v8::PinScope` to operate with, we cannot
 /// simply put the async task into tokio `spawn` API.
-pub trait JsFuture {
+pub trait JsFuture<'s, 'b> {
   fn run(&mut self, scope: &mut v8::PinScope<'s, 'b>);
 }
 
@@ -148,7 +148,7 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   );
 }
 
-fn init_builtin_modules(scope: &mut v8::PinScope<'_, '_>) {
+fn init_builtin_modules(scope: &mut v8::PinScope) {
   static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
     (
       "00__web.js",
@@ -170,7 +170,7 @@ fn init_builtin_modules(scope: &mut v8::PinScope<'_, '_>) {
     let filename = module.0;
     let source = module.1;
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    let tc_scope = std::pin::pin!(v8::TryCatch::new(scope));
 
     let module = fetch_module(tc_scope, filename, Some(source)).unwrap();
     let _ = module
@@ -358,7 +358,7 @@ pub mod boost {
   }
 
   /// The state of js runtime.
-  pub struct JsRuntimeState {
+  pub struct JsRuntimeState<'s, 'b> {
     /// A sand-boxed execution context with its own set of built-in objects and functions.
     pub context: v8::Global<v8::Context>,
     /// Holds information about resolved ES modules.
@@ -368,7 +368,7 @@ pub mod boost {
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
-    pub pending_futures: Vec<Box<dyn JsFuture>>,
+    pub pending_futures: Vec<Box<dyn JsFuture<'s, 'b>>>,
     /// Indicates the start time of the process.
     pub startup_moment: Instant,
     /// Specifies the timestamp which the current process began in Unix time.
@@ -393,7 +393,16 @@ pub mod boost {
     // Data Access for RSVIM }
   }
 
-  rc_refcell_ptr!(JsRuntimeState);
+  pub type JsRuntimeStateRc<'s, 'b> =
+    std::rc::Rc<std::cell::RefCell<JsRuntimeState<'s, 'b>>>;
+  pub type JsRuntimeStateWk<'s, 'b> =
+    std::rc::Weak<std::cell::RefCell<JsRuntimeState<'s, 'b>>>;
+
+  impl<'s, 'b> JsRuntimeState<'s, 'b> {
+    pub fn to_rc(value: JsRuntimeState<'s, 'b>) -> JsRuntimeStateRc<'s, 'b> {
+      std::rc::Rc::new(std::cell::RefCell::new(value))
+    }
+  }
 
   /// Javascript runtime.
   ///
@@ -404,22 +413,22 @@ pub mod boost {
   /// - Handle Scope
   ///
   /// For more details, please see: <https://v8.dev/docs/embed>.
-  pub struct JsRuntime {
+  pub struct JsRuntime<'s, 'b> {
     /// V8 isolate.
     pub isolate: v8::OwnedIsolate,
 
     /// The state of the runtime.
     #[allow(unused)]
-    pub state: JsRuntimeStateRc,
+    pub state: JsRuntimeStateRc<'s, 'b>,
   }
 
-  impl std::fmt::Debug for JsRuntime {
+  impl<'s, 'b> std::fmt::Debug for JsRuntime<'s, 'b> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
       write!(f, "JsRuntime")
     }
   }
 
-  impl JsRuntime {
+  impl<'s, 'b> JsRuntime<'s, 'b> {
     /// Creates a new JsRuntime with snapshot.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -853,7 +862,7 @@ pub mod boost {
     }
   }
 
-  impl JsRuntime {
+  impl<'s, 'b> JsRuntime<'s, 'b> {
     /// Returns if unhandled promise rejections where caught.
     pub fn has_promise_rejections(&mut self) -> bool {
       self.get_state().borrow().exceptions.has_promise_rejection()
@@ -952,8 +961,8 @@ pub mod boost {
   }
 }
 
-pub fn execute_module(
-  scope: &mut v8::HandleScope,
+pub fn execute_module<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   filename: &str,
   source: Option<&str>,
 ) {
