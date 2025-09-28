@@ -954,10 +954,7 @@ pub fn execute_module(
 ) {
   // trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
-  let report_eval_error = |state_rc: JsRuntimeStateRc, e: AnyErr| {
-    let state = state_rc.borrow_mut();
-    report_js_error(&state, e);
-  };
+  let state_rc = JsRuntime::state(scope);
 
   // The following code allows the runtime to execute code with no valid
   // location passed as parameter as an ES module.
@@ -970,7 +967,8 @@ pub fn execute_module(
       Err(e) => {
         // Returns the error directly.
         // trace!("Failed to resolve module path, filename:{filename:?}");
-        report_eval_error(JsRuntime::state(scope), e);
+        let state = state_rc.borrow_mut();
+        report_js_error(&state, e);
         return;
       }
     }
@@ -988,7 +986,8 @@ pub fn execute_module(
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      report_eval_error(JsRuntime::state(tc_scope), exception.into());
+      let state = state_rc.borrow_mut();
+      report_js_error(&state, exception.into());
       return;
     }
   };
@@ -1003,7 +1002,8 @@ pub fn execute_module(
     assert!(tc_scope.has_caught());
     let exception = tc_scope.exception().unwrap();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    report_eval_error(JsRuntime::state(tc_scope), exception.into());
+    let state = state_rc.borrow_mut();
+    report_js_error(&state, exception.into());
     return;
   }
 
