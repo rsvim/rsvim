@@ -1004,7 +1004,7 @@ pub fn execute_module(
       // trace!(
       //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
       // );
-      report_eval_js_thrown(&mut tc_scope);
+      report_eval_js_thrown(tc_scope);
       return;
     }
   };
@@ -1016,14 +1016,14 @@ pub fn execute_module(
     // trace!(
     //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    report_eval_js_thrown(&mut tc_scope);
+    report_eval_js_thrown(tc_scope);
     return;
   }
 
   let _ = module.evaluate(tc_scope);
-  trace!("|execute_module| ModuleMap evaluated {:?}", path);
   trace!(
-    "|execute_module| Module {path:?} evaluated module.status: {:?}",
+    "|execute_module| ModuleMap evaluated {:?}, status {:?}",
+    path,
     module.get_status()
   );
 
@@ -1031,7 +1031,7 @@ pub fn execute_module(
     let exception = module.get_exception();
     let exception = v8::Global::new(tc_scope, exception);
 
-    let state_rc = JsRuntime::state(scope);
+    let state_rc = JsRuntime::state(tc_scope);
     let mut state = state_rc.borrow_mut();
 
     state.exceptions.capture_exception(exception.clone());
