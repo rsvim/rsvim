@@ -45,7 +45,10 @@ async fn test_js_echo1() -> IoResult<()> {
     assert_eq!(n, 1);
 
     let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
     assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "1");
   }
 
   Ok(())
@@ -61,10 +64,7 @@ async fn test_js_throw1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
 
   let src: &str = r#"
-    Rsvim.cmd.echo("");
-    Rsvim.cmd.echo("Test echo");
-    Rsvim.cmd.echo(123);
-    Rsvim.cmd.echo(true);
+  throw new Error(1);
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -72,12 +72,6 @@ async fn test_js_throw1() -> IoResult<()> {
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-  // Before running
-  {
-    let contents = lock!(event_loop.contents);
-    assert_eq!(contents.command_line_message().rope().to_string(), "");
-  }
 
   event_loop.initialize()?;
   event_loop
@@ -87,15 +81,14 @@ async fn test_js_throw1() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message().rope().to_string();
-    let actual = actual.trim();
-    assert!(
-      actual.is_empty()
-        || actual == "Test echo"
-        || actual == "123"
-        || actual == "true"
-    );
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert!(actual.contains("Uncaught Error: 1"));
   }
 
   Ok(())
