@@ -21,6 +21,8 @@ pub mod pending;
 pub mod transpiler;
 
 #[cfg(test)]
+mod command_tests;
+#[cfg(test)]
 mod module_tests;
 
 use crate::buf::BuffersManagerArc;
@@ -174,6 +176,11 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
       .instantiate_module(tc_scope, module_resolve_cb)
       .unwrap();
     let _ = module.evaluate(tc_scope);
+    trace!(
+      "|init_builtin_modules| ModuleMap evaluated {:?}, status {:?}",
+      filename,
+      module.get_status()
+    );
 
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
@@ -574,11 +581,7 @@ pub mod boost {
     }
 
     /// Executes javascript source code as ES module, i.e. ECMA standard.
-    pub fn execute_module(
-      &mut self,
-      filename: &str,
-      source: Option<&str>,
-    ) -> Result<(), AnyErr> {
+    pub fn execute_module(&mut self, filename: &str, source: Option<&str>) {
       // Get a reference to v8's scope.
       let scope = &mut self.handle_scope();
 
@@ -593,7 +596,7 @@ pub mod boost {
       self.run_pending_futures();
 
       trace!(
-        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}({:?}), has_pending_import_loaders:{:?}({:?}), has_unresolved_imports:{:?}({:?})",
+        "|JsRuntime::tick_event_loop| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}({:?}), has_pending_import_loaders:{:?}({:?}), has_unresolved_imports:{:?}({:?})",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
@@ -798,8 +801,9 @@ pub mod boost {
 
         let _ = module.evaluate(tc_scope);
         trace!(
-          "|JsRuntime::fast_forward_imports| ModuleMap evaluated {:?}",
-          path
+          "|JsRuntime::fast_forward_imports| ModuleMap evaluated {:?}, status: {:?}",
+          path,
+          module.get_status()
         );
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
@@ -808,9 +812,10 @@ pub mod boost {
         // v8 hook will also trigger, resulting in the same exception being registered
         // as an unhandled promise rejection. Therefore, we need to manually remove it.
         if module.get_status() == v8::ModuleStatus::Errored && is_root_module {
-          let mut state = state_rc.borrow_mut();
           let exception = module.get_exception();
           let exception = v8::Global::new(tc_scope, exception);
+
+          let mut state = state_rc.borrow_mut();
 
           state.exceptions.capture_exception(exception.clone());
           state.exceptions.remove_promise_rejection_entry(&exception);
@@ -946,8 +951,10 @@ pub fn execute_module(
   scope: &mut v8::HandleScope,
   filename: &str,
   source: Option<&str>,
-) -> AnyResult<()> {
+) {
   // trace!("Execute module, filename:{filename:?}, source:{source:?}");
+
+  let state_rc = JsRuntime::state(scope);
 
   // The following code allows the runtime to execute code with no valid
   // location passed as parameter as an ES module.
@@ -960,7 +967,9 @@ pub fn execute_module(
       Err(e) => {
         // Returns the error directly.
         // trace!("Failed to resolve module path, filename:{filename:?}");
-        return Err(e);
+        let state = state_rc.borrow_mut();
+        report_js_error(&state, e);
+        return;
       }
     }
   };
@@ -971,13 +980,15 @@ pub fn execute_module(
   let module = match fetch_module_tree(tc_scope, filename, source) {
     Some(module) => module,
     None => {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
       // trace!(
       //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
       // );
-      anyhow::bail!(exception);
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      let state = state_rc.borrow_mut();
+      report_js_error(&state, exception.into());
+      return;
     }
   };
 
@@ -985,34 +996,45 @@ pub fn execute_module(
     .instantiate_module(tc_scope, module_resolve_cb)
     .is_none()
   {
-    assert!(tc_scope.has_caught());
-    let exception = tc_scope.exception().unwrap();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
     // trace!(
     //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    anyhow::bail!(exception);
+    assert!(tc_scope.has_caught());
+    let exception = tc_scope.exception().unwrap();
+    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    let state = state_rc.borrow_mut();
+    report_js_error(&state, exception.into());
+    return;
   }
 
-  let result = module.evaluate(tc_scope);
-  trace!("|execute_module| ModuleMap evaluated {:?}", path);
+  let _ = module.evaluate(tc_scope);
   trace!(
-    "Module {path:?} evaluate result: {:?}",
-    result
-      .map(|r| r.to_rust_string_lossy(tc_scope))
-      .unwrap_or("None".to_string()),
+    "|execute_module| ModuleMap evaluated {:?}, status {:?}",
+    path,
+    module.get_status()
   );
 
   if module.get_status() == v8::ModuleStatus::Errored {
     let exception = module.get_exception();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    let exception = v8::Global::new(tc_scope, exception);
+
+    let state_rc = JsRuntime::state(tc_scope);
+    let mut state = state_rc.borrow_mut();
+
+    state.exceptions.capture_exception(exception.clone());
+    state.exceptions.remove_promise_rejection_entry(&exception);
+
+    drop(state);
+
+    if let Some(error) = check_exceptions(tc_scope) {
+      let state = state_rc.borrow();
+      report_js_error(&state, error.into());
+    }
+
     // trace!(
     //   "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    anyhow::bail!(exception);
   }
-
-  Ok(())
 }
 
 /// Runs callbacks stored in the next-tick queue.
