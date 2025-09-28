@@ -7,6 +7,7 @@ use crate::state::ops::Operation;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use compact_str::ToCompactString;
+use ringbuf::traits::*;
 use std::time::Duration;
 
 #[tokio::test]
@@ -31,29 +32,20 @@ async fn test_js_echo1() -> IoResult<()> {
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
-  // Before running
-  {
-    let contents = lock!(event_loop.contents);
-    assert_eq!(contents.command_line_message().rope().to_string(), "");
-  }
-
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_ops))
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message().rope().to_string();
-    let actual = actual.trim();
-    assert!(
-      actual.is_empty()
-        || actual == "Test echo"
-        || actual == "123"
-        || actual == "true"
-    );
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    assert!(actual.is_some());
   }
 
   Ok(())
