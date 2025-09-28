@@ -21,7 +21,7 @@ use crate::prelude::*;
 use std::ffi::c_void;
 
 // /// Function pointer for the bindings initializers.
-// type BindingInitFn = fn(&mut v8::PinScope<'s, 'v>) -> v8::Global<v8::Object>;
+// type BindingInitFn = fn(&mut v8::PinScope<'s, 'b>) -> v8::Global<v8::Object>;
 //
 // lazy_static! {
 //   pub static ref BINDINGS: FoldMap<&'static str, BindingInitFn> = {
@@ -42,8 +42,8 @@ use std::ffi::c_void;
 // }
 
 /// Populates a new JavaScript context with low-level Rust bindings.
-pub fn create_new_context<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v, ()>,
+pub fn create_new_context<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b, ()>,
 ) -> v8::Local<'s, v8::Context> {
   // Here we need an EscapableHandleScope so V8 doesn't drop the
   // newly created HandleScope on return. (https://v8.dev/docs/embed#handles-and-garbage-collection)
@@ -198,8 +198,8 @@ pub fn create_new_context<'s, 'v>(
 }
 
 /// Adds a property with the given name and value, into the given object.
-pub fn set_property_to<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn set_property_to<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   target: v8::Local<v8::Object>,
   name: &'static str,
   value: v8::Local<v8::Value>,
@@ -209,8 +209,8 @@ pub fn set_property_to<'s, 'v>(
 }
 
 /// Adds a read-only property with the given name and value, into the given object.
-pub fn set_constant_to<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn set_constant_to<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   target: v8::Local<v8::Object>,
   name: &str,
   value: v8::Local<v8::Value>,
@@ -225,8 +225,8 @@ pub fn set_constant_to<'s, 'v>(
 }
 
 /// Adds a `Function` object which calls the given Rust function
-pub fn set_function_to<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn set_function_to<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   target: v8::Local<v8::Object>,
   name: &'static str,
   callback: impl v8::MapFnTo<v8::FunctionCallback>,
@@ -239,8 +239,8 @@ pub fn set_function_to<'s, 'v>(
 }
 
 /// Creates an object with a given name under a `target` object.
-pub fn create_object_under<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn create_object_under<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   target: v8::Local<v8::Object>,
   name: &'static str,
 ) -> v8::Local<'s, v8::Object> {
@@ -253,8 +253,8 @@ pub fn create_object_under<'s, 'v>(
 }
 
 /// Stores a Rust type inside a v8 object.
-pub fn set_internal_ref<'s, 'v, T>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn set_internal_ref<'s, 'b, T>(
+  scope: &mut v8::PinScope<'s, 'b>,
   target: v8::Local<v8::Object>,
   index: usize,
   data: T,
@@ -267,8 +267,8 @@ pub fn set_internal_ref<'s, 'v, T>(
 }
 
 /// Gets a previously stored Rust type from a v8 object.
-pub fn get_internal_ref<'s, 'v, T>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn get_internal_ref<'s, 'b, T>(
+  scope: &mut v8::PinScope<'s, 'b>,
   source: v8::Local<v8::Object>,
   index: usize,
 ) -> &'s mut T {
@@ -280,8 +280,8 @@ pub fn get_internal_ref<'s, 'v, T>(
 }
 
 /// Sets error code to exception if possible.
-pub fn set_exception_code<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+pub fn set_exception_code<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   exception: v8::Local<v8::Value>,
   error: &AnyErr,
 ) {

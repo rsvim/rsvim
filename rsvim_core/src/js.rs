@@ -71,7 +71,7 @@ pub fn v8_version() -> &'static str {
 /// everything in V8 needs the `&mut v8::PinScope` to operate with, we cannot
 /// simply put the async task into tokio `spawn` API.
 pub trait JsFuture {
-  fn run(&mut self, scope: &mut v8::HandleScope);
+  fn run(&mut self, scope: &mut v8::PinScope<'s, 'b>);
 }
 
 pub type JsTimerId = i32;
