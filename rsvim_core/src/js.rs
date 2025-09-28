@@ -969,6 +969,19 @@ pub fn execute_module(
 ) -> AnyResult<()> {
   // trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
+  let report_eval_error = |e: AnyErr| {
+    let state_rc = JsRuntime::state(scope);
+    let state = state_rc.borrow_mut();
+    report_js_error(&state, e);
+  };
+  let report_js_exception = |tc_scope: &mut v8::TryCatch<v8::HandleScope>| {
+    assert!(tc_scope.has_caught());
+    let exception = tc_scope.exception().unwrap();
+    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    report_eval_error(exception.into());
+    exception
+  };
+
   // The following code allows the runtime to execute code with no valid
   // location passed as parameter as an ES module.
   let path = if source.is_some() {
@@ -980,7 +993,8 @@ pub fn execute_module(
       Err(e) => {
         // Returns the error directly.
         // trace!("Failed to resolve module path, filename:{filename:?}");
-        return Err(e);
+        report_eval_error(e.into());
+        anyhow::bail!(e);
       }
     }
   };
@@ -991,12 +1005,10 @@ pub fn execute_module(
   let module = match fetch_module_tree(tc_scope, filename, source) {
     Some(module) => module,
     None => {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
       // trace!(
       //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
       // );
+      let exception = report_js_exception(&mut tc_scope);
       anyhow::bail!(exception);
     }
   };
@@ -1006,11 +1018,14 @@ pub fn execute_module(
     .is_none()
   {
     assert!(tc_scope.has_caught());
+    let state_rc = JsRuntime::state(scope);
+    let state = state_rc.borrow_mut();
     let exception = tc_scope.exception().unwrap();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
     // trace!(
     //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
+    report_js_error(&state, exception.into());
     anyhow::bail!(exception);
   }
 
@@ -1027,12 +1042,27 @@ pub fn execute_module(
   );
 
   if module.get_status() == v8::ModuleStatus::Errored {
+    let js_error = JsError::from_v8_exception(scope, rejection, None);
+
+    let state_rc = JsRuntime::state(scope);
+    let mut state = state_rc.borrow_mut();
     let exception = module.get_exception();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    let exception = v8::Global::new(tc_scope, exception);
+
+    state.exceptions.capture_exception(exception.clone());
+    state.exceptions.remove_promise_rejection_entry(&exception);
+
+    drop(state);
+
+    if let Some(error) = check_exceptions(tc_scope) {
+      let state = state_rc.borrow();
+      report_js_error(&state, error.into());
+    }
+
     // trace!(
     //   "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    anyhow::bail!(exception);
+    anyhow::bail!(js_error);
   }
 
   Ok(())
