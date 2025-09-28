@@ -177,7 +177,7 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
       .unwrap();
     let result = module.evaluate(tc_scope);
     trace!(
-      "|init_builtin_modules| Module {path:?} evaluate result: {:?}, is_promise: {:?}, module.status: {:?}, tc_scope.has_caught: {:?}",
+      "|init_builtin_modules| Module {filename:?} evaluate result: {:?}, is_promise: {:?}, module.status: {:?}, tc_scope.has_caught: {:?}",
       result
         .map(|r| r.to_rust_string_lossy(tc_scope))
         .unwrap_or("None".to_string()),
