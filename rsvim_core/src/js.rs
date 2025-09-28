@@ -50,6 +50,7 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
+use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
@@ -270,7 +271,7 @@ pub mod build {
       init_v8_isolate(&mut isolate);
 
       let global_context = {
-        v8::scope!(let handle_scope, isolate);
+        v8::scope!(handle_scope, isolate);
         let context = v8::Context::new(handle_scope, Default::default());
         v8::Global::new(handle_scope, context)
       };
@@ -457,11 +458,11 @@ pub mod boost {
       // });
 
       let context: v8::Global<v8::Context> = {
-        let scope = &mut v8::HandleScope::new(&mut *isolate);
-        let context = binding::create_new_context(scope);
+        v8::scope!(handle_scope, &mut *isolate);
+        let context = binding::create_new_context(handle_scope);
 
         // let module_handles = get_context_data(scope, context);
-        v8::Global::new(scope, context)
+        v8::Global::new(handle_scope, context)
       };
 
       // Store state inside the v8 isolate slot.
@@ -929,9 +930,10 @@ pub mod boost {
 
     /// Returns a v8 handle scope for the runtime.
     /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
-    pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
+    pub fn handle_scope(&mut self) -> v8::PinScope<'_, '_> {
       let context = self.context();
-      v8::HandleScope::with_context(&mut self.isolate, context)
+      v8::scope_with_context!(context_scope, &mut self.isolate, context);
+      context_scope.deref()
     }
 
     /// Returns a global context created for the runtime.
