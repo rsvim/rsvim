@@ -8,9 +8,7 @@ pub mod opt;
 mod attr_tests;
 
 use crate::js::JsFuture;
-use crate::js::JsRuntime;
 use crate::js::JsTaskId;
-use crate::js::binding;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
