@@ -999,10 +999,11 @@ pub fn execute_module(
   let result = module.evaluate(tc_scope);
   trace!("|execute_module| ModuleMap evaluated {:?}", path);
   trace!(
-    "Module {path:?} evaluate result: {:?}",
+    "Module {path:?} evaluate result: {:?}, is_promise: {:?}",
     result
       .map(|r| r.to_rust_string_lossy(tc_scope))
       .unwrap_or("None".to_string()),
+    result.map(|r| r.is_promise()).unwrap_or(false)
   );
 
   if module.get_status() == v8::ModuleStatus::Errored {
