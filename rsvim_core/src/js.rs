@@ -317,9 +317,10 @@ pub mod build {
       Self::state(self.isolate.as_ref().unwrap())
     }
 
-    pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
+    pub fn handle_scope(&mut self) -> v8::PinScope<'_, '_> {
       let context = self.context();
-      v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
+      v8::scope_with_context!(scope, self.isolate.as_mut().unwrap(), context);
+      scope
     }
   }
 }
