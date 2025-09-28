@@ -43,7 +43,7 @@ use std::ffi::c_void;
 
 /// Populates a new JavaScript context with low-level Rust bindings.
 pub fn create_new_context<'s, 'v>(
-  scope: &mut v8::PinScope<'s, 'v>,
+  scope: &mut v8::PinScope<'s, 'v, ()>,
 ) -> v8::Local<'s, v8::Context> {
   // Here we need an EscapableHandleScope so V8 doesn't drop the
   // newly created HandleScope on return. (https://v8.dev/docs/embed#handles-and-garbage-collection)
