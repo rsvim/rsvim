@@ -404,21 +404,9 @@ impl EventLoop {
   /// Initialize user config file.
   fn _init_config(&mut self) -> IoResult<()> {
     if let Some(config_entry) = PATH_CONFIG.config_entry() {
-      match self
+      self
         .js_runtime
-        .execute_module(&config_entry.to_string_lossy(), None)
-      {
-        Ok(_) => { /* do nothing */ }
-        Err(e) => {
-          // Send error message to command-line
-          msg::sync_send_to_master(
-            self.master_tx.clone(),
-            MasterMessage::PrintReq(msg::PrintReq {
-              payload: e.to_string(),
-            }),
-          );
-        }
-      }
+        .execute_module(&config_entry.to_string_lossy(), None);
     }
     Ok(())
   }
