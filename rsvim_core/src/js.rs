@@ -240,8 +240,8 @@ pub mod build {
 
       let (mut isolate, global_context) = Self::create_isolate();
 
-      let mut context_scope =
-        v8::HandleScope::with_context(&mut isolate, global_context.clone());
+      v8::scope_with_context!(context_scope, &mut isolate, global_context);
+
       let scope = &mut context_scope;
       // let _context = v8::Local::new(scope, global_context.clone());
 
@@ -269,7 +269,8 @@ pub mod build {
       init_v8_isolate(&mut isolate);
 
       let global_context = {
-        let scope = &mut v8::HandleScope::new(&mut isolate);
+        let scope = std::pin::pin!(v8::HandleScope::new(&mut isolate));
+        let scope = &mut scope.init();
         let context = v8::Context::new(scope, Default::default());
         v8::Global::new(scope, context)
       };
