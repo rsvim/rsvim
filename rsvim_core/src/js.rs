@@ -585,11 +585,7 @@ pub mod boost {
     }
 
     /// Executes javascript source code as ES module, i.e. ECMA standard.
-    pub fn execute_module(
-      &mut self,
-      filename: &str,
-      source: Option<&str>,
-    ) -> Result<(), AnyErr> {
+    pub fn execute_module(&mut self, filename: &str, source: Option<&str>) {
       // Get a reference to v8's scope.
       let scope = &mut self.handle_scope();
 
@@ -828,9 +824,10 @@ pub mod boost {
         // v8 hook will also trigger, resulting in the same exception being registered
         // as an unhandled promise rejection. Therefore, we need to manually remove it.
         if module.get_status() == v8::ModuleStatus::Errored && is_root_module {
-          let mut state = state_rc.borrow_mut();
           let exception = module.get_exception();
           let exception = v8::Global::new(tc_scope, exception);
+
+          let mut state = state_rc.borrow_mut();
 
           state.exceptions.capture_exception(exception.clone());
           state.exceptions.remove_promise_rejection_entry(&exception);
@@ -966,7 +963,7 @@ pub fn execute_module(
   scope: &mut v8::HandleScope,
   filename: &str,
   source: Option<&str>,
-) -> AnyResult<()> {
+) {
   // trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
   let report_eval_error = |e: AnyErr| {
@@ -974,12 +971,11 @@ pub fn execute_module(
     let state = state_rc.borrow_mut();
     report_js_error(&state, e);
   };
-  let report_js_exception = |tc_scope: &mut v8::TryCatch<v8::HandleScope>| {
+  let report_eval_js_thrown = |tc_scope: &mut v8::TryCatch<v8::HandleScope>| {
     assert!(tc_scope.has_caught());
     let exception = tc_scope.exception().unwrap();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    report_eval_error(exception.into());
-    exception
+    report_eval_error(exception.clone().into());
   };
 
   // The following code allows the runtime to execute code with no valid
@@ -994,7 +990,7 @@ pub fn execute_module(
         // Returns the error directly.
         // trace!("Failed to resolve module path, filename:{filename:?}");
         report_eval_error(e.into());
-        anyhow::bail!(e);
+        return;
       }
     }
   };
@@ -1008,8 +1004,8 @@ pub fn execute_module(
       // trace!(
       //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
       // );
-      let exception = report_js_exception(&mut tc_scope);
-      anyhow::bail!(exception);
+      report_eval_js_thrown(&mut tc_scope);
+      return;
     }
   };
 
@@ -1017,16 +1013,11 @@ pub fn execute_module(
     .instantiate_module(tc_scope, module_resolve_cb)
     .is_none()
   {
-    assert!(tc_scope.has_caught());
-    let state_rc = JsRuntime::state(scope);
-    let state = state_rc.borrow_mut();
-    let exception = tc_scope.exception().unwrap();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
     // trace!(
     //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    report_js_error(&state, exception.into());
-    anyhow::bail!(exception);
+    report_eval_js_thrown(&mut tc_scope);
+    return;
   }
 
   let result = module.evaluate(tc_scope);
@@ -1042,12 +1033,11 @@ pub fn execute_module(
   );
 
   if module.get_status() == v8::ModuleStatus::Errored {
-    let js_error = JsError::from_v8_exception(scope, rejection, None);
+    let exception = module.get_exception();
+    let exception = v8::Global::new(tc_scope, exception);
 
     let state_rc = JsRuntime::state(scope);
     let mut state = state_rc.borrow_mut();
-    let exception = module.get_exception();
-    let exception = v8::Global::new(tc_scope, exception);
 
     state.exceptions.capture_exception(exception.clone());
     state.exceptions.remove_promise_rejection_entry(&exception);
@@ -1062,7 +1052,7 @@ pub fn execute_module(
     // trace!(
     //   "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    anyhow::bail!(js_error);
+    return;
   }
 
   Ok(())
