@@ -43,6 +43,8 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable rust-src clippy rustfmt
+          rustup toolchain install nightly
+          rustup component add --toolchain nightly rustfmt
       - name: Rustfmt
         run: cargo +nightly fmt --check
       - name: Clippy
