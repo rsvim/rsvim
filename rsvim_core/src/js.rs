@@ -200,6 +200,8 @@ fn init_builtin_modules(scope: &mut v8::PinScope<'_, '_>) {
 /// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
 pub mod build {
+  use std::ops::DerefMut;
+
   use super::*;
 
   /// The state for js runtime of snapshot.
@@ -243,7 +245,7 @@ pub mod build {
 
       v8::scope_with_context!(context_scope, &mut isolate, &global_context);
 
-      let scope = context_scope;
+      let scope = context_scope.deref_mut();
       // let _context = v8::Local::new(scope, global_context.clone());
 
       // Load, compile and evaluate all built-in modules.
