@@ -175,15 +175,11 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
     let _ = module
       .instantiate_module(tc_scope, module_resolve_cb)
       .unwrap();
-    let result = module.evaluate(tc_scope);
+    let _ = module.evaluate(tc_scope);
     trace!(
-      "|init_builtin_modules| Module {filename:?} evaluate result: {:?}, is_promise: {:?}, module.status: {:?}, tc_scope.has_caught: {:?}",
-      result
-        .map(|r| r.to_rust_string_lossy(tc_scope))
-        .unwrap_or("None".to_string()),
-      result.map(|r| r.is_promise()).unwrap_or(false),
-      module.get_status(),
-      tc_scope.has_caught()
+      "|init_builtin_modules| ModuleMap evaluated {:?}, status {:?}",
+      path,
+      module.get_status()
     );
 
     if module.get_status() == v8::ModuleStatus::Errored {
@@ -803,19 +799,11 @@ pub mod boost {
           continue;
         }
 
-        let result = module.evaluate(tc_scope);
+        let _ = module.evaluate(tc_scope);
         trace!(
-          "|JsRuntime::fast_forward_imports| ModuleMap evaluated {:?}",
-          path
-        );
-        trace!(
-          "|JsRuntime::fast_forward_imports| Module {path:?} evaluate result: {:?}, is_promise: {:?}, module.status: {:?}, tc_scope.has_caught: {:?}",
-          result
-            .map(|r| r.to_rust_string_lossy(tc_scope))
-            .unwrap_or("None".to_string()),
-          result.map(|r| r.is_promise()).unwrap_or(false),
-          module.get_status(),
-          tc_scope.has_caught()
+          "|JsRuntime::fast_forward_imports| ModuleMap evaluated {:?}, status: {:?}",
+          path,
+          module.get_status()
         );
 
         let is_root_module = !graph.root_rc().borrow().is_dynamic_import();
