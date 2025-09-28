@@ -1020,16 +1020,11 @@ pub fn execute_module(
     return;
   }
 
-  let result = module.evaluate(tc_scope);
+  let _ = module.evaluate(tc_scope);
   trace!("|execute_module| ModuleMap evaluated {:?}", path);
   trace!(
-    "|execute_module| Module {path:?} evaluate result: {:?}, is_promise: {:?}, module.status: {:?}, tc_scope.has_caught: {:?}",
-    result
-      .map(|r| r.to_rust_string_lossy(tc_scope))
-      .unwrap_or("None".to_string()),
-    result.map(|r| r.is_promise()).unwrap_or(false),
-    module.get_status(),
-    tc_scope.has_caught()
+    "|execute_module| Module {path:?} evaluated module.status: {:?}",
+    module.get_status()
   );
 
   if module.get_status() == v8::ModuleStatus::Errored {
@@ -1052,10 +1047,7 @@ pub fn execute_module(
     // trace!(
     //   "Failed to evaluate module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    return;
   }
-
-  Ok(())
 }
 
 /// Runs callbacks stored in the next-tick queue.
