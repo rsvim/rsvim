@@ -67,7 +67,7 @@ pub fn v8_version() -> &'static str {
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
 
 /// An abstract interface for javascript `Promise` and `async`.
-/// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
+/// Since everything in V8 needs the `&mut v8::HandleScope` (or `&mut v8::PinScope` since v140.2.0) to operate with, we cannot simply put
 /// the async task into tokio `spawn` API.
 pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
