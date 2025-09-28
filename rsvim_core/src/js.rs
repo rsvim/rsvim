@@ -954,16 +954,9 @@ pub fn execute_module(
 ) {
   // trace!("Execute module, filename:{filename:?}, source:{source:?}");
 
-  let report_eval_error = |e: AnyErr| {
-    let state_rc = JsRuntime::state(scope);
+  let report_eval_error = |state_rc: JsRuntimeStateRc, e: AnyErr| {
     let state = state_rc.borrow_mut();
     report_js_error(&state, e);
-  };
-  let report_eval_js_thrown = |tc_scope: &mut v8::TryCatch<v8::HandleScope>| {
-    assert!(tc_scope.has_caught());
-    let exception = tc_scope.exception().unwrap();
-    let exception = JsError::from_v8_exception(tc_scope, exception, None);
-    report_eval_error(exception.clone().into());
   };
 
   // The following code allows the runtime to execute code with no valid
@@ -977,7 +970,7 @@ pub fn execute_module(
       Err(e) => {
         // Returns the error directly.
         // trace!("Failed to resolve module path, filename:{filename:?}");
-        report_eval_error(e.into());
+        report_eval_error(JsRuntime::state(scope), e);
         return;
       }
     }
@@ -992,7 +985,10 @@ pub fn execute_module(
       // trace!(
       //   "Failed to fetch module, filename:{filename:?}({path:?}), exception:{exception:?}"
       // );
-      report_eval_js_thrown(tc_scope);
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      report_eval_error(JsRuntime::state(tc_scope), exception.into());
       return;
     }
   };
@@ -1004,7 +1000,10 @@ pub fn execute_module(
     // trace!(
     //   "Failed to initialize module, filename:{filename:?}({path:?}), exception:{exception:?}"
     // );
-    report_eval_js_thrown(tc_scope);
+    assert!(tc_scope.has_caught());
+    let exception = tc_scope.exception().unwrap();
+    let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    report_eval_error(JsRuntime::state(tc_scope), exception.into());
     return;
   }
 
