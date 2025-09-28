@@ -147,7 +147,7 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   );
 }
 
-fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
+fn init_builtin_modules(scope: &mut v8::PinScope<'_, '_>) {
   static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
     (
       "00__web.js",
@@ -240,9 +240,9 @@ pub mod build {
 
       let (mut isolate, global_context) = Self::create_isolate();
 
-      v8::scope_with_context!(context_scope, &mut isolate, global_context);
+      v8::scope_with_context!(context_scope, &mut isolate, &global_context);
 
-      let scope = &mut context_scope;
+      let scope = context_scope;
       // let _context = v8::Local::new(scope, global_context.clone());
 
       // Load, compile and evaluate all built-in modules.
@@ -255,6 +255,7 @@ pub mod build {
       scope.set_slot(state.clone());
 
       drop(context_scope);
+      drop(scope);
 
       JsRuntimeForSnapshot {
         isolate: Some(isolate),
