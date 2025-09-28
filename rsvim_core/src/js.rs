@@ -604,7 +604,7 @@ pub mod boost {
       self.run_pending_futures();
 
       trace!(
-        "|JsRuntime::execute_module| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}({:?}), has_pending_import_loaders:{:?}({:?}), has_unresolved_imports:{:?}({:?})",
+        "|JsRuntime::tick_event_loop| has_promise_rejections:{:?}, has_pending_background_tasks:{:?}, has_pending_imports:{:?}({:?}), has_pending_import_loaders:{:?}({:?}), has_unresolved_imports:{:?}({:?})",
         self.has_promise_rejections(),
         self.isolate.has_pending_background_tasks(),
         self.has_pending_imports(),
