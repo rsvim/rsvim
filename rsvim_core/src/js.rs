@@ -178,7 +178,7 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
     let _ = module.evaluate(tc_scope);
     trace!(
       "|init_builtin_modules| ModuleMap evaluated {:?}, status {:?}",
-      path,
+      filename,
       module.get_status()
     );
 
