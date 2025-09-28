@@ -44,7 +44,7 @@ jobs:
           rustup default stable
           rustup component add --toolchain stable rust-src clippy rustfmt
       - name: Rustfmt
-        run: cargo fmt --check
+        run: cargo +nightly fmt --check
       - name: Clippy
         run: cargo clippy --all-targets
       - uses: taiki-e/install-action@cargo-binstall
