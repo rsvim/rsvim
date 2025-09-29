@@ -1,8 +1,8 @@
 // use super::module_map::*;
 use crate::cli::CliOptions;
+use crate::evloop::mock::*;
 use crate::prelude::*;
 use crate::results::IoResult;
-use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use ringbuf::traits::*;
 use std::path::Path;
