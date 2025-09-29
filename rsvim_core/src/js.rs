@@ -270,21 +270,6 @@ pub mod build {
       }
     }
 
-    fn create_isolate() -> (v8::OwnedIsolate, v8::Global<v8::Context>) {
-      let mut isolate =
-        v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
-
-      init_v8_isolate(&mut isolate);
-
-      let global_context = {
-        v8::scope!(scope, isolate);
-        let context = v8::Context::new(scope, Default::default());
-        v8::Global::new(scope, context)
-      };
-
-      (isolate, global_context)
-    }
-
     pub fn create_snapshot(mut self) -> v8::StartupData {
       // Set default context
       {
