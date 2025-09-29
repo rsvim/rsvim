@@ -23,6 +23,7 @@ doctest = false
 default = ["simd", "unicode_lines"]
 simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
+benchmarks = []
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }

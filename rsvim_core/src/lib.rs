@@ -26,5 +26,5 @@ mod cli_tests;
 mod coord_tests;
 #[cfg(test)]
 mod js_tests;
-// #[cfg(any(test, bench))]
+#[cfg(any(test, feature = "benchmarks"))]
 pub mod tests;
