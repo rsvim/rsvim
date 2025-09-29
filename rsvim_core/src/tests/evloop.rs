@@ -21,7 +21,6 @@ use std::task::Waker;
 use std::thread_local;
 use std::time::Duration;
 
-#[cfg(debug_assertions)]
 #[derive(Debug)]
 pub struct TempConfigDir {
   pub home_dir: assert_fs::TempDir,
@@ -29,10 +28,6 @@ pub struct TempConfigDir {
   pub xdg_cache_home: assert_fs::TempDir,
   pub xdg_data_home: assert_fs::TempDir,
 }
-
-#[cfg(not(debug_assertions))]
-#[derive(Debug)]
-pub struct TempConfigDir {}
 
 #[derive(Debug, Clone)]
 pub struct TempPathConfig {
@@ -42,13 +37,11 @@ pub struct TempPathConfig {
   pub xdg_data_home: PathBuf,
 }
 
-#[cfg(debug_assertions)]
 thread_local! {
   pub static TEMP_PATH_CONFIG: RefCell<Option<TempPathConfig>> = const { RefCell::new(None) };
 }
 
 impl TempConfigDir {
-  #[cfg(debug_assertions)]
   pub fn create() -> Self {
     let temp_dirs = TempConfigDir {
       home_dir: assert_fs::TempDir::new().unwrap(),
@@ -67,11 +60,6 @@ impl TempConfigDir {
     TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
 
     temp_dirs
-  }
-
-  #[cfg(not(debug_assertions))]
-  pub fn create() -> Self {
-    Self {}
   }
 }
 
