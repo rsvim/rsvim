@@ -9,7 +9,7 @@ use crate::prelude::*;
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
 /// Also known as _line-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.
 pub fn get_wrap(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -23,7 +23,7 @@ pub fn get_wrap(
 
 /// Set the _wrap_ option.
 pub fn set_wrap(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -40,7 +40,7 @@ pub fn set_wrap(
 /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>
 /// Also known as _word-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.
 pub fn get_line_break(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -54,7 +54,7 @@ pub fn get_line_break(
 
 /// Set the _line-break_ option.
 pub fn set_line_break(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -70,7 +70,7 @@ pub fn set_line_break(
 /// Get the _tap-stop_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>
 pub fn get_tab_stop(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -84,7 +84,7 @@ pub fn get_tab_stop(
 
 /// Set the _tab-stop_ option.
 pub fn set_tab_stop(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -102,7 +102,7 @@ pub fn set_tab_stop(
 /// Get the _expand-tab_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>
 pub fn get_expand_tab(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -116,7 +116,7 @@ pub fn get_expand_tab(
 
 /// Set the _expand-tab_ option.
 pub fn set_expand_tab(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -133,7 +133,7 @@ pub fn set_expand_tab(
 /// Get the _shift-width_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27shiftwidth%27>
 pub fn get_shift_width(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -147,7 +147,7 @@ pub fn get_shift_width(
 
 /// Set the _shift-width_ option.
 pub fn set_shift_width(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -165,7 +165,7 @@ pub fn set_shift_width(
 /// Get the _file-encoding_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27fileencoding%27>
 pub fn get_file_encoding(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -180,7 +180,7 @@ pub fn get_file_encoding(
 
 /// Set the _file-encoding_ option.
 pub fn set_file_encoding(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -198,7 +198,7 @@ pub fn set_file_encoding(
 /// Get the _file-format_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27fileformat%27>
 pub fn get_file_format(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -213,7 +213,7 @@ pub fn get_file_format(
 
 /// Set the _file-format_ option.
 pub fn set_file_format(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
