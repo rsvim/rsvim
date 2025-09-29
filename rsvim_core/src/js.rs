@@ -588,7 +588,7 @@ pub mod boost {
 
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
-      self.with_scope(|scope| run_next_tick_callbacks(scope));
+      self.with_scope(run_next_tick_callbacks);
       self.fast_forward_imports();
       // self.event_loop.tick();
       self.run_pending_futures();
