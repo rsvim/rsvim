@@ -22,9 +22,9 @@ pub struct CommandOptions {
 }
 
 impl CommandOptions {
-  pub fn from_v8_object<'a>(
-    scope: &mut v8::HandleScope,
-    value: v8::Local<'a, v8::Object>,
+  pub fn from_v8_object<'s, 'b>(
+    scope: &mut v8::PinScope<'s, 'b>,
+    value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandOptionsBuilder::default();
 
@@ -55,10 +55,10 @@ impl CommandOptions {
     builder.build().unwrap()
   }
 
-  pub fn into_v8_object<'a>(
+  pub fn into_v8_object<'s, 'b>(
     &self,
-    scope: &mut v8::HandleScope<'a>,
-  ) -> v8::Local<'a, v8::Object> {
+    scope: &mut v8::PinScope<'s, 'b>,
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
     // force
