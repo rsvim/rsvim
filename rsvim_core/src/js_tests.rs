@@ -50,7 +50,7 @@ fn create_snapshot1() {
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
-      bytes.into(),
+      SnapshotData::new(bytes.clone().as_slice()),
       startup_moment,
       startup_unix_epoch,
       master_tx.clone(),
