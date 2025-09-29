@@ -1,40 +1,41 @@
-use crate::cli::CliOptions;
-use crate::evloop::EventLoop;
-use crate::evloop::writer::StdoutWriterValue;
-use crate::js::*;
-use crate::prelude::*;
-use crate::results::IoResult;
-use crate::state::ops::CursorInsertPayload;
-use crate::state::ops::Operation;
-use crate::tests::evloop::*;
-use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use ringbuf::traits::*;
+use rsvim_core::cli::CliOptions;
+use rsvim_core::evloop::EventLoop;
+use rsvim_core::evloop::writer::StdoutWriterValue;
+use rsvim_core::js::*;
+use rsvim_core::prelude::*;
+use rsvim_core::results::IoResult;
+use rsvim_core::state::ops::CursorInsertPayload;
+use rsvim_core::state::ops::Operation;
+use rsvim_core::tests::evloop::*;
+use rsvim_core::tests::log::init as test_log_init;
 use std::time::Duration;
 
-async fn create_snapshot1() -> IoResult<()> {
-  test_log_init();
-
-  // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = make_configs(vec![(Path::new("rsvim.js"), "")]);
-
-  let snapshot_file = tp.xdg_data_home.child("snapshot.bin");
+fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
+  let snapshot_file = Path::new("benches_startup_snapshot.bin");
 
   // Prepare snapshot data
-  {
-    let js_runtime = JsRuntimeForSnapshot::new();
-    let snapshot = js_runtime.create_snapshot();
-    let snapshot = Box::from(&snapshot);
-    let mut vec = Vec::with_capacity(snapshot.len());
-    vec.extend_from_slice(&snapshot);
+  let js_runtime = JsRuntimeForSnapshot::new();
+  let snapshot = js_runtime.create_snapshot();
+  let snapshot = Box::from(&snapshot);
+  let mut vec = Vec::with_capacity(snapshot.len());
+  vec.extend_from_slice(&snapshot);
 
-    info!("Write snapshot to {:?}", snapshot_file.path());
-    std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
-  };
+  info!("Write snapshot to {:?}", snapshot_file.path());
+  std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
 
   let bytes = std::fs::read(snapshot_file.path()).unwrap();
 
+  bytes
+}
+
+async fn run_with_snapshot(
+  tp: &TempPathConfig,
+  snapshot: Vec<u8>,
+) -> IoResult<()> {
   // Create js runtime with snapshot.
   let mut event_loop = {
     let cli_opts = CliOptions::empty();
@@ -58,7 +59,7 @@ async fn create_snapshot1() -> IoResult<()> {
 
     let writer = StdoutWriterValue::dev_null();
 
-    let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
+    let bytes: &'static [u8] = Box::leak(snapshot.into_boxed_slice());
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -105,7 +106,6 @@ async fn create_snapshot1() -> IoResult<()> {
       CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
-    MockOperation::SleepFor(Duration::from_millis(50)),
   ];
 
   event_loop.initialize()?;
@@ -114,18 +114,13 @@ async fn create_snapshot1() -> IoResult<()> {
     .await?;
   event_loop.shutdown()?;
 
-  // After running
-  {
-    let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 1);
-
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "1");
-  }
-
   Ok(())
 }
+
+pub fn criterion_benchmark(c: &mut Criterion) {
+  c.bench_function("With snapshot", |b| b.iter(|| fibonacci(black_box(20))));
+  c.bench_function("Without snapshot", |b| b.iter(|| fibonacci(black_box(20))));
+}
+
+criterion_group!(benches, criterion_benchmark);
+criterion_main!(benches);

@@ -17,6 +17,9 @@ pub mod state;
 pub mod ui;
 pub mod util;
 
+// #[cfg(test)]
+pub mod tests;
+
 // Only for unit test.
 #[cfg(test)]
 mod buf_tests;
@@ -26,5 +29,3 @@ mod cli_tests;
 mod coord_tests;
 #[cfg(test)]
 mod js_tests;
-#[cfg(test)]
-pub mod tests;
