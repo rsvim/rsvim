@@ -3,10 +3,15 @@ use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::evloop::writer::StdoutWriterValue;
 use crate::prelude::*;
+use crate::results::IoResult;
+use crate::state::ops::CursorInsertPayload;
+use crate::state::ops::Operation;
+use crate::tests::evloop::*;
 use assert_fs::prelude::PathChild;
 
-#[test]
-fn create_snapshot1() {
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn create_snapshot1() -> IoResult<()> {
   // Prepare snapshot data
   let snapshot_file = {
     let js_runtime = JsRuntimeForSnapshot::new();
@@ -85,4 +90,35 @@ fn create_snapshot1() {
       jsrt_tx,
     }
   };
+
+  // Run the event loop.
+  let mocked_ops = vec![
+    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::CursorInsert(
+      CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
+    )),
+    MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
+    MockOperation::SleepFor(Duration::from_millis(50)),
+  ];
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert_eq!(actual, "1");
+  }
+
+  Ok(())
 }
