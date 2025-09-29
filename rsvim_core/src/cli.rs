@@ -32,7 +32,7 @@ impl CliSpecialOptions {
     self.long_help
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   pub fn empty() -> Self {
     Self {
       version: false,
@@ -137,7 +137,7 @@ impl CliOptions {
     }
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   pub fn empty() -> Self {
     Self {
       special_opts: CliSpecialOptions::empty(),
