@@ -164,7 +164,7 @@ impl PathConfig {
 
   #[cfg(test)]
   pub fn config_entry(&self) -> Option<PathBuf> {
-    use crate::tests::evloop::TEMP_PATH_CONFIG;
+    use crate::evloop::mock::TEMP_PATH_CONFIG;
     TEMP_PATH_CONFIG.with_borrow(|tp| {
       Self::_new_with_temp_path(tp.as_ref().unwrap())
         .config_entry
