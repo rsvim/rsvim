@@ -16,19 +16,18 @@ use std::time::Duration;
 #[cfg_attr(miri, ignore)]
 async fn create_snapshot1() -> IoResult<()> {
   let temp_dir = assert_fs::TempDir::new().unwrap();
+  let snapshot_file = temp_dir.child("snapshot.bin");
 
   // Prepare snapshot data
-  let snapshot_file = {
+  {
     let js_runtime = JsRuntimeForSnapshot::new();
     let snapshot = js_runtime.create_snapshot();
     let snapshot = Box::from(&snapshot);
     let mut vec = Vec::with_capacity(snapshot.len());
     vec.extend_from_slice(&snapshot);
 
-    let output_path = temp_dir.child("snapshot.bin");
-    info!("Write snapshot to {:?}", output_path.path());
-    std::fs::write(output_path.path(), vec.into_boxed_slice()).unwrap();
-    output_path
+    info!("Write snapshot to {:?}", snapshot_file.path());
+    std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
   };
 
   // Create js runtime with snapshot.
