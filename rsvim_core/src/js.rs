@@ -851,7 +851,7 @@ pub mod boost {
     }
   }
 
-  impl<'s, 'b> JsRuntime<'s, 'b> {
+  impl JsRuntime {
     /// Returns if unhandled promise rejections where caught.
     pub fn has_promise_rejections(&mut self) -> bool {
       self.get_state().borrow().exceptions.has_promise_rejection()
