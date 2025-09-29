@@ -1,6 +1,8 @@
 use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::Criterion;
+use criterion::criterion_group;
+use criterion::criterion_main;
 use ringbuf::traits::*;
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
