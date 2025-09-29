@@ -50,7 +50,6 @@ use module::fetch_module_tree;
 use module::resolve_import;
 use pending::TaskCallback;
 use pending::TimerCallback;
-use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Once;
 use std::sync::atomic::AtomicI32;
