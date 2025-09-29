@@ -7,7 +7,6 @@ use rsvim_core::evloop::EventLoop;
 use rsvim_core::evloop::mock::*;
 use rsvim_core::evloop::writer::StdoutWriterValue;
 use rsvim_core::js::*;
-use rsvim_core::prelude::*;
 use rsvim_core::results::IoResult;
 use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
