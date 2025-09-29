@@ -42,6 +42,7 @@ pub struct TempPathConfig {
   pub xdg_data_home: PathBuf,
 }
 
+#[cfg(debug_assertions)]
 thread_local! {
   pub static TEMP_PATH_CONFIG: RefCell<Option<TempPathConfig>> = const { RefCell::new(None) };
 }
@@ -59,14 +60,16 @@ impl TempConfigDir {
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
 
-    let temp_path = TempPathConfig {
-      home_dir: temp_dirs.home_dir.to_path_buf(),
-      xdg_config_home: temp_dirs.xdg_config_home.to_path_buf(),
-      xdg_cache_home: temp_dirs.xdg_cache_home.to_path_buf(),
-      xdg_data_home: temp_dirs.xdg_data_home.to_path_buf(),
-    };
+    if cfg!(debug_assertions) {
+      let temp_path = TempPathConfig {
+        home_dir: temp_dirs.home_dir.to_path_buf(),
+        xdg_config_home: temp_dirs.xdg_config_home.to_path_buf(),
+        xdg_cache_home: temp_dirs.xdg_cache_home.to_path_buf(),
+        xdg_data_home: temp_dirs.xdg_data_home.to_path_buf(),
+      };
 
-    TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
+      TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
+    }
 
     temp_dirs
   }
