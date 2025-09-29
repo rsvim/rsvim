@@ -210,7 +210,7 @@ impl JsFuture for EsModuleFuture {
       }
     };
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    v8::tc_scope!(let tc_scope, scope);
     let origin = create_origin(tc_scope, &self.path, true);
 
     // Compile source and get it's dependencies.

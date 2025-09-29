@@ -1116,7 +1116,7 @@ pub fn check_exceptions(scope: &mut v8::PinScope) -> Option<JsError> {
     if let Some(callback) = state.exceptions.unhandled_rejection_cb.as_ref() {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, promise.into()]);
@@ -1138,7 +1138,7 @@ pub fn check_exceptions(scope: &mut v8::PinScope) -> Option<JsError> {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
       let origin = v8::String::new(scope, "unhandledRejection").unwrap();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, origin.into()]);

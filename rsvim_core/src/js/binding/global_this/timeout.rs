@@ -23,7 +23,7 @@ impl JsFuture for TimeoutFuture {
       .map(|arg| v8::Local::new(scope, arg))
       .collect();
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    v8::tc_scope!(let tc_scope, scope);
 
     callback.call(tc_scope, undefined, &args);
 
