@@ -14,6 +14,7 @@ use rsvim_core::state::ops::Operation;
 
 fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
   let snapshot_file = tp.xdg_data_home.join("snapshot.bin");
+  let snapshot_file = snapshot_file.as_path();
 
   // Prepare snapshot data
   let js_runtime = JsRuntimeForSnapshot::new();
@@ -22,10 +23,9 @@ fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
   let mut vec = Vec::with_capacity(snapshot.len());
   vec.extend_from_slice(&snapshot);
 
-  info!("Write snapshot to {:?}", snapshot_file.path());
-  std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
+  std::fs::write(snapshot_file, vec.into_boxed_slice()).unwrap();
 
-  let bytes = std::fs::read(snapshot_file.path()).unwrap();
+  let bytes = std::fs::read(snapshot_file).unwrap();
 
   bytes
 }
