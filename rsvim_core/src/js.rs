@@ -274,7 +274,13 @@ pub mod build {
       // Set default context
       {
         let context = self.context();
-        v8::scope_with_context!(scope, self.isolate.as_mut().unwrap(), context);
+        v8::scope_with_context!(
+          scope,
+          self.isolate.as_mut().unwrap(),
+          context.clone()
+        );
+        let context = v8::Local::new(scope, context);
+        scope.set_default_context(context);
       }
 
       // Drop state (and the global context inside)
