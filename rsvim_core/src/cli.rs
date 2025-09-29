@@ -137,7 +137,7 @@ impl CliOptions {
     }
   }
 
-  #[cfg(test)]
+  /// NOTE: This should only been used for testing or running benchmarks.
   pub fn empty() -> Self {
     Self {
       special_opts: CliSpecialOptions::empty(),
