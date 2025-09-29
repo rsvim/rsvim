@@ -48,9 +48,9 @@ impl JsError {
 
 impl JsError {
   // https://github.com/denoland/rusty_v8/blob/0d093a02f658781d52e6d70d138768fc19a79d54/examples/shell.rs#L158
-  pub fn from_v8_exception<'a>(
-    scope: &'a mut v8::HandleScope,
-    rejection: v8::Local<'a, v8::Value>,
+  pub fn from_v8_exception<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    rejection: v8::Local<'s, v8::Value>,
     prefix: Option<&str>,
   ) -> Self {
     // Create a new HandleScope.
