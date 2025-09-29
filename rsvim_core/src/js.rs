@@ -255,13 +255,12 @@ pub mod build {
         v8::scope_with_context!(scope, &mut *isolate, context.clone());
         // Load, compile and evaluate all built-in modules.
         init_builtin_modules(scope);
-        let state =
-          JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
-            context: Some(context),
-          });
-        scope.set_slot(state.clone());
-        state
+        JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
+          context: Some(context),
+        })
       };
+
+      isolate.set_slot(state.clone());
 
       JsRuntimeForSnapshot {
         isolate: Some(isolate),

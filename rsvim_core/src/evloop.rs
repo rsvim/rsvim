@@ -538,7 +538,10 @@ impl EventLoop {
   }
 
   #[cfg(test)]
-  async fn process_operation(&mut self, op: Option<IoResult<MockOperation>>) {
+  async fn _process_mocked_operations(
+    &mut self,
+    op: Option<IoResult<MockOperation>>,
+  ) {
     match op {
       Some(Ok(op)) => {
         trace!("Polled editor operation ok: {:?}", op);
@@ -611,24 +614,29 @@ impl EventLoop {
         }
         MasterMessage::LoadImportReq(req) => {
           trace!("Recv LoadImportReq:{:?}", req.task_id);
-          let maybe_source = async_load_import(&req.specifier, false).await;
-          let _ = self
-            .jsrt_forwarder_tx
-            .send(JsMessage::LoadImportResp(msg::LoadImportResp {
-              task_id: req.task_id,
-              maybe_source: match maybe_source {
-                Ok(source) => Some(Ok(
-                  bincode::encode_to_vec(source, bincode::config::standard())
-                    .unwrap(),
-                )),
-                Err(e) => Some(Err(e)),
-              },
-            }))
-            .await;
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_source = async_load_import(&req.specifier, false).await;
+            let _ = jsrt_forwarder_tx
+              .send(JsMessage::LoadImportResp(msg::LoadImportResp {
+                task_id: req.task_id,
+                maybe_source: match maybe_source {
+                  Ok(source) => Some(Ok(
+                    bincode::encode_to_vec(source, bincode::config::standard())
+                      .unwrap(),
+                  )),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .await;
+          });
         }
         MasterMessage::TickAgainReq => {
           trace!("Recv TickAgainReq");
-          let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+          });
         }
       }
     }
@@ -758,7 +766,7 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
-          self.process_operation(op).await;
+          self._process_mocked_operations(op).await;
         }
         master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
           debug_assert_eq!(master_n, master_messages.len());
