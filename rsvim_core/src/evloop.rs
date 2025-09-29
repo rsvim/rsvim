@@ -753,7 +753,7 @@ impl EventLoop {
   }
 
   #[cfg(test)]
-  pub async fn run_with_mock_operations(
+  pub async fn _run_with_mocked_operations(
     &mut self,
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
