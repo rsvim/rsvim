@@ -238,31 +238,40 @@ pub mod build {
     pub fn new() -> Self {
       init_v8_platform(true, None);
 
-      let mut isolate =
-        v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+      let (isolate, state) = {
+        let mut isolate = v8::Isolate::snapshot_creator(
+          None,
+          Some(v8::CreateParams::default()),
+        );
 
-      // NOTE: For snapshot runtime, it cannot call the
-      // `init_v8_isolate(&mut isolate)` API because it doesn't have many
-      // components such as "ModuleMap".
+        // NOTE: For snapshot runtime, it cannot call the
+        // `init_v8_isolate(&mut isolate)` API because it doesn't have many
+        // components such as "ModuleMap".
 
-      let context: v8::Global<v8::Context> = {
-        v8::scope!(scope, &mut *isolate);
-        let context = v8::Context::new(scope, Default::default());
-        v8::Global::new(scope, context)
+        let context: v8::Global<v8::Context> = {
+          v8::scope!(scope, &mut *isolate);
+          let context = v8::Context::new(scope, Default::default());
+          v8::Global::new(scope, context)
+        };
+
+        let state = {
+          v8::scope_with_context!(scope, &mut *isolate, context.clone());
+
+          // Load, compile and evaluate all built-in modules.
+          init_builtin_modules(scope);
+
+          let state =
+            JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
+              context: Some(context),
+            });
+
+          scope.set_slot(state.clone());
+
+          state
+        };
+
+        (isolate, state)
       };
-
-      v8::scope_with_context!(scope, &mut *isolate, context.clone());
-
-      // Load, compile and evaluate all built-in modules.
-      init_builtin_modules(scope);
-
-      let state = JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
-        context: Some(context),
-      });
-
-      scope.set_slot(state.clone());
-
-      drop(scope);
 
       JsRuntimeForSnapshot {
         isolate: Some(isolate),
