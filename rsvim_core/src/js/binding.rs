@@ -192,8 +192,8 @@ pub fn create_new_context<'s, 'b>(
 }
 
 /// Adds a property with the given name and value, into the given object.
-pub fn set_property_to<'s, 'b>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn set_property_to(
+  scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
   name: &'static str,
   value: v8::Local<v8::Value>,
@@ -203,8 +203,8 @@ pub fn set_property_to<'s, 'b>(
 }
 
 /// Adds a read-only property with the given name and value, into the given object.
-pub fn set_constant_to<'s, 'b>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn set_constant_to(
+  scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
   name: &str,
   value: v8::Local<v8::Value>,
@@ -219,8 +219,8 @@ pub fn set_constant_to<'s, 'b>(
 }
 
 /// Adds a `Function` object which calls the given Rust function
-pub fn set_function_to<'s, 'b>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn set_function_to(
+  scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
   name: &'static str,
   callback: impl v8::MapFnTo<v8::FunctionCallback>,
