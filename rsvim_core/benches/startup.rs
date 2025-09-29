@@ -9,7 +9,6 @@ use rsvim_core::results::IoResult;
 use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
 use rsvim_core::tests::evloop::*;
-use rsvim_core::tests::log::init as test_log_init;
 
 fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
   let snapshot_file = Path::new("benches_startup_snapshot.bin");
