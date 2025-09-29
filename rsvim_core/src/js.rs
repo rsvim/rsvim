@@ -169,7 +169,7 @@ fn init_builtin_modules(scope: &mut v8::PinScope) {
     let filename = module.0;
     let source = module.1;
 
-    let tc_scope = std::pin::pin!(v8::TryCatch::new(scope));
+    v8::tc_scope!(let tc_scope, scope);
 
     let module = fetch_module(tc_scope, filename, Some(source)).unwrap();
     let _ = module
@@ -777,7 +777,7 @@ pub mod boost {
       // Execute the root module from the graph.
       for graph_rc in ready_imports {
         // Create a tc scope.
-        let tc_scope = &mut v8::TryCatch::new(scope);
+        v8::tc_scope!(let tc_scope, scope);
 
         let graph = graph_rc.borrow();
         let path = graph.root_rc().borrow().path().clone();
@@ -966,7 +966,7 @@ pub fn execute_module<'s, 'b>(
   };
   // trace!("Module path resolved, filename:{filename:?}({path:?})");
 
-  let tc_scope = &mut v8::TryCatch::new(scope);
+  v8::tc_scope!(let tc_scope, scope);
 
   let module = match fetch_module_tree(tc_scope, filename, source) {
     Some(module) => module,
@@ -1034,7 +1034,7 @@ fn run_next_tick_callbacks(scope: &mut v8::PinScope) {
   // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
   // let undefined = v8::undefined(scope);
-  let tc_scope = &mut v8::TryCatch::new(scope);
+  v8::tc_scope!(let tc_scope, scope);
   //
   // for (cb, params) in callbacks {
   //   // Create a local handle for the callback and its parameters.
@@ -1078,7 +1078,7 @@ pub fn check_exceptions(scope: &mut v8::PinScope) -> Option<JsError> {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
       let origin = v8::String::new(scope, "uncaughtException").unwrap();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, origin.into()]);
