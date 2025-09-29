@@ -184,7 +184,7 @@ impl EsModuleFuture {
 
 impl JsFuture for EsModuleFuture {
   /// Drives the future to completion.
-  fn run(&mut self, scope: &mut v8::HandleScope) {
+  fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|EsModuleFuture run|");
     let state_rc = JsRuntime::state(scope);
     let mut state = state_rc.borrow_mut();
