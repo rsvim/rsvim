@@ -32,7 +32,7 @@ impl CliSpecialOptions {
     self.long_help
   }
 
-  #[cfg(test)]
+  /// NOTE: This should only been used for testing or running benchmarks.
   pub fn empty() -> Self {
     Self {
       version: false,
