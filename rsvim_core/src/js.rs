@@ -256,7 +256,6 @@ pub mod build {
 
         // Load, compile and evaluate all built-in modules.
         init_builtin_modules(scope);
-
         let state =
           JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
             context: Some(context),
