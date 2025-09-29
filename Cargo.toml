@@ -85,8 +85,8 @@ oxc_resolver = "11.8.3"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
-# deno: https://github.com/denoland/deno/blob/v2.5.0/Cargo.toml
-# deno_core: https://github.com/denoland/deno_core/blob/0.357.0/Cargo.toml
+# deno: https://github.com/denoland/deno/blob/v2.5.2/Cargo.toml
+# deno_core: https://github.com/denoland/deno_core/blob/0.362.0/Cargo.toml
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.50.1/Cargo.toml
 
 swc_atoms = "=7.0.0"
