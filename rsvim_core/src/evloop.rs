@@ -632,7 +632,7 @@ impl EventLoop {
           trace!("Recv TickAgainReq");
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
           });
         }
       }
