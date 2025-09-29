@@ -1,7 +1,7 @@
 use super::module::*;
+use crate::evloop::mock::*;
 use crate::js::JsRuntime;
 use crate::prelude::*;
-use crate::tests::evloop::*;
 use crate::tests::js::make_js_runtime;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
