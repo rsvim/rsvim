@@ -137,15 +137,15 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   Ok(())
 }
 
-async fn with_snapshot(tp: &TempConfigDir, snapshot: Vec<u8>) -> IoResult<()> {
+async fn with_snapshot(snapshot: Vec<u8>) -> IoResult<()> {
   // Create js runtime with snapshot.
-  let mut event_loop = create_event_loop(Some(snapshot));
+  let event_loop = create_event_loop(Some(snapshot));
 
   run_event_loop(event_loop).await
 }
 
-async fn without_snapshot(tp: &TempConfigDir) -> IoResult<()> {
-  let mut event_loop = create_event_loop(None);
+async fn without_snapshot() -> IoResult<()> {
+  let event_loop = create_event_loop(None);
 
   run_event_loop(event_loop).await
 }
@@ -158,14 +158,14 @@ pub fn criterion_benchmark(c: &mut Criterion) {
   c.bench_function("with snapshot", |b| {
     b.iter(|| {
       rt.block_on(async {
-        with_snapshot(&tp, snapshot).await;
+        with_snapshot(snapshot).await;
       });
     })
   });
   c.bench_function("without snapshot", |b| {
     b.iter(|| {
       rt.block_on(async {
-        without_snapshot(&tp, snapshot).await;
+        without_snapshot().await;
       });
     })
   });
