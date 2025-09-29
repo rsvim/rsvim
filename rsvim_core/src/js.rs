@@ -581,11 +581,7 @@ pub mod boost {
       };
 
       // When without snapshot, we need to initialize builtin js modules.
-      {
-        let context = runtime.context();
-        v8::scope_with_context!(scope, &mut runtime.isolate, context);
-        init_builtin_modules(scope);
-      }
+      runtime.with_scope(|scope| init_builtin_modules(scope));
 
       // // Start inspector agent is requested.
       // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -596,18 +592,25 @@ pub mod boost {
       runtime
     }
 
+    fn with_scope<F>(&mut self, func: F)
+    where
+      F: FnOnce(&mut v8::PinScope),
+    {
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
+      let mut scope = scope;
+      func(&mut scope);
+    }
+
     /// Executes javascript source code as ES module, i.e. ECMA standard.
     pub fn execute_module(&mut self, filename: &str, source: Option<&str>) {
       // Get a reference to v8's scope.
-      let context = self.context();
-      v8::scope_with_context!(scope, &mut self.isolate, context);
-
-      execute_module(scope, filename, source)
+      self.with_scope(|scope| execute_module(scope, filename, source));
     }
 
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
-      run_next_tick_callbacks(&mut self.handle_scope());
+      self.with_scope(|scope| run_next_tick_callbacks(scope));
       self.fast_forward_imports();
       // self.event_loop.tick();
       self.run_pending_futures();
@@ -646,7 +649,8 @@ pub mod boost {
     /// Runs pending javascript tasks which have received results from master.
     fn run_pending_futures(&mut self) {
       // Get a handle-scope and a reference to the runtime's state.
-      let scope = &mut self.handle_scope();
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
       let state_rc = Self::state(scope);
 
       // Drain all pending messages
