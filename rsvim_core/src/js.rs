@@ -250,8 +250,6 @@ pub mod build {
 
       scope.set_slot(state.clone());
 
-      drop(global_context);
-
       JsRuntimeForSnapshot {
         isolate: Some(isolate),
         state,
