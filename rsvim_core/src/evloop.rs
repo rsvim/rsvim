@@ -747,7 +747,7 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(test)]
+  /// NOTE: This is only for testing or benchmarks.
   pub async fn run_with_mock_operations(
     &mut self,
     mut reader: MockOperationReader,
