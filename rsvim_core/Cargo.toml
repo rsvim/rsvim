@@ -119,3 +119,7 @@ tracing-subscriber = { workspace = true, features = [
 tracing-appender = { workspace = true, features = ["parking_lot"] }
 regex = { workspace = true }
 criterion = { workspace = true }
+
+[[bench]]
+name = "startup"
+harness = false
