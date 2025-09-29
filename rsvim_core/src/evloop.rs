@@ -663,8 +663,9 @@ impl EventLoop {
 
     let mut reader = EventStream::new();
     loop {
-      let mut master_messages: SmallVec<[MasterMessage; *CHANNEL_BUF_SIZE]> =
-        SmallVec::with_capacity(*CHANNEL_BUF_SIZE);
+      let mut master_messages: SmallVec<
+        [MasterMessage; crate::consts::RSVIM_CHANNEL_BUF_SIZE],
+      > = SmallVec::with_capacity(*CHANNEL_BUF_SIZE);
       let mut js_messages: Vec<JsMessage> = vec![];
 
       tokio::select! {
