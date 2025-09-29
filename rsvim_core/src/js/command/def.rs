@@ -52,7 +52,7 @@ impl CommandDefinition {
 
   pub fn into_v8_object<'s>(
     &self,
-    scope: &mut v8::PinScope,
+    scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
