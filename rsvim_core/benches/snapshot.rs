@@ -11,7 +11,6 @@ use rsvim_core::results::IoResult;
 use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
 use rsvim_core::tests::evloop::*;
-use rsvim_core::tests::log::init as test_log_init;
 use std::time::Duration;
 
 fn create_snapshot(tp: &TempConfigDir) -> Vec<u8> {
