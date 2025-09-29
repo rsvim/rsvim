@@ -581,7 +581,11 @@ pub mod boost {
       };
 
       // When without snapshot, we need to initialize builtin js modules.
-      init_builtin_modules(&mut runtime.handle_scope());
+      {
+        let context = runtime.context();
+        v8::scope_with_context!(scope, &mut runtime.isolate, context);
+        init_builtin_modules(scope);
+      }
 
       // // Start inspector agent is requested.
       // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -595,7 +599,8 @@ pub mod boost {
     /// Executes javascript source code as ES module, i.e. ECMA standard.
     pub fn execute_module(&mut self, filename: &str, source: Option<&str>) {
       // Get a reference to v8's scope.
-      let scope = &mut self.handle_scope();
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
 
       execute_module(scope, filename, source)
     }
