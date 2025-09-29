@@ -2,13 +2,13 @@ use compact_str::ToCompactString;
 use criterion::{Criterion, criterion_group, criterion_main};
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
+use rsvim_core::evloop::mock::*;
 use rsvim_core::evloop::writer::StdoutWriterValue;
 use rsvim_core::js::*;
 use rsvim_core::prelude::*;
 use rsvim_core::results::IoResult;
 use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
-use rsvim_core::tests::evloop::*;
 
 fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
   let snapshot_file = Path::new("benches_startup_snapshot.bin");

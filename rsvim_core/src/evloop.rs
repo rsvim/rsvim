@@ -1,5 +1,6 @@
 //! Event loop.
 
+pub mod mock;
 pub mod writer;
 
 use crate::buf::BuffersManager;
@@ -43,12 +44,6 @@ use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
 #[cfg(test)]
-use crate::tests::evloop::MockEventReader;
-#[cfg(test)]
-use crate::tests::evloop::MockOperation;
-#[cfg(test)]
-use crate::tests::evloop::MockOperationReader;
-#[cfg(test)]
 use bitflags::bitflags_match;
 #[cfg(test)]
 use crossterm::event::KeyCode;
@@ -56,6 +51,12 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 #[cfg(test)]
 use crossterm::event::KeyModifiers;
+#[cfg(test)]
+use mock::MockEventReader;
+#[cfg(test)]
+use mock::MockOperation;
+#[cfg(test)]
+use mock::MockOperationReader;
 
 #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop

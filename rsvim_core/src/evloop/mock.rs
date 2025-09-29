@@ -1,4 +1,6 @@
-// use crate::cfg::path_cfg::PathConfig;
+//! Warning: This is mocking utility for testing or running benchmarks for
+//! event loop. This should never been used in production logic.
+
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
