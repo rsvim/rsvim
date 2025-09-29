@@ -2,8 +2,8 @@ use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
-#[cfg(debug_assertions)]
-use assert_fs::prelude::*;
+// use assert_fs::prelude::*;
+use assert_fs::fixture::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
