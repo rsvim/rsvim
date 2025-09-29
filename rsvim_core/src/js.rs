@@ -199,8 +199,6 @@ fn init_builtin_modules(scope: &mut v8::PinScope) {
 /// NOTE: This runtime is for creating snapshot for builtin Runtime APIs to
 /// achieve much better performance.
 pub mod build {
-  use std::ops::DerefMut;
-
   use super::*;
 
   /// The state for js runtime of snapshot.
