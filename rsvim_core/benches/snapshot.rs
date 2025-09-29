@@ -26,8 +26,7 @@ fn create_snapshot(tp: &TempConfigDir) -> Vec<u8> {
   info!("Write snapshot to {:?}", snapshot_file.path());
   std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
 
-  let snapshot = std::fs::read(snapshot_file.path()).unwrap();
-  snapshot
+  std::fs::read(snapshot_file.path()).unwrap()
 }
 
 fn create_event_loop(snapshot: Option<Vec<u8>>) -> EventLoop {
