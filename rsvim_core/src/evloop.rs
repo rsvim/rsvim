@@ -322,9 +322,8 @@ impl EventLoop {
     })
   }
 
-  #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn mock_new(
+  pub fn _mock_new(
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
