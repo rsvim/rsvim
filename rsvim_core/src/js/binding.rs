@@ -18,14 +18,13 @@ use crate::prelude::*;
 // use crate::stdio;
 // use crate::timers;
 // use crate::prelude::*;
-// use litemap::LiteMap;
 use std::ffi::c_void;
 
 // /// Function pointer for the bindings initializers.
 // type BindingInitFn = fn(&mut v8::PinScope<'s, 'b>) -> v8::Global<v8::Object>;
 //
 // lazy_static! {
-//   pub static ref BINDINGS: LiteMap<&'static str, BindingInitFn> = {
+//   pub static ref BINDINGS: FoldMap<&'static str, BindingInitFn> = {
 //     let bindings: Vec<(&'static str, BindingInitFn)> = vec![
 //       ("stdio", stdio::initialize),
 //       ("timers", timers::initialize),
@@ -38,7 +37,7 @@ use std::ffi::c_void;
 //       ("signals", signals::initialize),
 //       ("exceptions", exceptions::initialize),
 //     ];
-//     LiteMap::from_iter(bindings.into_iter())
+//     FoldMap::from_iter(bindings.into_iter())
 //   };
 // }
 
