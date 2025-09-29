@@ -50,7 +50,7 @@ mod test_static_import {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -104,7 +104,7 @@ mod test_static_import {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -192,7 +192,7 @@ mod test_static_import {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -284,7 +284,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -372,7 +372,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -447,7 +447,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -524,7 +524,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -586,7 +586,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -641,7 +641,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -713,7 +713,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -815,7 +815,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -877,7 +877,7 @@ export function echoA(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -975,7 +975,7 @@ export function echoA(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1052,7 +1052,7 @@ export function echoA(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1145,7 +1145,7 @@ export function echoA(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1239,7 +1239,7 @@ export function echoMain(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1393,7 +1393,7 @@ setTimeout(() => {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1480,7 +1480,7 @@ mod test_dynamic_import {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1543,7 +1543,7 @@ Rsvim.rt.exit(0);
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1645,7 +1645,7 @@ Rsvim.rt.exit(0);
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1723,7 +1723,7 @@ try {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1822,7 +1822,7 @@ export function echoD(value) {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -1917,7 +1917,7 @@ export default {};
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -2012,7 +2012,7 @@ export default {};
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -2070,7 +2070,7 @@ mod test_require {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 

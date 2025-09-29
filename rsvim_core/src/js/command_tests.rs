@@ -34,7 +34,7 @@ async fn test_js_echo1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
@@ -75,7 +75,7 @@ async fn test_js_throw1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -115,7 +115,7 @@ async fn test_js_invalid1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 

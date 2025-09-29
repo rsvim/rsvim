@@ -39,7 +39,7 @@ async fn test_timeout1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -90,7 +90,7 @@ async fn test_timeout2() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -141,7 +141,7 @@ async fn test_timeout3() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -212,7 +212,7 @@ async fn test_timeout4() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -263,7 +263,7 @@ async fn test_timeout5() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -307,7 +307,7 @@ async fn test_interval1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -356,7 +356,7 @@ async fn test_interval2() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -410,7 +410,7 @@ async fn test_interval3() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
+    .run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 

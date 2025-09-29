@@ -46,7 +46,7 @@ mod tests_current1 {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -118,7 +118,7 @@ mod tests_current1 {
 
     event_loop.initialize()?;
     event_loop
-      ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+      .run_with_mock_operations(MockOperationReader::new(mocked_ops))
       .await?;
     event_loop.shutdown()?;
 
@@ -188,7 +188,7 @@ mod tests_current1 {
 
       event_loop.initialize()?;
       event_loop
-        ._run_with_mocked_operations(MockOperationReader::new(
+        .run_with_mock_operations(MockOperationReader::new(
           mocked_ops.clone(),
         ))
         .await?;
@@ -224,7 +224,7 @@ mod tests_current1 {
 
       event_loop.initialize()?;
       event_loop
-        ._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
+        .run_with_mock_operations(MockOperationReader::new(mocked_ops))
         .await?;
       event_loop.shutdown()?;
 
