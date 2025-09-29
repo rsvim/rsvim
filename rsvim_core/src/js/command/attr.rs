@@ -55,7 +55,7 @@ pub struct CommandAttributes {
 
 impl CommandAttributes {
   pub fn from_v8_object<'a>(
-    scope: &mut v8::HandleScope,
+    scope: &mut v8::PinScope,
     value: v8::Local<'a, v8::Object>,
   ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
