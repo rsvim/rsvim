@@ -239,11 +239,7 @@ pub mod build {
       init_v8_platform(true, None);
 
       let (mut isolate, global_context) = Self::create_isolate();
-
       v8::scope_with_context!(scope, &mut isolate, &global_context);
-
-      let scope = scope.deref_mut();
-      // let _context = v8::Local::new(scope, global_context.clone());
 
       // Load, compile and evaluate all built-in modules.
       init_builtin_modules(scope);
@@ -254,7 +250,7 @@ pub mod build {
 
       scope.set_slot(state.clone());
 
-      drop(context_scope);
+      drop(global_context);
 
       JsRuntimeForSnapshot {
         isolate: Some(isolate),
