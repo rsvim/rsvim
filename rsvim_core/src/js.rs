@@ -412,7 +412,7 @@ pub mod boost {
     }
   }
 
-  impl<'s, 'b> JsRuntime<'s, 'b> {
+  impl JsRuntime {
     /// Creates a new JsRuntime with snapshot.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
