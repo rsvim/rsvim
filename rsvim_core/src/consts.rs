@@ -6,17 +6,18 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 pub const RSVIM_LOG: &str = "RSVIM_LOG";
-pub const RSVIM_MUTEX_TIMEOUT_SECS: u64 = u64::MAX;
-pub const RSVIM_CHANNEL_BUF_SIZE: usize = 100;
+pub const RSVIM_MUTEX_TIMEOUT_SECS: &str = "RSVIM_MUTEX_TIMEOUT_SECS";
+pub const RSVIM_CHANNEL_BUF_SIZE: &str = "RSVIM_CHANNEL_BUF_SIZE";
 
 /// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
 /// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS`
 /// environment variable.
 pub static MUTEX_TIMEOUT_SECS: LazyLock<u64> = LazyLock::new(|| {
-  std::env::var("RSVIM_MUTEX_TIMEOUT_SECS")
-    .map(|v| v.parse::<u64>().unwrap_or(RSVIM_MUTEX_TIMEOUT_SECS))
-    .unwrap_or(RSVIM_MUTEX_TIMEOUT_SECS)
+  let default_timeout_secs = u64::MAX;
+  std::env::var(RSVIM_MUTEX_TIMEOUT_SECS)
+    .map(|v| v.parse::<u64>().unwrap_or(default_timeout_secs))
+    .unwrap_or(default_timeout_secs)
 });
 
 /// Mutex locking timeout duration, by default is [`u64::MAX`] seconds.
@@ -28,9 +29,10 @@ pub static MUTEX_TIMEOUT: LazyLock<Duration> =
 /// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE`
 /// environment variable.
 pub static CHANNEL_BUF_SIZE: LazyLock<usize> = LazyLock::new(|| {
-  std::env::var("RSVIM_CHANNEL_BUF_SIZE")
-    .map(|v| v.parse::<usize>().unwrap_or(RSVIM_CHANNEL_BUF_SIZE))
-    .unwrap_or(RSVIM_CHANNEL_BUF_SIZE)
+  let default_buf_size = 100_usize;
+  std::env::var(RSVIM_CHANNEL_BUF_SIZE)
+    .map(|v| v.parse::<usize>().unwrap_or(default_buf_size))
+    .unwrap_or(default_buf_size)
 });
 
 // /// Windows drive's full path beginning regex, for example full file path begins with `C:\\`.
