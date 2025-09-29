@@ -1052,7 +1052,7 @@ pub fn execute_module<'s, 'b>(
 }
 
 /// Runs callbacks stored in the next-tick queue.
-fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
+fn run_next_tick_callbacks(scope: &mut v8::PinScope) {
   // let state_rc = JsRuntime::state(scope);
   // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
@@ -1089,7 +1089,7 @@ fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
 }
 
 // Returns an error if an uncaught exception or unhandled rejection has been captured.
-pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
+pub fn check_exceptions(scope: &mut v8::PinScope) -> Option<JsError> {
   let state_rc = JsRuntime::state(scope);
   let maybe_exception = state_rc.borrow_mut().exceptions.exception.take();
 
