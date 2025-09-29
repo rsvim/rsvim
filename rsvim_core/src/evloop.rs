@@ -42,19 +42,19 @@ use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crate::tests::evloop::MockEventReader;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crate::tests::evloop::MockOperation;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crate::tests::evloop::MockOperationReader;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use bitflags::bitflags_match;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crossterm::event::KeyCode;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crossterm::event::KeyEventKind;
-#[cfg(test)]
+#[cfg(debug_assertions)]
 use crossterm::event::KeyModifiers;
 
 #[derive(Debug)]
@@ -121,7 +121,7 @@ pub struct EventLoop {
   // pub jsrt_rx: Receiver<JsMessage>,
 }
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
     Some(Ok(Event::Key(key_event))) => {
@@ -537,7 +537,7 @@ impl EventLoop {
     }
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   async fn process_operation(&mut self, op: Option<IoResult<MockOperation>>) {
     match op {
       Some(Ok(op)) => {
