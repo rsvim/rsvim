@@ -104,7 +104,7 @@ pub fn make_event_loop(
   terminal_rows: u16,
   cli_opts: CliOptions,
 ) -> EventLoop {
-  EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
+  EventLoop::_mocked_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
 const INTERVAL_MILLIS: Duration = Duration::from_millis(2);

@@ -286,7 +286,6 @@ impl BuffersManager {
     }
   }
 
-  #[cfg(debug_assertions)]
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
