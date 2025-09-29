@@ -1,8 +1,8 @@
 use super::js::*;
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
+use crate::evloop::mock::*;
 use crate::evloop::writer::StdoutWriterValue;
-use crate::evloop_mock::*;
 use crate::prelude::*;
 use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
