@@ -1,4 +1,4 @@
-use assert_fs::prelude::PathChild;
+use assert_fs::fixture::PathChild;
 use compact_str::ToCompactString;
 use criterion::Criterion;
 use criterion::criterion_group;
