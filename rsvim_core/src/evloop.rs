@@ -630,7 +630,10 @@ impl EventLoop {
         }
         MasterMessage::TickAgainReq => {
           trace!("Recv TickAgainReq");
-          let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let _ = self.jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+          });
         }
       }
     }
