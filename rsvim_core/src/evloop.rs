@@ -702,8 +702,8 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(test)]
-  pub async fn run_with_mock_events(
+  /// NOTE: This is only for testing or benchmarks.
+  pub async fn _mock_run_with_key_events(
     &mut self,
     mut reader: MockEventReader,
   ) -> IoResult<()> {

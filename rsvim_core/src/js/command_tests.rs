@@ -75,7 +75,7 @@ async fn test_js_throw1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 

@@ -28,7 +28,7 @@ async fn test_queue_microtask1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -71,7 +71,7 @@ async fn test_queue_microtask2() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -112,7 +112,7 @@ async fn test_queue_microtask_failed3() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -155,7 +155,7 @@ async fn test_queue_microtask_failed4() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -194,7 +194,7 @@ async fn test_report_error1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -235,7 +235,7 @@ async fn test_report_error2() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mock_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
