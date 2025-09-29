@@ -13,7 +13,6 @@ use rsvim_core::results::IoResult;
 use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
 use rsvim_core::tests::evloop::*;
-use std::time::Duration;
 
 fn create_snapshot(tp: &TempConfigDir) -> Vec<u8> {
   let snapshot_file = tp.xdg_data_home.child("snapshot.bin");
@@ -31,10 +30,7 @@ fn create_snapshot(tp: &TempConfigDir) -> Vec<u8> {
   snapshot
 }
 
-fn create_event_loop(
-  tp: &TempConfigDir,
-  snapshot: Option<Vec<u8>>,
-) -> EventLoop {
+fn create_event_loop(snapshot: Option<Vec<u8>>) -> EventLoop {
   let cli_opts = CliOptions::empty();
   let (
     startup_moment,
