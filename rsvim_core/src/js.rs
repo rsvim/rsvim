@@ -560,7 +560,7 @@ pub mod boost {
       };
 
       // When without snapshot, we need to initialize builtin js modules.
-      runtime.with_scope(|scope| init_builtin_modules(scope));
+      runtime.with_scope(init_builtin_modules);
 
       // // Start inspector agent is requested.
       // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -577,8 +577,7 @@ pub mod boost {
     {
       let context = self.context();
       v8::scope_with_context!(scope, &mut self.isolate, context);
-      let mut scope = scope;
-      func(&mut scope);
+      func(scope);
     }
 
     /// Executes javascript source code as ES module, i.e. ECMA standard.
