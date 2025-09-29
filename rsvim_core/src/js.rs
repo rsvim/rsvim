@@ -397,16 +397,16 @@ pub mod boost {
   /// - Handle Scope
   ///
   /// For more details, please see: <https://v8.dev/docs/embed>.
-  pub struct JsRuntime<'s, 'b> {
+  pub struct JsRuntime {
     /// V8 isolate.
     pub isolate: v8::OwnedIsolate,
 
     /// The state of the runtime.
     #[allow(unused)]
-    pub state: JsRuntimeStateRc<'s, 'b>,
+    pub state: JsRuntimeStateRc,
   }
 
-  impl<'s, 'b> std::fmt::Debug for JsRuntime<'s, 'b> {
+  impl std::fmt::Debug for JsRuntime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
       write!(f, "JsRuntime")
     }
