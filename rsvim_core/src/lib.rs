@@ -7,6 +7,7 @@ pub mod consts;
 pub mod content;
 pub mod coord;
 pub mod evloop;
+pub mod evloop_mock;
 pub mod js;
 pub mod lock;
 pub mod log;
@@ -26,5 +27,5 @@ mod cli_tests;
 mod coord_tests;
 #[cfg(test)]
 mod js_tests;
-#[cfg(any(test, feature = "benchmarks"))]
+#[cfg(test)]
 pub mod tests;
