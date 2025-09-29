@@ -240,9 +240,9 @@ pub mod build {
 
       let (mut isolate, global_context) = Self::create_isolate();
 
-      v8::scope_with_context!(context_scope, &mut isolate, &global_context);
+      v8::scope_with_context!(scope, &mut isolate, &global_context);
 
-      let scope = context_scope.deref_mut();
+      let scope = scope.deref_mut();
       // let _context = v8::Local::new(scope, global_context.clone());
 
       // Load, compile and evaluate all built-in modules.
