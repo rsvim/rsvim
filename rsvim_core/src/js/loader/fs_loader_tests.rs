@@ -1,8 +1,8 @@
 use super::fs_loader::*;
+use crate::evloop::mock::*;
 use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
-use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use normpath::PathExt;
 
