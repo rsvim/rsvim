@@ -34,8 +34,9 @@ fn fetch1() {
   }
 
   let mut jsrt = make_js_runtime();
-  let mut scope = jsrt.handle_scope();
-  let actual1 = fetch_module(&mut scope, &fetch1.to_string_lossy(), None);
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
+  let actual1 = fetch_module(scope, &fetch1.to_string_lossy(), None);
   assert!(actual1.is_some());
   let actual1 = actual1.unwrap();
   info!(
@@ -72,8 +73,9 @@ fn fetch2() {
   }
 
   let mut jsrt = make_js_runtime();
-  let mut scope = jsrt.handle_scope();
-  let actual2 = fetch_module(&mut scope, &fetch2.to_string_lossy(), None);
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
+  let actual2 = fetch_module(scope, &fetch2.to_string_lossy(), None);
   assert!(actual2.is_none());
 }
 
@@ -120,9 +122,10 @@ fn fetch_tree3() {
   ]);
 
   let mut jsrt = make_js_runtime();
-  let mut scope = jsrt.handle_scope();
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
   let actual1 = fetch_module_tree(
-    &mut scope,
+    scope,
     &tp.xdg_config_home.join("rsvim/fetch3.js").to_string_lossy(),
     None,
   );
@@ -226,9 +229,10 @@ fn fetch_tree4() {
   ]);
 
   let mut jsrt = make_js_runtime();
-  let mut scope = jsrt.handle_scope();
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
   let actual1 = fetch_module_tree(
-    &mut scope,
+    scope,
     &tp.xdg_config_home.join("rsvim/index.js").to_string_lossy(),
     None,
   );
