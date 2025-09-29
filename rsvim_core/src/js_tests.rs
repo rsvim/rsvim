@@ -15,6 +15,8 @@ use std::time::Duration;
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
 async fn create_snapshot1() -> IoResult<()> {
+  let temp_dir = assert_fs::TempDir::new().unwrap();
+
   // Prepare snapshot data
   let snapshot_file = {
     let js_runtime = JsRuntimeForSnapshot::new();
@@ -23,7 +25,6 @@ async fn create_snapshot1() -> IoResult<()> {
     let mut vec = Vec::with_capacity(snapshot.len());
     vec.extend_from_slice(&snapshot);
 
-    let temp_dir = assert_fs::TempDir::new().unwrap();
     let output_path = temp_dir.child("snapshot.bin");
     info!("Write snapshot to {:?}", output_path.path());
     std::fs::write(output_path.path(), vec.into_boxed_slice()).unwrap();
