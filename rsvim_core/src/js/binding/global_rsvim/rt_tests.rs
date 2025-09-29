@@ -33,7 +33,7 @@ async fn test_exit1() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    ._mock_run_with_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
@@ -73,7 +73,7 @@ async fn test_exit2() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    ._mock_run_with_operations(MockOperationReader::new(mocked_ops))
     .await?;
   event_loop.shutdown()?;
 
