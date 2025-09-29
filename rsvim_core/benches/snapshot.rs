@@ -110,7 +110,7 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   let mocked_ops = vec![
     MockOperation::Operation(Operation::GotoCommandLineExMode),
     MockOperation::Operation(Operation::CursorInsert(
-      CursorInsertPayload::Text("js Rsvim.rt.exit();".to_compact_string()),
+      CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
   ];
