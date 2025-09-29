@@ -65,7 +65,6 @@ ringbuf = { workspace = true }
 normpath = { workspace = true }
 bincode = { workspace = true }
 oxc_resolver = { workspace = true }
-assert_fs = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
@@ -107,6 +106,7 @@ timezone_provider = { workspace = true }
 [dev-dependencies]
 unicode-width = { workspace = true }
 # unicode-segmentation = { workspace = true }
+assert_fs = { workspace = true }
 bitflags = { workspace = true }
 tracing = { workspace = true, features = [
   "max_level_trace",
