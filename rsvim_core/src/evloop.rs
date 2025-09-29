@@ -323,6 +323,9 @@ impl EventLoop {
   }
 
   /// Make new event loop for testing.
+  ///
+  /// NOTE: This method should only been used for testing or running
+  /// benchmarks.
   pub fn _mock_new(
     terminal_columns: u16,
     terminal_rows: u16,
