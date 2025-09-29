@@ -7,6 +7,7 @@ use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::tests::evloop::*;
+use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
@@ -15,8 +16,12 @@ use std::time::Duration;
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
 async fn create_snapshot1() -> IoResult<()> {
-  let temp_dir = assert_fs::TempDir::new().unwrap();
-  let snapshot_file = temp_dir.child("snapshot.bin");
+  test_log_init();
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = make_configs(vec![(Path::new("rsvim.js"), "")]);
+
+  let snapshot_file = tp.xdg_data_home.child("snapshot.bin");
 
   // Prepare snapshot data
   {
