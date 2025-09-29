@@ -30,6 +30,8 @@ async fn create_snapshot1() -> IoResult<()> {
     std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
   };
 
+  let bytes = std::fs::read(snapshot_file.path()).unwrap();
+
   // Create js runtime with snapshot.
   let mut event_loop = {
     let cli_opts = CliOptions::empty();
@@ -53,7 +55,6 @@ async fn create_snapshot1() -> IoResult<()> {
 
     let writer = StdoutWriterValue::dev_null();
 
-    let bytes = std::fs::read(snapshot_file.path()).unwrap();
     let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
 
     // Js Runtime
