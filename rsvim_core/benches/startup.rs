@@ -13,7 +13,7 @@ use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
 
 fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
-  let snapshot_file = Path::new("benches_startup_snapshot.bin");
+  let snapshot_file = tp.xdg_data_home.join("snapshot.bin");
 
   // Prepare snapshot data
   let js_runtime = JsRuntimeForSnapshot::new();
