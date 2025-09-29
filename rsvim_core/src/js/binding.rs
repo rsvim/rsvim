@@ -274,8 +274,8 @@ pub fn get_internal_ref<T>(
 }
 
 /// Sets error code to exception if possible.
-pub fn set_exception_code<'s, 'b>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn set_exception_code(
+  scope: &mut v8::PinScope,
   exception: v8::Local<v8::Value>,
   error: &AnyErr,
 ) {
