@@ -1,9 +1,9 @@
 use super::js::*;
 use crate::prelude::*;
 use assert_fs::prelude::PathChild;
-use std::path::Path;
 
-fn snapshot() {
+#[test]
+fn create_snapshot1() {
   let js_runtime = JsRuntimeForSnapshot::new();
   let snapshot = js_runtime.create_snapshot();
   let snapshot = Box::from(&snapshot);
@@ -13,5 +13,5 @@ fn snapshot() {
   let temp_dir = assert_fs::TempDir::new().unwrap();
   let output_path = temp_dir.child("snapshot.bin");
   info!("Write snapshot to {:?}", output_path.path());
-  std::fs::write(output_path.as_path(), vec.into_boxed_slice()).unwrap();
+  std::fs::write(output_path.path(), vec.into_boxed_slice()).unwrap();
 }
