@@ -272,9 +272,9 @@ pub mod build {
       init_v8_isolate(&mut isolate);
 
       let global_context = {
-        v8::scope!(handle_scope, isolate);
-        let context = v8::Context::new(handle_scope, Default::default());
-        v8::Global::new(handle_scope, context)
+        v8::scope!(scope, isolate);
+        let context = v8::Context::new(scope, Default::default());
+        v8::Global::new(scope, context)
       };
 
       (isolate, global_context)
@@ -467,11 +467,11 @@ pub mod boost {
       // });
 
       let context: v8::Global<v8::Context> = {
-        v8::scope!(handle_scope, &mut *isolate);
-        let context = binding::create_new_context(handle_scope);
+        v8::scope!(scope, &mut *isolate);
+        let context = binding::create_new_context(scope);
 
         // let module_handles = get_context_data(scope, context);
-        v8::Global::new(handle_scope, context)
+        v8::Global::new(scope, context)
       };
 
       // Store state inside the v8 isolate slot.
