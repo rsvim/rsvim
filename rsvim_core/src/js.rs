@@ -261,7 +261,6 @@ pub mod build {
           JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
             context: Some(context),
           });
-
         scope.set_slot(state.clone());
 
         state
