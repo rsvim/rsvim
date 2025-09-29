@@ -1,5 +1,6 @@
 use super::js::*;
 use crate::prelude::*;
+use assert_fs::prelude::PathChild;
 use std::path::Path;
 
 fn snapshot() {
@@ -9,11 +10,8 @@ fn snapshot() {
   let mut vec = Vec::with_capacity(snapshot.len());
   vec.extend_from_slice(&snapshot);
 
-  let output_path =
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_SNAPSHOT.BIN");
-  eprintln!(
-    "[RSVIM] Writing snapshot into {:?}...",
-    output_path.as_path()
-  );
+  let temp_dir = assert_fs::TempDir::new().unwrap();
+  let output_path = temp_dir.child("snapshot.bin");
+  info!("Write snapshot to {:?}", output_path.path());
   std::fs::write(output_path.as_path(), vec.into_boxed_slice()).unwrap();
 }
