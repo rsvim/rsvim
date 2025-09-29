@@ -321,7 +321,7 @@ impl EventLoop {
     })
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   /// Make new event loop for testing.
   pub fn mock_new(
     terminal_columns: u16,
@@ -699,7 +699,7 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   pub async fn run_with_mock_events(
     &mut self,
     mut reader: MockEventReader,
@@ -744,7 +744,7 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   pub async fn run_with_mock_operations(
     &mut self,
     mut reader: MockOperationReader,

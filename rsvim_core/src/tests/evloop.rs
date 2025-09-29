@@ -22,17 +22,18 @@ use std::task::Waker;
 use std::thread_local;
 use std::time::Duration;
 
+#[cfg(debug_assertions)]
 #[derive(Debug)]
 pub struct TempConfigDir {
-  #[cfg(debug_assertions)]
   pub home_dir: assert_fs::TempDir,
-  #[cfg(debug_assertions)]
   pub xdg_config_home: assert_fs::TempDir,
-  #[cfg(debug_assertions)]
   pub xdg_cache_home: assert_fs::TempDir,
-  #[cfg(debug_assertions)]
   pub xdg_data_home: assert_fs::TempDir,
 }
+
+#[cfg(not(debug_assertions))]
+#[derive(Debug)]
+pub struct TempConfigDir {}
 
 #[derive(Debug, Clone)]
 pub struct TempPathConfig {
@@ -48,30 +49,30 @@ thread_local! {
 }
 
 impl TempConfigDir {
+  #[cfg(debug_assertions)]
   pub fn create() -> Self {
     let temp_dirs = TempConfigDir {
-      #[cfg(debug_assertions)]
       home_dir: assert_fs::TempDir::new().unwrap(),
-      #[cfg(debug_assertions)]
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
-      #[cfg(debug_assertions)]
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
-      #[cfg(debug_assertions)]
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
 
-    if cfg!(debug_assertions) {
-      let temp_path = TempPathConfig {
-        home_dir: temp_dirs.home_dir.to_path_buf(),
-        xdg_config_home: temp_dirs.xdg_config_home.to_path_buf(),
-        xdg_cache_home: temp_dirs.xdg_cache_home.to_path_buf(),
-        xdg_data_home: temp_dirs.xdg_data_home.to_path_buf(),
-      };
+    let temp_path = TempPathConfig {
+      home_dir: temp_dirs.home_dir.to_path_buf(),
+      xdg_config_home: temp_dirs.xdg_config_home.to_path_buf(),
+      xdg_cache_home: temp_dirs.xdg_cache_home.to_path_buf(),
+      xdg_data_home: temp_dirs.xdg_data_home.to_path_buf(),
+    };
 
-      TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
-    }
+    TEMP_PATH_CONFIG.with_borrow_mut(|p| *p = Some(temp_path));
 
     temp_dirs
+  }
+
+  #[cfg(not(debug_assertions))]
+  pub fn create() -> Self {
+    Self {}
   }
 }
 
