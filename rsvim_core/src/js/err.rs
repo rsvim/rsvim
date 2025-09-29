@@ -53,7 +53,6 @@ impl JsError {
     rejection: v8::Local<'s, v8::Value>,
     prefix: Option<&str>,
   ) -> Self {
-    // Create a new HandleScope.
     let message = v8::Exception::create_message(scope, rejection);
 
     let mut message_value = message
