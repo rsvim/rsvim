@@ -24,8 +24,6 @@ fn create_snapshot1() {
 
   // Create js runtime with snapshot.
   let mut event_loop = {
-    let bytes = std::fs::read(snapshot_file.path()).unwrap();
-
     let cli_opts = CliOptions::empty();
     let (
       startup_moment,
@@ -47,10 +45,13 @@ fn create_snapshot1() {
 
     let writer = StdoutWriterValue::dev_null();
 
+    let bytes = std::fs::read(snapshot_file.path()).unwrap();
+    let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
+
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
-      SnapshotData::new(bytes.clone().as_slice()),
+      SnapshotData::new(bytes),
       startup_moment,
       startup_unix_epoch,
       master_tx.clone(),
