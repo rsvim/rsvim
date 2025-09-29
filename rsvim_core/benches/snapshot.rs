@@ -152,20 +152,26 @@ async fn without_snapshot() -> IoResult<()> {
 
 pub fn criterion_benchmark(c: &mut Criterion) {
   let tp = make_configs(vec![(Path::new("rsvim.js"), "")]);
-  let snapshot = create_snapshot(&tp);
-  let rt = tokio::runtime::Runtime::new().unwrap();
 
   c.bench_function("with snapshot", |b| {
+    let snapshot = create_snapshot(&tp);
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
     b.iter(|| {
-      rt.block_on(async {
-        with_snapshot(snapshot).await;
+      let snapshot = snapshot.clone();
+      rt.block_on(async move {
+        let result = with_snapshot(snapshot).await;
+        result.unwrap();
       });
     })
   });
   c.bench_function("without snapshot", |b| {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
     b.iter(|| {
       rt.block_on(async {
-        without_snapshot().await;
+        let result = without_snapshot().await;
+        result.unwrap();
       });
     })
   });
