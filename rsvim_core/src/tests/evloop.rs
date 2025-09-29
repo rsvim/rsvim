@@ -4,8 +4,6 @@ use crate::evloop::EventLoop;
 use crate::prelude::*;
 use crate::state::ops::Operation;
 #[cfg(debug_assertions)]
-use assert_fs::TempDir;
-#[cfg(debug_assertions)]
 use assert_fs::prelude::*;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -26,10 +24,14 @@ use std::time::Duration;
 
 #[derive(Debug)]
 pub struct TempConfigDir {
-  pub home_dir: TempDir,
-  pub xdg_config_home: TempDir,
-  pub xdg_cache_home: TempDir,
-  pub xdg_data_home: TempDir,
+  #[cfg(debug_assertions)]
+  pub home_dir: assert_fs::TempDir,
+  #[cfg(debug_assertions)]
+  pub xdg_config_home: assert_fs::TempDir,
+  #[cfg(debug_assertions)]
+  pub xdg_cache_home: assert_fs::TempDir,
+  #[cfg(debug_assertions)]
+  pub xdg_data_home: assert_fs::TempDir,
 }
 
 #[derive(Debug, Clone)]
@@ -47,9 +49,13 @@ thread_local! {
 impl TempConfigDir {
   pub fn create() -> Self {
     let temp_dirs = TempConfigDir {
+      #[cfg(debug_assertions)]
       home_dir: assert_fs::TempDir::new().unwrap(),
+      #[cfg(debug_assertions)]
       xdg_config_home: assert_fs::TempDir::new().unwrap(),
+      #[cfg(debug_assertions)]
       xdg_cache_home: assert_fs::TempDir::new().unwrap(),
+      #[cfg(debug_assertions)]
       xdg_data_home: assert_fs::TempDir::new().unwrap(),
     };
 
