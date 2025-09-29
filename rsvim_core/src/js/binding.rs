@@ -233,8 +233,8 @@ pub fn set_function_to(
 }
 
 /// Creates an object with a given name under a `target` object.
-pub fn create_object_under<'s, 'b>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn create_object_under<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
   target: v8::Local<v8::Object>,
   name: &'static str,
 ) -> v8::Local<'s, v8::Object> {
