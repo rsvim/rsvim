@@ -36,6 +36,8 @@
 //!
 //! Static import runs synchronizely, dynamic import runs asynchronizely.
 
+use litemap::LiteMap;
+
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::es_module::*;
@@ -149,10 +151,10 @@ pub struct ModuleMap {
   main: Option<ModulePath>,
 
   // Maps from "Module Path" to "v8 Module".
-  index: FoldMap<ModulePath, v8::Global<v8::Module>>,
+  index: LiteMap<ModulePath, v8::Global<v8::Module>>,
 
   // Module status.
-  pub seen: FoldMap<ModulePath, ModuleStatus>,
+  pub seen: LiteMap<ModulePath, ModuleStatus>,
 
   // Pending modules.
   pub pending: Vec<ModuleGraphRc>,
@@ -168,7 +170,7 @@ impl Debug for ModuleMap {
           .index
           .keys()
           .map(|k| (k.clone(), "v8::Module".to_string()))
-          .collect::<FoldMap<String, String>>(),
+          .collect::<LiteMap<String, String>>(),
       )
       .field("seen", &self.seen)
       .field("pending", &self.pending)
@@ -181,8 +183,8 @@ impl ModuleMap {
   pub fn new() -> ModuleMap {
     Self {
       main: None,
-      index: FoldMap::new(),
-      seen: FoldMap::new(),
+      index: LiteMap::new(),
+      seen: LiteMap::new(),
       pending: vec![],
     }
   }

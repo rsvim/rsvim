@@ -43,6 +43,7 @@ use crate::js::loader::FsModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::prelude::*;
 use crate::util::paths;
+use litemap::LiteMap;
 use std::sync::LazyLock;
 // use url::Url;
 pub use es_module::*;
@@ -76,7 +77,7 @@ pub enum ModuleStatus {
   Ready,
 }
 
-pub static CORE_MODULES: LazyLock<FoldMap<&'static str, &'static str>> =
+pub static CORE_MODULES: LazyLock<LiteMap<&'static str, &'static str>> =
   LazyLock::new(|| {
     let modules = vec![
       // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
@@ -99,7 +100,7 @@ pub static CORE_MODULES: LazyLock<FoldMap<&'static str, &'static str>> =
       // ("@web/clone", include_str!("./js/structured-clone.js")),
       // ("@web/fetch", include_str!("./js/fetch.js")),
     ];
-    FoldMap::from_iter(modules)
+    LiteMap::from_iter(modules)
   });
 
 /// Creates v8 script origins, see:
