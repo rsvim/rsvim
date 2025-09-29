@@ -261,8 +261,8 @@ pub fn set_internal_ref<T>(
 }
 
 /// Gets a previously stored Rust type from a v8 object.
-pub fn get_internal_ref<T>(
-  scope: &mut v8::PinScope,
+pub fn get_internal_ref<'s, T>(
+  scope: &mut v8::PinScope<'s, '_>,
   source: v8::Local<v8::Object>,
   index: usize,
 ) -> &'s mut T {
