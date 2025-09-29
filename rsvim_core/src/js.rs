@@ -253,7 +253,6 @@ pub mod build {
 
       let state = {
         v8::scope_with_context!(scope, &mut *isolate, context.clone());
-
         // Load, compile and evaluate all built-in modules.
         init_builtin_modules(scope);
         let state =
@@ -261,7 +260,6 @@ pub mod build {
             context: Some(context),
           });
         scope.set_slot(state.clone());
-
         state
       };
 
