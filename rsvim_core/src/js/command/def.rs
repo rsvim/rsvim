@@ -30,7 +30,7 @@ impl Debug for CommandDefinition {
 
 impl CommandDefinition {
   pub fn from_v8_object(
-    scope: &mut v8::HandleScope,
+    scope: &mut v8::PinScope,
     args: v8::FunctionCallbackArguments,
   ) -> Self {
     debug_assert!(args.length() == 4);
@@ -50,10 +50,10 @@ impl CommandDefinition {
     }
   }
 
-  pub fn into_v8_object<'a>(
+  pub fn into_v8_object<'s>(
     &self,
-    scope: &mut v8::HandleScope<'a>,
-  ) -> v8::Local<'a, v8::Object> {
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
     // name

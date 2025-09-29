@@ -27,7 +27,7 @@ pub struct BuiltinCommandFuture {
 }
 
 impl JsFuture for BuiltinCommandFuture {
-  fn run(&mut self, scope: &mut v8::HandleScope) {
+  fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|BuiltinCommandFuture| run:{:?}", self.task_id);
     let filename = format!("<command-js:{}>", self.task_id);
 

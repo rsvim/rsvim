@@ -27,7 +27,7 @@ pub fn module_resolve_cb<'a>(
   referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
   // Get `CallbackScope` from context.
-  let scope = &mut unsafe { v8::CallbackScope::new(context) };
+  v8::callback_scope!(unsafe scope, context);
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
 
@@ -57,8 +57,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   meta: v8::Local<v8::Object>,
 ) {
   // Get `CallbackScope` from context.
-  let scope = &mut unsafe { v8::CallbackScope::new(context) };
-  let scope = &mut v8::HandleScope::new(scope);
+  v8::callback_scope!(unsafe scope, context);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();
@@ -106,7 +105,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 }
 
 fn import_meta_resolve(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -138,7 +137,7 @@ fn import_meta_resolve(
 /// See: <https://v8.dev/features/promise-combinators>.
 pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   // Create a v8 callback-scope.
-  let scope = &mut unsafe { v8::CallbackScope::new(&message) };
+  v8::callback_scope!(unsafe scope, &message);
   let undefined = v8::undefined(scope).into();
   let event = message.get_event();
   trace!("|promise_reject_cb| event:{event:?}, message:{message:?}");
@@ -179,7 +178,7 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
 // Called when we require the embedder to load a module.
 // https://docs.rs/v8/0.56.1/v8/trait.HostImportModuleDynamicallyCallback.html
 pub fn host_import_module_dynamically_cb<'s>(
-  scope: &mut v8::HandleScope<'s>,
+  scope: &mut v8::PinScope<'s, '_>,
   _host_defined_options: v8::Local<'s, v8::Data>,
   base: v8::Local<'s, v8::Value>,
   specifier: v8::Local<'s, v8::String>,

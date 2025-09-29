@@ -26,7 +26,7 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
 
 /// `Rsvim.cmd.echo` API.
 pub fn echo(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
@@ -41,7 +41,7 @@ pub fn echo(
 
 /// `Rsvim.cmd.create` API.
 pub fn create(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -64,7 +64,7 @@ pub fn create(
 
 /// `Rsvim.cmd.list` API.
 pub fn list(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -87,7 +87,7 @@ pub fn list(
 
 /// `Rsvim.cmd.remove` API.
 pub fn remove(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {

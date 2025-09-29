@@ -13,7 +13,7 @@ struct TimeoutFuture {
 }
 
 impl JsFuture for TimeoutFuture {
-  fn run(&mut self, scope: &mut v8::HandleScope) {
+  fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|TimeoutFuture| run");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
@@ -23,7 +23,7 @@ impl JsFuture for TimeoutFuture {
       .map(|arg| v8::Local::new(scope, arg))
       .collect();
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    v8::tc_scope!(let tc_scope, scope);
 
     callback.call(tc_scope, undefined, &args);
 
@@ -42,7 +42,7 @@ impl JsFuture for TimeoutFuture {
 
 /// Javascript `setTimeout`/`setInterval` API.
 pub fn create_timer(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -101,7 +101,7 @@ pub fn create_timer(
 
 /// Javascript `clearTimeout`/`clearInterval` API.
 pub fn clear_timer(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {

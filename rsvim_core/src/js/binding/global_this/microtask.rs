@@ -5,7 +5,7 @@ use crate::js::JsRuntime;
 use crate::js::err::report_js_error;
 
 pub fn report_error(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {
@@ -24,7 +24,7 @@ pub fn report_error(
 
 // This method queues a microtask to invoke callback.
 pub fn queue_microtask(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   _: v8::ReturnValue,
 ) {

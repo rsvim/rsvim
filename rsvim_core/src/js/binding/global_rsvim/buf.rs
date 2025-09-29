@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 /// `Rsvim.buf.current` API.
 pub fn current(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -31,7 +31,7 @@ pub fn current(
 
 /// `Rsvim.buf.list` API.
 pub fn list(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
@@ -53,7 +53,7 @@ pub fn list(
 
 /// `Rsvim.buf.writeSync` API.
 pub fn write_sync(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {

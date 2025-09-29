@@ -287,11 +287,12 @@ async fn test_recreate1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
 
   let src: &str = r#"
-const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;});
-Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
-
-const prev2 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(2); return 2;});
-Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
+setTimeout(() => {
+  const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;});
+  Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
+  const prev2 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(2); return 2;});
+  Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
+});
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js

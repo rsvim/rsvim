@@ -66,11 +66,11 @@ pub fn v8_version() -> &'static str {
 // /// A vector with JS callbacks and parameters.
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
 
-/// An abstract interface for javascript `Promise` and `async`.
-/// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
-/// the async task into tokio `spawn` API.
+/// An abstract interface for javascript `Promise` and `async`. Since
+/// everything in V8 needs the `&mut v8::PinScope` to operate with, we cannot
+/// simply put the async task into tokio `spawn` API.
 pub trait JsFuture {
-  fn run(&mut self, scope: &mut v8::HandleScope);
+  fn run(&mut self, scope: &mut v8::PinScope);
 }
 
 pub type JsTimerId = i32;
@@ -147,7 +147,7 @@ fn init_v8_isolate(isolate: &mut v8::OwnedIsolate) {
   );
 }
 
-fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
+fn init_builtin_modules(scope: &mut v8::PinScope) {
   static BUILTIN_MODULES: [(/* filename */ &str, /* source */ &str); 2] = [
     (
       "00__web.js",
@@ -169,7 +169,7 @@ fn init_builtin_modules(scope: &mut v8::HandleScope<'_>) {
     let filename = module.0;
     let source = module.1;
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    v8::tc_scope!(let tc_scope, scope);
 
     let module = fetch_module(tc_scope, filename, Some(source)).unwrap();
     let _ = module
@@ -238,23 +238,30 @@ pub mod build {
     pub fn new() -> Self {
       init_v8_platform(true, None);
 
-      let (mut isolate, global_context) = Self::create_isolate();
+      let mut isolate =
+        v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
 
-      let mut context_scope =
-        v8::HandleScope::with_context(&mut isolate, global_context.clone());
-      let scope = &mut context_scope;
-      // let _context = v8::Local::new(scope, global_context.clone());
+      // NOTE: For snapshot runtime, it cannot call the
+      // `init_v8_isolate(&mut isolate)` API because it doesn't have many
+      // components such as "ModuleMap".
 
-      // Load, compile and evaluate all built-in modules.
-      init_builtin_modules(scope);
+      let context: v8::Global<v8::Context> = {
+        v8::scope!(scope, &mut *isolate);
+        let context = v8::Context::new(scope, Default::default());
+        v8::Global::new(scope, context)
+      };
 
-      let state = JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
-        context: Some(global_context),
-      });
-
-      scope.set_slot(state.clone());
-
-      drop(context_scope);
+      let state = {
+        v8::scope_with_context!(scope, &mut *isolate, context.clone());
+        // Load, compile and evaluate all built-in modules.
+        init_builtin_modules(scope);
+        let state =
+          JsRuntimeStateForSnapshot::to_rc(JsRuntimeStateForSnapshot {
+            context: Some(context),
+          });
+        scope.set_slot(state.clone());
+        state
+      };
 
       JsRuntimeForSnapshot {
         isolate: Some(isolate),
@@ -262,27 +269,16 @@ pub mod build {
       }
     }
 
-    fn create_isolate() -> (v8::OwnedIsolate, v8::Global<v8::Context>) {
-      let mut isolate =
-        v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
-
-      init_v8_isolate(&mut isolate);
-
-      let global_context = {
-        let scope = &mut v8::HandleScope::new(&mut isolate);
-        let context = v8::Context::new(scope, Default::default());
-        v8::Global::new(scope, context)
-      };
-
-      (isolate, global_context)
-    }
-
     pub fn create_snapshot(mut self) -> v8::StartupData {
       // Set default context
       {
-        let global_context = self.context();
-        let mut scope = self.handle_scope();
-        let context = v8::Local::new(&mut scope, global_context);
+        let context = self.context();
+        v8::scope_with_context!(
+          scope,
+          self.isolate.as_mut().unwrap(),
+          context.clone()
+        );
+        let context = v8::Local::new(scope, context);
         scope.set_default_context(context);
       }
 
@@ -313,11 +309,6 @@ pub mod build {
 
     pub fn get_state(&self) -> JsRuntimeStateForSnapshotRc {
       Self::state(self.isolate.as_ref().unwrap())
-    }
-
-    pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
-      let context = self.context();
-      v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
     }
   }
 }
@@ -455,7 +446,7 @@ pub mod boost {
       // });
 
       let context: v8::Global<v8::Context> = {
-        let scope = &mut v8::HandleScope::new(&mut *isolate);
+        v8::scope!(scope, &mut *isolate);
         let context = binding::create_new_context(scope);
 
         // let module_handles = get_context_data(scope, context);
@@ -529,7 +520,7 @@ pub mod boost {
       init_v8_isolate(&mut isolate);
 
       let context: v8::Global<v8::Context> = {
-        let scope = &mut v8::HandleScope::new(&mut *isolate);
+        v8::scope!(scope, &mut isolate);
         let context = binding::create_new_context(scope);
 
         // let module_handles = get_context_data(scope, context);
@@ -569,7 +560,7 @@ pub mod boost {
       };
 
       // When without snapshot, we need to initialize builtin js modules.
-      init_builtin_modules(&mut runtime.handle_scope());
+      runtime.with_scope(init_builtin_modules);
 
       // // Start inspector agent is requested.
       // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -580,17 +571,24 @@ pub mod boost {
       runtime
     }
 
+    fn with_scope<F>(&mut self, func: F)
+    where
+      F: FnOnce(&mut v8::PinScope),
+    {
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
+      func(scope);
+    }
+
     /// Executes javascript source code as ES module, i.e. ECMA standard.
     pub fn execute_module(&mut self, filename: &str, source: Option<&str>) {
       // Get a reference to v8's scope.
-      let scope = &mut self.handle_scope();
-
-      execute_module(scope, filename, source)
+      self.with_scope(|scope| execute_module(scope, filename, source));
     }
 
     /// Runs a single tick of the event-loop.
     pub fn tick_event_loop(&mut self) {
-      run_next_tick_callbacks(&mut self.handle_scope());
+      self.with_scope(run_next_tick_callbacks);
       self.fast_forward_imports();
       // self.event_loop.tick();
       self.run_pending_futures();
@@ -629,7 +627,8 @@ pub mod boost {
     /// Runs pending javascript tasks which have received results from master.
     fn run_pending_futures(&mut self) {
       // Get a handle-scope and a reference to the runtime's state.
-      let scope = &mut self.handle_scope();
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
       let state_rc = Self::state(scope);
 
       // Drain all pending messages
@@ -713,7 +712,8 @@ pub mod boost {
     /// Checks for imports (static/dynamic) ready for execution.
     fn fast_forward_imports(&mut self) {
       // Get a v8 handle-scope.
-      let scope = &mut self.handle_scope();
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
       let state_rc = JsRuntime::state(scope);
       let mut ready_imports = vec![];
 
@@ -779,7 +779,7 @@ pub mod boost {
       // Execute the root module from the graph.
       for graph_rc in ready_imports {
         // Create a tc scope.
-        let tc_scope = &mut v8::TryCatch::new(scope);
+        v8::tc_scope!(let tc_scope, scope);
 
         let graph = graph_rc.borrow();
         let path = graph.root_rc().borrow().path().clone();
@@ -925,13 +925,6 @@ pub mod boost {
       Self::state(&self.isolate)
     }
 
-    /// Returns a v8 handle scope for the runtime.
-    /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
-    pub fn handle_scope(&mut self) -> v8::HandleScope<'_> {
-      let context = self.context();
-      v8::HandleScope::with_context(&mut self.isolate, context)
-    }
-
     /// Returns a global context created for the runtime.
     /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
     pub fn context(&mut self) -> v8::Global<v8::Context> {
@@ -947,8 +940,8 @@ pub mod boost {
   }
 }
 
-pub fn execute_module(
-  scope: &mut v8::HandleScope,
+pub fn execute_module<'s, 'b>(
+  scope: &mut v8::PinScope<'s, 'b>,
   filename: &str,
   source: Option<&str>,
 ) {
@@ -975,7 +968,7 @@ pub fn execute_module(
   };
   // trace!("Module path resolved, filename:{filename:?}({path:?})");
 
-  let tc_scope = &mut v8::TryCatch::new(scope);
+  v8::tc_scope!(let tc_scope, scope);
 
   let module = match fetch_module_tree(tc_scope, filename, source) {
     Some(module) => module,
@@ -1038,12 +1031,12 @@ pub fn execute_module(
 }
 
 /// Runs callbacks stored in the next-tick queue.
-fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
+fn run_next_tick_callbacks(scope: &mut v8::PinScope) {
   // let state_rc = JsRuntime::state(scope);
   // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
   // let undefined = v8::undefined(scope);
-  let tc_scope = &mut v8::TryCatch::new(scope);
+  v8::tc_scope!(let tc_scope, scope);
   //
   // for (cb, params) in callbacks {
   //   // Create a local handle for the callback and its parameters.
@@ -1075,7 +1068,7 @@ fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
 }
 
 // Returns an error if an uncaught exception or unhandled rejection has been captured.
-pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
+pub fn check_exceptions(scope: &mut v8::PinScope) -> Option<JsError> {
   let state_rc = JsRuntime::state(scope);
   let maybe_exception = state_rc.borrow_mut().exceptions.exception.take();
 
@@ -1087,7 +1080,7 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
       let origin = v8::String::new(scope, "uncaughtException").unwrap();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, origin.into()]);
@@ -1125,7 +1118,7 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
     if let Some(callback) = state.exceptions.unhandled_rejection_cb.as_ref() {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, promise.into()]);
@@ -1147,7 +1140,7 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
       let callback = v8::Local::new(scope, callback);
       let undefined = v8::undefined(scope).into();
       let origin = v8::String::new(scope, "unhandledRejection").unwrap();
-      let tc_scope = &mut v8::TryCatch::new(scope);
+      v8::tc_scope!(let tc_scope, scope);
       drop(state);
 
       callback.call(tc_scope, undefined, &[exception, origin.into()]);

@@ -108,7 +108,7 @@ pub static CORE_MODULES: LazyLock<FoldMap<&'static str, &'static str>> =
 /// - MDN script: <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script>.
 /// - HTML5 origin: <https://www.w3.org/TR/2011/WD-html5-20110525/origin-0.html>.
 pub fn create_origin<'s>(
-  scope: &mut v8::HandleScope<'s, ()>,
+  scope: &mut v8::PinScope<'s, '_>,
   name: &str,
   is_module: bool,
 ) -> v8::ScriptOrigin<'s> {
@@ -215,11 +215,11 @@ pub async fn async_load_import(
 /// Resolves module imports without dependency.
 ///
 /// TODO: Support dependencies resolving for custom snapshot.
-pub fn fetch_module<'a>(
-  scope: &mut v8::HandleScope<'a>,
+pub fn fetch_module<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
   filename: &str,
   source: Option<&str>,
-) -> Option<v8::Local<'a, v8::Module>> {
+) -> Option<v8::Local<'s, v8::Module>> {
   // Create a script origin.
   let origin = create_origin(scope, filename, true);
 
@@ -247,11 +247,11 @@ pub fn fetch_module<'a>(
 
 /// Resolves module imports synchronously.
 /// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
-pub fn fetch_module_tree<'a>(
-  scope: &mut v8::HandleScope<'a>,
+pub fn fetch_module_tree<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
   filename: &str,
   source: Option<&str>,
-) -> Option<v8::Local<'a, v8::Module>> {
+) -> Option<v8::Local<'s, v8::Module>> {
   let module = match fetch_module(scope, filename, source) {
     Some(module) => module,
     None => {

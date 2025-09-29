@@ -184,7 +184,7 @@ impl EsModuleFuture {
 
 impl JsFuture for EsModuleFuture {
   /// Drives the future to completion.
-  fn run(&mut self, scope: &mut v8::HandleScope) {
+  fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|EsModuleFuture run|");
     let state_rc = JsRuntime::state(scope);
     let mut state = state_rc.borrow_mut();
@@ -210,7 +210,7 @@ impl JsFuture for EsModuleFuture {
       }
     };
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
+    v8::tc_scope!(let tc_scope, scope);
     let origin = create_origin(tc_scope, &self.path, true);
 
     // Compile source and get it's dependencies.
