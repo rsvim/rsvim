@@ -8,6 +8,9 @@ use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::tests::evloop::*;
 use assert_fs::prelude::PathChild;
+use compact_str::ToCompactString;
+use ringbuf::traits::*;
+use std::time::Duration;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
