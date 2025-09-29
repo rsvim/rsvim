@@ -247,8 +247,8 @@ pub fn create_object_under<'s>(
 }
 
 /// Stores a Rust type inside a v8 object.
-pub fn set_internal_ref<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn set_internal_ref<T>(
+  scope: &mut v8::PinScope,
   target: v8::Local<v8::Object>,
   index: usize,
   data: T,
@@ -261,8 +261,8 @@ pub fn set_internal_ref<'s, 'b, T>(
 }
 
 /// Gets a previously stored Rust type from a v8 object.
-pub fn get_internal_ref<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
+pub fn get_internal_ref<T>(
+  scope: &mut v8::PinScope,
   source: v8::Local<v8::Object>,
   index: usize,
 ) -> &'s mut T {
