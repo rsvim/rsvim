@@ -140,7 +140,24 @@ async fn run_without_snapshot(tp: &TempPathConfig) -> IoResult<()> {
   Ok(())
 }
 
+fn tokio_run_with_snapshot(tp: &TempPathConfig, snapshot: Vec<u8>) {
+  let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
+  evloop_tokio_runtime.block_on(async {
+    run_with_snapshot(tp, snapshot).await;
+  });
+}
+
+fn tokio_run_without_snapshot(tp: &TempPathConfig) {
+  let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
+  evloop_tokio_runtime.block_on(async {
+    run_without_snapshot(tp).await;
+  });
+}
+
 pub fn criterion_benchmark(c: &mut Criterion) {
+  let tp = TempPathConfig::create();
+  let snapshot = create_snapshot(&tp);
+
   c.bench_function("With snapshot", |b| b.iter(|| fibonacci(black_box(20))));
   c.bench_function("Without snapshot", |b| b.iter(|| fibonacci(black_box(20))));
 }
