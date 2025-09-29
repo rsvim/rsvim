@@ -117,6 +117,29 @@ async fn run_with_snapshot(
   Ok(())
 }
 
+async fn run_without_snapshot(tp: &TempPathConfig) -> IoResult<()> {
+  // Create js runtime without snapshot.
+  let cli_opts = CliOptions::empty();
+  let mut event_loop = make_event_loop(10, 10, cli_opts);
+
+  // Run the event loop.
+  let mocked_ops = vec![
+    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::CursorInsert(
+      CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
+    )),
+    MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
+  ];
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  Ok(())
+}
+
 pub fn criterion_benchmark(c: &mut Criterion) {
   c.bench_function("With snapshot", |b| b.iter(|| fibonacci(black_box(20))));
   c.bench_function("Without snapshot", |b| b.iter(|| fibonacci(black_box(20))));
