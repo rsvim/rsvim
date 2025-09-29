@@ -316,12 +316,6 @@ pub mod build {
     pub fn get_state(&self) -> JsRuntimeStateForSnapshotRc {
       Self::state(self.isolate.as_ref().unwrap())
     }
-
-    pub fn handle_scope(&mut self) -> v8::PinScope<'_, '_> {
-      let context = self.context();
-      v8::scope_with_context!(scope, self.isolate.as_mut().unwrap(), context);
-      scope
-    }
   }
 }
 
@@ -357,7 +351,7 @@ pub mod boost {
   }
 
   /// The state of js runtime.
-  pub struct JsRuntimeState<'s, 'b> {
+  pub struct JsRuntimeState {
     /// A sand-boxed execution context with its own set of built-in objects and functions.
     pub context: v8::Global<v8::Context>,
     /// Holds information about resolved ES modules.
@@ -367,7 +361,7 @@ pub mod boost {
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
-    pub pending_futures: Vec<Box<dyn JsFuture<'s, 'b>>>,
+    pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
     pub startup_moment: Instant,
     /// Specifies the timestamp which the current process began in Unix time.
@@ -392,16 +386,7 @@ pub mod boost {
     // Data Access for RSVIM }
   }
 
-  pub type JsRuntimeStateRc<'s, 'b> =
-    std::rc::Rc<std::cell::RefCell<JsRuntimeState<'s, 'b>>>;
-  pub type JsRuntimeStateWk<'s, 'b> =
-    std::rc::Weak<std::cell::RefCell<JsRuntimeState<'s, 'b>>>;
-
-  impl<'s, 'b> JsRuntimeState<'s, 'b> {
-    pub fn to_rc(value: JsRuntimeState<'s, 'b>) -> JsRuntimeStateRc<'s, 'b> {
-      std::rc::Rc::new(std::cell::RefCell::new(value))
-    }
-  }
+  rc_refcell_ptr!(JsRuntimeState);
 
   /// Javascript runtime.
   ///
@@ -734,7 +719,8 @@ pub mod boost {
     /// Checks for imports (static/dynamic) ready for execution.
     fn fast_forward_imports(&mut self) {
       // Get a v8 handle-scope.
-      let scope = &mut self.handle_scope();
+      let context = self.context();
+      v8::scope_with_context!(scope, &mut self.isolate, context);
       let state_rc = JsRuntime::state(scope);
       let mut ready_imports = vec![];
 
@@ -944,14 +930,6 @@ pub mod boost {
     /// Returns the runtime's state.
     pub fn get_state(&self) -> JsRuntimeStateRc {
       Self::state(&self.isolate)
-    }
-
-    /// Returns a v8 handle scope for the runtime.
-    /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
-    pub fn handle_scope(&mut self) -> v8::PinScope<'_, '_> {
-      let context = self.context();
-      v8::scope_with_context!(context_scope, &mut self.isolate, context);
-      context_scope.deref()
     }
 
     /// Returns a global context created for the runtime.
