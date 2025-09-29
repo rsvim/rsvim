@@ -54,9 +54,9 @@ pub struct CommandAttributes {
 }
 
 impl CommandAttributes {
-  pub fn from_v8_object<'a>(
+  pub fn from_v8_object<'s>(
     scope: &mut v8::PinScope,
-    value: v8::Local<'a, v8::Object>,
+    value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
 
@@ -87,10 +87,10 @@ impl CommandAttributes {
     builder.build().unwrap()
   }
 
-  pub fn into_v8_object<'a>(
+  pub fn into_v8_object<'s, 'b>(
     &self,
-    scope: &mut v8::HandleScope<'a>,
-  ) -> v8::Local<'a, v8::Object> {
+    scope: &mut v8::PinScope<'s, 'b>,
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
     // bang
