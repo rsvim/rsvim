@@ -3,7 +3,6 @@ use compact_str::ToCompactString;
 use criterion::Criterion;
 use criterion::criterion_group;
 use criterion::criterion_main;
-use ringbuf::traits::*;
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::evloop::writer::StdoutWriterValue;
