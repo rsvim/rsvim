@@ -45,10 +45,6 @@ use std::ffi::c_void;
 pub fn create_new_context<'s, 'b>(
   scope: &mut v8::PinScope<'s, 'b, ()>,
 ) -> v8::Local<'s, v8::Context> {
-  // Here we need an EscapableHandleScope so V8 doesn't drop the
-  // newly created HandleScope on return. (https://v8.dev/docs/embed#handles-and-garbage-collection)
-  v8::escapable_handle_scope!(let scope, scope);
-
   // Create and enter a new JavaScript context.
   let context = v8::Context::new(scope, Default::default());
   let global = context.global(scope);
@@ -192,9 +188,7 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "rt_exit", global_rsvim::rt::exit);
   }
 
-  // Expose low-level functions to JavaScript.
-  // process::initialize(scope, global);
-  scope.escape(context)
+  context
 }
 
 /// Adds a property with the given name and value, into the given object.
