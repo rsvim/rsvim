@@ -26,5 +26,5 @@ mod cli_tests;
 mod coord_tests;
 #[cfg(test)]
 mod js_tests;
-#[cfg(test)]
+#[cfg(any(test, debug_assertions))]
 pub mod tests;
