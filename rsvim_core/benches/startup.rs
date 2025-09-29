@@ -1,7 +1,5 @@
-use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use ringbuf::traits::*;
+use criterion::{Criterion, criterion_group, criterion_main};
 use rsvim_core::cli::CliOptions;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::evloop::writer::StdoutWriterValue;
@@ -12,7 +10,6 @@ use rsvim_core::state::ops::CursorInsertPayload;
 use rsvim_core::state::ops::Operation;
 use rsvim_core::tests::evloop::*;
 use rsvim_core::tests::log::init as test_log_init;
-use std::time::Duration;
 
 fn create_snapshot(tp: &TempPathConfig) -> Vec<u8> {
   let snapshot_file = Path::new("benches_startup_snapshot.bin");
