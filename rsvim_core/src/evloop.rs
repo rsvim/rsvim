@@ -30,6 +30,7 @@ use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
+use smallvec::SmallVec;
 use std::sync::Arc;
 use std::time::Instant;
 use std::time::SystemTime;
@@ -662,7 +663,8 @@ impl EventLoop {
 
     let mut reader = EventStream::new();
     loop {
-      let mut master_messages: Vec<MasterMessage> = vec![];
+      let mut master_messages: SmallVec<[MasterMessage; *CHANNEL_BUF_SIZE]> =
+        SmallVec::with_capacity(*CHANNEL_BUF_SIZE);
       let mut js_messages: Vec<JsMessage> = vec![];
 
       tokio::select! {
