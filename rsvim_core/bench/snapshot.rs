@@ -14,23 +14,23 @@ use rsvim_core::tests::evloop::*;
 use rsvim_core::tests::log::init as test_log_init;
 use std::time::Duration;
 
-fn create_snapshot(tp: &TempConfigDir) -> IoResult<()> {
+fn create_snapshot(tp: &TempConfigDir) -> Vec<u8> {
   let snapshot_file = tp.xdg_data_home.child("snapshot.bin");
 
-  // Prepare snapshot data
-  {
-    let js_runtime = JsRuntimeForSnapshot::new();
-    let snapshot = js_runtime.create_snapshot();
-    let snapshot = Box::from(&snapshot);
-    let mut vec = Vec::with_capacity(snapshot.len());
-    vec.extend_from_slice(&snapshot);
+  let js_runtime = JsRuntimeForSnapshot::new();
+  let snapshot = js_runtime.create_snapshot();
+  let snapshot = Box::from(&snapshot);
+  let mut vec = Vec::with_capacity(snapshot.len());
+  vec.extend_from_slice(&snapshot);
 
-    info!("Write snapshot to {:?}", snapshot_file.path());
-    std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
-  };
+  info!("Write snapshot to {:?}", snapshot_file.path());
+  std::fs::write(snapshot_file.path(), vec.into_boxed_slice()).unwrap();
 
-  let bytes = std::fs::read(snapshot_file.path()).unwrap();
+  let snapshot = std::fs::read(snapshot_file.path()).unwrap();
+  snapshot
+}
 
+async fn with_snapshot(tp: &TempConfigDir, snapshot: Vec<u8>) -> IoResult<()> {
   // Create js runtime with snapshot.
   let mut event_loop = {
     let cli_opts = CliOptions::empty();
@@ -53,8 +53,7 @@ fn create_snapshot(tp: &TempConfigDir) -> IoResult<()> {
     ) = EventLoop::_internal_new(10, 10).unwrap();
 
     let writer = StdoutWriterValue::dev_null();
-
-    let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
+    let bytes: &'static [u8] = Box::leak(snapshot.into_boxed_slice());
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -101,7 +100,6 @@ fn create_snapshot(tp: &TempConfigDir) -> IoResult<()> {
       CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
-    MockOperation::SleepFor(Duration::from_millis(50)),
   ];
 
   event_loop.initialize()?;
@@ -126,7 +124,7 @@ fn create_snapshot(tp: &TempConfigDir) -> IoResult<()> {
   Ok(())
 }
 
-async fn create_snapshot1() -> IoResult<()> {
+async fn with_snapshot() -> IoResult<()> {
   test_log_init();
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -244,6 +242,8 @@ async fn create_snapshot1() -> IoResult<()> {
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
+  let tp = make_configs(vec![(Path::new("rsvim.js"), "")]);
+
   c.bench_function("with snapshot", |b| b.iter(|| fibonacci(black_box(20))));
   c.bench_function("without snapshot", |b| b.iter(|| fibonacci(black_box(20))));
 }
