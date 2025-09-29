@@ -273,9 +273,8 @@ pub mod build {
     pub fn create_snapshot(mut self) -> v8::StartupData {
       // Set default context
       {
-        let global_context = self.context();
-        let context = v8::Local::new(&mut scope, global_context);
-        scope.set_default_context(context);
+        let context = self.context();
+        v8::scope_with_context!(scope, self.isolate.as_mut().unwrap(), context);
       }
 
       // Drop state (and the global context inside)
