@@ -538,7 +538,10 @@ impl EventLoop {
   }
 
   #[cfg(test)]
-  async fn process_operation(&mut self, op: Option<IoResult<MockOperation>>) {
+  async fn _process_mocked_operations(
+    &mut self,
+    op: Option<IoResult<MockOperation>>,
+  ) {
     match op {
       Some(Ok(op)) => {
         trace!("Polled editor operation ok: {:?}", op);
@@ -763,7 +766,7 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
-          self.process_operation(op).await;
+          self._process_mocked_operations(op).await;
         }
         master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
           debug_assert_eq!(master_n, master_messages.len());
