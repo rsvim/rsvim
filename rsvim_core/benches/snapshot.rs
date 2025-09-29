@@ -107,7 +107,7 @@ fn create_event_loop(snapshot: Option<Vec<u8>>) -> EventLoop {
   }
 }
 
-fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
+async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   // Run the event loop.
   let mocked_ops = vec![
     MockOperation::Operation(Operation::GotoCommandLineExMode),
@@ -141,13 +141,13 @@ async fn with_snapshot(tp: &TempConfigDir, snapshot: Vec<u8>) -> IoResult<()> {
   // Create js runtime with snapshot.
   let mut event_loop = create_event_loop(Some(snapshot));
 
-  run_event_loop(event_loop)
+  run_event_loop(event_loop).await
 }
 
 async fn without_snapshot(tp: &TempConfigDir) -> IoResult<()> {
   let mut event_loop = create_event_loop(None);
 
-  run_event_loop(event_loop)
+  run_event_loop(event_loop).await
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
