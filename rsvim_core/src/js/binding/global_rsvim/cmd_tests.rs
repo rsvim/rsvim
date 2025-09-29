@@ -43,7 +43,7 @@ async fn test_echo1_should_panic_with_missing_param() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -97,7 +97,7 @@ async fn test_echo2_should_panic_with_null_param() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -145,7 +145,7 @@ async fn test_echo3() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -198,7 +198,7 @@ async fn test_echo4() -> IoResult<()> {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -245,7 +245,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -303,7 +303,7 @@ setTimeout(() => {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -376,7 +376,7 @@ Rsvim.cmd.list().forEach((cmd_def) => {
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -443,7 +443,7 @@ Rsvim.cmd.echo(prev.name);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -491,7 +491,7 @@ Rsvim.cmd.echo(`${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -547,7 +547,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -595,7 +595,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -643,7 +643,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -691,7 +691,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -739,7 +739,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -787,7 +787,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -835,7 +835,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -883,7 +883,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -931,7 +931,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 
@@ -979,7 +979,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
 
   event_loop.initialize()?;
   event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
+    ._run_with_mocked_key_events(MockEventReader::new(mocked_events))
     .await?;
   event_loop.shutdown()?;
 

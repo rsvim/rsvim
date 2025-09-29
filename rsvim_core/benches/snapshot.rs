@@ -117,7 +117,7 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   ];
 
   ev.initialize()?;
-  ev.run_with_mock_operations(MockOperationReader::new(mocked_ops))
+  ev._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
     .await?;
   ev.shutdown()?;
 

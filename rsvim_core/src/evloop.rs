@@ -42,19 +42,12 @@ use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
-#[cfg(debug_assertions)]
 use crate::tests::evloop::MockEventReader;
-#[cfg(debug_assertions)]
 use crate::tests::evloop::MockOperation;
-#[cfg(debug_assertions)]
 use crate::tests::evloop::MockOperationReader;
-#[cfg(debug_assertions)]
 use bitflags::bitflags_match;
-#[cfg(debug_assertions)]
 use crossterm::event::KeyCode;
-#[cfg(debug_assertions)]
 use crossterm::event::KeyEventKind;
-#[cfg(debug_assertions)]
 use crossterm::event::KeyModifiers;
 
 #[derive(Debug)]
@@ -121,8 +114,7 @@ pub struct EventLoop {
   // pub jsrt_rx: Receiver<JsMessage>,
 }
 
-#[cfg(debug_assertions)]
-fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
+fn _is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
     Some(Ok(Event::Key(key_event))) => {
       if key_event.code == KeyCode::Char('d')
@@ -536,8 +528,10 @@ impl EventLoop {
     }
   }
 
-  #[cfg(debug_assertions)]
-  async fn process_operation(&mut self, op: Option<IoResult<MockOperation>>) {
+  async fn _process_mocked_operation(
+    &mut self,
+    op: Option<IoResult<MockOperation>>,
+  ) {
     match op {
       Some(Ok(op)) => {
         trace!("Polled editor operation ok: {:?}", op);
@@ -698,8 +692,7 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(debug_assertions)]
-  pub async fn run_with_mock_events(
+  pub async fn _run_with_mocked_key_events(
     &mut self,
     mut reader: MockEventReader,
   ) -> IoResult<()> {
@@ -712,7 +705,7 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
-          if is_ctrl_d(&event) {
+          if _is_ctrl_d(&event) {
             break;
           }
           self.process_event(event).await;
@@ -743,8 +736,7 @@ impl EventLoop {
     Ok(())
   }
 
-  #[cfg(debug_assertions)]
-  pub async fn run_with_mock_operations(
+  pub async fn _run_with_mocked_operations(
     &mut self,
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
@@ -757,7 +749,7 @@ impl EventLoop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
-          self.process_operation(op).await;
+          self._process_mocked_operation(op).await;
         }
         master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
           debug_assert_eq!(master_n, master_messages.len());
