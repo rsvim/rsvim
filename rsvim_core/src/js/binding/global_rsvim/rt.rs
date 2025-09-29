@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 /// Exit editor.
 pub fn exit(
-  scope: &mut v8::HandleScope,
+  scope: &mut v8::PinScope,
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
