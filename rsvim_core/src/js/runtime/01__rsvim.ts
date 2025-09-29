@@ -232,7 +232,7 @@ export interface RsvimCmd {
    * Create a ex command with a callback function.
    *
    * :::warning
-   * The only builtin command `js` cannot be override.
+   * The builtin command `js` cannot be override.
    * :::
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
@@ -299,7 +299,7 @@ export interface RsvimCmd {
    * Remove an ex command by name.
    *
    * :::warning
-   * The only builtin command `js` cannot be removed.
+   * The builtin command `js` cannot be removed.
    * :::
    *
    * @param {string} name - The command name to be removed.
