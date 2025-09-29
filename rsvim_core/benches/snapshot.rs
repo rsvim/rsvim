@@ -111,7 +111,7 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   let mocked_ops = vec![
     MockOperation::Operation(Operation::GotoCommandLineExMode),
     MockOperation::Operation(Operation::CursorInsert(
-      CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
+      CursorInsertPayload::Text("js Rsvim.rt.exit();".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
   ];
@@ -120,18 +120,6 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
   ev._run_with_mocked_operations(MockOperationReader::new(mocked_ops))
     .await?;
   ev.shutdown()?;
-
-  // After running
-  {
-    let mut contents = lock!(ev.contents);
-    let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 1);
-
-    let actual = contents.command_line_message_history_mut().try_pop();
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert_eq!(actual, "1");
-  }
 
   Ok(())
 }
