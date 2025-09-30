@@ -18,7 +18,7 @@ pub struct CommandDefinition {
   pub options: CommandOptions,
 }
 
-rc_refcell_ptr!(CommandDefinition);
+rc_ptr!(CommandDefinition);
 
 impl Debug for CommandDefinition {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

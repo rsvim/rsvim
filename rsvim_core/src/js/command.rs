@@ -16,6 +16,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinition;
 use def::CommandDefinitionRc;
+use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 
@@ -90,11 +91,11 @@ impl CommandsManager {
   pub fn insert(
     &mut self,
     name: CompactString,
-    definition: CommandDefinitionRc,
-  ) -> AnyResult<Option<CommandDefinitionRc>> {
-    let alias = definition.borrow().options.alias.clone();
+    definition: CommandDefinition,
+  ) -> AnyResult<Option<CommandDefinition>> {
+    let alias = definition.options.alias.clone();
 
-    if !definition.borrow().options.force {
+    if !definition.options.force {
       if self.commands.contains_key(&name) {
         anyhow::bail!(format!("Command name {:?} already exists", name));
       }
@@ -105,12 +106,15 @@ impl CommandsManager {
       }
     }
 
+    let def = CommandDefinition::to_rc(definition);
     if let Some(alias) = alias {
-      self.commands.insert(alias, definition.clone());
+      self.commands.insert(alias, def.clone());
     }
-    let old = self.commands.insert(name.clone(), definition.clone());
+    let old = self.commands.insert(name.clone(), def);
+    let old = old.unwrap();
+    let old = Rc::try_unwrap(old).unwrap();
 
-    Ok(old)
+    Ok(Some(old))
   }
 
   pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
