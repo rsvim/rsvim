@@ -28,4 +28,5 @@ pub fn to_v8<'s, 'b, T>(
 where
   T: ToV8,
 {
+  input.to_v8(scope)
 }
