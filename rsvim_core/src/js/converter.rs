@@ -3,7 +3,6 @@
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use std::collections::LinkedList;
 
 pub trait ToV8 {
   fn to_v8<'s>(
@@ -81,22 +80,6 @@ impl ToV8 for CompactString {
 }
 
 impl<T> ToV8 for Vec<T>
-where
-  T: ToV8,
-{
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Array::new_with_elements(
-      scope,
-      &self.iter().map(|v| v.to_v8(scope)).collect(),
-    )
-    .into()
-  }
-}
-
-impl<T> ToV8 for LinkedList<T>
 where
   T: ToV8,
 {
