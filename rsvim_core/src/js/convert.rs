@@ -1,8 +1,5 @@
 //! Converters between rust and v8 values.
 
-use serde::ser;
-use serde::ser::Serialize;
-
 pub trait ToV8 {
   fn to_v8<'s>(
     &self,
