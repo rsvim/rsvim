@@ -45,7 +45,11 @@ pub struct UserCommandFuture {
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
+  // Maps from command "name" to its "definition".
   commands: BTreeMap<CompactString, CommandDefinition>,
+
+  // Maps from "alias" to its "name".
+  aliases: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(CommandsManager);
@@ -68,7 +72,23 @@ impl CommandsManager {
     name: CompactString,
     definition: CommandDefinition,
   ) -> Option<CommandDefinition> {
-    self.commands.insert(name, definition)
+    let new_alias = definition.options.alias.clone();
+
+    // - Inserts new command definition by name
+    // - Also removes the old command definition
+    // - Then removes the old command alias if exists
+    let old = self.commands.insert(name.clone(), definition);
+    if let Some(ref old) = old {
+      if let Some(old_alias) = &old.options.alias {
+        self.aliases.remove(old_alias.as_str());
+      }
+    }
+
+    // - Inserts new command alias.
+    if let Some(new_alias) = new_alias {
+      self.aliases.insert(new_alias.clone(), name.clone());
+    }
+    old
   }
 
   pub fn get(&self, name: &str) -> Option<CommandDefinition> {
