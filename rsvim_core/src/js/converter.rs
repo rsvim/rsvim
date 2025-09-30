@@ -43,15 +43,6 @@ impl ToV8 for i32 {
   }
 }
 
-impl ToV8 for f32 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Number::new(scope, self).into()
-  }
-}
-
 impl ToV8 for f64 {
   fn to_v8<'s>(
     &self,
