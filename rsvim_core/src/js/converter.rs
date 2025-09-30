@@ -167,10 +167,7 @@ impl FromV8 for i32 {
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_int32() {
-      match value.int32_value(scope) {
-        Some(value) => Some(value),
-        None => None,
-      }
+      value.int32_value(scope)
     } else {
       None
     }
@@ -182,11 +179,21 @@ impl FromV8 for f64 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    if value.is_number() {
-      match value.number_value(scope) {
-        Some(value) => Some(value as f64),
-        None => None,
-      }
+    if value.is_number() || value.is_number_object() {
+      value.number_value(scope)
+    } else {
+      None
+    }
+  }
+}
+
+impl FromV8 for bool {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    if value.is_boolean() || value.is_boolean_object() {
+      value.boolean_value(scope)
     } else {
       None
     }
