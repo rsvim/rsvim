@@ -12,7 +12,7 @@
 
 pub mod binding;
 pub mod command;
-pub mod convert;
+pub mod converter;
 pub mod err;
 pub mod exception;
 pub mod hook;
@@ -23,6 +23,8 @@ pub mod transpiler;
 
 #[cfg(test)]
 mod command_tests;
+#[cfg(test)]
+mod converter_tests;
 #[cfg(test)]
 mod module_tests;
 
