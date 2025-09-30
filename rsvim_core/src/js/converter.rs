@@ -204,3 +204,27 @@ impl FromV8 for i8 {
     }
   }
 }
+
+impl FromV8 for u16 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.integer_value(scope) {
+      Some(value) => Some(value as u16),
+      None => None,
+    }
+  }
+}
+
+impl FromV8 for i16 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.integer_value(scope) {
+      Some(value) => Some(value as i16),
+      None => None,
+    }
+  }
+}
