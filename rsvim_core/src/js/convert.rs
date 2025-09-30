@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use compact_str::CompactString;
+use std::collections::LinkedList;
 
 pub trait ToV8 {
   fn to_v8<'s>(
@@ -158,7 +159,7 @@ where
   }
 }
 
-impl<T> ToV8 for std::collections::LinkedList<T>
+impl<T> ToV8 for LinkedList<T>
 where
   T: ToV8,
 {
