@@ -93,7 +93,7 @@ impl ToV8 for f32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Number::new(scope, *self as f64).into()
+    v8::Number::new(scope, self).into()
   }
 }
 
