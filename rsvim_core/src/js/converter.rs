@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::collections::LinkedList;
 
 pub trait ToV8 {
@@ -189,6 +190,19 @@ impl FromV8 for String {
   ) -> Option<Self> {
     if value.is_string() || value.is_string_object() {
       Some(value.to_rust_string_lossy(scope))
+    } else {
+      None
+    }
+  }
+}
+
+impl FromV8 for CompactString {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    if value.is_string() || value.is_string_object() {
+      Some(value.to_rust_string_lossy(scope).to_compact_string())
     } else {
       None
     }
