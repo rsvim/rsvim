@@ -42,3 +42,73 @@ impl ToV8 for u8 {
     v.to_object(scope)
   }
 }
+
+impl ToV8 for i8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Int32::from(self);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for u16 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Uint32::from(self);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for i16 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Int32::from(self);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for u32 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Uint32::from(self);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for i32 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Int32::from(self);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for f32 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Number::new(scope, *self as f64);
+    v.to_object(scope)
+  }
+}
+
+impl ToV8 for f64 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let v = v8::Number::new(scope, self);
+    v.to_object(scope)
+  }
+}
