@@ -181,3 +181,16 @@ impl FromV8 for bool {
     }
   }
 }
+
+impl FromV8 for String {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    if value.is_string() || value.is_string_object() {
+      Some(value.to_rust_string_lossy(scope))
+    } else {
+      None
+    }
+  }
+}
