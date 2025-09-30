@@ -186,9 +186,13 @@ impl FromV8 for u8 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as u8),
-      None => None,
+    if value.is_int32() {
+      match value.integer_value(scope) {
+        Some(value) => Some(value as u8),
+        None => None,
+      }
+    } else {
+      None
     }
   }
 }
@@ -198,8 +202,11 @@ impl FromV8 for i8 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as i8),
+    match value.to_integer(scope) {
+      Some(value) => match value.integer_value(scope) {
+        Some(value) => Some(value as i8),
+        None => None,
+      },
       None => None,
     }
   }
@@ -210,8 +217,11 @@ impl FromV8 for u16 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as u16),
+    match value.to_integer(scope) {
+      Some(value) => match value.integer_value(scope) {
+        Some(value) => Some(value as u16),
+        None => None,
+      },
       None => None,
     }
   }
@@ -222,8 +232,11 @@ impl FromV8 for i16 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as i16),
+    match value.to_integer(scope) {
+      Some(value) => match value.integer_value(scope) {
+        Some(value) => Some(value as i16),
+        None => None,
+      },
       None => None,
     }
   }
@@ -234,8 +247,11 @@ impl FromV8 for u32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as u32),
+    match value.to_integer(scope) {
+      Some(value) => match value.integer_value(scope) {
+        Some(value) => Some(value as u32),
+        None => None,
+      },
       None => None,
     }
   }
@@ -246,8 +262,11 @@ impl FromV8 for i32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.integer_value(scope) {
-      Some(value) => Some(value as i32),
+    match value.to_integer(scope) {
+      Some(value) => match value.integer_value(scope) {
+        Some(value) => Some(value as i32),
+        None => None,
+      },
       None => None,
     }
   }
@@ -258,8 +277,11 @@ impl FromV8 for f32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.number_value(scope) {
-      Some(value) => Some(value as f32),
+    match value.is_number(scope) {
+      Some(value) => match value.number_value(scope) {
+        Some(value) => Some(value as f32),
+        None => None,
+      },
       None => None,
     }
   }
