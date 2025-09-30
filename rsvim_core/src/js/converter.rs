@@ -25,16 +25,6 @@ pub trait FromV8 {
   ) -> Option<Self>;
 }
 
-pub fn to_v8<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
-  input: T,
-) -> Option<v8::Local<'s, v8::Value>>
-where
-  T: ToV8,
-{
-  input.to_v8(scope)
-}
-
 impl ToV8 for u8 {
   fn to_v8<'s>(
     &self,
