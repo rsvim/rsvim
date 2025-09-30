@@ -191,3 +191,19 @@ impl FromV8 for CompactString {
     }
   }
 }
+
+impl<T> FromV8 for Vec<T>
+where
+  T: FromV8,
+{
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    if value.is_array() {
+      Some(value.to_rust_string_lossy(scope).to_compact_string())
+    } else {
+      None
+    }
+  }
+}
