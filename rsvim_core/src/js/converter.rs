@@ -201,7 +201,15 @@ where
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_array() {
-      Some(value.to_rust_string_lossy(scope).to_compact_string())
+      let a: v8::Local<'s, v8::Array> = value.into();
+      let mut v: Vec<T> = Vec::with_capacity(a.length());
+      let mut i = 0;
+      while i < a.length() {
+        let e = a.get_index(scope, i).unwrap();
+        let t = T::from_v8(scope, e);
+        v.push(t);
+        i += 1;
+      }
     } else {
       None
     }
