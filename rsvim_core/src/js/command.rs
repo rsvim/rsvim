@@ -47,8 +47,11 @@ pub struct UserCommandFuture {
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
-  // Maps from command "name" or "alias" to its "definition".
+  // Maps from command "name" to its "definition".
   commands: BTreeMap<CompactString, CommandDefinitionRc>,
+
+  // Maps from command "alias" to its "name".
+  aliases: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(CommandsManager);
@@ -100,7 +103,7 @@ impl CommandsManager {
         anyhow::bail!(format!("Command name {:?} already exists", name));
       }
       if let Some(ref alias) = alias {
-        if self.commands.contains_key(alias.as_str()) {
+        if self.aliases.contains_key(alias.as_str()) {
           anyhow::bail!(format!("Command alias {:?} already exists", name));
         }
       }
@@ -108,13 +111,16 @@ impl CommandsManager {
 
     let def = CommandDefinition::to_rc(definition);
     if let Some(alias) = alias {
-      self.commands.insert(alias, def.clone());
+      self.aliases.insert(alias, name.clone());
     }
-    let old = self.commands.insert(name.clone(), def);
-    let old = old.unwrap();
-    let old = Rc::try_unwrap(old).unwrap();
-
-    Ok(Some(old))
+    match self.commands.insert(name, def) {
+      Some(old) => {
+        // Take definition out of the `Rc` pointer.
+        let old = Rc::try_unwrap(old).unwrap();
+        Ok(Some(old))
+      }
+      None => Ok(None),
+    }
   }
 
   pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
