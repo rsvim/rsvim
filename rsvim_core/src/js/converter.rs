@@ -39,7 +39,7 @@ impl ToV8 for i32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new(scope, self).into()
+    v8::Int32::from(self).into()
   }
 }
 
