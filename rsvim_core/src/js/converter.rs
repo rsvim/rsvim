@@ -95,6 +95,22 @@ where
   }
 }
 
+impl<T> ToV8 for [T]
+where
+  T: ToV8,
+{
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    v8::Array::new_with_elements(
+      scope,
+      &self.iter().map(|v| v.to_v8(scope)).collect(),
+    )
+    .into()
+  }
+}
+
 impl FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
