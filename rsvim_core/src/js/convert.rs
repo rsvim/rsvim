@@ -141,3 +141,16 @@ impl ToV8 for char {
     v8::String::new(scope, self).into()
   }
 }
+
+impl<T> ToV8 for Vec<T>
+where
+  T: ToV8,
+{
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    let elements = self.iter().map(|v| v.to_v8(scope)).collect::<Vec<_>>();
+    v8::Array::new_with_elements(scope, &elements).into()
+  }
+}
