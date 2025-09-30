@@ -80,12 +80,14 @@ impl CommandsManager {
   ///
   /// # Returns
   ///
-  /// It returns `Ok(None)` if registered successfully, and no conflicting one
-  /// exists. It returns `Ok(CommandDefinition)` if registered successfully,
-  /// and previous one is been removed and returned (Note: this requires the
-  /// `force` option). It returns `Err` if registered failed, because neither
-  /// the command name nor alias already exists, and user doesn't require
-  /// register with `force` option.
+  /// 1. It returns `Ok(None)` if registered successfully, and no conflicting
+  ///    one exists.
+  /// 2. It returns `Ok(CommandDefinition)` if registered successfully, and
+  ///    previous one is been removed and returned. Note: this requires the
+  ///    `force` option.
+  /// 3. It returns `Err` if registered failed, because neither
+  ///    the command name nor alias already exists, and user doesn't require
+  ///    register with `force` option.
   pub fn insert(
     &mut self,
     name: CompactString,
