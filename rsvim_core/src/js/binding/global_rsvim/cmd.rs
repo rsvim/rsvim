@@ -1,7 +1,9 @@
 //! APIs for `Rsvim.cmd` namespace.
 
+use crate::js::FromV8CallbackArguments;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
+use crate::js::ToV8;
 use crate::js::command::def::CommandDefinition;
 use crate::msg;
 use crate::msg::MasterMessage;
@@ -51,14 +53,18 @@ pub fn create(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  let removed = commands.insert(def.name.to_compact_string(), def);
+  let removed = commands
+    .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match removed {
-    Some(removed) => {
-      let obj = removed.into_v8_object(scope);
-      rv.set(obj.into());
+    Ok(Some(removed)) => {
+      let obj = removed.to_v8(scope);
+      rv.set(obj);
     }
-    None => rv.set_undefined(),
+    Ok(None) => {
+      rv.set_undefined();
+    }
+    Err(e) => {}
   }
 }
 
