@@ -85,9 +85,8 @@ impl CommandsManager {
   /// 2. It returns `Ok(CommandDefinition)` if registered successfully, and
   ///    previous one is been removed and returned. Note: this requires the
   ///    `force` option.
-  /// 3. It returns `Err` if registered failed, because neither
-  ///    the command name nor alias already exists, and user doesn't require
-  ///    register with `force` option.
+  /// 3. It returns `Err` if registered failed, because either command name or
+  ///    alias already exists, and user doesn't have the `force` option.
   pub fn insert(
     &mut self,
     name: CompactString,
