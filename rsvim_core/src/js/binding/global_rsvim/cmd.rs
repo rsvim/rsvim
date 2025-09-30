@@ -45,7 +45,7 @@ pub fn create(
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
-  let def = CommandDefinition::from_v8_object(scope, args);
+  let def = CommandDefinition::from_v8_callback_arguments(scope, args);
   trace!("Rsvim.cmd.create:{:?}", def);
 
   let state_rc = JsRuntime::state(scope);
@@ -78,7 +78,7 @@ pub fn list(
   let cmds = v8::Array::new(scope, commands.len() as i32);
 
   for (i, def) in commands.values().enumerate() {
-    let v = def.into_v8_object(scope);
+    let v = def.to_v8(scope);
     cmds.set_index(scope, i as u32, v.into());
   }
 
@@ -100,7 +100,7 @@ pub fn remove(
   let mut commands = lock!(state.commands);
   match commands.remove(&name) {
     Some(removed) => {
-      let obj = removed.into_v8_object(scope);
+      let obj = removed.to_v8(scope);
       rv.set(obj.into());
     }
     None => rv.set_undefined(),

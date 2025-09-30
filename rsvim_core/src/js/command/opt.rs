@@ -1,5 +1,7 @@
 //! Ex command options.
 
+use crate::js::FromV8;
+use crate::js::ToV8;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -21,9 +23,9 @@ pub struct CommandOptions {
   pub alias: Option<CompactString>,
 }
 
-impl CommandOptions {
-  pub fn from_v8_object<'s>(
-    scope: &mut v8::PinScope,
+impl FromV8 for CommandOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandOptionsBuilder::default();
@@ -54,11 +56,13 @@ impl CommandOptions {
 
     builder.build().unwrap()
   }
+}
 
-  pub fn into_v8_object<'s>(
+impl ToV8 for CommandOptions {
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // force
@@ -73,6 +77,6 @@ impl CommandOptions {
       obj.set(scope, alias_field.into(), alias_value.into());
     }
 
-    obj
+    obj.into()
   }
 }

@@ -1,5 +1,7 @@
 //! Ex command attributes.
 
+use crate::js::FromV8;
+use crate::js::ToV8;
 use crate::prelude::*;
 use std::str::FromStr;
 
@@ -53,9 +55,9 @@ pub struct CommandAttributes {
   pub nargs: Nargs,
 }
 
-impl CommandAttributes {
-  pub fn from_v8_object<'s>(
-    scope: &mut v8::PinScope,
+impl FromV8 for CommandAttributes {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
@@ -86,11 +88,13 @@ impl CommandAttributes {
 
     builder.build().unwrap()
   }
+}
 
-  pub fn into_v8_object<'s>(
+impl ToV8 for CommandAttributes {
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // bang
@@ -103,6 +107,6 @@ impl CommandAttributes {
     let nargs_value = v8::String::new(scope, &self.nargs.to_string()).unwrap();
     obj.set(scope, nargs_field.into(), nargs_value.into());
 
-    obj
+    obj.into()
   }
 }

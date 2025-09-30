@@ -1,5 +1,8 @@
 //! Ex command definition.
 
+use crate::js::FromV8;
+use crate::js::FromV8CallbackArguments;
+use crate::js::ToV8;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::prelude::*;
@@ -31,8 +34,8 @@ impl Debug for CommandDefinition {
   }
 }
 
-impl CommandDefinition {
-  pub fn from_v8_object(
+impl FromV8CallbackArguments for CommandDefinition {
+  fn from_v8_callback_arguments(
     scope: &mut v8::PinScope,
     args: v8::FunctionCallbackArguments,
   ) -> Self {
@@ -41,9 +44,9 @@ impl CommandDefinition {
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     let attributes = args.get(2).to_object(scope).unwrap();
-    let attributes = CommandAttributes::from_v8_object(scope, attributes);
+    let attributes = CommandAttributes::from_v8(scope, attributes);
     let options = args.get(3).to_object(scope).unwrap();
-    let options = CommandOptions::from_v8_object(scope, options);
+    let options = CommandOptions::from_v8(scope, options);
 
     Self {
       name: name.to_compact_string(),
@@ -52,11 +55,13 @@ impl CommandDefinition {
       options,
     }
   }
+}
 
-  pub fn into_v8_object<'s>(
+impl ToV8 for CommandDefinition {
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // name
@@ -71,14 +76,14 @@ impl CommandDefinition {
 
     // attributes
     let attr_field = v8::String::new(scope, "attributes").unwrap();
-    let attr_value = self.attributes.into_v8_object(scope);
+    let attr_value = self.attributes.to_v8(scope);
     obj.set(scope, attr_field.into(), attr_value.into());
 
     // options
     let opts_field = v8::String::new(scope, "options").unwrap();
-    let opts_value = self.options.into_v8_object(scope);
+    let opts_value = self.options.to_v8(scope);
     obj.set(scope, opts_field.into(), opts_value.into());
 
-    obj
+    obj.into()
   }
 }
