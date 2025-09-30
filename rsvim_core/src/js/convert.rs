@@ -88,8 +88,7 @@ impl ToV8 for i32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    let v = v8::Int32::from(self);
-    v.to_object(scope)
+    v8::Integer::new(scope, self).into()
   }
 }
 
@@ -98,8 +97,7 @@ impl ToV8 for f32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    let v = v8::Number::new(scope, *self as f64);
-    v.to_object(scope)
+    v8::Number::new(scope, *self as f64).into()
   }
 }
 
@@ -108,7 +106,15 @@ impl ToV8 for f64 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    let v = v8::Number::new(scope, self);
-    v.to_object(scope)
+    v8::Number::new(scope, self).into()
+  }
+}
+
+impl ToV8 for bool {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    v8::Boolean::new(scope, self).into()
   }
 }
