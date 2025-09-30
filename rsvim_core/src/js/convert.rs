@@ -1,6 +1,7 @@
 //! Converters between rust and v8 values.
 
 use crate::prelude::*;
+use compact_str::CompactString;
 
 pub trait ToV8 {
   fn to_v8<'s>(
@@ -111,5 +112,23 @@ impl ToV8 for bool {
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
     v8::Boolean::new(scope, self).into()
+  }
+}
+
+impl ToV8 for String {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    v8::String::new(scope, self).into()
+  }
+}
+
+impl ToV8 for CompactString {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    v8::String::new(scope, self).into()
   }
 }
