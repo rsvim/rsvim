@@ -25,48 +25,12 @@ pub trait FromV8 {
   ) -> Option<Self>;
 }
 
-impl ToV8 for u8 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new_from_unsigned(scope, self).into()
-  }
-}
-
-impl ToV8 for i8 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new(scope, self).into()
-  }
-}
-
-impl ToV8 for u16 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new_from_unsigned(scope, self).into()
-  }
-}
-
-impl ToV8 for i16 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new(scope, self).into()
-  }
-}
-
 impl ToV8 for u32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Integer::new_from_unsigned(scope, self).into()
+    v8::Uint32::from(self).into()
   }
 }
 
@@ -181,78 +145,18 @@ where
   }
 }
 
-impl FromV8 for u8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
-    if value.is_uint32() || value.is_int32() {
-      match value.integer_value(scope) {
-        Some(value) => Some(value as u8),
-        None => None,
-      }
-    } else {
-      None
-    }
-  }
-}
-
-impl FromV8 for i8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
-    match value.to_integer(scope) {
-      Some(value) => match value.integer_value(scope) {
-        Some(value) => Some(value as i8),
-        None => None,
-      },
-      None => None,
-    }
-  }
-}
-
-impl FromV8 for u16 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
-    match value.to_integer(scope) {
-      Some(value) => match value.integer_value(scope) {
-        Some(value) => Some(value as u16),
-        None => None,
-      },
-      None => None,
-    }
-  }
-}
-
-impl FromV8 for i16 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
-    match value.to_integer(scope) {
-      Some(value) => match value.integer_value(scope) {
-        Some(value) => Some(value as i16),
-        None => None,
-      },
-      None => None,
-    }
-  }
-}
-
 impl FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.to_integer(scope) {
-      Some(value) => match value.integer_value(scope) {
-        Some(value) => Some(value as u32),
+    if value.is_uint32() {
+      match value.uint32_value(scope) {
+        Some(value) => Some(value),
         None => None,
-      },
-      None => None,
+      }
+    } else {
+      None
     }
   }
 }
@@ -262,12 +166,13 @@ impl FromV8 for i32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.to_integer(scope) {
-      Some(value) => match value.integer_value(scope) {
-        Some(value) => Some(value as i32),
+    if value.is_int32() {
+      match value.int32_value(scope) {
+        Some(value) => Some(value),
         None => None,
-      },
-      None => None,
+      }
+    } else {
+      None
     }
   }
 }
@@ -277,7 +182,7 @@ impl FromV8 for f32 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    match value.is_number(scope) {
+    match value.is_number() {
       Some(value) => match value.number_value(scope) {
         Some(value) => Some(value as f32),
         None => None,
