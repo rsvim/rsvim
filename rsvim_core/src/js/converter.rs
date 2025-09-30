@@ -88,15 +88,6 @@ impl ToV8 for CompactString {
   }
 }
 
-impl ToV8 for char {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::String::new(scope, self).into()
-  }
-}
-
 impl<T> ToV8 for Vec<T>
 where
   T: ToV8,
