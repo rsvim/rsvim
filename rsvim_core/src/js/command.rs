@@ -15,8 +15,6 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinition;
-use def::CommandDefinitionRc;
-use std::rc::Rc;
 
 const JS_COMMAND_NAME: &str = "js";
 
@@ -42,13 +40,13 @@ impl JsFuture for BuiltinCommandFuture {
 pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub definition: CommandDefinitionRc,
+  pub definition: CommandDefinition,
 }
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
   // Maps from command "name" to its "definition".
-  commands: BTreeMap<CompactString, CommandDefinitionRc>,
+  commands: BTreeMap<CompactString, CommandDefinition>,
 
   // Maps from command "alias" to its "name".
   aliases: FoldMap<CompactString, CompactString>,
@@ -57,11 +55,11 @@ pub struct CommandsManager {
 arc_mutex_ptr!(CommandsManager);
 
 pub type CommandsManagerKeys<'a> =
-  std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Keys<'a, CompactString, CommandDefinition>;
 pub type CommandsManagerValues<'a> =
-  std::collections::btree_map::Values<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Values<'a, CompactString, CommandDefinition>;
 pub type CommandsManagerIter<'a> =
-  std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
+  std::collections::btree_map::Iter<'a, CompactString, CommandDefinition>;
 
 impl CommandsManager {
   pub fn is_empty(&self) -> bool {
@@ -72,7 +70,7 @@ impl CommandsManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<CommandDefinitionRc> {
+  pub fn remove(&mut self, name: &str) -> Option<CommandDefinition> {
     self.commands.remove(name)
   }
 
@@ -109,21 +107,14 @@ impl CommandsManager {
       }
     }
 
-    let def = CommandDefinition::to_rc(definition);
     if let Some(alias) = alias {
       self.aliases.insert(alias, name.clone());
     }
-    match self.commands.insert(name, def) {
-      Some(old) => {
-        // Take definition out of the `Rc` pointer.
-        let old = Rc::try_unwrap(old).unwrap();
-        Ok(Some(old))
-      }
-      None => Ok(None),
-    }
+    let maybe_old = self.commands.insert(name, definition);
+    Ok(maybe_old)
   }
 
-  pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
+  pub fn get(&self, name: &str) -> Option<CommandDefinition> {
     self.commands.get(name).cloned()
   }
 
@@ -145,13 +136,11 @@ impl CommandsManager {
 
   pub fn first_key_value(
     &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
+  ) -> Option<(&CompactString, &CommandDefinition)> {
     self.commands.first_key_value()
   }
 
-  pub fn last_key_value(
-    &self,
-  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
+  pub fn last_key_value(&self) -> Option<(&CompactString, &CommandDefinition)> {
     self.commands.last_key_value()
   }
 }
