@@ -186,7 +186,7 @@ impl FromV8 for u8 {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    if value.is_uint32() {
+    if value.is_uint32() || value.is_int32() {
       match value.integer_value(scope) {
         Some(value) => Some(value as u8),
         None => None,
