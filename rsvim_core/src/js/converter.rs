@@ -252,3 +252,27 @@ impl FromV8 for i32 {
     }
   }
 }
+
+impl FromV8 for f32 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.number_value(scope) {
+      Some(value) => Some(value as f32),
+      None => None,
+    }
+  }
+}
+
+impl FromV8 for f64 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.number_value(scope) {
+      Some(value) => Some(value as f64),
+      None => None,
+    }
+  }
+}
