@@ -180,3 +180,27 @@ where
     .into()
   }
 }
+
+impl FromV8 for u8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.integer_value(scope) {
+      Some(value) => value as u8,
+      None => None,
+    }
+  }
+}
+
+impl FromV8 for i8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
+    match value.integer_value(scope) {
+      Some(value) => value as i8,
+      None => None,
+    }
+  }
+}
