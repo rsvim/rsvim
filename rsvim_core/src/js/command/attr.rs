@@ -86,12 +86,12 @@ impl ToV8 for CommandAttributes {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> Option<v8::Local<'s, v8::Value>> {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = v8::String::new(scope, "bang").unwrap();
-    let bang_value = v8::Boolean::new(scope, self.bang);
+    let bang_field = to_v8(scope, "bang").unwrap();
+    let bang_value = to_v8(scope, self.bang).unwrap();
     obj.set(scope, bang_field.into(), bang_value.into());
 
     // nargs
