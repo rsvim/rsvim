@@ -92,7 +92,7 @@ pub fn create_timer(
   pending::create_timer(
     &mut state,
     timer_id,
-    delay,
+    delay as u64,
     repeated,
     Box::new(timer_cb),
   );
