@@ -102,7 +102,7 @@ pub fn create_timer<'s>(
     repeated,
     Box::new(timer_cb),
   );
-  rv.set(to_v8(scope, timer_id));
+  rv.set_int32(timer_id);
   trace!(
     "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
     timer_id, delay, repeated
@@ -117,7 +117,7 @@ pub fn clear_timer<'s>(
 ) {
   debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
-  let timer_id = from_v8::<JsTimerId>(scope, args.get(0)).unwrap();
+  let timer_id = from_v8::<JsTimerId>(scope, args.get(0));
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();
