@@ -2,7 +2,7 @@
 
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
-use crate::js::convert::*;
+use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -36,7 +36,7 @@ impl FromV8CallbackArguments for CommandDefinition {
   fn from_v8_callback_arguments(
     scope: &mut v8::PinScope,
     args: v8::FunctionCallbackArguments,
-  ) -> Self {
+  ) -> Option<Self> {
     debug_assert!(args.length() == 4);
     let name = args.get(0).to_rust_string_lossy(scope);
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
@@ -59,7 +59,7 @@ impl ToV8 for CommandDefinition {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> Option<v8::Local<'s, v8::Value>> {
     let obj = v8::Object::new(scope);
 
     // name
