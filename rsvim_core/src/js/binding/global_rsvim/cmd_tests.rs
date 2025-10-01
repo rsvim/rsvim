@@ -360,13 +360,13 @@ async fn test_recreate_failed1() -> IoResult<()> {
   let src: &str = r#"
 setTimeout(() => {
   try {
-  const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;});
-  Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
-  const prev2 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(2); return 2;}, {}, {force:false});
-  Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
+    const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;});
+    Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
+    const prev2 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(2); return 2;}, {}, {force:false});
+    Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
   } catch(e) {
-  Rsvim.cmd.echo(`Failed to recreate command ${e}`);
-}
+    Rsvim.cmd.echo(`Failed to recreate command ${e}`);
+  }
 });
     "#;
 
