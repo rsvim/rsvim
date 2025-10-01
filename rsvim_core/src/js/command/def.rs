@@ -74,7 +74,7 @@ impl ToV8 for CommandDefinition {
     // callback
     let callback_field = to_v8(scope, CALLBACK);
     let callback_value =
-      v8::Local::new(scope, Rc::unwrap_or_clone(self.callback));
+      v8::Local::new(scope, Rc::unwrap_or_clone(self.callback.clone()));
     obj.set(scope, callback_field, callback_value.into());
 
     // attributes
