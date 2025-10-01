@@ -116,9 +116,9 @@ pub fn get_expand_tab(
 }
 
 /// Set the _expand-tab_ option.
-pub fn set_expand_tab(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_expand_tab<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
