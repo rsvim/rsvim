@@ -360,7 +360,7 @@ async fn test_recreate_failed1() -> IoResult<()> {
   let src: &str = r#"
 setTimeout(() => {
   try {
-    const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;});
+    const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;}, {}, {force:false});
     Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
     const prev2 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(2); return 2;}, {}, {force:false});
     Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
@@ -403,7 +403,7 @@ setTimeout(() => {
     info!("actual3:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Previous-2 command:object, 1"));
+    assert!(actual.contains("Failed to recreate command"));
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
@@ -416,7 +416,7 @@ setTimeout(() => {
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang);
     assert_eq!(command_def.attributes.nargs, Nargs::Zero);
-    assert!(command_def.options.force);
+    assert!(!command_def.options.force);
     assert_eq!(command_def.options.alias, None);
   }
 
