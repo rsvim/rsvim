@@ -34,7 +34,7 @@ fn test_converter1() {
   assert_eq!(val1, a1);
 
   let a2 = CommandAttributesBuilder::default()
-    .alias(Some("w".to_compact_string()))
+    .nargs(Nargs::Any)
     .build()
     .unwrap();
   let obj2 = to_v8(scope, a2.clone()).unwrap();
