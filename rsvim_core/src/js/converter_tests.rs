@@ -32,6 +32,8 @@ fn test_number1() {
 
   let a1 = 1.23_f64;
   let obj1 = to_v8(scope, a1);
+  assert!(obj1.is_some());
+  let obj1 = obj1.unwrap();
   let val1 = from_v8::<f64>(scope, obj1);
   assert_eq!(val1, a1);
 
