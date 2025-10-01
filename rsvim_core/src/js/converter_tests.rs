@@ -28,19 +28,13 @@ fn test_number1() {
 
   let a1 = 1.23_f64;
   let obj1 = to_v8(scope, a1);
-  assert!(obj1.is_some());
-  let obj1 = obj1.unwrap();
   let val1 = from_v8::<f64>(scope, obj1);
-  assert!(val1.is_some());
-  assert_eq!(val1.unwrap(), a1);
+  assert_eq!(val1, a1);
 
   let a2 = 8_f64;
   let obj2 = to_v8(scope, a2);
-  assert!(obj2.is_some());
-  let obj2 = obj2.unwrap();
   let val2 = from_v8::<f64>(scope, obj2);
-  assert!(val2.is_some());
-  assert_eq!(val2.unwrap(), a2);
+  assert_eq!(val2, a2);
 }
 
 #[test]
