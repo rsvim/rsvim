@@ -1,7 +1,7 @@
 //! Ex command options.
 
 use crate::js::converter::*;
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 
 /// Command option names.
 pub const FORCE: &str = "force";
@@ -30,7 +30,7 @@ impl FromV8 for CommandOptions {
       let obj = value.to_object(scope).unwrap();
 
       // force
-      let force = to_v8(scope, &FORCE).unwrap();
+      let force = to_v8(scope, FORCE.to_compact_string()).unwrap();
       if let Some(force_value) = obj.get(scope, force) {
         builder.force(from_v8::<bool>(scope, force_value).unwrap());
       }
