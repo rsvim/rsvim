@@ -57,8 +57,8 @@ impl ToV8 for CommandOptions {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = to_v8(scope, &FORCE).unwrap();
-    let force_value = to_v8(scope, &self.force).unwrap();
+    let force_field = to_v8(scope, FORCE.to_compact_string()).unwrap();
+    let force_value = to_v8(scope, self.force).unwrap();
     obj.set(scope, force_field, force_value);
 
     // alias
