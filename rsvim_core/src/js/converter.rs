@@ -137,12 +137,8 @@ impl FromV8 for u32 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
-    if value.is_uint32() {
-      value.uint32_value(scope)
-    } else {
-      None
-    }
+  ) -> Self {
+      value.uint32_value(scope).unwrap()
   }
 }
 
