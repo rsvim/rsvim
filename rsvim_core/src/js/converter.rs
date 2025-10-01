@@ -90,12 +90,12 @@ impl ToV8 for bool {
   }
 }
 
-impl ToV8 for &'static str {
+impl ToV8 for str {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Value> {
-    v8::String::new(scope, self).map(|s| s.into())
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -103,8 +103,8 @@ impl ToV8 for String {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::String::new(scope, self).map(|s| s.into())
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
