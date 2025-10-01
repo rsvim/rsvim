@@ -1,4 +1,7 @@
+use compact_str::ToCompactString;
+
 use super::opt::*;
+use crate::js::converter::*;
 
 #[test]
 fn test1() {
@@ -6,5 +9,16 @@ fn test1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let opt1 = CommandOptionsBuilder::default().build().unwrap();
+  let a1 = CommandOptionsBuilder::default().build().unwrap();
+  let obj1 = to_v8(scope, a1).unwrap();
+  let val1 = from_v8::<CommandOptions>(scope, obj1).unwrap();
+  assert_eq!(val1, a1);
+
+  let a2 = CommandOptionsBuilder::default()
+    .alias(Some("w".to_compact_string()))
+    .build()
+    .unwrap();
+  let obj2 = to_v8(scope, a2).unwrap();
+  let val2 = from_v8::<CommandOptions>(scope, obj2).unwrap();
+  assert_eq!(val2, a2);
 }

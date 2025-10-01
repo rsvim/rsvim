@@ -12,7 +12,7 @@ pub const ALIAS_NAME: &str = "alias";
 pub const FORCE_VALUE: bool = true;
 pub const ALIAS_VALUE: Option<CompactString> = None;
 
-#[derive(Debug, Clone, derive_builder::Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
   #[builder(default = FORCE_VALUE)]
   pub force: bool,
