@@ -3,6 +3,7 @@
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::js::JsRuntime;
+use crate::js::converter::*;
 use crate::prelude::*;
 
 /// Get the _wrap_ option.
@@ -22,13 +23,13 @@ pub fn get_wrap(
 }
 
 /// Set the _wrap_ option.
-pub fn set_wrap(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_wrap<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).boolean_value(scope);
+  let value = from_v8::<bool>(scope, args.get(0)).unwrap();
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
