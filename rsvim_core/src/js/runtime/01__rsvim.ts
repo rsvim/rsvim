@@ -241,7 +241,7 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
    * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined previously.
    *
-   * @throws Throws {@link !TypeError} if any parameters are invalid, {@link Error} if command name or alias already exists, while `force` option is not set to override existing command forcibly.
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Throws {@link Error} if command name or alias already exists, while `force` option is not set to override existing command forcibly.
    *
    * @example
    * ```javascript
