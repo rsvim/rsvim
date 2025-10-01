@@ -58,16 +58,16 @@ impl ToV8 for CommandOptions {
 
     // force
     let force_field = to_v8(scope, FORCE.to_compact_string());
-    let force_value = to_v8(scope, self.force).unwrap();
+    let force_value = to_v8(scope, self.force);
     obj.set(scope, force_field, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = to_v8(scope, ALIAS.to_compact_string()).unwrap();
-      let alias_value = to_v8(scope, alias.clone()).unwrap();
+      let alias_field = to_v8(scope, ALIAS.to_compact_string());
+      let alias_value = to_v8(scope, alias.clone());
       obj.set(scope, alias_field, alias_value);
     }
 
-    Some(obj.into())
+    obj.into()
   }
 }
