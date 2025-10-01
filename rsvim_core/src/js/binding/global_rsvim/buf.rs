@@ -49,13 +49,14 @@ pub fn list(
 }
 
 /// `Rsvim.buf.writeSync` API.
-pub fn write_sync<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
+pub fn write_sync(
+  scope: &mut v8::PinScope,
+  args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let buf_id = from_v8::<BufferId>(scope, args.get(0)).unwrap();
+  let buf_id = args.get(0);
+  let buf_id = from_v8::<BufferId>(scope, buf_id).unwrap();
   trace!("Rsvim.buf.writeSync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);
