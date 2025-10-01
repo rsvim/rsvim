@@ -3,6 +3,7 @@
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
+use crate::js::JsTimerId;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
@@ -42,9 +43,9 @@ impl JsFuture for TimeoutFuture {
 }
 
 /// Javascript `setTimeout`/`setInterval` API.
-pub fn create_timer(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn create_timer<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 4);
@@ -104,13 +105,14 @@ pub fn create_timer(
 }
 
 /// Javascript `clearTimeout`/`clearInterval` API.
-pub fn clear_timer(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn clear_timer<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
+  debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
-  let timer_id = args.get(0).int32_value(scope).unwrap();
+  let timer_id = from_v8::<JsTimerId>(scope, args.get(0)).unwrap();
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();
