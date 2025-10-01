@@ -3,7 +3,6 @@
 use compact_str::{CompactString, ToCompactString};
 
 use crate::js::converter::*;
-use crate::prelude::*;
 use std::str::FromStr;
 
 /// Command attribute name.
