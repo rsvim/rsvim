@@ -75,7 +75,8 @@ pub fn create_timer<'s>(
   // };
 
   // NOTE: Since in javascript side, we always pass no extra parameters to
-  // timers, thus it is always empty array.
+  // timers, thus it is always empty array. But, we leave this code here as a
+  // reference.
   let params = vec![];
   let params = Rc::new(params);
 
