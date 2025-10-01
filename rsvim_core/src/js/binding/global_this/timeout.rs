@@ -3,6 +3,7 @@
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
+use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
@@ -51,9 +52,9 @@ pub fn create_timer(
   let callback = Rc::new(v8::Global::new(scope, callback));
 
   // Get timer's delay time in millis.
-  let delay = args.get(1).int32_value(scope).unwrap() as u64;
+  let delay = from_v8::<u32>(scope, args.get(1)).unwrap();
   // Get timer's repeated.
-  let repeated = args.get(2).boolean_value(scope);
+  let repeated = from_v8::<bool>(scope, args.get(3)).unwrap();
 
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
