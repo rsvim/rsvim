@@ -3,6 +3,7 @@
 use crate::buf::BufferId;
 use crate::js::JsRuntime;
 use crate::js::binding;
+use crate::js::converter::*;
 use crate::prelude::*;
 
 /// `Rsvim.buf.current` API.
@@ -40,15 +41,11 @@ pub fn list(
   let buffers = state_rc.borrow().buffers.clone();
   let buffers = lock!(buffers);
   trace!("Rsvim.buf.list: {:?}", buffers.keys());
-  let buf_ids = buffers.keys().copied().collect::<Vec<BufferId>>();
 
-  let bufs = v8::Array::new(scope, buf_ids.len() as i32);
-  for (i, buf_id) in buf_ids.iter().enumerate() {
-    let v = v8::Integer::new(scope, *buf_id);
-    // let v = v8::Local::new(scope, v);
-    bufs.set_index(scope, i as u32, v.into());
-  }
-  rv.set(v8::Local::new(scope, bufs).into());
+  let bufs =
+    to_v8::<Vec<BufferId>>(scope, buffers.keys().copied().collect()).unwrap();
+
+  rv.set(bufs);
 }
 
 /// `Rsvim.buf.writeSync` API.
