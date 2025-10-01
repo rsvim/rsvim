@@ -1,7 +1,6 @@
 //! Ex command options.
 
 use crate::js::converter::*;
-use crate::prelude::*;
 use compact_str::CompactString;
 
 /// Command option names.
@@ -27,21 +26,26 @@ impl FromV8 for CommandOptions {
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     let mut builder = CommandOptionsBuilder::default();
+    if value.is_object() {
+      let obj = value.to_object(scope).unwrap();
 
-    // force
-    let force_name = to_v8(scope, FORCE).unwrap();
-    if let Some(force_value) = value.get(scope, force_name) {
-      builder.force(from_v8::<bool>(scope, force_value).unwrap());
+      // force
+      let force_name = to_v8(scope, &FORCE).unwrap();
+      if let Some(force_value) = obj.get(scope, force_name) {
+        builder.force(from_v8::<bool>(scope, force_value).unwrap());
+      }
+
+      // alias
+      let alias_name = to_v8(scope, &ALIAS).unwrap();
+      if let Some(alias_value) = obj.get(scope, alias_name) {
+        builder
+          .alias(Some(from_v8::<CompactString>(scope, alias_value).unwrap()));
+      }
+
+      Some(builder.build().unwrap())
+    } else {
+      None
     }
-
-    // alias
-    let alias_name = to_v8(scope, ALIAS).unwrap();
-    if let Some(alias_value) = value.get(scope, alias_name) {
-      builder
-        .alias(Some(from_v8::<CompactString>(scope, alias_value).unwrap()));
-    }
-
-    builder.build().unwrap()
   }
 }
 
