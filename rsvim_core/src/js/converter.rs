@@ -137,11 +137,11 @@ where
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::Array::new_with_elements(
-      scope,
-      &self.iter().map(|v| v.to_v8(scope)).collect(),
-    )
-    .into()
+    let elements = self
+      .iter()
+      .map(|v| v.to_v8(scope).unwrap())
+      .collect::<Vec<_>>();
+    Some(v8::Array::new_with_elements(scope, &elements).into())
   }
 }
 
