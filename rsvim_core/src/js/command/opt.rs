@@ -2,7 +2,6 @@
 
 use crate::js::converter::*;
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 /// Command option names.
 pub const FORCE: &str = "force";
