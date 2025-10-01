@@ -50,7 +50,7 @@ impl ToV8 for CommandOptions {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> Option<v8::Local<'s, v8::Value>> {
     let obj = v8::Object::new(scope);
 
     // force
