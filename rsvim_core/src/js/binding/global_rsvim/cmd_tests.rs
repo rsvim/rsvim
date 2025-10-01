@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::results::IoResult;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::time::Duration;
 
@@ -480,7 +481,7 @@ setTimeout(() => {
     assert!(!command_def.attributes.bang);
     assert_eq!(command_def.attributes.nargs, Nargs::Zero);
     assert!(!command_def.options.force);
-    assert_eq!(command_def.options.alias, Some("w"));
+    assert_eq!(command_def.options.alias, Some("w".to_compact_string()));
   }
 
   Ok(())
