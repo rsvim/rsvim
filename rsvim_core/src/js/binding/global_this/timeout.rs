@@ -55,9 +55,9 @@ pub fn create_timer<'s>(
   let callback = Rc::new(v8::Global::new(scope, callback));
 
   // Get timer's delay time in millis.
-  let delay = from_v8::<u32>(scope, args.get(1)).unwrap();
+  let delay = from_v8::<u32>(scope, args.get(1));
   // Get timer's repeated.
-  let repeated = from_v8::<bool>(scope, args.get(2)).unwrap();
+  let repeated = from_v8::<bool>(scope, args.get(2));
 
   // NOTE: Don't delete this part of code, it shows how to convert function
   // arguments into an array of values.
