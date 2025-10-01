@@ -30,13 +30,13 @@ impl FromV8 for CommandOptions {
     let obj = value.to_object(scope).unwrap();
 
     // force
-    let force = to_v8(scope, FORCE.to_compact_string());
+    let force = to_v8(scope, FORCE);
     if let Some(force_value) = obj.get(scope, force) {
       builder.force(from_v8::<bool>(scope, force_value));
     }
 
     // alias
-    let alias = to_v8(scope, ALIAS.to_compact_string());
+    let alias = to_v8(scope, ALIAS);
     if let Some(has_alias) = obj.has(scope, alias) {
       if has_alias {
         if let Some(alias_value) = obj.get(scope, alias) {
@@ -57,13 +57,13 @@ impl ToV8 for CommandOptions {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = to_v8(scope, FORCE.to_compact_string());
+    let force_field = to_v8(scope, FORCE);
     let force_value = to_v8(scope, self.force);
     obj.set(scope, force_field, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = to_v8(scope, ALIAS.to_compact_string());
+      let alias_field = to_v8(scope, ALIAS);
       let alias_value = to_v8(scope, alias.clone());
       obj.set(scope, alias_field, alias_value);
     }
