@@ -108,8 +108,8 @@ pub fn remove(
   let mut commands = lock!(state.commands);
   match commands.remove(&name) {
     Some(removed) => {
-      let obj = removed.to_v8(scope);
-      rv.set(obj.into());
+      let obj = removed.to_v8(scope).unwrap();
+      rv.set(obj);
     }
     None => rv.set_undefined(),
   }
