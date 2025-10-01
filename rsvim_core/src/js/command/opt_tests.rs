@@ -10,7 +10,7 @@ fn test1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = CommandOptionsBuilder::default().build().unwrap();
-  let obj1 = to_v8(scope, &a1).unwrap();
+  let obj1 = to_v8(scope, a1.clone()).unwrap();
   let val1 = from_v8::<CommandOptions>(scope, obj1).unwrap();
   assert_eq!(val1, a1);
 
