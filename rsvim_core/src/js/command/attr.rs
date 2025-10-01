@@ -103,6 +103,6 @@ impl ToV8 for CommandAttributes {
     let nargs_value = to_v8(scope, self.nargs.to_compact_string()).unwrap();
     obj.set(scope, nargs_field, nargs_value);
 
-    obj.into()
+    Some(obj.into())
   }
 }
