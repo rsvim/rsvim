@@ -74,7 +74,7 @@ pub fn create_timer<'s>(
   //   Err(_) => vec![],
   // };
 
-  // NOTE: Since in javascript side, we always pass no extra parameters to
+  // NOTE: Since in javascript side, we don't pass any extra parameters to
   // timers, thus it is always empty array. But, we leave this code here as a
   // reference.
   let params = vec![];
