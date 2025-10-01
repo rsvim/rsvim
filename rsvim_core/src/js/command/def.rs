@@ -31,8 +31,8 @@ impl Debug for CommandDefinition {
 }
 
 impl FromV8CallbackArguments for CommandDefinition {
-  fn from_v8_callback_arguments(
-    scope: &mut v8::PinScope,
+  fn from_v8_callback_arguments<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments,
   ) -> Option<Self> {
     debug_assert!(args.length() == 4);
@@ -59,19 +59,19 @@ impl ToV8 for CommandDefinition {
     let obj = v8::Object::new(scope);
 
     // name
-    let name_field = v8::String::new(scope, "name").unwrap();
-    let name_value = v8::String::new(scope, &self.name).unwrap();
+    let name_field = to_v8(scope, "name".to_compact_string()).unwrap();
+    let name_value = to_v8(scope, self.name).unwrap();
     obj.set(scope, name_field.into(), name_value.into());
 
     // callback
-    let callback_field = v8::String::new(scope, "callback").unwrap();
+    let callback_field = to_v8(scope, "callback".to_compact_string()).unwrap();
     let callback_value = v8::Local::new(scope, (*self.callback).clone());
     obj.set(scope, callback_field.into(), callback_value.into());
 
     // attributes
-    let attr_field = v8::String::new(scope, "attributes").unwrap();
+    let attr_field = to_v8(scope, "attributes").unwrap();
     let attr_value = self.attributes.to_v8(scope);
-    obj.set(scope, attr_field.into(), attr_value.into());
+    obj.set(scope, attr_field, attr_value);
 
     // options
     let opts_field = v8::String::new(scope, "options").unwrap();
