@@ -31,7 +31,7 @@ pub fn set_wrap<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0)).unwrap();
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -62,7 +62,7 @@ pub fn set_line_break<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0)).unwrap();
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -92,7 +92,7 @@ pub fn set_tab_stop<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0)).unwrap();
+  let value = from_v8::<u32>(scope, args.get(0));
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -124,7 +124,7 @@ pub fn set_expand_tab<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0)).unwrap();
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -155,7 +155,7 @@ pub fn set_shift_width<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0)).unwrap();
+  let value = from_v8::<u32>(scope, args.get(0));
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -177,7 +177,7 @@ pub fn get_file_encoding(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
-  rv.set(to_v8(scope, value.to_compact_string()).unwrap());
+  rv.set(to_v8(scope, value.to_compact_string()));
 }
 
 /// Set the _file-encoding_ option.
