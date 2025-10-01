@@ -143,10 +143,7 @@ impl FromV8 for u32 {
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_uint32() {
-      match value.uint32_value(scope) {
-        Some(value) => Some(value),
-        None => None,
-      }
+      value.uint32_value(scope)
     } else {
       None
     }

@@ -69,12 +69,12 @@ impl ToV8 for CommandDefinition {
     // name
     let name_field = to_v8(scope, NAME.to_compact_string()).unwrap();
     let name_value = to_v8(scope, self.name.clone()).unwrap();
-    obj.set(scope, name_field.into(), name_value.into());
+    obj.set(scope, name_field, name_value);
 
     // callback
     let callback_field = to_v8(scope, CALLBACK.to_compact_string()).unwrap();
     let callback_value = v8::Local::new(scope, (*self.callback).clone());
-    obj.set(scope, callback_field.into(), callback_value.into());
+    obj.set(scope, callback_field, callback_value.into());
 
     // attributes
     let attr_field = to_v8(scope, ATTRIBUTES.to_compact_string()).unwrap();
@@ -84,7 +84,7 @@ impl ToV8 for CommandDefinition {
     // options
     let opts_field = to_v8(scope, OPTIONS.to_compact_string()).unwrap();
     let opts_value = to_v8(scope, self.options.clone()).unwrap();
-    obj.set(scope, opts_field.into(), opts_value);
+    obj.set(scope, opts_field, opts_value);
 
     Some(obj.into())
   }
