@@ -16,11 +16,8 @@ fn test_integer1() {
 
   let a2 = 10_u32;
   let obj2 = to_v8(scope, a2);
-  assert!(obj2.is_some());
-  let obj2 = obj2.unwrap();
   let val2 = from_v8::<u32>(scope, obj2);
-  assert!(val2.is_some());
-  assert_eq!(val2.unwrap(), a2);
+  assert_eq!(val2, a2);
 }
 
 #[test]
