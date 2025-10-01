@@ -59,7 +59,7 @@ impl ToV8 for u32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Value> {
-    Some(v8::Integer::new_from_unsigned(scope, *self).into())
+    v8::Integer::new_from_unsigned(scope, *self).into()
   }
 }
 
@@ -67,8 +67,8 @@ impl ToV8 for i32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    Some(v8::Integer::new(scope, *self).into())
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Integer::new(scope, *self).into()
   }
 }
 
@@ -76,8 +76,8 @@ impl ToV8 for f64 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    Some(v8::Number::new(scope, *self).into())
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Number::new(scope, *self).into()
   }
 }
 
@@ -85,8 +85,8 @@ impl ToV8 for bool {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    Some(v8::Boolean::new(scope, *self).into())
+  ) -> v8::Local<'s, v8::Value> {
+    v8::Boolean::new(scope, *self).into()
   }
 }
 
@@ -94,7 +94,7 @@ impl ToV8 for &'static str {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
+  ) -> v8::Local<'s, v8::Value> {
     v8::String::new(scope, self).map(|s| s.into())
   }
 }
