@@ -34,7 +34,7 @@ pub fn to_v8<'s, 'b, T>(
   input: &T,
 ) -> Option<v8::Local<'s, v8::Value>>
 where
-  T: ToV8,
+  T: ToV8 + Sized,
 {
   input.to_v8(scope)
 }
