@@ -6,6 +6,8 @@ pub mod opt;
 
 #[cfg(test)]
 mod attr_tests;
+#[cfg(test)]
+mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsTaskId;
