@@ -95,8 +95,8 @@ impl ToV8 for CommandAttributes {
     obj.set(scope, bang_field.into(), bang_value.into());
 
     // nargs
-    let nargs_field = v8::String::new(scope, "nargs").unwrap();
-    let nargs_value = v8::String::new(scope, &self.nargs.to_string()).unwrap();
+    let nargs_field = to_v8(scope, "nargs").unwrap();
+    let nargs_value = to_v8(scope, &self.nargs.to_string()).unwrap();
     obj.set(scope, nargs_field.into(), nargs_value.into());
 
     obj.into()
