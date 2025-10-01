@@ -96,7 +96,7 @@ pub fn create_timer(
     repeated,
     Box::new(timer_cb),
   );
-  rv.set(v8::Integer::new(scope, timer_id as i32).into());
+  rv.set(to_v8(scope, timer_id).unwrap());
   trace!(
     "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
     timer_id, delay, repeated
