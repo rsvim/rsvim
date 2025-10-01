@@ -10,6 +10,7 @@ use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
+use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::rc::Rc;
 
@@ -94,13 +95,13 @@ pub fn list(
 }
 
 /// `Rsvim.cmd.remove` API.
-pub fn remove(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn remove<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = args.get(0).to_rust_string_lossy(scope);
+  let name = from_v8::<CompactString>(scope, args.get(0)).unwrap();
   trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
