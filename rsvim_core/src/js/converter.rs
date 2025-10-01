@@ -223,18 +223,18 @@ where
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
-    if value.is_array() {
-      let elements = v8::Local::<v8::Array>::try_from(value).unwrap();
-      let n = elements.length();
-      let mut v: Vec<T> = Vec::with_capacity(n as usize);
-      for i in 0..n {
-        let e = elements.get_index(scope, i).unwrap();
-        let t = T::from_v8(scope, e).unwrap();
-        v.push(t);
+    match v8::Local::<v8::Array>::try_from(value) {
+      Ok(elements) => {
+        let n = elements.length();
+        let mut v: Vec<T> = Vec::with_capacity(n as usize);
+        for i in 0..n {
+          let e = elements.get_index(scope, i).unwrap();
+          let t = T::from_v8(scope, e).unwrap();
+          v.push(t);
+        }
+        Some(v)
       }
-      Some(v)
-    } else {
-      None
+      Err(_) => None,
     }
   }
 }
