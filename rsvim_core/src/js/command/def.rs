@@ -27,10 +27,10 @@ pub struct CommandDefinition {
 impl Debug for CommandDefinition {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("CommandDefinition")
-      .field("name", &self.name)
-      .field("callback", &"Rc<v8::Global<v8::Function>>")
-      .field("attributes", &self.attributes)
-      .field("options", &self.options)
+      .field(NAME, &self.name)
+      .field(CALLBACK, &"Rc<v8::Global<v8::Function>>")
+      .field(ATTRIBUTES, &self.attributes)
+      .field(OPTIONS, &self.options)
       .finish()
   }
 }
