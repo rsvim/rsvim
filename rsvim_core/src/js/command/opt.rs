@@ -33,8 +33,7 @@ impl FromV8 for CommandOptions {
     let force_name = to_v8(scope, FORCE_NAME).unwrap();
     match value.get(scope, force_name.into()) {
       Some(force_value) => {
-        let force = to_v8::<bool>(scope, force_value).unwrap();
-        builder.force(force);
+        builder.force(to_v8::<bool>(scope, force_value).unwrap());
       }
       None => { /* do nothing */ }
     }
