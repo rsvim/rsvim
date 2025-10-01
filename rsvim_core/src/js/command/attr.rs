@@ -94,13 +94,13 @@ impl ToV8 for CommandAttributes {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = to_v8(scope, &BANG.to_compact_string()).unwrap();
+    let bang_field = to_v8(scope, BANG.to_compact_string()).unwrap();
     let bang_value = to_v8(scope, self.bang).unwrap();
     obj.set(scope, bang_field, bang_value);
 
     // nargs
-    let nargs_field = to_v8(scope, &NARGS.to_compact_string()).unwrap();
-    let nargs_value = to_v8(scope, &self.nargs.to_compact_string()).unwrap();
+    let nargs_field = to_v8(scope, NARGS.to_compact_string()).unwrap();
+    let nargs_value = to_v8(scope, self.nargs.to_compact_string()).unwrap();
     obj.set(scope, nargs_field, nargs_value);
 
     obj.into()
