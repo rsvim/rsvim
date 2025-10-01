@@ -235,7 +235,7 @@ where
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_array() {
-      let a: v8::Local<'s, v8::Array> = value.into();
+      let a: v8::Local<'s, v8::Object> = value.to_object().unwrap();
       let mut v: Vec<T> = Vec::with_capacity(a.length());
       let mut i = 0;
       while i < a.length() {
