@@ -1,6 +1,7 @@
 //! APIs for `Rsvim.opt` namespace.
 
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
@@ -177,8 +178,7 @@ pub fn get_file_encoding(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
-  let value = v8::String::new(scope, &value.to_string()).unwrap();
-  rv.set(value.into());
+  rv.set(to_v8(scope, value.to_compact_string()).unwrap());
 }
 
 /// Set the _file-encoding_ option.
@@ -212,8 +212,7 @@ pub fn get_file_format(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
-  let value = v8::String::new(scope, &value.to_string()).unwrap();
-  rv.set(value.into());
+  rv.set(to_v8(scope, value.to_compact_string()).unwrap());
 }
 
 /// Set the _file-format_ option.
