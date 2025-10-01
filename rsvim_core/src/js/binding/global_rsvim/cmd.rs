@@ -88,8 +88,7 @@ pub fn list(
       .values()
       .map(|def| Rc::unwrap_or_clone(def.clone()))
       .collect(),
-  )
-  .unwrap();
+  );
 
   rv.set(commands);
 }
