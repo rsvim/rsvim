@@ -36,7 +36,7 @@ impl FromV8 for CommandOptions {
       }
 
       // alias
-      let alias = to_v8(scope, &ALIAS).unwrap();
+      let alias = to_v8(scope, ALIAS.to_compact_string()).unwrap();
       if let Some(alias_value) = obj.get(scope, alias) {
         builder
           .alias(Some(from_v8::<CompactString>(scope, alias_value).unwrap()));
