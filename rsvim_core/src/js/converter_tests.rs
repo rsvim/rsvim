@@ -77,14 +77,14 @@ fn test_array1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, [1_i32, 2_i32, 3_i32]);
+  let a1: [i32; 3] = [1, 2, 3];
+  let obj1 = to_v8(scope, a1.clone());
   let val1 = from_v8::<Vec<i32>>(scope, obj1);
-  assert_eq!(val1, [1, 2, 3]);
+  assert_eq!(val1, a1);
 
-  let obj2 = to_v8(
-    scope,
-    vec!["a".to_string(), "b", to_string(), "c".to_string()],
-  );
+  let a2: Vec<String> =
+    vec!["a".to_string(), "b", to_string(), "c".to_string()];
+  let obj2 = to_v8(scope, a2.clone());
   let val2 = from_v8::<Vec<String>>(scope, obj2);
-  assert_eq!(val2, "World".to_compact_string());
+  assert_eq!(val2, a2);
 }
