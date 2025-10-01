@@ -1,7 +1,8 @@
 //! Ex command attributes.
 
-use crate::js::FromV8;
-use crate::js::ToV8;
+use compact_str::CompactString;
+
+use crate::js::converter::*;
 use crate::prelude::*;
 use std::str::FromStr;
 
@@ -58,32 +59,23 @@ pub struct CommandAttributes {
 impl FromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Object>,
-  ) -> Self {
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
     let mut builder = CommandAttributesBuilder::default();
 
     // bang
-    let bang_name = v8::String::new(scope, BANG_NAME).unwrap();
-    match value.get(scope, bang_name.into()) {
-      Some(bang_value) => {
-        let bang = bang_value.to_boolean(scope).boolean_value(scope);
-        trace!("|from_v8_object| bang:{:?}", bang);
-        builder.bang(bang);
-      }
-      None => { /* do nothing */ }
+    let bang_name = to_v8(scope, BANG_NAME).unwrap();
+    if let Some(bang_value) = value.get(scope, bang_name.into()) {
+      builder.bang(from_v8::<bool>(scope, bang_value).unwrap());
     }
 
     // nargs
-    let nargs_name = v8::String::new(scope, NARGS_NAME).unwrap();
-    match value.get(scope, nargs_name.into()) {
-      Some(nargs_value) => {
-        let nargs = nargs_value.to_rust_string_lossy(scope);
-        trace!("|from_v8_object| nargs:{:?}", nargs);
-        if let Ok(nargs) = Nargs::from_str(&nargs) {
-          builder.nargs(nargs);
-        }
+    let nargs_name = to_v8(scope, NARGS_NAME).unwrap();
+    if let Some(nargs_value) = value.get(scope, nargs_name.into()) {
+      let nargs = from_v8::<CompactString>(scope, nargs_value).unwrap();
+      if let Ok(nargs) = Nargs::from_str(&nargs) {
+        builder.nargs(nargs);
       }
-      None => { /* do nothing */ }
     }
 
     builder.build().unwrap()
