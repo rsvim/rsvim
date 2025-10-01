@@ -12,17 +12,21 @@ pub trait ToV8 {
 }
 
 pub trait FromV8CallbackArguments {
-  fn from_v8_callback_arguments(
-    scope: &mut v8::PinScope,
-    args: v8::FunctionCallbackArguments,
-  ) -> Option<Self>;
+  fn from_v8_callback_arguments<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    args: v8::FunctionCallbackArguments<'s>,
+  ) -> Option<Self>
+  where
+    Self: Sized;
 }
 
 pub trait FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self>;
+  ) -> Option<Self>
+  where
+    Self: Sized;
 }
 
 pub fn to_v8<'s, 'b, T>(
@@ -40,7 +44,7 @@ pub fn from_v8_callback_arguments<'s, 'b, T>(
   value: v8::FunctionCallbackArguments,
 ) -> Option<T>
 where
-  T: FromV8,
+  T: FromV8 + Sized,
 {
   T::from_v8_callback_arguments(scope, value)
 }
@@ -50,7 +54,7 @@ pub fn from_v8<'s, 'b, T>(
   value: v8::Local<'s, v8::Value>,
 ) -> Option<T>
 where
-  T: FromV8,
+  T: FromV8 + Sized,
 {
   T::from_v8(scope, value)
 }
