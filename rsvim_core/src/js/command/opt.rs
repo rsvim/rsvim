@@ -68,6 +68,6 @@ impl ToV8 for CommandOptions {
       obj.set(scope, alias_field, alias_value);
     }
 
-    obj.into()
+    Some(obj.into())
   }
 }
