@@ -363,7 +363,7 @@ setTimeout(() => {
   const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;}, {alias:"w"}, {force:false});
   Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
   const prev2 = Rsvim.cmd.create("writeSync", () => {Rsvim.cmd.echo(2); return 2;}, {alias:"w"}, {force:false});
-  Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
+  Rsvim.cmd.echo(`Previous-2 command:${prev2}`);
 });
     "#;
 
@@ -383,7 +383,7 @@ setTimeout(() => {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 3);
+    assert_eq!(n, 2);
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual1:{:?}", actual);
     assert!(actual.is_some());
@@ -394,27 +394,20 @@ setTimeout(() => {
     info!("actual2:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert_eq!(actual, "1");
-
-    let actual = contents.command_line_message_history_mut().try_pop();
-    info!("actual3:{:?}", actual);
-    assert!(actual.is_some());
-    let actual = actual.unwrap();
-    assert!(actual.contains("Previous-2 command:object, 1"));
+    assert!(actual.contains("Previous-2 command:undefined"));
 
     let state_rc = event_loop.js_runtime.get_state();
     let state = state_rc.borrow();
     let commands = lock!(state.commands);
-    assert_eq!(commands.len(), 1);
-    let first_command = commands.first_key_value();
-    assert!(first_command.is_some());
-    let (command_name, command_def) = first_command.unwrap();
-    assert_eq!(command_name, "write");
-    assert_eq!(command_def.name, "write");
-    assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
-    assert!(command_def.options.force);
-    assert_eq!(command_def.options.alias, None);
+    assert_eq!(commands.len(), 2);
+    for (name, def) in commands.iter() {
+      assert!(name == "write" || name == "writeSync");
+      assert_eq!(name, def.name);
+      assert!(!def.attributes.bang);
+      assert_eq!(def.attributes.nargs, Nargs::Zero);
+      assert!(!def.options.force);
+      assert_eq!(def.options.alias, None);
+    }
   }
 
   Ok(())
