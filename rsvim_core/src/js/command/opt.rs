@@ -25,16 +25,15 @@ pub struct CommandOptions {
 impl FromV8 for CommandOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Object>,
-  ) -> Self {
+    value: v8::Local<'s, v8::Value>,
+  ) -> Option<Self> {
     let mut builder = CommandOptionsBuilder::default();
 
     // force
-    let force_name = v8::String::new(scope, FORCE_NAME).unwrap();
+    let force_name = to_v8(scope, FORCE_NAME).unwrap();
     match value.get(scope, force_name.into()) {
       Some(force_value) => {
-        let force = force_value.to_boolean(scope).boolean_value(scope);
-        trace!("|from_v8_object| force:{:?}", force);
+        let force = to_v8::<bool>(scope, force_value).unwrap();
         builder.force(force);
       }
       None => { /* do nothing */ }
