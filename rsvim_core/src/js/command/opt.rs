@@ -5,19 +5,19 @@ use crate::prelude::*;
 use compact_str::CompactString;
 
 /// Command option names.
-pub const FORCE_NAME: &str = "force";
-pub const ALIAS_NAME: &str = "alias";
+pub const FORCE: &str = "force";
+pub const ALIAS: &str = "alias";
 
 /// Default command options.
-pub const FORCE_VALUE: bool = true;
-pub const ALIAS_VALUE: Option<CompactString> = None;
+pub const FORCE_DEFAULT: bool = true;
+pub const ALIAS_DEFAULT: Option<CompactString> = None;
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
-  #[builder(default = FORCE_VALUE)]
+  #[builder(default = FORCE_DEFAULT)]
   pub force: bool,
 
-  #[builder(default = ALIAS_VALUE)]
+  #[builder(default = ALIAS_DEFAULT)]
   pub alias: Option<CompactString>,
 }
 
@@ -29,13 +29,13 @@ impl FromV8 for CommandOptions {
     let mut builder = CommandOptionsBuilder::default();
 
     // force
-    let force_name = to_v8(scope, FORCE_NAME).unwrap();
+    let force_name = to_v8(scope, FORCE).unwrap();
     if let Some(force_value) = value.get(scope, force_name) {
       builder.force(from_v8::<bool>(scope, force_value).unwrap());
     }
 
     // alias
-    let alias_name = to_v8(scope, ALIAS_NAME).unwrap();
+    let alias_name = to_v8(scope, ALIAS).unwrap();
     if let Some(alias_value) = value.get(scope, alias_name) {
       builder
         .alias(Some(from_v8::<CompactString>(scope, alias_value).unwrap()));
