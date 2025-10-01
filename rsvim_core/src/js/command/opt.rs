@@ -3,7 +3,6 @@
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 /// Command option names.
 pub const FORCE_NAME: &str = "force";
