@@ -47,6 +47,9 @@ pub fn create_timer(
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
+  debug_assert!(args.length() == 4);
+  debug_assert!(args.get(3).is_array());
+
   // Get timer's callback.
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
