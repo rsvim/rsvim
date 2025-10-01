@@ -25,6 +25,36 @@ pub trait FromV8 {
   ) -> Option<Self>;
 }
 
+pub fn to_v8<'s, 'b, T>(
+  scope: &mut v8::PinScope<'s, 'b>,
+  input: T,
+) -> Option<v8::Local<'s, v8::Value>>
+where
+  T: ToV8,
+{
+  T::to_v8(input, scope)
+}
+
+pub fn from_v8_callback_arguments<'s, 'b, T>(
+  scope: &mut v8::PinScope<'s, 'b>,
+  value: v8::FunctionCallbackArguments,
+) -> Option<T>
+where
+  T: FromV8,
+{
+  T::from_v8_callback_arguments(scope, value)
+}
+
+pub fn from_v8<'s, 'b, T>(
+  scope: &mut v8::PinScope<'s, 'b>,
+  value: v8::Local<'s, v8::Value>,
+) -> Option<T>
+where
+  T: FromV8,
+{
+  T::from_v8(scope, value)
+}
+
 impl ToV8 for u32 {
   fn to_v8<'s>(
     &self,

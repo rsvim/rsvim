@@ -4,5 +4,7 @@ use crate::tests::evloop::*;
 
 #[test]
 fn test_integer1() {
-  let ev = make_event_loop(10, 10, CliOptions::empty());
+  let mut jsrt = make_js_runtime();
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 }
