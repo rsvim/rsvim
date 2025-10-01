@@ -224,20 +224,13 @@ where
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_array() {
-      let a: v8::Local<'s, v8::Object> = value.to_object(scope).unwrap();
-      let length_name = to_v8(scope, "length".to_compact_string()).unwrap();
-      let length_value = a
-        .get(scope, length_name)
-        .unwrap()
-        .int32_value(scope)
-        .unwrap() as u32;
-      let mut v: Vec<T> = Vec::with_capacity(length_value as usize);
-      let mut i = 0_u32;
-      while i < length_value {
-        let e = a.get_index(scope, i).unwrap();
+      let elements = v8::Local::<v8::Array>::try_from(value).unwrap();
+      let n = elements.length();
+      let mut v: Vec<T> = Vec::with_capacity(n as usize);
+      for i in 0..n {
+        let e = elements.get_index(scope, i).unwrap();
         let t = T::from_v8(scope, e).unwrap();
         v.push(t);
-        i += 1;
       }
       Some(v)
     } else {
