@@ -63,29 +63,30 @@ impl ToV8 for CommandDefinition {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // name
-    let name_field = to_v8(scope, NAME.to_compact_string()).unwrap();
-    let name_value = to_v8(scope, self.name.clone()).unwrap();
+    let name_field = to_v8(scope, NAME);
+    let name_value = to_v8(scope, self.name.clone());
     obj.set(scope, name_field, name_value);
 
     // callback
-    let callback_field = to_v8(scope, CALLBACK.to_compact_string()).unwrap();
-    let callback_value = v8::Local::new(scope, (*self.callback).clone());
+    let callback_field = to_v8(scope, CALLBACK);
+    let callback_value =
+      v8::Local::new(scope, Rc::unwrap_or_clone(self.callback));
     obj.set(scope, callback_field, callback_value.into());
 
     // attributes
-    let attr_field = to_v8(scope, ATTRIBUTES.to_compact_string()).unwrap();
-    let attr_value = to_v8(scope, self.attributes.clone()).unwrap();
+    let attr_field = to_v8(scope, ATTRIBUTES);
+    let attr_value = to_v8(scope, self.attributes.clone());
     obj.set(scope, attr_field, attr_value);
 
     // options
-    let opts_field = to_v8(scope, OPTIONS.to_compact_string()).unwrap();
-    let opts_value = to_v8(scope, self.options.clone()).unwrap();
+    let opts_field = to_v8(scope, OPTIONS);
+    let opts_value = to_v8(scope, self.options.clone());
     obj.set(scope, opts_field, opts_value);
 
-    Some(obj.into())
+    obj.into()
   }
 }
