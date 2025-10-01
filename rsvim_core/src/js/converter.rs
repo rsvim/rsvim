@@ -100,7 +100,7 @@ impl ToV8 for String {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> Option<v8::Local<'s, v8::Value>> {
-    Some(v8::String::new(scope, *self).into())
+    Some(v8::String::new(scope, self).into())
   }
 }
 
