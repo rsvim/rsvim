@@ -69,12 +69,13 @@ impl ToV8 for CommandDefinition {
     obj.set(scope, callback_field.into(), callback_value.into());
 
     // attributes
-    let attr_field = to_v8(scope, &"attributes".to_compact_string().unwrap();
+    let attr_field = to_v8(scope, &"attributes".to_compact_string()).unwrap();
     let attr_value = self.attributes.to_v8(scope);
     obj.set(scope, attr_field, attr_value);
 
     // options
-    let opts_field = v8::String::new(scope, &"options".to_compact_string()).unwrap();
+    let opts_field =
+      v8::String::new(scope, &"options".to_compact_string()).unwrap();
     let opts_value = self.options.to_v8(scope);
     obj.set(scope, opts_field.into(), opts_value.into());
 
