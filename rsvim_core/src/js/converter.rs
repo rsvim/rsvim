@@ -193,7 +193,7 @@ impl FromV8 for bool {
     value: v8::Local<'s, v8::Value>,
   ) -> Option<Self> {
     if value.is_boolean() || value.is_boolean_object() {
-      value.boolean_value(scope)
+      Some(value.boolean_value(scope))
     } else {
       None
     }
