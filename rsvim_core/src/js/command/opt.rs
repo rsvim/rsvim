@@ -53,11 +53,11 @@ impl ToV8 for CommandOptions {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = to_v8(scope, FORCE.to_compact_string()).unwrap();
+    let force_field = to_v8(scope, FORCE.to_compact_string());
     let force_value = to_v8(scope, self.force).unwrap();
     obj.set(scope, force_field, force_value);
 
