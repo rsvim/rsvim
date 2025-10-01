@@ -125,15 +125,15 @@ impl CommandsManager {
     self.commands.contains_key(name)
   }
 
-  pub fn keys(&self) -> CommandsManagerKeys {
+  pub fn keys(&self) -> CommandsManagerKeys<'_> {
     self.commands.keys()
   }
 
-  pub fn values(&self) -> CommandsManagerValues {
+  pub fn values(&self) -> CommandsManagerValues<'_> {
     self.commands.values()
   }
 
-  pub fn iter(&self) -> CommandsManagerIter {
+  pub fn iter(&self) -> CommandsManagerIter<'_> {
     self.commands.iter()
   }
 
