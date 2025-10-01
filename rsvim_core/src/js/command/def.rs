@@ -3,6 +3,7 @@
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
+use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
@@ -23,6 +24,8 @@ pub struct CommandDefinition {
   pub attributes: CommandAttributes,
   pub options: CommandOptions,
 }
+
+rc_ptr!(CommandDefinition);
 
 impl Debug for CommandDefinition {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
