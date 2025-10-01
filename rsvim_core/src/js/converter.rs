@@ -32,7 +32,7 @@ pub fn to_v8<'s, 'b, T>(
 where
   T: ToV8,
 {
-  T::to_v8(input, scope)
+  input.to_v8(scope)
 }
 
 pub fn from_v8_callback_arguments<'s, 'b, T>(
