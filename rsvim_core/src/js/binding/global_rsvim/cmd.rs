@@ -82,7 +82,8 @@ pub fn list(
   let cmds = v8::Array::new(scope, commands.len() as i32);
 
   for (i, def) in commands.values().enumerate() {
-    cmds.set_index(scope, i as u32, def.to_v8(scope).unwrap());
+    let v = def.to_v8(scope).unwrap();
+    cmds.set_index(scope, i as u32, v);
   }
 
   rv.set(v8::Local::new(scope, cmds).into());
