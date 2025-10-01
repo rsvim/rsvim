@@ -45,19 +45,13 @@ fn test_bool1() {
 
   let a1 = true;
   let obj1 = to_v8(scope, a1);
-  assert!(obj1.is_some());
-  let obj1 = obj1.unwrap();
   let val1 = from_v8::<bool>(scope, obj1);
-  assert!(val1.is_some());
-  assert!(val1.unwrap());
+  assert!(val1);
 
   let a2 = false;
   let obj2 = to_v8(scope, a2);
-  assert!(obj2.is_some());
-  let obj2 = obj2.unwrap();
   let val2 = from_v8::<bool>(scope, obj2);
-  assert!(val2.is_some());
-  assert!(!val2.unwrap());
+  assert!(!val2);
 }
 
 #[test]
