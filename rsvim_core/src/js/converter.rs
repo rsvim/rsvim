@@ -112,8 +112,8 @@ impl ToV8 for CompactString {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
-    v8::String::new(scope, self).map(|s| s.into())
+  ) -> v8::Local<'s, v8::Value> {
+    v8::String::new(scope, self).unwrap().into()
   }
 }
 
@@ -124,12 +124,12 @@ where
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
+  ) -> v8::Local<'s, v8::Value> {
     let elements = self
       .iter()
-      .map(|v| v.to_v8(scope).unwrap())
+      .map(|v| v.to_v8(scope))
       .collect::<Vec<_>>();
-    Some(v8::Array::new_with_elements(scope, &elements).into())
+    v8::Array::new_with_elements(scope, &elements).into()
   }
 }
 
