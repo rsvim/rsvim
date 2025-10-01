@@ -3,7 +3,6 @@
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
-use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::fmt::Debug;
