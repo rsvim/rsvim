@@ -1,4 +1,4 @@
-use super::opt::*;
+use super::def::*;
 use crate::js::converter::*;
 use crate::tests::js::*;
 use compact_str::ToCompactString;
@@ -9,7 +9,7 @@ fn test1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let a1 = CommandOptionsBuilder::default().build().unwrap();
+  let a1 = CommandDefinition::default().build().unwrap();
   let obj1 = to_v8(scope, &a1).unwrap();
   let val1 = from_v8::<CommandOptions>(scope, obj1).unwrap();
   assert_eq!(val1, a1);
