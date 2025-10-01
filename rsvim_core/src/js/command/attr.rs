@@ -62,7 +62,7 @@ impl FromV8 for CommandAttributes {
   ) -> Option<Self> {
     let mut builder = CommandAttributesBuilder::default();
     if value.is_object() {
-      let obj = value.to_object(scope);
+      let obj = value.to_object(scope).unwrap();
 
       // bang
       let bang_name = to_v8(scope, BANG.to_compact_string()).unwrap();
