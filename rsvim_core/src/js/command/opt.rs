@@ -25,33 +25,28 @@ impl FromV8 for CommandOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
+  ) -> Self {
     let mut builder = CommandOptionsBuilder::default();
-    if value.is_object() {
-      let obj = value.to_object(scope).unwrap();
+    let obj = value.to_object(scope).unwrap();
 
-      // force
-      let force = to_v8(scope, FORCE.to_compact_string()).unwrap();
-      if let Some(force_value) = obj.get(scope, force) {
-        builder.force(from_v8::<bool>(scope, force_value).unwrap());
-      }
+    // force
+    let force = to_v8(scope, FORCE.to_compact_string());
+    if let Some(force_value) = obj.get(scope, force) {
+      builder.force(from_v8::<bool>(scope, force_value));
+    }
 
-      // alias
-      let alias = to_v8(scope, ALIAS.to_compact_string()).unwrap();
-      if let Some(has_alias) = obj.has(scope, alias) {
-        if has_alias {
-          if let Some(alias_value) = obj.get(scope, alias) {
-            builder.alias(Some(
-              from_v8::<CompactString>(scope, alias_value).unwrap(),
-            ));
-          }
+    // alias
+    let alias = to_v8(scope, ALIAS.to_compact_string()).unwrap();
+    if let Some(has_alias) = obj.has(scope, alias) {
+      if has_alias {
+        if let Some(alias_value) = obj.get(scope, alias) {
+          builder
+            .alias(Some(from_v8::<CompactString>(scope, alias_value).unwrap()));
         }
       }
-
-      Some(builder.build().unwrap())
-    } else {
-      None
     }
+
+    builder.build().unwrap()
   }
 }
 
