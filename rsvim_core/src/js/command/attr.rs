@@ -46,7 +46,7 @@ pub enum Nargs {
   Any,
 }
 
-#[derive(Debug, Clone, derive_builder::Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
   #[builder(default = BANG_DEFAULT)]
   pub bang: bool,
