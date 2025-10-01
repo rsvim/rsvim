@@ -114,6 +114,6 @@ fn test_array1() {
   assert!(obj2.is_some());
   let obj2 = obj2.unwrap();
   let val2 = from_v8::<Vec<String>>(scope, obj2);
-  assert!(val2.is_some();
+  assert!(val2.is_some());
   assert_eq!(val2.unwrap(), a2);
 }
