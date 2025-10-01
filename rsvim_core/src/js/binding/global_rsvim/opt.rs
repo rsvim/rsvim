@@ -54,9 +54,9 @@ pub fn get_line_break(
 }
 
 /// Set the _line-break_ option.
-pub fn set_line_break(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_line_break<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
