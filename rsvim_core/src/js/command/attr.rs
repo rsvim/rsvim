@@ -1,6 +1,6 @@
 //! Ex command attributes.
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -96,7 +96,7 @@ impl ToV8 for CommandAttributes {
 
     // nargs
     let nargs_field = to_v8(scope, "nargs").unwrap();
-    let nargs_value = to_v8(scope, &self.nargs.to_string()).unwrap();
+    let nargs_value = to_v8(scope, &self.nargs.to_compact_string()).unwrap();
     obj.set(scope, nargs_field.into(), nargs_value.into());
 
     obj.into()
