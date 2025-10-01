@@ -3,6 +3,7 @@
 use crate::buf::BufferId;
 use crate::js::JsRuntime;
 use crate::js::binding;
+use crate::js::converter::*;
 use crate::prelude::*;
 
 /// `Rsvim.buf.current` API.
@@ -24,7 +25,7 @@ pub fn current(
     }
     None => {
       trace!("Rsvim.buf.current: not exist");
-      rv.set_null();
+      rv.set_undefined();
     }
   }
 }
@@ -40,25 +41,20 @@ pub fn list(
   let buffers = state_rc.borrow().buffers.clone();
   let buffers = lock!(buffers);
   trace!("Rsvim.buf.list: {:?}", buffers.keys());
-  let buf_ids = buffers.keys().copied().collect::<Vec<BufferId>>();
 
-  let bufs = v8::Array::new(scope, buf_ids.len() as i32);
-  for (i, buf_id) in buf_ids.iter().enumerate() {
-    let v = v8::Integer::new(scope, *buf_id);
-    // let v = v8::Local::new(scope, v);
-    bufs.set_index(scope, i as u32, v.into());
-  }
-  rv.set(v8::Local::new(scope, bufs).into());
+  let bufs = to_v8::<Vec<BufferId>>(scope, buffers.keys().copied().collect());
+
+  rv.set(bufs);
 }
 
 /// `Rsvim.buf.writeSync` API.
-pub fn write_sync(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn write_sync<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let buf_id = args.get(0).int32_value(scope).unwrap();
+  let buf_id = from_v8::<BufferId>(scope, args.get(0));
   trace!("Rsvim.buf.writeSync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);

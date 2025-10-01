@@ -6,6 +6,8 @@ pub mod opt;
 
 #[cfg(test)]
 mod attr_tests;
+#[cfg(test)]
+mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsTaskId;
@@ -14,7 +16,7 @@ use crate::js::next_task_id;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use def::CommandDefinition;
+use def::CommandDefinitionRc;
 
 const JS_COMMAND_NAME: &str = "js";
 
@@ -40,15 +42,26 @@ impl JsFuture for BuiltinCommandFuture {
 pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub definition: CommandDefinition,
+  pub definition: CommandDefinitionRc,
 }
 
 #[derive(Debug, Default)]
 pub struct CommandsManager {
-  commands: BTreeMap<CompactString, CommandDefinition>,
+  // Maps from command "name" to its "definition".
+  commands: BTreeMap<CompactString, CommandDefinitionRc>,
+
+  // Maps from command "alias" to its "name".
+  aliases: FoldMap<CompactString, CompactString>,
 }
 
 arc_mutex_ptr!(CommandsManager);
+
+pub type CommandsManagerKeys<'a> =
+  std::collections::btree_map::Keys<'a, CompactString, CommandDefinitionRc>;
+pub type CommandsManagerValues<'a> =
+  std::collections::btree_map::Values<'a, CompactString, CommandDefinitionRc>;
+pub type CommandsManagerIter<'a> =
+  std::collections::btree_map::Iter<'a, CompactString, CommandDefinitionRc>;
 
 impl CommandsManager {
   pub fn is_empty(&self) -> bool {
@@ -59,19 +72,52 @@ impl CommandsManager {
     self.commands.len()
   }
 
-  pub fn remove(&mut self, name: &str) -> Option<CommandDefinition> {
+  pub fn remove(&mut self, name: &str) -> Option<CommandDefinitionRc> {
     self.commands.remove(name)
   }
 
+  /// Insert new command definition.
+  ///
+  /// Every "command" has a unique name and it alias (if exists). When
+  /// inserts/registers a new command, both its name and alias cannot conflict
+  /// with existing registered ones.
+  ///
+  /// # Returns
+  ///
+  /// 1. It returns `Ok(None)` if registered successfully, and no conflicting
+  ///    one exists.
+  /// 2. It returns `Ok(CommandDefinitionRc)` if registered successfully, and
+  ///    previous one is been removed and returned. Note: this requires the
+  ///    `force` option.
+  /// 3. It returns `Err` if registered failed, because either command name or
+  ///    alias already exists, and user doesn't have the `force` option.
   pub fn insert(
     &mut self,
     name: CompactString,
-    definition: CommandDefinition,
-  ) -> Option<CommandDefinition> {
-    self.commands.insert(name, definition)
+    definition: CommandDefinitionRc,
+  ) -> AnyResult<Option<CommandDefinitionRc>> {
+    let alias = definition.options.alias.clone();
+
+    if !definition.options.force {
+      if self.commands.contains_key(&name) {
+        anyhow::bail!(format!("Command name {:?} already exists", name));
+      }
+      if let Some(ref alias) = alias {
+        if self.aliases.contains_key(alias.as_str()) {
+          anyhow::bail!(format!("Command alias {:?} already exists", name));
+        }
+      }
+    }
+
+    if let Some(alias) = alias {
+      self.aliases.insert(alias, name.clone());
+    }
+
+    let maybe_old = self.commands.insert(name, definition);
+    Ok(maybe_old)
   }
 
-  pub fn get(&self, name: &str) -> Option<CommandDefinition> {
+  pub fn get(&self, name: &str) -> Option<CommandDefinitionRc> {
     self.commands.get(name).cloned()
   }
 
@@ -79,34 +125,27 @@ impl CommandsManager {
     self.commands.contains_key(name)
   }
 
-  pub fn keys(
-    &self,
-  ) -> std::collections::btree_map::Keys<'_, CompactString, CommandDefinition>
-  {
+  pub fn keys(&self) -> CommandsManagerKeys<'_> {
     self.commands.keys()
   }
 
-  pub fn values(
-    &self,
-  ) -> std::collections::btree_map::Values<'_, CompactString, CommandDefinition>
-  {
+  pub fn values(&self) -> CommandsManagerValues<'_> {
     self.commands.values()
   }
 
-  pub fn iter(
-    &self,
-  ) -> std::collections::btree_map::Iter<'_, CompactString, CommandDefinition>
-  {
+  pub fn iter(&self) -> CommandsManagerIter<'_> {
     self.commands.iter()
   }
 
   pub fn first_key_value(
     &self,
-  ) -> Option<(&CompactString, &CommandDefinition)> {
+  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
     self.commands.first_key_value()
   }
 
-  pub fn last_key_value(&self) -> Option<(&CompactString, &CommandDefinition)> {
+  pub fn last_key_value(
+    &self,
+  ) -> Option<(&CompactString, &CommandDefinitionRc)> {
     self.commands.last_key_value()
   }
 }

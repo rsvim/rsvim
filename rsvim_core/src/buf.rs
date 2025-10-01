@@ -159,6 +159,13 @@ pub struct BuffersManager {
 
 arc_mutex_ptr!(BuffersManager);
 
+pub type BuffersManagerKeys<'a> =
+  std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> =
+  std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> =
+  std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+
 impl BuffersManager {
   pub fn new() -> Self {
     BuffersManager {
@@ -442,21 +449,15 @@ impl BuffersManager {
     self.buffers.contains_key(id)
   }
 
-  pub fn keys(
-    &self,
-  ) -> std::collections::btree_map::Keys<'_, BufferId, BufferArc> {
+  pub fn keys(&self) -> BuffersManagerKeys<'_> {
     self.buffers.keys()
   }
 
-  pub fn values(
-    &self,
-  ) -> std::collections::btree_map::Values<'_, BufferId, BufferArc> {
+  pub fn values(&self) -> BuffersManagerValues<'_> {
     self.buffers.values()
   }
 
-  pub fn iter(
-    &self,
-  ) -> std::collections::btree_map::Iter<'_, BufferId, BufferArc> {
+  pub fn iter(&self) -> BuffersManagerIter<'_> {
     self.buffers.iter()
   }
 

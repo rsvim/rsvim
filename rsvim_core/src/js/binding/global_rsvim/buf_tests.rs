@@ -17,7 +17,7 @@ mod tests_current1 {
 
   #[tokio::test]
   #[cfg_attr(miri, ignore)]
-  async fn null1() -> IoResult<()> {
+  async fn undefined1() -> IoResult<()> {
     test_log_init();
 
     let terminal_cols = 10_u16;
@@ -26,8 +26,8 @@ mod tests_current1 {
 
     let src: &str = r#"
     const buf = Rsvim.buf.current();
-    if (buf !== null) {
-        throw new Error("Current buffer ID is not null!");
+    if (buf !== undefined) {
+        throw new Error("Current buffer ID is not undefined!");
     }
     const bufs = Rsvim.buf.list();
     if (!Array.isArray(bufs)) {

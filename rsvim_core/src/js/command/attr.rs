@@ -1,15 +1,17 @@
 //! Ex command attributes.
 
-use crate::prelude::*;
+use crate::js::converter::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::str::FromStr;
 
 /// Command attribute name.
-pub const BANG_NAME: &str = "bang";
-pub const NARGS_NAME: &str = "nargs";
+pub const BANG: &str = "bang";
+pub const NARGS: &str = "nargs";
 
 /// Default command attributes.
-pub const NARGS_VALUE: Nargs = Nargs::Zero;
-pub const BANG_VALUE: bool = false;
+pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
+pub const BANG_DEFAULT: bool = false;
 
 #[derive(
   Debug,
@@ -44,65 +46,57 @@ pub enum Nargs {
   Any,
 }
 
-#[derive(Debug, Clone, derive_builder::Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
-  #[builder(default = BANG_VALUE)]
+  #[builder(default = BANG_DEFAULT)]
   pub bang: bool,
 
-  #[builder(default = NARGS_VALUE)]
+  #[builder(default = NARGS_DEFAULT)]
   pub nargs: Nargs,
 }
 
-impl CommandAttributes {
-  pub fn from_v8_object<'s>(
-    scope: &mut v8::PinScope,
-    value: v8::Local<'s, v8::Object>,
+impl FromV8 for CommandAttributes {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
+    let obj = value.to_object(scope).unwrap();
 
     // bang
-    let bang_name = v8::String::new(scope, BANG_NAME).unwrap();
-    match value.get(scope, bang_name.into()) {
-      Some(bang_value) => {
-        let bang = bang_value.to_boolean(scope).boolean_value(scope);
-        trace!("|from_v8_object| bang:{:?}", bang);
-        builder.bang(bang);
-      }
-      None => { /* do nothing */ }
+    let bang_name = to_v8(scope, BANG);
+    if let Some(bang_value) = obj.get(scope, bang_name) {
+      builder.bang(from_v8::<bool>(scope, bang_value));
     }
 
     // nargs
-    let nargs_name = v8::String::new(scope, NARGS_NAME).unwrap();
-    match value.get(scope, nargs_name.into()) {
-      Some(nargs_value) => {
-        let nargs = nargs_value.to_rust_string_lossy(scope);
-        trace!("|from_v8_object| nargs:{:?}", nargs);
-        if let Ok(nargs) = Nargs::from_str(&nargs) {
-          builder.nargs(nargs);
-        }
-      }
-      None => { /* do nothing */ }
+    let nargs_name = to_v8(scope, NARGS);
+    if let Some(nargs_value) = obj.get(scope, nargs_name) {
+      let nargs = from_v8::<CompactString>(scope, nargs_value);
+      builder.nargs(Nargs::from_str(&nargs).unwrap());
     }
 
     builder.build().unwrap()
   }
+}
 
-  pub fn into_v8_object<'s>(
+impl ToV8 for CommandAttributes {
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = v8::String::new(scope, "bang").unwrap();
-    let bang_value = v8::Boolean::new(scope, self.bang);
-    obj.set(scope, bang_field.into(), bang_value.into());
+    let bang_field = to_v8(scope, BANG);
+    let bang_value = to_v8(scope, self.bang);
+    obj.set(scope, bang_field, bang_value);
 
     // nargs
-    let nargs_field = v8::String::new(scope, "nargs").unwrap();
-    let nargs_value = v8::String::new(scope, &self.nargs.to_string()).unwrap();
-    obj.set(scope, nargs_field.into(), nargs_value.into());
+    let nargs_field = to_v8(scope, NARGS);
+    let nargs_value = to_v8(scope, self.nargs.to_compact_string());
+    obj.set(scope, nargs_field, nargs_value);
 
-    obj
+    obj.into()
   }
 }

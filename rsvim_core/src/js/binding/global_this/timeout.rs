@@ -3,6 +3,8 @@
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
+use crate::js::JsTimerId;
+use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
@@ -41,33 +43,41 @@ impl JsFuture for TimeoutFuture {
 }
 
 /// Javascript `setTimeout`/`setInterval` API.
-pub fn create_timer(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn create_timer<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
+  debug_assert!(args.length() == 3);
+
   // Get timer's callback.
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
 
   // Get timer's delay time in millis.
-  let delay = args.get(1).int32_value(scope).unwrap() as u64;
+  let delay = from_v8::<u32>(scope, args.get(1));
   // Get timer's repeated.
-  let repeated = args.get(2).boolean_value(scope);
+  let repeated = from_v8::<bool>(scope, args.get(2));
 
+  // NOTE: Don't delete this part of code, it shows how to convert function
+  // arguments into an array of values.
   // Convert params argument (Array<Local<Value>>) to Rust vector.
-  let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
-    Ok(params) => (0..params.length()).fold(
-      Vec::<v8::Global<v8::Value>>::new(),
-      |mut acc, i| {
-        let param = params.get_index(scope, i).unwrap();
-        acc.push(v8::Global::new(scope, param));
-        acc
-      },
-    ),
-    Err(_) => vec![],
-  };
+  // let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
+  //   Ok(params) => (0..params.length()).fold(
+  //     Vec::<v8::Global<v8::Value>>::new(),
+  //     |mut acc, i| {
+  //       let param = params.get_index(scope, i).unwrap();
+  //       acc.push(v8::Global::new(scope, param));
+  //       acc
+  //     },
+  //   ),
+  //   Err(_) => vec![],
+  // };
 
+  // NOTE: Since in javascript side, we don't pass any extra parameters to
+  // timers, thus it is always empty array. But, we leave this code here as a
+  // reference.
+  let params = vec![];
   let params = Rc::new(params);
 
   let state_rc = JsRuntime::state(scope);
@@ -88,11 +98,11 @@ pub fn create_timer(
   pending::create_timer(
     &mut state,
     timer_id,
-    delay,
+    delay as u64,
     repeated,
     Box::new(timer_cb),
   );
-  rv.set(v8::Integer::new(scope, timer_id as i32).into());
+  rv.set_int32(timer_id);
   trace!(
     "|create_timer| timer_id:{:?}, delay:{:?}, repeated:{:?}",
     timer_id, delay, repeated
@@ -100,13 +110,14 @@ pub fn create_timer(
 }
 
 /// Javascript `clearTimeout`/`clearInterval` API.
-pub fn clear_timer(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn clear_timer<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
+  debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
-  let timer_id = args.get(0).int32_value(scope).unwrap();
+  let timer_id = from_v8::<JsTimerId>(scope, args.get(0));
   let state_rc = JsRuntime::state(scope);
 
   let mut state = state_rc.borrow_mut();

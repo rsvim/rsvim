@@ -15,7 +15,7 @@ pub enum IndicatorSymbol {
   Empty,
   Ex,
   SearchForward,
-  SearchBackard,
+  SearchBackward,
 }
 
 impl std::fmt::Display for IndicatorSymbol {
@@ -24,7 +24,7 @@ impl std::fmt::Display for IndicatorSymbol {
       IndicatorSymbol::Empty => write!(f, " "),
       IndicatorSymbol::Ex => write!(f, ":"),
       IndicatorSymbol::SearchForward => write!(f, "/"),
-      IndicatorSymbol::SearchBackard => write!(f, "?"),
+      IndicatorSymbol::SearchBackward => write!(f, "?"),
     }
   }
 }

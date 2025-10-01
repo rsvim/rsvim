@@ -3,7 +3,10 @@
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::js::JsRuntime;
+use crate::js::converter::*;
 use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
@@ -22,13 +25,13 @@ pub fn get_wrap(
 }
 
 /// Set the _wrap_ option.
-pub fn set_wrap(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
+pub fn set_wrap<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).boolean_value(scope);
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -53,13 +56,13 @@ pub fn get_line_break(
 }
 
 /// Set the _line-break_ option.
-pub fn set_line_break(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
+pub fn set_line_break<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).boolean_value(scope);
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -83,19 +86,19 @@ pub fn get_tab_stop(
 }
 
 /// Set the _tab-stop_ option.
-pub fn set_tab_stop(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_tab_stop<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).int32_value(scope).unwrap();
+  let value = from_v8::<u32>(scope, args.get(0));
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u16;
   buffers.global_local_options_mut().set_tab_stop(value);
 }
 
@@ -115,13 +118,13 @@ pub fn get_expand_tab(
 }
 
 /// Set the _expand-tab_ option.
-pub fn set_expand_tab(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_expand_tab<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).boolean_value(scope);
+  let value = from_v8::<bool>(scope, args.get(0));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -146,19 +149,19 @@ pub fn get_shift_width(
 }
 
 /// Set the _shift-width_ option.
-pub fn set_shift_width(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_shift_width<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).int32_value(scope).unwrap();
+  let value = from_v8::<u32>(scope, args.get(0));
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u16;
   buffers.global_local_options_mut().set_shift_width(value);
 }
 
@@ -174,18 +177,17 @@ pub fn get_file_encoding(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
-  let value = v8::String::new(scope, &value.to_string()).unwrap();
-  rv.set(value.into());
+  rv.set(to_v8(scope, value.to_compact_string()));
 }
 
 /// Set the _file-encoding_ option.
-pub fn set_file_encoding(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_file_encoding<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
+  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -207,18 +209,17 @@ pub fn get_file_format(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
-  let value = v8::String::new(scope, &value.to_string()).unwrap();
-  rv.set(value.into());
+  rv.set(to_v8(scope, value.to_compact_string()));
 }
 
 /// Set the _file-format_ option.
-pub fn set_file_format(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_file_format<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
+  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();

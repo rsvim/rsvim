@@ -1,78 +1,72 @@
 //! Ex command options.
 
-use crate::prelude::*;
+use crate::js::converter::*;
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 /// Command option names.
-pub const FORCE_NAME: &str = "force";
-pub const ALIAS_NAME: &str = "alias";
+pub const FORCE: &str = "force";
+pub const ALIAS: &str = "alias";
 
 /// Default command options.
-pub const FORCE_VALUE: bool = true;
-pub const ALIAS_VALUE: Option<CompactString> = None;
+pub const FORCE_DEFAULT: bool = true;
+pub const ALIAS_DEFAULT: Option<CompactString> = None;
 
-#[derive(Debug, Clone, derive_builder::Builder)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
-  #[builder(default = FORCE_VALUE)]
+  #[builder(default = FORCE_DEFAULT)]
   pub force: bool,
 
-  #[builder(default = ALIAS_VALUE)]
+  #[builder(default = ALIAS_DEFAULT)]
   pub alias: Option<CompactString>,
 }
 
-impl CommandOptions {
-  pub fn from_v8_object<'s>(
-    scope: &mut v8::PinScope,
-    value: v8::Local<'s, v8::Object>,
+impl FromV8 for CommandOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
   ) -> Self {
     let mut builder = CommandOptionsBuilder::default();
+    let obj = value.to_object(scope).unwrap();
 
     // force
-    let force_name = v8::String::new(scope, FORCE_NAME).unwrap();
-    match value.get(scope, force_name.into()) {
-      Some(force_value) => {
-        let force = force_value.to_boolean(scope).boolean_value(scope);
-        trace!("|from_v8_object| force:{:?}", force);
-        builder.force(force);
-      }
-      None => { /* do nothing */ }
+    let force = to_v8(scope, FORCE);
+    if let Some(force_value) = obj.get(scope, force) {
+      builder.force(from_v8::<bool>(scope, force_value));
     }
 
     // alias
-    let alias_name = v8::String::new(scope, ALIAS_NAME).unwrap();
-    match value.get(scope, alias_name.into()) {
-      Some(alias_value) => {
-        if alias_value.is_string() || alias_value.is_string_object() {
-          let alias = alias_value.to_rust_string_lossy(scope);
-          trace!("|from_v8_object| alias:{:?}", alias);
-          builder.alias(Some(alias.to_compact_string()));
+    let alias = to_v8(scope, ALIAS);
+    if let Some(has_alias) = obj.has(scope, alias) {
+      if has_alias {
+        if let Some(alias_value) = obj.get(scope, alias) {
+          builder.alias(Some(from_v8::<CompactString>(scope, alias_value)));
         }
       }
-      None => { /* do nothing */ }
     }
 
     builder.build().unwrap()
   }
+}
 
-  pub fn into_v8_object<'s>(
+impl ToV8 for CommandOptions {
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
+  ) -> v8::Local<'s, v8::Value> {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = v8::String::new(scope, "force").unwrap();
-    let force_value = v8::Boolean::new(scope, self.force);
-    obj.set(scope, force_field.into(), force_value.into());
+    let force_field = to_v8(scope, FORCE);
+    let force_value = to_v8(scope, self.force);
+    obj.set(scope, force_field, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = v8::String::new(scope, "alias").unwrap();
-      let alias_value = v8::String::new(scope, alias).unwrap();
-      obj.set(scope, alias_field.into(), alias_value.into());
+      let alias_field = to_v8(scope, ALIAS);
+      let alias_value = to_v8(scope, alias.clone());
+      obj.set(scope, alias_field, alias_value);
     }
 
-    obj
+    obj.into()
   }
 }
