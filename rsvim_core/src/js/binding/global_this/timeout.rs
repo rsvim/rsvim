@@ -57,7 +57,7 @@ pub fn create_timer<'s>(
   // Get timer's delay time in millis.
   let delay = from_v8::<u32>(scope, args.get(1)).unwrap();
   // Get timer's repeated.
-  let repeated = from_v8::<bool>(scope, args.get(3)).unwrap();
+  let repeated = from_v8::<bool>(scope, args.get(2)).unwrap();
 
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
