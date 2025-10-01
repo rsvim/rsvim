@@ -59,18 +59,21 @@ pub fn create_timer<'s>(
   // Get timer's repeated.
   let repeated = from_v8::<bool>(scope, args.get(2)).unwrap();
 
+  // NOTE: Don't delete this part of code, it shows how to convert function
+  // arguments into an array of values.
   // Convert params argument (Array<Local<Value>>) to Rust vector.
-  let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
-    Ok(params) => (0..params.length()).fold(
-      Vec::<v8::Global<v8::Value>>::new(),
-      |mut acc, i| {
-        let param = params.get_index(scope, i).unwrap();
-        acc.push(v8::Global::new(scope, param));
-        acc
-      },
-    ),
-    Err(_) => vec![],
-  };
+  // let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
+  //   Ok(params) => (0..params.length()).fold(
+  //     Vec::<v8::Global<v8::Value>>::new(),
+  //     |mut acc, i| {
+  //       let param = params.get_index(scope, i).unwrap();
+  //       acc.push(v8::Global::new(scope, param));
+  //       acc
+  //     },
+  //   ),
+  //   Err(_) => vec![],
+  // };
+  let params = vec![];
 
   let params = Rc::new(params);
 
