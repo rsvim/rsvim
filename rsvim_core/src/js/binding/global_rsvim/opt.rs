@@ -1,13 +1,12 @@
 //! APIs for `Rsvim.opt` namespace.
 
-use compact_str::CompactString;
-use compact_str::ToCompactString;
-
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
