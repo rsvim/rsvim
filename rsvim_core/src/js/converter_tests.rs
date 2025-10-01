@@ -9,13 +9,15 @@ fn test_integer1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, 10_i32);
+  let a1 = 10_i32;
+  let obj1 = to_v8(scope, a1);
   let val1 = from_v8::<i32>(scope, obj1);
-  assert_eq!(val1, 10);
+  assert_eq!(val1, a1);
 
-  let obj2 = to_v8(scope, 10_u32);
+  let a2 = 10_u32;
+  let obj2 = to_v8(scope, a2);
   let val2 = from_v8::<u32>(scope, obj2);
-  assert_eq!(val2, 10_u32);
+  assert_eq!(val2, a2);
 }
 
 #[test]
@@ -24,13 +26,15 @@ fn test_number1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, 1.23_f64);
+  let a1 = 1.23_f64;
+  let obj1 = to_v8(scope, a1);
   let val1 = from_v8::<f64>(scope, obj1);
-  assert_eq!(val1, 1.23_f64);
+  assert_eq!(val1, a1);
 
-  let obj2 = to_v8(scope, 8_f64);
+  let a2 = 8_f64;
+  let obj2 = to_v8(scope, a2);
   let val2 = from_v8::<f64>(scope, obj2);
-  assert_eq!(val2, 8_f64);
+  assert_eq!(val2, a2);
 }
 
 #[test]
@@ -39,11 +43,13 @@ fn test_bool1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, true);
+  let a1 = true;
+  let obj1 = to_v8(scope, a1);
   let val1 = from_v8::<bool>(scope, obj1);
   assert!(val1);
 
-  let obj2 = to_v8(scope, false);
+  let a2 = false;
+  let obj2 = to_v8(scope, a2);
   let val2 = from_v8::<bool>(scope, obj2);
   assert!(!val2);
 }
@@ -54,26 +60,31 @@ fn test_string1() {
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, "Hello".to_string());
+  let a1 = "Hello".to_string();
+  let obj1 = to_v8(scope, a1);
   let val1 = from_v8::<String>(scope, obj1);
-  assert_eq!(val1, "Hello".to_string());
+  assert_eq!(val1, a1);
 
+  let a2 = "Hello".to_string();
   let obj2 = to_v8(scope, "World".to_compact_string());
   let val2 = from_v8::<CompactString>(scope, obj2);
   assert_eq!(val2, "World".to_compact_string());
 }
 
 #[test]
-fn test_string1() {
+fn test_array1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
-  let obj1 = to_v8(scope, "Hello".to_string());
-  let val1 = from_v8::<String>(scope, obj1);
-  assert_eq!(val1, "Hello".to_string());
+  let obj1 = to_v8(scope, [1_i32, 2_i32, 3_i32]);
+  let val1 = from_v8::<Vec<i32>>(scope, obj1);
+  assert_eq!(val1, [1, 2, 3]);
 
-  let obj2 = to_v8(scope, "World".to_compact_string());
-  let val2 = from_v8::<CompactString>(scope, obj2);
+  let obj2 = to_v8(
+    scope,
+    vec!["a".to_string(), "b", to_string(), "c".to_string()],
+  );
+  let val2 = from_v8::<Vec<String>>(scope, obj2);
   assert_eq!(val2, "World".to_compact_string());
 }
