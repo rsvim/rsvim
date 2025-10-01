@@ -41,9 +41,9 @@ pub fn echo(
 }
 
 /// `Rsvim.cmd.create` API.
-pub fn create(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn create<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   let def = CommandDefinition::from_v8_callback_arguments(scope, args).unwrap();
