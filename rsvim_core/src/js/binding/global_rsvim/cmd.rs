@@ -71,10 +71,10 @@ pub fn create<'s>(
 /// `Rsvim.cmd.list` API.
 pub fn list(
   scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+  _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 0);
+  debug_assert!(_args.length() == 0);
   trace!("Rsvim.cmd.list");
 
   let state_rc = JsRuntime::state(scope);
