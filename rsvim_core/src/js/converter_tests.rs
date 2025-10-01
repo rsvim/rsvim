@@ -1,6 +1,5 @@
 use super::converter::*;
-use crate::cli::CliOptions;
-use crate::tests::evloop::*;
+use crate::tests::js::*;
 
 #[test]
 fn test_integer1() {
