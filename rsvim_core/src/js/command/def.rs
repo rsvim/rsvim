@@ -11,6 +11,11 @@ use std::rc::Rc;
 
 pub type CommandCallback = Rc<v8::Global<v8::Function>>;
 
+/// Command definition names.
+pub const NAME: &str = "name";
+pub const CALLBACK: &str = "callback";
+pub const ATTRIBUTES: &str = "attributes";
+
 #[derive(Clone)]
 pub struct CommandDefinition {
   pub name: CompactString,
@@ -60,7 +65,7 @@ impl ToV8 for CommandDefinition {
 
     // name
     let name_field = to_v8(scope, &"name".to_compact_string()).unwrap();
-    let name_value = to_v8(scope, self.name).unwrap();
+    let name_value = to_v8(scope, &self.name).unwrap();
     obj.set(scope, name_field.into(), name_value.into());
 
     // callback
@@ -70,14 +75,13 @@ impl ToV8 for CommandDefinition {
 
     // attributes
     let attr_field = to_v8(scope, &"attributes".to_compact_string()).unwrap();
-    let attr_value = self.attributes.to_v8(scope);
+    let attr_value = to_v8(scope, &self.attributes).unwrap();
     obj.set(scope, attr_field, attr_value);
 
     // options
-    let opts_field =
-      v8::String::new(scope, &"options".to_compact_string()).unwrap();
-    let opts_value = self.options.to_v8(scope);
-    obj.set(scope, opts_field.into(), opts_value.into());
+    let opts_field = to_v8(scope, &"options".to_compact_string()).unwrap()
+    let opts_value = to_v8(scope, &self.options).unwrap();
+    obj.set(scope, opts_field.into(), opts_value);
 
     obj.into()
   }

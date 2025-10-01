@@ -7,12 +7,12 @@ use crate::prelude::*;
 use std::str::FromStr;
 
 /// Command attribute name.
-pub const BANG_NAME: &str = "bang";
-pub const NARGS_NAME: &str = "nargs";
+pub const BANG: &str = "bang";
+pub const NARGS: &str = "nargs";
 
 /// Default command attributes.
-pub const NARGS_VALUE: Nargs = Nargs::Zero;
-pub const BANG_VALUE: bool = false;
+pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
+pub const BANG_DEFAULT: bool = false;
 
 #[derive(
   Debug,
@@ -49,10 +49,10 @@ pub enum Nargs {
 
 #[derive(Debug, Clone, derive_builder::Builder)]
 pub struct CommandAttributes {
-  #[builder(default = BANG_VALUE)]
+  #[builder(default = BANG_DEFAULT)]
   pub bang: bool,
 
-  #[builder(default = NARGS_VALUE)]
+  #[builder(default = NARGS_DEFAULT)]
   pub nargs: Nargs,
 }
 
@@ -64,13 +64,13 @@ impl FromV8 for CommandAttributes {
     let mut builder = CommandAttributesBuilder::default();
 
     // bang
-    let bang_name = to_v8(scope, &BANG_NAME.to_compact_string()).unwrap();
+    let bang_name = to_v8(scope, &BANG.to_compact_string()).unwrap();
     if let Some(bang_value) = value.get(scope, bang_name) {
       builder.bang(from_v8::<bool>(scope, bang_value).unwrap());
     }
 
     // nargs
-    let nargs_name = to_v8(scope, &NARGS_NAME.to_compact_string()).unwrap();
+    let nargs_name = to_v8(scope, &NARGS.to_compact_string()).unwrap();
     if let Some(nargs_value) = value.get(scope, nargs_name) {
       let nargs = from_v8::<CompactString>(scope, nargs_value).unwrap();
       if let Ok(nargs) = Nargs::from_str(&nargs) {
@@ -90,12 +90,12 @@ impl ToV8 for CommandAttributes {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = to_v8(scope, &BANG_NAME.to_compact_string()).unwrap();
+    let bang_field = to_v8(scope, &BANG.to_compact_string()).unwrap();
     let bang_value = to_v8(scope, self.bang).unwrap();
     obj.set(scope, bang_field, bang_value);
 
     // nargs
-    let nargs_field = to_v8(scope, &NARGS_NAME.to_compact_string()).unwrap();
+    let nargs_field = to_v8(scope, &NARGS.to_compact_string()).unwrap();
     let nargs_value = to_v8(scope, &self.nargs.to_compact_string()).unwrap();
     obj.set(scope, nargs_field, nargs_value);
 
