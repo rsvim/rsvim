@@ -56,12 +56,8 @@ pub fn create(
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match removed {
-    Ok(Some(removed)) => {
-      rv.set(to_v8(scope, removed).unwrap());
-    }
-    Ok(None) => {
-      rv.set_undefined();
-    }
+    Ok(Some(removed)) => rv.set(removed.to_v8(scope).unwrap()),
+    Ok(None) => rv.set_undefined(),
     Err(e) => {}
   }
 }
