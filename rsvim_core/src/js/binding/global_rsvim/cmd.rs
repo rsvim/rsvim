@@ -100,14 +100,14 @@ pub fn remove<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = from_v8::<CompactString>(scope, args.get(0)).unwrap();
+  let name = from_v8::<CompactString>(scope, args.get(0));
   trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
   match commands.remove(&name) {
-    Some(removed) => rv.set(removed.to_v8(scope).unwrap()),
+    Some(removed) => rv.set(removed.to_v8(scope)),
     None => rv.set_undefined(),
   }
 }
