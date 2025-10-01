@@ -64,13 +64,13 @@ impl FromV8 for CommandAttributes {
     let obj = value.to_object(scope).unwrap();
 
     // bang
-    let bang_name = to_v8(scope, BANG.to_compact_string());
+    let bang_name = to_v8(scope, BANG);
     if let Some(bang_value) = obj.get(scope, bang_name) {
       builder.bang(from_v8::<bool>(scope, bang_value));
     }
 
     // nargs
-    let nargs_name = to_v8(scope, NARGS.to_compact_string());
+    let nargs_name = to_v8(scope, NARGS);
     if let Some(nargs_value) = obj.get(scope, nargs_name) {
       let nargs = from_v8::<CompactString>(scope, nargs_value);
       builder.nargs(Nargs::from_str(&nargs).unwrap());
