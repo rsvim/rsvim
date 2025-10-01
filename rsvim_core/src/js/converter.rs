@@ -44,7 +44,7 @@ pub fn from_v8_callback_arguments<'s, 'b, T>(
   value: v8::FunctionCallbackArguments,
 ) -> Option<T>
 where
-  T: FromV8 + Sized,
+  T: FromV8CallbackArguments + Sized,
 {
   T::from_v8_callback_arguments(scope, value)
 }
