@@ -37,7 +37,7 @@ impl Debug for CommandDefinition {
 }
 
 impl FromV8CallbackArguments for CommandDefinition {
-  fn from_v8_callback_arguments<'s, '_>(
+  fn from_v8_callback_arguments<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Option<Self> {
