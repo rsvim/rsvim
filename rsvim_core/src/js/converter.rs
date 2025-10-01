@@ -1,6 +1,5 @@
 //! Converters between rust and v8 values.
 
-use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
