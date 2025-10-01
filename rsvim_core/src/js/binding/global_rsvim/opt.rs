@@ -216,13 +216,15 @@ pub fn get_file_format(
 }
 
 /// Set the _file-format_ option.
-pub fn set_file_format(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_file_format<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
+  let value = from_v8::<CompactString>(scope, args.get(0))
+    .unwrap()
+    .to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
