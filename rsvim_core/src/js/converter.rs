@@ -95,6 +95,15 @@ impl ToV8 for bool {
   }
 }
 
+impl ToV8 for &'static str {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> Option<v8::Local<'s, v8::Value>> {
+    v8::String::new(scope, self).map(|s| s.into())
+  }
+}
+
 impl ToV8 for String {
   fn to_v8<'s>(
     &self,

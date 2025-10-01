@@ -70,17 +70,17 @@ impl ToV8 for CommandDefinition {
     obj.set(scope, name_field.into(), name_value.into());
 
     // callback
-    let callback_field = to_v8(scope, &CALLBACK.to_compact_string()).unwrap();
+    let callback_field = to_v8(scope, &CALLBACK).unwrap();
     let callback_value = v8::Local::new(scope, (*self.callback).clone());
     obj.set(scope, callback_field.into(), callback_value.into());
 
     // attributes
-    let attr_field = to_v8(scope, &ATTRIBUTES.to_compact_string()).unwrap();
+    let attr_field = to_v8(scope, &ATTRIBUTES).unwrap();
     let attr_value = to_v8(scope, &self.attributes).unwrap();
     obj.set(scope, attr_field, attr_value);
 
     // options
-    let opts_field = to_v8(scope, &OPTIONS.to_compact_string()).unwrap()
+    let opts_field = to_v8(scope, OPTIONS).unwrap();
     let opts_value = to_v8(scope, &self.options).unwrap();
     obj.set(scope, opts_field.into(), opts_value);
 
