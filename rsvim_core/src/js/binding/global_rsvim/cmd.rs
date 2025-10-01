@@ -54,6 +54,7 @@ pub fn create<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
+
   let result = commands
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
