@@ -84,6 +84,6 @@ impl ToV8 for CommandDefinition {
     let opts_value = to_v8(scope, &self.options).unwrap();
     obj.set(scope, opts_field.into(), opts_value);
 
-    obj.into()
+    Some(obj.into())
   }
 }
