@@ -1,7 +1,7 @@
-use compact_str::ToCompactString;
-
 use super::opt::*;
 use crate::js::converter::*;
+use crate::tests::js::*;
+use compact_str::ToCompactString;
 
 #[test]
 fn test1() {
