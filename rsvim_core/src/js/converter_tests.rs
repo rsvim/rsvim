@@ -11,11 +11,15 @@ fn test_integer1() {
 
   let a1 = 10_i32;
   let obj1 = to_v8(scope, &a1);
+  assert!(obj1.is_some());
+  let obj1 = obj1.unwrap();
   let val1 = from_v8::<i32>(scope, &obj1);
   assert_eq!(val1, &a1);
 
   let a2 = 10_u32;
   let obj2 = to_v8(scope, &a2);
+  assert!(obj2.is_some());
+  let obj2 = obj2.unwrap();
   let val2 = from_v8::<u32>(scope, &obj2);
   assert_eq!(val2, &a2);
 }
@@ -61,13 +65,13 @@ fn test_string1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = "Hello".to_string();
-  let obj1 = to_v8(scope, a1.clone());
-  let val1 = from_v8::<String>(scope, obj1);
+  let obj1 = to_v8(scope, &a1);
+  let val1 = from_v8::<String>(scope, &obj1);
   assert_eq!(val1, a1);
 
   let a2 = "World".to_compact_string();
-  let obj2 = to_v8(scope, a2);
-  let val2 = from_v8::<CompactString>(scope, obj2);
+  let obj2 = to_v8(scope, &a2);
+  let val2 = from_v8::<CompactString>(scope, &obj2);
   assert_eq!(val2, a2);
 }
 
@@ -78,8 +82,8 @@ fn test_array1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1: [i32; 3] = [1, 2, 3];
-  let obj1 = to_v8(scope, a1.clone());
-  let val1 = from_v8::<Vec<i32>>(scope, obj1);
+  let obj1 = to_v8(scope, &a1);
+  let val1 = from_v8::<Vec<i32>>(scope, &obj1);
   assert_eq!(val1, a1);
 
   let a2: Vec<String> =
