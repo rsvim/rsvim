@@ -26,7 +26,7 @@ pub fn get_wrap(
 pub fn set_wrap<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  _: v8::ReturnValue,
+  mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let value = from_v8::<bool>(scope, args.get(0)).unwrap();
