@@ -28,18 +28,18 @@ pub fn init() {
       .apply()
       .unwrap();
 
-    // tracing for oxc_resolver
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
-      // .with_file(true)
-      .with_line_number(true)
-      // .with_thread_ids(true)
-      // .with_thread_names(true)
-      .with_level(true)
-      .with_ansi(false)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_env(RSVIM_LOG))
-      .with_writer(std::io::stdout)
-      .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+    // // tracing for oxc_resolver
+    // let subscriber = tracing_subscriber::FmtSubscriber::builder()
+    //   // .with_file(true)
+    //   .with_line_number(true)
+    //   // .with_thread_ids(true)
+    //   // .with_thread_names(true)
+    //   .with_level(true)
+    //   .with_ansi(false)
+    //   .with_env_filter(tracing_subscriber::EnvFilter::from_env(RSVIM_LOG))
+    //   .with_writer(std::io::stdout)
+    //   .finish();
+    // tracing::subscriber::set_global_default(subscriber).unwrap();
 
     // log::info!("GITHUB_ACTIONS:{:?}", std::env::var("GITHUB_ACTIONS"));
   });

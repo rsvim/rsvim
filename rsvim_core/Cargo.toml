@@ -109,13 +109,13 @@ unicode-width = { workspace = true }
 # unicode-segmentation = { workspace = true }
 assert_fs = { workspace = true }
 bitflags = { workspace = true }
-tracing = { workspace = true, features = [
-  "max_level_trace",
-  "release_max_level_error",
-] }
-tracing-subscriber = { workspace = true, features = [
-  "env-filter",
-  "parking_lot",
-] }
-tracing-appender = { workspace = true, features = ["parking_lot"] }
+# tracing = { workspace = true, features = [
+#   "max_level_trace",
+#   "release_max_level_error",
+# ] }
+# tracing-subscriber = { workspace = true, features = [
+#   "env-filter",
+#   "parking_lot",
+# ] }
+# tracing-appender = { workspace = true, features = ["parking_lot"] }
 regex = { workspace = true }
