@@ -1,7 +1,6 @@
 use super::attr::*;
 use crate::js::converter::*;
 use crate::tests::js::*;
-use compact_str::ToCompactString;
 use std::str::FromStr;
 
 #[test]
