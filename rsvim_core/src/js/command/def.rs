@@ -42,13 +42,13 @@ impl FromV8CallbackArguments for CommandDefinition {
   fn from_v8_callback_arguments<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
-  ) -> Option<Self> {
+  ) -> Self {
     debug_assert!(args.length() == 4);
     let name = args.get(0).to_rust_string_lossy(scope);
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
-    let attributes = CommandAttributes::from_v8(scope, args.get(2)).unwrap();
-    let options = CommandOptions::from_v8(scope, args.get(3)).unwrap();
+    let attributes = CommandAttributes::from_v8(scope, args.get(2));
+    let options = CommandOptions::from_v8(scope, args.get(3));
 
     Some(Self {
       name: name.to_compact_string(),
