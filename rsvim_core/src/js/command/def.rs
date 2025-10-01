@@ -37,9 +37,9 @@ impl Debug for CommandDefinition {
 }
 
 impl FromV8CallbackArguments for CommandDefinition {
-  fn from_v8_callback_arguments<'s>(
+  fn from_v8_callback_arguments<'s, '_>(
     scope: &mut v8::PinScope<'s, '_>,
-    args: v8::FunctionCallbackArguments,
+    args: v8::FunctionCallbackArguments<'s>,
   ) -> Option<Self> {
     debug_assert!(args.length() == 4);
     let name = args.get(0).to_rust_string_lossy(scope);
