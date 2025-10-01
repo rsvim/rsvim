@@ -65,7 +65,7 @@ impl ToV8 for CommandDefinition {
     let obj = v8::Object::new(scope);
 
     // name
-    let name_field = to_v8(scope, &NAME.to_compact_string()).unwrap();
+    let name_field = to_v8(scope, &NAME).unwrap();
     let name_value = to_v8(scope, &self.name).unwrap();
     obj.set(scope, name_field.into(), name_value.into());
 
