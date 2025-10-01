@@ -49,7 +49,7 @@ pub fn create<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  let def = CommandDefinition::from_v8_callback_arguments(scope, args).unwrap();
+  let def = CommandDefinition::from_v8_callback_arguments(scope, args);
   trace!("Rsvim.cmd.create:{:?}", def);
 
   let state_rc = JsRuntime::state(scope);
@@ -60,7 +60,7 @@ pub fn create<'s>(
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match result {
-    Ok(Some(removed)) => rv.set(removed.to_v8(scope).unwrap()),
+    Ok(Some(removed)) => rv.set(removed.to_v8(scope)),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
       rv.set_undefined();

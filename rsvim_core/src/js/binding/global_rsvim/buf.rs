@@ -54,7 +54,7 @@ pub fn write_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let buf_id = from_v8::<BufferId>(scope, args.get(0)).unwrap();
+  let buf_id = from_v8::<BufferId>(scope, args.get(0));
   trace!("Rsvim.buf.writeSync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);
