@@ -13,7 +13,7 @@ pub fn exit<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let exit_code = from_v8::<i32>(scope, args.get(0)).unwrap();
+  let exit_code = from_v8::<i32>(scope, args.get(0));
   trace!("exit: {:?}", exit_code);
 
   let state_rc = JsRuntime::state(scope);
