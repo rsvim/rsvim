@@ -449,15 +449,15 @@ impl BuffersManager {
     self.buffers.contains_key(id)
   }
 
-  pub fn keys(&self) -> BuffersManagerKeys {
+  pub fn keys(&self) -> BuffersManagerKeys<'_> {
     self.buffers.keys()
   }
 
-  pub fn values(&self) -> BuffersManagerValues {
+  pub fn values(&self) -> BuffersManagerValues<'_> {
     self.buffers.values()
   }
 
-  pub fn iter(&self) -> BuffersManagerIter {
+  pub fn iter(&self) -> BuffersManagerIter<'_> {
     self.buffers.iter()
   }
 
