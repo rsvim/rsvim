@@ -7,33 +7,29 @@ pub trait ToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>>;
+  ) -> v8::Local<'s, v8::Value>;
 }
 
 pub trait FromV8CallbackArguments {
   fn from_v8_callback_arguments<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
-  ) -> Option<Self>
-  where
-    Self: Sized;
+  ) -> Self
 }
 
 pub trait FromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self>
-  where
-    Self: Sized;
+  ) -> Self
 }
 
 pub fn to_v8<'s, 'b, T>(
   scope: &mut v8::PinScope<'s, 'b>,
   input: T,
-) -> Option<v8::Local<'s, v8::Value>>
+) -> v8::Local<'s, v8::Value>
 where
-  T: ToV8 + Sized,
+  T: ToV8 ,
 {
   input.to_v8(scope)
 }
@@ -41,9 +37,9 @@ where
 pub fn from_v8_callback_arguments<'s, 'b, T>(
   scope: &mut v8::PinScope<'s, 'b>,
   value: v8::FunctionCallbackArguments<'s>,
-) -> Option<T>
+) -> T
 where
-  T: FromV8CallbackArguments + Sized,
+  T: FromV8CallbackArguments,
 {
   T::from_v8_callback_arguments(scope, value)
 }
@@ -51,9 +47,9 @@ where
 pub fn from_v8<'s, 'b, T>(
   scope: &mut v8::PinScope<'s, 'b>,
   value: v8::Local<'s, v8::Value>,
-) -> Option<T>
+) -> T
 where
-  T: FromV8 + Sized,
+  T: FromV8,
 {
   T::from_v8(scope, value)
 }
@@ -62,7 +58,7 @@ impl ToV8 for u32 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> Option<v8::Local<'s, v8::Value>> {
+  ) -> v8::Local<'s, v8::Value> {
     Some(v8::Integer::new_from_unsigned(scope, *self).into())
   }
 }
