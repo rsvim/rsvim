@@ -30,3 +30,18 @@ fn test_number1() {
   let val2 = from_v8::<f64>(scope, obj2);
   assert_eq!(val2, 8_f64);
 }
+
+#[test]
+fn test_bool1() {
+  let mut jsrt = make_js_runtime();
+  let context = jsrt.context();
+  v8::scope_with_context!(scope, &mut jsrt.isolate, context);
+
+  let obj1 = to_v8(scope, true);
+  let val1 = from_v8::<bool>(scope, obj1);
+  assert!(val1);
+
+  let obj2 = to_v8(scope, false);
+  let val2 = from_v8::<bool>(scope, obj2);
+  assert!(!val2);
+}
