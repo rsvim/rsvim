@@ -61,14 +61,14 @@ fn test_string1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = "Hello".to_string();
-  let obj1 = to_v8(scope, a1);
+  let obj1 = to_v8(scope, a1.clone());
   let val1 = from_v8::<String>(scope, obj1);
   assert_eq!(val1, a1);
 
-  let a2 = "Hello".to_string();
-  let obj2 = to_v8(scope, "World".to_compact_string());
+  let a2 = "World".to_compact_string();
+  let obj2 = to_v8(scope, a2);
   let val2 = from_v8::<CompactString>(scope, obj2);
-  assert_eq!(val2, "World".to_compact_string());
+  assert_eq!(val2, a2);
 }
 
 #[test]

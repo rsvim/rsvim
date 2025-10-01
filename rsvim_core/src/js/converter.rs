@@ -27,7 +27,7 @@ pub trait FromV8 {
 
 pub fn to_v8<'s, 'b, T>(
   scope: &mut v8::PinScope<'s, 'b>,
-  input: &T,
+  input: T,
 ) -> Option<v8::Local<'s, v8::Value>>
 where
   T: ToV8,
