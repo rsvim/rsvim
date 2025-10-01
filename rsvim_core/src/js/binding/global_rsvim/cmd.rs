@@ -54,10 +54,10 @@ pub fn create<'s>(
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
-  let removed = commands
+  let result = commands
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
-  match removed {
+  match result {
     Ok(Some(removed)) => rv.set(removed.to_v8(scope).unwrap()),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
