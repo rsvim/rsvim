@@ -79,7 +79,7 @@ impl FromV8 for CommandAttributes {
         }
       }
 
-      builder.build().unwrap()
+      Some(builder.build().unwrap())
     } else {
       None
     }
