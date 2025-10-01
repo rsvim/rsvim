@@ -255,7 +255,7 @@ where
       let mut i = 0_u32;
       while i < length_value {
         let e = a.get_index(scope, i).unwrap();
-        let t = T::from_v8(scope, e);
+        let t = T::from_v8(scope, e).unwrap();
         v.push(t);
         i += 1;
       }
