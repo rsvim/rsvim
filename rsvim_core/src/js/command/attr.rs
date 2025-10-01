@@ -59,30 +59,26 @@ impl FromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Option<Self> {
+  ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
-    if value.is_object() {
-      let obj = value.to_object(scope).unwrap();
+    let obj = value.to_object(scope).unwrap();
 
-      // bang
-      let bang_name = to_v8(scope, BANG.to_compact_string()).unwrap();
-      if let Some(bang_value) = obj.get(scope, bang_name) {
-        builder.bang(from_v8::<bool>(scope, bang_value).unwrap());
-      }
-
-      // nargs
-      let nargs_name = to_v8(scope, NARGS.to_compact_string()).unwrap();
-      if let Some(nargs_value) = obj.get(scope, nargs_name) {
-        let nargs = from_v8::<CompactString>(scope, nargs_value).unwrap();
-        if let Ok(nargs) = Nargs::from_str(&nargs) {
-          builder.nargs(nargs);
-        }
-      }
-
-      Some(builder.build().unwrap())
-    } else {
-      None
+    // bang
+    let bang_name = to_v8(scope, BANG.to_compact_string());
+    if let Some(bang_value) = obj.get(scope, bang_name) {
+      builder.bang(from_v8::<bool>(scope, bang_value));
     }
+
+    // nargs
+    let nargs_name = to_v8(scope, NARGS.to_compact_string());
+    if let Some(nargs_value) = obj.get(scope, nargs_name) {
+      let nargs = from_v8::<CompactString>(scope, nargs_value);
+      if let Ok(nargs) = Nargs::from_str(&nargs) {
+        builder.nargs(nargs);
+      }
+    }
+
+    builder.build().unwrap()
   }
 }
 
