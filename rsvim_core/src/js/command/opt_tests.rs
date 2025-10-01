@@ -18,7 +18,7 @@ fn test1() {
     .alias(Some("w".to_compact_string()))
     .build()
     .unwrap();
-  let obj2 = to_v8(scope, &a2).unwrap();
+  let obj2 = to_v8(scope, a2.clone()).unwrap();
   let val2 = from_v8::<CommandOptions>(scope, obj2).unwrap();
   assert_eq!(val2, a2);
 }
