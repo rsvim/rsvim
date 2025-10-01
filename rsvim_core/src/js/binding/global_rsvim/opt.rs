@@ -147,19 +147,19 @@ pub fn get_shift_width(
 }
 
 /// Set the _shift-width_ option.
-pub fn set_shift_width(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_shift_width<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).int32_value(scope).unwrap();
+  let value = from_v8::<u32>(scope, args.get(0)).unwrap();
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as i32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u16;
   buffers.global_local_options_mut().set_shift_width(value);
 }
 
