@@ -2,6 +2,7 @@
 
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
+use crate::js::binding;
 use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
 use crate::msg;
@@ -58,7 +59,10 @@ pub fn create<'s>(
   match removed {
     Ok(Some(removed)) => rv.set(removed.to_v8(scope).unwrap()),
     Ok(None) => rv.set_undefined(),
-    Err(e) => {}
+    Err(e) => {
+      rv.set_undefined();
+      binding::throw_exception(scope, &e);
+    }
   }
 }
 
