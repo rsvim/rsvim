@@ -102,7 +102,9 @@ fn test_array1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1: [i32; 3] = [1, 2, 3];
-  let obj1 = to_v8(scope, &a1);
+  let obj1 = to_v8(scope, a1.clone());
+  assert!(obj1.is_some());
+  let obj1 = obj1.unwrap();
   let val1 = from_v8::<Vec<i32>>(scope, &obj1);
   assert_eq!(val1, a1);
 
