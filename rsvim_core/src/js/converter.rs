@@ -41,7 +41,7 @@ where
 
 pub fn from_v8_callback_arguments<'s, 'b, T>(
   scope: &mut v8::PinScope<'s, 'b>,
-  value: v8::FunctionCallbackArguments,
+  value: v8::FunctionCallbackArguments<'s>,
 ) -> Option<T>
 where
   T: FromV8CallbackArguments + Sized,
