@@ -122,7 +122,7 @@ pub fn set_expand_tab(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).boolean_value(scope);
+  let value = from_v8::<bool>(scope, args.get(0)).unwrap();
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
