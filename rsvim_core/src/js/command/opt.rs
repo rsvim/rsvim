@@ -63,7 +63,7 @@ impl ToV8 for CommandOptions {
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = to_v8(scope, &ALIAS).unwrap();
+      let alias_field = to_v8(scope, ALIAS.to_compact_string()).unwrap();
       let alias_value = to_v8(scope, alias).unwrap();
       obj.set(scope, alias_field, alias_value);
     }
