@@ -1,5 +1,7 @@
 //! APIs for `Rsvim.opt` namespace.
 
+use compact_str::CompactString;
+
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::js::JsRuntime;
@@ -180,13 +182,15 @@ pub fn get_file_encoding(
 }
 
 /// Set the _file-encoding_ option.
-pub fn set_file_encoding(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn set_file_encoding<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
+  let value = from_v8::<CompactString>(scope, args.get(0))
+    .unwrap()
+    .to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
