@@ -8,10 +8,10 @@ fn test_integer1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let obj1 = to_v8(scope, 10_i32);
-  let val1 = from_v8(scope, obj1);
+  let val1 = from_v8::<i32>(scope, obj1);
   assert_eq!(val1, 10);
 
   let obj2 = to_v8(scope, 10_u32);
-  let val2 = from_v8(scope, obj2);
+  let val2 = from_v8::<u32>(scope, obj2);
   assert_eq!(val2, 10_u32);
 }
