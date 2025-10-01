@@ -50,12 +50,12 @@ impl FromV8CallbackArguments for CommandDefinition {
     let attributes = CommandAttributes::from_v8(scope, args.get(2));
     let options = CommandOptions::from_v8(scope, args.get(3));
 
-    Some(Self {
+    Self {
       name: name.to_compact_string(),
       callback,
       attributes,
       options,
-    })
+    }
   }
 }
 
