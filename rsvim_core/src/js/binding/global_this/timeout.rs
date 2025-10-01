@@ -73,8 +73,10 @@ pub fn create_timer<'s>(
   //   ),
   //   Err(_) => vec![],
   // };
-  let params = vec![];
 
+  // NOTE: Since in javascript side, we always pass no extra parameters to
+  // timers, thus it is always empty array.
+  let params = vec![];
   let params = Rc::new(params);
 
   let state_rc = JsRuntime::state(scope);
