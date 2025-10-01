@@ -429,9 +429,9 @@ async fn test_recreate_failed2() -> IoResult<()> {
   let src: &str = r#"
 setTimeout(() => {
   try {
-    const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;}, {alias:"w"}, {force:false});
+    const prev1 = Rsvim.cmd.create("write", () => {Rsvim.cmd.echo(1); return 1;}, {}, {force:false,alias:"w"});
     Rsvim.cmd.echo(`Previous-1 command:${prev1}`);
-    const prev2 = Rsvim.cmd.create("writeSync", () => {Rsvim.cmd.echo(2); return 2;}, {alias:"w"}, {force:false});
+    const prev2 = Rsvim.cmd.create("writeSync", () => {Rsvim.cmd.echo(2); return 2;}, {}, {force:false, alias:"w"});
     Rsvim.cmd.echo(`Previous-2 command:${typeof prev2}, ${prev2.callback()}`);
   } catch(e) {
     Rsvim.cmd.echo(`Failed to recreate command ${e}`);
