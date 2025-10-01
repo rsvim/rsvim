@@ -19,8 +19,6 @@ pub struct CommandDefinition {
   pub options: CommandOptions,
 }
 
-rc_ptr!(CommandDefinition);
-
 impl Debug for CommandDefinition {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("CommandDefinition")
@@ -41,17 +39,15 @@ impl FromV8CallbackArguments for CommandDefinition {
     let name = args.get(0).to_rust_string_lossy(scope);
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
-    let attributes = args.get(2).to_object(scope).unwrap();
-    let attributes = CommandAttributes::from_v8(scope, attributes);
-    let options = args.get(3).to_object(scope).unwrap();
-    let options = CommandOptions::from_v8(scope, options);
+    let attributes = CommandAttributes::from_v8(scope, args.get(2)).unwrap();
+    let options = CommandOptions::from_v8(scope, args.get(3)).unwrap();
 
-    Self {
+    Some(Self {
       name: name.to_compact_string(),
       callback,
       attributes,
       options,
-    }
+    })
   }
 }
 
