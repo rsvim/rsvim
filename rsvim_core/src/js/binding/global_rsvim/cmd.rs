@@ -1,10 +1,9 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::js::FromV8CallbackArguments;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
-use crate::js::ToV8;
 use crate::js::command::def::CommandDefinition;
+use crate::js::converter::*;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::msg::PrintReq;
@@ -47,7 +46,7 @@ pub fn create(
   args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
-  let def = CommandDefinition::from_v8_callback_arguments(scope, args);
+  let def = CommandDefinition::from_v8_callback_arguments(scope, args).unwrap();
   trace!("Rsvim.cmd.create:{:?}", def);
 
   let state_rc = JsRuntime::state(scope);
@@ -58,8 +57,7 @@ pub fn create(
 
   match removed {
     Ok(Some(removed)) => {
-      let obj = removed.to_v8(scope);
-      rv.set(obj);
+      rv.set(to_v8(scope, removed).unwrap());
     }
     Ok(None) => {
       rv.set_undefined();
