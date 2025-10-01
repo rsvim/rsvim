@@ -92,12 +92,12 @@ impl ToV8 for CommandAttributes {
     // bang
     let bang_field = to_v8(scope, "bang").unwrap();
     let bang_value = to_v8(scope, self.bang).unwrap();
-    obj.set(scope, bang_field.into(), bang_value.into());
+    obj.set(scope, bang_field, bang_value);
 
     // nargs
     let nargs_field = to_v8(scope, "nargs").unwrap();
     let nargs_value = to_v8(scope, &self.nargs.to_compact_string()).unwrap();
-    obj.set(scope, nargs_field.into(), nargs_value.into());
+    obj.set(scope, nargs_field, nargs_value);
 
     obj.into()
   }
