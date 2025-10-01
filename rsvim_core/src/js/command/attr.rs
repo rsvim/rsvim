@@ -73,9 +73,7 @@ impl FromV8 for CommandAttributes {
     let nargs_name = to_v8(scope, NARGS.to_compact_string());
     if let Some(nargs_value) = obj.get(scope, nargs_name) {
       let nargs = from_v8::<CompactString>(scope, nargs_value);
-      if let Ok(nargs) = Nargs::from_str(&nargs) {
-        builder.nargs(nargs);
-      }
+      builder.nargs(Nargs::from_str(&nargs).unwrap());
     }
 
     builder.build().unwrap()
