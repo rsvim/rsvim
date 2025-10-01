@@ -1,7 +1,8 @@
 //! Ex command attributes.
 
 use crate::js::converter::*;
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use std::str::FromStr;
 
 /// Command attribute name.
