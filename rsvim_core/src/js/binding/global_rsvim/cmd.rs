@@ -11,6 +11,7 @@ use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use compact_str::ToCompactString;
+use std::rc::Rc;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
@@ -79,14 +80,16 @@ pub fn list(
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
 
-  let cmds = v8::Array::new(scope, commands.len() as i32);
+  let commands = to_v8::<Vec<CommandDefinition>>(
+    scope,
+    commands
+      .values()
+      .map(|def| Rc::unwrap_or_clone(def.clone()))
+      .collect(),
+  )
+  .unwrap();
 
-  for (i, def) in commands.values().enumerate() {
-    let v = def.to_v8(scope).unwrap();
-    cmds.set_index(scope, i as u32, v);
-  }
-
-  rv.set(v8::Local::new(scope, cmds).into());
+  rv.set(commands);
 }
 
 /// `Rsvim.cmd.remove` API.
