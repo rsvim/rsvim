@@ -306,7 +306,7 @@ export interface RsvimCmd {
    * The builtin `js` command cannot be get.
    * :::
    *
-   * @returns {RsvimCmd.CommandDefinition | undefined} Returns command definition by its name, except the `js` command.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns command definition by its name, except the `js` command.
    *
    * @example
    * ```javascript
@@ -324,7 +324,7 @@ export interface RsvimCmd {
    * :::
    *
    * @param {string} name - The command name to be removed.
-   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
    *
    * @throws Throws {@link !TypeError} if name is not a string.
    *
@@ -406,7 +406,7 @@ class RsvimCmdImpl implements RsvimCmd {
 
   get(name: string): RsvimCmd.CommandDefinition | undefined {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.cmd_get();
+    return __InternalRsvimGlobalObject.cmd_get(name);
   }
 
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
