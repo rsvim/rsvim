@@ -1,6 +1,24 @@
 //! Window options.
 
+use bitflags::bitflags;
 use derive_builder::Builder;
+use std::fmt::Debug;
+
+bitflags! {
+  #[derive(Copy, Clone)]
+  pub struct WindowOptionFlags :u8 {
+    const WRAP = 1;
+    const LINE_BREAK = 1 << 1;
+  }
+}
+
+impl Debug for WindowOptionFlags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("WindowOptionFlags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
 
 /// Default window options.
 pub const WRAP: bool = true;
