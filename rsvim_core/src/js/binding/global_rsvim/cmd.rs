@@ -88,6 +88,27 @@ pub fn list(
   rv.set(commands);
 }
 
+/// `Rsvim.cmd.get` API.
+pub fn get(
+  scope: &mut v8::PinScope,
+  args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let name = from_v8::<CompactString>(scope, args.get(0));
+  trace!("Rsvim.cmd.get");
+
+  let state_rc = JsRuntime::state(scope);
+  let state = state_rc.borrow_mut();
+
+  let commands = lock!(state.commands);
+
+  let commands =
+    to_v8::<Vec<CompactString>>(scope, commands.keys().cloned().collect());
+
+  rv.set(commands);
+}
+
 /// `Rsvim.cmd.remove` API.
 pub fn remove<'s>(
   scope: &mut v8::PinScope<'s, '_>,
