@@ -26,13 +26,30 @@ pub const SCROLL_OFF: u16 = 0_u16;
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(default = WINDOW_OPTION_FLAGS)]
+  #[builder(setter(custom))]
   // wrap
   // line_break
   flags: WindowOptionFlags,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u16,
+}
+
+impl WindowOptionsBuilder {
+  pub fn wrap(&mut self, value: bool) -> &mut Self {
+    let new = self;
+    new.flags = match new.flags {
+      Some(flags) => {
+        if value {
+          Some(flags | WindowOptionFlags::WRAP)
+        } else {
+          Some(flags)
+        }
+      }
+      None => Some(WINDOW_OPTION_FLAGS),
+    };
+    new
+  }
 }
 
 impl WindowOptions {
