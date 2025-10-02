@@ -95,6 +95,8 @@ pub fn make_event_loop(
   EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
+const INTERVAL_MILLIS: Duration = Duration::from_micros(1);
+
 #[derive(Debug)]
 struct SharedWaker {
   pub waker: Option<Waker>,
@@ -107,9 +109,6 @@ pub enum MockEvent {
 
   /// Sleep for a specific amount of time.
   SleepFor(Duration),
-
-  /// Sleep until a specific time point.
-  SleepUntil(Zoned),
 }
 
 const CTRL_D: Event = Event::Key(KeyEvent::new_with_kind(
@@ -136,19 +135,11 @@ impl MockEventReader {
 
         match event {
           MockEvent::Event(e) => {
+            std::thread::sleep(INTERVAL_MILLIS);
             tx.send(Ok(e.clone())).unwrap();
           }
           MockEvent::SleepFor(d) => {
             std::thread::sleep(*d);
-          }
-          MockEvent::SleepUntil(ts) => {
-            let now = Zoned::now();
-            let d = ts.duration_since(&now);
-            let d = d.as_millis();
-            if d > 0 {
-              let d = Duration::from_millis(d as u64);
-              std::thread::sleep(d);
-            }
           }
         }
 
@@ -159,6 +150,7 @@ impl MockEventReader {
       }
 
       trace!("Send final mock event[{}]: CTRL+D {CTRL_D:?}", events.len());
+      std::thread::sleep(INTERVAL_MILLIS);
       tx.send(Ok(CTRL_D.clone())).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
@@ -197,9 +189,6 @@ pub enum MockOperation {
   /// Sleep for a specific amount of time.
   SleepFor(Duration),
 
-  /// Sleep until a specific time point.
-  SleepUntil(Zoned),
-
   Exit,
 }
 
@@ -223,21 +212,14 @@ impl MockOperationReader {
 
         match op {
           MockOperation::Operation(op) => {
+            std::thread::sleep(INTERVAL_MILLIS);
             tx.send(Ok(MockOperation::Operation(op.clone()))).unwrap();
           }
           MockOperation::SleepFor(d) => {
             std::thread::sleep(*d);
           }
-          MockOperation::SleepUntil(ts) => {
-            let now = Zoned::now();
-            let d = ts.duration_since(&now);
-            let d = d.as_millis();
-            if d > 0 {
-              let d = Duration::from_millis(d as u64);
-              std::thread::sleep(d);
-            }
-          }
           MockOperation::Exit => {
+            std::thread::sleep(INTERVAL_MILLIS);
             tx.send(Ok(MockOperation::Exit)).unwrap();
           }
         }
@@ -253,6 +235,7 @@ impl MockOperationReader {
         operations.len(),
         EXIT
       );
+      std::thread::sleep(INTERVAL_MILLIS);
       tx.send(Ok(EXIT.clone())).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
