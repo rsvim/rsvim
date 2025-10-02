@@ -405,6 +405,8 @@ class RsvimCmdImpl implements RsvimCmd {
   }
 
   get(name: string): RsvimCmd.CommandDefinition | undefined {
+    checkIsString(name, `"Rsvim.cmd.get" name`);
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_get(name);
   }
