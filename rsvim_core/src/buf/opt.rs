@@ -8,11 +8,10 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use std::fmt::Debug;
-
 use bitflags::bitflags;
 pub use file_encoding::*;
 pub use file_format::*;
+use std::fmt::Debug;
 
 bitflags! {
   #[derive(Copy, Clone)]
