@@ -316,10 +316,8 @@ export interface RsvimCmd {
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.list().forEach((name) => {
-   *   const cdef = Rsvim.cmd.get(name);
-   *   Rsvim.cmd.echo(`Command: ${cdef.name}`);
-   * });
+   * const def = Rsvim.cmd.get("write");
+   * Rsvim.cmd.echo(`Command: ${def.name}`);
    * ```
    */
 
