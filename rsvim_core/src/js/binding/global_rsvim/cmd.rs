@@ -89,14 +89,14 @@ pub fn list(
 }
 
 /// `Rsvim.cmd.get` API.
-pub fn get(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
+pub fn get<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let name = from_v8::<CompactString>(scope, args.get(0));
-  trace!("Rsvim.cmd.get");
+  trace!("Rsvim.cmd.get:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
