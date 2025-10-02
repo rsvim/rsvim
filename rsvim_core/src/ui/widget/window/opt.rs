@@ -2,7 +2,7 @@
 
 pub const WRAP: bool = true;
 pub const LINE_BREAK: bool = false;
-pub const SCROLL_OFF: u16 = 0_u16;
+pub const SCROLL_OFF: u8 = 0;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
@@ -14,7 +14,7 @@ pub struct WindowOptions {
   line_break: bool,
 
   #[builder(default = SCROLL_OFF)]
-  scroll_off: u16,
+  scroll_off: u8,
 }
 
 impl WindowOptions {
@@ -43,11 +43,11 @@ impl WindowOptions {
   /// The 'scroll-off' option, default to `0`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27scrolloff%27>.
-  pub fn scroll_off(&self) -> u16 {
+  pub fn scroll_off(&self) -> u8 {
     self.scroll_off
   }
 
-  pub fn set_scroll_off(&mut self, value: u16) {
+  pub fn set_scroll_off(&mut self, value: u8) {
     self.scroll_off = value;
   }
 }
