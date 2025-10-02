@@ -16,7 +16,7 @@ pub use file_format::*;
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct BufferOptionFlags :u8 {
+  pub struct BufferOptionFlags :u8 {
     const EXPAND_TAB = 1;
   }
 }
