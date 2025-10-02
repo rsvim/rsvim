@@ -1,4 +1,4 @@
-export declare interface GlobalThis {
+export interface GlobalThis {
     clearInterval(id: number): void;
     clearTimeout(id: number): void;
     queueMicrotask(callback: () => void): void;

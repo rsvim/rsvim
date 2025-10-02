@@ -1,4 +1,4 @@
-export declare interface Rsvim {
+export interface Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly opt: RsvimOpt;
