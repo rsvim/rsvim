@@ -145,7 +145,7 @@ pub fn get_shift_width(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().shift_width();
   trace!("get_shift_width: {:?}", value);
-  rv.set_int32(value as i32);
+  rv.set_uint32(value as u32);
 }
 
 /// Set the _shift-width_ option.
