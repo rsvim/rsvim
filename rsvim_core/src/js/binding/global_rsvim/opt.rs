@@ -82,7 +82,7 @@ pub fn get_tab_stop(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().tab_stop();
   trace!("get_tab_stop: {:?}", value);
-  rv.set_int32(value as i32);
+  rv.set_uint32(value as u32);
 }
 
 /// Set the _tab-stop_ option.
