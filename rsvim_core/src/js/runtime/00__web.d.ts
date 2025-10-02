@@ -5,11 +5,9 @@ declare function checkIsBoolean(arg: any, msg: string): void;
 declare function checkIsFunction(arg: any, msg: string): void;
 declare function checkIsOptions(arg: any, options: any[], msg: string): void;
 declare function boundByIntegers(arg: any, bound: [number, number]): any;
-declare interface GlobalThis {
-    clearInterval(id: number): void;
-    clearTimeout(id: number): void;
-    queueMicrotask(callback: () => void): void;
-    reportError(error: any): void;
-    setInterval(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
-    setTimeout(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
-}
+declare function clearInterval(id: number): void;
+declare function clearTimeout(id: number): void;
+declare function queueMicrotask(callback: () => void): void;
+declare function reportError(error: any): void;
+declare function setInterval(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
+declare function setTimeout(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;

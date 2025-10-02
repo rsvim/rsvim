@@ -1,9 +1,3 @@
-class RsvimImpl {
-    buf = new RsvimBufImpl();
-    cmd = new RsvimCmdImpl();
-    opt = new RsvimOptImpl();
-    rt = new RsvimRtImpl();
-}
 function checkNotNull(arg, msg) {
     if (arg === undefined || arg === null) {
         throw new TypeError(`${msg} cannot be undefined or null`);
@@ -59,6 +53,12 @@ function boundByIntegers(arg, bound) {
         return bound[1];
     }
     return arg;
+}
+class RsvimImpl {
+    buf = new RsvimBufImpl();
+    cmd = new RsvimCmdImpl();
+    opt = new RsvimOptImpl();
+    rt = new RsvimRtImpl();
 }
 class RsvimBufImpl {
     current() {
