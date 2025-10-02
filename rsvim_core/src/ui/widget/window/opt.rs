@@ -1,25 +1,5 @@
 //! Window options.
 
-use bitflags::bitflags;
-use std::fmt::Debug;
-
-bitflags! {
-  #[derive(Copy, Clone)]
-  pub struct WindowOptionFlags :u8 {
-    const WRAP = 1;
-    const LINE_BREAK = 1 << 1;
-  }
-}
-
-impl Debug for WindowOptionFlags {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("WindowOptionFlags")
-      .field("bits", &format!("{:b}", self.bits()))
-      .finish()
-  }
-}
-
-pub const WINDOW_OPTION_FLAGS: WindowOptionFlags = WindowOptionFlags::WRAP;
 pub const WRAP: bool = true;
 pub const LINE_BREAK: bool = false;
 pub const SCROLL_OFF: u16 = 0_u16;
@@ -27,44 +7,14 @@ pub const SCROLL_OFF: u16 = 0_u16;
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(setter(custom))]
-  // wrap
-  // line_break
-  flags: WindowOptionFlags,
+  #[builder(default = WRAP)]
+  wrap: bool,
+
+  #[builder(default = LINE_BREAK)]
+  line_break: bool,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u16,
-}
-
-impl WindowOptionsBuilder {
-  pub fn wrap(&mut self, value: bool) -> &mut Self {
-    let new = self;
-    new.flags = match new.flags {
-      Some(flags) => {
-        if value {
-          Some(flags | WindowOptionFlags::WRAP)
-        } else {
-          Some(flags | !WindowOptionFlags::WRAP)
-        }
-      }
-      None => Some(WINDOW_OPTION_FLAGS),
-    };
-    new
-  }
-  pub fn line_break(&mut self, value: bool) -> &mut Self {
-    let new = self;
-    new.flags = match new.flags {
-      Some(flags) => {
-        if value {
-          Some(flags | WindowOptionFlags::LINE_BREAK)
-        } else {
-          Some(flags | !WindowOptionFlags::LINE_BREAK)
-        }
-      }
-      None => Some(WINDOW_OPTION_FLAGS),
-    };
-    new
-  }
 }
 
 impl WindowOptions {
@@ -72,30 +22,22 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.flags.contains(WindowOptionFlags::WRAP)
+    self.wrap
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    if value {
-      self.flags.insert(WindowOptionFlags::WRAP);
-    } else {
-      self.flags.remove(WindowOptionFlags::WRAP);
-    }
+    self.wrap = value;
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.flags.contains(WindowOptionFlags::LINE_BREAK)
+    self.line_break
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    if value {
-      self.flags.insert(WindowOptionFlags::LINE_BREAK);
-    } else {
-      self.flags.remove(WindowOptionFlags::LINE_BREAK);
-    }
+    self.line_break
   }
 
   /// The 'scroll-off' option, default to `0`.
