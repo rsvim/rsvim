@@ -81,9 +81,9 @@ impl BufferOptions {
 
   pub fn set_expand_tab(&mut self, value: bool) {
     if value {
-      self.flags.insert(BufferOptionFlags::EXPAND_TAB)
+      self.flags.insert(BufferOptionFlags::EXPAND_TAB);
     } else {
-      self.flags.remove(BufferOptionFlags::EXPAND_TAB)
+      self.flags.remove(BufferOptionFlags::EXPAND_TAB);
     }
   }
 

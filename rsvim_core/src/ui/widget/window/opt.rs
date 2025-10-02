@@ -41,11 +41,15 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.wrap
+    self.flags.contains(WindowOptionFlags::WRAP)
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.wrap = value;
+    if value {
+      self.flags.insert(WindowOptionFlags::WRAP);
+    } else {
+      self.flags.remove(WindowOptionFlags::WRAP);
+    }
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
