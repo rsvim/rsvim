@@ -334,7 +334,7 @@ async fn test_interval2() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
   var n = 0;
   const timerId = setInterval(() => {
@@ -364,9 +364,11 @@ async fn test_interval2() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
+    info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {
       let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual-{}:{:?}", i, actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
       if i < n - 1 {
@@ -388,7 +390,7 @@ async fn test_interval3() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
 
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(20))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
   var n = 0;
   const timerId = setInterval(() => {
@@ -418,9 +420,11 @@ async fn test_interval3() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
+    info!("n:{}", n);
     assert!(n >= 2);
     for i in 0..n {
       let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual-{}:{:?}", i, actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
       if i < n - 1 {

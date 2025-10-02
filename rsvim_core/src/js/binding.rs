@@ -102,6 +102,7 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "cmd_create", global_rsvim::cmd::create);
     set_function_to(scope, vim, "cmd_echo", global_rsvim::cmd::echo);
     set_function_to(scope, vim, "cmd_list", global_rsvim::cmd::list);
+    set_function_to(scope, vim, "cmd_get", global_rsvim::cmd::get);
     set_function_to(scope, vim, "cmd_remove", global_rsvim::cmd::remove);
   }
 

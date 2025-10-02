@@ -12,7 +12,8 @@ export interface RsvimBuf {
 export interface RsvimCmd {
     create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     echo(message: any): void;
-    list(): RsvimCmd.CommandDefinition[];
+    list(): string[];
+    get(name: string): RsvimCmd.CommandDefinition | undefined;
     remove(name: string): RsvimCmd.CommandDefinition | undefined;
 }
 export declare namespace RsvimCmd {

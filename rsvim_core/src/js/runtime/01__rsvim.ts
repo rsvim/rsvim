@@ -147,7 +147,7 @@ export interface RsvimBuf {
    * the valid buffer ID.
    * :::
    *
-   * @returns {number | undefined} It returns a valid buffer ID if the editor is initialized.
+   * @returns {(number | undefined)} It returns a valid buffer ID if the editor is initialized.
    * Otherwise it returns `undefined` if the editor is not initialized.
    *
    * @example
@@ -223,12 +223,6 @@ class RsvimBufImpl implements RsvimBuf {
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
- * :::tip
- * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
- * user can move cursor to command-line and input commands. Rather than referring to the
- * ["ex commands"](https://vimhelp.org/intro.txt.html#Ex-mode) in Vim editor.
- * :::
- *
  * @example
  * ```javascript
  * // Create a alias to 'Rsvim.cmd'.
@@ -249,9 +243,9 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
-   * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined previously.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
    *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
    *
    * @example
    * ```javascript
@@ -288,22 +282,39 @@ export interface RsvimCmd {
   echo(message: any): void;
 
   /**
-   * List all registered ex commands.
+   * List all registered ex command names.
    *
    * :::warning
    * The builtin `js` command will not be listed here.
    * :::
    *
-   * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
+   * @returns {string[]} Returns all registered ex command names, except the `js` command.
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.list().forEach((cmd) => {
-   *   Rsvim.cmd.echo(`Command: ${cmd.name}`);
+   * Rsvim.cmd.list().forEach((name) => {
+   *   Rsvim.cmd.echo(`Command: ${name}`);
    * });
    * ```
    */
-  list(): RsvimCmd.CommandDefinition[];
+  list(): string[];
+
+  /**
+   * Get ex command definition by name.
+   *
+   * :::warning
+   * The builtin `js` command cannot be get.
+   * :::
+   *
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns command definition by its name, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * const def = Rsvim.cmd.get("write");
+   * Rsvim.cmd.echo(`Command: ${def.name}`);
+   * ```
+   */
+  get(name: string): RsvimCmd.CommandDefinition | undefined;
 
   /**
    * Remove an ex command by name.
@@ -313,7 +324,7 @@ export interface RsvimCmd {
    * :::
    *
    * @param {string} name - The command name to be removed.
-   * @returns {RsvimCmd.CommandDefinition | undefined} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
    *
    * @throws Throws {@link !TypeError} if name is not a string.
    *
@@ -388,9 +399,16 @@ class RsvimCmdImpl implements RsvimCmd {
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
 
-  list(): RsvimCmd.CommandDefinition[] {
+  list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
+  }
+
+  get(name: string): RsvimCmd.CommandDefinition | undefined {
+    checkIsString(name, `"Rsvim.cmd.get" name`);
+
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_get(name);
   }
 
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
