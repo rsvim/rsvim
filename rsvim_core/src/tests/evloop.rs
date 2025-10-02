@@ -9,7 +9,6 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
-use jiff::Zoned;
 use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::path::Path;
@@ -95,7 +94,7 @@ pub fn make_event_loop(
   EventLoop::mock_new(terminal_cols, terminal_rows, cli_opts).unwrap()
 }
 
-const INTERVAL_MILLIS: Duration = Duration::from_micros(1);
+const INTERVAL: Duration = Duration::from_micros(1);
 
 #[derive(Debug)]
 struct SharedWaker {
@@ -135,7 +134,7 @@ impl MockEventReader {
 
         match event {
           MockEvent::Event(e) => {
-            std::thread::sleep(INTERVAL_MILLIS);
+            std::thread::sleep(INTERVAL);
             tx.send(Ok(e.clone())).unwrap();
           }
           MockEvent::SleepFor(d) => {
@@ -150,7 +149,7 @@ impl MockEventReader {
       }
 
       trace!("Send final mock event[{}]: CTRL+D {CTRL_D:?}", events.len());
-      std::thread::sleep(INTERVAL_MILLIS);
+      std::thread::sleep(INTERVAL);
       tx.send(Ok(CTRL_D.clone())).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
@@ -212,14 +211,14 @@ impl MockOperationReader {
 
         match op {
           MockOperation::Operation(op) => {
-            std::thread::sleep(INTERVAL_MILLIS);
+            std::thread::sleep(INTERVAL);
             tx.send(Ok(MockOperation::Operation(op.clone()))).unwrap();
           }
           MockOperation::SleepFor(d) => {
             std::thread::sleep(*d);
           }
           MockOperation::Exit => {
-            std::thread::sleep(INTERVAL_MILLIS);
+            std::thread::sleep(INTERVAL);
             tx.send(Ok(MockOperation::Exit)).unwrap();
           }
         }
@@ -235,7 +234,7 @@ impl MockOperationReader {
         operations.len(),
         EXIT
       );
-      std::thread::sleep(INTERVAL_MILLIS);
+      std::thread::sleep(INTERVAL);
       tx.send(Ok(EXIT.clone())).unwrap();
 
       let mut thread_shared_waker = cloned_shared_waker.lock();
