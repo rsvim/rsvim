@@ -615,6 +615,128 @@ Rsvim.cmd.list().forEach((name) => {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
+async fn test_get1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+
+  let src: &str = r#"
+Rsvim.cmd.create("write", () => {});
+const def = Rsvim.cmd.get("write");
+Rsvim.cmd.echo(`name:${def.name}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let expects = ["name:write"];
+
+    for i in 0..n {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual{}:{:?}", i, actual);
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(expects.iter().any(|e| *e == actual));
+    }
+
+    let state_rc = event_loop.js_runtime.get_state();
+    let state = state_rc.borrow();
+    let commands = lock!(state.commands);
+    assert_eq!(commands.len(), 1);
+    let first_command = commands.first_key_value();
+    assert!(first_command.is_some());
+    let (command_name, command_def) = first_command.unwrap();
+    assert_eq!(command_name, "write");
+    assert_eq!(command_def.name, "write");
+    assert!(!command_def.attributes.bang);
+    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert!(command_def.options.force);
+    assert_eq!(command_def.options.alias, None);
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_get_failed1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+
+  let src: &str = r#"
+Rsvim.cmd.create("write", () => {});
+const def = Rsvim.cmd.get("w");
+Rsvim.cmd.echo(`name:${def}`);
+    "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let expects = ["name:undefined"];
+
+    for i in 0..n {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      info!("actual{}:{:?}", i, actual);
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      assert!(expects.iter().any(|e| *e == actual));
+    }
+
+    let state_rc = event_loop.js_runtime.get_state();
+    let state = state_rc.borrow();
+    let commands = lock!(state.commands);
+    assert_eq!(commands.len(), 1);
+    let first_command = commands.first_key_value();
+    assert!(first_command.is_some());
+    let (command_name, command_def) = first_command.unwrap();
+    assert_eq!(command_name, "write");
+    assert_eq!(command_def.name, "write");
+    assert!(!command_def.attributes.bang);
+    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
+    assert!(command_def.options.force);
+    assert_eq!(command_def.options.alias, None);
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_remove1() -> IoResult<()> {
   test_log_init();
 
