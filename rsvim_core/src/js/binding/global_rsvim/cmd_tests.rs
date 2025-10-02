@@ -583,7 +583,7 @@ Rsvim.cmd.list().forEach((name) => {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 5);
+    assert_eq!(n, 1);
 
     let expects = ["name:write"];
 
