@@ -82,7 +82,7 @@ impl CommandLine {
     let options = WindowOptionsBuilder::default()
       .wrap(false)
       .line_break(false)
-      .scroll_off(0_u16)
+      .scroll_off(0)
       .build()
       .unwrap();
 
