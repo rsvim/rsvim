@@ -32,8 +32,7 @@ impl Debug for BufferOptionFlags {
 /// Buffer default options.
 pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
-pub const BUFFER_OPTION_FLAGS: BufferOptionFlags =
-  BufferOptionFlags::EXPAND_TAB;
+pub const BUFFER_OPTION_FLAGS: BufferOptionFlags = BufferOptionFlags::empty();
 pub const SHIFT_WIDTH: u16 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 #[cfg(target_os = "windows")]
