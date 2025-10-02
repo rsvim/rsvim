@@ -82,13 +82,8 @@ pub fn list(
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
 
-  let commands = to_v8::<Vec<CommandDefinition>>(
-    scope,
-    commands
-      .keys()
-      .map(|def| Rc::unwrap_or_clone(def.clone()))
-      .collect(),
-  );
+  let commands =
+    to_v8::<Vec<CompactString>>(scope, commands.keys().cloned().collect());
 
   rv.set(commands);
 }
