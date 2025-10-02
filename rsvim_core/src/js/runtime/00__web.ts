@@ -62,67 +62,72 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 }
 
 /**
- * Cancel a repeated timer previously established by calling {@link setInterval}.
- *
- * @param {number} id - The ID (integer) which identifies the schedule.
- * @throws Throws {@link !TypeError} if ID is not an integer.
+ * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
-declare function clearInterval(id: number): void;
+declare interface GlobalThis {
+  /**
+   * Cancel a repeated timer previously established by calling {@link setInterval}.
+   *
+   * @param {number} id - The ID (integer) which identifies the schedule.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
+   */
+  clearInterval(id: number): void;
 
-/**
- * Cancel a timeout previously established by calling {@link setTimeout}.
- *
- * @param {number} id - The ID (integer) which identifies the timer.
- * @throws Throws {@link !TypeError} if ID is not an integer.
- */
-declare function clearTimeout(id: number): void;
+  /**
+   * Cancel a timeout previously established by calling {@link setTimeout}.
+   *
+   * @param {number} id - The ID (integer) which identifies the timer.
+   * @throws Throws {@link !TypeError} if ID is not an integer.
+   */
+  clearTimeout(id: number): void;
 
-/**
- * A microtask is a short function which is executed after the function or module which created it exits and
- * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
- * to drive the script's execution environment.
- *
- * @param {function} callback - A function to be executed.
- * @throws Throws {@link !TypeError} if callback is not a function.
- */
-declare function queueMicrotask(callback: () => void): void;
+  /**
+   * A microtask is a short function which is executed after the function or module which created it exits and
+   * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
+   * to drive the script's execution environment.
+   *
+   * @param {function} callback - A function to be executed.
+   * @throws Throws {@link !TypeError} if callback is not a function.
+   */
+  queueMicrotask(callback: () => void): void;
 
-/**
- * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
- *
- * @param {any} error - Anything to be thrown.
- */
-declare function reportError(error: any): void;
+  /**
+   * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
+   *
+   * @param {any} error - Anything to be thrown.
+   */
+  reportError(error: any): void;
 
-/**
- * Set a repeated timer that calls a function, with a fixed time delay between each call.
- *
- * @param {function} callback - A function to be executed every `delay` milliseconds.
- * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
- * @param {...any} [args] - Additional arguments which are passed through to the function.
- * @returns {number} The ID (integer) which identifies the timer created.
- * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
- */
-declare function setInterval(
-  callback: (...args: any[]) => void,
-  delay?: number,
-  ...args: any[]
-): number;
+  /**
+   * Set a repeated timer that calls a function, with a fixed time delay between each call.
+   *
+   * @param {function} callback - A function to be executed every `delay` milliseconds.
+   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
+   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @returns {number} The ID (integer) which identifies the timer created.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
+   */
+  setInterval(
+    callback: (...args: any[]) => void,
+    delay?: number,
+    ...args: any[]
+  ): number;
 
-/**
- * Set a timer which executes a function or specified piece of code once the timer expires.
- *
- * @param {function} callback - A function to be executed after the timer expires.
- * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
- * @param {...any} [args] - Additional arguments which are passed through to the function.
- * @returns {number} The ID (integer) which identifies the timer created.
- * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
- */
-declare function setTimeout(
-  callback: (...args: any[]) => void,
-  delay?: number,
-  ...args: any[]
-): number;
+  /**
+   * Set a timer which executes a function or specified piece of code once the timer expires.
+   *
+   * @param {function} callback - A function to be executed after the timer expires.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
+   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @returns {number} The ID (integer) which identifies the timer created.
+   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
+   */
+  setTimeout(
+    callback: (...args: any[]) => void,
+    delay?: number,
+    ...args: any[]
+  ): number;
+}
 
 ((globalThis) => {
   // Timer API {
