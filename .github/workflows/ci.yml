@@ -102,12 +102,11 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os:
-          [
+        os: [
             ubuntu-22.04,
             ubuntu-22.04-arm,
             macos-14,
-            macos-14-large,
+            # macos-14-large,
             windows-2022,
           ]
     runs-on: ${{ matrix.os }}
