@@ -32,7 +32,7 @@ impl Debug for BufferOptionFlags {
 pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
 pub const BUFFER_OPTION_FLAGS: BufferOptionFlags = BufferOptionFlags::empty();
-pub const SHIFT_WIDTH: u16 = 8;
+pub const SHIFT_WIDTH: u8 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 #[cfg(target_os = "windows")]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
@@ -50,7 +50,7 @@ pub struct BufferOptions {
   flags: BufferOptionFlags,
 
   #[builder(default = SHIFT_WIDTH)]
-  shift_width: u16,
+  shift_width: u8,
 
   #[builder(default = FILE_ENCODING)]
   file_encoding: FileEncodingOption,
@@ -89,11 +89,11 @@ impl BufferOptions {
   /// Buffer 'shift-width' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27shiftwidth%27>.
-  pub fn shift_width(&self) -> u16 {
+  pub fn shift_width(&self) -> u8 {
     self.shift_width
   }
 
-  pub fn set_shift_width(&mut self, value: u16) {
+  pub fn set_shift_width(&mut self, value: u8) {
     self.shift_width = value;
   }
 
