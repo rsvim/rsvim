@@ -320,6 +320,7 @@ export interface RsvimCmd {
    * Rsvim.cmd.echo(`Command: ${def.name}`);
    * ```
    */
+  get(name: string): RsvimCmd.CommandDefinition | undefined;
 
   /**
    * Remove an ex command by name.
@@ -407,6 +408,11 @@ class RsvimCmdImpl implements RsvimCmd {
   list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
+  }
+
+  get(name: string): RsvimCmd.CommandDefinition | undefined {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.cmd_get();
   }
 
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
