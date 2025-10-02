@@ -306,6 +306,24 @@ export interface RsvimCmd {
   list(): string[];
 
   /**
+   * Get ex command definition by name.
+   *
+   * :::warning
+   * The builtin `js` command cannot be get.
+   * :::
+   *
+   * @returns {RsvimCmd.CommandDefinition | undefined} Returns command definition by its name, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((name) => {
+   *   const cdef = Rsvim.cmd.get(name);
+   *   Rsvim.cmd.echo(`Command: ${cdef.name}`);
+   * });
+   * ```
+   */
+
+  /**
    * Remove an ex command by name.
    *
    * :::warning
