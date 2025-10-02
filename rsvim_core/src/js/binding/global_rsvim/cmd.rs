@@ -85,7 +85,7 @@ pub fn list(
   let commands = to_v8::<Vec<CommandDefinition>>(
     scope,
     commands
-      .values()
+      .keys()
       .map(|def| Rc::unwrap_or_clone(def.clone()))
       .collect(),
   );
