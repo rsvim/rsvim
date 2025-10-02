@@ -401,6 +401,11 @@ class RsvimCmdImpl implements RsvimCmd {
   }
 }
 
+/**
+ * The `Rsvim.cmd` global object for Ex commands.
+ *
+ * @category Editor APIs
+ */
 export namespace RsvimCmd {
   /**
    * Command attributes.
