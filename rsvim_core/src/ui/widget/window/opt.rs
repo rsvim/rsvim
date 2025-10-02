@@ -37,7 +37,7 @@ impl WindowOptions {
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.line_break
+    self.line_break = value;
   }
 
   /// The 'scroll-off' option, default to `0`.
