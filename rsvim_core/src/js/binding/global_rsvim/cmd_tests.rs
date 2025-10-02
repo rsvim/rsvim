@@ -562,12 +562,8 @@ async fn test_list1() -> IoResult<()> {
 
   let src: &str = r#"
 Rsvim.cmd.create("write", () => {});
-Rsvim.cmd.list().forEach((cmd_def) => {
-  Rsvim.cmd.echo(`name:${cmd_def.name}`);
-  Rsvim.cmd.echo(`attributes.bang:${cmd_def.attributes.bang}`);
-  Rsvim.cmd.echo(`attributes.nargs:${cmd_def.attributes.nargs}`);
-  Rsvim.cmd.echo(`options.force:${cmd_def.options.force}`);
-  Rsvim.cmd.echo(`options.alias:${cmd_def.options.alias}`);
+Rsvim.cmd.list().forEach((name) => {
+  Rsvim.cmd.echo(`name:${name}`);
 });
     "#;
 
@@ -589,13 +585,7 @@ Rsvim.cmd.list().forEach((cmd_def) => {
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 5);
 
-    let expects = [
-      "name:write",
-      "attributes.bang:false",
-      "attributes.nargs:0",
-      "options.alias:undefined",
-      "options.force:true",
-    ];
+    let expects = ["name:write"];
 
     for i in 0..n {
       let actual = contents.command_line_message_history_mut().try_pop();
