@@ -288,22 +288,22 @@ export interface RsvimCmd {
   echo(message: any): void;
 
   /**
-   * List all registered ex commands.
+   * List all registered ex command names.
    *
    * :::warning
    * The builtin `js` command will not be listed here.
    * :::
    *
-   * @returns {RsvimCmd.CommandDefinition[]} Returns all registered ex commands, except the `js` command.
+   * @returns {string[]} Returns all registered ex command names, except the `js` command.
    *
    * @example
    * ```javascript
-   * Rsvim.cmd.list().forEach((cmd) => {
-   *   Rsvim.cmd.echo(`Command: ${cmd.name}`);
+   * Rsvim.cmd.list().forEach((name) => {
+   *   Rsvim.cmd.echo(`Command: ${name}`);
    * });
    * ```
    */
-  list(): RsvimCmd.CommandDefinition[];
+  list(): string[];
 
   /**
    * Remove an ex command by name.
@@ -388,7 +388,7 @@ class RsvimCmdImpl implements RsvimCmd {
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
 
-  list(): RsvimCmd.CommandDefinition[] {
+  list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
   }
