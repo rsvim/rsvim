@@ -7,18 +7,21 @@
  * @packageDocumentation
  */
 
+/** @hidden */
 function checkNotNull(arg: any, msg: string) {
   if (arg === undefined || arg === null) {
     throw new TypeError(`${msg} cannot be undefined or null`);
   }
 }
 
+/** @hidden */
 function checkIsNumber(arg: any, msg: string) {
   if (typeof arg !== "number") {
     throw new TypeError(`${msg} must be a number, but found ${typeof arg}`);
   }
 }
 
+/** @hidden */
 function checkIsInteger(arg: any, msg: string) {
   checkIsNumber(arg, msg);
   if (!Number.isInteger(arg)) {
@@ -26,24 +29,28 @@ function checkIsInteger(arg: any, msg: string) {
   }
 }
 
+/** @hidden */
 function checkIsBoolean(arg: any, msg: string) {
   if (typeof arg !== "boolean") {
     throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
   }
 }
 
+/** @hidden */
 function checkIsFunction(arg: any, msg: string) {
   if (typeof arg !== "function") {
     throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
   }
 }
 
+/** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
   }
 }
 
+/** @hidden */
 function boundByIntegers(arg: any, bound: [number, number]) {
   if (arg < bound[0]) {
     return bound[0];
