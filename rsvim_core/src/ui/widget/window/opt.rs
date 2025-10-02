@@ -56,11 +56,15 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.line_break
+    self.flags.contains(WindowOptionFlags::LINE_BREAK)
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.line_break = value;
+    if value {
+      self.flags.insert(WindowOptionFlags::LINE_BREAK);
+    } else {
+      self.flags.remove(WindowOptionFlags::LINE_BREAK);
+    }
   }
 
   /// The 'scroll-off' option, default to `0`.
