@@ -223,12 +223,6 @@ class RsvimBufImpl implements RsvimBuf {
 /**
  * The `Rsvim.cmd` global object for Ex commands.
  *
- * :::tip
- * The "ex command" mostly describes the product function, i.e. when user types ":" in normal mode,
- * user can move cursor to command-line and input commands. Rather than referring to the
- * ["ex commands"](https://vimhelp.org/intro.txt.html#Ex-mode) in Vim editor.
- * :::
- *
  * @example
  * ```javascript
  * // Create a alias to 'Rsvim.cmd'.
