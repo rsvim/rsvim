@@ -100,13 +100,14 @@ pub fn get<'s>(
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
-
   let commands = lock!(state.commands);
-
-  let commands =
-    to_v8::<Vec<CompactString>>(scope, commands.keys().cloned().collect());
-
-  rv.set(commands);
+  match commands.get(&name) {
+    Some(def) => {
+      let def = to_v8(scope, Rc::unwrap_or_clone(def));
+      rv.set(def);
+    }
+    None => rv.set_undefined(),
+  }
 }
 
 /// `Rsvim.cmd.remove` API.
