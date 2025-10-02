@@ -44,11 +44,11 @@ impl BufferOptions {
   /// Buffer 'tab-stop' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>.
-  pub fn tab_stop(&self) -> u16 {
+  pub fn tab_stop(&self) -> u8 {
     self.tab_stop
   }
 
-  pub fn set_tab_stop(&mut self, value: u16) {
+  pub fn set_tab_stop(&mut self, value: u8) {
     self.tab_stop = value;
   }
 
