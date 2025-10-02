@@ -50,6 +50,20 @@ impl WindowOptionsBuilder {
     };
     new
   }
+  pub fn line_break(&mut self, value: bool) -> &mut Self {
+    let new = self;
+    new.flags = match new.flags {
+      Some(flags) => {
+        if value {
+          Some(flags | WindowOptionFlags::LINE_BREAK)
+        } else {
+          Some(flags | !WindowOptionFlags::LINE_BREAK)
+        }
+      }
+      None => Some(WINDOW_OPTION_FLAGS),
+    };
+    new
+  }
 }
 
 impl WindowOptions {
