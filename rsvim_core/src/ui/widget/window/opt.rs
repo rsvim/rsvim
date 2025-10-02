@@ -19,8 +19,9 @@ impl Debug for WindowOptionFlags {
   }
 }
 
-/// wrap=true,line_break=false
 pub const WINDOW_OPTION_FLAGS: WindowOptionFlags = WindowOptionFlags::WRAP;
+pub const WRAP: bool = true;
+pub const LINE_BREAK: bool = false;
 pub const SCROLL_OFF: u16 = 0_u16;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
