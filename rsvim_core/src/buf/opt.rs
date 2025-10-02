@@ -8,12 +8,32 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
+use std::fmt::Debug;
+
+use bitflags::bitflags;
 pub use file_encoding::*;
 pub use file_format::*;
+
+bitflags! {
+  #[derive(Copy, Clone)]
+  struct BufferOptionFlags :u8 {
+    const EXPAND_TAB = 1;
+  }
+}
+
+impl Debug for BufferOptionFlags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("BufferOptionFlags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
 
 /// Buffer default options.
 pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
+pub const BUFFER_OPTION_FLAGS: BufferOptionFlags =
+  BufferOptionFlags::EXPAND_TAB;
 pub const SHIFT_WIDTH: u16 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 #[cfg(target_os = "windows")]
@@ -27,8 +47,9 @@ pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
 
-  #[builder(default = EXPAND_TAB)]
-  expand_tab: bool,
+  // expand_tab
+  #[builder(default = BUFFER_OPTION_FLAGS)]
+  flags: BufferOptionFlags,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u16,
@@ -56,11 +77,15 @@ impl BufferOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
   pub fn expand_tab(&self) -> bool {
-    self.expand_tab
+    self.flags.contains(BufferOptionFlags::EXPAND_TAB)
   }
 
   pub fn set_expand_tab(&mut self, value: bool) {
-    self.expand_tab = value;
+    if value {
+      self.flags.insert(BufferOptionFlags::EXPAND_TAB)
+    } else {
+      self.flags.remove(BufferOptionFlags::EXPAND_TAB)
+    }
   }
 
   /// Buffer 'shift-width' option.
