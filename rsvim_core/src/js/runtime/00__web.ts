@@ -129,7 +129,7 @@ declare interface GlobalThis {
   ): number;
 }
 
-((globalThis) => {
+((globalThis: GlobalThis) => {
   // Timer API {
 
   const TIMEOUT_MAX = Math.pow(2, 31) - 1;
@@ -268,4 +268,4 @@ declare interface GlobalThis {
   globalThis.setInterval = setInterval;
   globalThis.queueMicrotask = queueMicrotask;
   globalThis.reportError = reportError;
-})(globalThis);
+})(globalThis as unknown as GlobalThis);
