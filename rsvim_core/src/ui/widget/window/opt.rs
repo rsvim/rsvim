@@ -20,19 +20,17 @@ impl Debug for WindowOptionFlags {
   }
 }
 
-/// Default window options.
-pub const WRAP: bool = true;
-pub const LINE_BREAK: bool = false;
+/// wrap=true,line_break=false
+pub const WINDOW_OPTION_FLAGS: WindowOptionFlags = WindowOptionFlags::WRAP;
 pub const SCROLL_OFF: u16 = 0_u16;
 
 #[derive(Debug, Copy, Clone, Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(default = WRAP)]
-  wrap: bool,
-
-  #[builder(default = LINE_BREAK)]
-  line_break: bool,
+  #[builder(default = WINDOW_OPTION_FLAGS)]
+  // wrap
+  // line_break
+  flags: WindowOptionFlags,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u16,

@@ -28,9 +28,10 @@ impl Debug for BufferOptionFlags {
   }
 }
 
-/// Buffer default options.
+// Buffer default options.
 pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
+/// expand_tab=true
 pub const BUFFER_OPTION_FLAGS: BufferOptionFlags = BufferOptionFlags::empty();
 pub const SHIFT_WIDTH: u8 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
@@ -45,8 +46,8 @@ pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
 
-  // expand_tab
   #[builder(default = BUFFER_OPTION_FLAGS)]
+  // expand_tab
   flags: BufferOptionFlags,
 
   #[builder(default = SHIFT_WIDTH)]
