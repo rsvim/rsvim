@@ -1,7 +1,6 @@
 //! Window options.
 
 use bitflags::bitflags;
-use derive_builder::Builder;
 use std::fmt::Debug;
 
 bitflags! {
@@ -24,7 +23,7 @@ impl Debug for WindowOptionFlags {
 pub const WINDOW_OPTION_FLAGS: WindowOptionFlags = WindowOptionFlags::WRAP;
 pub const SCROLL_OFF: u16 = 0_u16;
 
-#[derive(Debug, Copy, Clone, Builder)]
+#[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
   #[builder(default = WINDOW_OPTION_FLAGS)]
@@ -79,6 +78,6 @@ impl WindowOptions {
   }
 }
 
-#[derive(Debug, Copy, Clone, Builder)]
+#[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Global window options.
 pub struct WindowGlobalOptions {}
