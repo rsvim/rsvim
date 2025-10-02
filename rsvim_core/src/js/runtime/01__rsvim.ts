@@ -147,7 +147,7 @@ export interface RsvimBuf {
    * the valid buffer ID.
    * :::
    *
-   * @returns {number | undefined} It returns a valid buffer ID if the editor is initialized.
+   * @returns {(number | undefined)} It returns a valid buffer ID if the editor is initialized.
    * Otherwise it returns `undefined` if the editor is not initialized.
    *
    * @example
@@ -249,9 +249,11 @@ export interface RsvimCmd {
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
-   * @returns {undefined | RsvimCmd.CommandDefinition} It returns `undefined` is the command is newly created, or a command definition that was defined previously.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} - It returns `undefined` is the command is newly created.
+   *                                                     - Or it returns a command definition that was defined previously.
    *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
+   * @throws - Throws {@link !TypeError} if any parameters are invalid.
+   *         - Throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
    *
    * @example
    * ```javascript
