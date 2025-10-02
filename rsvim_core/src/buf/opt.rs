@@ -11,10 +11,10 @@ mod file_format_tests;
 pub use file_encoding::*;
 pub use file_format::*;
 
-/// Buffer default options.
-pub const TAB_STOP: u16 = 8;
+// Buffer default options.
+pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
-pub const SHIFT_WIDTH: u16 = 8;
+pub const SHIFT_WIDTH: u8 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
 #[cfg(target_os = "windows")]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
@@ -25,13 +25,13 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
-  tab_stop: u16,
+  tab_stop: u8,
 
   #[builder(default = EXPAND_TAB)]
   expand_tab: bool,
 
   #[builder(default = SHIFT_WIDTH)]
-  shift_width: u16,
+  shift_width: u8,
 
   #[builder(default = FILE_ENCODING)]
   file_encoding: FileEncodingOption,
@@ -44,11 +44,11 @@ impl BufferOptions {
   /// Buffer 'tab-stop' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>.
-  pub fn tab_stop(&self) -> u16 {
+  pub fn tab_stop(&self) -> u8 {
     self.tab_stop
   }
 
-  pub fn set_tab_stop(&mut self, value: u16) {
+  pub fn set_tab_stop(&mut self, value: u8) {
     self.tab_stop = value;
   }
 
@@ -66,11 +66,11 @@ impl BufferOptions {
   /// Buffer 'shift-width' option.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27shiftwidth%27>.
-  pub fn shift_width(&self) -> u16 {
+  pub fn shift_width(&self) -> u8 {
     self.shift_width
   }
 
-  pub fn set_shift_width(&mut self, value: u16) {
+  pub fn set_shift_width(&mut self, value: u8) {
     self.shift_width = value;
   }
 

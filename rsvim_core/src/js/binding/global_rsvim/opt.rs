@@ -82,7 +82,7 @@ pub fn get_tab_stop(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().tab_stop();
   trace!("get_tab_stop: {:?}", value);
-  rv.set_int32(value as i32);
+  rv.set_uint32(value as u32);
 }
 
 /// Set the _tab-stop_ option.
@@ -98,7 +98,7 @@ pub fn set_tab_stop<'s>(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u8;
   buffers.global_local_options_mut().set_tab_stop(value);
 }
 
@@ -145,7 +145,7 @@ pub fn get_shift_width(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().shift_width();
   trace!("get_shift_width: {:?}", value);
-  rv.set_int32(value as i32);
+  rv.set_uint32(value as u32);
 }
 
 /// Set the _shift-width_ option.
@@ -161,7 +161,7 @@ pub fn set_shift_width<'s>(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u16;
+  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u8;
   buffers.global_local_options_mut().set_shift_width(value);
 }
 
