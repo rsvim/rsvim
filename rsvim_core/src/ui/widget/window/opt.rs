@@ -43,7 +43,7 @@ impl WindowOptionsBuilder {
         if value {
           Some(flags | WindowOptionFlags::WRAP)
         } else {
-          Some(flags)
+          Some(flags | !WindowOptionFlags::WRAP)
         }
       }
       None => Some(WINDOW_OPTION_FLAGS),
