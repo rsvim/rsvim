@@ -1,3 +1,9 @@
+export declare interface Rsvim {
+    readonly buf: RsvimBuf;
+    readonly cmd: RsvimCmd;
+    readonly opt: RsvimOpt;
+    readonly rt: RsvimRt;
+}
 export interface RsvimBuf {
     current(): number | undefined;
     list(): number[];

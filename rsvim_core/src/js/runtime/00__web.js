@@ -1,4 +1,3 @@
-"use strict";
 function checkNotNull(arg, msg) {
     if (arg === undefined || arg === null) {
         throw new TypeError(`${msg} cannot be undefined or null`);
@@ -109,3 +108,4 @@ function boundByIntegers(arg, bound) {
     globalThis.queueMicrotask = queueMicrotask;
     globalThis.reportError = reportError;
 })(globalThis);
+export {};

@@ -64,7 +64,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 /**
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
-declare interface GlobalThis {
+export declare interface GlobalThis {
   /**
    * Cancel a repeated timer previously established by calling {@link setInterval}.
    *

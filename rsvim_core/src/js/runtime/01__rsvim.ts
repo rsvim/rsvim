@@ -108,7 +108,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  *
  * @category Global Object
  */
-declare interface Rsvim {
+export declare interface Rsvim {
   readonly buf: RsvimBuf;
   readonly cmd: RsvimCmd;
   readonly opt: RsvimOpt;
