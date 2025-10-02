@@ -12,7 +12,7 @@ pub use file_encoding::*;
 pub use file_format::*;
 
 /// Buffer default options.
-pub const TAB_STOP: u16 = 8;
+pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
 pub const SHIFT_WIDTH: u16 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
@@ -25,7 +25,7 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
-  tab_stop: u16,
+  tab_stop: u8,
 
   #[builder(default = EXPAND_TAB)]
   expand_tab: bool,
