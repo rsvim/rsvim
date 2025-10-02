@@ -108,6 +108,9 @@ class RsvimCmdImpl {
     list() {
         return __InternalRsvimGlobalObject.cmd_list();
     }
+    get(name) {
+        return __InternalRsvimGlobalObject.cmd_get();
+    }
     remove(name) {
         checkIsString(name, `"Rsvim.cmd.remove" name`);
         return __InternalRsvimGlobalObject.cmd_remove(name);
