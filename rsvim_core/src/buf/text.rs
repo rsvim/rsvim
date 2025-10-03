@@ -439,6 +439,14 @@ impl Text {
   /// Resize cache.
   fn resize_cached_lines(&self, canvas_size: U16Size) {
     let new_cache_size = _cached_size(canvas_size);
+
+    // cached clone lines
+    let mut cached_lines = self.cached_clone_lines.borrow_mut();
+    if new_cache_size > cached_lines.cap() {
+      cached_lines.resize(new_cache_size);
+    }
+
+    // cached lines width
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
       cached_width.resize(new_cache_size);
