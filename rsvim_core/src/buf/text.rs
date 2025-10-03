@@ -420,12 +420,12 @@ impl Text {
     // cached clone lines
     {
       let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-      let to_be_removed_lines: Vec<ClonedLineKey> = cached_lines
+      let to_be_removed: Vec<ClonedLineKey> = cached_lines
         .iter()
         .filter(|(k, _)| !f(&k.0))
         .map(|(k, _)| *k)
         .collect();
-      for cloned_key in to_be_removed_lines.iter() {
+      for cloned_key in to_be_removed.iter() {
         cached_lines.pop(cloned_key);
       }
     }
@@ -433,12 +433,12 @@ impl Text {
     // cached lines width
     {
       let mut cached_width = self.cached_lines_width.borrow_mut();
-      let to_be_removed_lines: Vec<usize> = cached_width
+      let to_be_removed: Vec<usize> = cached_width
         .iter()
         .filter(|(line_idx, _)| !f(line_idx))
         .map(|(line_idx, _)| *line_idx)
         .collect();
-      for line_idx in to_be_removed_lines.iter() {
+      for line_idx in to_be_removed.iter() {
         cached_width.pop(line_idx);
       }
     }
