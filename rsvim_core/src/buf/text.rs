@@ -111,10 +111,10 @@ impl Text {
     max_chars: usize,
   ) -> Option<Arc<String>> {
     let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
-    let mut cached_clone_lines = self.cached_cloned_lines.borrow_mut();
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
 
-    if cached_clone_lines.contains(&key) {
-      return cached_clone_lines.get(&key).cloned();
+    if cached_cloned_lines.contains(&key) {
+      return cached_cloned_lines.get(&key).cloned();
     }
 
     match self.rope.get_line(line_idx) {
@@ -124,7 +124,7 @@ impl Text {
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
               return Some(
-                cached_clone_lines
+                cached_cloned_lines
                   .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
                   .clone(),
               );
@@ -132,7 +132,7 @@ impl Text {
             builder.push(c);
           }
           Some(
-            cached_clone_lines
+            cached_cloned_lines
               .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
               .clone(),
           )
@@ -394,14 +394,14 @@ impl Text {
   }
 
   fn _remove_cached_cloned_line(&self, line_idx: usize) {
-    let mut cached_clone_lines = self.cached_cloned_lines.borrow_mut();
-    let to_be_removed: Vec<ClonedLineKey> = cached_clone_lines
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
       .iter()
       .filter(|(k, _)| k.0 == line_idx)
       .map(|(k, _)| *k)
       .collect();
     for key in to_be_removed.iter() {
-      cached_clone_lines.pop(key);
+      cached_cloned_lines.pop(key);
     }
   }
 
