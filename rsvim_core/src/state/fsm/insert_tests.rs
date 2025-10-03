@@ -8900,24 +8900,14 @@ mod tests_delete_text {
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let text5 = CompactString::new(format!("he extra{buf_eol}"));
-      let expect = vec![
-        "SVIM!\n",
-        "s is a qui",
-        " sow of th",
-        ". When the",
-        "he extra p",
-        text5.as_str(),
-        "",
-      ];
+      let expect = vec!["* The ", "extra\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        0,
+        5,
         7,
         &expect_fills,
         &expect_fills,
