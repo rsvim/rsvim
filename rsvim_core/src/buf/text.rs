@@ -404,14 +404,14 @@ impl Text {
   {
     // cached clone lines
     {
-      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
-      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
+      let mut cached_lines = self.cached_clone_lines.borrow_mut();
+      let to_be_removed_lines: Vec<ClonedLineKey> = cached_lines
         .iter()
         .filter(|(k, _)| !f(&k.0))
         .map(|(k, _)| *k)
         .collect();
       for cloned_key in to_be_removed_lines.iter() {
-        cached_clone_lines.pop(cloned_key);
+        cached_lines.pop(cloned_key);
       }
     }
 
