@@ -374,6 +374,20 @@ impl Text {
   #[allow(dead_code)]
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
+    // cached clone lines
+    {
+      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
+        .iter()
+        .filter(|(k, _)| k.0 == line_idx)
+        .map(|(k, _)| *k)
+        .collect();
+      for cloned_key in to_be_removed_lines.iter() {
+        cached_clone_lines.pop(cloned_key);
+      }
+    }
+
+    // cached lines with
     self
       .cached_lines_width
       .borrow_mut()
