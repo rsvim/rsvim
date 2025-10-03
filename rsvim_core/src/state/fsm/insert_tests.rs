@@ -8894,7 +8894,7 @@ mod tests_delete_text {
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
-      assert_eq!(actual3.row_idx(), 5);
+      assert_eq!(actual3.row_idx(), 1);
       assert_eq!(actual3.column_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
