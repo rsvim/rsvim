@@ -8552,12 +8552,14 @@ mod tests_delete_text {
       let expect = vec![
         "HeRSVIM!\n",
         "This is a ",
+        "quite ",
+        "simple and",
+        " small ",
+        "test lines",
+        ".\n",
         "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "",
+        "it ",
+        "contains ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -8574,14 +8576,14 @@ mod tests_delete_text {
       let expect_canvas = vec![
         "HeRSVIM!  ",
         "This is a ",
+        "quite     ",
+        "simple and",
+        " small    ",
+        "test lines",
+        ".         ",
         "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "          ",
-        "          ",
-        "          ",
+        "it        ",
+        "contains  ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
