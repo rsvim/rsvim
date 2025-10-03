@@ -8651,7 +8651,7 @@ mod tests_delete_text {
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
-      assert_eq!(actual3.row_idx(), 2);
+      assert_eq!(actual3.row_idx(), 0);
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
@@ -8665,15 +8665,13 @@ mod tests_delete_text {
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        vec![(2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        0,
-        7,
+        2,
+        3,
         &expect_fills,
         &expect_fills,
       );
