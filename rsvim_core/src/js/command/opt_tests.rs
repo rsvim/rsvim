@@ -4,6 +4,7 @@ use crate::tests::js::*;
 use compact_str::ToCompactString;
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();

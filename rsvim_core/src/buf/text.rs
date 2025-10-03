@@ -16,12 +16,22 @@ use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Hash, PartialEq, Eq, Copy, Clone)]
+struct ClonedLineKey(
+  /* line_idx */ usize,
+  /* start_char_idx */ usize,
+  /* max_chars */ usize,
+);
 
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
+  cached_cloned_lines:
+    RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
   options: BufferOptions,
 }
 
@@ -38,6 +48,10 @@ impl Text {
     Self {
       rope,
       cached_lines_width: RefCell::new(LruCache::with_hasher(
+        cache_size,
+        RandomState::default(),
+      )),
+      cached_cloned_lines: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
       )),
@@ -90,28 +104,73 @@ impl Text {
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
   /// for performance reason when the line is too long to clone.
-  pub fn clone_line(
+  fn _clone_line_impl(
     &self,
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<String> {
+    skip_cache: bool,
+  ) -> Option<Rc<String>> {
+    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+
+    if !skip_cache && cached_cloned_lines.contains(&key) {
+      return cached_cloned_lines.get(&key).cloned();
+    }
+
     match self.rope.get_line(line_idx) {
       Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
-              return Some(builder);
+              if skip_cache {
+                return Some(Rc::new(builder));
+              } else {
+                return Some(
+                  cached_cloned_lines
+                    .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
+                    .clone(),
+                );
+              }
             }
             builder.push(c);
           }
-          Some(builder)
+
+          if skip_cache {
+            Some(Rc::new(builder))
+          } else {
+            Some(
+              cached_cloned_lines
+                .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
+                .clone(),
+            )
+          }
         }
         None => None,
       },
       None => None,
     }
+  }
+
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
+  /// for performance reason when the line is too long to clone.
+  pub fn clone_line(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<Rc<String>> {
+    let result1 =
+      self._clone_line_impl(line_idx, start_char_idx, max_chars, false);
+
+    // Ensure cached version and non-cached version have same results.
+    if cfg!(debug_assertions) {
+      let result2 =
+        self._clone_line_impl(line_idx, start_char_idx, max_chars, true);
+      debug_assert_eq!(result1, result2);
+    }
+    result1
   }
 
   // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
@@ -333,6 +392,10 @@ impl Text {
 
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
+    // cached clone lines
+    self._remove_cached_cloned_line(line_idx);
+
+    // cached lines width
     self
       .cached_lines_width
       .borrow_mut()
@@ -346,6 +409,10 @@ impl Text {
   #[allow(dead_code)]
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
+    // cached clone lines
+    self._remove_cached_cloned_line(line_idx);
+
+    // cached lines with
     self
       .cached_lines_width
       .borrow_mut()
@@ -356,33 +423,60 @@ impl Text {
       .truncate_since_width(width)
   }
 
+  fn _remove_cached_cloned_line(&self, line_idx: usize) {
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
+      .iter()
+      .filter(|(k, _)| k.0 == line_idx)
+      .map(|(k, _)| *k)
+      .collect();
+    for key in to_be_removed.iter() {
+      cached_cloned_lines.pop(key);
+    }
+  }
+
   #[allow(dead_code)]
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
+    self._remove_cached_cloned_line(line_idx);
     self.cached_lines_width.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
   fn retain_cached_lines<F>(&self, f: F)
   where
-    F: Fn(
-      /* line_idx */ &usize,
-      /* column_idx */ &ColumnIndex,
-    ) -> bool,
+    F: Fn(/* line_idx */ &usize) -> bool,
   {
-    let mut cached_width = self.cached_lines_width.borrow_mut();
-    let to_be_removed_lines: Vec<usize> = cached_width
-      .iter()
-      .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
-      .map(|(line_idx, _)| *line_idx)
-      .collect();
-    for line_idx in to_be_removed_lines.iter() {
-      cached_width.pop(line_idx);
+    // cached clone lines
+    {
+      let mut cached_lines = self.cached_cloned_lines.borrow_mut();
+      let to_be_removed: Vec<ClonedLineKey> = cached_lines
+        .iter()
+        .filter(|(k, _)| !f(&k.0))
+        .map(|(k, _)| *k)
+        .collect();
+      for cloned_key in to_be_removed.iter() {
+        cached_lines.pop(cloned_key);
+      }
+    }
+
+    // cached lines width
+    {
+      let mut cached_width = self.cached_lines_width.borrow_mut();
+      let to_be_removed: Vec<usize> = cached_width
+        .iter()
+        .filter(|(line_idx, _)| !f(line_idx))
+        .map(|(line_idx, _)| *line_idx)
+        .collect();
+      for line_idx in to_be_removed.iter() {
+        cached_width.pop(line_idx);
+      }
     }
   }
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
+    self.cached_cloned_lines.borrow_mut().clear();
     self.cached_lines_width.borrow_mut().clear()
   }
 
@@ -390,6 +484,14 @@ impl Text {
   /// Resize cache.
   fn resize_cached_lines(&self, canvas_size: U16Size) {
     let new_cache_size = _cached_size(canvas_size);
+
+    // cached clone lines
+    let mut cached_lines = self.cached_cloned_lines.borrow_mut();
+    if new_cache_size > cached_lines.cap() {
+      cached_lines.resize(new_cache_size);
+    }
+
+    // cached lines width
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
       cached_width.resize(new_cache_size);
@@ -528,9 +630,7 @@ impl Text {
             .rope_mut()
             .insert(buffer_len_chars, eol.to_compact_string().as_str());
           let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
-          self.retain_cached_lines(|line_idx, _column_idx| {
-            *line_idx < inserted_line_idx
-          });
+          self.retain_cached_lines(|line_idx| *line_idx < inserted_line_idx);
           self.dbg_print_textline_absolutely(
             inserted_line_idx,
             buffer_len_chars,
@@ -605,9 +705,7 @@ impl Text {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
       let min_cursor_line_idx =
         std::cmp::min(line_idx_after_inserted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| {
-        *line_idx < min_cursor_line_idx
-      });
+      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
     }
 
     // Append eol at file end if it doesn't exist.
@@ -744,9 +842,7 @@ impl Text {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
       let min_cursor_line_idx =
         std::cmp::min(cursor_line_idx_after_deleted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| {
-        *line_idx < min_cursor_line_idx
-      });
+      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
     }
 
     // Append eol at file end if it doesn't exist.

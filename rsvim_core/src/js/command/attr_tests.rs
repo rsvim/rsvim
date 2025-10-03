@@ -22,6 +22,7 @@ fn test_nargs() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_converter1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
