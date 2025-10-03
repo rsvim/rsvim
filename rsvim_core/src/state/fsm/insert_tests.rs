@@ -8914,12 +8914,12 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "SVIM!     ",
-        "s is a qui",
-        " sow of th",
-        ". When the",
-        "he extra p",
-        "he extra  ",
+        "* The     ",
+        "extra     ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
         "          ",
         "          ",
         "          ",
