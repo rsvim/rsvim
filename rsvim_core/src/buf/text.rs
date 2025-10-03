@@ -109,18 +109,33 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<String> {
+  ) -> Option<Arc<String>> {
+    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
+    let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+
+    if cached_clone_lines.contains(&key) {
+      return cached_clone_lines.get(&key).cloned();
+    }
+
     match self.rope.get_line(line_idx) {
       Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
-              return Some(builder);
+              return Some(
+                cached_clone_lines
+                  .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+                  .clone(),
+              );
             }
             builder.push(c);
           }
-          Some(builder)
+          Some(
+            cached_clone_lines
+              .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+              .clone(),
+          )
         }
         None => None,
       },
