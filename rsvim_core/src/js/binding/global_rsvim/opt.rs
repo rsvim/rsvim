@@ -98,8 +98,8 @@ pub fn set_tab_stop<'s>(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u8;
-  buffers.global_local_options_mut().set_tab_stop(value);
+  debug_assert!(value <= u8::MAX as u32);
+  buffers.global_local_options_mut().set_tab_stop(value as u8);
 }
 
 /// Get the _expand-tab_ option.
@@ -161,8 +161,10 @@ pub fn set_shift_width<'s>(
   let buffers = state_rc.borrow().buffers.clone();
   let mut buffers = lock!(buffers);
 
-  let value = num_traits::clamp(value, 0, u8::MAX as u32) as u8;
-  buffers.global_local_options_mut().set_shift_width(value);
+  debug_assert!(value <= u8::MAX as u32);
+  buffers
+    .global_local_options_mut()
+    .set_shift_width(value as u8);
 }
 
 /// Get the _file-encoding_ option.
