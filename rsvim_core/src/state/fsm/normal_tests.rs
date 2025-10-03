@@ -7779,6 +7779,38 @@ mod tests_cursor_move {
         &expect_fills,
       );
     }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(170));
+
+    // Move-4
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 0);
+      assert_eq!(actual.char_idx(), 158);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "ltiple cases: a)The extra",
+        " parts are been truncated",
+        " if both line-wrap and ",
+        "word-wrap options are not",
+        " set. b)The extra parts ",
+        "are split into the next ",
+        "row, if either line-wrap ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 }
 #[cfg(test)]
