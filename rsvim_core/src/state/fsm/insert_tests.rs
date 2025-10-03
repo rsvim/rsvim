@@ -8856,8 +8856,6 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec!["* The ", "extra.\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
