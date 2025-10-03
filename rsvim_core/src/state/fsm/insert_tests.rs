@@ -8709,24 +8709,25 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "HeRSVIM!\n",
-        "This is a ",
-        "But srow o",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "",
+        "But trow ",
+        "of the ",
+        "window ",
+        "content ",
+        "widget, ",
+        "then the ",
+        "line-wrap ",
+        "and word-",
+        "wrap ",
+        "doesn't ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        vec![(2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        0,
-        7,
+        2,
+        3,
         &expect_fills,
         &expect_fills,
       );
