@@ -161,37 +161,7 @@ impl Text {
     start_char_idx: usize,
     max_chars: usize,
   ) -> Option<Arc<String>> {
-    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
-    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
-
-    if cached_cloned_lines.contains(&key) {
-      return cached_cloned_lines.get(&key).cloned();
-    }
-
-    match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(
-                cached_cloned_lines
-                  .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
-                  .clone(),
-              );
-            }
-            builder.push(c);
-          }
-          Some(
-            cached_cloned_lines
-              .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
-              .clone(),
-          )
-        }
-        None => None,
-      },
-      None => None,
-    }
+    self._clone_line_impl(line_idx, start_char_idx, max_chars, false)
   }
 
   // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
