@@ -8709,7 +8709,7 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "But trow ",
+        "But srow ",
         "of the ",
         "window ",
         "content ",
@@ -8733,16 +8733,16 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "HeRSVIM!  ",
-        "This is a ",
-        "But srow o",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "          ",
-        "          ",
-        "          ",
-        "          ",
+        "But srow  ",
+        "of the    ",
+        "window    ",
+        "content   ",
+        "widget,   ",
+        "then the  ",
+        "line-wrap ",
+        "and word- ",
+        "wrap      ",
+        "doesn't   ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
