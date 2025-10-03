@@ -1931,17 +1931,14 @@ mod tests_raw_window_scroll_y_by {
         "lines.\n",
         "But still it ",
         "contains ",
-        "several ",
-        "things we ",
-        "want to test:\n",
+        "several things ",
+        "we want to test",
+        ":\n",
         "  1. When the ",
         "line is small ",
         "enough to ",
         "completely put ",
         "inside a row of",
-        " the window ",
-        "content widget,",
-        " then the ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
