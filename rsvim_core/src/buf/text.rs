@@ -16,7 +16,7 @@ use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 struct ClonedLineKey(
@@ -31,7 +31,7 @@ pub struct Text {
   rope: Rope,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
-    RefCell<LruCache<ClonedLineKey, Arc<String>, RandomState>>,
+    RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
   options: BufferOptions,
 }
 
@@ -110,7 +110,7 @@ impl Text {
     start_char_idx: usize,
     max_chars: usize,
     skip_cache: bool,
-  ) -> Option<Arc<String>> {
+  ) -> Option<Rc<String>> {
     let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
 
@@ -125,11 +125,11 @@ impl Text {
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
               if skip_cache {
-                return Some(Arc::new(builder));
+                return Some(Rc::new(builder));
               } else {
                 return Some(
                   cached_cloned_lines
-                    .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+                    .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
                     .clone(),
                 );
               }
@@ -138,11 +138,11 @@ impl Text {
           }
 
           if skip_cache {
-            Some(Arc::new(builder))
+            Some(Rc::new(builder))
           } else {
             Some(
               cached_cloned_lines
-                .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+                .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
                 .clone(),
             )
           }
@@ -160,7 +160,7 @@ impl Text {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Arc<String>> {
+  ) -> Option<Rc<String>> {
     let result1 =
       self._clone_line_impl(line_idx, start_char_idx, max_chars, false);
 
