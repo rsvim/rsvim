@@ -7559,13 +7559,13 @@ mod tests_cursor_move {
         "  2. When the line is too",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
         2,
-        4,
+        5,
         &expect_fills,
         &expect_fills,
       );
