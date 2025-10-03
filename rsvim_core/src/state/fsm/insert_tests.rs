@@ -8391,14 +8391,15 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
+        "Hello, ",
+        "RSVIM!\n",
         "This is a ",
+        "quite ",
+        "simple and",
+        " small test",
+        " lines.\n",
         "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "",
+        "it",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
