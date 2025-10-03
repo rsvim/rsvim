@@ -7684,14 +7684,14 @@ mod tests_cursor_move {
     }
 
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(50));
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(300));
 
     // Move-1
     {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
-      assert_eq!(actual.char_idx(), 50);
+      assert_eq!(actual.char_idx(), 300);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
