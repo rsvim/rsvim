@@ -8603,16 +8603,16 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "But still ",
-        "it ",
-        "contains ",
-        "several ",
-        "things we ",
-        "want to ",
-        "test:\n",
-        "  1. When ",
-        "the line ",
-        "is small ",
+        "But st1. ",
+        "When the ",
+        "line is ",
+        "small ",
+        "enough to ",
+        "completely",
+        " put ",
+        "inside a ",
+        "row of the",
+        " window ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
@@ -8627,16 +8627,16 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "But still ",
-        "it        ",
-        "contains  ",
-        "several   ",
-        "things we ",
-        "want to   ",
-        "test:     ",
-        "  1. When ",
-        "the line  ",
-        "is small  ",
+        "But st1.  ",
+        "When the  ",
+        "line is   ",
+        "small     ",
+        "enough to ",
+        "completely",
+        " put      ",
+        "inside a  ",
+        "row of the",
+        " window   ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
