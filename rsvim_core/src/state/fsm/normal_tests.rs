@@ -7583,12 +7583,12 @@ mod tests_cursor_move {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
-        "multiple cases:\n",
+        " long to be completely ",
+        "put in a row of the ",
+        "window content widget, ",
+        "there're multiple cases:\n",
         "    * The extra parts are",
-        " been truncated if both l",
+        " been truncated if both ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
