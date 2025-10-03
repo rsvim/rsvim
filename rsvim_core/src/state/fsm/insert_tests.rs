@@ -8468,16 +8468,16 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "Hello, RSV",
+        "Hello,    ",
+        "RSVIM!    ",
         "This is a ",
+        "quite     ",
+        "simple and",
+        " small    ",
+        "test lines",
+        ".         ",
         "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "          ",
-        "          ",
-        "          ",
+        "it        ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
