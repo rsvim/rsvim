@@ -30,7 +30,7 @@ struct ClonedLineKey(
 pub struct Text {
   rope: Rope,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
-  cached_clone_lines:
+  cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Arc<String>, RandomState>>,
   options: BufferOptions,
 }
@@ -51,7 +51,7 @@ impl Text {
         cache_size,
         RandomState::default(),
       )),
-      cached_clone_lines: RefCell::new(LruCache::with_hasher(
+      cached_cloned_lines: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
       )),
@@ -111,7 +111,7 @@ impl Text {
     max_chars: usize,
   ) -> Option<Arc<String>> {
     let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
-    let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+    let mut cached_clone_lines = self.cached_cloned_lines.borrow_mut();
 
     if cached_clone_lines.contains(&key) {
       return cached_clone_lines.get(&key).cloned();
@@ -394,7 +394,7 @@ impl Text {
   }
 
   fn _remove_cached_cloned_line(&self, line_idx: usize) {
-    let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+    let mut cached_clone_lines = self.cached_cloned_lines.borrow_mut();
     let to_be_removed: Vec<ClonedLineKey> = cached_clone_lines
       .iter()
       .filter(|(k, _)| k.0 == line_idx)
@@ -419,7 +419,7 @@ impl Text {
   {
     // cached clone lines
     {
-      let mut cached_lines = self.cached_clone_lines.borrow_mut();
+      let mut cached_lines = self.cached_cloned_lines.borrow_mut();
       let to_be_removed_lines: Vec<ClonedLineKey> = cached_lines
         .iter()
         .filter(|(k, _)| !f(&k.0))
@@ -446,7 +446,7 @@ impl Text {
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
-    self.cached_clone_lines.borrow_mut().clear();
+    self.cached_cloned_lines.borrow_mut().clear();
     self.cached_lines_width.borrow_mut().clear()
   }
 
@@ -456,7 +456,7 @@ impl Text {
     let new_cache_size = _cached_size(canvas_size);
 
     // cached clone lines
-    let mut cached_lines = self.cached_clone_lines.borrow_mut();
+    let mut cached_lines = self.cached_cloned_lines.borrow_mut();
     if new_cache_size > cached_lines.cap() {
       cached_lines.resize(new_cache_size);
     }
