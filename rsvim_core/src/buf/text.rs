@@ -163,6 +163,8 @@ impl Text {
   ) -> Option<Arc<String>> {
     let result1 =
       self._clone_line_impl(line_idx, start_char_idx, max_chars, false);
+
+    // Ensure cached version and non-cached version have same results.
     if cfg!(debug_assertions) {
       let result2 =
         self._clone_line_impl(line_idx, start_char_idx, max_chars, true);
