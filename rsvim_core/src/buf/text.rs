@@ -161,7 +161,14 @@ impl Text {
     start_char_idx: usize,
     max_chars: usize,
   ) -> Option<Arc<String>> {
-    self._clone_line_impl(line_idx, start_char_idx, max_chars, false)
+    let result1 =
+      self._clone_line_impl(line_idx, start_char_idx, max_chars, false);
+    if cfg!(debug_assertions) {
+      let result2 =
+        self._clone_line_impl(line_idx, start_char_idx, max_chars, true);
+      debug_assert_eq!(result1, result2);
+    }
+    result1
   }
 
   // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
