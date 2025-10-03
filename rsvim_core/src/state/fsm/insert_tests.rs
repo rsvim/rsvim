@@ -8824,14 +8824,12 @@ mod tests_delete_text {
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        0,
+        5,
         7,
         &expect_fills,
         &expect_fills,
