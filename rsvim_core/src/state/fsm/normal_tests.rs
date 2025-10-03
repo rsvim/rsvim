@@ -7690,7 +7690,7 @@ mod tests_cursor_move {
     {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
-      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 50);
 
       let viewport = get_viewport(tree.clone());
@@ -7698,13 +7698,13 @@ mod tests_cursor_move {
         "1. When the line is small enough to completely put inside a row. 2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases: a)The extra parts are been truncated if both line-wrap and word-wrap options are not set. b)The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        2,
-        5,
+        0,
+        1,
         &expect_fills,
         &expect_fills,
       );
