@@ -8853,7 +8853,7 @@ mod tests_delete_text {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 12);
       assert_eq!(actual3.row_idx(), 1);
-      assert_eq!(actual3.column_idx(), 9);
+      assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["* The ", "extra.\n", ""];
@@ -8870,12 +8870,12 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "SVIM!     ",
-        "s is a qui",
-        " sow of th",
-        ". When the",
-        "he extra p",
-        "he extra. ",
+        "* The     ",
+        "extra.    ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
         "          ",
         "          ",
         "          ",
