@@ -7615,12 +7615,12 @@ mod tests_cursor_move {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite simple an",
-        "d small test lines.\n",
-        "But still it contains sev",
-        "eral things we want to te",
-        "st:\n",
-        "  1. When the line is sma",
+        "This is a quite simple ",
+        "and small test lines.\n",
+        "But still it contains ",
+        "several things we want to",
+        " test:\n",
+        "  1. When the line is ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
