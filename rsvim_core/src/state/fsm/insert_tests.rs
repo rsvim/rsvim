@@ -8615,13 +8615,13 @@ mod tests_delete_text {
         "is small ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0), (3, 0)].into_iter().collect();
+        vec![(2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
         2,
-        4,
+        3,
         &expect_fills,
         &expect_fills,
       );
