@@ -1963,21 +1963,21 @@ mod tests_raw_window_scroll_y_by {
     {
       let viewport = get_viewport(tree);
       let expect = vec![
-        "  2. When the l",
-        "ine is too long",
-        " to be complete",
-        "ly put in a row",
-        " of the window ",
-        "content widget,",
-        " there're multi",
-        "ple cases:\n",
-        "     * The extr",
-        "a parts are bee",
-        "n truncated if ",
-        "both line-wrap ",
-        "and word-wrap o",
-        "ptions are not ",
-        "set.\n",
+        "  2. When the ",
+        "line is too ",
+        "long to be ",
+        "completely put ",
+        "in a row of the",
+        " window content",
+        " widget, there'",
+        "re multiple ",
+        "cases:\n",
+        "     * The ",
+        "extra parts are",
+        " been truncated",
+        " if both line-",
+        "wrap and word-",
+        "wrap options ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0)].into_iter().collect();
