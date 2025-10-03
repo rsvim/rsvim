@@ -8895,7 +8895,7 @@ mod tests_delete_text {
       assert_eq!(actual3.line_idx(), 5);
       assert_eq!(actual3.char_idx(), 11);
       assert_eq!(actual3.row_idx(), 1);
-      assert_eq!(actual3.column_idx(), 8);
+      assert_eq!(actual3.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
