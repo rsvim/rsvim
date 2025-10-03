@@ -4,6 +4,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_integer1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
@@ -21,6 +22,7 @@ fn test_integer1() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_number1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
@@ -38,6 +40,7 @@ fn test_number1() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_bool1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
@@ -55,6 +58,7 @@ fn test_bool1() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_string1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
@@ -72,6 +76,7 @@ fn test_string1() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn test_array1() {
   let mut jsrt = make_js_runtime();
   let context = jsrt.context();
