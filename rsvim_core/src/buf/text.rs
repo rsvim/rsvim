@@ -16,12 +16,22 @@ use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
+use std::sync::Arc;
+
+#[derive(Hash, PartialEq, Eq, Copy)]
+struct ClonedLineKey(
+  /* line_idx */ usize,
+  /* start_char_idx */ usize,
+  /* max_chars */ usize,
+);
 
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
+  cached_clone_lines:
+    RefCell<LruCache<ClonedLineKey, Arc<String>, RandomState>>,
   options: BufferOptions,
 }
 
@@ -38,6 +48,10 @@ impl Text {
     Self {
       rope,
       cached_lines_width: RefCell::new(LruCache::with_hasher(
+        cache_size,
+        RandomState::default(),
+      )),
+      cached_clone_lines: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
       )),
@@ -333,6 +347,20 @@ impl Text {
 
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
+    // cached clone lines
+    {
+      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
+        .iter()
+        .filter(|(k, _)| k.0 == line_idx)
+        .map(|(k, _)| *k)
+        .collect();
+      for cloned_key in to_be_removed_lines.iter() {
+        cached_clone_lines.pop(cloned_key);
+      }
+    }
+
+    // cached lines width
     self
       .cached_lines_width
       .borrow_mut()
@@ -383,6 +411,7 @@ impl Text {
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
+    self.cached_clone_lines.borrow_mut().clear();
     self.cached_lines_width.borrow_mut().clear()
   }
 
