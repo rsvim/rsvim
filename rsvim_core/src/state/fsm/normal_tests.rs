@@ -7722,33 +7722,33 @@ mod tests_cursor_move {
     {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
-      assert_eq!(actual.line_idx(), 4);
-      assert_eq!(actual.char_idx(), 74);
+      assert_eq!(actual.line_idx(), 0);
+      assert_eq!(actual.char_idx(), 324);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
-        "multiple cases:\n",
-        "    * The extra parts are",
-        " been truncated if both l",
+        "ltiple cases: a)The extra",
+        " parts are been truncated",
+        " if both line-wrap and ",
+        "word-wrap options are not",
+        " set. b)The extra parts ",
+        "are split into the next ",
+        "row, if either line-wrap ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(4, 0), (5, 0)].into_iter().collect();
+        vec![(0, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        4,
-        6,
+        0,
+        1,
         &expect_fills,
         &expect_fills,
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveBy((-4, -4)));
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(4));
 
     // Move-3
     {
