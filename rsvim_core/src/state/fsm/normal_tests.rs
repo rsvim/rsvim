@@ -7716,7 +7716,7 @@ mod tests_cursor_move {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveBy((24, 1)));
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(24));
 
     // Move-2
     {
