@@ -1893,6 +1893,105 @@ mod tests_raw_window_scroll_y_by {
       );
     }
   }
+
+  #[test]
+  fn wrap_linebreak1() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "  3. If a single char needs multiple cells to display on the window, and it happens the char is at the end of the row, there can be multiple cases:\n",
+      "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
+      "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
+    ];
+    let (event, tree, bufs, buf, contents, data_access) = make_tree(
+      U16Size::new(15, 15),
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    // Before cursor scroll
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
+        "  1. When the l",
+        "ine is small en",
+        "ough to complet",
+        "ely put inside ",
+        "a row of the wi",
+        "ndow content wi",
+        "dget, then the ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let stateful = NormalStateful::default();
+    stateful
+      ._test_raw_window_scroll(&data_access, Operation::WindowScrollDownBy(4));
+
+    let tree = data_access.tree.clone();
+
+    // After cursor scroll
+    {
+      let viewport = get_viewport(tree);
+      let expect = vec![
+        "  2. When the l",
+        "ine is too long",
+        " to be complete",
+        "ly put in a row",
+        " of the window ",
+        "content widget,",
+        " there're multi",
+        "ple cases:\n",
+        "     * The extr",
+        "a parts are bee",
+        "n truncated if ",
+        "both line-wrap ",
+        "and word-wrap o",
+        "ptions are not ",
+        "set.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(4, 0), (5, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
 }
 #[cfg(test)]
 mod tests_raw_window_scroll_x_by {
