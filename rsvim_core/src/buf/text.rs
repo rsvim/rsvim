@@ -104,6 +104,57 @@ impl Text {
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
   /// for performance reason when the line is too long to clone.
+  fn _clone_line_impl(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+    skip_cache: bool,
+  ) -> Option<Arc<String>> {
+    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+
+    if !skip_cache && cached_cloned_lines.contains(&key) {
+      return cached_cloned_lines.get(&key).cloned();
+    }
+
+    match self.rope.get_line(line_idx) {
+      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              if skip_cache {
+                return Some(Arc::new(builder));
+              } else {
+                return Some(
+                  cached_cloned_lines
+                    .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+                    .clone(),
+                );
+              }
+            }
+            builder.push(c);
+          }
+
+          if skip_cache {
+            Some(Arc::new(builder))
+          } else {
+            Some(
+              cached_cloned_lines
+                .get_or_insert(key, || -> Arc<String> { Arc::new(builder) })
+                .clone(),
+            )
+          }
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
+
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
+  /// for performance reason when the line is too long to clone.
   pub fn clone_line(
     &self,
     line_idx: usize,
