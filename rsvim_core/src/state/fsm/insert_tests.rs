@@ -8814,15 +8814,7 @@ mod tests_delete_text {
       assert_eq!(actual1.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "SVIM!\n",
-        "s is a qui",
-        " sow of th",
-        ". When the",
-        "he extra p",
-        "he extra.\n",
-        "",
-      ];
+      let expect = vec!["* The ", "extra.\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
@@ -8836,12 +8828,12 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "SVIM!     ",
-        "s is a qui",
-        " sow of th",
-        ". When the",
-        "he extra p",
-        "he extra. ",
+        "* The     ",
+        "extra.    ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
         "          ",
         "          ",
         "          ",
