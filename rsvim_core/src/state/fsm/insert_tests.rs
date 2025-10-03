@@ -8396,10 +8396,11 @@ mod tests_delete_text {
         "This is a ",
         "quite ",
         "simple and",
-        " small test",
-        " lines.\n",
+        " small ",
+        "test lines",
+        ".\n",
         "But still ",
-        "it",
+        "it ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
