@@ -8598,44 +8598,45 @@ mod tests_delete_text {
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 2);
       assert_eq!(actual3.char_idx(), 6);
-      assert_eq!(actual3.row_idx(), 2);
+      assert_eq!(actual3.row_idx(), 0);
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "HeRSVIM!\n",
-        "This is a ",
-        "But st1. W",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "",
+        "But still ",
+        "it ",
+        "contains ",
+        "several ",
+        "things we ",
+        "want to ",
+        "test:\n",
+        "  1. When ",
+        "the line ",
+        "is small ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &viewport,
         &expect,
-        0,
-        7,
+        2,
+        4,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "HeRSVIM!  ",
-        "This is a ",
-        "But st1. W",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
-        "          ",
-        "          ",
-        "          ",
-        "          ",
+        "But still ",
+        "it        ",
+        "contains  ",
+        "several   ",
+        "things we ",
+        "want to   ",
+        "test:     ",
+        "  1. When ",
+        "the line  ",
+        "is small  ",
       ];
       let actual_canvas =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
