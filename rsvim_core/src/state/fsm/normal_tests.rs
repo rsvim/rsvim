@@ -7549,12 +7549,13 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "But still it contains sev",
-        "eral things we want to te",
-        "st:\n",
-        "  1. When the line is sma",
-        "ll enough to completely p",
-        "ut inside a row.\n",
+        "But still it contains ",
+        "several things we want to",
+        " test:\n",
+        "  1. When the line is ",
+        "small enough to ",
+        "completely put inside a ",
+        "row.\n",
         "  2. When the line is too",
       ];
       let expect_fills: BTreeMap<usize, usize> =
