@@ -8856,7 +8856,9 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 6);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["* The ", "extra.\n", ""];
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text10 = format!("extra.{buf_eol}");
+      let expect = vec!["* The ", text10.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
@@ -8899,8 +8901,8 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra{buf_eol}"));
-      let expect = vec!["* The ", "extra\n", ""];
+      let text11 = format!("extra{buf_eol}");
+      let expect = vec!["* The ", text11.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
