@@ -18,7 +18,7 @@ use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::sync::Arc;
 
-#[derive(Hash, PartialEq, Eq, Copy)]
+#[derive(Hash, PartialEq, Eq, Copy, Clone)]
 struct ClonedLineKey(
   /* line_idx */ usize,
   /* start_char_idx */ usize,
@@ -348,17 +348,7 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached clone lines
-    {
-      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
-      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
-        .iter()
-        .filter(|(k, _)| k.0 == line_idx)
-        .map(|(k, _)| *k)
-        .collect();
-      for cloned_key in to_be_removed_lines.iter() {
-        cached_clone_lines.pop(cloned_key);
-      }
-    }
+    self._remove_cached_cloned_line(line_idx);
 
     // cached lines width
     self
@@ -375,17 +365,7 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached clone lines
-    {
-      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
-      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
-        .iter()
-        .filter(|(k, _)| k.0 == line_idx)
-        .map(|(k, _)| *k)
-        .collect();
-      for cloned_key in to_be_removed_lines.iter() {
-        cached_clone_lines.pop(cloned_key);
-      }
-    }
+    self._remove_cached_cloned_line(line_idx);
 
     // cached lines with
     self
@@ -398,28 +378,54 @@ impl Text {
       .truncate_since_width(width)
   }
 
+  fn _remove_cached_cloned_line(&self, line_idx: usize) {
+    let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+    let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
+      .iter()
+      .filter(|(k, _)| k.0 == line_idx)
+      .map(|(k, _)| *k)
+      .collect();
+    for cloned_key in to_be_removed_lines.iter() {
+      cached_clone_lines.pop(cloned_key);
+    }
+  }
+
   #[allow(dead_code)]
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
+    self._remove_cached_cloned_line(line_idx);
     self.cached_lines_width.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
   fn retain_cached_lines<F>(&self, f: F)
   where
-    F: Fn(
-      /* line_idx */ &usize,
-      /* column_idx */ &ColumnIndex,
-    ) -> bool,
+    F: Fn(/* line_idx */ &usize) -> bool,
   {
-    let mut cached_width = self.cached_lines_width.borrow_mut();
-    let to_be_removed_lines: Vec<usize> = cached_width
-      .iter()
-      .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
-      .map(|(line_idx, _)| *line_idx)
-      .collect();
-    for line_idx in to_be_removed_lines.iter() {
-      cached_width.pop(line_idx);
+    // cached clone lines
+    {
+      let mut cached_clone_lines = self.cached_clone_lines.borrow_mut();
+      let to_be_removed_lines: Vec<ClonedLineKey> = cached_clone_lines
+        .iter()
+        .filter(|(k, _)| !f(&k.0))
+        .map(|(k, _)| *k)
+        .collect();
+      for cloned_key in to_be_removed_lines.iter() {
+        cached_clone_lines.pop(cloned_key);
+      }
+    }
+
+    // cached lines width
+    {
+      let mut cached_width = self.cached_lines_width.borrow_mut();
+      let to_be_removed_lines: Vec<usize> = cached_width
+        .iter()
+        .filter(|(line_idx, _)| !f(line_idx))
+        .map(|(line_idx, _)| *line_idx)
+        .collect();
+      for line_idx in to_be_removed_lines.iter() {
+        cached_width.pop(line_idx);
+      }
     }
   }
 
@@ -571,9 +577,7 @@ impl Text {
             .rope_mut()
             .insert(buffer_len_chars, eol.to_compact_string().as_str());
           let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
-          self.retain_cached_lines(|line_idx, _column_idx| {
-            *line_idx < inserted_line_idx
-          });
+          self.retain_cached_lines(|line_idx| *line_idx < inserted_line_idx);
           self.dbg_print_textline_absolutely(
             inserted_line_idx,
             buffer_len_chars,
@@ -648,9 +652,7 @@ impl Text {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
       let min_cursor_line_idx =
         std::cmp::min(line_idx_after_inserted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| {
-        *line_idx < min_cursor_line_idx
-      });
+      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
     }
 
     // Append eol at file end if it doesn't exist.
@@ -787,9 +789,7 @@ impl Text {
       // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
       let min_cursor_line_idx =
         std::cmp::min(cursor_line_idx_after_deleted, line_idx);
-      self.retain_cached_lines(|line_idx, _column_idx| {
-        *line_idx < min_cursor_line_idx
-      });
+      self.retain_cached_lines(|line_idx| *line_idx < min_cursor_line_idx);
     }
 
     // Append eol at file end if it doesn't exist.
