@@ -400,11 +400,11 @@ impl BuffersManager {
               }
             },
             Err(e) => {
-              anyhow::bail!(e);
+              bail!(TheError::BufferWriteFileFailed(buf_id, e));
             }
           },
           Err(e) => {
-            anyhow::bail!(e);
+            bail!(TheError::BufferWriteFileFailed(buf_id, e));
           }
         };
         trace!("Write file {:?}, bytes: {:?}", filename, n);
