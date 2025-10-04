@@ -45,6 +45,7 @@ async fn create_snapshot1() -> IoResult<()> {
       cli_opts,
       SnapshotData::new(bytes),
     )
+    .unwrap()
   };
 
   // Run the event loop.
