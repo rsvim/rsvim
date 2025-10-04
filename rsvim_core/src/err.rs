@@ -4,6 +4,8 @@ use crate::buf::BufferId;
 use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
+use std::borrow::Cow;
+use swc_ecma_parser::error::SyntaxError;
 
 // std::io {
 
@@ -66,9 +68,9 @@ pub enum TheErr {
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
 
-  #[error("Failed to compile typescript `{0}`.")]
+  #[error("Failed to compile typescript: `{0}`.")]
   /// Failed to compile typescript
-  CompileTypeScriptFailed(String),
+  CompileTypeScriptFailed(Cow<'static, str>),
 
   #[error("Not enough function arguments specified.")]
   /// Failed to compile typescript
