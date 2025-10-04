@@ -23,13 +23,13 @@ pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
   /// Resolve module path by its specifier.
-  fn resolve(&self, _base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, _base: &str, specifier: &str) -> TheResult<ModulePath> {
     assert!(CORE_MODULES.contains_key(specifier));
     Ok(specifier.to_string())
   }
 
   /// Load module source by its module path.
-  fn load(&self, module_path: &str) -> AnyResult<ModuleSource> {
+  fn load(&self, module_path: &str) -> TheResult<ModuleSource> {
     assert!(CORE_MODULES.contains_key(module_path));
     Ok(CORE_MODULES.get(module_path).unwrap().to_string())
   }
