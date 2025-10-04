@@ -278,17 +278,17 @@ impl BuffersManager {
   }
 
   /// Write (save) a buffer to filesystem.
-  pub fn write_buffer(&self, buf_id: BufferId) -> AnyResult<usize> {
+  pub fn write_buffer(&self, buf_id: BufferId) -> TheResult<usize> {
     match self.buffers.get(&buf_id) {
       Some(buf) => {
         let mut buf = lock!(buf);
         if !buf.has_filename() {
-          anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!");
+          bail!(TheErr::BufferHaveNoFileName(buf_id));
         }
         self.write_file(&mut buf)
       }
       None => {
-        anyhow::bail!("Error: buffer {buf_id:?} not exist!");
+        bail!(TheErr::BufferNotExist(buf_id));
       }
     }
   }
@@ -375,7 +375,8 @@ impl BuffersManager {
     }
   }
 
-  fn write_file(&self, buf: &mut Buffer) -> AnyResult<usize> {
+  fn write_file(&self, buf: &mut Buffer) -> TheResult<usize> {
+    let buf_id = buf.id();
     let filename = buf.filename().as_ref().unwrap();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
@@ -395,15 +396,15 @@ impl BuffersManager {
             Ok(_) => match writer.flush() {
               Ok(_) => n,
               Err(e) => {
-                anyhow::bail!(e);
+                bail!(TheErr::SaveBufferFailed(buf_id, e));
               }
             },
             Err(e) => {
-              anyhow::bail!(e);
+              bail!(TheErr::SaveBufferFailed(buf_id, e));
             }
           },
           Err(e) => {
-            anyhow::bail!(e);
+            bail!(TheErr::SaveBufferFailed(buf_id, e));
           }
         };
         trace!("Write file {:?}, bytes: {:?}", filename, n);
@@ -416,8 +417,10 @@ impl BuffersManager {
         n
       }
       Err(e) => {
-        error!("Failed to open(w) file {:?}:{:?}", filename, e);
-        anyhow::bail!(e);
+        bail!(TheErr::OpenFileForWriteFailed(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     };
 

@@ -43,8 +43,8 @@ geo = { workspace = true }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
 dirs = { workspace = true }
-anyhow = { workspace = true }
-# thiserror = { workspace = true }
+# anyhow = { workspace = true }
+thiserror = { workspace = true }
 foldhash = { workspace = true }
 # url = { workspace = true }
 path-absolutize = { workspace = true }
@@ -70,7 +70,7 @@ oxc_resolver = { workspace = true }
 # NOTE: Javascript dependencies {
 
 swc_atoms = { workspace = true }
-swc_common = { workspace = true, features = ["tty-emitter"] }
+swc_common = { workspace = true }
 swc_config = { workspace = true }
 swc_config_macro = { workspace = true }
 swc_ecma_ast = { workspace = true }

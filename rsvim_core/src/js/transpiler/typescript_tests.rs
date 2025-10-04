@@ -30,3 +30,12 @@ fn test1() {
   let actual2 = actual2.unwrap();
   info!("{m2}:\n{actual2}");
 }
+
+#[test]
+fn test2() {
+  test_log_init();
+
+  let actual1 = TypeScript::compile(None, "const let var function");
+  assert!(actual1.is_err());
+  info!("{:?}", actual1.err().unwrap().to_string());
+}

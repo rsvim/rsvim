@@ -2,7 +2,7 @@
 
 use crate::js::JsRuntimeState;
 use crate::js::binding::global_rsvim::cmd::send_cmdline_message;
-use crate::prelude::AnyErr;
+use crate::prelude::*;
 
 /// Represents an exception coming from V8.
 #[derive(Eq, PartialEq, Clone, Default)]
@@ -161,6 +161,6 @@ impl std::fmt::Debug for JsError {
   }
 }
 
-pub fn report_js_error(state: &JsRuntimeState, e: AnyErr) {
+pub fn report_js_error(state: &JsRuntimeState, e: TheErr) {
   send_cmdline_message(state, e.to_string());
 }

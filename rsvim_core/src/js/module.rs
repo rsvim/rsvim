@@ -159,7 +159,7 @@ pub fn resolve_import(
   base: &str,
   specifier: &str,
   import_map: Option<ImportMap>,
-) -> AnyResult<ModulePath> {
+) -> TheResult<ModulePath> {
   // Use import-maps if available.
   let specifier = match import_map {
     Some(map) => map.lookup(specifier).unwrap_or_else(|| specifier.into()),
@@ -176,7 +176,7 @@ pub fn resolve_import(
 pub fn load_import(
   specifier: &str,
   _skip_cache: bool,
-) -> AnyResult<ModuleSource> {
+) -> TheResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
   //   CORE_MODULES.contains_key(specifier),
@@ -205,7 +205,7 @@ pub fn load_import(
 pub async fn async_load_import(
   specifier: &str,
   _skip_cache: bool,
-) -> AnyResult<ModuleSource> {
+) -> TheResult<ModuleSource> {
   static ASYNC_FS_MODULE_LOADER: AsyncFsModuleLoader = AsyncFsModuleLoader {};
 
   let loader: &dyn AsyncModuleLoader = &ASYNC_FS_MODULE_LOADER;

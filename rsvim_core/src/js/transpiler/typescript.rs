@@ -1,14 +1,11 @@
 //! Typescript transpiler.
 
 use crate::prelude::*;
-use anyhow::bail;
 use swc_common::FileName;
 use swc_common::GLOBALS;
 use swc_common::Globals;
 use swc_common::Mark;
 use swc_common::SourceMap;
-use swc_common::errors::ColorConfig;
-use swc_common::errors::Handler;
 use swc_common::sync::Lrc;
 use swc_ecma_ast::EsVersion;
 use swc_ecma_codegen::Emitter;
@@ -29,15 +26,9 @@ pub struct TypeScript;
 
 impl TypeScript {
   /// Compiles TypeScript code into JavaScript.
-  pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
+  pub fn compile(filename: Option<&str>, source: &str) -> TheResult<String> {
     let globals = Globals::default();
     let cm: Lrc<SourceMap> = Default::default();
-    let handler = Handler::with_tty_emitter(
-      ColorConfig::Never,
-      true,
-      false,
-      Some(cm.clone()),
-    );
 
     let filename = match filename {
       Some(filename) => FileName::Custom(filename.into()),
@@ -54,19 +45,17 @@ impl TypeScript {
         no_early_errors: true,
         ..Default::default()
       }),
-      EsVersion::EsNext, // NOTE: Always use "esnext" version.
+      // NOTE: Always use "esnext" version.
+      EsVersion::EsNext,
       StringInput::from(&*fm),
       None,
     );
 
     let mut parser = Parser::new_from(lexer);
 
-    let program = match parser
-      .parse_program()
-      .map_err(|e| e.into_diagnostic(&handler).emit())
-    {
+    let program = match parser.parse_program() {
       Ok(module) => module,
-      Err(_) => bail!("TypeScript compilation failed."),
+      Err(e) => bail!(TheErr::CompileTypeScriptFailed(e.kind().msg())),
     };
 
     // This is where we're gonna store the JavaScript output.
@@ -81,8 +70,9 @@ impl TypeScript {
         .apply(&mut fixer(None));
 
       {
+        // NOTE: Always use "esnext" version.
         let cfg =
-          swc_ecma_codegen::Config::default().with_target(EsVersion::EsNext); // NOTE: Always use "esnext" version.
+          swc_ecma_codegen::Config::default().with_target(EsVersion::EsNext);
         let mut emitter = Emitter {
           cfg,
           cm: cm.clone(),

@@ -164,12 +164,12 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_source: Option<AnyResult<Vec<u8>>>,
+  pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
   // Handles static import error.
-  fn handle_failure(&self, state: &JsRuntimeState, e: anyhow::Error) {
+  fn handle_failure(&self, state: &JsRuntimeState, e: TheErr) {
     let mut module = self.module.borrow_mut();
     // In dynamic imports we reject the promise(s).
     if module.is_dynamic_import() {
@@ -205,7 +205,7 @@ impl JsFuture for EsModuleFuture {
       >(&source, bincode::config::standard())
       .unwrap(),
       Err(e) => {
-        self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+        self.handle_failure(&state, e);
         return;
       }
     };
@@ -224,10 +224,7 @@ impl JsFuture for EsModuleFuture {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          let exception =
-            format!("{} ({})", exception.message, exception.resource_name);
-
-          self.handle_failure(&state, anyhow::Error::msg(exception));
+          self.handle_failure(&state, TheErr::JsError(Box::new(exception)));
           return;
         }
       };
@@ -266,7 +263,7 @@ impl JsFuture for EsModuleFuture {
         match resolve_import(&base, &specifier, import_map.clone()) {
           Ok(specifier) => specifier,
           Err(e) => {
-            self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+            self.handle_failure(&state, e);
             return;
           }
         };
@@ -296,7 +293,7 @@ impl JsFuture for EsModuleFuture {
         let loader_cb = {
           let state_rc = state_rc.clone();
           let specifier = specifier.clone();
-          move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+          move |maybe_result: Option<TheResult<Vec<u8>>>| {
             let fut = EsModuleFuture {
               path: specifier.clone(),
               module: Rc::clone(&module),

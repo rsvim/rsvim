@@ -11,12 +11,6 @@ use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
 
-macro_rules! path_not_found {
-  ($path:expr) => {
-    anyhow::bail!(format!("Module path NotFound({:?})", $path))
-  };
-}
-
 /// Checks if path is a JSON file.
 fn is_json_import(path: &Path) -> bool {
   path
@@ -34,19 +28,25 @@ mod sync_load {
   use super::*;
 
   /// Loads contents from a file.
-  pub fn load_source(path: &Path) -> AnyResult<ModuleSource> {
-    let source = std::fs::read_to_string(path)?;
-    let source = if is_json_import(path) {
-      wrap_json(source.as_str())
-    } else {
-      source
-    };
-
-    Ok(source)
+  pub fn load_source(path: &Path) -> TheResult<ModuleSource> {
+    match std::fs::read_to_string(path) {
+      Ok(source) => {
+        let source = if is_json_import(path) {
+          wrap_json(source.as_str())
+        } else {
+          source
+        };
+        Ok(source)
+      }
+      Err(e) => bail!(TheErr::LoadModuleFailed(
+        path.to_string_lossy().to_string(),
+        e
+      )),
+    }
   }
 
   /// Loads import as file.
-  pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+  pub fn load_as_file(path: &Path) -> TheResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
       return match load_source(path) {
@@ -55,27 +55,35 @@ mod sync_load {
       };
     }
 
-    path_not_found!(path)
+    bail!(TheErr::ModulePathNotFound(
+      path.to_string_lossy().to_string()
+    ));
   }
 }
 
 mod async_load {
   use super::*;
 
-  pub async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
-    let source = tokio::fs::read_to_string(path).await?;
-    let source = if is_json_import(path) {
-      wrap_json(source.as_str())
-    } else {
-      source
-    };
-
-    Ok(source)
+  pub async fn async_load_source(path: &Path) -> TheResult<ModuleSource> {
+    match tokio::fs::read_to_string(path).await {
+      Ok(source) => {
+        let source = if is_json_import(path) {
+          wrap_json(source.as_str())
+        } else {
+          source
+        };
+        Ok(source)
+      }
+      Err(e) => bail!(TheErr::LoadModuleFailed(
+        path.to_string_lossy().to_string(),
+        e
+      )),
+    }
   }
 
   pub async fn async_load_as_file(
     path: &Path,
-  ) -> AnyResult<(PathBuf, ModuleSource)> {
+  ) -> TheResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
       return match async_load_source(path).await {
@@ -84,7 +92,9 @@ mod async_load {
       };
     }
 
-    path_not_found!(path)
+    bail!(TheErr::ModulePathNotFound(
+      path.to_string_lossy().to_string()
+    ));
   }
 }
 
@@ -139,7 +149,7 @@ impl FsModuleLoader {
     resolver: &Resolver,
     base: &str,
     specifier: &str,
-  ) -> AnyResult<ModulePath> {
+  ) -> TheResult<ModulePath> {
     let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
@@ -148,7 +158,7 @@ impl FsModuleLoader {
 
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
+      Err(_) => bail!(TheErr::ModulePathNotFound(specifier.to_string())),
     }
   }
 }
@@ -166,18 +176,18 @@ impl ModuleLoader for FsModuleLoader {
   /// 3. The `require` keyword is not supported.
   ///
   /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath> {
     self.resolve_impl(&self.resolver, base, specifier)
   }
 
   #[cfg(test)]
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath> {
     let resolver = Resolver::new(create_resolve_opts());
     self.resolve_impl(&resolver, base, specifier)
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  fn load(&self, specifier: &str) -> TheResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = sync_load::load_as_file(path);
@@ -215,7 +225,7 @@ pub struct AsyncFsModuleLoader;
 
 #[async_trait]
 impl AsyncModuleLoader for AsyncFsModuleLoader {
-  async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  async fn load(&self, specifier: &str) -> TheResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = async_load::async_load_as_file(path).await;

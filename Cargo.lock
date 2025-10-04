@@ -2583,7 +2583,6 @@ dependencies = [
 name = "rsvim_core"
 version = "0.1.2"
 dependencies = [
- "anyhow",
  "ascii",
  "assert_fs",
  "async-trait",
@@ -2642,6 +2641,7 @@ dependencies = [
  "swc_sourcemap",
  "swc_trace_macro",
  "swc_visit",
+ "thiserror",
  "timezone_provider",
  "tokio",
  "tokio-util",
@@ -3034,7 +3034,6 @@ dependencies = [
  "swc_atoms",
  "swc_eq_ignore_macros",
  "swc_visit",
- "termcolor",
  "tracing",
  "unicode-width 0.1.14",
  "url",
@@ -3692,15 +3691,6 @@ dependencies = [
  "tinystr 0.8.1",
  "tzif",
  "writeable 0.6.1",
-]
-
-[[package]]
-name = "termcolor"
-version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
-dependencies = [
- "winapi-util",
 ]
 
 [[package]]

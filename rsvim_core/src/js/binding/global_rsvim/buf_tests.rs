@@ -1,7 +1,6 @@
 use crate::cli::CliOptions;
 use crate::cli::CliSpecialOptions;
 use crate::prelude::*;
-use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;

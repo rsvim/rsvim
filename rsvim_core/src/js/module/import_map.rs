@@ -32,7 +32,7 @@ pub struct ImportMap {
 }
 
 impl ImportMap {
-  pub fn parse_from_json(_text: &str) -> AnyResult<ImportMap> {
+  pub fn parse_from_json(_text: &str) -> TheResult<ImportMap> {
     Ok(ImportMap { map: Vec::new() })
   }
 

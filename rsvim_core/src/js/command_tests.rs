@@ -1,7 +1,6 @@
 // use super::command::*;
 use crate::cli::CliOptions;
 use crate::prelude::*;
-use crate::results::IoResult;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::tests::evloop::*;

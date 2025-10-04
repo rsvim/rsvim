@@ -111,7 +111,8 @@ fn import_meta_resolve(
 ) {
   // Check for provided arguments.
   if args.length() == 0 {
-    throw_type_error(scope, "Not enough arguments specified.");
+    let e = TheErr::FunctionArgumentsNotEnough;
+    throw_type_error(scope, &e.to_string());
     return;
   }
 
@@ -272,7 +273,7 @@ pub fn host_import_module_dynamically_cb<'s>(
   let loader_cb = {
     let state_rc = state_rc.clone();
     let specifier = specifier.clone();
-    move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
       let fut = EsModuleFuture {
         path: specifier.clone(),
         module: graph_rc.borrow().root_rc(),
