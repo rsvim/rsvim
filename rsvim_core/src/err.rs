@@ -70,7 +70,7 @@ pub enum TheErr {
   /// Failed to compile typescript
   CompileTypeScriptFailed(String),
 
-  #[error("Function arguments not enough")]
+  #[error("not enough function arguments specified")]
   /// Failed to compile typescript
   FunctionArgumentsNotEnough,
   // js }
