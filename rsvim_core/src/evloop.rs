@@ -327,7 +327,6 @@ impl EventLoop {
     })
   }
 
-  #[cfg(test)]
   /// Make new event loop for testing.
   pub fn mock_new_without_snapshot(
     terminal_columns: u16,
@@ -401,7 +400,6 @@ impl EventLoop {
     })
   }
 
-  #[cfg(test)]
   /// Make new event loop for testing.
   pub fn mock_new_with_snapshot(
     terminal_columns: u16,

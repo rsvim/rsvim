@@ -83,6 +83,7 @@ snmalloc-rs = "0.3.8"
 mimalloc-safe = "0.1.54"
 tikv-jemallocator = "0.6"
 oxc_resolver = "11.8.4"
+criterion = "0.7"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 

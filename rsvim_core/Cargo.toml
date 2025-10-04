@@ -119,3 +119,4 @@ bitflags = { workspace = true }
 # ] }
 # tracing-appender = { workspace = true, features = ["parking_lot"] }
 regex = { workspace = true }
+criterion = { workspace = true }
