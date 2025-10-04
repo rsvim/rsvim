@@ -37,5 +37,5 @@ fn test2() {
 
   let actual1 = TypeScript::compile(None, "const let var function");
   assert!(actual1.is_err());
-  info!("{actual1:?}");
+  info!("{:?}", actual1.err().unwrap().to_string());
 }
