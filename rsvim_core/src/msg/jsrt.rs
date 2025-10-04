@@ -28,7 +28,7 @@ pub enum JsMessage {
 pub struct TimeoutResp {
   pub timer_id: JsTimerId,
   pub expire_at: Instant,
-  pub delay: u64,
+  pub delay: u32,
   pub repeated: bool,
 }
 

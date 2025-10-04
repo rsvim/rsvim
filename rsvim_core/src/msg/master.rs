@@ -40,7 +40,7 @@ pub struct PrintReq {
 pub struct TimeoutReq {
   pub timer_id: JsTimerId,
   pub start_at: Instant,
-  pub delay: u64,
+  pub delay: u32,
   pub repeated: bool,
 }
 
