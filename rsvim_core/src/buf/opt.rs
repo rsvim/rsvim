@@ -48,6 +48,7 @@ pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
 
+  #[builder(default = OPT_FLAGS)]
   #[builder(setter(custom))]
   // expand_tab
   flags: OptFlags,

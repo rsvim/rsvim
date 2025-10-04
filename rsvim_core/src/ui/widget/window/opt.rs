@@ -31,6 +31,7 @@ const OPT_FLAGS: OptFlags = OptFlags::WRAP;
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
+  #[builder(default = OPT_FLAGS)]
   #[builder(setter(custom))]
   // wrap
   // line_break
