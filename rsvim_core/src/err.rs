@@ -49,7 +49,7 @@ pub enum TheError {
 
   #[error("Failed to open(w) file {0}: {1}")]
   /// Buffer failed to open(w) file
-  BufferOpenwFileFailed(String, IoErr),
+  WriteBufferOpenFailed(String, IoErr),
   // buf }
 
   // js {
