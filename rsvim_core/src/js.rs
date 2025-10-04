@@ -703,7 +703,7 @@ pub mod boost {
         if let Some(exception) = check_exceptions(scope) {
           trace!("Got exceptions when running pending futures: {exception:?}");
           let state = state_rc.borrow();
-          report_js_error(&state, TheError::JsErr(exception));
+          report_js_error(&state, TheError::JsErr(Box::new(exception)));
         }
         run_next_tick_callbacks(scope);
       }
@@ -795,7 +795,7 @@ pub mod boost {
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
           let state = state_rc.borrow();
-          report_js_error(&state, TheError::JsErr(exception));
+          report_js_error(&state, TheError::JsErr(Box::new(exception)));
           continue;
         }
 
