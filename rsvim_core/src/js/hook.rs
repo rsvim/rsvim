@@ -11,7 +11,6 @@ use crate::js::module::resolve_import;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::util::paths;
-use compact_str::ToCompactString;
 use normpath::PathExt;
 use std::cell::RefCell;
 use std::rc::Rc;
