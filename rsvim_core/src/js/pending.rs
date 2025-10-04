@@ -14,7 +14,7 @@ pub type TaskCallback = Box<dyn FnMut(Option<TheResult<Vec<u8>>>) + 'static>;
 pub fn create_timer(
   state: &mut JsRuntimeState,
   timer_id: JsTimerId,
-  delay: u64,
+  delay: u32,
   repeated: bool,
   cb: TimerCallback,
 ) {
