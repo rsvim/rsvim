@@ -2642,6 +2642,7 @@ dependencies = [
  "swc_sourcemap",
  "swc_trace_macro",
  "swc_visit",
+ "thiserror",
  "timezone_provider",
  "tokio",
  "tokio-util",

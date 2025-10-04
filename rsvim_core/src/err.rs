@@ -1,4 +1,4 @@
-//! Results and errors.
+//! Errors and results.
 
 // anyhow {
 
