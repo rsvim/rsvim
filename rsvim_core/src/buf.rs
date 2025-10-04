@@ -278,12 +278,12 @@ impl BuffersManager {
   }
 
   /// Write (save) a buffer to filesystem.
-  pub fn write_buffer(&self, buf_id: BufferId) -> AnyResult<usize> {
+  pub fn write_buffer(&self, buf_id: BufferId) -> TheResult<usize> {
     match self.buffers.get(&buf_id) {
       Some(buf) => {
         let mut buf = lock!(buf);
         if !buf.has_filename() {
-          anyhow::bail!("Error: buffer {buf_id:?} doesn't have a filename!");
+          the_bail!(TheError::BufferHaveNoFileName(buf_id));
         }
         self.write_file(&mut buf)
       }

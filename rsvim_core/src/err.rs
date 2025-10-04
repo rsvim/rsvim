@@ -29,10 +29,22 @@ pub type IoResult<T> = std::io::Result<T>;
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum TheError {
   #[error("Buffer {0} doesn't have a filename")]
+  /// Buffer doesn't have a filename.
   BufferHaveNoFileName(crate::buf::BufferId),
+
+  #[error("Buffer {0} not found")]
+  /// Buffer not found
+  BufferNotFound(crate::buf::BufferId),
 }
 
 /// [`Result`] with `T` if ok, [`TheError`] if error.
-pub type TheResult<T, TheError> = Result<T, TheError>;
+pub type TheResult<T> = Result<T, TheError>;
 
 // thiserror }
+
+#[macro_export]
+macro_rules! the_bail {
+  ($e:expr) => {
+    return Err($e);
+  };
+}

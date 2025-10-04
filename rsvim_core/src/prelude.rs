@@ -8,6 +8,7 @@ pub use crate::err::*;
 pub use crate::lock;
 pub use crate::rc_ptr;
 pub use crate::rc_refcell_ptr;
+pub use crate::the_bail;
 pub use foldhash::HashMap as FoldMap;
 pub use foldhash::HashMapExt;
 pub use foldhash::HashSet as FoldSet;
