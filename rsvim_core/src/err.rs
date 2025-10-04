@@ -54,7 +54,7 @@ pub enum TheErr {
   /// Command not found
   CommandAliasAlreadyExist(CompactString),
 
-  #[error("js error: {0}")]
+  #[error("{0}")]
   /// JavaScript error/exception
   JsError(Box<JsError>),
 
