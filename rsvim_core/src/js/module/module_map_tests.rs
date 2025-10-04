@@ -1426,7 +1426,9 @@ setTimeout(() => {
       assert!(url3.is_some());
       let actual = url3.unwrap();
       info!("url3:{:?}", actual);
-      assert!(actual.contains("TypeError: Not enough arguments specified."));
+      assert!(
+        actual.contains("TypeError: not enough function arguments specified")
+      );
     }
 
     Ok(())
