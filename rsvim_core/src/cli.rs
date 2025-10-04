@@ -17,7 +17,7 @@ bitflags! {
 
 impl Debug for SpecialFlags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SpecialOptFlags")
+    f.debug_struct("SpecialFlags")
       .field("bits", &format!("{:b}", self.bits()))
       .finish()
   }
@@ -75,7 +75,7 @@ bitflags! {
 
 impl Debug for Flags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("OptFlags")
+    f.debug_struct("Flags")
       .field("bits", &format!("{:b}", self.bits()))
       .finish()
   }
