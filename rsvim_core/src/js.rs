@@ -824,7 +824,7 @@ pub mod boost {
 
           if let Some(error) = check_exceptions(tc_scope) {
             let state = state_rc.borrow();
-            report_js_error(&state, TheError::JsErr(error));
+            report_js_error(&state, TheError::JsErr(Box::new(error)));
             continue;
           }
         }
@@ -980,7 +980,7 @@ pub fn execute_module<'s, 'b>(
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
       let state = state_rc.borrow_mut();
-      report_js_error(&state, TheError::JsErr(exception));
+      report_js_error(&state, TheError::JsErr(Box::new(exception)));
       return;
     }
   };
@@ -996,7 +996,7 @@ pub fn execute_module<'s, 'b>(
     let exception = tc_scope.exception().unwrap();
     let exception = JsError::from_v8_exception(tc_scope, exception, None);
     let state = state_rc.borrow_mut();
-    report_js_error(&state, TheError::JsErr(exception));
+    report_js_error(&state, TheError::JsErr(Box::new(exception)));
     return;
   }
 
