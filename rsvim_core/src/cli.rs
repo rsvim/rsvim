@@ -68,7 +68,7 @@ impl CliSpecialOptions {
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct Flags : u8{
+  struct Flags: u8 {
     const HEADLESS = 1;
   }
 }
