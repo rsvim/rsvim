@@ -19,7 +19,7 @@ pub fn report_error(
 
   if let Some(error) = js::check_exceptions(scope) {
     let state = state_rc.borrow();
-    report_js_error(&state, TheErr::JsErr(Box::new(error)));
+    report_js_error(&state, TheErr::JsError(Box::new(error)));
   }
 }
 

@@ -56,7 +56,7 @@ pub enum TheErr {
 
   #[error("Js error: {0}")]
   /// JavaScript error/exception
-  JsErr(Box<JsError>),
+  JsError(Box<JsError>),
 
   #[error("Failed to read module path `{0}`: {1}")]
   /// Failed to read script file when loading module

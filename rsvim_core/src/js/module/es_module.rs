@@ -224,7 +224,7 @@ impl JsFuture for EsModuleFuture {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          self.handle_failure(&state, TheErr::JsErr(Box::new(exception)));
+          self.handle_failure(&state, TheErr::JsError(Box::new(exception)));
           return;
         }
       };
