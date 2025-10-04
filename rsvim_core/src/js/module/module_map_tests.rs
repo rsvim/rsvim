@@ -892,7 +892,7 @@ export function echoA(value) {
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: module path"));
+      assert!(actual.contains("Uncaught Error: Module path"));
     }
 
     Ok(())
