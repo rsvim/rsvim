@@ -150,7 +150,7 @@ impl ToV8 for CommandAttributes {
 
     // bang
     let bang_field = to_v8(scope, BANG);
-    let bang_value = to_v8(scope, self.bang);
+    let bang_value = to_v8(scope, self.bang());
     obj.set(scope, bang_field, bang_value);
 
     // nargs
