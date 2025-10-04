@@ -42,9 +42,13 @@ use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
 // For mocking or testing
+#[cfg(test)]
 use bitflags::bitflags_match;
+#[cfg(test)]
 use crossterm::event::KeyCode;
+#[cfg(test)]
 use crossterm::event::KeyEventKind;
+#[cfg(test)]
 use crossterm::event::KeyModifiers;
 #[cfg(test)]
 use mock::MockEventReader;
