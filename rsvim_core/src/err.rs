@@ -32,15 +32,15 @@ pub type IoResult<T> = std::io::Result<T>;
 
 /// All error codes.
 #[derive(Debug, thiserror::Error)]
-pub enum TheError {
+pub enum TheErr {
   // buf {
-  #[error("Buffer `{0}` doesn't have a filename")]
+  #[error("buffer `{0}` doesn't have a filename")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
 
-  #[error("Buffer `{0}` not found")]
+  #[error("buffer `{0}` not exist")]
   /// Buffer not found
-  BufferNotFound(BufferId),
+  BufferNotExist(BufferId),
 
   #[error("Failed to write buffer `{0}`: {1}")]
   /// Buffer failed to write file
@@ -82,8 +82,8 @@ pub enum TheError {
   // js }
 }
 
-/// [`Result`] with `T` if ok, [`TheError`] if error.
-pub type TheResult<T> = Result<T, TheError>;
+/// [`Result`] with `T` if ok, [`TheErr`] if error.
+pub type TheResult<T> = Result<T, TheErr>;
 
 // thiserror }
 

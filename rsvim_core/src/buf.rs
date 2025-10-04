@@ -288,7 +288,7 @@ impl BuffersManager {
         self.write_file(&mut buf)
       }
       None => {
-        bail!(TheError::BufferNotFound(buf_id));
+        bail!(TheError::BufferNotExist(buf_id));
       }
     }
   }
