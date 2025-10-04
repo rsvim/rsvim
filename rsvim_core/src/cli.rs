@@ -8,14 +8,14 @@ use std::path::PathBuf;
 
 bitflags! {
   #[derive(Copy, Clone, PartialEq, Eq)]
-  struct SpecialOptFlags : u8{
+  struct SpecialFlags : u8{
     const VERSION = 1;
     const SHORT_HELP = 1 << 1;
     const LONG_HELP = 1 << 2;
   }
 }
 
-impl Debug for SpecialOptFlags {
+impl Debug for SpecialFlags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("SpecialOptFlags")
       .field("bits", &format!("{:b}", self.bits()))
@@ -28,52 +28,52 @@ pub struct CliSpecialOptions {
   // version
   // short_help
   // long_help
-  flags: SpecialOptFlags,
+  flags: SpecialFlags,
 }
 
 impl CliSpecialOptions {
   pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
-    let mut flags = SpecialOptFlags::empty();
+    let mut flags = SpecialFlags::empty();
     if version {
-      flags.insert(SpecialOptFlags::VERSION);
+      flags.insert(SpecialFlags::VERSION);
     }
     if short_help {
-      flags.insert(SpecialOptFlags::SHORT_HELP);
+      flags.insert(SpecialFlags::SHORT_HELP);
     }
     if long_help {
-      flags.insert(SpecialOptFlags::LONG_HELP);
+      flags.insert(SpecialFlags::LONG_HELP);
     }
     Self { flags }
   }
 
   pub fn version(&self) -> bool {
-    self.flags.contains(SpecialOptFlags::VERSION)
+    self.flags.contains(SpecialFlags::VERSION)
   }
 
   pub fn short_help(&self) -> bool {
-    self.flags.contains(SpecialOptFlags::SHORT_HELP)
+    self.flags.contains(SpecialFlags::SHORT_HELP)
   }
 
   pub fn long_help(&self) -> bool {
-    self.flags.contains(SpecialOptFlags::LONG_HELP)
+    self.flags.contains(SpecialFlags::LONG_HELP)
   }
 
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      flags: SpecialOptFlags::empty(),
+      flags: SpecialFlags::empty(),
     }
   }
 }
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct OptFlags : u8{
+  struct Flags : u8{
     const HEADLESS = 1;
   }
 }
 
-impl Debug for OptFlags {
+impl Debug for Flags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("OptFlags")
       .field("bits", &format!("{:b}", self.bits()))
@@ -88,7 +88,7 @@ pub struct CliOptions {
   special_opts: CliSpecialOptions,
 
   // headless
-  flags: OptFlags,
+  flags: Flags,
 
   // Normal opts
   file: Vec<PathBuf>,
@@ -100,7 +100,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   let mut version: bool = false;
   let mut short_help: bool = false;
   let mut long_help: bool = false;
-  let mut flags: OptFlags = OptFlags::empty();
+  let mut flags: Flags = Flags::empty();
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
@@ -115,7 +115,7 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
         version = true;
       }
       Long("headless") => {
-        flags.insert(OptFlags::HEADLESS);
+        flags.insert(Flags::HEADLESS);
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -162,7 +162,7 @@ impl CliOptions {
 
   /// Headless mode.
   pub fn headless(&self) -> bool {
-    self.flags.contains(OptFlags::HEADLESS)
+    self.flags.contains(Flags::HEADLESS)
   }
 
   #[cfg(test)]
@@ -171,9 +171,9 @@ impl CliOptions {
     file: Vec<PathBuf>,
     headless: bool,
   ) -> Self {
-    let mut flags: OptFlags = OptFlags::empty();
+    let mut flags: Flags = Flags::empty();
     if headless {
-      flags.insert(OptFlags::HEADLESS);
+      flags.insert(Flags::HEADLESS);
     }
     Self {
       special_opts,
@@ -184,7 +184,7 @@ impl CliOptions {
 
   #[cfg(test)]
   pub fn empty() -> Self {
-    let flags: OptFlags = OptFlags::HEADLESS;
+    let flags: Flags = Flags::HEADLESS;
     Self {
       special_opts: CliSpecialOptions::empty(),
       flags,
