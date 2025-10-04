@@ -1,6 +1,7 @@
 //! Errors and results.
 
 use crate::buf::BufferId;
+use crate::js::err::JsError;
 use compact_str::CompactString;
 
 // anyhow {
@@ -53,6 +54,9 @@ pub enum TheError {
   #[error("Command {0} not found")]
   /// Command not found
   CommandNotFound(CompactString),
+
+  #[error("JavaScript: {0}")]
+  JavaScriptErr(JsError),
   // js }
 }
 
