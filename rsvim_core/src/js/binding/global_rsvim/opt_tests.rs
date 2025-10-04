@@ -1,7 +1,7 @@
 use crate::buf::opt::*;
 use crate::cli::CliOptions;
+use crate::evloop::mock::*;
 use crate::prelude::*;
-use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::widget::window::opt::*;
 use ringbuf::traits::*;

@@ -1,6 +1,6 @@
 // use super::path_cfg::*;
+use crate::evloop::mock::TempConfigDir;
 use crate::prelude::*;
-use crate::tests::evloop::TempConfigDir;
 use crate::tests::log::init as test_log_init;
 use std::io::Write;
 
