@@ -69,6 +69,10 @@ pub enum TheErr {
   #[error("failed to compile typescript `{0}`")]
   /// Failed to compile typescript
   CompileTypeScriptFailed(String),
+
+  #[error("Function arguments not enough")]
+  /// Failed to compile typescript
+  FunctionArgumentsNotEnough,
   // js }
 }
 
