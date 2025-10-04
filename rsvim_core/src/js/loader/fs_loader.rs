@@ -44,7 +44,7 @@ mod sync_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheError::LoadModuleReadFileFailed(
+      Err(e) => bail!(TheError::ReadModulePathFailed(
         path.to_string_lossy().to_string(),
         e
       )),
