@@ -8,8 +8,10 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
+use bitflags::bitflags;
 pub use file_encoding::*;
 pub use file_format::*;
+use std::fmt::Debug;
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;
@@ -21,14 +23,33 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_os = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
+bitflags! {
+  #[derive(Copy, Clone)]
+  struct OptFlags: u8 {
+    const EXPAND_TAB = 1;
+  }
+}
+
+impl Debug for OptFlags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("OptFlags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
+
+// expand_tab
+const OPT_FLAGS: OptFlags = OptFlags::empty();
+
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
 
-  #[builder(default = EXPAND_TAB)]
-  expand_tab: bool,
+  #[builder(setter(custom))]
+  // expand_tab
+  flags: OptFlags,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u8,
@@ -38,6 +59,27 @@ pub struct BufferOptions {
 
   #[builder(default = FILE_FORMAT)]
   file_format: FileFormatOption,
+}
+
+impl BufferOptionsBuilder {
+  fn expand_tab(&mut self, value: bool) {
+    match self.flags {
+      Some(flags) => {
+        if value {
+          self.flags = Some(flags | OptFlags::EXPAND_TAB);
+        } else {
+          self.flags = Some(flags & !OptFlags::EXPAND_TAB);
+        }
+      }
+      None => {
+        if value {
+          self.flags = Some(OPT_FLAGS | OptFlags::EXPAND_TAB);
+        } else {
+          self.flags = Some(OPT_FLAGS & !OptFlags::EXPAND_TAB);
+        }
+      }
+    }
+  }
 }
 
 impl BufferOptions {
