@@ -1,7 +1,6 @@
 //! Ex command attributes.
 
 use crate::js::converter::*;
-use bitflags::Flag;
 use bitflags::bitflags;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
