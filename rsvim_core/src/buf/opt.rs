@@ -64,7 +64,7 @@ pub struct BufferOptions {
 
 impl BufferOptionsBuilder {
   #[allow(dead_code)]
-  pub fn expand_tab(&mut self, value: bool) {
+  pub fn expand_tab(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
       None => OPT_FLAGS,
@@ -75,6 +75,7 @@ impl BufferOptionsBuilder {
       flags.remove(OptFlags::EXPAND_TAB);
     }
     self.flags = Some(flags);
+    self
   }
 }
 

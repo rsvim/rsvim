@@ -41,7 +41,7 @@ pub struct WindowOptions {
 }
 
 impl WindowOptionsBuilder {
-  pub fn wrap(&mut self, value: bool) {
+  pub fn wrap(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
       None => OPT_FLAGS,
@@ -52,9 +52,10 @@ impl WindowOptionsBuilder {
       flags.remove(OptFlags::WRAP);
     }
     self.flags = Some(flags);
+    self
   }
 
-  pub fn line_break(&mut self, value: bool) {
+  pub fn line_break(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
       None => OPT_FLAGS,
@@ -65,6 +66,7 @@ impl WindowOptionsBuilder {
       flags.remove(OptFlags::LINE_BREAK);
     }
     self.flags = Some(flags);
+    self
   }
 }
 
