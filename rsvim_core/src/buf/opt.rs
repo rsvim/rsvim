@@ -38,6 +38,7 @@ impl Debug for OptFlags {
   }
 }
 
+#[allow(dead_code)]
 // expand_tab
 const OPT_FLAGS: OptFlags = OptFlags::empty();
 
@@ -62,7 +63,8 @@ pub struct BufferOptions {
 }
 
 impl BufferOptionsBuilder {
-  fn expand_tab(&mut self, value: bool) {
+  #[allow(dead_code)]
+  pub fn expand_tab(&mut self, value: bool) {
     let mut flags = match self.flags {
       Some(flags) => flags,
       None => OPT_FLAGS,
