@@ -32,7 +32,7 @@ pub enum TheErr {
   /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("Failed to write buffer `{0}`: {1}")]
+  #[error("Failed to save buffer `{0}`: {1}")]
   /// Buffer failed to write file
   SaveBufferFailed(BufferId, IoErr),
 
