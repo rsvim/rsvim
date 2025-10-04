@@ -28,7 +28,7 @@ pub enum TheErr {
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
 
-  #[error("buffer `{0}` not exist")]
+  #[error("buffer `{0}` not exist.")]
   /// Buffer not found
   BufferNotExist(BufferId),
 
@@ -42,15 +42,15 @@ pub enum TheErr {
   // buf }
 
   // js {
-  #[error("command `{0}` not found")]
+  #[error("command `{0}` not found.")]
   /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("command name `{0}` already exist")]
+  #[error("command name `{0}` already exist.")]
   /// Command not found
   CommandNameAlreadyExist(CompactString),
 
-  #[error("command alias `{0}` already exist")]
+  #[error("command alias `{0}` already exist.")]
   /// Command not found
   CommandAliasAlreadyExist(CompactString),
 
@@ -58,19 +58,19 @@ pub enum TheErr {
   /// JavaScript error/exception
   JsError(Box<JsError>),
 
-  #[error("failed to load module `{0}`: {1}")]
+  #[error("failed to load module `{0}`: {1}.")]
   /// Failed to load module
   LoadModuleFailed(ModulePath, IoErr),
 
-  #[error("module path `{0}` not found")]
+  #[error("module path `{0}` not found.")]
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
 
-  #[error("failed to compile typescript `{0}`")]
+  #[error("failed to compile typescript `{0}`.")]
   /// Failed to compile typescript
   CompileTypeScriptFailed(String),
 
-  #[error("not enough function arguments specified")]
+  #[error("not enough function arguments specified.")]
   /// Failed to compile typescript
   FunctionArgumentsNotEnough,
   // js }
