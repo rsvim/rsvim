@@ -60,7 +60,7 @@ pub enum TheErr {
 
   #[error("Failed to read module path `{0}`: {1}")]
   /// Failed to read script file when loading module
-  LoadModuleSourceFailed(ModulePath, IoErr),
+  LoadModuleFailed(ModulePath, IoErr),
 
   #[error("Module path `{0}` not found")]
   /// Failed to read script file when loading module
