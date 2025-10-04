@@ -346,8 +346,8 @@ impl Debug for BaseFlags {
   }
 }
 
-// enabled
-// visible
+// enabled=true
+// visible=true
 const BASE_FLAGS: BaseFlags = BaseFlags::all();
 
 #[derive(Debug, Clone, Copy)]
