@@ -3,6 +3,7 @@
 use crate::js;
 use crate::js::JsRuntime;
 use crate::js::err::report_js_error;
+use crate::prelude::*;
 
 pub fn report_error(
   scope: &mut v8::PinScope,
@@ -18,7 +19,7 @@ pub fn report_error(
 
   if let Some(error) = js::check_exceptions(scope) {
     let state = state_rc.borrow();
-    report_js_error(&state, error.into());
+    report_js_error(&state, TheError::JsErr(error));
   }
 }
 

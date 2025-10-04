@@ -55,8 +55,9 @@ pub enum TheError {
   /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("JavaScript: {0}")]
-  JavaScriptErr(JsError),
+  #[error("Js error: {0}")]
+  /// JavaScript error/exception
+  JsErr(JsError),
   // js }
 }
 
