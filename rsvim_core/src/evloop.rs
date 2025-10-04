@@ -46,8 +46,11 @@ use bitflags::bitflags_match;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
+#[cfg(test)]
 use mock::MockEventReader;
+#[cfg(test)]
 use mock::MockOperation;
+#[cfg(test)]
 use mock::MockOperationReader;
 
 #[derive(Debug)]
