@@ -35,7 +35,7 @@ fn test1() {
 fn test2() {
   test_log_init();
 
-  let actual1 = TypeScript::compile(None, "const let var");
+  let actual1 = TypeScript::compile(None, "const let var function");
   assert!(actual1.is_err());
   info!("{actual1:?}");
 }
