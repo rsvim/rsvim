@@ -164,7 +164,7 @@ impl FsModuleLoader {
 
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => anyhow::bail!(format!("Module path not found:{:?}", e)),
+      Err(e) => bail!(TheError::ModulePathNotFound(specifier.to_string())),
     }
   }
 }
