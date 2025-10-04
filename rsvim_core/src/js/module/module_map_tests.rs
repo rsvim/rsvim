@@ -1410,7 +1410,7 @@ setTimeout(() => {
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path")
+        actual.contains("TypeError: module path")
           && actual.contains("undefined")
       );
 
@@ -1419,7 +1419,7 @@ setTimeout(() => {
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path") && actual.contains("null")
+        actual.contains("TypeError: module path") && actual.contains("null")
       );
 
       let url3 = contents.command_line_message_history_mut().try_pop();
