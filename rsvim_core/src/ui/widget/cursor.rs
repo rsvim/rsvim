@@ -114,8 +114,8 @@ impl Widgetable for Cursor {
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
-      self.blinking,
-      self.hidden,
+      self.blinking(),
+      self.hidden(),
       self.style,
     ));
   }
