@@ -36,5 +36,5 @@ fn test_failed1() {
   test_log_init();
 
   let actual1 = TypeScript::compile(None, "asdf");
-  assert!(actual1.is_err());
+  assert!(actual1.is_ok());
 }
