@@ -1,7 +1,9 @@
 //! Ex command options.
 
 use crate::js::converter::*;
+use bitflags::bitflags;
 use compact_str::CompactString;
+use std::fmt::Debug;
 
 /// Command option names.
 pub const FORCE: &str = "force";
@@ -11,13 +13,49 @@ pub const ALIAS: &str = "alias";
 pub const FORCE_DEFAULT: bool = true;
 pub const ALIAS_DEFAULT: Option<CompactString> = None;
 
+bitflags! {
+  #[derive(Copy, Clone, PartialEq, Eq)]
+  struct Flags: u8 {
+    const FORCE = 1;
+  }
+}
+
+impl Debug for Flags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Flags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
+
+// force=true
+const FLAGS: Flags = Flags::all();
+
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
-  #[builder(default = FORCE_DEFAULT)]
-  pub force: bool,
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // force=true
+  flags: Flags,
 
   #[builder(default = ALIAS_DEFAULT)]
   pub alias: Option<CompactString>,
+}
+
+impl CommandOptionsBuilder {
+  pub fn force(&mut self, value: bool) -> &mut Self {
+    let mut flags = match self.flags {
+      Some(flags) => flags,
+      None => FLAGS,
+    };
+    if value {
+      flags.insert(Flags::FORCE);
+    } else {
+      flags.remove(Flags::FORCE);
+    }
+    self.flags = Some(flags);
+    self
+  }
 }
 
 impl FromV8 for CommandOptions {
