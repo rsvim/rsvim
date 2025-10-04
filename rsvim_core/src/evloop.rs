@@ -1,5 +1,6 @@
 //! Event loop.
 
+pub mod mock;
 pub mod writer;
 
 use crate::buf::BuffersManager;
@@ -40,20 +41,14 @@ use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
-#[cfg(test)]
-use crate::tests::evloop::MockEventReader;
-#[cfg(test)]
-use crate::tests::evloop::MockOperation;
-#[cfg(test)]
-use crate::tests::evloop::MockOperationReader;
-#[cfg(test)]
+// For mocking
 use bitflags::bitflags_match;
-#[cfg(test)]
 use crossterm::event::KeyCode;
-#[cfg(test)]
 use crossterm::event::KeyEventKind;
-#[cfg(test)]
 use crossterm::event::KeyModifiers;
+use mock::MockEventReader;
+use mock::MockOperation;
+use mock::MockOperationReader;
 
 #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop
@@ -123,7 +118,6 @@ pub struct EventLoop {
   js_messages: Vec<JsMessage>,
 }
 
-#[cfg(test)]
 fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
     Some(Ok(Event::Key(key_event))) => {
