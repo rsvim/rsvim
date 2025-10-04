@@ -38,7 +38,7 @@ pub enum TheErr {
 
   #[error("Failed to open(w) file `{0}`: {1}")]
   /// Buffer failed to open(w) file
-  WriteBufferOpenFailed(String, IoErr),
+  OpenFileForWriteFailed(String, IoErr),
   // buf }
 
   // js {
