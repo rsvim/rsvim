@@ -7,15 +7,33 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
+use bitflags::bitflags;
 use std::fmt::Debug;
+
+bitflags! {
+  #[derive(Copy, Clone)]
+  struct Flags: u8{
+    const BLINKING = 1;
+    const HIDDEN = 1 << 1;
+  }
+}
+
+impl Debug for Flags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Flags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
 
 #[derive(Debug, Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
-  blinking: bool,
-  hidden: bool,
   style: CursorStyle,
+  // blinking
+  // hidden
+  flags: Flags,
 }
 
 impl Cursor {
@@ -25,37 +43,53 @@ impl Cursor {
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
+    let mut flags = Flags::empty();
+    if blinking {
+      flags.insert(Flags::BLINKING);
+    }
+    if hidden {
+      flags.insert(Flags::HIDDEN);
+    }
     Cursor {
       base: InodeBase::new(shape),
-      blinking,
-      hidden,
       style,
+      flags,
     }
   }
 
   pub fn default(shape: IRect) -> Self {
+    // blinking=false
+    // hidden=false
+    let flags = Flags::empty();
     Cursor {
       base: InodeBase::new(shape),
-      blinking: false,
-      hidden: false,
       style: CursorStyle::SteadyBlock,
+      flags,
     }
   }
 
   pub fn blinking(&self) -> bool {
-    self.blinking
+    self.flags.contains(Flags::BLINKING)
   }
 
   pub fn set_blinking(&mut self, value: bool) {
-    self.blinking = value;
+    if value {
+      self.flags.insert(Flags::BLINKING);
+    } else {
+      self.flags.remove(Flags::BLINKING);
+    }
   }
 
   pub fn hidden(&self) -> bool {
-    self.hidden
+    self.flags.contains(Flags::HIDDEN)
   }
 
   pub fn set_hidden(&mut self, value: bool) {
-    self.hidden = value;
+    if value {
+      self.flags.insert(Flags::HIDDEN);
+    } else {
+      self.flags.remove(Flags::HIDDEN);
+    }
   }
 
   pub fn style(&self) -> &CursorStyle {

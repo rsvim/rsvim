@@ -67,8 +67,8 @@ impl Cursor {
   }
 
   /// Set blinking.
-  pub fn set_blinking(&mut self, blinking: bool) {
-    if blinking {
+  pub fn set_blinking(&mut self, value: bool) {
+    if value {
       self.flags.insert(Flags::BLINKING);
     } else {
       self.flags.remove(Flags::BLINKING);
@@ -81,8 +81,8 @@ impl Cursor {
   }
 
   /// Set hidden.
-  pub fn set_hidden(&mut self, hidden: bool) {
-    if hidden {
+  pub fn set_hidden(&mut self, value: bool) {
+    if value {
       self.flags.insert(Flags::HIDDEN);
     } else {
       self.flags.remove(Flags::HIDDEN);
