@@ -224,10 +224,7 @@ impl JsFuture for EsModuleFuture {
           assert!(tc_scope.has_caught());
           let exception = tc_scope.exception().unwrap();
           let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          let exception =
-            format!("{} ({})", exception.message, exception.resource_name);
-
-          self.handle_failure(&state, anyhow::Error::msg(exception));
+          self.handle_failure(&state, TheError::JsErr(exception));
           return;
         }
       };
@@ -296,7 +293,7 @@ impl JsFuture for EsModuleFuture {
         let loader_cb = {
           let state_rc = state_rc.clone();
           let specifier = specifier.clone();
-          move |maybe_result: Option<AnyResult<Vec<u8>>>| {
+          move |maybe_result: Option<TheResult<Vec<u8>>>| {
             let fut = EsModuleFuture {
               path: specifier.clone(),
               module: Rc::clone(&module),
