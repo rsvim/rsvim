@@ -63,22 +63,16 @@ pub struct BufferOptions {
 
 impl BufferOptionsBuilder {
   fn expand_tab(&mut self, value: bool) {
-    match self.flags {
-      Some(flags) => {
-        if value {
-          self.flags = Some(flags | OptFlags::EXPAND_TAB);
-        } else {
-          self.flags = Some(flags & !OptFlags::EXPAND_TAB);
-        }
-      }
-      None => {
-        if value {
-          self.flags = Some(OPT_FLAGS | OptFlags::EXPAND_TAB);
-        } else {
-          self.flags = Some(OPT_FLAGS & !OptFlags::EXPAND_TAB);
-        }
-      }
+    let mut flags = match self.flags {
+      Some(flags) => flags,
+      None => OPT_FLAGS,
+    };
+    if value {
+      flags.insert(OptFlags::EXPAND_TAB);
+    } else {
+      flags.remove(OptFlags::EXPAND_TAB);
     }
+    self.flags = Some(flags);
   }
 }
 
@@ -98,11 +92,15 @@ impl BufferOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
   pub fn expand_tab(&self) -> bool {
-    self.expand_tab
+    self.flags.contains(OptFlags::EXPAND_TAB)
   }
 
   pub fn set_expand_tab(&mut self, value: bool) {
-    self.expand_tab = value;
+    if value {
+      self.flags.insert(OptFlags::EXPAND_TAB);
+    } else {
+      self.flags.remove(OptFlags::EXPAND_TAB);
+    }
   }
 
   /// Buffer 'shift-width' option.
