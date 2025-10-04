@@ -341,8 +341,8 @@ setTimeout(() => {
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang());
     assert_eq!(command_def.attributes.nargs(), Nargs::Zero);
-    assert!(command_def.options.force);
-    assert_eq!(command_def.options.alias, None);
+    assert!(command_def.options.force());
+    assert_eq!(command_def.options.alias(), &None);
   }
 
   Ok(())
@@ -404,8 +404,8 @@ setTimeout(() => {
       assert_eq!(name, def.name);
       assert!(!def.attributes.bang());
       assert_eq!(def.attributes.nargs(), Nargs::Zero);
-      assert!(!def.options.force);
-      assert_eq!(def.options.alias, None);
+      assert!(!def.options.force());
+      assert_eq!(def.options.alias(), &None);
     }
   }
 
@@ -474,8 +474,8 @@ setTimeout(() => {
     assert_eq!(command_def.name, "write");
     assert!(!command_def.attributes.bang());
     assert_eq!(command_def.attributes.nargs(), Nargs::Zero);
-    assert!(!command_def.options.force);
-    assert_eq!(command_def.options.alias, Some("w".to_compact_string()));
+    assert!(!command_def.options.force());
+    assert_eq!(command_def.options.alias(), &Some("w".to_compact_string()));
   }
 
   Ok(())
