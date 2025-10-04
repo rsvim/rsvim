@@ -40,12 +40,12 @@ impl Debug for Flags {
 
 #[allow(dead_code)]
 // expand_tab=false
-const OPT_FLAGS: Flags = Flags::empty();
+const FLAGS: Flags = Flags::empty();
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
-  #[builder(default = OPT_FLAGS)]
+  #[builder(default = FLAGS)]
   #[builder(setter(custom))]
   // expand_tab
   flags: Flags,
@@ -68,7 +68,7 @@ impl BufferOptionsBuilder {
   pub fn expand_tab(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
-      None => OPT_FLAGS,
+      None => FLAGS,
     };
     if value {
       flags.insert(Flags::EXPAND_TAB);
