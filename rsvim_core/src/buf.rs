@@ -283,12 +283,12 @@ impl BuffersManager {
       Some(buf) => {
         let mut buf = lock!(buf);
         if !buf.has_filename() {
-          bail!(TheError::BufferHaveNoFileName(buf_id));
+          bail!(TheErr::BufferHaveNoFileName(buf_id));
         }
         self.write_file(&mut buf)
       }
       None => {
-        bail!(TheError::BufferNotExist(buf_id));
+        bail!(TheErr::BufferNotExist(buf_id));
       }
     }
   }
