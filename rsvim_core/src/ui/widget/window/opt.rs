@@ -24,20 +24,48 @@ impl Debug for OptFlags {
 }
 
 #[allow(dead_code)]
-// expand_tab
+// wrap
+// line_break
 const OPT_FLAGS: OptFlags = OptFlags::WRAP;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(default = WRAP)]
-  wrap: bool,
-
-  #[builder(default = LINE_BREAK)]
-  line_break: bool,
+  #[builder(setter(custom))]
+  // wrap
+  // line_break
+  flags: OptFlags,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u8,
+}
+
+impl WindowOptionsBuilder {
+  pub fn wrap(&mut self, value: bool) {
+    let mut flags = match self.flags {
+      Some(flags) => flags,
+      None => OPT_FLAGS,
+    };
+    if value {
+      flags.insert(OptFlags::WRAP);
+    } else {
+      flags.remove(OptFlags::WRAP);
+    }
+    self.flags = Some(flags);
+  }
+
+  pub fn line_break(&mut self, value: bool) {
+    let mut flags = match self.flags {
+      Some(flags) => flags,
+      None => OPT_FLAGS,
+    };
+    if value {
+      flags.insert(OptFlags::LINE_BREAK);
+    } else {
+      flags.remove(OptFlags::LINE_BREAK);
+    }
+    self.flags = Some(flags);
+  }
 }
 
 impl WindowOptions {
@@ -45,22 +73,30 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.wrap
+    self.flags.contains(OptFlags::WRAP)
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.wrap = value;
+    if value {
+      self.flags.insert(OptFlags::WRAP);
+    } else {
+      self.flags.remove(OptFlags::WRAP);
+    }
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.line_break
+    self.flags.contains(OptFlags::LINE_BREAK)
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.line_break = value;
+    if value {
+      self.flags.insert(OptFlags::LINE_BREAK);
+    } else {
+      self.flags.remove(OptFlags::LINE_BREAK);
+    }
   }
 
   /// The 'scroll-off' option, default to `0`.
