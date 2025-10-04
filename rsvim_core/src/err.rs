@@ -41,7 +41,7 @@ pub enum TheError {
   #[error("Buffer {0} failed to write file: {1}")]
   BufferWriteFileFailed(BufferId, IoErr),
 
-  #[error("Buffer {0} failed to open (write) file: {1}")]
+  #[error("Buffer {0} failed to open(write) file: {1}")]
   BufferOpenWriteFileFailed(BufferId, IoErr),
 }
 
