@@ -278,18 +278,18 @@ pub fn get_internal_ref<'s, T>(
 pub fn set_exception_code(
   scope: &mut v8::PinScope,
   exception: v8::Local<v8::Value>,
-  error: &AnyError,
+  error: &TheError,
 ) {
   let exception = exception.to_object(scope).unwrap();
-  if let Some(error) = error.downcast_ref::<IoErr>() {
+  if let TheError::LoadModuleSourceFailed(_path, ioerr) = error {
     let key = v8::String::new(scope, "code").unwrap();
-    let value = v8::String::new(scope, &format!("{:?}", error.kind())).unwrap();
+    let value = v8::String::new(scope, &format!("{:?}", ioerr.kind())).unwrap();
     exception.set(scope, key.into(), value.into());
   }
 }
 
 /// Useful utility to throw v8 exceptions.
-pub fn throw_exception(scope: &mut v8::PinScope, error: &AnyError) {
+pub fn throw_exception(scope: &mut v8::PinScope, error: &TheError) {
   let message = v8::String::new(scope, &error.to_string()).unwrap();
   let exception = v8::Exception::error(scope, message);
   set_exception_code(scope, exception, error);
