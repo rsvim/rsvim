@@ -29,6 +29,9 @@ use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 use std::sync::LazyLock;
+use std::time::Instant;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 const RSVIM_BIN_NAME: &str = "{RSVIM_BIN_NAME}";
 const RSVIM_PKG_VERSION: &str = "{RSVIM_PKG_VERSION}";
@@ -66,6 +69,13 @@ static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() -> IoResult<()> {
+  // Startup time
+  let startup_moment = Instant::now();
+  let startup_unix_epoch = SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .unwrap()
+    .as_millis();
+
   log::init();
 
   let cli_opts = match CliOptions::from_env() {
@@ -96,8 +106,12 @@ fn main() -> IoResult<()> {
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
-    let mut event_loop =
-      EventLoop::new(cli_opts, SnapshotData::new(RSVIM_SNAPSHOT))?;
+    let mut event_loop = EventLoop::new(
+      startup_moment,
+      startup_unix_epoch,
+      cli_opts,
+      SnapshotData::new(RSVIM_SNAPSHOT),
+    )?;
 
     // Initialize.
     event_loop.initialize()?;

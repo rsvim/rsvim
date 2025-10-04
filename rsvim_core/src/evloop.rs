@@ -32,8 +32,6 @@ use crossterm::event::EventStream;
 use futures::StreamExt;
 use std::sync::Arc;
 use std::time::Instant;
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::channel;
@@ -119,6 +117,10 @@ pub struct EventLoop {
   /// Channel-3
   pub jsrt_tx: Sender<JsMessage>,
   // pub jsrt_rx: Receiver<JsMessage>,
+
+  // Received messages buffer
+  master_messages: Vec<MasterMessage>,
+  js_messages: Vec<JsMessage>,
 }
 
 #[cfg(test)]
@@ -146,8 +148,6 @@ impl EventLoop {
     terminal_cols: u16,
     terminal_rows: u16,
   ) -> IoResult<(
-    /* startup_moment */ Instant,
-    /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ StateMachine,
@@ -170,6 +170,8 @@ impl EventLoop {
       /* jsrt_tx */ Sender<JsMessage>,
       /* jsrt_rx */ Receiver<JsMessage>,
     ),
+    /* master_messages */ Vec<MasterMessage>,
+    /* js_messages */ Vec<JsMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -230,16 +232,11 @@ impl EventLoop {
     // Channel-3
     let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
 
-    // Startup time
-    let startup_moment = Instant::now();
-    let startup_unix_epoch = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_millis();
+    let master_messages: Vec<MasterMessage> =
+      Vec::with_capacity(*CHANNEL_BUF_SIZE);
+    let js_messages: Vec<JsMessage> = Vec::with_capacity(*CHANNEL_BUF_SIZE);
 
     Ok((
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -253,15 +250,20 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
+      master_messages,
+      js_messages,
     ))
   }
 
   /// Make new event loop.
-  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+  pub fn new(
+    startup_moment: Instant,
+    startup_unix_epoch: u128,
+    cli_opts: CliOptions,
+    snapshot: SnapshotData,
+  ) -> IoResult<Self> {
     let (cols, rows) = crossterm::terminal::size()?;
     let (
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -275,6 +277,8 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
+      master_messages,
+      js_messages,
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -318,19 +322,22 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
+      master_messages,
+      js_messages,
     })
   }
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn mock_new(
+  pub fn mock_new_without_snapshot(
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
   ) -> IoResult<Self> {
+    use std::time::SystemTime;
+    use std::time::UNIX_EPOCH;
+
     let (
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -344,8 +351,15 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
+      master_messages,
+      js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
     let writer = StdoutWriterValue::dev_null();
 
     // Js Runtime
@@ -382,6 +396,84 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
+      master_messages,
+      js_messages,
+    })
+  }
+
+  #[cfg(test)]
+  /// Make new event loop for testing.
+  pub fn mock_new_with_snapshot(
+    terminal_columns: u16,
+    terminal_rows: u16,
+    cli_opts: CliOptions,
+    snapshot: SnapshotData,
+  ) -> IoResult<Self> {
+    use std::time::SystemTime;
+    use std::time::UNIX_EPOCH;
+
+    let (
+      canvas,
+      tree,
+      state_machine,
+      buffers,
+      contents,
+      commands,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      exit_code,
+      (master_tx, master_rx),
+      (jsrt_forwarder_tx, jsrt_forwarder_rx),
+      (jsrt_tx, jsrt_rx),
+      master_messages,
+      js_messages,
+    ) = Self::_internal_new(terminal_columns, terminal_rows)?;
+
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
+    let writer = StdoutWriterValue::dev_null();
+
+    // Js Runtime
+    let js_runtime = JsRuntime::new(
+      JsRuntimeOptions::default(),
+      snapshot,
+      startup_moment,
+      startup_unix_epoch,
+      master_tx.clone(),
+      jsrt_rx,
+      cli_opts.clone(),
+      tree.clone(),
+      buffers.clone(),
+      contents.clone(),
+      commands,
+    );
+
+    Ok(EventLoop {
+      startup_moment,
+      startup_unix_epoch,
+      cli_opts,
+      canvas,
+      tree,
+      state_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      exit_code,
+      js_runtime,
+      master_tx,
+      master_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
+      jsrt_tx,
+      master_messages,
+      js_messages,
     })
   }
 
@@ -577,8 +669,8 @@ impl EventLoop {
     }
   }
 
-  async fn process_master_message(&mut self, messages: Vec<MasterMessage>) {
-    for message in messages {
+  async fn process_master_message(&mut self) {
+    for message in self.master_messages.drain(..) {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Recv ExitReq:{:?}", req.exit_code);
@@ -642,8 +734,8 @@ impl EventLoop {
     }
   }
 
-  async fn forward_js_message(&mut self, messages: Vec<JsMessage>) {
-    for message in messages {
+  async fn forward_js_message(&mut self) {
+    for message in self.js_messages.drain(..) {
       trace!("Process resp msg:{:?}", message);
       let _ = self.jsrt_tx.send(message).await;
       self.js_runtime.tick_event_loop();
@@ -670,26 +762,23 @@ impl EventLoop {
 
     let mut reader = EventStream::new();
     loop {
-      let mut master_messages: Vec<MasterMessage> = vec![];
-      let mut js_messages: Vec<JsMessage> = vec![];
-
       tokio::select! {
         // Receive keyboard/mouse events
         event = reader.next() => {
           self.process_event(event).await;
         }
         // Receive master message
-        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n , master_messages.len());
+        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n , self.master_messages.len());
           if master_n > 0 {
-            self.process_master_message(master_messages).await;
+            self.process_master_message().await;
           }
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, js_messages.len());
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, self.js_messages.len());
           if js_n > 0 {
-            self.forward_js_message(js_messages).await;
+            self.forward_js_message().await;
           }
         }
         // Receive cancellation notify
@@ -715,9 +804,6 @@ impl EventLoop {
     self.js_runtime.tick_event_loop();
 
     loop {
-      let mut master_messages: Vec<MasterMessage> = vec![];
-      let mut js_messages: Vec<JsMessage> = vec![];
-
       tokio::select! {
         // Receive mocked keyboard/mouse events
         event = reader.next() => {
@@ -726,16 +812,16 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, master_messages.len());
+        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n, self.master_messages.len());
           if master_n > 0 {
-            self.process_master_message(master_messages).await;
+            self.process_master_message().await;
           }
         }
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, js_messages.len());
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, self.js_messages.len());
           if js_n > 0 {
-             self.forward_js_message(js_messages).await;
+             self.forward_js_message().await;
           }
         }
         _ = self.cancellation_token.cancelled() => {
@@ -760,24 +846,21 @@ impl EventLoop {
     self.js_runtime.tick_event_loop();
 
     loop {
-      let mut master_messages: Vec<MasterMessage> = vec![];
-      let mut js_messages: Vec<JsMessage> = vec![];
-
       tokio::select! {
         // Receive mocked keyboard/mouse events
         op = reader.next() => {
           self._process_mocked_operations(op).await;
         }
-        master_n = self.master_rx.recv_many(&mut master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, master_messages.len());
+        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(master_n, self.master_messages.len());
           if master_n> 0 {
-             self.process_master_message(master_messages).await;
+             self.process_master_message().await;
           }
         }
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, js_messages.len());
+        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
+          debug_assert_eq!(js_n, self.js_messages.len());
           if js_n > 0 {
-             self.forward_js_message(js_messages).await;
+             self.forward_js_message().await;
           }
         }
         _ = self.cancellation_token.cancelled() => {
