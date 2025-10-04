@@ -418,7 +418,7 @@ impl BuffersManager {
       }
       Err(e) => {
         error!("Failed to open(w) file {:?}:{:?}", filename, e);
-        anyhow::bail!(e);
+        bail!(TheError::BufferWriteFileFailed(buf_id, e));
       }
     };
 
