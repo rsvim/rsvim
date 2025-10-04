@@ -32,11 +32,11 @@ pub enum TheErr {
   /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("Failed to save buffer {0}: {1}")]
+  #[error("failed to save buffer {0}: {1}")]
   /// Buffer failed to write file
   SaveBufferFailed(BufferId, IoErr),
 
-  #[error("Failed to open file `{0}` for write: {1}")]
+  #[error("failed to open(w) file `{0}`: {1}")]
   /// Failed to open file for write
   OpenFileForWriteFailed(String, IoErr),
   // buf }
