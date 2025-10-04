@@ -25,6 +25,10 @@ pub type IoResult<T> = std::io::Result<T>;
 
 // thiserror {
 
-pub enum TheError {}
+#[derive(Debug, Clone, thiserror::Error)]
+pub enum TheError {
+  #[error("Buffer {0} doesn't have a filename")]
+  BufferHaveNoFileName(crate::buf::BufferId),
+}
 
 // thiserror }
