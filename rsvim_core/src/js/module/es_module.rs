@@ -164,12 +164,12 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_source: Option<AnyResult<Vec<u8>>>,
+  pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
   // Handles static import error.
-  fn handle_failure(&self, state: &JsRuntimeState, e: anyhow::Error) {
+  fn handle_failure(&self, state: &JsRuntimeState, e: TheError) {
     let mut module = self.module.borrow_mut();
     // In dynamic imports we reject the promise(s).
     if module.is_dynamic_import() {
@@ -205,7 +205,7 @@ impl JsFuture for EsModuleFuture {
       >(&source, bincode::config::standard())
       .unwrap(),
       Err(e) => {
-        self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+        self.handle_failure(&state, Err(e));
         return;
       }
     };

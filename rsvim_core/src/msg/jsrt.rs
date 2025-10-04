@@ -40,7 +40,7 @@ pub struct ExCommandReq {
 #[derive(Debug)]
 pub struct LoadImportResp {
   pub task_id: JsTaskId,
-  pub maybe_source: Option<AnyResult<Vec<u8>>>,
+  pub maybe_source: Option<TheResult<Vec<u8>>>,
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
