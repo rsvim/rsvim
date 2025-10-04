@@ -34,7 +34,7 @@ pub enum TheErr {
 
   #[error("Failed to write buffer `{0}`: {1}")]
   /// Buffer failed to write file
-  WriteBufferFailed(BufferId, IoErr),
+  SaveBufferFailed(BufferId, IoErr),
 
   #[error("Failed to open(w) file `{0}`: {1}")]
   /// Buffer failed to open(w) file
