@@ -1,8 +1,31 @@
 //! Window options.
 
+use bitflags::bitflags;
+use std::fmt::Debug;
+
 pub const WRAP: bool = true;
 pub const LINE_BREAK: bool = false;
 pub const SCROLL_OFF: u8 = 0;
+
+bitflags! {
+  #[derive(Copy, Clone)]
+  struct OptFlags: u8 {
+    const WRAP = 1;
+    const LINE_BREAK = 1 << 1;
+  }
+}
+
+impl Debug for OptFlags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("OptFlags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
+  }
+}
+
+#[allow(dead_code)]
+// expand_tab
+const OPT_FLAGS: OptFlags = OptFlags::WRAP;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
