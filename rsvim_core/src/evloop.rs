@@ -41,7 +41,7 @@ use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
 use writer::StdoutWriterValue;
 
-// For mocking
+// For mocking or testing
 use bitflags::bitflags_match;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
