@@ -36,5 +36,6 @@ fn test2() {
   test_log_init();
 
   let actual1 = TypeScript::compile(None, "const let var");
-  assert!(actual1.is_ok());
+  assert!(actual1.is_err());
+  info!("{actual1:?}");
 }
