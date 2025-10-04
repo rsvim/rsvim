@@ -67,7 +67,7 @@ pub enum TheErr {
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
 
-  #[error("Failed to compile typescript: `{0}`.")]
+  #[error("Failed to compile typescript: {0}.")]
   /// Failed to compile typescript
   CompileTypeScriptFailed(Cow<'static, str>),
 
