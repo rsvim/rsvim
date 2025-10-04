@@ -42,7 +42,7 @@ pub enum TheError {
   BufferWriteFileFailed(BufferId, IoErr),
 
   #[error("Buffer {0} failed to open(w) file: {1}")]
-  BufferOpenWriteFileFailed(BufferId, IoErr),
+  BufferOpenwFileFailed(BufferId, IoErr),
 }
 
 /// [`Result`] with `T` if ok, [`TheError`] if error.
