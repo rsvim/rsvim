@@ -1021,7 +1021,7 @@ pub fn execute_module<'s, 'b>(
 
     if let Some(error) = check_exceptions(tc_scope) {
       let state = state_rc.borrow();
-      report_js_error(&state, TheError::JsErr(error));
+      report_js_error(&state, TheError::JsErr(Box::new(error)));
     }
 
     // trace!(
