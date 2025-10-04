@@ -3,12 +3,23 @@
 use crate::prelude::*;
 use bitflags::bitflags;
 use geo::point;
+use std::fmt::Debug;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
 bitflags! {
-  struct Flags {
+  #[derive(Copy, Clone, PartialEq, Eq)]
+  struct Flags: u8{
+    const BLINKING = 1;
+    const HIDDEN = 1 << 1;
+  }
+}
 
+impl Debug for Flags {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Flags")
+      .field("bits", &format!("{:b}", self.bits()))
+      .finish()
   }
 }
 
@@ -16,9 +27,10 @@ bitflags! {
 /// Terminal cursor.
 pub struct Cursor {
   pos: U16Pos,
-  blinking: bool,
-  hidden: bool,
   style: CursorStyle,
+  // blinking
+  // hidden
+  flags: Flags,
 }
 
 impl Cursor {
@@ -29,12 +41,14 @@ impl Cursor {
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
-    Cursor {
-      pos,
-      blinking,
-      hidden,
-      style,
+    let mut flags = Flags::empty();
+    if blinking {
+      flags.insert(Flags::BLINKING);
     }
+    if hidden {
+      flags.insert(Flags::HIDDEN);
+    }
+    Cursor { pos, flags, style }
   }
 
   /// Get position.
@@ -49,22 +63,30 @@ impl Cursor {
 
   /// Get blinking.
   pub fn blinking(&self) -> bool {
-    self.blinking
+    self.flags.contains(Flags::BLINKING)
   }
 
   /// Set blinking.
   pub fn set_blinking(&mut self, blinking: bool) {
-    self.blinking = blinking;
+    if blinking {
+      self.flags.insert(Flags::BLINKING);
+    } else {
+      self.flags.remove(Flags::BLINKING);
+    }
   }
 
   /// Get hidden.
   pub fn hidden(&self) -> bool {
-    self.hidden
+    self.flags.contains(Flags::HIDDEN)
   }
 
   /// Set hidden.
   pub fn set_hidden(&mut self, hidden: bool) {
-    self.hidden = hidden;
+    if hidden {
+      self.flags.insert(Flags::HIDDEN);
+    } else {
+      self.flags.remove(Flags::HIDDEN);
+    }
   }
 
   /// Get style.
@@ -81,10 +103,12 @@ impl Cursor {
 impl Default for Cursor {
   /// Make default cursor.
   fn default() -> Self {
+    // blinking=false
+    // hidden=false
+    let flags = Flags::empty();
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      blinking: false,
-      hidden: false,
+      flags,
       style: CursorStyle::SteadyBlock,
     }
   }
