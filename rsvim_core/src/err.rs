@@ -63,11 +63,11 @@ pub enum TheError {
 
   #[error("Failed to read module path {0}: {1}")]
   /// Failed to read script file when loading module
-  ModulePathReadFailed(ModulePath, IoErr),
+  ReadModulePathFailed(ModulePath, IoErr),
 
-  #[error("Module path to read file {0}: {1}")]
+  #[error("Module path to read file {0}")]
   /// Failed to read script file when loading module
-  ModulePathNotFound(ModulePath, IoErr),
+  ModulePathNotFound(ModulePath),
   // js }
 }
 
