@@ -111,7 +111,7 @@ fn import_meta_resolve(
 ) {
   // Check for provided arguments.
   if args.length() == 0 {
-    throw_type_error(scope, "Not enough arguments specified.");
+    throw_type_error(scope, "not enough arguments specified.");
     return;
   }
 
