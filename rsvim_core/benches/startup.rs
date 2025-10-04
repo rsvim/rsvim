@@ -48,13 +48,16 @@ async fn run_event_loop(mut ev: EventLoop) -> IoResult<()> {
 
 pub fn criterion_benchmark(c: &mut Criterion) {
   c.bench_function("startup time with snapshot", |b| {
-    let tp = make_configs(vec![(Path::new(".rsvim.js"), "Rsvim.rt.exit();")]);
+    let tp = make_configs(vec![(
+      black_box(Path::new(".rsvim.js")),
+      black_box("Rsvim.rt.exit();"),
+    )]);
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let snapshot = create_snapshot(&tp);
+    let snapshot = create_snapshot(black_box(&tp));
     b.iter(|| {
       rt.block_on(async {
         let snapshot = snapshot.clone();
-        let ev = create_event_loop(Some(snapshot));
+        let ev = create_event_loop(black_box(Some(snapshot)));
         let result = run_event_loop(ev).await;
         result.unwrap();
       })
@@ -62,11 +65,14 @@ pub fn criterion_benchmark(c: &mut Criterion) {
   });
 
   c.bench_function("startup time without snapshot", |b| {
-    let _tp = make_configs(vec![(Path::new(".rsvim.js"), "Rsvim.rt.exit();")]);
+    let _tp = make_configs(vec![(
+      black_box(Path::new(".rsvim.js")),
+      black_box("Rsvim.rt.exit();"),
+    )]);
     let rt = tokio::runtime::Runtime::new().unwrap();
     b.iter(|| {
       rt.block_on(async {
-        let ev = create_event_loop(None);
+        let ev = create_event_loop(black_box(None));
         let result = run_event_loop(ev).await;
         result.unwrap();
       })

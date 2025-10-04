@@ -121,6 +121,7 @@ pub struct EventLoop {
   js_messages: Vec<JsMessage>,
 }
 
+#[cfg(test)]
 fn is_ctrl_d(event: &Option<IoResult<Event>>) -> bool {
   match event {
     Some(Ok(Event::Key(key_event))) => {
