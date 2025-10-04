@@ -1,5 +1,7 @@
 //! Errors and results.
 
+use crate::buf::BufferId;
+
 // anyhow {
 
 /// [`anyhow::Error`]
@@ -26,15 +28,18 @@ pub type IoResult<T> = std::io::Result<T>;
 // thiserror {
 
 /// All error codes.
-#[derive(Debug, Clone, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum TheError {
   #[error("Buffer {0} doesn't have a filename")]
   /// Buffer doesn't have a filename.
-  BufferHaveNoFileName(crate::buf::BufferId),
+  BufferHaveNoFileName(BufferId),
 
   #[error("Buffer {0} not found")]
   /// Buffer not found
-  BufferNotFound(crate::buf::BufferId),
+  BufferNotFound(BufferId),
+
+  #[error("Buffer {0} failed to write file: {1}")]
+  BufferWriteFileFailed(BufferId, IoErr),
 }
 
 /// [`Result`] with `T` if ok, [`TheError`] if error.

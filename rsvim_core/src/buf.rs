@@ -375,7 +375,8 @@ impl BuffersManager {
     }
   }
 
-  fn write_file(&self, buf: &mut Buffer) -> AnyResult<usize> {
+  fn write_file(&self, buf: &mut Buffer) -> TheResult<usize> {
+    let buf_id = buf.id();
     let filename = buf.filename().as_ref().unwrap();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
@@ -395,7 +396,7 @@ impl BuffersManager {
             Ok(_) => match writer.flush() {
               Ok(_) => n,
               Err(e) => {
-                anyhow::bail!(e);
+                bail!(TheError::BufferWriteFileFailed(buf_id, e));
               }
             },
             Err(e) => {
