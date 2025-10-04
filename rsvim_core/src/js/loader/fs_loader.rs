@@ -71,14 +71,20 @@ mod async_load {
   use super::*;
 
   pub async fn async_load_source(path: &Path) -> TheResult<ModuleSource> {
-    let source = tokio::fs::read_to_string(path).await?;
-    let source = if is_json_import(path) {
-      wrap_json(source.as_str())
-    } else {
-      source
-    };
-
-    Ok(source)
+    match tokio::fs::read_to_string(path).await {
+      Ok(source) => {
+        let source = if is_json_import(path) {
+          wrap_json(source.as_str())
+        } else {
+          source
+        };
+        Ok(source)
+      }
+      Err(e) => bail!(TheError::LoadModuleSourceFailed(
+        path.to_string_lossy().to_string(),
+        e
+      )),
+    }
   }
 
   pub async fn async_load_as_file(
