@@ -1,9 +1,16 @@
 //! Cursor of canvas frame.
 
 use crate::prelude::*;
+use bitflags::bitflags;
 use geo::point;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
+
+bitflags! {
+  struct Flags {
+
+  }
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Terminal cursor.

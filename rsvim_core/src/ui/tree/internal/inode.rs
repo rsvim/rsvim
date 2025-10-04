@@ -332,13 +332,13 @@ const VISIBLE: bool = true;
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct BaseFlags: u8 {
+  struct Flags: u8 {
     const ENABLED = 1;
     const VISIBLE = 1 << 1;
   }
 }
 
-impl Debug for BaseFlags {
+impl Debug for Flags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("Flags")
       .field("bits", &format!("{:b}", self.bits()))
@@ -348,7 +348,7 @@ impl Debug for BaseFlags {
 
 // enabled=true
 // visible=true
-const BASE_FLAGS: BaseFlags = BaseFlags::all();
+const FLAGS: Flags = Flags::all();
 
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
@@ -361,7 +361,7 @@ pub struct InodeBase {
 
   // enabled
   // visible
-  flags: BaseFlags,
+  flags: Flags,
 }
 
 impl InodeBase {
@@ -373,7 +373,7 @@ impl InodeBase {
       shape,
       actual_shape,
       zindex: 0,
-      flags: BASE_FLAGS,
+      flags: FLAGS,
     }
   }
 
@@ -414,26 +414,26 @@ impl InodeBase {
   }
 
   pub fn enabled(&self) -> bool {
-    self.flags.contains(BaseFlags::ENABLED)
+    self.flags.contains(Flags::ENABLED)
   }
 
   pub fn set_enabled(&mut self, enabled: bool) {
     if enabled {
-      self.flags.insert(BaseFlags::ENABLED);
+      self.flags.insert(Flags::ENABLED);
     } else {
-      self.flags.remove(BaseFlags::ENABLED);
+      self.flags.remove(Flags::ENABLED);
     }
   }
 
   pub fn visible(&self) -> bool {
-    self.flags.contains(BaseFlags::VISIBLE)
+    self.flags.contains(Flags::VISIBLE)
   }
 
   pub fn set_visible(&mut self, visible: bool) {
     if visible {
-      self.flags.insert(BaseFlags::VISIBLE);
+      self.flags.insert(Flags::VISIBLE);
     } else {
-      self.flags.remove(BaseFlags::VISIBLE);
+      self.flags.remove(Flags::VISIBLE);
     }
   }
 }
