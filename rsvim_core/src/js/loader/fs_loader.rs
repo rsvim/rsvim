@@ -11,12 +11,6 @@ use async_trait::async_trait;
 use oxc_resolver::ResolveOptions;
 use oxc_resolver::Resolver;
 
-macro_rules! path_not_found {
-  ($path:expr) => {
-    anyhow::bail!(format!("Module path NotFound({:?})", $path))
-  };
-}
-
 /// Checks if path is a JSON file.
 fn is_json_import(path: &Path) -> bool {
   path
@@ -164,7 +158,7 @@ impl FsModuleLoader {
 
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(e) => bail!(TheError::ModulePathNotFound(specifier.to_string())),
+      Err(_) => bail!(TheError::ModulePathNotFound(specifier.to_string())),
     }
   }
 }
