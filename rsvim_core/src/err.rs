@@ -50,7 +50,7 @@ pub enum TheErr {
   /// Command not found
   CommandNameAlreadyExist(CompactString),
 
-  #[error("Command alias `{0}` already exist")]
+  #[error("command alias `{0}` already exist")]
   /// Command not found
   CommandAliasAlreadyExist(CompactString),
 
