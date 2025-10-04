@@ -32,6 +32,8 @@ use crossterm::event::EventStream;
 use futures::StreamExt;
 use std::sync::Arc;
 use std::time::Instant;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::channel;
@@ -329,7 +331,7 @@ impl EventLoop {
 
   #[cfg(test)]
   /// Make new event loop for testing.
-  pub fn mock_new(
+  pub fn mock_new_without_snapshot(
     terminal_columns: u16,
     terminal_rows: u16,
     cli_opts: CliOptions,
@@ -362,6 +364,79 @@ impl EventLoop {
     // Js Runtime
     let js_runtime = JsRuntime::new_without_snapshot(
       JsRuntimeOptions::default(),
+      startup_moment,
+      startup_unix_epoch,
+      master_tx.clone(),
+      jsrt_rx,
+      cli_opts.clone(),
+      tree.clone(),
+      buffers.clone(),
+      contents.clone(),
+      commands,
+    );
+
+    Ok(EventLoop {
+      startup_moment,
+      startup_unix_epoch,
+      cli_opts,
+      canvas,
+      tree,
+      state_machine,
+      buffers,
+      contents,
+      writer,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      exit_code,
+      js_runtime,
+      master_tx,
+      master_rx,
+      jsrt_forwarder_tx,
+      jsrt_forwarder_rx,
+      jsrt_tx,
+      master_messages,
+      js_messages,
+    })
+  }
+
+  #[cfg(test)]
+  /// Make new event loop for testing.
+  pub fn mock_new_with_snapshot(
+    terminal_columns: u16,
+    terminal_rows: u16,
+    cli_opts: CliOptions,
+    snapshot: SnapshotData,
+  ) -> IoResult<Self> {
+    let (
+      canvas,
+      tree,
+      state_machine,
+      buffers,
+      contents,
+      commands,
+      cancellation_token,
+      detached_tracker,
+      blocked_tracker,
+      exit_code,
+      (master_tx, master_rx),
+      (jsrt_forwarder_tx, jsrt_forwarder_rx),
+      (jsrt_tx, jsrt_rx),
+      master_messages,
+      js_messages,
+    ) = Self::_internal_new(terminal_columns, terminal_rows)?;
+
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
+    let writer = StdoutWriterValue::dev_null();
+
+    // Js Runtime
+    let js_runtime = JsRuntime::new(
+      JsRuntimeOptions::default(),
+      snapshot,
       startup_moment,
       startup_unix_epoch,
       master_tx.clone(),

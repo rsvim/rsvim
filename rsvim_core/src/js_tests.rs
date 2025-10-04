@@ -11,6 +11,7 @@ use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::time::Duration;
+use v8::StartupData;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
@@ -39,64 +40,8 @@ async fn create_snapshot1() -> IoResult<()> {
   // Create js runtime with snapshot.
   let mut event_loop = {
     let cli_opts = CliOptions::empty();
-    let (
-      startup_moment,
-      startup_unix_epoch,
-      canvas,
-      tree,
-      state_machine,
-      buffers,
-      contents,
-      commands,
-      cancellation_token,
-      detached_tracker,
-      blocked_tracker,
-      exit_code,
-      (master_tx, master_rx),
-      (jsrt_forwarder_tx, jsrt_forwarder_rx),
-      (jsrt_tx, jsrt_rx),
-    ) = EventLoop::_internal_new(10, 10).unwrap();
-
-    let writer = StdoutWriterValue::dev_null();
-
     let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
-
-    // Js Runtime
-    let js_runtime = JsRuntime::new(
-      JsRuntimeOptions::default(),
-      SnapshotData::new(bytes),
-      startup_moment,
-      startup_unix_epoch,
-      master_tx.clone(),
-      jsrt_rx,
-      cli_opts.clone(),
-      tree.clone(),
-      buffers.clone(),
-      contents.clone(),
-      commands,
-    );
-
-    EventLoop {
-      startup_moment,
-      startup_unix_epoch,
-      cli_opts,
-      canvas,
-      tree,
-      state_machine,
-      buffers,
-      contents,
-      writer,
-      cancellation_token,
-      detached_tracker,
-      blocked_tracker,
-      exit_code,
-      js_runtime,
-      master_tx,
-      master_rx,
-      jsrt_forwarder_tx,
-      jsrt_forwarder_rx,
-      jsrt_tx,
-    }
+    EventLoop::mock_new_with_snapshot(10, 10, cli_opts, StartupData::new(bytes))
   };
 
   // Run the event loop.
