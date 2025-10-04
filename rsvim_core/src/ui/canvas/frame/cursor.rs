@@ -9,7 +9,7 @@ pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
 bitflags! {
   #[derive(Copy, Clone, PartialEq, Eq)]
-  struct Flags: u8{
+  struct Flags: u8 {
     const BLINKING = 1;
     const HIDDEN = 1 << 1;
   }
