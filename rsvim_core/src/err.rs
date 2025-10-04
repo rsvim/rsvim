@@ -59,7 +59,7 @@ pub enum TheErr {
   JsError(Box<JsError>),
 
   #[error("Failed to load module `{0}`: {1}")]
-  /// Failed to load module source
+  /// Failed to load module
   LoadModuleFailed(ModulePath, IoErr),
 
   #[error("Module path `{0}` not found")]
