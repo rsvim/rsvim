@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use assert_fs::prelude::*;
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use rsvim_core::cli::CliOptions;
