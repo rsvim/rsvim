@@ -42,11 +42,11 @@ pub enum TheErr {
   // buf }
 
   // js {
-  #[error("Command `{0}` not found")]
+  #[error("command `{0}` not found")]
   /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("Command name `{0}` already exist")]
+  #[error("command name `{0}` already exist")]
   /// Command not found
   CommandNameAlreadyExist(CompactString),
 
