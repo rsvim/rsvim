@@ -32,7 +32,7 @@ fn test1() {
 }
 
 #[test]
-fn test_failed1() {
+fn test2() {
   test_log_init();
 
   let actual1 = TypeScript::compile(None, "asdf");
