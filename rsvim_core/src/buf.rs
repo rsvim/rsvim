@@ -417,7 +417,7 @@ impl BuffersManager {
         n
       }
       Err(e) => {
-        bail!(TheError::WriteBufferOpenFailed(
+        bail!(TheErr::WriteBufferOpenFailed(
           filename.to_string_lossy().to_string(),
           e
         ));
