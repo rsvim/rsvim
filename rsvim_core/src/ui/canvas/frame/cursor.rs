@@ -48,7 +48,7 @@ impl Cursor {
     if hidden {
       flags.insert(Flags::HIDDEN);
     }
-    Cursor { pos, flags, style }
+    Cursor { pos, style, flags }
   }
 
   /// Get position.
@@ -108,8 +108,8 @@ impl Default for Cursor {
     let flags = Flags::empty();
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      flags,
       style: CursorStyle::SteadyBlock,
+      flags,
     }
   }
 }
