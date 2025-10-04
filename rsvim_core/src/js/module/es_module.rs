@@ -205,7 +205,7 @@ impl JsFuture for EsModuleFuture {
       >(&source, bincode::config::standard())
       .unwrap(),
       Err(e) => {
-        self.handle_failure(&state, Err(e));
+        self.handle_failure(&state, e);
         return;
       }
     };
@@ -263,7 +263,7 @@ impl JsFuture for EsModuleFuture {
         match resolve_import(&base, &specifier, import_map.clone()) {
           Ok(specifier) => specifier,
           Err(e) => {
-            self.handle_failure(&state, anyhow::Error::msg(e.to_string()));
+            self.handle_failure(&state, e);
             return;
           }
         };
