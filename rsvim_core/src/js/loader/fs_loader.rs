@@ -42,7 +42,6 @@ mod sync_load {
         } else {
           source
         };
-
         Ok(source)
       }
       Err(e) => bail!(TheError::LoadModuleReadFileFailed(
