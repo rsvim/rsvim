@@ -4,6 +4,7 @@ use crate::buf::BufferId;
 use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
+use std::path::PathBuf;
 
 // anyhow {
 
@@ -42,13 +43,13 @@ pub enum TheError {
   /// Buffer not found
   BufferNotFound(BufferId),
 
-  #[error("Buffer {0} failed to write file: {1}")]
+  #[error("Failed to write buffer {0}: {1}")]
   /// Buffer failed to write file
-  BufferWriteFileFailed(BufferId, IoErr),
+  WriteBufferFailed(BufferId, IoErr),
 
-  #[error("Buffer {0} failed to open(w) file: {1}")]
+  #[error("Failed to open(w) file {0} : {1}")]
   /// Buffer failed to open(w) file
-  BufferOpenwFileFailed(BufferId, IoErr),
+  BufferOpenFileForWriteFailed(String, IoErr),
   // buf }
 
   // js {
@@ -60,9 +61,13 @@ pub enum TheError {
   /// JavaScript error/exception
   JsErr(JsError),
 
-  #[error("Load module failed to read file {0}: {1}")]
+  #[error("Failed to read module path {0}: {1}")]
   /// Failed to read script file when loading module
-  LoadModuleReadFileFailed(ModulePath, IoErr),
+  ModulePathReadFailed(ModulePath, IoErr),
+
+  #[error("Module path to read file {0}: {1}")]
+  /// Failed to read script file when loading module
+  ModulePathNotFound(ModulePath, IoErr),
   // js }
 }
 

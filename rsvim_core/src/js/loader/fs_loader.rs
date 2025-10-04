@@ -61,6 +61,7 @@ mod sync_load {
       };
     }
 
+    bail!();
     path_not_found!(path)
   }
 }
