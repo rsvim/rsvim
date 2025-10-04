@@ -66,6 +66,13 @@ static RSVIM_LONG_HELP: LazyLock<String> = LazyLock::new(|| {
 });
 
 fn main() -> IoResult<()> {
+  // Startup time
+  let startup_moment = Instant::now();
+  let startup_unix_epoch = SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .unwrap()
+    .as_millis();
+
   log::init();
 
   let cli_opts = match CliOptions::from_env() {

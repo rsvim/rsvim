@@ -150,8 +150,6 @@ impl EventLoop {
     terminal_cols: u16,
     terminal_rows: u16,
   ) -> IoResult<(
-    /* startup_moment */ Instant,
-    /* startup_unix_epoch */ u128,
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
     /* state_machine */ StateMachine,
@@ -240,16 +238,7 @@ impl EventLoop {
       Vec::with_capacity(*CHANNEL_BUF_SIZE);
     let js_messages: Vec<JsMessage> = Vec::with_capacity(*CHANNEL_BUF_SIZE);
 
-    // Startup time
-    let startup_moment = Instant::now();
-    let startup_unix_epoch = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_millis();
-
     Ok((
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -269,11 +258,14 @@ impl EventLoop {
   }
 
   /// Make new event loop.
-  pub fn new(cli_opts: CliOptions, snapshot: SnapshotData) -> IoResult<Self> {
+  pub fn new(
+    startup_moment: Instant,
+    startup_unix_epoch: u128,
+    cli_opts: CliOptions,
+    snapshot: SnapshotData,
+  ) -> IoResult<Self> {
     let (cols, rows) = crossterm::terminal::size()?;
     let (
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -345,8 +337,6 @@ impl EventLoop {
     cli_opts: CliOptions,
   ) -> IoResult<Self> {
     let (
-      startup_moment,
-      startup_unix_epoch,
       canvas,
       tree,
       state_machine,
@@ -364,6 +354,11 @@ impl EventLoop {
       js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
     let writer = StdoutWriterValue::dev_null();
 
     // Js Runtime
