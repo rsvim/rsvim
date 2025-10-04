@@ -164,6 +164,22 @@ impl FsModuleLoader {
 }
 
 impl ModuleLoader for FsModuleLoader {
+  #[cfg(not(test))]
+  /// Resolve module path by specifier in local filesystem.
+  ///
+  /// It tries to resolve npm packages, thus we can directly use npm registry to maintain plugins.
+  /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
+  /// we only choose to maintain a small subset (at least for now):
+  ///
+  /// 1. The "common js" standard is not supported.
+  /// 2. The `cjs` file extension is not supported.
+  /// 3. The `require` keyword is not supported.
+  ///
+  /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
+  fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath> {
+    self.resolve_impl(&self.resolver, base, specifier)
+  }
+
   #[cfg(test)]
   fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath> {
     let resolver = Resolver::new(create_resolve_opts());
