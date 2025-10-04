@@ -417,7 +417,7 @@ impl BuffersManager {
         n
       }
       Err(e) => {
-        bail!(TheError::BufferOpenWriteFileFailed(buf_id, e));
+        bail!(TheError::BufferOpenwFileFailed(buf_id, e));
       }
     };
 
