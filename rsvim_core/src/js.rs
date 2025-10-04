@@ -980,7 +980,7 @@ pub fn execute_module<'s, 'b>(
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
       let state = state_rc.borrow_mut();
-      report_js_error(&state, exception.into());
+      report_js_error(&state, TheError::JsErr(exception));
       return;
     }
   };
