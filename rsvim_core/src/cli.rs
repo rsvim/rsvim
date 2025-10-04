@@ -11,7 +11,7 @@ bitflags! {
   struct SpecialOptFlags : u8{
     const VERSION = 1;
     const SHORT_HELP = 1 << 1;
-    const LONG_HELP = 1 << 1;
+    const LONG_HELP = 1 << 2;
   }
 }
 
