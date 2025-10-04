@@ -70,7 +70,7 @@ oxc_resolver = { workspace = true }
 # NOTE: Javascript dependencies {
 
 swc_atoms = { workspace = true }
-swc_common = { workspace = true, features = ["tty-emitter"] }
+swc_common = { workspace = true }
 swc_config = { workspace = true }
 swc_config_macro = { workspace = true }
 swc_ecma_ast = { workspace = true }
