@@ -45,7 +45,8 @@ impl TypeScript {
         no_early_errors: true,
         ..Default::default()
       }),
-      EsVersion::EsNext, // NOTE: Always use "esnext" version.
+      // NOTE: Always use "esnext" version.
+      EsVersion::EsNext,
       StringInput::from(&*fm),
       None,
     );
