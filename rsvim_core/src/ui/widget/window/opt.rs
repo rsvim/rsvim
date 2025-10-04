@@ -24,8 +24,8 @@ impl Debug for OptFlags {
 }
 
 #[allow(dead_code)]
-// wrap
-// line_break
+// wrap=true
+// line_break=false
 const OPT_FLAGS: OptFlags = OptFlags::WRAP;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]

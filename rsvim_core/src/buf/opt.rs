@@ -39,7 +39,7 @@ impl Debug for OptFlags {
 }
 
 #[allow(dead_code)]
-// expand_tab
+// expand_tab=false
 const OPT_FLAGS: OptFlags = OptFlags::empty();
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
