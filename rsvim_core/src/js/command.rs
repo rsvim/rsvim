@@ -100,11 +100,11 @@ impl CommandsManager {
 
     if !definition.options.force {
       if self.commands.contains_key(&name) {
-        bail!(TheError::CommandNameAlreadyExist(name));
+        bail!(TheErr::CommandNameAlreadyExist(name));
       }
       if let Some(ref alias) = alias {
         if self.aliases.contains_key(alias.as_str()) {
-          bail!(TheError::CommandAliasAlreadyExist(alias.clone()));
+          bail!(TheErr::CommandAliasAlreadyExist(alias.clone()));
         }
       }
     }
