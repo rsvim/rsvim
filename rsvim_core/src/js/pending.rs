@@ -9,7 +9,7 @@ use crate::prelude::*;
 use tokio::time::Instant;
 
 pub type TimerCallback = Box<dyn FnMut() + 'static>;
-pub type TaskCallback = Box<dyn FnMut(Option<AnyResult<Vec<u8>>>) + 'static>;
+pub type TaskCallback = Box<dyn FnMut(Option<TheResult<Vec<u8>>>) + 'static>;
 
 pub fn create_timer(
   state: &mut JsRuntimeState,
