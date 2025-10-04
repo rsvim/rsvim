@@ -161,6 +161,6 @@ impl std::fmt::Debug for JsError {
   }
 }
 
-pub fn report_js_error(state: &JsRuntimeState, e: AnyError) {
+pub fn report_js_error(state: &JsRuntimeState, e: TheError) {
   send_cmdline_message(state, e.to_string());
 }

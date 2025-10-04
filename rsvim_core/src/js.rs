@@ -674,8 +674,7 @@ pub mod boost {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message
-              let e =
-                anyhow::anyhow!("Error: invalid command {:?}", req.payload);
+              let e = TheError::CommandNotFound(req.payload);
               report_js_error(&state, e);
             }
           }

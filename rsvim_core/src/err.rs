@@ -1,6 +1,7 @@
 //! Errors and results.
 
 use crate::buf::BufferId;
+use compact_str::CompactString;
 
 // anyhow {
 
@@ -30,6 +31,7 @@ pub type IoResult<T> = std::io::Result<T>;
 /// All error codes.
 #[derive(Debug, thiserror::Error)]
 pub enum TheError {
+  // buf {
   #[error("Buffer {0} doesn't have a filename")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
@@ -39,10 +41,19 @@ pub enum TheError {
   BufferNotFound(BufferId),
 
   #[error("Buffer {0} failed to write file: {1}")]
+  /// Buffer failed to write file
   BufferWriteFileFailed(BufferId, IoErr),
 
   #[error("Buffer {0} failed to open(w) file: {1}")]
+  /// Buffer failed to open(w) file
   BufferOpenwFileFailed(BufferId, IoErr),
+  // buf }
+
+  // js {
+  #[error("Command {0} not found")]
+  /// Command not found
+  CommandNotFound(CompactString),
+  // js }
 }
 
 /// [`Result`] with `T` if ok, [`TheError`] if error.
