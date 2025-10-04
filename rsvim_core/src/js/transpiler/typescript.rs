@@ -29,7 +29,7 @@ pub struct TypeScript;
 
 impl TypeScript {
   /// Compiles TypeScript code into JavaScript.
-  pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
+  pub fn compile(filename: Option<&str>, source: &str) -> TheResult<String> {
     let globals = Globals::default();
     let cm: Lrc<SourceMap> = Default::default();
     let handler = Handler::with_tty_emitter(
@@ -39,6 +39,9 @@ impl TypeScript {
       Some(cm.clone()),
     );
 
+    let filename2 = filename
+      .map(|f| f.to_string())
+      .unwrap_or("unknown".to_string());
     let filename = match filename {
       Some(filename) => FileName::Custom(filename.into()),
       None => FileName::Anon,
@@ -66,7 +69,7 @@ impl TypeScript {
       .map_err(|e| e.into_diagnostic(&handler).emit())
     {
       Ok(module) => module,
-      Err(_) => bail!("TypeScript compilation failed."),
+      Err(_) => bail!(TheError::CompileTypeScriptFailed(filename2)),
     };
 
     // This is where we're gonna store the JavaScript output.

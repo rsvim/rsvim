@@ -4,7 +4,6 @@ use crate::buf::BufferId;
 use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
-use std::path::PathBuf;
 
 // anyhow {
 
@@ -65,9 +64,13 @@ pub enum TheError {
   /// Failed to read script file when loading module
   LoadModuleSourceFailed(ModulePath, IoErr),
 
-  #[error("Module path to read file {0}")]
+  #[error("Module path {0} not found")]
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
+
+  #[error("Failed to compile typescript: {0}")]
+  /// Failed to compile typescript
+  CompileTypeScriptFailed(String),
   // js }
 }
 
