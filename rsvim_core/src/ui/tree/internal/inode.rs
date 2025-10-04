@@ -325,7 +325,9 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+#[allow(dead_code)]
 const ENABLED: bool = true;
+#[allow(dead_code)]
 const VISIBLE: bool = true;
 
 bitflags! {
