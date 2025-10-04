@@ -24,33 +24,33 @@ pub type IoResult<T> = std::io::Result<T>;
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
   // buf {
-  #[error("buffer `{0}` doesn't have a filename")]
+  #[error("Buffer `{0}` doesn't have a filename.")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
 
-  #[error("buffer `{0}` not exist.")]
+  #[error("Buffer `{0}` not exist.")]
   /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("failed to save buffer {0}: {1}")]
+  #[error("Failed to save buffer {0}: {1}")]
   /// Buffer failed to write file
   SaveBufferFailed(BufferId, IoErr),
 
-  #[error("failed to open(w) file `{0}`: {1}")]
+  #[error("Failed to open(w) file `{0}`: {1}")]
   /// Failed to open file for write
   OpenFileForWriteFailed(String, IoErr),
   // buf }
 
   // js {
-  #[error("command `{0}` not found.")]
+  #[error("Command `{0}` not found.")]
   /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("command name `{0}` already exist.")]
+  #[error("Command name `{0}` already exist.")]
   /// Command not found
   CommandNameAlreadyExist(CompactString),
 
-  #[error("command alias `{0}` already exist.")]
+  #[error("Command alias `{0}` already exist.")]
   /// Command not found
   CommandAliasAlreadyExist(CompactString),
 
@@ -58,19 +58,19 @@ pub enum TheErr {
   /// JavaScript error/exception
   JsError(Box<JsError>),
 
-  #[error("failed to load module `{0}`: {1}.")]
+  #[error("Failed to load module `{0}`: {1}.")]
   /// Failed to load module
   LoadModuleFailed(ModulePath, IoErr),
 
-  #[error("module path `{0}` not found.")]
+  #[error("Module path `{0}` not found.")]
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
 
-  #[error("failed to compile typescript `{0}`.")]
+  #[error("Failed to compile typescript `{0}`.")]
   /// Failed to compile typescript
   CompileTypeScriptFailed(String),
 
-  #[error("not enough function arguments specified.")]
+  #[error("Not enough function arguments specified.")]
   /// Failed to compile typescript
   FunctionArgumentsNotEnough,
   // js }
