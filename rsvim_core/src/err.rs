@@ -43,7 +43,7 @@ pub type TheResult<T> = Result<T, TheError>;
 // thiserror }
 
 #[macro_export]
-macro_rules! the_bail {
+macro_rules! bail {
   ($e:expr) => {
     return Err($e);
   };
