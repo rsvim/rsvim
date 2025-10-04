@@ -32,8 +32,6 @@ use crossterm::event::EventStream;
 use futures::StreamExt;
 use std::sync::Arc;
 use std::time::Instant;
-use std::time::SystemTime;
-use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::mpsc::channel;
