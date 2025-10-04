@@ -95,16 +95,16 @@ impl CommandsManager {
     &mut self,
     name: CompactString,
     definition: CommandDefinitionRc,
-  ) -> AnyResult<Option<CommandDefinitionRc>> {
+  ) -> TheResult<Option<CommandDefinitionRc>> {
     let alias = definition.options.alias.clone();
 
     if !definition.options.force {
       if self.commands.contains_key(&name) {
-        anyhow::bail!(format!("Command name {:?} already exists", name));
+        bail!(TheError::CommandNameAlreadyExist(name));
       }
       if let Some(ref alias) = alias {
         if self.aliases.contains_key(alias.as_str()) {
-          anyhow::bail!(format!("Command alias {:?} already exists", name));
+          bail!(TheError::CommandAliasAlreadyExist(alias.clone()));
         }
       }
     }

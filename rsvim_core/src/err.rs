@@ -56,6 +56,14 @@ pub enum TheError {
   /// Command not found
   CommandNotFound(CompactString),
 
+  #[error("Command name {0} already exist")]
+  /// Command not found
+  CommandNameAlreadyExist(CompactString),
+
+  #[error("Command alias {0} already exist")]
+  /// Command not found
+  CommandAliasAlreadyExist(CompactString),
+
   #[error("Js error: {0}")]
   /// JavaScript error/exception
   JsErr(JsError),
