@@ -3,7 +3,7 @@
 // anyhow {
 
 /// [`anyhow::Error`]
-pub type AnyErr = anyhow::Error;
+pub type AnyError = anyhow::Error;
 
 /// [`anyhow::Result`] with `T` if ok, [`AnyErr`]([`anyhow::Error`]) if error.
 pub type AnyResult<T> = anyhow::Result<T>;
@@ -22,3 +22,9 @@ pub type IoErrKind = std::io::ErrorKind;
 pub type IoResult<T> = std::io::Result<T>;
 
 // std::io }
+
+// thiserror {
+
+pub enum TheError {}
+
+// thiserror }

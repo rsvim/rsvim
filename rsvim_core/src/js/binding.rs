@@ -278,7 +278,7 @@ pub fn get_internal_ref<'s, T>(
 pub fn set_exception_code(
   scope: &mut v8::PinScope,
   exception: v8::Local<v8::Value>,
-  error: &AnyErr,
+  error: &AnyError,
 ) {
   let exception = exception.to_object(scope).unwrap();
   if let Some(error) = error.downcast_ref::<IoErr>() {
@@ -289,7 +289,7 @@ pub fn set_exception_code(
 }
 
 /// Useful utility to throw v8 exceptions.
-pub fn throw_exception(scope: &mut v8::PinScope, error: &AnyErr) {
+pub fn throw_exception(scope: &mut v8::PinScope, error: &AnyError) {
   let message = v8::String::new(scope, &error.to_string()).unwrap();
   let exception = v8::Exception::error(scope, message);
   set_exception_code(scope, exception, error);
