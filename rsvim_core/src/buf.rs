@@ -396,15 +396,15 @@ impl BuffersManager {
             Ok(_) => match writer.flush() {
               Ok(_) => n,
               Err(e) => {
-                bail!(TheError::WriteBufferFailed(buf_id, e));
+                bail!(TheErr::WriteBufferFailed(buf_id, e));
               }
             },
             Err(e) => {
-              bail!(TheError::WriteBufferFailed(buf_id, e));
+              bail!(TheErr::WriteBufferFailed(buf_id, e));
             }
           },
           Err(e) => {
-            bail!(TheError::WriteBufferFailed(buf_id, e));
+            bail!(TheErr::WriteBufferFailed(buf_id, e));
           }
         };
         trace!("Write file {:?}, bytes: {:?}", filename, n);
