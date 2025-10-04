@@ -39,7 +39,7 @@ pub struct CommandOptions {
   flags: Flags,
 
   #[builder(default = ALIAS_DEFAULT)]
-  pub alias: Option<CompactString>,
+  alias: Option<CompactString>,
 }
 
 impl CommandOptionsBuilder {
@@ -55,6 +55,28 @@ impl CommandOptionsBuilder {
     }
     self.flags = Some(flags);
     self
+  }
+}
+
+impl CommandOptions {
+  pub fn force(&self) -> bool {
+    self.flags.contains(Flags::FORCE)
+  }
+
+  pub fn set_force(&mut self, value: bool) {
+    if value {
+      self.flags.insert(Flags::FORCE);
+    } else {
+      self.flags.remove(Flags::FORCE);
+    }
+  }
+
+  pub fn alias(&self) -> &Option<CompactString> {
+    &self.alias
+  }
+
+  pub fn set_alias(&mut self, value: Option<CompactString>) {
+    self.alias = value;
   }
 }
 
@@ -95,7 +117,7 @@ impl ToV8 for CommandOptions {
 
     // force
     let force_field = to_v8(scope, FORCE);
-    let force_value = to_v8(scope, self.force);
+    let force_value = to_v8(scope, self.force());
     obj.set(scope, force_field, force_value);
 
     // alias
