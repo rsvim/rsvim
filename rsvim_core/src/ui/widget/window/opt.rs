@@ -9,13 +9,13 @@ pub const SCROLL_OFF: u8 = 0;
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct OptFlags: u8 {
+  struct Flags: u8 {
     const WRAP = 1;
     const LINE_BREAK = 1 << 1;
   }
 }
 
-impl Debug for OptFlags {
+impl Debug for Flags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("OptFlags")
       .field("bits", &format!("{:b}", self.bits()))
@@ -26,16 +26,16 @@ impl Debug for OptFlags {
 #[allow(dead_code)]
 // wrap=true
 // line_break=false
-const OPT_FLAGS: OptFlags = OptFlags::WRAP;
+const FLAGS: Flags = Flags::WRAP;
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(default = OPT_FLAGS)]
+  #[builder(default = FLAGS)]
   #[builder(setter(custom))]
   // wrap
   // line_break
-  flags: OptFlags,
+  flags: Flags,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u8,
@@ -45,12 +45,12 @@ impl WindowOptionsBuilder {
   pub fn wrap(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
-      None => OPT_FLAGS,
+      None => FLAGS,
     };
     if value {
-      flags.insert(OptFlags::WRAP);
+      flags.insert(Flags::WRAP);
     } else {
-      flags.remove(OptFlags::WRAP);
+      flags.remove(Flags::WRAP);
     }
     self.flags = Some(flags);
     self
@@ -59,12 +59,12 @@ impl WindowOptionsBuilder {
   pub fn line_break(&mut self, value: bool) -> &mut Self {
     let mut flags = match self.flags {
       Some(flags) => flags,
-      None => OPT_FLAGS,
+      None => FLAGS,
     };
     if value {
-      flags.insert(OptFlags::LINE_BREAK);
+      flags.insert(Flags::LINE_BREAK);
     } else {
-      flags.remove(OptFlags::LINE_BREAK);
+      flags.remove(Flags::LINE_BREAK);
     }
     self.flags = Some(flags);
     self
@@ -76,14 +76,14 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.flags.contains(OptFlags::WRAP)
+    self.flags.contains(Flags::WRAP)
   }
 
   pub fn set_wrap(&mut self, value: bool) {
     if value {
-      self.flags.insert(OptFlags::WRAP);
+      self.flags.insert(Flags::WRAP);
     } else {
-      self.flags.remove(OptFlags::WRAP);
+      self.flags.remove(Flags::WRAP);
     }
   }
 
@@ -91,14 +91,14 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.flags.contains(OptFlags::LINE_BREAK)
+    self.flags.contains(Flags::LINE_BREAK)
   }
 
   pub fn set_line_break(&mut self, value: bool) {
     if value {
-      self.flags.insert(OptFlags::LINE_BREAK);
+      self.flags.insert(Flags::LINE_BREAK);
     } else {
-      self.flags.remove(OptFlags::LINE_BREAK);
+      self.flags.remove(Flags::LINE_BREAK);
     }
   }
 

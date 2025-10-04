@@ -25,12 +25,12 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
 bitflags! {
   #[derive(Copy, Clone)]
-  struct OptFlags: u8 {
+  struct Flags: u8 {
     const EXPAND_TAB = 1;
   }
 }
 
-impl Debug for OptFlags {
+impl Debug for Flags {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("OptFlags")
       .field("bits", &format!("{:b}", self.bits()))
@@ -40,18 +40,18 @@ impl Debug for OptFlags {
 
 #[allow(dead_code)]
 // expand_tab=false
-const OPT_FLAGS: OptFlags = OptFlags::empty();
+const OPT_FLAGS: Flags = Flags::empty();
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
-  #[builder(default = TAB_STOP)]
-  tab_stop: u8,
-
   #[builder(default = OPT_FLAGS)]
   #[builder(setter(custom))]
   // expand_tab
-  flags: OptFlags,
+  flags: Flags,
+
+  #[builder(default = TAB_STOP)]
+  tab_stop: u8,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u8,
@@ -71,9 +71,9 @@ impl BufferOptionsBuilder {
       None => OPT_FLAGS,
     };
     if value {
-      flags.insert(OptFlags::EXPAND_TAB);
+      flags.insert(Flags::EXPAND_TAB);
     } else {
-      flags.remove(OptFlags::EXPAND_TAB);
+      flags.remove(Flags::EXPAND_TAB);
     }
     self.flags = Some(flags);
     self
@@ -96,14 +96,14 @@ impl BufferOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
   pub fn expand_tab(&self) -> bool {
-    self.flags.contains(OptFlags::EXPAND_TAB)
+    self.flags.contains(Flags::EXPAND_TAB)
   }
 
   pub fn set_expand_tab(&mut self, value: bool) {
     if value {
-      self.flags.insert(OptFlags::EXPAND_TAB);
+      self.flags.insert(Flags::EXPAND_TAB);
     } else {
-      self.flags.remove(OptFlags::EXPAND_TAB);
+      self.flags.remove(Flags::EXPAND_TAB);
     }
   }
 
