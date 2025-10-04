@@ -1,7 +1,6 @@
 use super::js::*;
 use crate::cli::CliOptions;
 use crate::evloop::EventLoop;
-use crate::evloop::writer::StdoutWriterValue;
 use crate::prelude::*;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -11,7 +10,6 @@ use assert_fs::prelude::PathChild;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::time::Duration;
-use v8::StartupData;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
@@ -41,7 +39,12 @@ async fn create_snapshot1() -> IoResult<()> {
   let mut event_loop = {
     let cli_opts = CliOptions::empty();
     let bytes: &'static [u8] = Box::leak(bytes.into_boxed_slice());
-    EventLoop::mock_new_with_snapshot(10, 10, cli_opts, StartupData::new(bytes))
+    EventLoop::mock_new_with_snapshot(
+      10,
+      10,
+      cli_opts,
+      SnapshotData::new(bytes),
+    )
   };
 
   // Run the event loop.
