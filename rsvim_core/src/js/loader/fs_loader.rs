@@ -98,7 +98,9 @@ mod async_load {
       };
     }
 
-    path_not_found!(path)
+    bail!(TheError::ModulePathNotFound(
+      path.to_string_lossy().to_string()
+    ));
   }
 }
 
