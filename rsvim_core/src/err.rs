@@ -5,7 +5,6 @@ use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
 use std::borrow::Cow;
-use swc_ecma_parser::error::SyntaxError;
 
 // std::io {
 
