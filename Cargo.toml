@@ -91,7 +91,7 @@ oxc_resolver = "11.8.4"
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.50.1/Cargo.toml
 
 swc_atoms = "=7.0.0"
-swc_common = { version = "=14.0.3" }
+swc_common = "=14.0.3"
 swc_config = "=3.1.1"
 swc_config_macro = "=1.0.1"
 swc_ecma_ast = "=15.0.0"
