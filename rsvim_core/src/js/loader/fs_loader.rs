@@ -34,19 +34,26 @@ mod sync_load {
   use super::*;
 
   /// Loads contents from a file.
-  pub fn load_source(path: &Path) -> AnyResult<ModuleSource> {
-    let source = std::fs::read_to_string(path)?;
-    let source = if is_json_import(path) {
-      wrap_json(source.as_str())
-    } else {
-      source
-    };
+  pub fn load_source(path: &Path) -> TheResult<ModuleSource> {
+    match std::fs::read_to_string(path) {
+      Ok(source) => {
+        let source = if is_json_import(path) {
+          wrap_json(source.as_str())
+        } else {
+          source
+        };
 
-    Ok(source)
+        Ok(source)
+      }
+      Err(e) => bail!(TheError::LoadModuleReadFileFailed(
+        path.to_string_lossy().to_string(),
+        e
+      )),
+    }
   }
 
   /// Loads import as file.
-  pub fn load_as_file(path: &Path) -> AnyResult<(PathBuf, ModuleSource)> {
+  pub fn load_as_file(path: &Path) -> TheResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
       return match load_source(path) {
@@ -62,7 +69,7 @@ mod sync_load {
 mod async_load {
   use super::*;
 
-  pub async fn async_load_source(path: &Path) -> AnyResult<ModuleSource> {
+  pub async fn async_load_source(path: &Path) -> TheResult<ModuleSource> {
     let source = tokio::fs::read_to_string(path).await?;
     let source = if is_json_import(path) {
       wrap_json(source.as_str())
@@ -75,7 +82,7 @@ mod async_load {
 
   pub async fn async_load_as_file(
     path: &Path,
-  ) -> AnyResult<(PathBuf, ModuleSource)> {
+  ) -> TheResult<(PathBuf, ModuleSource)> {
     // If path is a file.
     if path.is_file() {
       return match async_load_source(path).await {
@@ -139,7 +146,7 @@ impl FsModuleLoader {
     resolver: &Resolver,
     base: &str,
     specifier: &str,
-  ) -> AnyResult<ModulePath> {
+  ) -> TheResult<ModulePath> {
     let base = Path::new(base).to_path_buf();
     trace!(
       "|FsModuleLoader::resolve| base:{:?}, specifier:{:?}",
@@ -154,30 +161,14 @@ impl FsModuleLoader {
 }
 
 impl ModuleLoader for FsModuleLoader {
-  #[cfg(not(test))]
-  /// Resolve module path by specifier in local filesystem.
-  ///
-  /// It tries to resolve npm packages, thus we can directly use npm registry to maintain plugins.
-  /// But node/npm have quite a history, it requires quite an effort to be fully compatible with,
-  /// we only choose to maintain a small subset (at least for now):
-  ///
-  /// 1. The "common js" standard is not supported.
-  /// 2. The `cjs` file extension is not supported.
-  /// 3. The `require` keyword is not supported.
-  ///
-  /// For more details about node/npm package, please see: <https://nodejs.org/api/packages.html>.
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
-    self.resolve_impl(&self.resolver, base, specifier)
-  }
-
   #[cfg(test)]
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath> {
     let resolver = Resolver::new(create_resolve_opts());
     self.resolve_impl(&resolver, base, specifier)
   }
 
   /// Load module source by its module path, it can be either a file path, or a directory path.
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  fn load(&self, specifier: &str) -> TheResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = sync_load::load_as_file(path);
@@ -215,7 +206,7 @@ pub struct AsyncFsModuleLoader;
 
 #[async_trait]
 impl AsyncModuleLoader for AsyncFsModuleLoader {
-  async fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  async fn load(&self, specifier: &str) -> TheResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = async_load::async_load_as_file(path).await;

@@ -2,6 +2,7 @@
 
 use crate::buf::BufferId;
 use crate::js::err::JsError;
+use crate::js::module::ModulePath;
 use compact_str::CompactString;
 
 // anyhow {
@@ -58,6 +59,10 @@ pub enum TheError {
   #[error("Js error: {0}")]
   /// JavaScript error/exception
   JsErr(JsError),
+
+  #[error("Load module failed to read file {0}: {1}")]
+  /// Failed to read script file when loading module
+  LoadModuleReadFileFailed(ModulePath, IoErr),
   // js }
 }
 
@@ -69,6 +74,6 @@ pub type TheResult<T> = Result<T, TheError>;
 #[macro_export]
 macro_rules! bail {
   ($e:expr) => {
-    return Err($e);
+    return Err($e)
   };
 }
