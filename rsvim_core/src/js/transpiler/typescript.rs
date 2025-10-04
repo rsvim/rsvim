@@ -68,7 +68,7 @@ impl TypeScript {
       .map_err(|e| e.into_diagnostic(&handler).emit())
     {
       Ok(module) => module,
-      Err(_) => bail!(TheError::CompileTypeScriptFailed(filename2)),
+      Err(_) => bail!(TheErr::CompileTypeScriptFailed(filename2)),
     };
 
     // This is where we're gonna store the JavaScript output.
