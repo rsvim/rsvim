@@ -34,33 +34,33 @@ pub type IoResult<T> = std::io::Result<T>;
 #[derive(Debug, thiserror::Error)]
 pub enum TheError {
   // buf {
-  #[error("Buffer {0} doesn't have a filename")]
+  #[error("Buffer `{0}` doesn't have a filename")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
 
-  #[error("Buffer {0} not found")]
+  #[error("Buffer `{0}` not found")]
   /// Buffer not found
   BufferNotFound(BufferId),
 
-  #[error("Failed to write buffer {0}: {1}")]
+  #[error("Failed to write buffer `{0}`: {1}")]
   /// Buffer failed to write file
   WriteBufferFailed(BufferId, IoErr),
 
-  #[error("Failed to open(w) file {0}: {1}")]
+  #[error("Failed to open(w) file `{0}`: {1}")]
   /// Buffer failed to open(w) file
   WriteBufferOpenFailed(String, IoErr),
   // buf }
 
   // js {
-  #[error("Command {0} not found")]
+  #[error("Command `{0}` not found")]
   /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("Command name {0} already exist")]
+  #[error("Command name `{0}` already exist")]
   /// Command not found
   CommandNameAlreadyExist(CompactString),
 
-  #[error("Command alias {0} already exist")]
+  #[error("Command alias `{0}` already exist")]
   /// Command not found
   CommandAliasAlreadyExist(CompactString),
 
@@ -68,15 +68,15 @@ pub enum TheError {
   /// JavaScript error/exception
   JsErr(Box<JsError>),
 
-  #[error("Failed to read module path {0}: {1}")]
+  #[error("Failed to read module path `{0}`: {1}")]
   /// Failed to read script file when loading module
   LoadModuleSourceFailed(ModulePath, IoErr),
 
-  #[error("Module path {0} not found")]
+  #[error("Module path `{0}` not found")]
   /// Failed to read script file when loading module
   ModulePathNotFound(ModulePath),
 
-  #[error("Failed to compile typescript: {0}")]
+  #[error("Failed to compile typescript `{0}`")]
   /// Failed to compile typescript
   CompileTypeScriptFailed(String),
   // js }

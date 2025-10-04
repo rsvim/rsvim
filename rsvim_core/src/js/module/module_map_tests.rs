@@ -1410,7 +1410,7 @@ setTimeout(() => {
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
       assert!(
-        actual.contains("TypeError: Module path not found")
+        actual.contains("TypeError: Module path")
           && actual.contains("undefined")
       );
 
