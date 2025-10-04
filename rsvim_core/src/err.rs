@@ -32,13 +32,13 @@ pub enum TheErr {
   /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("Failed to save buffer `{0}`: {1}")]
+  #[error("Failed to save buffer: {0}")]
   /// Buffer failed to write file
-  SaveBufferFailed(BufferId, IoErr),
+  SaveBufferFailed(#[from] IoErr),
 
-  #[error("Failed to open file `{0}` for write: {1}")]
+  #[error("Failed to open file for write: {0}")]
   /// Failed to open file for write
-  OpenFileForWriteFailed(String, IoErr),
+  OpenFileForWriteFailed(#[from] IoErr),
   // buf }
 
   // js {
