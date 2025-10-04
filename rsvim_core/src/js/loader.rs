@@ -32,13 +32,13 @@ pub trait ModuleLoader {
   ///
   /// NOTE: This API (and all 3 loaders) are synchronized, include the url module loader's
   /// downloading process.
-  fn resolve(&self, base: &str, specifier: &str) -> AnyResult<ModulePath>;
+  fn resolve(&self, base: &str, specifier: &str) -> TheResult<ModulePath>;
 
   /// Load the module source by its module path.
   ///
   /// For url module loader, it will first download the resource to local filesystem as local file
   /// cache, then read the cache contents and return as module source code.
-  fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
+  fn load(&self, module_path: &str) -> TheResult<ModuleSource>;
 }
 
 #[async_trait]
@@ -47,5 +47,5 @@ pub trait ModuleLoader {
 /// NOTE: This is only allow to use in event loop, i.e. with tokio runtime, not
 /// in js runtime.
 pub trait AsyncModuleLoader {
-  async fn load(&self, module_path: &str) -> AnyResult<ModuleSource>;
+  async fn load(&self, module_path: &str) -> TheResult<ModuleSource>;
 }
