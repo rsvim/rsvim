@@ -5,15 +5,15 @@ use crate::js::err::JsError;
 use crate::js::module::ModulePath;
 use compact_str::CompactString;
 
-// anyhow {
-
-/// [`anyhow::Error`]
-pub type AnyError = anyhow::Error;
-
-/// [`anyhow::Result`] with `T` if ok, [`AnyErr`]([`anyhow::Error`]) if error.
-pub type AnyResult<T> = anyhow::Result<T>;
-
-// anyhow {
+// // anyhow {
+//
+// /// [`anyhow::Error`]
+// pub type AnyError = anyhow::Error;
+//
+// /// [`anyhow::Result`] with `T` if ok, [`AnyErr`]([`anyhow::Error`]) if error.
+// pub type AnyResult<T> = anyhow::Result<T>;
+//
+// // anyhow {
 
 // std::io {
 

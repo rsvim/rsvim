@@ -2583,7 +2583,6 @@ dependencies = [
 name = "rsvim_core"
 version = "0.1.2"
 dependencies = [
- "anyhow",
  "ascii",
  "assert_fs",
  "async-trait",
