@@ -4,7 +4,7 @@
 macro_rules! flags_impl {
   ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),+) => {
     bitflags::bitflags! {
-      #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+      #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $(
           const $upper = $value;
