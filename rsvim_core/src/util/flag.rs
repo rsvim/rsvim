@@ -15,6 +15,7 @@ macro_rules! flags_impl {
 
   (@each($name:ident,$unsigned:ty,$($inc:tt)*){$($collect:tt)*}) => {
     bitflags::bitflags! {
+      #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $($collect)*
       }
