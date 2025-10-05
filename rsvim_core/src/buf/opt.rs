@@ -13,7 +13,7 @@ use crate::flags_impl;
 pub use file_encoding::*;
 pub use file_format::*;
 
-flags_impl!(Flags, u8, EXPAND_TAB, expand_tab, 1);
+flags_impl!(Flags, u8, EXPAND_TAB, expand_tab, 0b0000_0001);
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;

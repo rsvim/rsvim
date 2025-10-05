@@ -1,5 +1,7 @@
 //! The node structure of the internal tree.
 
+use crate::flags_builder_impl;
+use crate::flags_impl;
 use crate::geo_rect_as;
 use crate::prelude::*;
 use std::fmt::Debug;
@@ -323,6 +325,8 @@ pub fn next_node_id() -> TreeNodeId {
   static VALUE: AtomicI32 = AtomicI32::new(100001);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
+
+flags_impl!();
 
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
