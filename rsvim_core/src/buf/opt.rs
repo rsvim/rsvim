@@ -68,11 +68,11 @@ impl BufferOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
   pub fn expand_tab(&self) -> bool {
-    self.expand_tab
+    self.flags.expand_tab()
   }
 
   pub fn set_expand_tab(&mut self, value: bool) {
-    self.expand_tab = value;
+    self.flags.set_expand_tab(value);
   }
 
   /// Buffer 'shift-width' option.
