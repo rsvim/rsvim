@@ -9,14 +9,17 @@ pub const WRAP: bool = true;
 pub const LINE_BREAK: bool = false;
 pub const SCROLL_OFF: u8 = 0;
 
+// wrap=true
+// line_break=false
+const FLAGS: Flags = Flags::WRAP;
+
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Window local options.
 pub struct WindowOptions {
-  #[builder(default = WRAP)]
-  wrap: bool,
-
-  #[builder(default = LINE_BREAK)]
-  line_break: bool,
+  #[builder(default = FLAGS)]
+  // wrap=true
+  // line_break=false
+  flags: Flags,
 
   #[builder(default = SCROLL_OFF)]
   scroll_off: u8,
