@@ -4,17 +4,11 @@
 macro_rules! flags_impl {
   ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),+) => {
     bitflags::bitflags! {
-      #[derive(Copy, Clone, PartialEq, Eq)]
+      #[derive(Debug, Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $(
           const $upper = $value;
         )+
-      }
-    }
-
-    impl std::fmt::Debug for $name {
-      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        bitflags::parser::to_writer(self, f)
       }
     }
 
