@@ -2,12 +2,12 @@
 
 #[macro_export]
 macro_rules! flags_impl {
-  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),+) => {
+  ($name:ident,$unsigned:ty,$($field:tt,$value:expr),+) => {
     bitflags::bitflags! {
       #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $(
-          const $upper = $value;
+          const $field = $value;
         )+
       }
     }
@@ -17,24 +17,6 @@ macro_rules! flags_impl {
         bitflags::parser::to_writer(self, f)
       }
     }
-
-    // paste::paste! {
-    //   impl $name {
-    //     $(
-    //       pub fn $lower(&self) -> bool {
-    //         self.contains($name::$upper)
-    //       }
-    //
-    //       pub fn [<set_ $lower>](&mut self, value: bool) {
-    //         if value {
-    //           self.insert($name::$upper);
-    //         } else {
-    //           self.remove($name::$upper);
-    //         }
-    //       }
-    //     )*
-    //   }
-    // }
   };
 }
 
