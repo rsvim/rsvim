@@ -5,16 +5,7 @@ use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
 
-flags_impl!(
-  SpecialFlags,
-  u8,
-  VERSION,
-  1,
-  SHORT_HELP,
-  1 << 1,
-  LONG_HELP,
-  1 << 2
-);
+flags_impl!(SpecialFlags, u8, VERSION, SHORT_HELP, LONG_HELP);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {

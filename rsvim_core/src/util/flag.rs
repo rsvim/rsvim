@@ -2,22 +2,8 @@
 
 #[macro_export]
 macro_rules! flags_impl {
-  ($name:ident,$unsigned:ty,$($field:tt,$value:expr),+) => {
-    bitflags::bitflags! {
-      #[derive(Copy, Clone, PartialEq, Eq)]
-      struct $name: $unsigned {
-        $(
-          const $field = $value;
-        )+
-      }
-    }
-
-    impl std::fmt::Debug for $name {
-      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("({:b})", self.bits()))?;
-        bitflags::parser::to_writer(self, f)
-      }
-    }
+  ($name:ident,$unsigned:ty,$($field:tt),+) => {
+    flags_impl!{@each($name,$unsigned,1){} $($field)+}
   };
 
   (@each($name:ident,$unsigned:ty,$($inc:tt)*){$($collect:tt)*} $i:ident $($rest:tt)*) => {
@@ -31,6 +17,13 @@ macro_rules! flags_impl {
     bitflags::bitflags! {
       struct $name: $unsigned {
         $($collect)*
+      }
+    }
+
+    impl std::fmt::Debug for $name {
+      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("({:b})", self.bits()))?;
+        bitflags::parser::to_writer(self, f)
       }
     }
   };
