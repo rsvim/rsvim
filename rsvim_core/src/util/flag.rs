@@ -12,6 +12,14 @@ macro_rules! flags_impl {
       }
     }
 
+    impl std::fmt::Debug for $name {
+      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Flags")
+          .field("bits", &format!("{:b}", self.bits()))
+          .finish()
+      }
+    }
+
     paste::paste! {
       impl $name {
         $(
