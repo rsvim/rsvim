@@ -25,14 +25,6 @@ pub struct CliSpecialOptions {
 }
 
 impl CliSpecialOptions {
-  pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
-    let mut flags = SpecialFlags::empty();
-    flags.set(SpecialFlags::VERSION, version);
-    flags.set(SpecialFlags::SHORT_HELP, short_help);
-    flags.set(SpecialFlags::LONG_HELP, long_help);
-    Self { flags }
-  }
-
   pub fn version(&self) -> bool {
     self.flags.contains(SpecialFlags::VERSION)
   }
