@@ -4,7 +4,7 @@
 #[macro_export]
 macro_rules! arc_mutex_ptr {
   ($name:ident) => {
-    paste! {
+    paste::paste! {
       pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
       pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
       pub type [<$name ReasGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
@@ -22,7 +22,7 @@ macro_rules! arc_mutex_ptr {
 #[macro_export]
 macro_rules! arc_ptr {
   ($name:ident) => {
-    paste! {
+    paste::paste! {
       pub type [<$name Arc>] = std::sync::Arc<$name>;
       pub type [<$name Wk>] = std::sync::Weak<$name>;
 
@@ -46,7 +46,7 @@ macro_rules! lock {
 #[macro_export]
 macro_rules! rc_refcell_ptr {
   ($name:ident) => {
-    paste! {
+    paste::paste! {
       pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
       pub type [<$name Wk>] = std::rc::Weak<std::cell::RefCell<$name>>;
 
@@ -63,7 +63,7 @@ macro_rules! rc_refcell_ptr {
 #[macro_export]
 macro_rules! rc_ptr {
   ($name:ident) => {
-    paste! {
+    paste::paste! {
       pub type [<$name Rc>] = std::rc::Rc<$name>;
       pub type [<$name Wk>] = std::rc::Weak<$name>;
 
