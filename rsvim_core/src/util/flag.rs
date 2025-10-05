@@ -40,7 +40,7 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$name:ident,$field:ident,$default:ident,$($lower:tt,$upper:expr),*) => {
+  ($builder:ident,$name:ident,$field:ident,$default:ident,$($lower:tt,$upper:tt),*) => {
     impl $builder {
       $(
         pub fn $lower(&mut self, value: bool) -> &mut Self {
