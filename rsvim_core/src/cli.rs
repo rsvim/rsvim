@@ -71,25 +71,26 @@ pub struct CliOptions {
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
-  let mut version: bool = false;
-  let mut short_help: bool = false;
-  let mut long_help: bool = false;
-  let mut headless: bool = false;
+  // let mut version: bool = false;
+  // let mut short_help: bool = false;
+  // let mut long_help: bool = false;
+  let mut special_flags: SpecialFlags = SpecialFlags::empty();
+  let mut flags: Flags = Flags::empty();
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') => {
-        short_help = true;
+        special_flags.insert(SpecialFlags::SHORT_HELP);
       }
       Long("help") => {
-        long_help = true;
+        special_flags.insert(SpecialFlags::LONG_HELP);
       }
       Short('V') | Long("version") => {
-        version = true;
+        special_flags.insert(SpecialFlags::VERSION);
       }
       Long("headless") => {
-        headless = true;
+        flags.insert(Flags::HEADLESS);
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -99,9 +100,11 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   }
 
   Ok(CliOptions {
-    special_opts: CliSpecialOptions::new(version, short_help, long_help),
+    special_opts: CliSpecialOptions {
+      flags: special_flags,
+    },
     file,
-    headless,
+    flags,
   })
 }
 
