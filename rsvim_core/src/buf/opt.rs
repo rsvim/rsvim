@@ -8,14 +8,11 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
+use crate::flags_impl;
 pub use file_encoding::*;
 pub use file_format::*;
-use bitflags::bitflags;
 
-bitflags! {
-  struct 
-}
-
+flags_impl!(Flags, u8, EXPAND_TAB, 1, expand_tab);
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;

@@ -3,11 +3,13 @@
 #[macro_export]
 macro_rules! flags_impl {
   ($name:ident,$unsigned:ty,$($upperfield:tt,$value:literal,$lowerfield:tt),*) => {
-    #[derive(Copy, Clone, PartialEq, Eq)]
-    struct $name: $unsigned {
-      $(
-        const $upperfield = $value;
-      )*
+    bitflags::bitflags! {
+      #[derive(Copy, Clone, PartialEq, Eq)]
+      struct $name: $unsigned {
+        $(
+          const $upperfield = $value;
+        )*
+      }
     }
 
     impl std::fmt::Debug for $name {
@@ -25,9 +27,9 @@ macro_rules! flags_impl {
 
       pub fn [<set_ $lowerfield>](&mut self, value: bool) {
         if value {
-          self.insert(&name::&upperfield);
+          self.insert($name::$upperfield);
         } else {
-          self.remove(&name::&upperfield);
+          self.remove($name::$upperfield);
         }
       }
     )*
