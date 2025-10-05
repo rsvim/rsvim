@@ -9,11 +9,11 @@ flags_impl!(
   SpecialFlags,
   u8,
   VERSION,
-  0b0000_0001,
+  1,
   SHORT_HELP,
-  0b0000_0010,
+  1 << 1,
   LONG_HELP,
-  0b0000_0100
+  1 << 2,
 );
 
 #[derive(Debug, Clone, PartialEq, Eq)]
