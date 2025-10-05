@@ -13,7 +13,7 @@ flags_impl!(
   SHORT_HELP,
   1 << 1,
   LONG_HELP,
-  1 << 2,
+  1 << 2
 );
 
 #[derive(Debug, Clone, PartialEq, Eq)]
