@@ -342,7 +342,7 @@ setTimeout(() => {
     assert!(!command_def.attributes.bang());
     assert_eq!(command_def.attributes.nargs(), Nargs::Zero);
     assert!(command_def.options.force());
-    assert_eq!(command_def.options.alias(), None);
+    assert_eq!(command_def.options.alias(), &None);
   }
 
   Ok(())
@@ -402,10 +402,10 @@ setTimeout(() => {
     for (name, def) in commands.iter() {
       assert!(name == "write" || name == "writeSync");
       assert_eq!(name, def.name);
-      assert!(!def.attributes.bang);
-      assert_eq!(def.attributes.nargs, Nargs::Zero);
-      assert!(!def.options.force);
-      assert_eq!(def.options.alias, None);
+      assert!(!def.attributes.bang());
+      assert_eq!(def.attributes.nargs(), Nargs::Zero);
+      assert!(!def.options.force());
+      assert_eq!(def.options.alias(), &None);
     }
   }
 
