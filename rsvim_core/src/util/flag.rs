@@ -19,6 +19,21 @@ macro_rules! flags_impl {
       }
     }
   };
+
+  (@each($name:ident,$unsigned:ty,$($inc:tt)*){$($collect:tt)*} $i:ident $($rest:tt)*) => {
+    flags_impl! {@each($name,$unsigned,$($inc)*<<1){
+      $($collect)*
+      const $i = $($inc)*;
+    } $($rest)*}
+  };
+
+  (@each($name:ident,$unsigned:ty,$($inc:tt)*){$($collect:tt)*}) => {
+    bitflags::bitflags! {
+      struct $name: $unsigned {
+        $($collect)*
+      }
+    }
+  };
 }
 
 #[macro_export]
