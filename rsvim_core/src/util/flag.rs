@@ -40,15 +40,15 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$name:ident,$field:ident,$default:ident,$($lower:tt,$upper:tt),*) => {
-    impl $builder {
+  ($name:ident,$field:ident,$default:ident,$($lower:tt,$upper:expr),*) => {
+    impl $name {
       $(
         pub fn $lower(&mut self, value: bool) -> &mut Self {
           let mut flags = self.$field.unwrap_or($default);
           if value {
-            flags.insert($name::$upper);
+            flags.insert($upper);
           } else {
-            flags.remove($name::$upper);
+            flags.remove($upper);
           }
           self.$field = Some(flags);
           self
