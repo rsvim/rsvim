@@ -17,6 +17,7 @@ const FLAGS: Flags = Flags::WRAP;
 /// Window local options.
 pub struct WindowOptions {
   #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
   // wrap=true
   // line_break=false
   flags: Flags,
