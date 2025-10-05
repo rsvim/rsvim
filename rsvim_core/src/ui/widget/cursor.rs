@@ -10,7 +10,7 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use std::fmt::Debug;
 
-flags_impl!(Flags, u8, BLINKING, 0b0000_0001, HIDDEN, 0b0000_0010);
+flags_impl!(Flags, u8, BLINKING, 1, HIDDEN, 1 << 1);
 
 #[derive(Debug, Clone, Copy)]
 /// Cursor widget.
