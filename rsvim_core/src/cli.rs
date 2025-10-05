@@ -53,15 +53,19 @@ impl CliSpecialOptions {
   }
 }
 
+flags_impl!(Flags, u8, HEADLESS, 0b0000_0001);
+
 #[derive(Debug, Clone)]
 /// Command line options.
 pub struct CliOptions {
   // Special opts
   special_opts: CliSpecialOptions,
 
+  // headless
+  flags: Flags,
+
   // Normal opts
   file: Vec<PathBuf>,
-  headless: bool,
 }
 
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
