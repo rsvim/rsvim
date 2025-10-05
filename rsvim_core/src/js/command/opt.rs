@@ -1,7 +1,11 @@
 //! Ex command options.
 
+use crate::flags_builder_impl;
+use crate::flags_impl;
 use crate::js::converter::*;
 use compact_str::CompactString;
+
+flags_impl!(Flags, u8, FORCE, 0b0000_0001);
 
 /// Command option names.
 pub const FORCE: &str = "force";
@@ -11,13 +15,25 @@ pub const ALIAS: &str = "alias";
 pub const FORCE_DEFAULT: bool = true;
 pub const ALIAS_DEFAULT: Option<CompactString> = None;
 
+const FLAGS: Flags = Flags::FORCE;
+
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
-  #[builder(default = FORCE_DEFAULT)]
-  pub force: bool,
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // force=true
+  flags: Flags,
 
   #[builder(default = ALIAS_DEFAULT)]
   pub alias: Option<CompactString>,
+}
+
+flags_builder_impl!(CommandOptionsBuilder, flags, FLAGS, force, Flags::FORCE);
+
+impl CommandOptions {
+  pub fn force(&self) -> bool {
+    self.flags.contains(Flags::FORCE)
+  }
 }
 
 impl FromV8 for CommandOptions {
@@ -57,7 +73,7 @@ impl ToV8 for CommandOptions {
 
     // force
     let force_field = to_v8(scope, FORCE);
-    let force_value = to_v8(scope, self.force);
+    let force_value = to_v8(scope, self.force());
     obj.set(scope, force_field, force_value);
 
     // alias
