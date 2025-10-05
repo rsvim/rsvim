@@ -404,18 +404,18 @@ impl InodeBase {
   }
 
   pub fn enabled(&self) -> bool {
-    self.enabled
+    self.flags.enabled()
   }
 
-  pub fn set_enabled(&mut self, enabled: bool) {
-    self.enabled = enabled;
+  pub fn set_enabled(&mut self, value: bool) {
+    self.flags.set_enabled(value);
   }
 
   pub fn visible(&self) -> bool {
-    self.visible
+    self.flags.visible()
   }
 
-  pub fn set_visible(&mut self, visible: bool) {
-    self.visible = visible;
+  pub fn set_visible(&mut self, value: bool) {
+    self.flags.set_visible(value);
   }
 }
