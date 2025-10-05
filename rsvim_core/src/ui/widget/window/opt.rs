@@ -28,13 +28,12 @@ pub struct WindowOptions {
 
 flags_builder_impl!(
   WindowOptionsBuilder,
-  Flags,
   flags,
   FLAGS,
   wrap,
-  WRAP,
+  Flags::WRAP,
   line_break,
-  LINE_BREAK,
+  Flags::LINE_BREAK,
 );
 
 impl WindowOptions {

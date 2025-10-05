@@ -51,11 +51,10 @@ pub struct BufferOptions {
 
 flags_builder_impl!(
   BufferOptionsBuilder,
-  Flags,
   flags,
   FLAGS,
   expand_tab,
-  EXPAND_TAB
+  Flags::EXPAND_TAB
 );
 
 impl BufferOptions {
