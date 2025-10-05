@@ -8,12 +8,12 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use crate::bitflags_impl;
-use crate::derive_builder_impl;
+use crate::flags_builder_impl;
+use crate::flags_impl;
 pub use file_encoding::*;
 pub use file_format::*;
 
-bitflags_impl!(Flags, u8, EXPAND_TAB, 1, expand_tab);
+flags_impl!(Flags, u8, EXPAND_TAB, 1, expand_tab);
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;
@@ -50,7 +50,7 @@ pub struct BufferOptions {
 }
 
 impl BufferOptionsBuilder {
-  derive_builder_impl!(Flags, flags, FLAGS, expand_tab, EXPAND_TAB);
+  flags_builder_impl!(Flags, flags, FLAGS, expand_tab, EXPAND_TAB);
 }
 
 impl BufferOptions {
