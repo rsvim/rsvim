@@ -1,9 +1,13 @@
 //! Ex command attributes.
 
+use crate::flags_builder_impl;
+use crate::flags_impl;
 use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::str::FromStr;
+
+flags_impl!(Flags, u8, BANG, 0b0000_0001);
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
@@ -12,6 +16,9 @@ pub const NARGS: &str = "nargs";
 /// Default command attributes.
 pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
 pub const BANG_DEFAULT: bool = false;
+
+// bang=false
+const FLAGS: Flags = Flags::empty();
 
 #[derive(
   Debug,

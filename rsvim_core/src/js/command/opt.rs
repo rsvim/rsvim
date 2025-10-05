@@ -15,17 +15,18 @@ pub const ALIAS: &str = "alias";
 pub const FORCE_DEFAULT: bool = true;
 pub const ALIAS_DEFAULT: Option<CompactString> = None;
 
+// force=true
 const FLAGS: Flags = Flags::FORCE;
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandOptions {
   #[builder(default = FLAGS)]
   #[builder(setter(custom))]
-  // force=true
+  // force
   flags: Flags,
 
   #[builder(default = ALIAS_DEFAULT)]
-  pub alias: Option<CompactString>,
+  alias: Option<CompactString>,
 }
 
 flags_builder_impl!(CommandOptionsBuilder, flags, FLAGS, force, Flags::FORCE);
@@ -33,6 +34,10 @@ flags_builder_impl!(CommandOptionsBuilder, flags, FLAGS, force, Flags::FORCE);
 impl CommandOptions {
   pub fn force(&self) -> bool {
     self.flags.contains(Flags::FORCE)
+  }
+
+  pub fn alias(&self) -> &Option<CompactString> {
+    &self.alias
   }
 }
 
