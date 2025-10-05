@@ -8,11 +8,12 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
-use crate::flags_impl;
+use crate::bitflags_impl;
+use crate::derive_builder_impl;
 pub use file_encoding::*;
 pub use file_format::*;
 
-flags_impl!(Flags, u8, EXPAND_TAB, 1, expand_tab);
+bitflags_impl!(Flags, u8, EXPAND_TAB, 1, expand_tab);
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;
@@ -24,14 +25,18 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_os = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
+const FLAGS: Flags = Flags::empty();
+
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
 
-  #[builder(default = EXPAND_TAB)]
-  expand_tab: bool,
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // expand_tab
+  flags: Flags,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u8,
@@ -41,6 +46,10 @@ pub struct BufferOptions {
 
   #[builder(default = FILE_FORMAT)]
   file_format: FileFormatOption,
+}
+
+impl BufferOptionsBuilder {
+  derive_builder_impl!(Flags, flags, FLAGS, expand_tab, EXPAND_TAB);
 }
 
 impl BufferOptions {

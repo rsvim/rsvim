@@ -1,7 +1,7 @@
 //! Bitwise flags
 
 #[macro_export]
-macro_rules! flags_impl {
+macro_rules! bitflags_impl {
   ($name:ident,$unsigned:ty,$($upperfield:tt,$value:literal,$lowerfield:tt),*) => {
     bitflags::bitflags! {
       #[derive(Copy, Clone, PartialEq, Eq)]
@@ -19,21 +19,42 @@ macro_rules! flags_impl {
     }
 
     paste::paste! {
-    impl $name {
-    $(
-      pub fn $lowerfield(&self) -> bool {
-        self.contains($name::$upperfield)
-      }
-
-      pub fn [<set_ $lowerfield>](&mut self, value: bool) {
-        if value {
-          self.insert($name::$upperfield);
-        } else {
-          self.remove($name::$upperfield);
+      impl $name {
+      $(
+        pub fn $lowerfield(&self) -> bool {
+          self.contains($name::$upperfield)
         }
+
+        pub fn [<set_ $lowerfield>](&mut self, value: bool) {
+          if value {
+            self.insert($name::$upperfield);
+          } else {
+            self.remove($name::$upperfield);
+          }
+        }
+      )*
       }
-    )*
-    }
     }
   };
+}
+
+#[macro_export]
+macro_rules! derive_builder_impl {
+  ($name:ident,$flags:ident,$default_flags:ident,$($lowerfield:tt,$upperfield:tt),*) => {
+    $(
+      pub fn $lowerfield(&mut self, value: bool) -> &mut Self {
+        let mut flags = match self.$flags {
+          Some(flags) => flags,
+          None => $default_flags,
+        };
+        if value {
+          flags.insert($name::$upperfield);
+        } else {
+          flags.remove($name::$upperfield);
+        }
+        self.$flags = Some(flags);
+        self
+      }
+    )*
+  }
 }
