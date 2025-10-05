@@ -33,7 +33,7 @@ flags_builder_impl!(
   wrap,
   Flags::WRAP,
   line_break,
-  Flags::LINE_BREAK,
+  Flags::LINE_BREAK
 );
 
 impl WindowOptions {
