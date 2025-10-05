@@ -7,7 +7,7 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::str::FromStr;
 
-flags_impl!(Flags, u8, BANG, 0b0000_0001);
+flags_impl!(Flags, u8, BANG, 1);
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
