@@ -25,6 +25,7 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_os = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
+// expand_tab=false
 const FLAGS: Flags = Flags::empty();
 
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
