@@ -9,5 +9,11 @@ macro_rules! flags_impl {
         const $field = $value;
       )*
     }
+
+    impl std::fmt::Debug for $name {
+      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        bitflags::parser::to_writer(self, f)
+      }
+    }
   };
 }
