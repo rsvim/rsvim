@@ -9,7 +9,6 @@ pub mod coord;
 pub mod err;
 pub mod evloop;
 pub mod js;
-pub mod lock;
 pub mod log;
 pub mod msg;
 pub mod prelude;
