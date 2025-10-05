@@ -54,7 +54,7 @@ impl CliSpecialOptions {
   }
 }
 
-flags_impl!(Flags, u8, HEADLESS, 0b0000_0001);
+flags_impl!(Flags, u8, HEADLESS, 1);
 
 #[derive(Debug, Clone)]
 /// Command line options.
