@@ -31,13 +31,13 @@ const FLAGS: Flags = Flags::empty();
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
-  #[builder(default = TAB_STOP)]
-  tab_stop: u8,
-
   #[builder(default = FLAGS)]
   #[builder(setter(custom))]
   // expand_tab
   flags: Flags,
+
+  #[builder(default = TAB_STOP)]
+  tab_stop: u8,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u8,
