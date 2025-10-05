@@ -20,19 +20,19 @@ macro_rules! flags_impl {
 
     paste::paste! {
       impl $name {
-      $(
-        pub fn $lower(&self) -> bool {
-          self.contains($name::$upper)
-        }
-
-        pub fn [<set_ $lower>](&mut self, value: bool) {
-          if value {
-            self.insert($name::$upper);
-          } else {
-            self.remove($name::$upper);
+        $(
+          pub fn $lower(&self) -> bool {
+            self.contains($name::$upper)
           }
-        }
-      )*
+
+          pub fn [<set_ $lower>](&mut self, value: bool) {
+            if value {
+              self.insert($name::$upper);
+            } else {
+              self.remove($name::$upper);
+            }
+          }
+        )*
       }
     }
   };
