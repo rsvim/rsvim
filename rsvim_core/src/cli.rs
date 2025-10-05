@@ -1,43 +1,54 @@
 //! Command line options.
 
+use crate::flags_impl;
 use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
 
+flags_impl!(
+  SpecialFlags,
+  u8,
+  VERSION,
+  0b0000_0001,
+  SHORT_HELP,
+  0b0000_0010,
+  LONG_HELP,
+  0b0000_0100
+);
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {
-  version: bool,
-  short_help: bool,
-  long_help: bool,
+  // version
+  // short_help
+  // long_help
+  flags: SpecialFlags,
 }
 
 impl CliSpecialOptions {
   pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
-    Self {
-      version,
-      short_help,
-      long_help,
-    }
+    let mut flags = SpecialFlags::empty();
+    flags.set(SpecialFlags::VERSION, version);
+    flags.set(SpecialFlags::SHORT_HELP, short_help);
+    flags.set(SpecialFlags::LONG_HELP, long_help);
+    Self { flags }
   }
 
   pub fn version(&self) -> bool {
-    self.version
+    self.flags.contains(SpecialFlags::VERSION)
   }
 
   pub fn short_help(&self) -> bool {
-    self.short_help
+    self.flags.contains(SpecialFlags::SHORT_HELP)
   }
 
   pub fn long_help(&self) -> bool {
-    self.long_help
+    self.flags.contains(SpecialFlags::LONG_HELP)
   }
 
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      version: false,
-      short_help: false,
-      long_help: false,
+      flags: SpecialFlags::empty(),
     }
   }
 }
