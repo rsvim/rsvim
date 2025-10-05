@@ -10,6 +10,12 @@ mod file_format_tests;
 
 pub use file_encoding::*;
 pub use file_format::*;
+use bitflags::bitflags;
+
+bitflags! {
+  struct 
+}
+
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;
