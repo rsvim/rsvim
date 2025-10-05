@@ -50,22 +50,22 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.flags.wrap()
+    self.flags.contains(Flags::WRAP)
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.flags.set_wrap(value);
+    self.flags.set(Flags::WRAP, value);
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.flags.line_break()
+    self.flags.contains(Flags::LINE_BREAK)
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.flags.set_line_break(value);
+    self.flags.set(Flags::LINE_BREAK, value);
   }
 
   /// The 'scroll-off' option, default to `0`.
