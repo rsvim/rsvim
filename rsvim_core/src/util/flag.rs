@@ -43,10 +43,7 @@ macro_rules! flags_builder_impl {
   ($name:ident,$flags:ident,$default_flags:ident,$($lowerfield:tt,$upperfield:tt),*) => {
     $(
       pub fn $lowerfield(&mut self, value: bool) -> &mut Self {
-        let mut flags = match self.$flags {
-          Some(flags) => flags,
-          None => $default_flags,
-        };
+        let mut flags = self.$flags.unwrap_or($default_flags);
         if value {
           flags.insert($name::$upperfield);
         } else {
