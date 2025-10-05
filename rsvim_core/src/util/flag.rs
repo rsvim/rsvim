@@ -2,13 +2,13 @@
 
 #[macro_export]
 macro_rules! flags_impl {
-  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),*) => {
+  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),+) => {
     bitflags::bitflags! {
       #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $(
           const $upper = $value;
-        )*
+        )+
       }
     }
 
@@ -40,7 +40,7 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$field:ident,$default:ident,$($lower:tt,$upper:path),*) => {
+  ($builder:ident,$field:ident,$default:ident,$($lower:tt,$upper:path),+) => {
     impl $builder {
       $(
         pub fn $lower(&mut self, value: bool) -> &mut Self {
@@ -53,7 +53,7 @@ macro_rules! flags_builder_impl {
           self.$field = Some(flags);
           self
         }
-      )*
+      )+
     }
   }
 }
