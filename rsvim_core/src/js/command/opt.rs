@@ -5,7 +5,7 @@ use crate::flags_impl;
 use crate::js::converter::*;
 use compact_str::CompactString;
 
-flags_impl!(Flags, u8, FORCE, 0b0000_0001);
+flags_impl!(Flags, u8, FORCE, 1);
 
 /// Command option names.
 pub const FORCE: &str = "force";
