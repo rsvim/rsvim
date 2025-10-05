@@ -2,12 +2,12 @@
 
 #[macro_export]
 macro_rules! flags_impl {
-  ($name:ident,$unsigned:ty,$($upperfield:tt,$value:literal,$lowerfield:tt),*) => {
+  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:literal),*) => {
     bitflags::bitflags! {
       #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
         $(
-          const $upperfield = $value;
+          const $upper = $value;
         )*
       }
     }
@@ -21,15 +21,15 @@ macro_rules! flags_impl {
     paste::paste! {
       impl $name {
       $(
-        pub fn $lowerfield(&self) -> bool {
-          self.contains($name::$upperfield)
+        pub fn $lower(&self) -> bool {
+          self.contains($name::$upper)
         }
 
-        pub fn [<set_ $lowerfield>](&mut self, value: bool) {
+        pub fn [<set_ $lower>](&mut self, value: bool) {
           if value {
-            self.insert($name::$upperfield);
+            self.insert($name::$upper);
           } else {
-            self.remove($name::$upperfield);
+            self.remove($name::$upper);
           }
         }
       )*
@@ -40,16 +40,16 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($name:ident,$flags:ident,$default_flags:ident,$($lowerfield:tt,$upperfield:tt),*) => {
+  ($name:ident,$field:ident,$default:ident,$($lower:tt,$upper:tt),*) => {
     $(
-      pub fn $lowerfield(&mut self, value: bool) -> &mut Self {
-        let mut flags = self.$flags.unwrap_or($default_flags);
+      pub fn $lower(&mut self, value: bool) -> &mut Self {
+        let mut flags = self.$field.unwrap_or($default);
         if value {
-          flags.insert($name::$upperfield);
+          flags.insert($name::$upper);
         } else {
-          flags.remove($name::$upperfield);
+          flags.remove($name::$upper);
         }
-        self.$flags = Some(flags);
+        self.$field = Some(flags);
         self
       }
     )*
