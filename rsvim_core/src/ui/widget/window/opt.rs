@@ -41,22 +41,22 @@ impl WindowOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.wrap
+    self.flags.wrap()
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.wrap = value;
+    self.flags.set_wrap(value);
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.line_break
+    self.flags.line_break()
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.line_break = value;
+    self.flags.set_line_break(value);
   }
 
   /// The 'scroll-off' option, default to `0`.
