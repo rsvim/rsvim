@@ -14,7 +14,7 @@ macro_rules! flags_impl {
 
     impl std::fmt::Debug for $name {
       fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        bitflags::parser::write_hex(self, f)
+        bitflags::parser::to_writer(self, f)
       }
     }
 
