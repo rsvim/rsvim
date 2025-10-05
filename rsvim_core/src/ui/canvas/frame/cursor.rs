@@ -6,7 +6,7 @@ use geo::point;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
-flags_impl!(Flags, u8, BLINKING, 1, HIDDEN, 1 << 1);
+flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Terminal cursor.

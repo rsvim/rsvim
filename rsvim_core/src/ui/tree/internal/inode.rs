@@ -325,7 +325,7 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED, 1, VISIBLE, 1 << 1);
+flags_impl!(Flags, u8, ENABLED, VISIBLE);
 
 // enabled=true
 // visible=true

@@ -3,7 +3,7 @@
 use crate::flags_builder_impl;
 use crate::flags_impl;
 
-flags_impl!(Flags, u8, WRAP, 1, LINE_BREAK, 1 << 1);
+flags_impl!(Flags, u8, WRAP, LINE_BREAK);
 
 pub const WRAP: bool = true;
 pub const LINE_BREAK: bool = false;
