@@ -725,10 +725,10 @@ Rsvim.cmd.echo(`name:${def}`);
     let (command_name, command_def) = first_command.unwrap();
     assert_eq!(command_name, "write");
     assert_eq!(command_def.name, "write");
-    assert!(!command_def.attributes.bang);
-    assert_eq!(command_def.attributes.nargs, Nargs::Zero);
-    assert!(command_def.options.force);
-    assert_eq!(command_def.options.alias, None);
+    assert!(!command_def.attributes.bang());
+    assert_eq!(command_def.attributes.nargs(), Nargs::Zero);
+    assert!(command_def.options.force());
+    assert_eq!(command_def.options.alias(), &None);
   }
 
   Ok(())
