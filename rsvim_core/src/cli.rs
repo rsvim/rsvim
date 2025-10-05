@@ -103,8 +103,8 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
     special_opts: CliSpecialOptions {
       flags: special_flags,
     },
-    file,
     flags,
+    file,
   })
 }
 
@@ -139,7 +139,7 @@ impl CliOptions {
 
   /// Headless mode.
   pub fn headless(&self) -> bool {
-    self.headless
+    self.flags.contains(Flags::HEADLESS)
   }
 
   #[cfg(test)]
@@ -148,10 +148,12 @@ impl CliOptions {
     file: Vec<PathBuf>,
     headless: bool,
   ) -> Self {
+    let mut flags = Flags::empty();
+    flags.set(Flags::HEADLESS, headless);
     Self {
       special_opts,
+      flags,
       file,
-      headless,
     }
   }
 
@@ -159,8 +161,9 @@ impl CliOptions {
   pub fn empty() -> Self {
     Self {
       special_opts: CliSpecialOptions::empty(),
+      // headless=true
+      flags: Flags::HEADLESS,
       file: vec![],
-      headless: true,
     }
   }
 }
