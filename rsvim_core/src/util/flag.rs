@@ -23,16 +23,12 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$field:ident,$default:ident,$($lower:tt,$upper:path),+) => {
+  ($builder:ident,$field:ident,$default:expr,$($lower:tt,$upper:path),+) => {
     impl $builder {
       $(
         pub fn $lower(&mut self, value: bool) -> &mut Self {
           let mut flags = self.$field.unwrap_or($default);
-          if value {
-            flags.insert($upper);
-          } else {
-            flags.remove($upper);
-          }
+          flags.set($upper, value);
           self.$field = Some(flags);
           self
         }
