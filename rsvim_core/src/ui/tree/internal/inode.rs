@@ -1,6 +1,5 @@
 //! The node structure of the internal tree.
 
-use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::geo_rect_as;
 use crate::prelude::*;
