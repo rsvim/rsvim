@@ -2,7 +2,7 @@
 
 #[macro_export]
 macro_rules! flags_impl {
-  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:literal),*) => {
+  ($name:ident,$unsigned:ty,$($upper:tt,$lower:tt,$value:expr),*) => {
     bitflags::bitflags! {
       #[derive(Copy, Clone, PartialEq, Eq)]
       struct $name: $unsigned {
