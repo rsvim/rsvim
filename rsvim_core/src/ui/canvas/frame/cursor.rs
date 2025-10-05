@@ -78,8 +78,9 @@ impl Default for Cursor {
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      blinking: false,
-      hidden: false,
+      // blinking=false
+      // hidden=false
+      flags: Flags::empty(),
       style: CursorStyle::SteadyBlock,
     }
   }
