@@ -48,7 +48,7 @@ compact_str = "0.9"
 ropey = { version = "1.6.1", default-features = false }
 geo = "0.31.0"
 num-traits = "0.2.19"
-parking_lot = "0.12.4"
+parking_lot = "0.12.5"
 dirs = "6.0.0"
 # anyhow = "1"
 thiserror = "2"
