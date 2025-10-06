@@ -32,7 +32,7 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$flags:tt,$($field:ident),+) => {
+  ($builder:ident,$flags:ident,$($field:ident),+) => {
     paste::paste! {
       impl $builder {
         $(
