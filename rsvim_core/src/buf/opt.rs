@@ -49,13 +49,7 @@ pub struct BufferOptions {
   file_format: FileFormatOption,
 }
 
-flags_builder_impl!(
-  BufferOptionsBuilder,
-  flags,
-  FLAGS,
-  expand_tab,
-  Flags::EXPAND_TAB
-);
+flags_builder_impl!(BufferOptionsBuilder, flags, expand_tab);
 
 impl BufferOptions {
   /// Buffer 'tab-stop' option.
