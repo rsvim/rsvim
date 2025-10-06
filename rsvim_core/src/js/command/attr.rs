@@ -1,9 +1,13 @@
 //! Ex command attributes.
 
+use crate::flags_builder_impl;
+use crate::flags_impl;
 use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::str::FromStr;
+
+flags_impl!(Flags, u8, BANG);
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
@@ -13,8 +17,12 @@ pub const NARGS: &str = "nargs";
 pub const NARGS_DEFAULT: Nargs = Nargs::Zero;
 pub const BANG_DEFAULT: bool = false;
 
+// bang=false
+const FLAGS: Flags = Flags::empty();
+
 #[derive(
   Debug,
+  Copy,
   Clone,
   PartialEq,
   Eq,
@@ -48,11 +56,25 @@ pub enum Nargs {
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
-  #[builder(default = BANG_DEFAULT)]
-  pub bang: bool,
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // bang
+  flags: Flags,
 
   #[builder(default = NARGS_DEFAULT)]
-  pub nargs: Nargs,
+  nargs: Nargs,
+}
+
+flags_builder_impl!(CommandAttributesBuilder, flags, FLAGS, bang, Flags::BANG);
+
+impl CommandAttributes {
+  pub fn bang(&self) -> bool {
+    self.flags.contains(Flags::BANG)
+  }
+
+  pub fn nargs(&self) -> Nargs {
+    self.nargs
+  }
 }
 
 impl FromV8 for CommandAttributes {
@@ -89,7 +111,7 @@ impl ToV8 for CommandAttributes {
 
     // bang
     let bang_field = to_v8(scope, BANG);
-    let bang_value = to_v8(scope, self.bang);
+    let bang_value = to_v8(scope, self.bang());
     obj.set(scope, bang_field, bang_value);
 
     // nargs

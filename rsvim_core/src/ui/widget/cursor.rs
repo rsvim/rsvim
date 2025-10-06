@@ -1,5 +1,6 @@
 //! Cursor widget.
 
+use crate::flags_impl;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas;
@@ -9,12 +10,15 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use std::fmt::Debug;
 
+flags_impl!(Flags, u8, BLINKING, HIDDEN);
+
 #[derive(Debug, Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
-  blinking: bool,
-  hidden: bool,
+  // blinking=false
+  // hidden=false
+  flags: Flags,
   style: CursorStyle,
 }
 
@@ -25,10 +29,12 @@ impl Cursor {
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
+    let mut flags = Flags::empty();
+    flags.set(Flags::BLINKING, blinking);
+    flags.set(Flags::HIDDEN, hidden);
     Cursor {
       base: InodeBase::new(shape),
-      blinking,
-      hidden,
+      flags,
       style,
     }
   }
@@ -36,26 +42,27 @@ impl Cursor {
   pub fn default(shape: IRect) -> Self {
     Cursor {
       base: InodeBase::new(shape),
-      blinking: false,
-      hidden: false,
+      // blinking=false
+      // hidden=false
+      flags: Flags::empty(),
       style: CursorStyle::SteadyBlock,
     }
   }
 
   pub fn blinking(&self) -> bool {
-    self.blinking
+    self.flags.contains(Flags::BLINKING)
   }
 
   pub fn set_blinking(&mut self, value: bool) {
-    self.blinking = value;
+    self.flags.set(Flags::BLINKING, value);
   }
 
   pub fn hidden(&self) -> bool {
-    self.hidden
+    self.flags.contains(Flags::HIDDEN)
   }
 
   pub fn set_hidden(&mut self, value: bool) {
-    self.hidden = value;
+    self.flags.set(Flags::HIDDEN, value);
   }
 
   pub fn style(&self) -> &CursorStyle {
@@ -80,8 +87,8 @@ impl Widgetable for Cursor {
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
-      self.blinking,
-      self.hidden,
+      self.blinking(),
+      self.hidden(),
       self.style,
     ));
   }

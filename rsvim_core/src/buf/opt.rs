@@ -8,8 +8,12 @@ mod file_encoding_tests;
 #[cfg(test)]
 mod file_format_tests;
 
+use crate::flags_builder_impl;
+use crate::flags_impl;
 pub use file_encoding::*;
 pub use file_format::*;
+
+flags_impl!(Flags, u8, EXPAND_TAB);
 
 // Buffer default options.
 pub const TAB_STOP: u8 = 8;
@@ -21,14 +25,19 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 #[cfg(not(target_os = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
+// expand_tab=false
+const FLAGS: Flags = Flags::empty();
+
 #[derive(Debug, Copy, Clone, derive_builder::Builder)]
 /// Local buffer options.
 pub struct BufferOptions {
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // expand_tab
+  flags: Flags,
+
   #[builder(default = TAB_STOP)]
   tab_stop: u8,
-
-  #[builder(default = EXPAND_TAB)]
-  expand_tab: bool,
 
   #[builder(default = SHIFT_WIDTH)]
   shift_width: u8,
@@ -39,6 +48,14 @@ pub struct BufferOptions {
   #[builder(default = FILE_FORMAT)]
   file_format: FileFormatOption,
 }
+
+flags_builder_impl!(
+  BufferOptionsBuilder,
+  flags,
+  FLAGS,
+  expand_tab,
+  Flags::EXPAND_TAB
+);
 
 impl BufferOptions {
   /// Buffer 'tab-stop' option.
@@ -56,11 +73,11 @@ impl BufferOptions {
   ///
   /// See: <https://vimhelp.org/options.txt.html#%27expandtab%27>.
   pub fn expand_tab(&self) -> bool {
-    self.expand_tab
+    self.flags.contains(Flags::EXPAND_TAB)
   }
 
   pub fn set_expand_tab(&mut self, value: bool) {
-    self.expand_tab = value;
+    self.flags.set(Flags::EXPAND_TAB, value)
   }
 
   /// Buffer 'shift-width' option.

@@ -1,46 +1,51 @@
 //! Command line options.
 
+use crate::flags_impl;
 use std::ffi::OsString;
 use std::path::Path;
 use std::path::PathBuf;
 
+flags_impl!(SpecialFlags, u8, VERSION, SHORT_HELP, LONG_HELP);
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliSpecialOptions {
-  version: bool,
-  short_help: bool,
-  long_help: bool,
+  // version
+  // short_help
+  // long_help
+  flags: SpecialFlags,
 }
 
 impl CliSpecialOptions {
-  pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
-    Self {
-      version,
-      short_help,
-      long_help,
-    }
-  }
-
   pub fn version(&self) -> bool {
-    self.version
+    self.flags.contains(SpecialFlags::VERSION)
   }
 
   pub fn short_help(&self) -> bool {
-    self.short_help
+    self.flags.contains(SpecialFlags::SHORT_HELP)
   }
 
   pub fn long_help(&self) -> bool {
-    self.long_help
+    self.flags.contains(SpecialFlags::LONG_HELP)
+  }
+
+  #[cfg(test)]
+  pub fn new(version: bool, short_help: bool, long_help: bool) -> Self {
+    let mut flags = SpecialFlags::empty();
+    flags.set(SpecialFlags::VERSION, version);
+    flags.set(SpecialFlags::SHORT_HELP, short_help);
+    flags.set(SpecialFlags::LONG_HELP, long_help);
+    Self { flags }
   }
 
   #[cfg(test)]
   pub fn empty() -> Self {
     Self {
-      version: false,
-      short_help: false,
-      long_help: false,
+      flags: SpecialFlags::empty(),
     }
   }
 }
+
+flags_impl!(Flags, u8, HEADLESS);
 
 #[derive(Debug, Clone)]
 /// Command line options.
@@ -48,33 +53,36 @@ pub struct CliOptions {
   // Special opts
   special_opts: CliSpecialOptions,
 
+  // headless
+  flags: Flags,
+
   // Normal opts
   file: Vec<PathBuf>,
-  headless: bool,
 }
 
 fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   use lexopt::prelude::*;
 
-  let mut version: bool = false;
-  let mut short_help: bool = false;
-  let mut long_help: bool = false;
-  let mut headless: bool = false;
+  // let mut version: bool = false;
+  // let mut short_help: bool = false;
+  // let mut long_help: bool = false;
+  let mut special_flags: SpecialFlags = SpecialFlags::empty();
+  let mut flags: Flags = Flags::empty();
   let mut file: Vec<PathBuf> = vec![];
 
   while let Some(arg) = parser.next()? {
     match arg {
       Short('h') => {
-        short_help = true;
+        special_flags.insert(SpecialFlags::SHORT_HELP);
       }
       Long("help") => {
-        long_help = true;
+        special_flags.insert(SpecialFlags::LONG_HELP);
       }
       Short('V') | Long("version") => {
-        version = true;
+        special_flags.insert(SpecialFlags::VERSION);
       }
       Long("headless") => {
-        headless = true;
+        flags.insert(Flags::HEADLESS);
       }
       Value(filename) => {
         file.push(Path::new(&filename).to_path_buf());
@@ -84,9 +92,11 @@ fn parse(mut parser: lexopt::Parser) -> Result<CliOptions, lexopt::Error> {
   }
 
   Ok(CliOptions {
-    special_opts: CliSpecialOptions::new(version, short_help, long_help),
+    special_opts: CliSpecialOptions {
+      flags: special_flags,
+    },
+    flags,
     file,
-    headless,
   })
 }
 
@@ -121,7 +131,7 @@ impl CliOptions {
 
   /// Headless mode.
   pub fn headless(&self) -> bool {
-    self.headless
+    self.flags.contains(Flags::HEADLESS)
   }
 
   #[cfg(test)]
@@ -130,10 +140,12 @@ impl CliOptions {
     file: Vec<PathBuf>,
     headless: bool,
   ) -> Self {
+    let mut flags = Flags::empty();
+    flags.set(Flags::HEADLESS, headless);
     Self {
       special_opts,
+      flags,
       file,
-      headless,
     }
   }
 
@@ -141,8 +153,9 @@ impl CliOptions {
   pub fn empty() -> Self {
     Self {
       special_opts: CliSpecialOptions::empty(),
+      // headless=true
+      flags: Flags::HEADLESS,
       file: vec![],
-      headless: true,
     }
   }
 }

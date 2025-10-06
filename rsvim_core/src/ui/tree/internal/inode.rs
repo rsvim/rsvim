@@ -1,5 +1,6 @@
 //! The node structure of the internal tree.
 
+use crate::flags_impl;
 use crate::geo_rect_as;
 use crate::prelude::*;
 use std::fmt::Debug;
@@ -324,6 +325,12 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+flags_impl!(Flags, u8, ENABLED, VISIBLE);
+
+// enabled=true
+// visible=true
+const FLAGS: Flags = Flags::all();
+
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
@@ -332,8 +339,9 @@ pub struct InodeBase {
   shape: IRect,
   actual_shape: U16Rect,
   zindex: usize,
-  enabled: bool,
-  visible: bool,
+  // enabled
+  // visible
+  flags: Flags,
 }
 
 impl InodeBase {
@@ -345,8 +353,7 @@ impl InodeBase {
       shape,
       actual_shape,
       zindex: 0,
-      enabled: true,
-      visible: true,
+      flags: FLAGS,
     }
   }
 
@@ -387,18 +394,18 @@ impl InodeBase {
   }
 
   pub fn enabled(&self) -> bool {
-    self.enabled
+    self.flags.contains(Flags::ENABLED)
   }
 
-  pub fn set_enabled(&mut self, enabled: bool) {
-    self.enabled = enabled;
+  pub fn set_enabled(&mut self, value: bool) {
+    self.flags.set(Flags::ENABLED, value);
   }
 
   pub fn visible(&self) -> bool {
-    self.visible
+    self.flags.contains(Flags::VISIBLE)
   }
 
-  pub fn set_visible(&mut self, visible: bool) {
-    self.visible = visible;
+  pub fn set_visible(&mut self, value: bool) {
+    self.flags.set(Flags::VISIBLE, value);
   }
 }
