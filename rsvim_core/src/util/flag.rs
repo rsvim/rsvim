@@ -32,16 +32,18 @@ macro_rules! flags_impl {
 
 #[macro_export]
 macro_rules! flags_builder_impl {
-  ($builder:ident,$field:ident,$default:expr,$($lower:tt,$upper:path),+) => {
-    impl $builder {
-      $(
-        pub fn $lower(&mut self, value: bool) -> &mut Self {
-          let mut flags = self.$field.unwrap_or($default);
-          flags.set($upper, value);
-          self.$field = Some(flags);
-          self
-        }
-      )+
+  ($builder:ident,$member:ident,$flags:ident,$($field:ident),+) => {
+    paste::paste! {
+      impl $builder {
+        $(
+          pub fn $field(&mut self, value: bool) -> &mut Self {
+            let mut flags = self.$member.unwrap_or( [< $member:upper >] );
+            flags.set( [<  $flags :: $field:upper >] , value);
+            self.$member = Some(flags);
+            self
+          }
+        )+
+      }
     }
   }
 }
