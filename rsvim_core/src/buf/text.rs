@@ -37,8 +37,8 @@ pub struct Text {
 arc_mutex_ptr!(Text);
 
 #[inline]
-fn _cached_size(canvas_size: U16Size) -> usize {
-  canvas_size.height() as usize * 2 + 3
+fn _cached_size(canvas_size: U16Size) -> u64 {
+  canvas_size.height() as u64 * 2 + 3
 }
 
 impl Text {
@@ -454,30 +454,16 @@ impl Text {
     F: Fn(/* line_idx */ &usize) -> bool,
   {
     // cached clone lines
-    {
-      let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-      let to_be_removed: Vec<ClonedLineKey> = cached_lines
-        .iter()
-        .filter(|(k, _)| !f(&k.0))
-        .map(|(k, _)| *k)
-        .collect();
-      for cloned_key in to_be_removed.iter() {
-        cached_lines.pop(cloned_key);
-      }
-    }
+    self
+      .cached_cloned_lines
+      .borrow_mut()
+      .retain(|cloned_line_key, _| f(&cloned_line_key.0));
 
     // cached lines width
-    {
-      let mut cached_width = self.cached_lines_width.borrow_mut();
-      let to_be_removed: Vec<usize> = cached_width
-        .iter()
-        .filter(|(line_idx, _)| !f(line_idx))
-        .map(|(line_idx, _)| *line_idx)
-        .collect();
-      for line_idx in to_be_removed.iter() {
-        cached_width.pop(line_idx);
-      }
-    }
+    self
+      .cached_lines_width
+      .borrow_mut()
+      .retain(|cached_line_idx, _| f(cached_line_idx));
   }
 
   /// Clear cache.
@@ -493,8 +479,8 @@ impl Text {
 
     // cached clone lines
     let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-    if new_cache_size > cached_lines.cap() {
-      cached_lines.resize(new_cache_size);
+    if new_cache_size > cached_lines.capacity() as usize {
+      cached_lines.set_capacity(new_cache_size);
     }
 
     // cached lines width
