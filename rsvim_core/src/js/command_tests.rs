@@ -185,7 +185,7 @@ Rsvim.cmd.create("write", write, {}, {alias: "w"});
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert_eq!(actual, "1");
+    assert!(actual.starts_with("Buffer") && actual.ends_with("bytes written."));
   }
 
   Ok(())
