@@ -17,7 +17,6 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
-use itertools::Itertools;
 
 const JS_COMMAND_NAME: &str = "js";
 
