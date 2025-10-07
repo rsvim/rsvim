@@ -181,7 +181,7 @@ impl CommandsManager {
     if is_builtin_js {
       // For builtin js command, it:
       // - Has only 1 args, which is the js expression payload
-      // - Doesn't have a js function based command definition.
+      // - Doesn't have a js function based command definition
 
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
