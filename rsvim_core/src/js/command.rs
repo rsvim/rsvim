@@ -211,7 +211,7 @@ impl CommandsManager {
         .map(|a| a.to_compact_string())
         .collect_vec();
       context.args(args);
-      let context = Some(context.build().unwrap());
+      let context = context.build().unwrap();
       let definition = Some(self.commands.get(&name).unwrap().clone());
 
       Some(CommandFuture {
