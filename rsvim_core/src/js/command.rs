@@ -42,13 +42,14 @@ impl JsFuture for BuiltinCommandFuture {
 pub struct UserCommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
+  pub args: Vec<CompactString>,
   pub definition: CommandDefinitionRc,
 }
 
 impl JsFuture for UserCommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|UserCommandFuture| run:{:?}", self.task_id);
-    let filename = format!("<command-js:{}>", self.task_id);
+    let filename = format!("<command-{}>", self.name);
 
     execute_module(scope, &filename, Some(self.body.trim()));
   }
