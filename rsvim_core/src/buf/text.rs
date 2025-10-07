@@ -135,14 +135,11 @@ impl Text {
               if skip_cache {
                 return Some(Rc::new(builder));
               } else {
-                let cache = cached_cloned_lines
-                  .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
-                    Ok(Rc::new(builder))
-                  })
-                  .unwrap()
-                  .cloned();
-                debug_assert!(cache.is_some());
-                return cache;
+                let value = Rc::new(builder);
+                cached_cloned_lines.insert(key, value);
+                let result = cached_cloned_lines.get(&key);
+                debug_assert!(result.is_some());
+                return result.cloned();
               }
             }
             builder.push(c);
@@ -151,14 +148,11 @@ impl Text {
           if skip_cache {
             Some(Rc::new(builder))
           } else {
-            let cache = cached_cloned_lines
-              .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
-                Ok(Rc::new(builder))
-              })
-              .unwrap()
-              .cloned();
-            debug_assert!(cache.is_some());
-            cache
+            let value = Rc::new(builder);
+            cached_cloned_lines.insert(key, value);
+            let result = cached_cloned_lines.get(&key);
+            debug_assert!(result.is_some());
+            result.cloned()
           }
         }
         None => None,
