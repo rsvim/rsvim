@@ -180,7 +180,7 @@ impl CommandsManager {
 
     if is_builtin_js {
       // For builtin js command, it has only 1 args, which is the js expression
-      // payload.
+      // payload. And it doesn't have a function-based command definition.
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
       Some(CommandFuture {
