@@ -445,7 +445,7 @@ impl Text {
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
     self._remove_cached_cloned_line(line_idx);
-    self.cached_lines_width.borrow_mut().pop(&line_idx);
+    self.cached_lines_width.borrow_mut().remove(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
