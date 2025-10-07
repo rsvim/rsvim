@@ -50,8 +50,6 @@ impl JsFuture for UserCommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|UserCommandFuture| run:{:?}", self.task_id);
     let filename = format!("<command-{}>", self.name);
-
-    execute_module(scope, &filename, Some(self.body.trim()));
   }
 }
 
