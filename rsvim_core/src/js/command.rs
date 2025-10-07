@@ -163,6 +163,8 @@ impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
 
+    let mut ctx = CommandContextBuilder::default();
+
     let (mut name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
@@ -175,8 +177,6 @@ impl CommandsManager {
         (name, body)
       }
     };
-
-    let mut ctx = CommandContextBuilder::default();
 
     if name.ends_with("!") {
       let _last = name.pop();
