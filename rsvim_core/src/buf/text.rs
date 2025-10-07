@@ -389,9 +389,11 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
+      .get_mut_or_insert_with(&line_idx, || -> Result<ColumnIndex, ()> {
+        Ok(ColumnIndex::with_capacity(rope_line.len_chars()))
       })
+      .unwrap()
+      .unwrap()
       .last_char_until(&self.options, &rope_line, width)
   }
 
