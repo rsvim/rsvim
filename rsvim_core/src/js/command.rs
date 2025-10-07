@@ -45,6 +45,15 @@ pub struct UserCommandFuture {
   pub definition: CommandDefinitionRc,
 }
 
+impl JsFuture for UserCommandFuture {
+  fn run(&mut self, scope: &mut v8::PinScope) {
+    trace!("|UserCommandFuture| run:{:?}", self.task_id);
+    let filename = format!("<command-js:{}>", self.task_id);
+
+    execute_module(scope, &filename, Some(self.body.trim()));
+  }
+}
+
 #[derive(Debug, Default)]
 pub struct CommandsManager {
   // Maps from command "name" to its "definition".
