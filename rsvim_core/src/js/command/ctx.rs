@@ -2,7 +2,6 @@
 
 use crate::js::converter::*;
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
