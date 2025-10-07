@@ -48,8 +48,7 @@ pub struct UserCommandFuture {
 
 impl JsFuture for UserCommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|UserCommandFuture| run:{:?}", self.task_id);
-    let filename = format!("<command-{}>", self.name);
+    trace!("|UserCommandFuture| run:{}({:?})", self.name, self.task_id);
   }
 }
 
