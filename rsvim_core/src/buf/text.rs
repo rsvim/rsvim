@@ -107,7 +107,7 @@ impl Text {
     let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
 
-    if !skip_cache && cached_cloned_lines.contains(&key) {
+    if !skip_cache && cached_cloned_lines.contains_key(&key) {
       return cached_cloned_lines.get(&key).cloned();
     }
 
@@ -120,11 +120,12 @@ impl Text {
               if skip_cache {
                 return Some(Rc::new(builder));
               } else {
-                return Some(
-                  cached_cloned_lines
-                    .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
-                    .clone(),
-                );
+                return cached_cloned_lines
+                  .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
+                    Ok(Rc::new(builder))
+                  })
+                  .unwrap()
+                  .cloned();
               }
             }
             builder.push(c);
@@ -133,11 +134,12 @@ impl Text {
           if skip_cache {
             Some(Rc::new(builder))
           } else {
-            Some(
-              cached_cloned_lines
-                .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
-                .clone(),
-            )
+            cached_cloned_lines
+              .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
+                Ok(Rc::new(builder))
+              })
+              .unwrap()
+              .cloned()
           }
         }
         None => None,
