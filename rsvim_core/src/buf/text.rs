@@ -435,15 +435,10 @@ impl Text {
   }
 
   fn _remove_cached_cloned_line(&self, line_idx: usize) {
-    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
-    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
-      .iter()
-      .filter(|(k, _)| k.0 == line_idx)
-      .map(|(k, _)| *k)
-      .collect();
-    for key in to_be_removed.iter() {
-      cached_cloned_lines.pop(key);
-    }
+    self
+      .cached_cloned_lines
+      .borrow_mut()
+      .retain(|cloned_line_key, _| cloned_line_key.0 != line_idx);
   }
 
   #[allow(dead_code)]
