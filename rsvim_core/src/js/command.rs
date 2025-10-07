@@ -1,9 +1,9 @@
 //! Vim ex commands.
 
 pub mod attr;
+pub mod ctx;
 pub mod def;
 pub mod opt;
-pub mod ctx;
 
 #[cfg(test)]
 mod attr_tests;
@@ -163,7 +163,18 @@ impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
 
-    let (name, body) = self.parse_name(payload);
+    let (name, body) = match payload.find(char::is_whitespace) {
+      Some(pos) => {
+        let name = payload.get(0..pos).unwrap().trim().to_compact_string();
+        let body = payload.get(pos..).unwrap().to_compact_string();
+        (name, body)
+      }
+      None => {
+        let name = payload.trim().to_compact_string();
+        let body = "".to_compact_string();
+        (name, body)
+      }
+    };
 
     let is_builtin_js = name == JS_COMMAND_NAME;
     let task_id = next_task_id();
@@ -184,27 +195,5 @@ impl CommandsManager {
     } else {
       None
     }
-  }
-
-  fn parse_name(&self, payload: &str) -> (CompactString, CompactString) {
-    match payload.find(char::is_whitespace) {
-      Some(pos) => {
-        let name = payload.get(0..pos).unwrap().trim().to_compact_string();
-        let body = payload.get(pos..).unwrap().to_compact_string();
-        (name, body)
-      }
-      None => {
-        let name = payload.trim().to_compact_string();
-        let body = "".to_compact_string();
-        (name, body)
-      }
-    }
-  }
-
-  fn parse_attributes(
-    &self,
-    name: &CompactString,
-    payload: 
-  ) -> (CompactString, Option<CommandAttributes>) {
   }
 }
