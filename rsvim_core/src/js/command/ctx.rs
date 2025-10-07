@@ -1,13 +1,8 @@
 //! Ex command runtime context.
 
-use crate::flags_builder_impl;
-use crate::flags_impl;
 use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use std::str::FromStr;
-
-flags_impl!(Flags, u8, BANG);
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
@@ -17,29 +12,23 @@ pub const ARGS: &str = "args";
 pub const BANG_DEFAULT: bool = false;
 pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 
-// bang=false
-const FLAGS: Flags = Flags::empty();
-
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandContext {
-  #[builder(default = FLAGS)]
-  #[builder(setter(custom))]
+  #[builder(default = BANG_DEFAULT)]
   // bang
-  flags: Flags,
+  bang: bool,
 
-  #[builder(default = NARGS_DEFAULT)]
-  nargs: Nargs,
+  #[builder(default = ARGS_DEFAULT)]
+  args: Vec<CompactString>,
 }
-
-flags_builder_impl!(CommandContextBuilder, flags, bang);
 
 impl CommandContext {
   pub fn bang(&self) -> bool {
-    self.flags.contains(Flags::BANG)
+    self.bang
   }
 
-  pub fn nargs(&self) -> Nargs {
-    self.nargs
+  pub fn args(&self) -> &Vec<CompactString> {
+    &self.args
   }
 }
 
