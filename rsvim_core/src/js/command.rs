@@ -179,6 +179,8 @@ impl CommandsManager {
     let task_id = next_task_id();
 
     if is_builtin_js {
+      // For builtin js command, it has only 1 args, which is the js expression
+      // payload.
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
       Some(CommandFuture {
@@ -203,8 +205,8 @@ impl CommandsManager {
         task_id,
         name,
         args,
-        definition,
         is_builtin_js,
+        definition,
       })
     } else {
       None
