@@ -11,6 +11,7 @@ mod attr_tests;
 mod opt_tests;
 
 use crate::js::JsFuture;
+use crate::js::JsRuntime;
 use crate::js::JsTaskId;
 use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
@@ -39,15 +40,15 @@ impl JsFuture for CommandFuture {
     trace!("|CommandFuture| run:{:?}({:?})", self.name, self.task_id);
     if self.is_builtin_js {
       let filename = format!("<command-js:{}>", self.task_id);
-      debug_assert_eq!(self.context.args().len(), 1);
-      execute_module(scope, &filename, Some(self.context.args()[0].trim()));
+      debug_assert_eq!(self.context.args.len(), 1);
+      execute_module(scope, &filename, Some(self.context.args[0].trim()));
     } else {
       let def = self.definition.unwrap();
       let undefined = v8::undefined(scope).into();
       let callback = v8::Local::new(scope, (*def.callback).clone());
       let args: Vec<v8::Local<v8::Value>> = self
         .context
-        .args()
+        .args
         .iter()
         .map(|arg| v8::Local::new(scope, arg))
         .collect();
