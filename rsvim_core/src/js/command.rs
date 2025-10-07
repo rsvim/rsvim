@@ -154,22 +154,12 @@ impl CommandsManager {
 impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
-    let components = payload.split_whitespace().collect_vec();
-    let (name, body) = match payload.find(char::is_whitespace) {
-      Some(pos) => {
-        let name = payload.get(0..pos).unwrap().trim().to_compact_string();
-        let body = payload.get(pos..).unwrap().to_compact_string();
-        (name, body)
-      }
-      None => {
-        let name = payload.trim().to_compact_string();
-        let body = "".to_compact_string();
-        (name, body)
-      }
-    };
+
+    let (name, body) = self.parse_name_and_body(payload);
 
     let is_builtin_js = name == JS_COMMAND_NAME;
     let task_id = next_task_id();
+
     if is_builtin_js {
       debug_assert!(!self.commands.contains_key(&name));
       Some(BuiltinCommandFuture {
@@ -185,6 +175,24 @@ impl CommandsManager {
       })
     } else {
       None
+    }
+  }
+
+  fn parse_name_and_body(
+    &self,
+    payload: &str,
+  ) -> (CompactString, CompactString) {
+    match payload.find(char::is_whitespace) {
+      Some(pos) => {
+        let name = payload.get(0..pos).unwrap().trim().to_compact_string();
+        let body = payload.get(pos..).unwrap().to_compact_string();
+        (name, body)
+      }
+      None => {
+        let name = payload.trim().to_compact_string();
+        let body = "".to_compact_string();
+        (name, body)
+      }
     }
   }
 }
