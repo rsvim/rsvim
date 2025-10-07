@@ -46,8 +46,8 @@ impl Text {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
-      cached_lines_width: RefCell::new(Cache::new(cache_size)),
-      cached_cloned_lines: RefCell::new(Cache::new(cache_size)),
+      cached_lines_width: RefCell::new(Cache::new(cache_size as usize)),
+      cached_cloned_lines: RefCell::new(Cache::new(cache_size as usize)),
       options: opts,
     }
   }
@@ -479,14 +479,14 @@ impl Text {
 
     // cached clone lines
     let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-    if new_cache_size > cached_lines.capacity() as usize {
+    if new_cache_size > cached_lines.capacity() {
       cached_lines.set_capacity(new_cache_size);
     }
 
     // cached lines width
     let mut cached_width = self.cached_lines_width.borrow_mut();
-    if new_cache_size > cached_width.cap() {
-      cached_width.resize(new_cache_size);
+    if new_cache_size > cached_width.capacity() {
+      cached_width.set_capacity(new_cache_size);
     }
   }
 }
