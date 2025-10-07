@@ -212,13 +212,12 @@ impl CommandsManager {
         .collect_vec();
       context.args(args);
       let context = Some(context.build().unwrap());
-
       let definition = Some(self.commands.get(&name).unwrap().clone());
 
       Some(CommandFuture {
         task_id,
         name,
-        args,
+        context,
         is_builtin_js,
         definition,
       })
