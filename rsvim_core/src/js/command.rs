@@ -196,8 +196,8 @@ impl CommandsManager {
     {
       // For user registered commands, it can have
       // - Command alias
-      // - Whitespace split arguments
-      // - A js function based command definition
+      // - Command arguments split by whitespaces
+      // - Js function based command definition
 
       let name = self.aliases.get(&name).unwrap_or(&name).clone();
       debug_assert!(self.commands.contains_key(&name));
