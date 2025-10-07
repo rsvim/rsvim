@@ -19,38 +19,29 @@ use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
+use itertools::Itertools;
 
 const JS_COMMAND_NAME: &str = "js";
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
-pub struct BuiltinCommandFuture {
-  pub task_id: JsTaskId,
-  pub name: CompactString,
-  pub body: CompactString,
-}
-
-impl JsFuture for BuiltinCommandFuture {
-  fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|BuiltinCommandFuture| run:{:?}", self.task_id);
-    let filename = format!("<command-js:{}>", self.task_id);
-
-    execute_module(scope, &filename, Some(self.body.trim()));
-  }
-}
-
-#[derive(Debug, Clone)]
-/// User command
-pub struct UserCommandFuture {
+pub struct CommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
   pub args: Vec<CompactString>,
-  pub definition: CommandDefinitionRc,
+  pub is_builtin_js: bool,
+  pub definition: Option<CommandDefinitionRc>,
 }
 
-impl JsFuture for UserCommandFuture {
+impl JsFuture for CommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|UserCommandFuture| run:{}({:?})", self.name, self.task_id);
+    trace!("|CommandFuture| run:{:?}({:?})", self.name, self.task_id);
+    if self.is_builtin_js {
+      let filename = format!("<command-js:{}>", self.task_id);
+      debug_assert_eq!(self.args.len(), 1);
+      execute_module(scope, &filename, Some(self.args[0].trim()));
+    } else {
+    }
   }
 }
 
@@ -160,7 +151,7 @@ impl CommandsManager {
 }
 
 impl CommandsManager {
-  pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
+  pub fn parse(&self, payload: &str) -> Option<CommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
 
     let mut ctx = CommandContextBuilder::default();
@@ -189,16 +180,31 @@ impl CommandsManager {
 
     if is_builtin_js {
       debug_assert!(!self.commands.contains_key(&name));
-      Some(BuiltinCommandFuture {
+      let args = vec![body];
+      Some(CommandFuture {
         task_id,
         name,
-        body,
+        args,
+        is_builtin_js,
+        definition: None,
       })
-    } else if self.commands.contains_key(&name) {
-      Some(BuiltinCommandFuture {
+    } else if self.commands.contains_key(&name)
+      || self.aliases.contains_key(&name)
+    {
+      let name = self.aliases.get(&name).unwrap_or(&name).clone();
+      debug_assert!(self.commands.contains_key(&name));
+      let args = body
+        .split_whitespace()
+        .map(|a| a.to_compact_string())
+        .collect_vec();
+      let definition = Some(self.commands.get(&name).unwrap().clone());
+
+      Some(CommandFuture {
         task_id,
         name,
-        body,
+        args,
+        definition,
+        is_builtin_js,
       })
     } else {
       None
