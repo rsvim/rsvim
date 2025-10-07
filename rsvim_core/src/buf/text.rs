@@ -12,7 +12,7 @@ use crate::prelude::*;
 pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use lru::LruCache;
+use quick_cache::unsync::Cache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
@@ -29,17 +29,16 @@ struct ClonedLineKey(
 /// Text content backend.
 pub struct Text {
   rope: Rope,
-  cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
-  cached_cloned_lines:
-    RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
+  cached_lines_width: RefCell<Cache<usize, ColumnIndex>>,
+  cached_cloned_lines: RefCell<Cache<ClonedLineKey, Rc<String>>>,
   options: BufferOptions,
 }
 
 arc_mutex_ptr!(Text);
 
 #[inline]
-fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
+fn _cached_size(canvas_size: U16Size) -> usize {
+  canvas_size.height() as usize * 2 + 3
 }
 
 impl Text {
@@ -47,14 +46,8 @@ impl Text {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
-      cached_lines_width: RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::default(),
-      )),
-      cached_cloned_lines: RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::default(),
-      )),
+      cached_lines_width: RefCell::new(Cache::new(cache_size)),
+      cached_cloned_lines: RefCell::new(Cache::new(cache_size)),
       options: opts,
     }
   }
