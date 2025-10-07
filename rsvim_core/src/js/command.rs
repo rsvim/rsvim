@@ -12,6 +12,7 @@ mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsTaskId;
+use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
@@ -160,8 +161,6 @@ impl CommandsManager {
 
 impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
-    use ctx::BANG_DEFAULT;
-
     debug_assert_eq!(payload.trim(), payload);
 
     let (mut name, body) = match payload.find(char::is_whitespace) {
@@ -177,10 +176,12 @@ impl CommandsManager {
       }
     };
 
-    let mut bang = BANG_DEFAULT;
+    let mut ctx = CommandContextBuilder::default();
 
     if name.ends_with("!") {
-      name = name[0..name.len() - 1].to_string().to_compact_string();
+      let _last = name.pop();
+      debug_assert_eq!(_last, Some('!'));
+      ctx.bang(true);
     }
 
     let is_builtin_js = name == JS_COMMAND_NAME;
