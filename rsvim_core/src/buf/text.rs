@@ -152,9 +152,11 @@ impl Text {
               if skip_cache {
                 return Some(Rc::new(builder));
               } else {
-                let value = Rc::new(builder);
-                cached_cloned_lines.insert(key, value);
-                let result = cached_cloned_lines.get(&key);
+                let result = cached_cloned_lines
+                  .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
+                    Ok(Rc::new(builder))
+                  })
+                  .unwrap();
                 debug_assert!(result.is_some());
                 return result.cloned();
               }
@@ -165,9 +167,11 @@ impl Text {
           if skip_cache {
             Some(Rc::new(builder))
           } else {
-            let value = Rc::new(builder);
-            cached_cloned_lines.insert(key, value);
-            let result = cached_cloned_lines.get(&key);
+            let result = cached_cloned_lines
+              .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
+                Ok(Rc::new(builder))
+              })
+              .unwrap();
             debug_assert!(result.is_some());
             result.cloned()
           }
