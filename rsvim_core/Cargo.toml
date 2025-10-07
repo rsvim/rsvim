@@ -54,7 +54,10 @@ ascii = { workspace = true }
 icu = { workspace = true, features = ["compiled_data"] }
 itertools = { workspace = true }
 derive_builder = { workspace = true }
-quick_cache = { workspace = true, features = ["stats"] }
+quick_cache = { workspace = true, default-features = false, features = [
+  "parking_lot",
+  "stats",
+] }
 paste = { workspace = true }
 smallvec = { workspace = true }
 litemap = { workspace = true }

@@ -135,12 +135,14 @@ impl Text {
               if skip_cache {
                 return Some(Rc::new(builder));
               } else {
-                return cached_cloned_lines
+                let cache = cached_cloned_lines
                   .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
                     Ok(Rc::new(builder))
                   })
                   .unwrap()
                   .cloned();
+                debug_assert!(cache.is_some());
+                return cache;
               }
             }
             builder.push(c);
@@ -149,12 +151,14 @@ impl Text {
           if skip_cache {
             Some(Rc::new(builder))
           } else {
-            cached_cloned_lines
+            let cache = cached_cloned_lines
               .get_or_insert_with(&key, || -> Result<Rc<String>, ()> {
                 Ok(Rc::new(builder))
               })
               .unwrap()
-              .cloned()
+              .cloned();
+            debug_assert!(cache.is_some());
+            cache
           }
         }
         None => None,

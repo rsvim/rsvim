@@ -65,7 +65,10 @@ unicode-width = "0.2.1"
 icu = { version = "2.0.0", features = ["compiled_data"] }
 itertools = "0.14.0"
 derive_builder = "0.20.2"
-quick_cache = { version = "0.6", features = ["stats"] }
+quick_cache = { version = "0.6", default-features = false, features = [
+  "parking_lot",
+  "stats",
+] }
 paste = "1.0.15"
 smallvec = "1.15.1"
 litemap = "0.8.0"
