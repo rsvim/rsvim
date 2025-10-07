@@ -1,5 +1,6 @@
 // use super::command::*;
 use crate::cli::CliOptions;
+use crate::cli::CliSpecialOptions;
 use crate::prelude::*;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -128,6 +129,124 @@ async fn test_js_invalid1() -> IoResult<()> {
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains("Uncaught ReferenceError: asdf is not defined"));
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_buf_write1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![
+    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::CursorInsert(
+      CursorInsertPayload::Text("w".to_compact_string()),
+    )),
+    MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
+    MockOperation::SleepFor(Duration::from_millis(50)),
+  ];
+
+  let src: &str = r#"
+function write() {
+  const bufId = Rsvim.buf.current();
+  try {
+    const n = Rsvim.buf.writeSync(bufId);
+    Rsvim.cmd.echo(`Buffer ${bufId} have been saved, ${n} bytes written.`);
+  } catch (e) {
+    Rsvim.cmd.echo(`Failed to write buffer ${bufId}: ${e}`);
+  }
+}
+
+Rsvim.cmd.create("write", write, {}, {alias: "w"});
+  "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let buf_file = tp.xdg_data_home.join("test.txt");
+  let cli_opts =
+    CliOptions::new(CliSpecialOptions::empty(), vec![buf_file], true);
+
+  let mut event_loop = make_event_loop(terminal_cols, terminal_rows, cli_opts);
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert!(actual.starts_with("Buffer") && actual.ends_with("bytes written."));
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_buf_write_failed1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_ops = vec![
+    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::CursorInsert(
+      CursorInsertPayload::Text("w".to_compact_string()),
+    )),
+    MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
+    MockOperation::SleepFor(Duration::from_millis(50)),
+  ];
+
+  let src: &str = r#"
+function write() {
+  const bufId = Rsvim.buf.current();
+  try {
+    const n = Rsvim.buf.writeSync(bufId);
+    Rsvim.cmd.echo(`Buffer ${bufId} have been saved, ${n} bytes written.`);
+  } catch (e) {
+    Rsvim.cmd.echo(`Failed to write buffer ${bufId}: ${e}`);
+  }
+}
+
+Rsvim.cmd.create("write", write, {}, {alias: "w"});
+  "#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_operations(MockOperationReader::new(mocked_ops))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert!(actual.starts_with("Failed to write buffer"));
   }
 
   Ok(())

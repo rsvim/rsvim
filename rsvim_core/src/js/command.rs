@@ -1,6 +1,7 @@
 //! Vim ex commands.
 
 pub mod attr;
+pub mod ctx;
 pub mod def;
 pub mod opt;
 
@@ -10,39 +11,61 @@ mod attr_tests;
 mod opt_tests;
 
 use crate::js::JsFuture;
+use crate::js::JsRuntime;
 use crate::js::JsTaskId;
+use crate::js::command::ctx::CommandContext;
+use crate::js::command::ctx::CommandContextBuilder;
+use crate::js::converter::*;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
+use itertools::Itertools;
 
 const JS_COMMAND_NAME: &str = "js";
 
 #[derive(Debug, Clone)]
 /// Builtin `:js` command
-pub struct BuiltinCommandFuture {
+pub struct CommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub body: CompactString,
+  pub context: CommandContext,
+  pub is_builtin_js: bool,
+  pub definition: Option<CommandDefinitionRc>,
 }
 
-impl JsFuture for BuiltinCommandFuture {
+impl JsFuture for CommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|BuiltinCommandFuture| run:{:?}", self.task_id);
-    let filename = format!("<command-js:{}>", self.task_id);
+    trace!("|CommandFuture| run:{:?}({:?})", self.name, self.task_id);
+    if self.is_builtin_js {
+      let filename = format!("<command-js:{}>", self.task_id);
+      debug_assert_eq!(self.context.args.len(), 1);
+      execute_module(scope, &filename, Some(self.context.args[0].trim()));
+    } else {
+      let def = self.definition.clone().unwrap();
+      let undefined = v8::undefined(scope).into();
+      let callback = v8::Local::new(scope, (*def.callback).clone());
+      let args: Vec<v8::Local<v8::Value>> =
+        vec![to_v8(scope, self.context.clone())];
 
-    execute_module(scope, &filename, Some(self.body.trim()));
+      v8::tc_scope!(let tc_scope, scope);
+
+      callback.call(tc_scope, undefined, &args);
+
+      // Report if callback threw an exception.
+      if tc_scope.has_caught() {
+        let exception = tc_scope.exception().unwrap();
+        let exception = v8::Global::new(tc_scope, exception);
+        let state_rc = JsRuntime::state(tc_scope);
+        state_rc
+          .borrow_mut()
+          .exceptions
+          .capture_exception(exception);
+      }
+    }
   }
-}
-
-#[derive(Debug, Clone)]
-/// User command
-pub struct UserCommandFuture {
-  pub task_id: JsTaskId,
-  pub name: CompactString,
-  pub definition: CommandDefinitionRc,
 }
 
 #[derive(Debug, Default)]
@@ -151,8 +174,12 @@ impl CommandsManager {
 }
 
 impl CommandsManager {
-  pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
-    let (name, body) = match payload.find(char::is_whitespace) {
+  pub fn parse(&self, payload: &str) -> Option<CommandFuture> {
+    debug_assert_eq!(payload.trim(), payload);
+
+    let mut context = CommandContextBuilder::default();
+
+    let (mut name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
         let body = payload.get(pos..).unwrap().to_compact_string();
@@ -165,20 +192,56 @@ impl CommandsManager {
       }
     };
 
+    if name.ends_with("!") {
+      let _last = name.pop();
+      debug_assert_eq!(_last, Some('!'));
+      context.bang(true);
+    }
+
     let is_builtin_js = name == JS_COMMAND_NAME;
     let task_id = next_task_id();
+
     if is_builtin_js {
+      // For builtin js command, it:
+      // - Has only 1 args, which is the js expression payload
+      // - Doesn't have a js function based command definition
+
       debug_assert!(!self.commands.contains_key(&name));
-      Some(BuiltinCommandFuture {
+      let args = vec![body];
+      context.args(args);
+      let context = context.build().unwrap();
+
+      Some(CommandFuture {
         task_id,
         name,
-        body,
+        context,
+        is_builtin_js,
+        definition: None,
       })
-    } else if self.commands.contains_key(&name) {
-      Some(BuiltinCommandFuture {
+    } else if self.commands.contains_key(&name)
+      || self.aliases.contains_key(&name)
+    {
+      // For user registered commands, it can have:
+      // - Command alias
+      // - Command arguments split by whitespaces
+      // - Js function based command definition
+
+      let name = self.aliases.get(&name).unwrap_or(&name).clone();
+      debug_assert!(self.commands.contains_key(&name));
+      let args = body
+        .split_whitespace()
+        .map(|a| a.to_compact_string())
+        .collect_vec();
+      context.args(args);
+      let context = context.build().unwrap();
+      let definition = Some(self.commands.get(&name).unwrap().clone());
+
+      Some(CommandFuture {
         task_id,
         name,
-        body,
+        context,
+        is_builtin_js,
+        definition,
       })
     } else {
       None
