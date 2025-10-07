@@ -181,6 +181,7 @@ impl CommandsManager {
     if is_builtin_js {
       // For builtin js command, it has only 1 args, which is the js expression
       // payload. And it doesn't have a function-based command definition.
+
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
       Some(CommandFuture {
@@ -193,6 +194,11 @@ impl CommandsManager {
     } else if self.commands.contains_key(&name)
       || self.aliases.contains_key(&name)
     {
+      // For user registered commands, it can have
+      // - Command alias
+      // - Whitespace split arguments
+      // - A js function based command definition
+
       let name = self.aliases.get(&name).unwrap_or(&name).clone();
       debug_assert!(self.commands.contains_key(&name));
       let args = body
