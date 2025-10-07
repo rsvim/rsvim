@@ -15,6 +15,7 @@ use crate::js::JsRuntime;
 use crate::js::JsTaskId;
 use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
+use crate::js::converter::*;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
@@ -43,15 +44,11 @@ impl JsFuture for CommandFuture {
       debug_assert_eq!(self.context.args.len(), 1);
       execute_module(scope, &filename, Some(self.context.args[0].trim()));
     } else {
-      let def = self.definition.unwrap();
+      let def = self.definition.clone().unwrap();
       let undefined = v8::undefined(scope).into();
       let callback = v8::Local::new(scope, (*def.callback).clone());
-      let args: Vec<v8::Local<v8::Value>> = self
-        .context
-        .args
-        .iter()
-        .map(|arg| v8::Local::new(scope, arg))
-        .collect();
+      let args: Vec<v8::Local<v8::Value>> =
+        vec![to_v8(scope, self.context.clone())];
 
       v8::tc_scope!(let tc_scope, scope);
 
