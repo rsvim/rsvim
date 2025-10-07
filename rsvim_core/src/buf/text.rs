@@ -29,8 +29,8 @@ struct ClonedLineKey(
 /// Text content backend.
 pub struct Text {
   rope: Rope,
-  cached_lines_width: RefCell<Cache<usize, ColumnIndex>>,
-  cached_cloned_lines: RefCell<Cache<ClonedLineKey, Rc<String>>>,
+  cached_lines_width: RefCell<Cache<usize, ColumnIndex, RandomState>>,
+  cached_cloned_lines: RefCell<Cache<ClonedLineKey, Rc<String>, RandomState>>,
   options: BufferOptions,
 }
 
