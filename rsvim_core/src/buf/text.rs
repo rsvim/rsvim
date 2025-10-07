@@ -13,7 +13,6 @@ pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use quick_cache::UnitWeighter;
-use quick_cache::Weighter;
 use quick_cache::unsync::Cache;
 use ropey::Rope;
 use ropey::RopeSlice;
