@@ -29,7 +29,7 @@ const JS_COMMAND_NAME: &str = "js";
 pub struct CommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub ctx: Option<CommandContext>,
+  pub context: CommandContext,
   pub is_builtin_js: bool,
   pub definition: Option<CommandDefinitionRc>,
 }
@@ -39,8 +39,8 @@ impl JsFuture for CommandFuture {
     trace!("|CommandFuture| run:{:?}({:?})", self.name, self.task_id);
     if self.is_builtin_js {
       let filename = format!("<command-js:{}>", self.task_id);
-      debug_assert_eq!(self.args.len(), 1);
-      execute_module(scope, &filename, Some(self.args[0].trim()));
+      debug_assert_eq!(self.context.args().len(), 1);
+      execute_module(scope, &filename, Some(self.context.args()[0].trim()));
     } else {
     }
   }
@@ -155,7 +155,7 @@ impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<CommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
 
-    let mut ctx = CommandContextBuilder::default();
+    let mut context = CommandContextBuilder::default();
 
     let (mut name, body) = match payload.find(char::is_whitespace) {
       Some(pos) => {
@@ -173,7 +173,7 @@ impl CommandsManager {
     if name.ends_with("!") {
       let _last = name.pop();
       debug_assert_eq!(_last, Some('!'));
-      ctx.bang(true);
+      context.bang(true);
     }
 
     let is_builtin_js = name == JS_COMMAND_NAME;
@@ -182,14 +182,17 @@ impl CommandsManager {
     if is_builtin_js {
       // For builtin js command, it:
       // - Has only 1 args, which is the js expression payload
-      // - Doesn't have a js function based command definition and context.
+      // - Doesn't have a js function based command definition
 
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
+      context.args(args);
+      let context = context.build().unwrap();
+
       Some(CommandFuture {
         task_id,
         name,
-        args,
+        context,
         is_builtin_js,
         definition: None,
       })
@@ -199,7 +202,7 @@ impl CommandsManager {
       // For user registered commands, it can have:
       // - Command alias
       // - Command arguments split by whitespaces
-      // - Js function based command definition and runtime context
+      // - Js function based command definition
 
       let name = self.aliases.get(&name).unwrap_or(&name).clone();
       debug_assert!(self.commands.contains_key(&name));
@@ -207,8 +210,10 @@ impl CommandsManager {
         .split_whitespace()
         .map(|a| a.to_compact_string())
         .collect_vec();
+      context.args(args);
+      let context = Some(context.build().unwrap());
+
       let definition = Some(self.commands.get(&name).unwrap().clone());
-      let context = Some(ctx.build().unwrap());
 
       Some(CommandFuture {
         task_id,
