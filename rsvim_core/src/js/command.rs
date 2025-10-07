@@ -3,6 +3,7 @@
 pub mod attr;
 pub mod def;
 pub mod opt;
+pub mod ctx;
 
 #[cfg(test)]
 mod attr_tests;
@@ -11,6 +12,7 @@ mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsTaskId;
+use crate::js::command::attr::CommandAttributes;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
@@ -161,7 +163,7 @@ impl CommandsManager {
   pub fn parse(&self, payload: &str) -> Option<BuiltinCommandFuture> {
     debug_assert_eq!(payload.trim(), payload);
 
-    let (name, body) = self.parse_name_and_body(payload);
+    let (name, body) = self.parse_name(payload);
 
     let is_builtin_js = name == JS_COMMAND_NAME;
     let task_id = next_task_id();
@@ -184,10 +186,7 @@ impl CommandsManager {
     }
   }
 
-  fn parse_name_and_body(
-    &self,
-    payload: &str,
-  ) -> (CompactString, CompactString) {
+  fn parse_name(&self, payload: &str) -> (CompactString, CompactString) {
     match payload.find(char::is_whitespace) {
       Some(pos) => {
         let name = payload.get(0..pos).unwrap().trim().to_compact_string();
@@ -200,5 +199,12 @@ impl CommandsManager {
         (name, body)
       }
     }
+  }
+
+  fn parse_attributes(
+    &self,
+    name: &CompactString,
+    payload: 
+  ) -> (CompactString, Option<CommandAttributes>) {
   }
 }
