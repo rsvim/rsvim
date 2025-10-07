@@ -68,6 +68,23 @@ impl Text {
   }
 }
 
+#[cfg(debug_assertions)]
+impl Drop for Text {
+  fn drop(&mut self) {
+    let cached_lines_width = self.cached_lines_width.borrow();
+    let cached_cloned_lines = self.cached_cloned_lines.borrow();
+    trace!(
+      "Text stats: cached lines width - hits:{},misses:{},mem:{}, (only for wrap+line_break) cached cloned lines - hits:{},misses:{},mem:{}",
+      cached_lines_width.hits(),
+      cached_lines_width.misses(),
+      cached_lines_width.memory_used().total(),
+      cached_cloned_lines.hits(),
+      cached_cloned_lines.misses(),
+      cached_cloned_lines.memory_used().total()
+    );
+  }
+}
+
 // Unicode {
 impl Text {
   /// Get the display width for a `char`, supports both ASCI control codes and unicode.
