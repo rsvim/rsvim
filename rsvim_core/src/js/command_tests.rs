@@ -143,14 +143,14 @@ async fn test_buf_write1() -> IoResult<()> {
   let mocked_ops = vec![
     MockOperation::Operation(Operation::GotoCommandLineExMode),
     MockOperation::Operation(Operation::CursorInsert(
-      CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
+      CursorInsertPayload::Text("w".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
     MockOperation::SleepFor(Duration::from_millis(50)),
   ];
 
-  let src3: &str = r#"
-function write(ctx) {
+  let src: &str = r#"
+function write() {
   const bufId = Rsvim.buf.current();
   try {
     const n = Rsvim.buf.writeSync(bufId);
@@ -160,11 +160,11 @@ function write(ctx) {
   }
 }
 
-  const result = addUtil.addPI(1.0, 2.5);
+Rsvim.cmd.create("write", write, {}, {alias: "w"});
   "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let _tp = make_configs(vec![(Path::new("rsvim.js"), "")]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
