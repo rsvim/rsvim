@@ -15,20 +15,10 @@ pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 pub struct CommandContext {
   #[builder(default = BANG_DEFAULT)]
   // bang
-  bang: bool,
+  pub bang: bool,
 
   #[builder(default = ARGS_DEFAULT)]
-  args: Vec<CompactString>,
-}
-
-impl CommandContext {
-  pub fn bang(&self) -> bool {
-    self.bang
-  }
-
-  pub fn args(&self) -> &Vec<CompactString> {
-    &self.args
-  }
+  pub args: Vec<CompactString>,
 }
 
 impl ToV8 for CommandContext {
@@ -40,12 +30,12 @@ impl ToV8 for CommandContext {
 
     // bang
     let bang_field = to_v8(scope, BANG);
-    let bang_value = to_v8(scope, self.bang());
+    let bang_value = to_v8(scope, self.bang);
     obj.set(scope, bang_field, bang_value);
 
     // args
     let args_field = to_v8(scope, ARGS);
-    let args_value = to_v8(scope, self.args().clone());
+    let args_value = to_v8(scope, self.args.clone());
     obj.set(scope, args_field, args_value);
 
     obj.into()

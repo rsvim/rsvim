@@ -42,6 +42,30 @@ impl JsFuture for CommandFuture {
       debug_assert_eq!(self.context.args().len(), 1);
       execute_module(scope, &filename, Some(self.context.args()[0].trim()));
     } else {
+      let def = self.definition.unwrap();
+      let undefined = v8::undefined(scope).into();
+      let callback = v8::Local::new(scope, (*def.callback).clone());
+      let args: Vec<v8::Local<v8::Value>> = self
+        .context
+        .args()
+        .iter()
+        .map(|arg| v8::Local::new(scope, arg))
+        .collect();
+
+      v8::tc_scope!(let tc_scope, scope);
+
+      callback.call(tc_scope, undefined, &args);
+
+      // Report if callback threw an exception.
+      if tc_scope.has_caught() {
+        let exception = tc_scope.exception().unwrap();
+        let exception = v8::Global::new(tc_scope, exception);
+        let state_rc = JsRuntime::state(tc_scope);
+        state_rc
+          .borrow_mut()
+          .exceptions
+          .capture_exception(exception);
+      }
     }
   }
 }
