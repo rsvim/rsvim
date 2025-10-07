@@ -12,6 +12,8 @@ use crate::prelude::*;
 pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use quick_cache::UnitWeighter;
+use quick_cache::Weighter;
 use quick_cache::unsync::Cache;
 use ropey::Rope;
 use ropey::RopeSlice;
@@ -29,8 +31,10 @@ struct ClonedLineKey(
 /// Text content backend.
 pub struct Text {
   rope: Rope,
-  cached_lines_width: RefCell<Cache<usize, ColumnIndex, RandomState>>,
-  cached_cloned_lines: RefCell<Cache<ClonedLineKey, Rc<String>, RandomState>>,
+  cached_lines_width:
+    RefCell<Cache<usize, ColumnIndex, UnitWeighter, RandomState>>,
+  cached_cloned_lines:
+    RefCell<Cache<ClonedLineKey, Rc<String>, UnitWeighter, RandomState>>,
   options: BufferOptions,
 }
 
@@ -46,8 +50,20 @@ impl Text {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
-      cached_lines_width: RefCell::new(Cache::new(cache_size as usize)),
-      cached_cloned_lines: RefCell::new(Cache::new(cache_size as usize)),
+      cached_lines_width: RefCell::new(Cache::with(
+        cache_size as usize,
+        cache_size,
+        Default::default(),
+        RandomState::default(),
+        Default::default(),
+      )),
+      cached_cloned_lines: RefCell::new(Cache::with(
+        cache_size as usize,
+        cache_size,
+        Default::default(),
+        RandomState::default(),
+        Default::default(),
+      )),
       options: opts,
     }
   }
