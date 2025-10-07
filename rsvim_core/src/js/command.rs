@@ -12,6 +12,7 @@ mod opt_tests;
 
 use crate::js::JsFuture;
 use crate::js::JsTaskId;
+use crate::js::command::ctx::CommandContext;
 use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::execute_module;
 use crate::js::next_task_id;
@@ -28,7 +29,7 @@ const JS_COMMAND_NAME: &str = "js";
 pub struct CommandFuture {
   pub task_id: JsTaskId,
   pub name: CompactString,
-  pub args: Vec<CompactString>,
+  pub ctx: Option<CommandContext>,
   pub is_builtin_js: bool,
   pub definition: Option<CommandDefinitionRc>,
 }
@@ -181,7 +182,7 @@ impl CommandsManager {
     if is_builtin_js {
       // For builtin js command, it:
       // - Has only 1 args, which is the js expression payload
-      // - Doesn't have a js function based command definition
+      // - Doesn't have a js function based command definition and context.
 
       debug_assert!(!self.commands.contains_key(&name));
       let args = vec![body];
@@ -198,7 +199,7 @@ impl CommandsManager {
       // For user registered commands, it can have:
       // - Command alias
       // - Command arguments split by whitespaces
-      // - Js function based command definition
+      // - Js function based command definition and runtime context
 
       let name = self.aliases.get(&name).unwrap_or(&name).clone();
       debug_assert!(self.commands.contains_key(&name));
@@ -207,6 +208,7 @@ impl CommandsManager {
         .map(|a| a.to_compact_string())
         .collect_vec();
       let definition = Some(self.commands.get(&name).unwrap().clone());
+      let context = Some(ctx.build().unwrap());
 
       Some(CommandFuture {
         task_id,
