@@ -394,9 +394,24 @@ impl Text {
       .last_char_until(&self.options, &rope_line, width)
   }
 
-  fn _retain_cached_cloned_line<F>(&self, f: F)
+  fn _retain_cached_lines_width<F>(&self, f: F)
   where
-    F: FnOnce(/* line_idx */ usize) -> bool,
+    F: Fn(/* line_idx */ usize) -> bool,
+  {
+    let mut cached_lines_width = self.cached_lines_width.borrow_mut();
+    let to_be_removed: Vec<usize> = cached_lines_width
+      .iter()
+      .filter(|(line_idx, _)| !f(**line_idx))
+      .map(|(lines_idx, _)| *lines_idx)
+      .collect();
+    for key in to_be_removed.iter() {
+      cached_lines_width.pop(key);
+    }
+  }
+
+  fn _retain_cached_cloned_lines<F>(&self, f: F)
+  where
+    F: Fn(/* line_idx */ usize) -> bool,
   {
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
     let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
