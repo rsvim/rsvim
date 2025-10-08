@@ -38,7 +38,7 @@ struct CacheStatus {
 
 impl CacheStatus {
   pub fn hit_one(&mut self) {
-    self.hits += 1;
+    self.misses += 1;
   }
 
   pub fn miss_one(&mut self) {
