@@ -75,6 +75,20 @@ impl Text {
   {
     f(&mut self.cached_lines_width.borrow_mut())
   }
+
+  fn with_cached_cloned_lines<F>(&self, f: F)
+  where
+    F: FnOnce(&CachedClonedLines),
+  {
+    f(&self.cached_cloned_lines.borrow())
+  }
+
+  fn with_cached_cloned_lines_mut<F>(&self, f: F)
+  where
+    F: FnOnce(&mut CachedClonedLines),
+  {
+    f(&mut self.cached_cloned_lines.borrow_mut())
+  }
 }
 
 // Unicode {
