@@ -97,9 +97,9 @@ impl Text {
     }
   }
 
-  fn with_cached_lines_width<F>(&self, f: F)
+  fn with_cached_lines_width<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&CachedLinesWidth, &mut CacheStatus),
+    F: FnOnce(&CachedLinesWidth, &mut CacheStatus) -> U,
   {
     f(
       &self.cached_lines_width.borrow(),
@@ -107,9 +107,9 @@ impl Text {
     )
   }
 
-  fn with_cached_lines_width_mut<F>(&self, f: F)
+  fn with_cached_lines_width_mut<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus),
+    F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus) -> U,
   {
     f(
       &mut self.cached_lines_width.borrow_mut(),
@@ -117,9 +117,9 @@ impl Text {
     )
   }
 
-  fn with_cached_cloned_lines<F>(&self, f: F)
+  fn with_cached_cloned_lines<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&CachedClonedLines, &mut CacheStatus),
+    F: FnOnce(&CachedClonedLines, &mut CacheStatus) -> U,
   {
     f(
       &self.cached_cloned_lines.borrow(),
@@ -127,9 +127,9 @@ impl Text {
     )
   }
 
-  fn with_cached_cloned_lines_mut<F>(&self, f: F)
+  fn with_cached_cloned_lines_mut<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&mut CachedClonedLines, &mut CacheStatus),
+    F: FnOnce(&mut CachedClonedLines, &mut CacheStatus) -> U,
   {
     f(
       &mut self.cached_cloned_lines.borrow_mut(),
@@ -231,50 +231,59 @@ impl Text {
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    let key = ClonedLineKey {
-      line_idx,
-      start_char_idx,
-      max_chars,
-    };
-    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+    self.with_cached_cloned_lines_mut(|caches, stats| {
+      let key = ClonedLineKey {
+        line_idx,
+        start_char_idx,
+        max_chars,
+      };
 
-    if !skip_cache && cached_cloned_lines.contains(&key) {
-      return cached_cloned_lines.get(&key).cloned();
-    }
+      if !skip_cache && caches.contains(&key) {
+        let result = caches.get(&key).cloned();
+        debug_assert!(result.is_some());
+        stats.miss_one();
+        return result;
+      }
 
-    match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              if skip_cache {
-                return Some(Rc::new(builder));
-              } else {
-                return Some(
-                  cached_cloned_lines
-                    .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
-                    .clone(),
-                );
+      match self.rope.get_line(line_idx) {
+        Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+          Some(chars_iter) => {
+            let mut builder = String::with_capacity(max_chars);
+            for (i, c) in chars_iter.enumerate() {
+              if i >= max_chars {
+                if skip_cache {
+                  return Some(Rc::new(builder));
+                } else {
+                  return Some(
+                    self
+                      .cached_cloned_lines_upsert(
+                        caches,
+                        stats,
+                        &key,
+                        || -> Rc<String> { Rc::new(builder) },
+                      )
+                      .clone(),
+                  );
+                }
               }
+              builder.push(c);
             }
-            builder.push(c);
-          }
 
-          if skip_cache {
-            Some(Rc::new(builder))
-          } else {
-            Some(
-              cached_cloned_lines
-                .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
-                .clone(),
-            )
+            if skip_cache {
+              Some(Rc::new(builder))
+            } else {
+              Some(
+                caches
+                  .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
+                  .clone(),
+              )
+            }
           }
-        }
+          None => None,
+        },
         None => None,
-      },
-      None => None,
-    }
+      }
+    })
   }
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
