@@ -614,7 +614,7 @@ impl Text {
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._remove_cached_cloned_line(caches, line_idx);
+      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
     });
 
     // cached lines width
