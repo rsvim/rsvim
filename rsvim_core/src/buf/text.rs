@@ -12,6 +12,7 @@ use crate::prelude::*;
 pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use geo::lines_iter;
 use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
@@ -630,28 +631,13 @@ impl Text {
   {
     // cached clone lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      let to_be_removed: Vec<ClonedLineKey> = caches
-        .iter()
-        .filter(|(k, _)| !f(&k.line_idx))
-        .map(|(k, _)| *k)
-        .collect();
-      for cloned_key in to_be_removed.iter() {
-        caches.pop(cloned_key);
-      }
+      self._retain_cached_cloned_lines(caches, |k| f(&k.line_idx));
     });
 
     // cached lines width
-    {
-      let mut cached_width = self.cached_lines_width.borrow_mut();
-      let to_be_removed: Vec<usize> = cached_width
-        .iter()
-        .filter(|(line_idx, _)| !f(line_idx))
-        .map(|(line_idx, _)| *line_idx)
-        .collect();
-      for line_idx in to_be_removed.iter() {
-        cached_width.pop(line_idx);
-      }
-    }
+    self.with_cached_lines_width_mut(|caches, _stats| {
+      self._retain_cached_lines_width(caches, |line_idx| f(line_idx));
+    });
   }
 
   /// Clear cache.
