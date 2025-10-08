@@ -19,11 +19,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
-struct ClonedLineKey(
-  /* line_idx */ usize,
-  /* start_char_idx */ usize,
-  /* max_chars */ usize,
-);
+struct ClonedLineKey {
+  pub line_idx: usize,
+  pub start_char_idx: usize,
+  pub max_chars: usize,
+}
 
 type CachedLinesWidth = LruCache<usize, ColumnIndex, RandomState>;
 type CachedClonedLines = LruCache<ClonedLineKey, Rc<String>, RandomState>;
@@ -62,10 +62,18 @@ impl Text {
     }
   }
 
-  fn with_cached_lines_width(&self, f: F)
+  fn with_cached_lines_width<F>(&self, f: F)
   where
-    F: FnOnce(),
+    F: FnOnce(&CachedLinesWidth),
   {
+    f(&self.cached_lines_width.borrow())
+  }
+
+  fn with_cached_lines_width_mut<F>(&self, f: F)
+  where
+    F: FnOnce(&mut CachedLinesWidth),
+  {
+    f(&mut self.cached_lines_width.borrow_mut())
   }
 }
 
