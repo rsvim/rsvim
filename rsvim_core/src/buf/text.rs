@@ -125,13 +125,16 @@ impl Text {
     f(&mut self.cached_cloned_lines.borrow_mut())
   }
 
-  fn cached_lines_width_upsert<F>(&self, k: usize, f: F) -> &ColumnIndex
+  fn cached_lines_width_upsert<'a, F>(
+    &self,
+    caches: &'a mut CachedLinesWidth,
+    stats: &mut CacheStatus,
+    k: usize,
+    f: F,
+  ) -> &'a ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
-    let mut caches = self.cached_lines_width.borrow_mut();
-    let mut stats = self.cached_lines_width_stats.borrow_mut();
-
     if !caches.contains(&k) {
       let v = f();
       caches.put(k, v);
@@ -141,6 +144,27 @@ impl Text {
     }
 
     caches.get(&k).unwrap()
+  }
+
+  fn cached_cloned_lines_upsert<'a, F>(
+    &self,
+    caches: &'a mut CachedClonedLines,
+    stats: &mut CacheStatus,
+    k: &ClonedLineKey,
+    f: F,
+  ) -> &'a Rc<String>
+  where
+    F: FnOnce() -> Rc<String>,
+  {
+    if !caches.contains(k) {
+      let v = f();
+      caches.put(*k, v);
+      stats.miss_one();
+    } else {
+      stats.hit_one();
+    }
+
+    caches.get(k).unwrap()
   }
 }
 
