@@ -278,12 +278,9 @@ impl Text {
                 } else {
                   return Some(
                     self
-                      .cached_cloned_lines_upsert(
-                        caches,
-                        stats,
-                        &key,
-                        || -> Rc<String> { Rc::new(builder) },
-                      )
+                      .cached_cloned_lines_upsert(caches, stats, &key, || {
+                        Rc::new(builder)
+                      })
                       .clone(),
                   );
                 }
@@ -296,12 +293,9 @@ impl Text {
             } else {
               Some(
                 self
-                  .cached_cloned_lines_upsert(
-                    caches,
-                    stats,
-                    &key,
-                    || -> Rc<String> { Rc::new(builder) },
-                  )
+                  .cached_cloned_lines_upsert(caches, stats, &key, || {
+                    Rc::new(builder)
+                  })
                   .clone(),
               )
             }
@@ -459,14 +453,9 @@ impl Text {
     self.with_cached_lines_width_mut(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(
-          caches,
-          stats,
-          &line_idx,
-          || -> ColumnIndex {
-            ColumnIndex::with_capacity(rope_line.len_chars())
-          },
-        )
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
         .width_before(&self.options, &rope_line, char_idx)
     })
   }
@@ -480,14 +469,9 @@ impl Text {
     self.with_cached_lines_width_mut(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(
-          caches,
-          stats,
-          &line_idx,
-          || -> ColumnIndex {
-            ColumnIndex::with_capacity(rope_line.len_chars())
-          },
-        )
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
         .width_until(&self.options, &rope_line, char_idx)
     })
   }
@@ -498,14 +482,14 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_before(&self.options, &rope_line, width)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .char_before(&self.options, &rope_line, width)
+    })
   }
 
   /// See [`ColumnIndex::char_at`].
@@ -518,7 +502,7 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+      .get_or_insert_mut(line_idx, || {
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
       .char_at(&self.options, &rope_line, width)
@@ -534,7 +518,7 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+      .get_or_insert_mut(line_idx, || {
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
       .char_after(&self.options, &rope_line, width)
@@ -554,7 +538,7 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+      .get_or_insert_mut(line_idx, || {
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
       .last_char_until(&self.options, &rope_line, width)
@@ -569,7 +553,7 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+      .get_or_insert_mut(line_idx, || {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
@@ -586,7 +570,7 @@ impl Text {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+      .get_or_insert_mut(line_idx, || {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
