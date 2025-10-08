@@ -554,15 +554,15 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
-    self.with_cached_clones(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
+    self.with_cached_clones(|cache, _stats| {
+      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
     });
 
     // cached lines width
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .truncate_since_char(char_idx)
@@ -573,15 +573,15 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
-    self.with_cached_clones(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
+    self.with_cached_clones(|cache, _stats| {
+      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
     });
 
     // cached lines width
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .truncate_since_width(width)
@@ -592,13 +592,13 @@ impl Text {
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
-    self.with_cached_clones(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
+    self.with_cached_clones(|cache, _stats| {
+      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
     });
 
     // cached lines width
-    self.with_cached_width(|caches, _stats| {
-      caches.pop(&line_idx);
+    self.with_cached_width(|cache, _stats| {
+      cache.pop(&line_idx);
     })
   }
 
@@ -608,23 +608,23 @@ impl Text {
     F: Fn(/* line_idx */ &usize) -> bool,
   {
     // cached clone lines
-    self.with_cached_clones(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |line| f(line));
+    self.with_cached_clones(|cache, _stats| {
+      self._retain_cached_cloned_lines(cache, |line| f(line));
     });
 
     // cached lines width
-    self.with_cached_width(|caches, _stats| {
-      self._retain_cached_lines_width(caches, |line| f(line));
+    self.with_cached_width(|cache, _stats| {
+      self._retain_cached_lines_width(cache, |line| f(line));
     });
   }
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
-    self.with_cached_clones(|caches, _stats| {
-      caches.clear();
+    self.with_cached_clones(|cache, _stats| {
+      cache.clear();
     });
-    self.with_cached_width(|caches, _stats| {
-      caches.clear();
+    self.with_cached_width(|cache, _stats| {
+      cache.clear();
     });
   }
 
@@ -634,14 +634,14 @@ impl Text {
     let new_cache_size = _cached_size(canvas_size);
 
     // cached clone lines
-    self.with_cached_clones(|caches, _stats| {
-      if new_cache_size > caches.cap() {
-        caches.resize(new_cache_size);
+    self.with_cached_clones(|cache, _stats| {
+      if new_cache_size > cache.cap() {
+        cache.resize(new_cache_size);
       }
     });
-    self.with_cached_width(|caches, _stats| {
-      if new_cache_size > caches.cap() {
-        caches.resize(new_cache_size);
+    self.with_cached_width(|cache, _stats| {
+      if new_cache_size > cache.cap() {
+        cache.resize(new_cache_size);
       }
     });
   }
