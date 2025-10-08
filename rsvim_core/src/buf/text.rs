@@ -74,7 +74,6 @@ pub struct Text {
 
 arc_mutex_ptr!(Text);
 
-#[inline]
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
   std::num::NonZeroUsize::new(canvas_size.height() as usize * 2 + 3).unwrap()
 }
@@ -93,6 +92,8 @@ impl Text {
         cache_size,
         RandomState::default(),
       )),
+      cached_lines_width_stats: CacheStatus::default(),
+      cached_cloned_lines_stats: CacheStatus::default(),
     }
   }
 
