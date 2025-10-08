@@ -96,7 +96,7 @@ impl Text {
     }
   }
 
-  fn with_cached_lines_width_mut<F, U>(&self, f: F) -> U
+  fn with_cached_width<F, U>(&self, f: F) -> U
   where
     F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus) -> U,
   {
@@ -429,7 +429,7 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -445,7 +445,7 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -461,7 +461,7 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -477,7 +477,7 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -493,7 +493,7 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -513,7 +513,7 @@ impl Text {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -559,7 +559,7 @@ impl Text {
     });
 
     // cached lines width
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -578,7 +578,7 @@ impl Text {
     });
 
     // cached lines width
-    self.with_cached_lines_width_mut(|caches, stats| {
+    self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
@@ -597,7 +597,7 @@ impl Text {
     });
 
     // cached lines width
-    self.with_cached_lines_width_mut(|caches, _stats| {
+    self.with_cached_width(|caches, _stats| {
       caches.pop(&line_idx);
     })
   }
@@ -613,7 +613,7 @@ impl Text {
     });
 
     // cached lines width
-    self.with_cached_lines_width_mut(|caches, _stats| {
+    self.with_cached_width(|caches, _stats| {
       self._retain_cached_lines_width(caches, |line| f(line));
     });
   }
@@ -623,7 +623,7 @@ impl Text {
     self.with_cached_cloned_lines_mut(|caches, _stats| {
       caches.clear();
     });
-    self.with_cached_lines_width_mut(|caches, _stats| {
+    self.with_cached_width(|caches, _stats| {
       caches.clear();
     });
   }
@@ -639,7 +639,7 @@ impl Text {
         caches.resize(new_cache_size);
       }
     });
-    self.with_cached_lines_width_mut(|caches, _stats| {
+    self.with_cached_width(|caches, _stats| {
       if new_cache_size > caches.cap() {
         caches.resize(new_cache_size);
       }
