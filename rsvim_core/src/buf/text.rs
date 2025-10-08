@@ -12,7 +12,6 @@ use crate::prelude::*;
 pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use geo::lines_iter;
 use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
