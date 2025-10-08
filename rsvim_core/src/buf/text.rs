@@ -577,7 +577,7 @@ impl Text {
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
+      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
     // cached lines width
@@ -596,7 +596,7 @@ impl Text {
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
+      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
     // cached lines width
@@ -615,7 +615,7 @@ impl Text {
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
+      self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
     // cached lines width
@@ -631,12 +631,12 @@ impl Text {
   {
     // cached clone lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |line_idx| f(line_idx));
+      self._retain_cached_cloned_lines(caches, |line| f(line));
     });
 
     // cached lines width
     self.with_cached_lines_width_mut(|caches, _stats| {
-      self._retain_cached_lines_width(caches, |line_idx| f(line_idx));
+      self._retain_cached_lines_width(caches, |line| f(line));
     });
   }
 
