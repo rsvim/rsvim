@@ -514,14 +514,14 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_after(&self.options, &rope_line, width)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .char_after(&self.options, &rope_line, width)
+    })
   }
 
   /// See [`ColumnIndex::last_char_until`].
@@ -534,30 +534,46 @@ impl Text {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .last_char_until(&self.options, &rope_line, width)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .last_char_until(&self.options, &rope_line, width)
+    })
+  }
+
+  fn remove_cached_cloned_line(
+    &self,
+    cached_cloned_lines: &mut CachedClonedLines,
+    line_idx: usize,
+  ) {
+    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
+      .iter()
+      .filter(|(k, _)| k.line_idx == line_idx)
+      .map(|(k, _)| *k)
+      .collect();
+    for key in to_be_removed.iter() {
+      cached_cloned_lines.pop(key);
+    }
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
-    // cached clone lines
-    self._remove_cached_cloned_line(line_idx);
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      self.remove_cached_cloned_line(caches, line_idx);
+    });
 
-    // cached lines width
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || {
-        let rope_line = self.rope.line(line_idx);
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .truncate_since_char(char_idx)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      // cached lines width
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          let rope_line = self.rope.line(line_idx);
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .truncate_since_char(char_idx)
+    })
   }
 
   #[allow(dead_code)]
