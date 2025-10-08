@@ -166,7 +166,7 @@ impl Drop for Text {
   fn drop(&mut self) {
     let stats1 = self.cached_width_stats.borrow();
     trace!(
-      "Text cached_lines_width - total:{},hits:{},misses:{},ratio:{}",
+      "Text drop - cached_lines_width total:{},hits:{},misses:{},ratio:{}",
       stats1.total(),
       stats1.hits(),
       stats1.misses(),
@@ -174,7 +174,7 @@ impl Drop for Text {
     );
     let stats2 = self.cached_clones_stats.borrow();
     trace!(
-      "Text cached_cloned_lines - total:{},hits:{},misses:{},ratio:{}",
+      "Text drop - cached_cloned_lines total:{},hits:{},misses:{},ratio:{}",
       stats2.total(),
       stats2.hits(),
       stats2.misses(),
