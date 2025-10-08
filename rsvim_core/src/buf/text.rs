@@ -498,14 +498,14 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_at(&self.options, &rope_line, width)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .char_at(&self.options, &rope_line, width)
+    })
   }
 
   /// See [`ColumnIndex::char_after`].
