@@ -137,7 +137,7 @@ impl Text {
     caches.get_mut(k).unwrap()
   }
 
-  fn cached_cloned_lines_upsert<'a, F>(
+  fn cached_clones_upsert<'a, F>(
     &self,
     caches: &'a mut CachedClonedLines,
     stats: &mut CacheStatus,
@@ -257,7 +257,7 @@ impl Text {
                 } else {
                   return Some(
                     self
-                      .cached_cloned_lines_upsert(caches, stats, &key, || {
+                      .cached_clones_upsert(caches, stats, &key, || {
                         Rc::new(builder)
                       })
                       .clone(),
@@ -272,7 +272,7 @@ impl Text {
             } else {
               Some(
                 self
-                  .cached_cloned_lines_upsert(caches, stats, &key, || {
+                  .cached_clones_upsert(caches, stats, &key, || {
                     Rc::new(builder)
                   })
                   .clone(),
