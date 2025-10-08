@@ -580,18 +580,20 @@ impl Text {
   #[allow(dead_code)]
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
-    // cached clone lines
-    self._remove_cached_cloned_line(line_idx);
+    // cached cloned lines
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      self.remove_cached_cloned_line(caches, line_idx);
+    });
 
-    // cached lines with
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || {
-        let rope_line = self.rope.line(line_idx);
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .truncate_since_width(width)
+    // cached lines width
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+          ColumnIndex::with_capacity(rope_line.len_chars())
+        })
+        .truncate_since_width(width)
+    })
   }
 
   fn _remove_cached_cloned_line(&self, line_idx: usize) {
