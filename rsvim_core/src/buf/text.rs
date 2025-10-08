@@ -68,13 +68,15 @@ pub struct Text {
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
+  cached_lines_width_stats: CacheStatus,
+  cached_cloned_lines_stats: CacheStatus,
 }
 
 arc_mutex_ptr!(Text);
 
 #[inline]
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
+  std::num::NonZeroUsize::new(canvas_size.height() as usize * 2 + 3).unwrap()
 }
 
 impl Text {
@@ -82,6 +84,7 @@ impl Text {
     let cache_size = _cached_size(canvas_size);
     Self {
       rope,
+      options: opts,
       cached_lines_width: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
@@ -90,7 +93,6 @@ impl Text {
         cache_size,
         RandomState::default(),
       )),
-      options: opts,
     }
   }
 
