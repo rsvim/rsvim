@@ -523,7 +523,7 @@ impl Text {
     })
   }
 
-  fn _retain_cached_cloned_lines<F>(&self, cache: &mut CachedClones, f: F)
+  fn _retain_cached_clones<F>(&self, cache: &mut CachedClones, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
@@ -537,7 +537,7 @@ impl Text {
     }
   }
 
-  fn _retain_cached_lines_width<F>(&self, cache: &mut CachedWidth, f: F)
+  fn _retain_cached_width<F>(&self, cache: &mut CachedWidth, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
@@ -555,7 +555,7 @@ impl Text {
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
     self.with_cached_clones(|cache, _stats| {
-      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
+      self._retain_cached_clones(cache, |line| *line != line_idx);
     });
 
     // cached lines width
@@ -574,7 +574,7 @@ impl Text {
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
     self.with_cached_clones(|cache, _stats| {
-      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
+      self._retain_cached_clones(cache, |line| *line != line_idx);
     });
 
     // cached lines width
@@ -593,12 +593,12 @@ impl Text {
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
     self.with_cached_clones(|cache, _stats| {
-      self._retain_cached_cloned_lines(cache, |line| *line != line_idx);
+      self._retain_cached_clones(cache, |line| *line != line_idx);
     });
 
     // cached lines width
     self.with_cached_width(|cache, _stats| {
-      cache.pop(&line_idx);
+      self._retain_cached_width(cache, |line| *line != line_idx);
     })
   }
 
@@ -609,12 +609,12 @@ impl Text {
   {
     // cached clone lines
     self.with_cached_clones(|cache, _stats| {
-      self._retain_cached_cloned_lines(cache, |line| f(line));
+      self._retain_cached_clones(cache, |line| f(line));
     });
 
     // cached lines width
     self.with_cached_width(|cache, _stats| {
-      self._retain_cached_lines_width(cache, |line| f(line));
+      self._retain_cached_width(cache, |line| f(line));
     });
   }
 
