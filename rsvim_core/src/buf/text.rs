@@ -97,16 +97,6 @@ impl Text {
     }
   }
 
-  fn with_cached_lines_width<F, U>(&self, f: F) -> U
-  where
-    F: FnOnce(&CachedLinesWidth, &mut CacheStatus) -> U,
-  {
-    f(
-      &self.cached_lines_width.borrow(),
-      &mut self.cached_lines_width_stats.borrow_mut(),
-    )
-  }
-
   fn with_cached_lines_width_mut<F, U>(&self, f: F) -> U
   where
     F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus) -> U,
