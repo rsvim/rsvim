@@ -124,6 +124,21 @@ impl Text {
   {
     f(&mut self.cached_cloned_lines.borrow_mut())
   }
+
+  fn cached_lines_width_upsert<F>(
+    cached_lines_width: &mut CachedLinesWidth,
+    k: usize,
+    f: F,
+  ) -> &ColumnIndex
+  where
+    F: FnOnce() -> ColumnIndex,
+  {
+    if !cached_lines_width.contains(&k) {
+      let v = f();
+      cached_lines_width.put(k, v);
+    }
+    cached_lines_width.get(&k).unwrap()
+  }
 }
 
 // Unicode {
