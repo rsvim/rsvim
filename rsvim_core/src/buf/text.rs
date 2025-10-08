@@ -36,7 +36,7 @@ pub struct Text {
 
   // Caches for:
   // 1. Lines width
-  // 2. Cloned lines, this is only used for wrap=true,line_break=true windows.
+  // 2. Cloned lines, this is only used when `wrap=true,line_break=true`.
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
