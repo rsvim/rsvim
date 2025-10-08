@@ -656,16 +656,16 @@ impl Text {
     let new_cache_size = _cached_size(canvas_size);
 
     // cached clone lines
-    let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-    if new_cache_size > cached_lines.cap() {
-      cached_lines.resize(new_cache_size);
-    }
-
-    // cached lines width
-    let mut cached_width = self.cached_lines_width.borrow_mut();
-    if new_cache_size > cached_width.cap() {
-      cached_width.resize(new_cache_size);
-    }
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      if new_cache_size > caches.cap() {
+        caches.resize(new_cache_size);
+      }
+    });
+    self.with_cached_lines_width_mut(|caches, _stats| {
+      if new_cache_size > caches.cap() {
+        caches.resize(new_cache_size);
+      }
+    });
   }
 }
 // Display Width }
