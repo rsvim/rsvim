@@ -18,15 +18,17 @@ use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+// Cached lines width.
+type CachedWidth = LruCache<usize, ColumnIndex, RandomState>;
+
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 struct ClonedLineKey {
   pub line_idx: usize,
   pub start_char_idx: usize,
   pub max_chars: usize,
 }
-
-type CachedLinesWidth = LruCache<usize, ColumnIndex, RandomState>;
-type CachedClonedLines = LruCache<ClonedLineKey, Rc<String>, RandomState>;
+// Cached cloned lines.
+type CachedClones = LruCache<ClonedLineKey, Rc<String>, RandomState>;
 
 #[derive(Debug, Default)]
 struct CacheStatus {
@@ -98,7 +100,7 @@ impl Text {
 
   fn with_cached_width<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus) -> U,
+    F: FnOnce(&mut CachedWidth, &mut CacheStatus) -> U,
   {
     f(
       &mut self.cached_width.borrow_mut(),
@@ -108,7 +110,7 @@ impl Text {
 
   fn with_cached_clones<F, U>(&self, f: F) -> U
   where
-    F: FnOnce(&mut CachedClonedLines, &mut CacheStatus) -> U,
+    F: FnOnce(&mut CachedClones, &mut CacheStatus) -> U,
   {
     f(
       &mut self.cached_clones.borrow_mut(),
@@ -118,7 +120,7 @@ impl Text {
 
   fn cached_width_upsert<'a, F>(
     &self,
-    caches: &'a mut CachedLinesWidth,
+    caches: &'a mut CachedWidth,
     stats: &mut CacheStatus,
     k: &usize,
     f: F,
@@ -139,7 +141,7 @@ impl Text {
 
   fn cached_clones_upsert<'a, F>(
     &self,
-    caches: &'a mut CachedClonedLines,
+    caches: &'a mut CachedClones,
     stats: &mut CacheStatus,
     k: &ClonedLineKey,
     f: F,
@@ -523,7 +525,7 @@ impl Text {
     })
   }
 
-  fn _retain_cached_cloned_lines<F>(&self, caches: &mut CachedClonedLines, f: F)
+  fn _retain_cached_cloned_lines<F>(&self, caches: &mut CachedClones, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
@@ -537,7 +539,7 @@ impl Text {
     }
   }
 
-  fn _retain_cached_lines_width<F>(&self, caches: &mut CachedLinesWidth, f: F)
+  fn _retain_cached_lines_width<F>(&self, caches: &mut CachedWidth, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
