@@ -561,15 +561,16 @@ impl Text {
 
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
+    // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
       self.remove_cached_cloned_line(caches, line_idx);
     });
 
+    // cached lines width
     self.with_cached_lines_width_mut(|caches, stats| {
-      // cached lines width
+      let rope_line = self.rope.line(line_idx);
       self
         .cached_lines_width_upsert(caches, stats, &line_idx, || {
-          let rope_line = self.rope.line(line_idx);
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .truncate_since_char(char_idx)
