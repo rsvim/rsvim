@@ -273,8 +273,13 @@ impl Text {
               Some(Rc::new(builder))
             } else {
               Some(
-                caches
-                  .get_or_insert(key, || -> Rc<String> { Rc::new(builder) })
+                self
+                  .cached_cloned_lines_upsert(
+                    caches,
+                    stats,
+                    &key,
+                    || -> Rc<String> { Rc::new(builder) },
+                  )
                   .clone(),
               )
             }
