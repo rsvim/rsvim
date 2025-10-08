@@ -547,11 +547,11 @@ impl Text {
 
   fn _retain_cached_cloned_lines<F>(&self, caches: &mut CachedClonedLines, f: F)
   where
-    F: Fn(/* cloned_line_key */ &ClonedLineKey) -> bool,
+    F: Fn(/* line_idx */ &usize) -> bool,
   {
     let to_be_removed: Vec<ClonedLineKey> = caches
       .iter()
-      .filter(|(k, _)| !f(&k))
+      .filter(|(k, _)| !f(&k.line_idx))
       .map(|(k, _)| *k)
       .collect();
     for cloned_key in to_be_removed.iter() {
@@ -577,7 +577,7 @@ impl Text {
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
+      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
     });
 
     // cached lines width
@@ -596,7 +596,7 @@ impl Text {
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
+      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
     });
 
     // cached lines width
@@ -615,7 +615,7 @@ impl Text {
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
+      self._retain_cached_cloned_lines(caches, |k| *k != line_idx);
     });
 
     // cached lines width
@@ -631,7 +631,7 @@ impl Text {
   {
     // cached clone lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self._retain_cached_cloned_lines(caches, |k| f(&k.line_idx));
+      self._retain_cached_cloned_lines(caches, |line_idx| f(line_idx));
     });
 
     // cached lines width
