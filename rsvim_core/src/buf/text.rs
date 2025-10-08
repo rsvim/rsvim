@@ -180,6 +180,28 @@ impl Text {
   }
 }
 
+#[cfg(debug_assertions)]
+impl Drop for Text {
+  fn drop(&mut self) {
+    let stats1 = self.cached_lines_width_stats.borrow();
+    trace!(
+      "Text cached_lines_width - total:{},hits:{},misses:{},ratio:{}",
+      stats1.total(),
+      stats1.hits(),
+      stats1.misses(),
+      stats1.hits() as f32 / stats1.total() as f32
+    );
+    let stats2 = self.cached_cloned_lines_stats.borrow();
+    trace!(
+      "Text cached_cloned_lines - total:{},hits:{},misses:{},ratio:{}",
+      stats2.total(),
+      stats2.hits(),
+      stats2.misses(),
+      stats2.hits() as f32 / stats2.total() as f32
+    );
+  }
+}
+
 // Unicode {
 impl Text {
   /// Get the display width for a `char`, supports both ASCI control codes and unicode.
