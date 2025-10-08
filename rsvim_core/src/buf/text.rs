@@ -28,6 +28,34 @@ struct ClonedLineKey {
 type CachedLinesWidth = LruCache<usize, ColumnIndex, RandomState>;
 type CachedClonedLines = LruCache<ClonedLineKey, Rc<String>, RandomState>;
 
+#[derive(Debug, Default)]
+struct CacheStatus {
+  hits: usize,
+  misses: usize,
+}
+
+impl CacheStatus {
+  pub fn hit_one(&mut self) {
+    self.hits += 1;
+  }
+
+  pub fn miss_one(&mut self) {
+    self.hits += 1;
+  }
+
+  pub fn hits(&self) -> usize {
+    self.hits
+  }
+
+  pub fn misses(&self) -> usize {
+    self.misses
+  }
+
+  pub fn total(&self) -> usize {
+    self.hits + self.misses
+  }
+}
+
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
