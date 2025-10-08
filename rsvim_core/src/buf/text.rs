@@ -116,7 +116,7 @@ impl Text {
     )
   }
 
-  fn cached_lines_width_upsert<'a, F>(
+  fn cached_width_upsert<'a, F>(
     &self,
     caches: &'a mut CachedLinesWidth,
     stats: &mut CacheStatus,
@@ -432,7 +432,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .width_before(&self.options, &rope_line, char_idx)
@@ -448,7 +448,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .width_until(&self.options, &rope_line, char_idx)
@@ -464,7 +464,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_before(&self.options, &rope_line, width)
@@ -480,7 +480,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_at(&self.options, &rope_line, width)
@@ -496,7 +496,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_after(&self.options, &rope_line, width)
@@ -516,7 +516,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .last_char_until(&self.options, &rope_line, width)
@@ -562,7 +562,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .truncate_since_char(char_idx)
@@ -581,7 +581,7 @@ impl Text {
     self.with_cached_width(|caches, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_lines_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(caches, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .truncate_since_width(width)
