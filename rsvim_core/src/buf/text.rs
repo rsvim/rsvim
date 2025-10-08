@@ -106,7 +106,7 @@ impl Text {
     )
   }
 
-  fn with_cached_cloned_lines_mut<F, U>(&self, f: F) -> U
+  fn with_cached_clones<F, U>(&self, f: F) -> U
   where
     F: FnOnce(&mut CachedClonedLines, &mut CacheStatus) -> U,
   {
@@ -232,7 +232,7 @@ impl Text {
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    self.with_cached_cloned_lines_mut(|caches, stats| {
+    self.with_cached_clones(|caches, stats| {
       let key = ClonedLineKey {
         line_idx,
         start_char_idx,
@@ -554,7 +554,7 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
@@ -573,7 +573,7 @@ impl Text {
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
@@ -592,7 +592,7 @@ impl Text {
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
     // cached cloned lines
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       self._retain_cached_cloned_lines(caches, |line| *line != line_idx);
     });
 
@@ -608,7 +608,7 @@ impl Text {
     F: Fn(/* line_idx */ &usize) -> bool,
   {
     // cached clone lines
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       self._retain_cached_cloned_lines(caches, |line| f(line));
     });
 
@@ -620,7 +620,7 @@ impl Text {
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       caches.clear();
     });
     self.with_cached_width(|caches, _stats| {
@@ -634,7 +634,7 @@ impl Text {
     let new_cache_size = _cached_size(canvas_size);
 
     // cached clone lines
-    self.with_cached_cloned_lines_mut(|caches, _stats| {
+    self.with_cached_clones(|caches, _stats| {
       if new_cache_size > caches.cap() {
         caches.resize(new_cache_size);
       }
