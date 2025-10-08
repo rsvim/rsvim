@@ -99,30 +99,42 @@ impl Text {
 
   fn with_cached_lines_width<F>(&self, f: F)
   where
-    F: FnOnce(&CachedLinesWidth),
+    F: FnOnce(&CachedLinesWidth, &mut CacheStatus),
   {
-    f(&self.cached_lines_width.borrow())
+    f(
+      &self.cached_lines_width.borrow(),
+      &mut self.cached_lines_width_stats.borrow_mut(),
+    )
   }
 
   fn with_cached_lines_width_mut<F>(&self, f: F)
   where
-    F: FnOnce(&mut CachedLinesWidth),
+    F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus),
   {
-    f(&mut self.cached_lines_width.borrow_mut())
+    f(
+      &mut self.cached_lines_width.borrow_mut(),
+      &mut self.cached_lines_width_stats.borrow_mut(),
+    )
   }
 
   fn with_cached_cloned_lines<F>(&self, f: F)
   where
-    F: FnOnce(&CachedClonedLines),
+    F: FnOnce(&CachedClonedLines, &mut CacheStatus),
   {
-    f(&self.cached_cloned_lines.borrow())
+    f(
+      &self.cached_cloned_lines.borrow(),
+      &mut self.cached_cloned_lines_stats.borrow_mut(),
+    )
   }
 
   fn with_cached_cloned_lines_mut<F>(&self, f: F)
   where
-    F: FnOnce(&mut CachedClonedLines),
+    F: FnOnce(&mut CachedClonedLines, &mut CacheStatus),
   {
-    f(&mut self.cached_cloned_lines.borrow_mut())
+    f(
+      &mut self.cached_cloned_lines.borrow_mut(),
+      &mut self.cached_cloned_lines_stats.borrow_mut(),
+    )
   }
 
   fn cached_lines_width_upsert<'a, F>(
