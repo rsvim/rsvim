@@ -107,16 +107,6 @@ impl Text {
     )
   }
 
-  fn with_cached_cloned_lines<F, U>(&self, f: F) -> U
-  where
-    F: FnOnce(&CachedClonedLines, &mut CacheStatus) -> U,
-  {
-    f(
-      &self.cached_cloned_lines.borrow(),
-      &mut self.cached_cloned_lines_stats.borrow_mut(),
-    )
-  }
-
   fn with_cached_cloned_lines_mut<F, U>(&self, f: F) -> U
   where
     F: FnOnce(&mut CachedClonedLines, &mut CacheStatus) -> U,
