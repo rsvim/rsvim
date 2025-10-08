@@ -68,8 +68,8 @@ pub struct Text {
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
-  cached_lines_width_stats: CacheStatus,
-  cached_cloned_lines_stats: CacheStatus,
+  cached_lines_width_stats: RefCell<CacheStatus>,
+  cached_cloned_lines_stats: RefCell<CacheStatus>,
 }
 
 arc_mutex_ptr!(Text);
@@ -92,8 +92,8 @@ impl Text {
         cache_size,
         RandomState::default(),
       )),
-      cached_lines_width_stats: CacheStatus::default(),
-      cached_cloned_lines_stats: CacheStatus::default(),
+      cached_lines_width_stats: RefCell::new(CacheStatus::default()),
+      cached_cloned_lines_stats: RefCell::new(CacheStatus::default()),
     }
   }
 
@@ -125,19 +125,22 @@ impl Text {
     f(&mut self.cached_cloned_lines.borrow_mut())
   }
 
-  fn cached_lines_width_upsert<F>(
-    cached_lines_width: &mut CachedLinesWidth,
-    k: usize,
-    f: F,
-  ) -> &ColumnIndex
+  fn cached_lines_width_upsert<F>(&self, k: usize, f: F) -> &ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
-    if !cached_lines_width.contains(&k) {
+    let mut caches = self.cached_lines_width.borrow_mut();
+    let mut stats = self.cached_lines_width_stats.borrow_mut();
+
+    if !caches.contains(&k) {
       let v = f();
-      cached_lines_width.put(k, v);
+      caches.put(k, v);
+      stats.miss_one();
+    } else {
+      stats.hit_one();
     }
-    cached_lines_width.get(&k).unwrap()
+
+    caches.get(&k).unwrap()
   }
 }
 
@@ -192,7 +195,11 @@ impl Text {
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
+    let key = ClonedLineKey {
+      line_idx,
+      start_char_idx,
+      max_chars,
+    };
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
 
     if !skip_cache && cached_cloned_lines.contains(&key) {
@@ -508,7 +515,7 @@ impl Text {
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
     let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
       .iter()
-      .filter(|(k, _)| k.0 == line_idx)
+      .filter(|(k, _)| k.line_idx == line_idx)
       .map(|(k, _)| *k)
       .collect();
     for key in to_be_removed.iter() {
@@ -533,7 +540,7 @@ impl Text {
       let mut cached_lines = self.cached_cloned_lines.borrow_mut();
       let to_be_removed: Vec<ClonedLineKey> = cached_lines
         .iter()
-        .filter(|(k, _)| !f(&k.0))
+        .filter(|(k, _)| !f(&k.line_idx))
         .map(|(k, _)| *k)
         .collect();
       for cloned_key in to_be_removed.iter() {
