@@ -544,18 +544,31 @@ impl Text {
     })
   }
 
-  fn remove_cached_cloned_line(
-    &self,
-    cached_cloned_lines: &mut CachedClonedLines,
-    line_idx: usize,
-  ) {
-    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
+  fn _retain_cached_cloned_lines<F>(&self, caches: &mut CachedClonedLines, f: F)
+  where
+    F: Fn(/* cloned_line_key */ &ClonedLineKey) -> bool,
+  {
+    let to_be_removed: Vec<ClonedLineKey> = caches
       .iter()
-      .filter(|(k, _)| k.line_idx == line_idx)
+      .filter(|(k, _)| !f(&k.line_idx))
       .map(|(k, _)| *k)
       .collect();
-    for key in to_be_removed.iter() {
-      cached_cloned_lines.pop(key);
+    for cloned_key in to_be_removed.iter() {
+      caches.pop(cloned_key);
+    }
+  }
+
+  fn _retain_cached_lines_width<F>(&self, caches: &mut CachedLinesWidth, f: F)
+  where
+    F: Fn(/* line_idx */ &usize) -> bool,
+  {
+    let to_be_removed: Vec<usize> = caches
+      .iter()
+      .filter(|(line_idx, _)| !f(line_idx))
+      .map(|(line_idx, _)| *line_idx)
+      .collect();
+    for cloned_key in to_be_removed.iter() {
+      caches.pop(cloned_key);
     }
   }
 
@@ -563,7 +576,7 @@ impl Text {
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self.remove_cached_cloned_line(caches, line_idx);
+      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
     });
 
     // cached lines width
@@ -582,7 +595,7 @@ impl Text {
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     // cached cloned lines
     self.with_cached_cloned_lines_mut(|caches, _stats| {
-      self.remove_cached_cloned_line(caches, line_idx);
+      self._retain_cached_cloned_lines(caches, |k| k.line_idx != line_idx);
     });
 
     // cached lines width
@@ -596,23 +609,18 @@ impl Text {
     })
   }
 
-  fn _remove_cached_cloned_line(&self, line_idx: usize) {
-    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
-    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
-      .iter()
-      .filter(|(k, _)| k.line_idx == line_idx)
-      .map(|(k, _)| *k)
-      .collect();
-    for key in to_be_removed.iter() {
-      cached_cloned_lines.pop(key);
-    }
-  }
-
   #[allow(dead_code)]
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
-    self._remove_cached_cloned_line(line_idx);
-    self.cached_lines_width.borrow_mut().pop(&line_idx);
+    // cached cloned lines
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      self._remove_cached_cloned_line(caches, line_idx);
+    });
+
+    // cached lines width
+    self.with_cached_lines_width_mut(|caches, _stats| {
+      caches.pop(&line_idx);
+    })
   }
 
   /// Retain multiple cached lines by lambda function `f`.
@@ -621,17 +629,16 @@ impl Text {
     F: Fn(/* line_idx */ &usize) -> bool,
   {
     // cached clone lines
-    {
-      let mut cached_lines = self.cached_cloned_lines.borrow_mut();
-      let to_be_removed: Vec<ClonedLineKey> = cached_lines
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      let to_be_removed: Vec<ClonedLineKey> = caches
         .iter()
         .filter(|(k, _)| !f(&k.line_idx))
         .map(|(k, _)| *k)
         .collect();
       for cloned_key in to_be_removed.iter() {
-        cached_lines.pop(cloned_key);
+        caches.pop(cloned_key);
       }
-    }
+    });
 
     // cached lines width
     {
