@@ -32,10 +32,14 @@ type CachedClonedLines = LruCache<ClonedLineKey, Rc<String>, RandomState>;
 /// Text content backend.
 pub struct Text {
   rope: Rope,
+  options: BufferOptions,
+
+  // Caches for:
+  // 1. Lines width
+  // 2. Cloned lines, this is only used for wrap=true,line_break=true windows.
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
-  options: BufferOptions,
 }
 
 arc_mutex_ptr!(Text);
