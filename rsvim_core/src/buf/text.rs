@@ -19,11 +19,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
-struct ClonedLineKey(
-  pub line_idx:  usize,
+struct ClonedLineKey {
+  pub line_idx: usize,
   pub start_char_idx: usize,
   pub max_chars: usize,
-);
+}
 
 #[derive(Debug)]
 /// Text content backend.
@@ -111,7 +111,11 @@ impl Text {
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    let key = ClonedLineKey(line_idx, start_char_idx, max_chars);
+    let key = ClonedLineKey {
+      line_idx,
+      start_char_idx,
+      max_chars,
+    };
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
 
     if !skip_cache && cached_cloned_lines.contains(&key) {
@@ -427,7 +431,7 @@ impl Text {
     let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
     let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
       .iter()
-      .filter(|(k, _)| k.0 == line_idx)
+      .filter(|(k, _)| k.line_idx == line_idx)
       .map(|(k, _)| *k)
       .collect();
     for key in to_be_removed.iter() {
