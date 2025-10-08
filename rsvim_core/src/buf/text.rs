@@ -20,19 +20,19 @@ use std::rc::Rc;
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 struct ClonedLineKey(
-  /* line_idx */ usize,
-  /* start_char_idx */ usize,
-  /* max_chars */ usize,
+  pub line_idx:  usize,
+  pub start_char_idx: usize,
+  pub max_chars: usize,
 );
 
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,
+  options: BufferOptions,
   cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
   cached_cloned_lines:
     RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
-  options: BufferOptions,
 }
 
 arc_mutex_ptr!(Text);
