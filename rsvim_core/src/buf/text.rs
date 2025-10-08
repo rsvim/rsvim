@@ -642,8 +642,12 @@ impl Text {
 
   /// Clear cache.
   fn clear_cached_lines(&self) {
-    self.cached_cloned_lines.borrow_mut().clear();
-    self.cached_lines_width.borrow_mut().clear()
+    self.with_cached_cloned_lines_mut(|caches, _stats| {
+      caches.clear();
+    });
+    self.with_cached_lines_width_mut(|caches, _stats| {
+      caches.clear();
+    });
   }
 
   #[allow(dead_code)]
