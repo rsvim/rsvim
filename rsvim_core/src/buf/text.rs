@@ -65,11 +65,10 @@ pub struct Text {
   // Caches for:
   // 1. Lines width
   // 2. Cloned lines, this is only used when `wrap=true,line_break=true`.
-  cached_lines_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
-  cached_cloned_lines:
-    RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
-  cached_lines_width_stats: RefCell<CacheStatus>,
-  cached_cloned_lines_stats: RefCell<CacheStatus>,
+  cached_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
+  cached_clones: RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
+  cached_width_stats: RefCell<CacheStatus>,
+  cached_clones_stats: RefCell<CacheStatus>,
 }
 
 arc_mutex_ptr!(Text);
@@ -84,16 +83,16 @@ impl Text {
     Self {
       rope,
       options: opts,
-      cached_lines_width: RefCell::new(LruCache::with_hasher(
+      cached_width: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
       )),
-      cached_cloned_lines: RefCell::new(LruCache::with_hasher(
+      cached_clones: RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::default(),
       )),
-      cached_lines_width_stats: RefCell::new(CacheStatus::default()),
-      cached_cloned_lines_stats: RefCell::new(CacheStatus::default()),
+      cached_width_stats: RefCell::new(CacheStatus::default()),
+      cached_clones_stats: RefCell::new(CacheStatus::default()),
     }
   }
 
@@ -102,8 +101,8 @@ impl Text {
     F: FnOnce(&mut CachedLinesWidth, &mut CacheStatus) -> U,
   {
     f(
-      &mut self.cached_lines_width.borrow_mut(),
-      &mut self.cached_lines_width_stats.borrow_mut(),
+      &mut self.cached_width.borrow_mut(),
+      &mut self.cached_width_stats.borrow_mut(),
     )
   }
 
@@ -112,8 +111,8 @@ impl Text {
     F: FnOnce(&mut CachedClonedLines, &mut CacheStatus) -> U,
   {
     f(
-      &mut self.cached_cloned_lines.borrow_mut(),
-      &mut self.cached_cloned_lines_stats.borrow_mut(),
+      &mut self.cached_clones.borrow_mut(),
+      &mut self.cached_clones_stats.borrow_mut(),
     )
   }
 
@@ -163,7 +162,7 @@ impl Text {
 #[cfg(debug_assertions)]
 impl Drop for Text {
   fn drop(&mut self) {
-    let stats1 = self.cached_lines_width_stats.borrow();
+    let stats1 = self.cached_width_stats.borrow();
     trace!(
       "Text cached_lines_width - total:{},hits:{},misses:{},ratio:{}",
       stats1.total(),
@@ -171,7 +170,7 @@ impl Drop for Text {
       stats1.misses(),
       stats1.hits() as f32 / stats1.total() as f32
     );
-    let stats2 = self.cached_cloned_lines_stats.borrow();
+    let stats2 = self.cached_clones_stats.borrow();
     trace!(
       "Text cached_cloned_lines - total:{},hits:{},misses:{},ratio:{}",
       stats2.total(),
