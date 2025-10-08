@@ -120,7 +120,7 @@ impl Text {
 
   fn cached_width_upsert<'a, F>(
     &self,
-    caches: &'a mut CachedWidth,
+    cache: &'a mut CachedWidth,
     stats: &mut CacheStatus,
     k: &usize,
     f: F,
@@ -128,20 +128,20 @@ impl Text {
   where
     F: FnOnce() -> ColumnIndex,
   {
-    if !caches.contains(k) {
+    if !cache.contains(k) {
       let v = f();
-      caches.put(*k, v);
+      cache.put(*k, v);
       stats.miss_one();
     } else {
       stats.hit_one();
     }
 
-    caches.get_mut(k).unwrap()
+    cache.get_mut(k).unwrap()
   }
 
   fn cached_clones_upsert<'a, F>(
     &self,
-    caches: &'a mut CachedClones,
+    cache: &'a mut CachedClones,
     stats: &mut CacheStatus,
     k: &ClonedLineKey,
     f: F,
@@ -149,15 +149,15 @@ impl Text {
   where
     F: FnOnce() -> Rc<String>,
   {
-    if !caches.contains(k) {
+    if !cache.contains(k) {
       let v = f();
-      caches.put(*k, v);
+      cache.put(*k, v);
       stats.miss_one();
     } else {
       stats.hit_one();
     }
 
-    caches.get(k).unwrap()
+    cache.get(k).unwrap()
   }
 }
 
@@ -234,15 +234,15 @@ impl Text {
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    self.with_cached_clones(|caches, stats| {
+    self.with_cached_clones(|cache, stats| {
       let key = ClonedLineKey {
         line_idx,
         start_char_idx,
         max_chars,
       };
 
-      if !skip_cache && caches.contains(&key) {
-        let result = caches.get(&key).cloned();
+      if !skip_cache && cache.contains(&key) {
+        let result = cache.get(&key).cloned();
         debug_assert!(result.is_some());
         stats.miss_one();
         return result;
@@ -259,7 +259,7 @@ impl Text {
                 } else {
                   return Some(
                     self
-                      .cached_clones_upsert(caches, stats, &key, || {
+                      .cached_clones_upsert(cache, stats, &key, || {
                         Rc::new(builder)
                       })
                       .clone(),
@@ -274,9 +274,7 @@ impl Text {
             } else {
               Some(
                 self
-                  .cached_clones_upsert(caches, stats, &key, || {
-                    Rc::new(builder)
-                  })
+                  .cached_clones_upsert(cache, stats, &key, || Rc::new(builder))
                   .clone(),
               )
             }
@@ -431,10 +429,10 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .width_before(&self.options, &rope_line, char_idx)
@@ -447,10 +445,10 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .width_until(&self.options, &rope_line, char_idx)
@@ -463,10 +461,10 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_before(&self.options, &rope_line, width)
@@ -479,10 +477,10 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_at(&self.options, &rope_line, width)
@@ -495,10 +493,10 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .char_after(&self.options, &rope_line, width)
@@ -515,41 +513,41 @@ impl Text {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    self.with_cached_width(|caches, stats| {
+    self.with_cached_width(|cache, stats| {
       let rope_line = self.rope.line(line_idx);
       self
-        .cached_width_upsert(caches, stats, &line_idx, || {
+        .cached_width_upsert(cache, stats, &line_idx, || {
           ColumnIndex::with_capacity(rope_line.len_chars())
         })
         .last_char_until(&self.options, &rope_line, width)
     })
   }
 
-  fn _retain_cached_cloned_lines<F>(&self, caches: &mut CachedClones, f: F)
+  fn _retain_cached_cloned_lines<F>(&self, cache: &mut CachedClones, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
-    let to_be_removed: Vec<ClonedLineKey> = caches
+    let to_be_removed: Vec<ClonedLineKey> = cache
       .iter()
       .filter(|(k, _)| !f(&k.line_idx))
       .map(|(k, _)| *k)
       .collect();
     for cloned_key in to_be_removed.iter() {
-      caches.pop(cloned_key);
+      cache.pop(cloned_key);
     }
   }
 
-  fn _retain_cached_lines_width<F>(&self, caches: &mut CachedWidth, f: F)
+  fn _retain_cached_lines_width<F>(&self, cache: &mut CachedWidth, f: F)
   where
     F: Fn(/* line_idx */ &usize) -> bool,
   {
-    let to_be_removed: Vec<usize> = caches
+    let to_be_removed: Vec<usize> = cache
       .iter()
       .filter(|(line_idx, _)| !f(line_idx))
       .map(|(line_idx, _)| *line_idx)
       .collect();
     for cloned_key in to_be_removed.iter() {
-      caches.pop(cloned_key);
+      cache.pop(cloned_key);
     }
   }
 
