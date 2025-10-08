@@ -25,6 +25,9 @@ struct ClonedLineKey(
   /* max_chars */ usize,
 );
 
+type CachedLinesWidth = LruCache<usize, ColumnIndex, RandomState>;
+type CachedClonedLines = LruCache<ClonedLineKey, Rc<String>, RandomState>;
+
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
@@ -57,6 +60,12 @@ impl Text {
       )),
       options: opts,
     }
+  }
+
+  fn with_cached_lines_width(&self, f: F)
+  where
+    F: FnOnce(),
+  {
   }
 }
 
