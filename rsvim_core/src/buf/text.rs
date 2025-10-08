@@ -550,7 +550,7 @@ impl Text {
   {
     let to_be_removed: Vec<ClonedLineKey> = caches
       .iter()
-      .filter(|(k, _)| !f(&k.line_idx))
+      .filter(|(k, _)| !f(&k))
       .map(|(k, _)| *k)
       .collect();
     for cloned_key in to_be_removed.iter() {
