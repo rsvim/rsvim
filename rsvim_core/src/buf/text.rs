@@ -394,6 +394,21 @@ impl Text {
       .last_char_until(&self.options, &rope_line, width)
   }
 
+  fn _retain_cached_cloned_line<F>(&self, f: F)
+  where
+    F: FnOnce(/* line_idx */ usize) -> bool,
+  {
+    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
+    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
+      .iter()
+      .filter(|(k, _)| !f(k.line_idx))
+      .map(|(k, _)| *k)
+      .collect();
+    for key in to_be_removed.iter() {
+      cached_cloned_lines.pop(key);
+    }
+  }
+
   /// See [`ColumnIndex::truncate_since_char`].
   fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     // cached clone lines
@@ -425,18 +440,6 @@ impl Text {
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
       .truncate_since_width(width)
-  }
-
-  fn _remove_cached_cloned_line(&self, line_idx: usize) {
-    let mut cached_cloned_lines = self.cached_cloned_lines.borrow_mut();
-    let to_be_removed: Vec<ClonedLineKey> = cached_cloned_lines
-      .iter()
-      .filter(|(k, _)| k.line_idx == line_idx)
-      .map(|(k, _)| *k)
-      .collect();
-    for key in to_be_removed.iter() {
-      cached_cloned_lines.pop(key);
-    }
   }
 
   #[allow(dead_code)]
