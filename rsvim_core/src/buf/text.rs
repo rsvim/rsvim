@@ -143,7 +143,7 @@ impl Text {
     stats: &mut CacheStatus,
     k: &usize,
     f: F,
-  ) -> &'a ColumnIndex
+  ) -> &'a mut ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
@@ -155,7 +155,7 @@ impl Text {
       stats.hit_one();
     }
 
-    caches.get(k).unwrap()
+    caches.get_mut(k).unwrap()
   }
 
   fn cached_cloned_lines_upsert<'a, F>(
@@ -456,14 +456,19 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .width_before(&self.options, &rope_line, char_idx)
+    self.with_cached_lines_width_mut(|caches, stats| {
+      let rope_line = self.rope.line(line_idx);
+      self
+        .cached_lines_width_upsert(
+          caches,
+          stats,
+          &line_idx,
+          || -> ColumnIndex {
+            ColumnIndex::with_capacity(rope_line.len_chars())
+          },
+        )
+        .width_before(&self.options, &rope_line, char_idx)
+    })
   }
 
   /// See [`ColumnIndex::width_until`].
