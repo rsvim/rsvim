@@ -129,21 +129,21 @@ impl Text {
     &self,
     caches: &'a mut CachedLinesWidth,
     stats: &mut CacheStatus,
-    k: usize,
+    k: &usize,
     f: F,
   ) -> &'a ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
-    if !caches.contains(&k) {
+    if !caches.contains(k) {
       let v = f();
-      caches.put(k, v);
+      caches.put(*k, v);
       stats.miss_one();
     } else {
       stats.hit_one();
     }
 
-    caches.get(&k).unwrap()
+    caches.get(k).unwrap()
   }
 
   fn cached_cloned_lines_upsert<'a, F>(
