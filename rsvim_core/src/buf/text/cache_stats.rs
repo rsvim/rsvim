@@ -29,8 +29,8 @@ impl CacheStats {
 }
 
 impl std::fmt::Display for CacheStats {
-  fn to_string(&self) -> String {
-    format!(
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.write_fmt(format_args!(
       "hit/miss/total:{}/{}/{},hit ratio:{}",
       self.hits,
       self.misses,
@@ -40,6 +40,6 @@ impl std::fmt::Display for CacheStats {
       } else {
         self.hits as f32 / (self.total() as f32)
       }
-    )
+    ))
   }
 }
