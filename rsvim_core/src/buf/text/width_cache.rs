@@ -1,0 +1,1 @@
+//! Lines width cache.
