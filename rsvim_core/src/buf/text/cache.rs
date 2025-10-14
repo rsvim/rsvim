@@ -86,16 +86,18 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   where
     F: FnOnce() -> Option<V>,
   {
+    if cfg!(debug_assertions) {
+      if self.cache.contains(k) {
+        self.stats.hit();
+      } else {
+        self.stats.miss();
+      }
+    }
+
     if !self.cache.contains(k) {
       if let Some(v) = f() {
         self.cache.put(*k, v);
       }
-
-      if cfg!(debug_assertions) {
-        self.stats.miss();
-      }
-    } else if cfg!(debug_assertions) {
-      self.stats.hit();
     }
 
     self.cache.get(k)
