@@ -351,13 +351,9 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|cache, stats| {
-      let rope_line = self.rope.line(line_idx);
-      self
-        .cached_width_upsert(cache, stats, &line_idx, || {
-          ColumnIndex::with_capacity(rope_line.len_chars())
-        })
-        .char_at(&self.options, &rope_line, width)
+    let rope_line = self.rope.line(line_idx);
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.char_at(&self.options, &rope_line, width)
     })
   }
 
@@ -367,13 +363,9 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|cache, stats| {
-      let rope_line = self.rope.line(line_idx);
-      self
-        .cached_width_upsert(cache, stats, &line_idx, || {
-          ColumnIndex::with_capacity(rope_line.len_chars())
-        })
-        .char_after(&self.options, &rope_line, width)
+    let rope_line = self.rope.line(line_idx);
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.char_after(&self.options, &rope_line, width)
     })
   }
 
@@ -387,13 +379,9 @@ impl Text {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    self.with_cached_width(|cache, stats| {
-      let rope_line = self.rope.line(line_idx);
-      self
-        .cached_width_upsert(cache, stats, &line_idx, || {
-          ColumnIndex::with_capacity(rope_line.len_chars())
-        })
-        .last_char_until(&self.options, &rope_line, width)
+    let rope_line = self.rope.line(line_idx);
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.last_char_until(&self.options, &rope_line, width)
     })
   }
 
