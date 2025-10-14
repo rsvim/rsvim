@@ -113,10 +113,8 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
       if cfg!(debug_assertions) {
         self.stats.miss();
       }
-    } else {
-      if cfg!(debug_assertions) {
-        self.stats.hit();
-      }
+    } else if cfg!(debug_assertions) {
+      self.stats.hit();
     }
 
     self.cache.get_mut(k)
