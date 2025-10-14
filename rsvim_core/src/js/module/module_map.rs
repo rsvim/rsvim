@@ -201,7 +201,7 @@ impl ModuleMap {
   pub fn insert(
     &mut self,
     path: &str,
-    id: i32,
+    module_id: i32,
     module: v8::Global<v8::Module>,
   ) {
     // No main module has been set, so let's update the value.
@@ -210,7 +210,7 @@ impl ModuleMap {
     }
     self.by_path.insert(path.into(), module.clone());
     let entry = (path.into(), module.clone());
-    match self.by_id.entry(id) {
+    match self.by_id.entry(module_id) {
       Entry::Vacant(value) => {
         value.insert(vec![entry]);
       }
@@ -262,10 +262,10 @@ impl ModuleMap {
   /// conflicted hash IDs.
   pub fn get_path(
     &self,
-    id: i32,
+    module_id: i32,
     module: v8::Global<v8::Module>,
   ) -> Option<ModulePath> {
-    match self.by_id.get(&id) {
+    match self.by_id.get(&module_id) {
       None => None,
       Some(entries) => {
         if entries.len() <= 1 {
