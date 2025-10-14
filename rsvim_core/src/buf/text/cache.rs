@@ -109,6 +109,10 @@ impl CachedLinesWidth {
       self.cache.resize(new_cache_size);
     }
   }
+
+  pub fn clear(&mut self) {
+    self.cache.clear();
+  }
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
