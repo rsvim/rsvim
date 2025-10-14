@@ -340,14 +340,9 @@ impl Text {
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
-    self
-      .cached_width
-      .borrow_mut()
-      .get_or_insert_mut(&line_idx, || {
-        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
-      })
-      .unwrap()
-      .char_before(&self.options, &rope_line, width)
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.char_before(&self.options, &rope_line, width)
+    })
   }
 
   /// See [`ColumnIndex::char_at`].
