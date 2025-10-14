@@ -62,13 +62,14 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
   std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
 }
 
+#[derive(Debug)]
 // Internal cache implementation.
-struct CacheImpl<K: Copy + Eq + Hash, V> {
+struct GenericCache<K: Copy + Eq + Hash, V> {
   cache: CLruCache<K, V, RandomState>,
   stats: Stats,
 }
 
-impl<K: Copy + Eq + Hash, V> CacheImpl<K, V> {
+impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   pub fn new(canvas_size: U16Size) -> Self {
     let cache_size = _cached_size(canvas_size);
     Self {
@@ -153,7 +154,7 @@ impl<K: Copy + Eq + Hash, V> CacheImpl<K, V> {
 /// Cached lines width.
 ///
 /// Key `line_idx` => Value `ColumnIndex`.
-pub type CachedWidth = CacheImpl<usize, ColumnIndex>;
+pub type CachedWidth = GenericCache<usize, ColumnIndex>;
 
 /// Cache key for `CachedLines`.
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
@@ -166,4 +167,4 @@ pub struct CachedLinesKey {
 /// Cached cloned lines.
 ///
 /// Key `CachedLinesKey` (line_idx, start_char_idx, max_chars) => Value `Rc<String>`.
-pub type CachedLines = CacheImpl<CachedLinesKey, Rc<String>>;
+pub type CachedLines = GenericCache<CachedLinesKey, Rc<String>>;

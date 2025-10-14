@@ -291,6 +291,24 @@ impl Text {
 
 // Display Width {
 impl Text {
+  fn with_cached_width<U, F>(
+    &self,
+    line_idx: usize,
+    rope_line: &RopeSlice,
+    f: F,
+  ) -> U
+  where
+    F: FnOnce(&mut ColumnIndex) -> U,
+  {
+    f(self
+      .cached_width
+      .borrow_mut()
+      .get_or_insert_mut(&line_idx, || {
+        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
+      })
+      .unwrap())
+  }
+
   /// See [`ColumnIndex::width_before`].
   ///
   /// # Panics
@@ -298,15 +316,9 @@ impl Text {
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
-
-    self
-      .cached_width
-      .borrow_mut()
-      .get_or_insert_mut(&line_idx, || {
-        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
-      })
-      .unwrap()
-      .width_before(&self.options, &rope_line, char_idx)
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.width_before(&self.options, &rope_line, char_idx)
+    })
   }
 
   /// See [`ColumnIndex::width_until`].
@@ -316,14 +328,9 @@ impl Text {
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
-    self
-      .cached_width
-      .borrow_mut()
-      .get_or_insert_mut(&line_idx, || {
-        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
-      })
-      .unwrap()
-      .width_until(&self.options, &rope_line, char_idx)
+    self.with_cached_width(line_idx, &rope_line, |col| {
+      col.width_until(&self.options, &rope_line, char_idx)
+    })
   }
 
   /// See [`ColumnIndex::char_before`].
@@ -332,14 +339,15 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.with_cached_width(|cache, stats| {
-      let rope_line = self.rope.line(line_idx);
-      self
-        .cached_width_upsert(cache, stats, &line_idx, || {
-          ColumnIndex::with_capacity(rope_line.len_chars())
-        })
-        .char_before(&self.options, &rope_line, width)
-    })
+    let rope_line = self.rope.line(line_idx);
+    self
+      .cached_width
+      .borrow_mut()
+      .get_or_insert_mut(&line_idx, || {
+        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
+      })
+      .unwrap()
+      .char_before(&self.options, &rope_line, width)
   }
 
   /// See [`ColumnIndex::char_at`].
