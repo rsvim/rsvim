@@ -90,6 +90,23 @@ impl CachedLinesWidth {
   {
     f(&mut self.cache.borrow_mut(), &mut self.stats.borrow_mut())
   }
+
+  pub fn get_or_insert<'a, F>(&self, k: &usize, f: F) -> &'a mut ColumnIndex
+  where
+    F: FnOnce() -> ColumnIndex,
+  {
+    self.with(|(cache, stats)| {
+      if !cache.contains(k) {
+        let v = f();
+        cache.put(*k, v);
+        stats.miss();
+      } else {
+        stats.hit();
+      }
+
+      cache.get_mut(k).unwrap()
+    })
+  }
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
