@@ -6,7 +6,7 @@
 
 use crate::buf::text::cidx::ColumnIndex;
 use crate::prelude::*;
-use clru::CLruCache;
+use lru::LruCache;
 use std::hash::Hash;
 use std::rc::Rc;
 
@@ -72,7 +72,7 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 #[derive(Debug)]
 // Internal cache implementation.
 pub struct GenericCache<K: Copy + Eq + Hash, V> {
-  cache: CLruCache<K, V, RandomState>,
+  cache: LruCache<K, V, RandomState>,
 
   #[cfg(debug_assertions)]
   stats: Stats,
@@ -82,7 +82,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   pub fn new(canvas_size: U16Size) -> Self {
     let cache_size = _cached_size(canvas_size);
     Self {
-      cache: CLruCache::with_hasher(cache_size, RandomState::default()),
+      cache: LruCache::with_hasher(cache_size, RandomState::default()),
 
       #[cfg(debug_assertions)]
       stats: Stats::default(),
