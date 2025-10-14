@@ -102,6 +102,13 @@ impl CachedLinesWidth {
 
     self.cache.get_mut(k).unwrap()
   }
+
+  pub fn resize(&mut self, canvas_size: U16Size) {
+    let new_cache_size = _cached_size(canvas_size);
+    if new_cache_size.get() > self.cache.capacity() {
+      self.cache.resize(new_cache_size);
+    }
+  }
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
