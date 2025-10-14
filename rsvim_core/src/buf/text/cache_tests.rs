@@ -2,6 +2,8 @@ use super::cache::*;
 
 #[cfg(test)]
 mod stats {
+  use super::*;
+
   #[test]
   fn test1() {
     let mut stats = Stats::default();
