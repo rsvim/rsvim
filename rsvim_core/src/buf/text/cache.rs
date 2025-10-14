@@ -68,7 +68,9 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 
 type LinesWidthCache = CLruCache<usize, ColumnIndex, RandomState>;
 
-// Cached lines width.
+/// Cached lines width.
+///
+/// Key `line_idx` => Value `ColumnIndex`.
 pub struct CachedLinesWidth {
   cache: LinesWidthCache,
   stats: Stats,
@@ -113,6 +115,21 @@ impl CachedLinesWidth {
   pub fn clear(&mut self) {
     self.cache.clear();
   }
+
+  fn retain<F>(&mut self, f: F)
+  where
+    F: Fn(/* line_idx */ &usize) -> bool,
+  {
+    let to_be_removed: Vec<usize> = self
+      .cache
+      .iter()
+      .filter(|(line_idx, _)| !f(line_idx))
+      .map(|(line_idx, _)| *line_idx)
+      .collect();
+    for cloned_key in to_be_removed.iter() {
+      self.cache.pop(cloned_key);
+    }
+  }
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
@@ -122,7 +139,9 @@ struct CachedClonedLinesKey {
   pub max_chars: usize,
 }
 
-// Cached cloned lines.
+/// Cached cloned lines.
+///
+/// Key `CachedClonedLinesKey` (line_idx, start_char_idx, max_chars) => Value `Rc<String>`.
 pub struct CachedClonedLines {
   cache: RefCell<CLruCache<CachedClonedLinesKey, Rc<String>, RandomState>>,
   stats: RefCell<Stats>,
