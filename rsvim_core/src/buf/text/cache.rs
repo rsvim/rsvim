@@ -48,13 +48,17 @@ impl Stats {
 
 impl std::fmt::Display for Stats {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_fmt(format_args!(
-      "hit/miss/total:{}/{}/{},hit ratio:{}",
-      self.hits,
-      self.misses,
-      self.total(),
-      self.ratio(),
-    ))
+    if self.total() == 0 {
+      Ok(())
+    } else {
+      f.write_fmt(format_args!(
+        "hit/miss/total:{}/{}/{},hit ratio:{}",
+        self.hits,
+        self.misses,
+        self.total(),
+        self.ratio(),
+      ))
+    }
   }
 }
 
@@ -78,8 +82,8 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
     }
   }
 
-  pub fn stats(&self) -> String {
-    format!("{}", self.stats)
+  pub fn stats(&self) -> &Stats {
+    &self.stats
   }
 
   fn _get_or_insert_impl<F>(&mut self, k: &K, f: F)
