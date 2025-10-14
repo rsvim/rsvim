@@ -1,8 +1,21 @@
 //! Internal cache for `Text`:
 //!
 //! - Lines width cache
-//! - Cloned line strings cache.
+//! - Cloned lines cache.
 //! - Cache hit/miss statistics.
+
+use crate::buf::opt::BufferOptions;
+use crate::buf::opt::EndOfLineOption;
+use crate::buf::unicode;
+use crate::prelude::*;
+pub use cidx::ColumnIndex;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use lru::LruCache;
+use ropey::Rope;
+use ropey::RopeSlice;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug, Default)]
 pub struct CacheStats {
@@ -50,4 +63,21 @@ impl std::fmt::Display for CacheStats {
       self.ratio(),
     ))
   }
+}
+
+// Lines width cache.
+pub struct LinesWidthCache {
+  c: LruCache<usize, ColumnIndex, RandomState>,
+}
+
+#[derive(Hash, PartialEq, Eq, Copy, Clone)]
+struct ClonedLinesCacheKey {
+  pub line_idx: usize,
+  pub start_char_idx: usize,
+  pub max_chars: usize,
+}
+
+// Cloned lines cache.
+pub struct ClonedLinesCache {
+  c: LruCache<ClonedLinesCacheKey, Rc<String>, RandomState>,
 }
