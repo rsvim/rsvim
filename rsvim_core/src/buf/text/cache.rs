@@ -10,12 +10,14 @@ use clru::CLruCache;
 use std::hash::Hash;
 use std::rc::Rc;
 
+#[cfg(debug_assertions)]
 #[derive(Debug, Default)]
 pub struct Stats {
   hits: usize,
   misses: usize,
 }
 
+#[cfg(debug_assertions)]
 impl Stats {
   pub fn hit(&mut self) {
     self.hits += 1;
@@ -46,6 +48,7 @@ impl Stats {
   }
 }
 
+#[cfg(debug_assertions)]
 impl std::fmt::Display for Stats {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.total() == 0 {
@@ -70,6 +73,8 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 // Internal cache implementation.
 pub struct GenericCache<K: Copy + Eq + Hash, V> {
   cache: CLruCache<K, V, RandomState>,
+
+  #[cfg(debug_assertions)]
   stats: Stats,
 }
 
@@ -78,10 +83,13 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
     let cache_size = _cached_size(canvas_size);
     Self {
       cache: CLruCache::with_hasher(cache_size, RandomState::default()),
+
+      #[cfg(debug_assertions)]
       stats: Stats::default(),
     }
   }
 
+  #[cfg(debug_assertions)]
   pub fn stats(&self) -> &Stats {
     &self.stats
   }
@@ -90,7 +98,8 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   where
     F: FnOnce() -> Option<V>,
   {
-    if cfg!(debug_assertions) {
+    #[cfg(debug_assertions)]
+    {
       if self.cache.contains(k) {
         self.stats.hit();
       } else {
