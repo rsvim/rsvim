@@ -3736,9 +3736,9 @@ dependencies = [
 
 [[package]]
 name = "timezone_provider"
-version = "0.0.14"
+version = "0.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f357f8e2cddee6a7b56b69fbb4cab30a7e82914c80ee7f9a5eb799ee3de3f24d"
+checksum = "14fab21f70d8ca989ca76d399d26f4487747ac2def3816d93eaa966f8dfa2ea7"
 dependencies = [
  "tinystr 0.8.1",
  "zerotrie",
