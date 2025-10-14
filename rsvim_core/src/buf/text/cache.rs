@@ -12,6 +12,7 @@ use clru::CLruCache;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::cell::RefCell;
+use std::hash::Hash;
 use std::rc::Rc;
 
 #[derive(Debug, Default)]
@@ -64,6 +65,71 @@ impl std::fmt::Display for Stats {
 
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
   std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
+}
+
+// Internal cache implementation.
+struct CacheImpl<K: Copy + Eq + Hash, V> {
+  cache: CLruCache<K, V, RandomState>,
+  stats: Stats,
+}
+
+impl<K, V> CacheImpl<K, V>
+where
+  K: Copy + Eq + Hash,
+{
+  pub fn new(canvas_size: U16Size) -> Self {
+    let cache_size = _cached_size(canvas_size);
+    Self {
+      cache: CLruCache::with_hasher(cache_size, RandomState::default()),
+      stats: Stats::default(),
+    }
+  }
+
+  pub fn get_or_insert<F>(&mut self, k: &K, f: F) -> &mut V
+  where
+    F: FnOnce() -> V,
+  {
+    if !self.cache.contains(k) {
+      let v = f();
+      self.cache.put(*k, v);
+
+      if cfg!(debug_assertions) {
+        self.stats.miss();
+      }
+    } else {
+      if cfg!(debug_assertions) {
+        self.stats.hit();
+      }
+    }
+
+    self.cache.get_mut(k).unwrap()
+  }
+
+  pub fn resize(&mut self, canvas_size: U16Size) {
+    let new_cache_size = _cached_size(canvas_size);
+    if new_cache_size.get() > self.cache.capacity() {
+      self.cache.resize(new_cache_size);
+    }
+  }
+
+  pub fn clear(&mut self) {
+    self.cache.clear();
+  }
+
+  fn retain<F>(&mut self, f: F)
+  where
+    F: Fn(/* line_idx */ &usize) -> bool,
+  {
+    let to_be_removed: Vec<usize> = self
+      .cache
+      .iter()
+      .filter(|(line_idx, _)| !f(line_idx))
+      .map(|(line_idx, _)| *line_idx)
+      .collect();
+    for cloned_key in to_be_removed.iter() {
+      self.cache.pop(cloned_key);
+    }
+  }
 }
 
 type LinesWidthCache = CLruCache<usize, ColumnIndex, RandomState>;
@@ -132,6 +198,7 @@ impl CachedLinesWidth {
   }
 }
 
+/// Cache key for `CachedClonedLines`.
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
 struct CachedClonedLinesKey {
   pub line_idx: usize,
@@ -145,4 +212,60 @@ struct CachedClonedLinesKey {
 pub struct CachedClonedLines {
   cache: RefCell<CLruCache<CachedClonedLinesKey, Rc<String>, RandomState>>,
   stats: RefCell<Stats>,
+}
+
+impl CachedClonedLines {
+  pub fn new(canvas_size: U16Size) -> Self {
+    let cache_size = _cached_size(canvas_size);
+    Self {
+      cache: CLruCache::with_hasher(cache_size, RandomState::default()),
+      stats: Stats::default(),
+    }
+  }
+
+  pub fn get_or_insert<F>(&mut self, k: &usize, f: F) -> &mut ColumnIndex
+  where
+    F: FnOnce() -> ColumnIndex,
+  {
+    if !self.cache.contains(k) {
+      let v = f();
+      self.cache.put(*k, v);
+
+      if cfg!(debug_assertions) {
+        self.stats.miss();
+      }
+    } else {
+      if cfg!(debug_assertions) {
+        self.stats.hit();
+      }
+    }
+
+    self.cache.get_mut(k).unwrap()
+  }
+
+  pub fn resize(&mut self, canvas_size: U16Size) {
+    let new_cache_size = _cached_size(canvas_size);
+    if new_cache_size.get() > self.cache.capacity() {
+      self.cache.resize(new_cache_size);
+    }
+  }
+
+  pub fn clear(&mut self) {
+    self.cache.clear();
+  }
+
+  fn retain<F>(&mut self, f: F)
+  where
+    F: Fn(/* line_idx */ &usize) -> bool,
+  {
+    let to_be_removed: Vec<usize> = self
+      .cache
+      .iter()
+      .filter(|(line_idx, _)| !f(line_idx))
+      .map(|(line_idx, _)| *line_idx)
+      .collect();
+    for cloned_key in to_be_removed.iter() {
+      self.cache.pop(cloned_key);
+    }
+  }
 }
