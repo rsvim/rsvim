@@ -64,7 +64,7 @@ fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
 
 #[derive(Debug)]
 // Internal cache implementation.
-struct GenericCache<K: Copy + Eq + Hash, V> {
+pub struct GenericCache<K: Copy + Eq + Hash, V> {
   cache: CLruCache<K, V, RandomState>,
   stats: Stats,
 }
