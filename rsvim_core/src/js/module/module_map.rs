@@ -41,6 +41,7 @@ use crate::js::module::ModulePath;
 use crate::js::module::ModuleStatus;
 use crate::js::module::es_module::*;
 use crate::prelude::*;
+use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 
 #[derive(Clone)]
@@ -150,7 +151,10 @@ pub struct ModuleMap {
   main: Option<ModulePath>,
 
   // Maps from "Module Path" to "v8 Module".
-  index: FoldMap<ModulePath, v8::Global<v8::Module>>,
+  by_path: FoldMap<ModulePath, v8::Global<v8::Module>>,
+
+  // Maps from "Module ID" to "v8 Module" and its path.
+  by_id: FoldMap<i32, Vec<(ModulePath, v8::Global<v8::Module>)>>,
 
   // Module status.
   pub seen: FoldMap<ModulePath, ModuleStatus>,
@@ -166,7 +170,7 @@ impl Debug for ModuleMap {
       .field(
         "index",
         &self
-          .index
+          .by_path
           .keys()
           .map(|k| (k.clone(), "v8::Module".to_string()))
           .collect::<FoldMap<String, String>>(),
@@ -182,7 +186,8 @@ impl ModuleMap {
   pub fn new() -> ModuleMap {
     Self {
       main: None,
-      index: FoldMap::new(),
+      by_path: FoldMap::new(),
+      by_id: FoldMap::new(),
       seen: FoldMap::new(),
       pending: vec![],
     }
@@ -193,12 +198,26 @@ impl ModuleMap {
   }
 
   /// Add a compiled v8 module to the cache.
-  pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
+  pub fn insert(
+    &mut self,
+    path: &str,
+    module_id: i32,
+    module: v8::Global<v8::Module>,
+  ) {
     // No main module has been set, so let's update the value.
     if self.main.is_none() && std::fs::metadata(path).is_ok() {
       self.main = Some(path.into());
     }
-    self.index.insert(path.into(), module);
+    self.by_path.insert(path.into(), module.clone());
+    let entry = (path.into(), module.clone());
+    match self.by_id.entry(module_id) {
+      Entry::Vacant(value) => {
+        value.insert(vec![entry]);
+      }
+      Entry::Occupied(mut value) => {
+        value.get_mut().push(entry);
+      }
+    }
   }
 
   // // Returns if there are still pending imports to be loaded.
@@ -206,14 +225,14 @@ impl ModuleMap {
   //   !self.pending.is_empty()
   // }
 
-  /// Returns a compiled v8 module.
-  pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
-    self.index.get(key).cloned()
+  /// Get v8 module by its path.
+  pub fn get(&self, path: &str) -> Option<v8::Global<v8::Module>> {
+    self.by_path.get(path).cloned()
   }
 
   /// Whether a v8 module already resolved.
   pub fn contains(&self, key: &str) -> bool {
-    self.index.contains_key(key)
+    self.by_path.contains_key(key)
   }
 
   #[cfg(test)]
@@ -224,7 +243,7 @@ impl ModuleMap {
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
     use normpath::PathExt;
 
-    self.index.iter().find(|(k, _v)| {
+    self.by_path.iter().find(|(k, _v)| {
       Path::new(k)
         .normalize()
         .unwrap()
@@ -236,13 +255,30 @@ impl ModuleMap {
     })
   }
 
-  /// Returns a specifier by a v8 module ID.
-  pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
-    self
-      .index
-      .iter()
-      .find(|(_, m)| **m == module)
-      .map(|(p, _)| p.clone())
+  /// Get module path by its ID.
+  ///
+  /// NOTE: v8 Module does not guarantee its ID is unique, thus here we use
+  /// `Vec<v8::Module>` to store all the modules with the same ID, to solve the
+  /// conflicted hash IDs.
+  pub fn get_path(
+    &self,
+    module_id: i32,
+    module: v8::Global<v8::Module>,
+  ) -> Option<ModulePath> {
+    match self.by_id.get(&module_id) {
+      None => None,
+      Some(entries) => {
+        if entries.len() <= 1 {
+          debug_assert!(!entries.is_empty());
+          Some(entries[0].0.clone())
+        } else {
+          entries
+            .iter()
+            .find(|(_, m)| *m == module)
+            .map(|(p, _)| p.clone())
+        }
+      }
+    }
   }
 }
 

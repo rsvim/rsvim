@@ -32,9 +32,10 @@ pub fn module_resolve_cb<'a>(
   let state = state_rc.borrow();
 
   let import_map = state.options.import_map.clone();
+  let referrer_id = referrer.get_identity_hash().get();
   let referrer = v8::Global::new(scope, referrer);
 
-  let dependant = state.module_map.get_path(referrer).unwrap();
+  let dependant = state.module_map.get_path(referrer_id, referrer).unwrap();
   let dependant = paths::parent_or_remain(&dependant).to_string_lossy();
   let specifier = specifier.to_rust_string_lossy(scope);
   let specifier = resolve_import(&dependant, &specifier, import_map).unwrap();
@@ -63,9 +64,10 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   let state = state_rc.borrow();
 
   // Make the module global.
+  let module_id = module.get_identity_hash().get();
   let module = v8::Global::new(scope, module);
 
-  let filename = state.module_map.get_path(module).unwrap();
+  let filename = state.module_map.get_path(module_id, module).unwrap();
   let is_main = state.module_map.main().as_ref() == Some(&filename);
   trace!(
     "|host_initialize_import_meta_object_cb| url:{:?}, is_main:{:?}",

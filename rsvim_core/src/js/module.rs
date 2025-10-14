@@ -263,10 +263,11 @@ pub fn fetch_module_tree<'s>(
   let state_rc = JsRuntime::state(scope);
 
   // Subscribe module to the module-map.
+  let module_id = module.get_identity_hash().get();
   let module_ref = v8::Global::new(scope, module);
   {
     let mut state = state_rc.borrow_mut();
-    state.module_map.insert(filename, module_ref);
+    state.module_map.insert(filename, module_id, module_ref);
     state
       .module_map
       .seen
