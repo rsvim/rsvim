@@ -14,54 +14,16 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::EndOfLineOption;
 use crate::buf::unicode;
 use crate::prelude::*;
+use cache::CachedLines;
+use cache::CachedLinesKey;
+use cache::CachedWidth;
 pub use cidx::ColumnIndex;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use lru::LruCache;
 use ropey::Rope;
 use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::rc::Rc;
-
-// Cached lines width.
-type CachedWidth = LruCache<usize, ColumnIndex, RandomState>;
-
-#[derive(Hash, PartialEq, Eq, Copy, Clone)]
-struct ClonedLineKey {
-  pub line_idx: usize,
-  pub start_char_idx: usize,
-  pub max_chars: usize,
-}
-// Cached cloned lines.
-type CachedClones = LruCache<ClonedLineKey, Rc<String>, RandomState>;
-
-#[derive(Debug, Default)]
-struct CacheStatus {
-  hits: usize,
-  misses: usize,
-}
-
-impl CacheStatus {
-  pub fn hit_one(&mut self) {
-    self.misses += 1;
-  }
-
-  pub fn miss_one(&mut self) {
-    self.hits += 1;
-  }
-
-  pub fn hits(&self) -> usize {
-    self.hits
-  }
-
-  pub fn misses(&self) -> usize {
-    self.misses
-  }
-
-  pub fn total(&self) -> usize {
-    self.hits + self.misses
-  }
-}
 
 #[derive(Debug)]
 /// Text content backend.
@@ -72,119 +34,30 @@ pub struct Text {
   // Caches for:
   // 1. Lines width
   // 2. Cloned lines, this is only used when `wrap=true,line_break=true`.
-  cached_width: RefCell<LruCache<usize, ColumnIndex, RandomState>>,
-  cached_clones: RefCell<LruCache<ClonedLineKey, Rc<String>, RandomState>>,
-  cached_width_stats: RefCell<CacheStatus>,
-  cached_clones_stats: RefCell<CacheStatus>,
+  cached_width: RefCell<CachedWidth>,
+  cached_lines: RefCell<CachedLines>,
 }
 
 arc_mutex_ptr!(Text);
 
-fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_size.height() as usize * 2 + 3).unwrap()
-}
-
 impl Text {
   pub fn new(opts: BufferOptions, canvas_size: U16Size, rope: Rope) -> Self {
-    let cache_size = _cached_size(canvas_size);
     Self {
       rope,
       options: opts,
-      cached_width: RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::default(),
-      )),
-      cached_clones: RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::default(),
-      )),
-      cached_width_stats: RefCell::new(CacheStatus::default()),
-      cached_clones_stats: RefCell::new(CacheStatus::default()),
+      cached_width: RefCell::new(CachedWidth::new(canvas_size)),
+      cached_lines: RefCell::new(CachedLines::new(canvas_size)),
     }
-  }
-
-  fn with_cached_width<F, U>(&self, f: F) -> U
-  where
-    F: FnOnce(&mut CachedWidth, &mut CacheStatus) -> U,
-  {
-    f(
-      &mut self.cached_width.borrow_mut(),
-      &mut self.cached_width_stats.borrow_mut(),
-    )
-  }
-
-  fn with_cached_clones<F, U>(&self, f: F) -> U
-  where
-    F: FnOnce(&mut CachedClones, &mut CacheStatus) -> U,
-  {
-    f(
-      &mut self.cached_clones.borrow_mut(),
-      &mut self.cached_clones_stats.borrow_mut(),
-    )
-  }
-
-  fn cached_width_upsert<'a, F>(
-    &self,
-    cache: &'a mut CachedWidth,
-    stats: &mut CacheStatus,
-    k: &usize,
-    f: F,
-  ) -> &'a mut ColumnIndex
-  where
-    F: FnOnce() -> ColumnIndex,
-  {
-    if !cache.contains(k) {
-      let v = f();
-      cache.put(*k, v);
-      stats.miss_one();
-    } else {
-      stats.hit_one();
-    }
-
-    cache.get_mut(k).unwrap()
-  }
-
-  fn cached_clones_upsert<'a, F>(
-    &self,
-    cache: &'a mut CachedClones,
-    stats: &mut CacheStatus,
-    k: &ClonedLineKey,
-    f: F,
-  ) -> &'a Rc<String>
-  where
-    F: FnOnce() -> Rc<String>,
-  {
-    if !cache.contains(k) {
-      let v = f();
-      cache.put(*k, v);
-      stats.miss_one();
-    } else {
-      stats.hit_one();
-    }
-
-    cache.get(k).unwrap()
   }
 }
 
 #[cfg(debug_assertions)]
 impl Drop for Text {
   fn drop(&mut self) {
-    let stats1 = self.cached_width_stats.borrow();
-    trace!(
-      "Text drop - cached_lines_width total:{},hits:{},misses:{},ratio:{}",
-      stats1.total(),
-      stats1.hits(),
-      stats1.misses(),
-      stats1.hits() as f32 / stats1.total() as f32
-    );
-    let stats2 = self.cached_clones_stats.borrow();
-    trace!(
-      "Text drop - cached_cloned_lines total:{},hits:{},misses:{},ratio:{}",
-      stats2.total(),
-      stats2.hits(),
-      stats2.misses(),
-      stats2.hits() as f32 / stats2.total() as f32
-    );
+    let cached_width = self.cached_width.borrow();
+    trace!("|drop| cached_width {}", cached_width.stats());
+    let cached_lines = self.cached_lines.borrow();
+    trace!("|drop| cached_lines {}", cached_lines.stats());
   }
 }
 
