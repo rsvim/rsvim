@@ -103,65 +103,87 @@ impl Text {
     &mut self.rope
   }
 
-  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
-  /// for performance reason when the line is too long to clone.
   fn _clone_line_impl(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<Rc<String>> {
+    match self.rope.get_line(line_idx) {
+      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(Rc::new(builder));
+            }
+            builder.push(c);
+          }
+          Some(Rc::new(builder))
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
+
+  fn _clone_line_impl_wrap(
     &self,
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
     skip_cache: bool,
   ) -> Option<Rc<String>> {
-    self.with_cached_clones(|cache, stats| {
-      let key = ClonedLineKey {
-        line_idx,
-        start_char_idx,
-        max_chars,
-      };
+    let mut cached_lines = self.cached_lines.borrow_mut();
 
-      if !skip_cache && cache.contains(&key) {
-        let result = cache.get(&key).cloned();
-        debug_assert!(result.is_some());
-        stats.miss_one();
-        return result;
-      }
+    let key = CachedLinesKey {
+      line_idx,
+      start_char_idx,
+      max_chars,
+    };
 
-      match self.rope.get_line(line_idx) {
-        Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-          Some(chars_iter) => {
-            let mut builder = String::with_capacity(max_chars);
-            for (i, c) in chars_iter.enumerate() {
-              if i >= max_chars {
-                if skip_cache {
-                  return Some(Rc::new(builder));
-                } else {
-                  return Some(
-                    self
-                      .cached_clones_upsert(cache, stats, &key, || {
-                        Rc::new(builder)
-                      })
-                      .clone(),
-                  );
-                }
+    if !skip_cache && cached_lines.contains(&key) {
+      let result = cache.get(&key).cloned();
+      debug_assert!(result.is_some());
+      stats.miss_one();
+      return result;
+    }
+
+    match self.rope.get_line(line_idx) {
+      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              if skip_cache {
+                return Some(Rc::new(builder));
+              } else {
+                return Some(
+                  self
+                    .cached_clones_upsert(cache, stats, &key, || {
+                      Rc::new(builder)
+                    })
+                    .clone(),
+                );
               }
-              builder.push(c);
             }
-
-            if skip_cache {
-              Some(Rc::new(builder))
-            } else {
-              Some(
-                self
-                  .cached_clones_upsert(cache, stats, &key, || Rc::new(builder))
-                  .clone(),
-              )
-            }
+            builder.push(c);
           }
-          None => None,
-        },
+
+          if skip_cache {
+            Some(Rc::new(builder))
+          } else {
+            Some(
+              self
+                .cached_clones_upsert(cache, stats, &key, || Rc::new(builder))
+                .clone(),
+            )
+          }
+        }
         None => None,
-      }
-    })
+      },
+      None => None,
+    }
   }
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
