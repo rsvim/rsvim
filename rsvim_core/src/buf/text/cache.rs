@@ -157,7 +157,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
 pub type CachedWidth = GenericCache<usize, ColumnIndex>;
 
 /// Cache key for `CachedLines`.
-#[derive(Hash, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, Hash, PartialEq, Eq, Copy, Clone)]
 pub struct CachedLinesKey {
   pub line_idx: usize,
   pub start_char_idx: usize,
