@@ -429,7 +429,7 @@ impl Text {
     self
       .cached_width
       .borrow_mut()
-      .retain(|line_idx| *line_idx != line_idx);
+      .retain(|line| *line != line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
