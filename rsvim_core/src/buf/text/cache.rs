@@ -11,12 +11,12 @@ pub struct CacheStats {
 }
 
 impl CacheStats {
-  pub fn hit_one(&mut self) {
-    self.misses += 1;
+  pub fn hit(&mut self) {
+    self.hits += 1;
   }
 
-  pub fn miss_one(&mut self) {
-    self.hits += 1;
+  pub fn miss(&mut self) {
+    self.misses += 1;
   }
 
   pub fn hits(&self) -> usize {
@@ -31,7 +31,7 @@ impl CacheStats {
     self.hits + self.misses
   }
 
-  pub fn hit_ratio(&self) -> f32 {
+  pub fn ratio(&self) -> f32 {
     if self.total() == 0 {
       0_f32
     } else {
@@ -47,7 +47,7 @@ impl std::fmt::Display for CacheStats {
       self.hits,
       self.misses,
       self.total(),
-      self.hit_ratio(),
+      self.ratio(),
     ))
   }
 }
