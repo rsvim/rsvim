@@ -4,7 +4,6 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::unicode;
 use crate::prelude::*;
 use ropey::RopeSlice;
-use smallvec::SmallVec;
 
 #[derive(Debug, Default, Clone)]
 /// Display width index (char-wise) for each unicode char in vim buffer. For each line, the
@@ -53,7 +52,7 @@ use smallvec::SmallVec;
 ///   on **current** char 18 is 26.
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
-  char2width: SmallVec<[usize; 80]>,
+  char2width: Vec<usize>,
 
   // Prefix display width maps to the right-most char index, i.e. the reversed mapping of
   // `char2width`.
@@ -70,7 +69,7 @@ impl ColumnIndex {
   /// Create new index.
   pub fn with_capacity(size: usize) -> Self {
     Self {
-      char2width: SmallVec::with_capacity(size),
+      char2width: Vec::with_capacity(size),
       width2char: BTreeMap::new(),
     }
   }
@@ -78,7 +77,7 @@ impl ColumnIndex {
   /// Create new index.
   pub fn new() -> Self {
     Self {
-      char2width: SmallVec::new(),
+      char2width: Vec::new(),
       width2char: BTreeMap::new(),
     }
   }

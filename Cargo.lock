@@ -2609,7 +2609,6 @@ dependencies = [
  "regex",
  "ringbuf",
  "ropey",
- "smallvec",
  "strum",
  "strum_macros",
  "swc_atoms",
