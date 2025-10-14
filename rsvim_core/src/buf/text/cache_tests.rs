@@ -5,6 +5,6 @@ mod stats {
 
   #[test]
   fn test1() {
-    let stats = CacheStatus::default();
+    let stats = CacheStats::default();
   }
 }

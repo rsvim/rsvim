@@ -5,7 +5,7 @@
 //! - Cache hit/miss statistics.
 
 #[derive(Debug, Default)]
-struct CacheStats {
+pub struct CacheStats {
   hits: usize,
   misses: usize,
 }

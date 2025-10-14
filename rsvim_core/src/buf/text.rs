@@ -1,7 +1,6 @@
 //! Text content backend for buffer.
 
 pub mod cache;
-pub mod cache_stats;
 pub mod cidx;
 pub mod string_cache;
 pub mod width_cache;
