@@ -135,7 +135,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
     self.cache.clear();
   }
 
-  fn retain<F>(&mut self, f: F)
+  pub fn retain<F>(&mut self, f: F)
   where
     F: Fn(/* key */ &K) -> bool,
   {
