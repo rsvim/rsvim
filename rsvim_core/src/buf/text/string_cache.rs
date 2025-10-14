@@ -1,1 +1,0 @@
-//! Cloned line strings cache.

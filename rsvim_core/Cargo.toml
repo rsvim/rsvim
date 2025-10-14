@@ -55,6 +55,7 @@ icu = { workspace = true, features = ["compiled_data"] }
 itertools = { workspace = true }
 derive_builder = { workspace = true }
 clru = { workspace = true }
+quick_cache = { workspace = true }
 paste = { workspace = true }
 smallvec = { workspace = true }
 litemap = { workspace = true }
