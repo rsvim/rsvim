@@ -39,9 +39,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install Rust
         run: |
-          rustup update --no-self-update stable
-          rustup default stable
-          rustup component add --toolchain stable rust-src clippy rustfmt
+          rustup update --no-self-update 1.89
+          rustup default 1.89
+          rustup component add --toolchain 1.89 rust-src clippy rustfmt
           rustup toolchain install nightly
           rustup component add --toolchain nightly rustfmt
       - name: Rustfmt
