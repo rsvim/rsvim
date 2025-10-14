@@ -90,9 +90,14 @@ impl CachedLinesWidth {
     if !self.cache.contains(k) {
       let v = f();
       self.cache.put(*k, v);
-      self.stats.miss();
+
+      if cfg!(debug_assertions) {
+        self.stats.miss();
+      }
     } else {
-      self.stats.hit();
+      if cfg!(debug_assertions) {
+        self.stats.hit();
+      }
     }
 
     self.cache.get_mut(k).unwrap()
