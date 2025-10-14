@@ -132,7 +132,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
 
   pub fn resize(&mut self, canvas_size: U16Size) {
     let new_cache_size = _cached_size(canvas_size);
-    if new_cache_size.get() > self.cache.capacity() {
+    if new_cache_size > self.cache.cap() {
       self.cache.resize(new_cache_size);
     }
   }
