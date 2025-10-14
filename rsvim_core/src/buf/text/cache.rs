@@ -4,8 +4,10 @@
 //! - Cloned lines cache.
 //! - Cache hit/miss statistics.
 
+#![allow(dead_code)]
+
+use crate::buf::text::cidx::ColumnIndex;
 use crate::prelude::*;
-pub use cidx::ColumnIndex;
 use clru::CLruCache;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -61,26 +63,23 @@ impl std::fmt::Display for Stats {
 }
 
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_size.height() as usize * 2 + 3).unwrap()
+  std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
 }
 
 type LinesWidthCache = CLruCache<usize, ColumnIndex, RandomState>;
 
 // Cached lines width.
 pub struct CachedLinesWidth {
-  cache: RefCell<LinesWidthCache>,
-  stats: RefCell<Stats>,
+  cache: LinesWidthCache,
+  stats: Stats,
 }
 
 impl CachedLinesWidth {
   pub fn new(canvas_size: U16Size) -> Self {
     let cache_size = _cached_size(canvas_size);
     Self {
-      cache: RefCell::new(CLruCache::with_hasher(
-        cache_size,
-        RandomState::default(),
-      )),
-      stats: RefCell::new(Stats::default()),
+      cache: CLruCache::with_hasher(cache_size, RandomState::default()),
+      stats: Stats::default(),
     }
   }
 
@@ -91,11 +90,11 @@ impl CachedLinesWidth {
     f(&mut self.cache.borrow_mut(), &mut self.stats.borrow_mut())
   }
 
-  pub fn get_or_insert<'a, F>(&self, k: &usize, f: F) -> &'a mut ColumnIndex
+  pub fn get_or_insert<F>(&self, k: &usize, f: F) -> &mut ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
-    self.with(|(cache, stats)| {
+    self.with(|cache, stats| {
       if !cache.contains(k) {
         let v = f();
         cache.put(*k, v);
