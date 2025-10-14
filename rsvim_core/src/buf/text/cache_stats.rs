@@ -26,6 +26,14 @@ impl CacheStats {
   pub fn total(&self) -> usize {
     self.hits + self.misses
   }
+
+  pub fn hit_ratio(&self) -> f32 {
+    if self.total() == 0 {
+      0_f32
+    } else {
+      self.hits as f32 / (self.total() as f32)
+    }
+  }
 }
 
 impl std::fmt::Display for CacheStats {
@@ -35,11 +43,7 @@ impl std::fmt::Display for CacheStats {
       self.hits,
       self.misses,
       self.total(),
-      if self.total() == 0 {
-        0.0_f32
-      } else {
-        self.hits as f32 / (self.total() as f32)
-      }
+      self.hit_ratio(),
     ))
   }
 }
