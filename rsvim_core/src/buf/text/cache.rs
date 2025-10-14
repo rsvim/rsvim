@@ -82,7 +82,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
     format!("{}", self.stats)
   }
 
-  pub fn get_or_insert<F>(&mut self, k: &K, f: F) -> Option<&V>
+  fn _get_or_insert_impl<F>(&mut self, k: &K, f: F)
   where
     F: FnOnce() -> Option<V>,
   {
@@ -99,7 +99,13 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
         self.cache.put(*k, v);
       }
     }
+  }
 
+  pub fn get_or_insert<F>(&mut self, k: &K, f: F) -> Option<&V>
+  where
+    F: FnOnce() -> Option<V>,
+  {
+    self._get_or_insert_impl(k, f);
     self.cache.get(k)
   }
 
@@ -107,18 +113,7 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
   where
     F: FnOnce() -> Option<V>,
   {
-    if !self.cache.contains(k) {
-      if let Some(v) = f() {
-        self.cache.put(*k, v);
-      }
-
-      if cfg!(debug_assertions) {
-        self.stats.miss();
-      }
-    } else if cfg!(debug_assertions) {
-      self.stats.hit();
-    }
-
+    self._get_or_insert_impl(k, f);
     self.cache.get_mut(k)
   }
 
