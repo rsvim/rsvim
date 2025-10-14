@@ -2,8 +2,6 @@
 
 pub mod cache;
 pub mod cidx;
-pub mod string_cache;
-pub mod width_cache;
 
 #[cfg(test)]
 mod cache_tests;
