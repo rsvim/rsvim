@@ -83,28 +83,19 @@ impl CachedLinesWidth {
     }
   }
 
-  fn with<F, U>(&self, f: F) -> U
-  where
-    F: FnOnce(&mut LinesWidthCache, &mut Stats) -> U,
-  {
-    f(&mut self.cache.borrow_mut(), &mut self.stats.borrow_mut())
-  }
-
   pub fn get_or_insert<F>(&self, k: &usize, f: F) -> &mut ColumnIndex
   where
     F: FnOnce() -> ColumnIndex,
   {
-    self.with(|cache, stats| {
-      if !cache.contains(k) {
-        let v = f();
-        cache.put(*k, v);
-        stats.miss();
-      } else {
-        stats.hit();
-      }
+    if !cache.contains(k) {
+      let v = f();
+      cache.put(*k, v);
+      stats.miss();
+    } else {
+      stats.hit();
+    }
 
-      cache.get_mut(k).unwrap()
-    })
+    cache.get_mut(k).unwrap()
   }
 }
 
