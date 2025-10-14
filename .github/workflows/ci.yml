@@ -37,7 +37,6 @@ jobs:
           tsc
           git diff --exit-code HEAD
       - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
           rustup update --no-self-update stable
@@ -102,13 +101,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [
-            ubuntu-22.04,
-            ubuntu-22.04-arm,
-            macos-14,
-            # macos-14-large,
-            windows-2022,
-          ]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, windows-2022]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
