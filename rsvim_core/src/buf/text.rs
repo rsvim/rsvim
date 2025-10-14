@@ -142,47 +142,14 @@ impl Text {
       max_chars,
     };
 
-    if !skip_cache && cached_lines.contains(&key) {
-      let result = cache.get(&key).cloned();
-      debug_assert!(result.is_some());
-      stats.miss_one();
-      return result;
-    }
-
-    match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              if skip_cache {
-                return Some(Rc::new(builder));
-              } else {
-                return Some(
-                  self
-                    .cached_clones_upsert(cache, stats, &key, || {
-                      Rc::new(builder)
-                    })
-                    .clone(),
-                );
-              }
-            }
-            builder.push(c);
-          }
-
-          if skip_cache {
-            Some(Rc::new(builder))
-          } else {
-            Some(
-              self
-                .cached_clones_upsert(cache, stats, &key, || Rc::new(builder))
-                .clone(),
-            )
-          }
-        }
-        None => None,
-      },
-      None => None,
+    if skip_cache {
+      self._clone_line_impl(line_idx, start_char_idx, max_chars)
+    } else {
+      cached_lines
+        .get_or_insert(&key, || {
+          self._clone_line_impl(line_idx, start_char_idx, max_chars)
+        })
+        .cloned()
     }
   }
 
@@ -195,14 +162,15 @@ impl Text {
     max_chars: usize,
   ) -> Option<Rc<String>> {
     let result1 =
-      self._clone_line_impl(line_idx, start_char_idx, max_chars, false);
+      self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, false);
 
     // Ensure cached version and non-cached version have same results.
     if cfg!(debug_assertions) {
       let result2 =
-        self._clone_line_impl(line_idx, start_char_idx, max_chars, true);
+        self._clone_line_impl_wrap(line_idx, start_char_idx, max_chars, true);
       debug_assert_eq!(result1, result2);
     }
+
     result1
   }
 

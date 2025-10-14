@@ -81,13 +81,14 @@ impl<K: Copy + Eq + Hash, V> CacheImpl<K, V> {
     format!("{}", self.stats)
   }
 
-  pub fn get_or_insert<F>(&mut self, k: &K, f: F) -> &mut V
+  pub fn get_or_insert<F>(&mut self, k: &K, f: F) -> Option<&V>
   where
-    F: FnOnce() -> V,
+    F: FnOnce() -> Option<V>,
   {
     if !self.cache.contains(k) {
-      let v = f();
-      self.cache.put(*k, v);
+      if let Some(v) = f() {
+        self.cache.put(*k, v);
+      }
 
       if cfg!(debug_assertions) {
         self.stats.miss();
@@ -98,7 +99,7 @@ impl<K: Copy + Eq + Hash, V> CacheImpl<K, V> {
       }
     }
 
-    self.cache.get_mut(k).unwrap()
+    self.cache.get_mut(k)
   }
 
   pub fn resize(&mut self, canvas_size: U16Size) {
