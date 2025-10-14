@@ -1,4 +1,8 @@
-//! Cache hit/miss status.
+//! Internal cache for `Text`:
+//!
+//! - Lines width cache
+//! - Cloned line strings cache.
+//! - Cache hit/miss statistics.
 
 #[derive(Debug, Default)]
 struct CacheStats {
