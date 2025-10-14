@@ -297,14 +297,14 @@ impl Text {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.with_cached_width(|cache, stats| {
-      let rope_line = self.rope.line(line_idx);
-      self
-        .cached_width_upsert(cache, stats, &line_idx, || {
-          ColumnIndex::with_capacity(rope_line.len_chars())
-        })
-        .width_before(&self.options, &rope_line, char_idx)
-    })
+    let mut cached_width = self.cached_width.borrow_mut();
+    let rope_line = self.rope.line(line_idx);
+    cached_width
+      .get_or_insert_mut(&line_idx, || {
+        Some(ColumnIndex::with_capacity(rope_line.len_chars()))
+      })
+      .unwrap()
+      .width_before(&self.options, &rope_line, char_idx)
   }
 
   /// See [`ColumnIndex::width_until`].
