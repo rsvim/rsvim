@@ -2,7 +2,6 @@ use super::cache::*;
 
 #[cfg(test)]
 mod stats {
-
   #[test]
   fn test1() {
     let mut stats = CacheStats::default();
