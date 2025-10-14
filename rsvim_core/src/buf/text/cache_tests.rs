@@ -4,7 +4,7 @@ use super::cache::*;
 mod stats {
   #[test]
   fn test1() {
-    let mut stats = CacheStats::default();
+    let mut stats = Stats::default();
     assert_eq!(stats.hits(), 0);
     assert_eq!(stats.misses(), 0);
     assert_eq!(stats.total(), 0);

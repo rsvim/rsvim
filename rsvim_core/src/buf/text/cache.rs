@@ -4,26 +4,21 @@
 //! - Cloned lines cache.
 //! - Cache hit/miss statistics.
 
-use crate::buf::opt::BufferOptions;
-use crate::buf::opt::EndOfLineOption;
-use crate::buf::unicode;
 use crate::prelude::*;
 pub use cidx::ColumnIndex;
+use clru::CLruCache;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use lru::LruCache;
-use ropey::Rope;
-use ropey::RopeSlice;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Debug, Default)]
-pub struct CacheStats {
+pub struct Stats {
   hits: usize,
   misses: usize,
 }
 
-impl CacheStats {
+impl Stats {
   pub fn hit(&mut self) {
     self.hits += 1;
   }
@@ -53,7 +48,7 @@ impl CacheStats {
   }
 }
 
-impl std::fmt::Display for CacheStats {
+impl std::fmt::Display for Stats {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.write_fmt(format_args!(
       "hit/miss/total:{}/{}/{},hit ratio:{}",
@@ -67,7 +62,8 @@ impl std::fmt::Display for CacheStats {
 
 // Lines width cache.
 pub struct LinesWidthCache {
-  c: LruCache<usize, ColumnIndex, RandomState>,
+  cache: RefCell<CLruCache<usize, ColumnIndex, RandomState>>,
+  stats: RefCell<Stats>,
 }
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone)]
@@ -79,5 +75,6 @@ struct ClonedLinesCacheKey {
 
 // Cloned lines cache.
 pub struct ClonedLinesCache {
-  c: LruCache<ClonedLinesCacheKey, Rc<String>, RandomState>,
+  cache: RefCell<CLruCache<ClonedLinesCacheKey, Rc<String>, RandomState>>,
+  stats: RefCell<Stats>,
 }
