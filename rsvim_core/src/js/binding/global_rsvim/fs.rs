@@ -31,12 +31,16 @@ fn to_fd(file: std::fs::File) -> usize {
 
 #[cfg(not(target_family = "windows"))]
 fn from_fd(fd: usize) -> std::fs::File {
-  unsafe { std::fs::File::from_raw_fd(fd) }
+  use std::os::fd::FromRawFd;
+  unsafe { std::fs::File::from_raw_fd(fd as std::os::fd::RawFd) }
 }
 
 #[cfg(target_family = "windows")]
 fn from_fd(handle: usize) -> File {
-  unsafe { fs::File::from_raw_handle(handle as RawHandle) }
+  use std::os::windows::io::FromRawHandle;
+  unsafe {
+    fs::File::from_raw_handle(handle as std::os::windows::io::RawHandle)
+  }
 }
 
 struct FsOpenFuture {
