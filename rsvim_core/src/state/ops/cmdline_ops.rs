@@ -34,8 +34,6 @@ pub fn cmdline_flush_pending_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
 ) {
-  debug_assert!(tree.command_line().is_some());
-
   // If message history contains some payload. This means before we actually
   // running the event loop, there's already some messages wait for print.
   let maybe_last_msg =
@@ -59,8 +57,6 @@ pub fn cmdline_set_message(
   text_contents: &mut TextContents,
   payload: String,
 ) {
-  set_message(tree, text_contents, payload.clone());
-
   // Also append message history:
   let cmdline_hist = text_contents.command_line_message_history_mut();
   cmdline_hist.push_overwrite(payload);
