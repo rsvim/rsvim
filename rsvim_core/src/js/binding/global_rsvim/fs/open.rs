@@ -19,6 +19,7 @@ use crate::state::ops::cmdline_ops;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
+use std::cell::Cell;
 use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
