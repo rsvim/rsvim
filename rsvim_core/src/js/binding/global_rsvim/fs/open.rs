@@ -1,5 +1,6 @@
 //! `Rsvim.fs.open` and `Rsvim.fs.openSync` APIs.
 
+use crate::flags_impl;
 use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
@@ -18,6 +19,18 @@ use ringbuf::traits::RingBuffer;
 use std::fs;
 use std::fs::File;
 use std::rc::Rc;
+
+
+// See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
+flags_impl!(FsOpenFlags, u8, APPEND, CREATE, CREATE_NEW, READ, TRUNCATE, WRITE);
+
+// All flags are false
+const FS_OPEN_FLAGS: FsOpenFlags = FsOpenFlags::empty();
+
+#[derive(Debug)]
+pub struct FsOpenOptions {
+  pub append 
+}
 
 fn open_file_impl<P: AsRef<Path>>(path: P) -> TheResult<usize> {}
 

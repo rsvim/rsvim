@@ -1,23 +1,6 @@
 //! File descriptor utilities.
 
-use crate::js;
-use crate::js::JsFuture;
-use crate::js::JsRuntime;
-use crate::js::JsRuntimeState;
-use crate::js::JsTimerId;
-use crate::js::binding;
-use crate::js::command::def::CommandDefinition;
-use crate::js::converter::*;
-use crate::js::converter::*;
-use crate::js::pending;
-use crate::prelude::*;
-use crate::state::ops::cmdline_ops;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
-use ringbuf::traits::RingBuffer;
-use std::fs;
 use std::fs::File;
-use std::rc::Rc;
 
 #[cfg(not(target_family = "windows"))]
 fn to_fd(file: File) -> usize {
