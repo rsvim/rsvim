@@ -753,13 +753,17 @@ impl EventLoop {
   //
   // And all messages will be print once the editor TUI is initialized.
   fn flush_pending_messages(&mut self) -> IoResult<()> {
-    let mut contents = lock!(self.contents);
-    let mut tree = lock!(self.tree);
-    cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+    {
+      let mut contents = lock!(self.contents);
+      let mut tree = lock!(self.tree);
+      cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+    }
 
     // Flush logic UI to terminal, i.e. print UI to stdout
-    tree.draw(self.canvas.clone());
-    self.writer.write(&mut lock!(self.canvas))
+    {
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))
+    }
   }
 
   /// Running the loop, it repeatedly do following steps:
