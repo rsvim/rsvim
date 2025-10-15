@@ -77,11 +77,11 @@ impl ToV8 for CommandDefinition {
 
     // attributes
     let attr_value = to_v8(scope, self.attributes.clone());
-    binding::set_constant_to(scope, obj, ATTRIBUTES, attr_value);
+    binding::set_property_to(scope, obj, ATTRIBUTES, attr_value);
 
     // options
     let opts_value = to_v8(scope, self.options.clone());
-    binding::set_constant_to(scope, obj, OPTIONS, opts_value);
+    binding::set_property_to(scope, obj, OPTIONS, opts_value);
 
     obj.into()
   }
