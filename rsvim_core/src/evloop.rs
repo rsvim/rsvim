@@ -30,6 +30,7 @@ use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
+use ringbuf::traits::Consumer;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
@@ -749,6 +750,36 @@ impl EventLoop {
     self.blocked_tracker.wait().await;
   }
 
+  // Since we run user's config script (i.e. `.rsvim/rsvim.js`) before
+  // initializing TUI/UI-tree. If user calls the `Rsvim.cmd.echo` API directly
+  // in their configs right before the editor TUI initialize, the UI tree is
+  // not created, and the "command-line-message" widget inside UI tree does not
+  // exist.
+  //
+  // Thus we will have to store the printed messages in
+  // `contents.command_line_message_history` temporarily. If the messages are
+  // just too many, old messages will be thrown, only new messages are left.
+  //
+  // And all messages will be print once the editor TUI is initialized.
+  fn flush_pending_command_line_messages(&mut self) {
+    let mut contents = lock!(self.contents);
+    let maybe_payload = contents.command_line_message_history().last().cloned();
+
+    // If message history contains some payload. This means before we actually
+    // running the event loop, there's already some messages wait for print.
+    if let Some(payload) = maybe_payload {
+      // Clear all pending messages, because in current "command-line-message"
+      // widget, it can only prints 1 single-line message, multi-line messages
+      // are not support yet.
+      //
+      // FIXME: Fix me once our "command-line-message" widget support
+      // multi-line messages.
+      contents.command_line_message_history_mut().clear();
+      let mut tree = lock!(self.tree);
+      cmdline_ops::cmdline_set_message(&mut tree, &mut contents, payload);
+    }
+  }
+
   /// Running the loop, it repeatedly do following steps:
   ///
   /// 1. Receives several things:
@@ -758,6 +789,8 @@ impl EventLoop {
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> IoResult<()> {
+    // At the beginning of running event loop, let's first do a few steps, it
+    // is like an initialization of the running.
     self.js_runtime.tick_event_loop();
 
     let mut reader = EventStream::new();
