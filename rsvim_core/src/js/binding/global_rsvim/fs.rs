@@ -18,12 +18,12 @@ use ringbuf::traits::RingBuffer;
 use std::rc::Rc;
 
 #[cfg(not(target_family = "windows"))]
-fn to_fd(fd: usize) -> std::os::fd {
+fn fd2stdfile(fd: usize) -> std::os::fd {
   unsafe { std::fs::File::from_raw_fd(fd as std::fs::fd) }
 }
 
 #[cfg(target_family = "windows")]
-fn get_file_reference(handle: usize) -> File {
+fn fd2stdfile(handle: usize) -> File {
   unsafe { fs::File::from_raw_handle(handle as RawHandle) }
 }
 
