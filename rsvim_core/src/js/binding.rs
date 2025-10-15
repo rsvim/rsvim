@@ -253,12 +253,13 @@ pub fn set_internal_ref<T>(
   target: v8::Local<v8::Object>,
   index: usize,
   data: T,
-) {
+) -> *mut T {
   let boxed_ref = Box::new(data);
-  let addr = Box::leak(boxed_ref) as *mut T as *mut c_void;
-  let v8_ext = v8::External::new(scope, addr);
+  let addr = Box::leak(boxed_ref) as *mut T;
+  let v8_ext = v8::External::new(scope, addr as *mut c_void);
 
   target.set_internal_field(index, v8_ext.into());
+  addr
 }
 
 /// Gets a previously stored Rust type from a v8 object.
