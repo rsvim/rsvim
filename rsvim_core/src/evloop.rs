@@ -758,7 +758,7 @@ impl EventLoop {
     cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
 
     // Flush logic UI to terminal, i.e. print UI to stdout
-    lock!(self.tree).draw(self.canvas.clone());
+    tree.draw(self.canvas.clone());
     self.writer.write(&mut lock!(self.canvas))
   }
 
