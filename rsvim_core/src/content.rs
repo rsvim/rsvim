@@ -4,7 +4,6 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use ringbuf::HeapRb;
-use ringbuf::traits::RingBuffer;
 use ropey::Rope;
 use std::fmt::Debug;
 
