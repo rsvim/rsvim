@@ -1,6 +1,7 @@
 //! Command-line operations.
 
 use crate::content::TextContents;
+use crate::prelude::*;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::Viewport;
@@ -39,6 +40,10 @@ pub fn cmdline_flush_pending_message(
   // running the event loop, there's already some messages wait for print.
   let maybe_last_msg =
     text_contents.command_line_message_history().last().cloned();
+  trace!(
+    "|cmdline_flush_pending_message| last_msg:{:?}",
+    maybe_last_msg
+  );
   if let Some(last_msg) = maybe_last_msg {
     // Current "command-line-message" widget can only print 1 single-line
     // message, multi-line messages are not support yet.
