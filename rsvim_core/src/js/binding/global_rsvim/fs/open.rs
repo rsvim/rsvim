@@ -172,7 +172,7 @@ impl JsFuture for FsOpenFuture {
 
     // Store the weak ref pointer into the "shared" cell.
     weak_rc.set(file_weak.into_raw());
-    set_internal_ref(scope, file_wrapper, 1, weak_rc);
+    binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
 
     self
       .promise
