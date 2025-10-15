@@ -39,7 +39,7 @@ flags_impl!(
 // All flags are false
 const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct FsOpenOptions {
   #[builder(default = FS_OPEN_OPTION_FLAGS)]
   #[builder(setter(custom))]

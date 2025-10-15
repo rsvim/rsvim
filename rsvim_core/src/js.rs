@@ -356,6 +356,8 @@ pub mod boost {
     pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
+    /// Pending tasks.
+    pub pending_tasks: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -462,6 +464,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -536,6 +539,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
