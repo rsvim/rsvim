@@ -2,6 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::js::binding;
 use crate::js::converter::*;
 use compact_str::CompactString;
 
@@ -77,25 +78,13 @@ impl ToV8 for CommandOptions {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = v8::String::new(scope, FORCE).unwrap();
     let force_value = to_v8(scope, self.force());
-    obj.define_own_property(
-      scope,
-      force_field.into(),
-      force_value,
-      v8::PropertyAttribute::READ_ONLY,
-    );
+    binding::set_constant_to(scope, obj, FORCE, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = v8::String::new(scope, ALIAS).unwrap();
       let alias_value = to_v8(scope, alias.clone());
-      obj.define_own_property(
-        scope,
-        alias_field.into(),
-        alias_value,
-        v8::PropertyAttribute::READ_ONLY,
-      );
+      binding::set_constant_to(scope, obj, ALIAS, alias_value);
     }
 
     obj.into()
