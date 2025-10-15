@@ -30,6 +30,7 @@ use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
+use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
@@ -520,12 +521,13 @@ impl EventLoop {
           Err(e) => {
             // Send error message to command-line
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
-            msg::sync_send_to_master(
-              self.master_tx.clone(),
-              MasterMessage::PrintReq(msg::PrintReq {
-                payload: e.to_string(),
-              }),
-            );
+
+            // Append error message to command line message history, wait for
+            // print once TUI initialized.
+            let mut contents = lock!(self.contents);
+            contents
+              .command_line_message_history_mut()
+              .push_overwrite(e.to_string());
           }
         }
       }
@@ -677,16 +679,6 @@ impl EventLoop {
           self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }
-        MasterMessage::PrintReq(req) => {
-          trace!("Recv PrintReq:{:?}", req.payload);
-          let mut tree = lock!(self.tree);
-          let mut contents = lock!(self.contents);
-          cmdline_ops::cmdline_set_message(
-            &mut tree,
-            &mut contents,
-            req.payload,
-          );
-        }
         MasterMessage::TimeoutReq(req) => {
           trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
@@ -749,6 +741,31 @@ impl EventLoop {
     self.blocked_tracker.wait().await;
   }
 
+  // Since we run user's config script (i.e. `.rsvim/rsvim.js`) before
+  // initializing TUI/UI-tree. If user calls the `Rsvim.cmd.echo` API directly
+  // in their configs right before the editor TUI initialize, the UI tree is
+  // not created, and the "command-line-message" widget inside UI tree does not
+  // exist.
+  //
+  // Thus we will have to store the printed messages in
+  // `contents.command_line_message_history` temporarily. If the messages are
+  // just too many, old messages will be thrown, only new messages are left.
+  //
+  // And all messages will be print once the editor TUI is initialized.
+  fn flush_pending_messages(&mut self) -> IoResult<()> {
+    {
+      let mut contents = lock!(self.contents);
+      let mut tree = lock!(self.tree);
+      cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+    }
+
+    // Flush logic UI to terminal, i.e. print UI to stdout
+    {
+      lock!(self.tree).draw(self.canvas.clone());
+      self.writer.write(&mut lock!(self.canvas))
+    }
+  }
+
   /// Running the loop, it repeatedly do following steps:
   ///
   /// 1. Receives several things:
@@ -758,7 +775,10 @@ impl EventLoop {
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> IoResult<()> {
+    // At the beginning of running event loop, let's first do a few steps, it
+    // is like an initialization of the running.
     self.js_runtime.tick_event_loop();
+    self.flush_pending_messages()?;
 
     let mut reader = EventStream::new();
     loop {
@@ -802,6 +822,7 @@ impl EventLoop {
     mut reader: MockEventReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
+    self.flush_pending_messages()?;
 
     loop {
       tokio::select! {
@@ -844,6 +865,7 @@ impl EventLoop {
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
+    self.flush_pending_messages()?;
 
     loop {
       tokio::select! {

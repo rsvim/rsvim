@@ -5,13 +5,11 @@ use crate::js::JsRuntimeState;
 use crate::js::binding;
 use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
-use crate::msg;
-use crate::msg::MasterMessage;
-use crate::msg::PrintReq;
 use crate::prelude::*;
 use crate::state::ops::cmdline_ops;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use ringbuf::traits::RingBuffer;
 use std::rc::Rc;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
@@ -21,10 +19,15 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   if tree.command_line_id().is_some() {
     cmdline_ops::cmdline_set_message(&mut tree, &mut contents, payload);
   } else {
-    msg::sync_send_to_master(
-      state.master_tx.clone(),
-      MasterMessage::PrintReq(PrintReq { payload }),
-    );
+    // If `command_line` widget does not exist, it means the TUI is not
+    // initialized yet. All we can do is simply store this message to
+    // command-line-message-history. When editor TUI initialize, it will flush
+    // all pending messages to TUI before running the event loop.
+    //
+    // See [crate::evloop::EventLoop::flush_pending_command_line_messages].
+    contents
+      .command_line_message_history_mut()
+      .push_overwrite(payload);
   }
 }
 
