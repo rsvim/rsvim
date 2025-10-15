@@ -239,15 +239,15 @@ impl ModuleMap {
   }
 
   /// Whether a v8 module already resolved.
-  pub fn contains(&self, key: &str) -> bool {
-    self.by_path.contains_key(key)
+  pub fn contains(&self, path: &str) -> bool {
+    self.by_path.contains_key(path)
   }
 
   #[cfg(test)]
   /// Whether a v8 module already resolved, compare by key suffix.
   pub fn get_by_suffix(
     &self,
-    key: &str,
+    path: &str,
   ) -> Option<(&ModulePath, &v8::Global<v8::Module>)> {
     use normpath::PathExt;
 
@@ -255,8 +255,8 @@ impl ModuleMap {
       Path::new(k)
         .normalize()
         .unwrap()
-        .ends_with(Path::new(key).normalize().unwrap())
-        || Path::new(key)
+        .ends_with(Path::new(path).normalize().unwrap())
+        || Path::new(path)
           .normalize()
           .unwrap()
           .ends_with(Path::new(*k).normalize().unwrap())
