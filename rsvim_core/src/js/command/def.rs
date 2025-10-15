@@ -73,17 +73,15 @@ impl ToV8 for CommandDefinition {
 
     // callback
     let callback_value = v8::Local::new(scope, (*self.callback).clone());
-    binding::set_constant_to(scope, obj, CALLBACK, callback_value);
+    binding::set_constant_to(scope, obj, CALLBACK, callback_value.into());
 
     // attributes
-    let attr_field = to_v8(scope, ATTRIBUTES);
     let attr_value = to_v8(scope, self.attributes.clone());
-    obj.set(scope, attr_field, attr_value);
+    binding::set_constant_to(scope, obj, ATTRIBUTES, attr_value);
 
     // options
-    let opts_field = to_v8(scope, OPTIONS);
     let opts_value = to_v8(scope, self.options.clone());
-    obj.set(scope, opts_field, opts_value);
+    binding::set_constant_to(scope, obj, OPTIONS, opts_value);
 
     obj.into()
   }
