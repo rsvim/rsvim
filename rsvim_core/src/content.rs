@@ -76,8 +76,14 @@ impl TextContents {
   /// messages are left.
   ///
   /// And all messages will be print once the editor TUI is initialized.
-  pub fn append_command_line_history(&mut self, payload: String) {
-    self.command_line_message_history.push_overwrite(payload);
+  ///
+  /// It returns `String` if the buffer is full and an old message is thrown,
+  /// returns `None` if the buffer is not full.
+  pub fn append_command_line_history(
+    &mut self,
+    payload: String,
+  ) -> Option<String> {
+    self.command_line_message_history.push_overwrite(payload)
   }
 }
 
