@@ -90,10 +90,7 @@ impl FsOpenOptions {
   }
 }
 
-fn open_file_impl<P: AsRef<Path>>(
-  path: P,
-  opts: FsOpenOptions,
-) -> TheResult<usize> {
+fn open_file_impl(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -105,7 +102,7 @@ fn open_file_impl<P: AsRef<Path>>(
   {
     Ok(file) => Ok(util::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
-      Path::new(&path).to_string_lossy().to_string(),
+      path.to_string_lossy().to_string(),
       e
     )),
   }
