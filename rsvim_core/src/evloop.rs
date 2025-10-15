@@ -792,6 +792,7 @@ impl EventLoop {
     // At the beginning of running event loop, let's first do a few steps, it
     // is like an initialization of the running.
     self.js_runtime.tick_event_loop();
+    self.flush_pending_command_line_messages();
 
     let mut reader = EventStream::new();
     loop {
@@ -835,6 +836,7 @@ impl EventLoop {
     mut reader: MockEventReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
+    self.flush_pending_command_line_messages();
 
     loop {
       tokio::select! {
@@ -877,6 +879,7 @@ impl EventLoop {
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
+    self.flush_pending_command_line_messages();
 
     loop {
       tokio::select! {
