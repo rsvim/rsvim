@@ -752,10 +752,14 @@ impl EventLoop {
   // just too many, old messages will be thrown, only new messages are left.
   //
   // And all messages will be print once the editor TUI is initialized.
-  fn flush_pending_command_line_messages(&mut self) {
+  fn flush_pending_messages(&mut self) -> IoResult<()> {
     let mut contents = lock!(self.contents);
     let mut tree = lock!(self.tree);
     cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+
+    // Flush logic UI to terminal, i.e. print UI to stdout
+    lock!(self.tree).draw(self.canvas.clone());
+    self.writer.write(&mut lock!(self.canvas))
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -770,7 +774,7 @@ impl EventLoop {
     // At the beginning of running event loop, let's first do a few steps, it
     // is like an initialization of the running.
     self.js_runtime.tick_event_loop();
-    self.flush_pending_command_line_messages();
+    self.flush_pending_messages()?;
 
     let mut reader = EventStream::new();
     loop {
@@ -814,7 +818,7 @@ impl EventLoop {
     mut reader: MockEventReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
-    self.flush_pending_command_line_messages();
+    self.flush_pending_messages()?;
 
     loop {
       tokio::select! {
@@ -857,7 +861,7 @@ impl EventLoop {
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
     self.js_runtime.tick_event_loop();
-    self.flush_pending_command_line_messages();
+    self.flush_pending_messages()?;
 
     loop {
       tokio::select! {
