@@ -17,9 +17,19 @@ use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
 use std::rc::Rc;
 
+#[cfg(not(target_family = "windows"))]
+fn to_fd(fd: usize) -> std::os::fd {
+  unsafe { std::fs::File::from_raw_fd(fd as std::fs::fd) }
+}
+
+#[cfg(target_family = "windows")]
+fn get_file_reference(handle: usize) -> File {
+  unsafe { fs::File::from_raw_handle(handle as RawHandle) }
+}
+
 struct FsOpenFuture {
-  cb: Rc<v8::Global<v8::Function>>,
-  params: Rc<Vec<v8::Global<v8::Value>>>,
+  promise: v8::Global<v8::PromiseResolver>,
+  maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 impl JsFuture for FsOpenFuture {

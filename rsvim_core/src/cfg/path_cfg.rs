@@ -82,7 +82,7 @@ fn find_config_home_and_entry(
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
 /// For others: `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
 fn _xdg_cache_dir(cache_dir: &Path) -> PathBuf {
-  let folder = if cfg!(target_os = "windows") {
+  let folder = if cfg!(target_family = "windows") {
     "rsvim-cache"
   } else {
     "rsvim"
@@ -93,7 +93,7 @@ fn _xdg_cache_dir(cache_dir: &Path) -> PathBuf {
 // For windows: `$env:USERPROFILE\AppData\Roaming\rsvim-data`.
 // For others: `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
 fn _xdg_data_dir(data_dir: &Path) -> PathBuf {
-  let folder = if cfg!(target_os = "windows") {
+  let folder = if cfg!(target_family = "windows") {
     "rsvim-data"
   } else {
     "rsvim"
