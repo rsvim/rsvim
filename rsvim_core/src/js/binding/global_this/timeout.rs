@@ -61,6 +61,7 @@ pub fn create_timer<'s>(
 
   // NOTE: Don't delete this part of code, it shows how to convert function
   // arguments into an array of values.
+  //
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   // let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
   //   Ok(params) => (0..params.length()).fold(
