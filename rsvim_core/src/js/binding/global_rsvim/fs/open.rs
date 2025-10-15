@@ -116,27 +116,66 @@ struct FsOpenFuture {
 impl JsFuture for FsOpenFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
     trace!("|FsOpenFuture| run");
-    let undefined = v8::undefined(scope).into();
-    let callback = v8::Local::new(scope, (*self.cb).clone());
-    let args: Vec<v8::Local<v8::Value>> = self
-      .params
-      .iter()
-      .map(|arg| v8::Local::new(scope, arg))
-      .collect();
 
-    v8::tc_scope!(let tc_scope, scope);
+    let result = self.maybe_result.take().unwrap();
 
-    callback.call(tc_scope, undefined, &args);
-
-    // Report if callback threw an exception.
-    if tc_scope.has_caught() {
-      let exception = tc_scope.exception().unwrap();
-      let exception = v8::Global::new(tc_scope, exception);
-      let state_rc = JsRuntime::state(tc_scope);
-      state_rc
-        .borrow_mut()
-        .exceptions
-        .capture_exception(exception);
+    // Handle when something goes wrong with opening the file.
+    if let Err(e) = result {
+      let message = v8::String::new(scope, &e.to_string()).unwrap();
+      let exception = v8::Exception::error(scope, message);
+      binding::set_exception_code(scope, exception, &e);
+      self.promise.open(scope).reject(scope, exception);
+      return;
     }
+
+    // Otherwise, get the result and deserialize it.
+    let result = result.unwrap();
+
+    // Deserialize bytes into a file-descriptor.
+    let (fd, _fd_len) = bincode::decode_from_slice::<
+      usize,
+      bincode::config::Configuration,
+    >(&result, bincode::config::standard())
+    .unwrap();
+
+    let file = util::from_fd(fd);
+
+    let file_wrapper = v8::ObjectTemplate::new(scope);
+
+    // Allocate space for the wrapped Rust type.
+    file_wrapper.set_internal_field_count(2);
+
+    let file_wrapper = file_wrapper.new_instance(scope).unwrap();
+    let fd = v8::Number::new(scope, fd as f64);
+
+    set_constant_to(scope, file_wrapper, "fd", fd.into());
+
+    let file_ptr = set_internal_ref(scope, file_wrapper, 0, Some(file));
+    let weak_rc = Rc::new(Cell::new(None));
+
+    // Note: To automatically close the file (i.e., drop the instance) when
+    // V8 garbage collects the object that internally holds the Rust file,
+    // we use a Weak reference with a finalizer callback.
+    let file_weak = v8::Weak::with_finalizer(
+      scope,
+      file_wrapper,
+      Box::new({
+        let weak_rc = weak_rc.clone();
+        move |isolate| unsafe {
+          drop(Box::from_raw(file_ptr));
+          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+        }
+      }),
+    );
+
+    // Store the weak ref pointer into the "shared" cell.
+    weak_rc.set(file_weak.into_raw());
+    set_internal_ref(scope, file_wrapper, 1, weak_rc);
+
+    self
+      .promise
+      .open(scope)
+      .resolve(scope, file_wrapper.into())
+      .unwrap();
   }
 }
