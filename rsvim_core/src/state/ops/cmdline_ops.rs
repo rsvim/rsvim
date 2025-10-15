@@ -57,6 +57,8 @@ pub fn cmdline_set_message(
   text_contents: &mut TextContents,
   payload: String,
 ) {
+  set_message(tree, text_contents, payload.clone());
+
   // Also append message history:
   let cmdline_hist = text_contents.command_line_message_history_mut();
   cmdline_hist.push_overwrite(payload);
