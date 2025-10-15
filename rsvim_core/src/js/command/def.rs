@@ -67,9 +67,14 @@ impl ToV8 for CommandDefinition {
     let obj = v8::Object::new(scope);
 
     // name
-    let name_field = to_v8(scope, NAME);
+    let name_field = v8::String::new(scope, NAME).unwrap();
     let name_value = to_v8(scope, self.name.clone());
-    obj.set(scope, name_field, name_value);
+    obj.define_own_property(
+      scope,
+      name_field.into(),
+      name_value,
+      v8::PropertyAttribute::READ_ONLY,
+    );
 
     // callback
     let callback_field = to_v8(scope, CALLBACK);
