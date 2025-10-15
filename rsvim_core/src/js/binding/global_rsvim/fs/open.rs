@@ -20,16 +20,32 @@ use std::fs;
 use std::fs::File;
 use std::rc::Rc;
 
-
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
-flags_impl!(FsOpenFlags, u8, APPEND, CREATE, CREATE_NEW, READ, TRUNCATE, WRITE);
+flags_impl!(
+  FsOpenOptionFlags,
+  u8,
+  APPEND,
+  CREATE,
+  CREATE_NEW,
+  READ,
+  TRUNCATE,
+  WRITE
+);
 
 // All flags are false
-const FS_OPEN_FLAGS: FsOpenFlags = FsOpenFlags::empty();
+const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct FsOpenOptions {
-  pub append 
+  #[builder(default = FS_OPEN_OPTION_FLAGS)]
+  #[builder(setter(custom))]
+  // append
+  // create
+  // create_new
+  // read
+  // truncate
+  // write
+  flags: FsOpenOptionFlags,
 }
 
 fn open_file_impl<P: AsRef<Path>>(path: P) -> TheResult<usize> {}
