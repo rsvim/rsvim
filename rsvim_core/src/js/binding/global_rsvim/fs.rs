@@ -19,23 +19,19 @@ use std::rc::Rc;
 
 #[cfg(not(target_family = "windows"))]
 fn to_fd(file: std::fs::File) -> usize {
-  use std::os::fd::AsRawFd;
-  let fd = file.as_raw_fd();
-  std::mem::forget(file);
-  fd as usize
+  use std::os::fd::IntoRawFd;
+  file.into_raw_fd() as usize
 }
 
 #[cfg(target_family = "windows")]
 fn to_fd(file: std::fs::File) -> usize {
-  use std::os::windows::io::AsRawHandle;
-  let handle = file.as_raw_handle();
-  std::mem::forget(file);
-  handle as usize
+  use std::os::windows::io::IntoRawHandle;
+  file.into_raw_handle() as usize
 }
 
 #[cfg(not(target_family = "windows"))]
-fn from_fd(fd: usize) -> std::os::fd {
-  unsafe { std::fs::File::from_raw_fd(fd as std::fs::fd) }
+fn from_fd(fd: usize) -> std::fs::File {
+  unsafe { std::fs::File::from_raw_fd(fd) }
 }
 
 #[cfg(target_family = "windows")]
