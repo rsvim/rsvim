@@ -4,6 +4,7 @@ use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use ringbuf::HeapRb;
+use ringbuf::traits::{Producer, RingBuffer};
 use ropey::Rope;
 use std::fmt::Debug;
 
@@ -62,6 +63,21 @@ impl TextContents {
   /// Get mutable "command line" message history
   pub fn command_line_message_history_mut(&mut self) -> &mut HeapRb<String> {
     &mut self.command_line_message_history
+  }
+
+  /// Append an message to "command-line-message" widget.
+  ///
+  /// Because if user calls the `Rsvim.cmd.echo` API in `.rsvim.js` configs
+  /// before the editor TUI initialize, the UI tree is not created, and the
+  /// "command-line-message" widget inside UI tree does not exist.
+  ///
+  /// Thus we will have to store the printed messages here, with a ring-buffer.
+  /// If the messages are just too many, old messages will be thrown, only new
+  /// messages are left.
+  ///
+  /// And all messages will be print once the editor TUI is initialized.
+  pub fn append_command_line_history(&mut self, payload: String) {
+    self.command_line_message_history.push_overwrite(payload);
   }
 }
 

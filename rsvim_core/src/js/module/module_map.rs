@@ -168,12 +168,20 @@ impl Debug for ModuleMap {
     f.debug_struct("ModuleMap")
       .field("main", &self.main)
       .field(
-        "index",
+        "by_path",
         &self
           .by_path
           .keys()
           .map(|k| (k.clone(), "v8::Module".to_string()))
           .collect::<FoldMap<String, String>>(),
+      )
+      .field(
+        "by_id",
+        &self
+          .by_id
+          .iter()
+          .map(|(k, v)| (*k, v.iter().map(|e| e.0.clone()).collect()))
+          .collect::<FoldMap<i32, Vec<String>>>(),
       )
       .field("seen", &self.seen)
       .field("pending", &self.pending)
