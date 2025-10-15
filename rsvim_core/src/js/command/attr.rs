@@ -112,11 +112,11 @@ impl ToV8 for CommandAttributes {
 
     // bang
     let bang_value = to_v8(scope, self.bang());
-    binding::set_constant_to(scope, obj, BANG, bang_value);
+    binding::set_property_to(scope, obj, BANG, bang_value);
 
     // nargs
     let nargs_value = to_v8(scope, self.nargs.to_compact_string());
-    binding::set_constant_to(scope, obj, NARGS, nargs_value);
+    binding::set_property_to(scope, obj, NARGS, nargs_value);
 
     obj.into()
   }

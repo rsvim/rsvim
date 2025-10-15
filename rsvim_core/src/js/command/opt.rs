@@ -79,12 +79,12 @@ impl ToV8 for CommandOptions {
 
     // force
     let force_value = to_v8(scope, self.force());
-    binding::set_constant_to(scope, obj, FORCE, force_value);
+    binding::set_property_to(scope, obj, FORCE, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
       let alias_value = to_v8(scope, alias.clone());
-      binding::set_constant_to(scope, obj, ALIAS, alias_value);
+      binding::set_property_to(scope, obj, ALIAS, alias_value);
     }
 
     obj.into()
