@@ -94,44 +94,20 @@ fn open_file_impl<P: AsRef<Path>>(
   path: P,
   opts: FsOpenOptions,
 ) -> TheResult<usize> {
-  if opts.create_new() {
-    match OpenOptions::new()
-      .append(opts.append())
-      .create_new(opts.create_new())
-      .read(opts.read())
-      .write(opts.write())
-      .open(path)
-    {
-      Ok(file) => Ok(util::to_fd(file)),
-      Err(e) => bail!(TheErr::OpenFileFailed(
-        Path::new(path).to_string_lossy().to_string(),
-        e
-      )),
-    }
-  } else {
-    match OpenOptions::new()
-      .read(opts.read())
-      .write(opts.write())
-      .create(opts.create())
-      .create_new
-      .append(opts.append())
-      .truncate(truncate)
-      .open(path)
-    {
-      #[cfg(target_family = "unix")]
-      Ok(file) => {
-        let fd = file.as_raw_fd();
-        std::mem::forget(file);
-        Ok(fd as usize)
-      }
-      #[cfg(target_family = "windows")]
-      Ok(file) => {
-        let handle = file.as_raw_handle();
-        std::mem::forget(file);
-        Ok(handle as usize)
-      }
-      Err(e) => bail!(e),
-    }
+  match OpenOptions::new()
+    .append(opts.append())
+    .create(opts.create())
+    .create_new(opts.create_new())
+    .read(opts.read())
+    .truncate(opts.truncate())
+    .write(opts.write())
+    .open(path)
+  {
+    Ok(file) => Ok(util::to_fd(file)),
+    Err(e) => bail!(TheErr::OpenFileFailed(
+      Path::new(&path).to_string_lossy().to_string(),
+      e
+    )),
   }
 }
 
