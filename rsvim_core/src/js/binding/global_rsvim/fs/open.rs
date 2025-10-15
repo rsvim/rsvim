@@ -1,5 +1,6 @@
 //! `Rsvim.fs.open` and `Rsvim.fs.openSync` APIs.
 
+use crate::buf::opt;
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js;
@@ -8,6 +9,7 @@ use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::JsTimerId;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::util;
 use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
 use crate::js::converter::*;
@@ -19,6 +21,7 @@ use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
 use std::fs;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::rc::Rc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
@@ -46,12 +49,13 @@ pub struct FsOpenOptions {
   // read
   // truncate
   // write
-  fs_open_option_flags: FsOpenOptionFlags,
+  flags: FsOpenOptionFlags,
 }
 
 flags_builder_impl!(
   FsOpenOptionsBuilder,
-  fs_open_option_flags,
+  flags,
+  FsOpenOptionFlags,
   append,
   create,
   create_new,
@@ -60,7 +64,76 @@ flags_builder_impl!(
   write
 );
 
-fn open_file_impl<P: AsRef<Path>>(path: P) -> TheResult<usize> {}
+impl FsOpenOptions {
+  pub fn append(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::APPEND)
+  }
+
+  pub fn create(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::CREATE)
+  }
+
+  pub fn create_new(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::CREATE_NEW)
+  }
+
+  pub fn read(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::READ)
+  }
+
+  pub fn truncate(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::TRUNCATE)
+  }
+
+  pub fn write(&self) -> bool {
+    self.flags.contains(FsOpenOptionFlags::WRITE)
+  }
+}
+
+fn open_file_impl<P: AsRef<Path>>(
+  path: P,
+  opts: FsOpenOptions,
+) -> TheResult<usize> {
+  if opts.create_new() {
+    match OpenOptions::new()
+      .append(opts.append())
+      .create_new(opts.create_new())
+      .read(opts.read())
+      .write(opts.write())
+      .open(path)
+    {
+      Ok(file) => Ok(util::to_fd(file)),
+      Err(e) => bail!(TheErr::OpenFileFailed(
+        Path::new(path).to_string_lossy().to_string(),
+        e
+      )),
+    }
+  } else {
+    match OpenOptions::new()
+      .read(opts.read())
+      .write(opts.write())
+      .create(opts.create())
+      .create_new
+      .append(opts.append())
+      .truncate(truncate)
+      .open(path)
+    {
+      #[cfg(target_family = "unix")]
+      Ok(file) => {
+        let fd = file.as_raw_fd();
+        std::mem::forget(file);
+        Ok(fd as usize)
+      }
+      #[cfg(target_family = "windows")]
+      Ok(file) => {
+        let handle = file.as_raw_handle();
+        std::mem::forget(file);
+        Ok(handle as usize)
+      }
+      Err(e) => bail!(e),
+    }
+  }
+}
 
 struct FsOpenFuture {
   promise: v8::Global<v8::PromiseResolver>,
