@@ -480,12 +480,15 @@ impl EventLoop {
 
   /// Initialize the editor
   pub fn initialize(&mut self) -> IoResult<()> {
+    // Initialize user js configs
     self._init_config()?;
 
     self.writer.init()?;
 
+    // Initialize TUI
     self._init_buffers()?;
     self._init_windows()?;
+    self._init_pending_messages();
 
     // Flush logic UI to terminal, i.e. print UI to stdout
     lock!(self.tree).draw(self.canvas.clone());
@@ -500,6 +503,9 @@ impl EventLoop {
       self
         .js_runtime
         .execute_module(&config_entry.to_string_lossy(), None);
+
+      // Extra tick for some pending imports.
+      self.js_runtime.tick_event_loop();
     }
     Ok(())
   }
@@ -594,6 +600,23 @@ impl EventLoop {
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
+  }
+
+  // Since we run user's config script (i.e. `.rsvim/rsvim.js`) before
+  // initializing TUI/UI-tree. If user calls the `Rsvim.cmd.echo` API directly
+  // in their configs right before the editor TUI initialize, the UI tree is
+  // not created, and the "command-line-message" widget inside UI tree does not
+  // exist.
+  //
+  // Thus we will have to store the printed messages in
+  // `contents.command_line_message_history` temporarily. If the messages are
+  // just too many, old messages will be thrown, only new messages are left.
+  //
+  // And all messages will be print once the editor TUI is initialized.
+  fn _init_pending_messages(&mut self) {
+    let mut contents = lock!(self.contents);
+    let mut tree = lock!(self.tree);
+    cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
   }
 
   /// Shutdown.
@@ -741,31 +764,6 @@ impl EventLoop {
     self.blocked_tracker.wait().await;
   }
 
-  // Since we run user's config script (i.e. `.rsvim/rsvim.js`) before
-  // initializing TUI/UI-tree. If user calls the `Rsvim.cmd.echo` API directly
-  // in their configs right before the editor TUI initialize, the UI tree is
-  // not created, and the "command-line-message" widget inside UI tree does not
-  // exist.
-  //
-  // Thus we will have to store the printed messages in
-  // `contents.command_line_message_history` temporarily. If the messages are
-  // just too many, old messages will be thrown, only new messages are left.
-  //
-  // And all messages will be print once the editor TUI is initialized.
-  fn flush_pending_messages(&mut self) -> IoResult<()> {
-    {
-      let mut contents = lock!(self.contents);
-      let mut tree = lock!(self.tree);
-      cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
-    }
-
-    // Flush logic UI to terminal, i.e. print UI to stdout
-    {
-      lock!(self.tree).draw(self.canvas.clone());
-      self.writer.write(&mut lock!(self.canvas))
-    }
-  }
-
   /// Running the loop, it repeatedly do following steps:
   ///
   /// 1. Receives several things:
@@ -775,11 +773,6 @@ impl EventLoop {
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> IoResult<()> {
-    // At the beginning of running event loop, let's first do a few steps, it
-    // is like an initialization of the running.
-    self.js_runtime.tick_event_loop();
-    self.flush_pending_messages()?;
-
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
@@ -821,9 +814,6 @@ impl EventLoop {
     &mut self,
     mut reader: MockEventReader,
   ) -> IoResult<()> {
-    self.js_runtime.tick_event_loop();
-    self.flush_pending_messages()?;
-
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
@@ -864,9 +854,6 @@ impl EventLoop {
     &mut self,
     mut reader: MockOperationReader,
   ) -> IoResult<()> {
-    self.js_runtime.tick_event_loop();
-    self.flush_pending_messages()?;
-
     loop {
       tokio::select! {
         // Receive mocked keyboard/mouse events
