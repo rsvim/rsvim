@@ -9,7 +9,7 @@ use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::JsTimerId;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::util;
+use crate::js::binding::global_rsvim::fs::fs_file;
 use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
 use crate::js::converter::*;
@@ -100,7 +100,7 @@ fn open_file_impl(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(util::to_fd(file)),
+    Ok(file) => Ok(fs_file::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
@@ -138,7 +138,7 @@ impl JsFuture for FsOpenFuture {
     >(&result, bincode::config::standard())
     .unwrap();
 
-    let file = util::from_fd(fd);
+    let file = fs_file::from_fd(fd);
 
     let file_wrapper = v8::ObjectTemplate::new(scope);
 

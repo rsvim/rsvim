@@ -1,7 +1,7 @@
 //! APIs for `Rsvim.fs` namespace.
 
+pub mod fs_file;
 pub mod open;
-pub mod util;
 
 use crate::js;
 use crate::js::JsFuture;
