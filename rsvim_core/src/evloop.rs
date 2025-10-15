@@ -31,6 +31,7 @@ use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
 use ringbuf::traits::Consumer;
+use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
@@ -521,12 +522,13 @@ impl EventLoop {
           Err(e) => {
             // Send error message to command-line
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
-            msg::sync_send_to_master(
-              self.master_tx.clone(),
-              MasterMessage::PrintReq(msg::PrintReq {
-                payload: e.to_string(),
-              }),
-            );
+
+            // Append error message to command line message history, wait for
+            // print once TUI initialized.
+            let mut contents = lock!(self.contents);
+            contents
+              .command_line_message_history_mut()
+              .push_overwrite(e.to_string());
           }
         }
       }
