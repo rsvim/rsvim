@@ -10,9 +10,6 @@ use tokio::time::Instant;
 #[derive(Debug)]
 /// Message sent to [`EventLoop`](crate::evloop::EventLoop).
 pub enum MasterMessage {
-  /// Js runtime ask master to print message
-  PrintReq(PrintReq),
-
   /// Js runtime ask master to set timeout, i.e. sleep
   TimeoutReq(TimeoutReq),
 
@@ -29,11 +26,6 @@ pub enum MasterMessage {
 #[derive(Debug)]
 pub struct ExitReq {
   pub exit_code: i32,
-}
-
-#[derive(Debug)]
-pub struct PrintReq {
-  pub payload: String,
 }
 
 #[derive(Debug)]

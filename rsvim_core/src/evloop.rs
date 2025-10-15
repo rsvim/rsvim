@@ -680,16 +680,6 @@ impl EventLoop {
           self.exit_code = req.exit_code;
           self.cancellation_token.cancel();
         }
-        MasterMessage::PrintReq(req) => {
-          trace!("Recv PrintReq:{:?}", req.payload);
-          let mut tree = lock!(self.tree);
-          let mut contents = lock!(self.contents);
-          cmdline_ops::cmdline_set_message(
-            &mut tree,
-            &mut contents,
-            req.payload,
-          );
-        }
         MasterMessage::TimeoutReq(req) => {
           trace!("Recv TimeoutReq:{:?}", req.timer_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
