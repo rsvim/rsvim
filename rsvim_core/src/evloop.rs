@@ -30,7 +30,6 @@ use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
-use ringbuf::traits::Consumer;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
