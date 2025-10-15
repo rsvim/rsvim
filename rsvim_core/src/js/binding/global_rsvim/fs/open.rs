@@ -148,9 +148,10 @@ impl JsFuture for FsOpenFuture {
     let file_wrapper = file_wrapper.new_instance(scope).unwrap();
     let fd = v8::Number::new(scope, fd as f64);
 
-    set_constant_to(scope, file_wrapper, "fd", fd.into());
+    binding::set_constant_to(scope, file_wrapper, "fd", fd.into());
 
-    let file_ptr = set_internal_ref(scope, file_wrapper, 0, Some(file));
+    let file_ptr =
+      binding::set_internal_ref(scope, file_wrapper, 0, Some(file));
     let weak_rc = Rc::new(Cell::new(None));
 
     // Note: To automatically close the file (i.e., drop the instance) when
