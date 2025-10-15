@@ -1,5 +1,6 @@
 //! `Rsvim.fs.open` and `Rsvim.fs.openSync` APIs.
 
+use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js;
 use crate::js::JsFuture;
@@ -45,8 +46,19 @@ pub struct FsOpenOptions {
   // read
   // truncate
   // write
-  flags: FsOpenOptionFlags,
+  fs_open_option_flags: FsOpenOptionFlags,
 }
+
+flags_builder_impl!(
+  FsOpenOptionsBuilder,
+  fs_open_option_flags,
+  append,
+  create,
+  create_new,
+  read,
+  truncate,
+  write
+);
 
 fn open_file_impl<P: AsRef<Path>>(path: P) -> TheResult<usize> {}
 
