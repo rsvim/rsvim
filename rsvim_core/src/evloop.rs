@@ -755,21 +755,8 @@ impl EventLoop {
   // And all messages will be print once the editor TUI is initialized.
   fn flush_pending_command_line_messages(&mut self) {
     let mut contents = lock!(self.contents);
-    let maybe_payload = contents.command_line_message_history().last().cloned();
-
-    // If message history contains some payload. This means before we actually
-    // running the event loop, there's already some messages wait for print.
-    if let Some(payload) = maybe_payload {
-      // Clear all pending messages, because in current "command-line-message"
-      // widget, it can only prints 1 single-line message, multi-line messages
-      // are not support yet.
-      //
-      // FIXME: Fix me once our "command-line-message" widget support
-      // multi-line messages.
-      contents.command_line_message_history_mut().clear();
-      let mut tree = lock!(self.tree);
-      cmdline_ops::cmdline_set_message(&mut tree, &mut contents, payload);
-    }
+    let mut tree = lock!(self.tree);
+    cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
   }
 
   /// Running the loop, it repeatedly do following steps:
