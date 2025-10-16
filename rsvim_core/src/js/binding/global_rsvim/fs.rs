@@ -2,7 +2,6 @@
 
 pub mod handle;
 pub mod open;
-pub mod read;
 
 use crate::js;
 use crate::js::JsRuntime;
