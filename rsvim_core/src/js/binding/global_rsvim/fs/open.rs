@@ -236,10 +236,10 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let (fd, _fd_len) = decode_bytes::<usize>(&result);
+    let (fd_handle, _fd_handle_len) = decode_bytes::<usize>(&result);
 
     let file_wrapper = v8::Object::new(scope);
-    let fd_value = to_v8(scope, fd as f64);
+    let fd_value = to_v8(scope, fd_handle as f64);
     binding::set_constant_to(scope, file_wrapper, handle::FD, fd_value);
 
     self
