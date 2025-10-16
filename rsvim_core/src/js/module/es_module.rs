@@ -198,8 +198,8 @@ impl JsFuture for EsModuleFuture {
 
     // Extract module's source code.
     debug_assert!(self.maybe_result.is_some());
-    let source = self.maybe_result.take().unwrap();
-    let (source, _source_len) = match source {
+    let result = self.maybe_result.take().unwrap();
+    let (source, _source_len) = match result {
       Ok(data) => decode_bytes::<String>(&data),
       // Ok(source) => bincode::decode_from_slice::<
       //   String,
