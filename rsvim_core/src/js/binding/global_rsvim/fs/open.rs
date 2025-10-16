@@ -34,6 +34,7 @@ pub const CREATE_NEW_DEFAULT: bool = false;
 pub const READ_DEFAULT: bool = false;
 pub const TRUNCATE_DEFAULT: bool = false;
 pub const WRITE_DEFAULT: bool = false;
+
 // All flags are false
 pub const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
