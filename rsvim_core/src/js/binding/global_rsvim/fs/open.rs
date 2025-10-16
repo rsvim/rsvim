@@ -171,7 +171,7 @@ impl ToV8 for FsOpenOptions {
   }
 }
 
-fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
@@ -189,7 +189,10 @@ fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   }
 }
 
-async fn async_fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+pub async fn async_fs_open(
+  path: &Path,
+  opts: FsOpenOptions,
+) -> TheResult<usize> {
   match tokio::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
