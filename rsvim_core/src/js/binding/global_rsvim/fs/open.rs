@@ -105,8 +105,32 @@ impl FromV8 for FsOpenOptions {
 
     // create
     let create_name = to_v8(scope, CREATE);
-    if let Some(append_value) = obj.get(scope, create_name) {
-      builder.append(from_v8::<bool>(scope, append_value));
+    if let Some(create_value) = obj.get(scope, create_name) {
+      builder.create(from_v8::<bool>(scope, create_value));
+    }
+
+    // create_new
+    let create_new_name = to_v8(scope, CREATE_NEW);
+    if let Some(create_new_value) = obj.get(scope, create_new_name) {
+      builder.create_new(from_v8::<bool>(scope, create_new_value));
+    }
+
+    // read
+    let read_name = to_v8(scope, READ);
+    if let Some(read_value) = obj.get(scope, read_name) {
+      builder.read(from_v8::<bool>(scope, read_value));
+    }
+
+    // truncate
+    let truncate_name = to_v8(scope, TRUNCATE);
+    if let Some(truncate_value) = obj.get(scope, truncate_name) {
+      builder.truncate(from_v8::<bool>(scope, truncate_value));
+    }
+
+    // write
+    let write_name = to_v8(scope, WRITE);
+    if let Some(write_value) = obj.get(scope, write_name) {
+      builder.write(from_v8::<bool>(scope, write_value));
     }
 
     builder.build().unwrap()
