@@ -36,7 +36,7 @@ pub const TRUNCATE_DEFAULT: bool = false;
 pub const WRITE_DEFAULT: bool = false;
 
 // All flags are false
-pub const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
+const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct FsOpenOptions {

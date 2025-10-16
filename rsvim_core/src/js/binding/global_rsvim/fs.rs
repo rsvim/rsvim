@@ -47,7 +47,7 @@ pub fn open<'s>(
   pending::create_fs_open(
     &mut state,
     task_id,
-    &filename,
+    filename,
     options,
     Box::new(open_cb),
   );
