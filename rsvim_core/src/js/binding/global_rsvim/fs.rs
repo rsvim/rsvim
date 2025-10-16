@@ -9,6 +9,7 @@ use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::JsTimerId;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
 use crate::js::converter::*;
@@ -30,7 +31,7 @@ pub fn open(
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
-  let options = args.get(1);
+  let options = FsOpenOptions::from_v8(scope, args.get(1));
   trace!("Rsvim.cmd.echo:{:?}", filename);
 
   let state_rc = JsRuntime::state(scope);

@@ -137,6 +137,41 @@ impl FromV8 for FsOpenOptions {
   }
 }
 
+impl ToV8 for FsOpenOptions {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    let obj = v8::Object::new(scope);
+
+    // append
+    let append_value = to_v8(scope, self.append());
+    binding::set_property_to(scope, obj, APPEND, append_value);
+
+    // create
+    let create_value = to_v8(scope, self.create());
+    binding::set_property_to(scope, obj, CREATE, create_value);
+
+    // create_new
+    let create_new_value = to_v8(scope, self.create_new());
+    binding::set_property_to(scope, obj, CREATE_NEW, create_new_value);
+
+    // read
+    let read_value = to_v8(scope, self.read());
+    binding::set_property_to(scope, obj, READ, read_value);
+
+    // truncate
+    let truncate_value = to_v8(scope, self.truncate());
+    binding::set_property_to(scope, obj, TRUNCATE, truncate_value);
+
+    // write
+    let write_value = to_v8(scope, self.write());
+    binding::set_property_to(scope, obj, WRITE, write_value);
+
+    obj.into()
+  }
+}
+
 fn open_file_impl(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match OpenOptions::new()
     .append(opts.append())
