@@ -1,6 +1,6 @@
 //! APIs for `Rsvim.fs` namespace.
 
-pub mod fs_file;
+pub mod handle;
 pub mod open;
 pub mod read;
 

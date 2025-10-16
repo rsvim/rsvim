@@ -4,7 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::fs_file;
+use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
@@ -182,7 +182,7 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(fs_file::to_fd(file)),
+    Ok(file) => Ok(handle::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
@@ -204,7 +204,7 @@ pub async fn async_fs_open(
     .open(path)
     .await
   {
-    Ok(file) => Ok(fs_file::to_fd(file)),
+    Ok(file) => Ok(handle::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
@@ -240,7 +240,7 @@ impl JsFuture for FsOpenFuture {
 
     let file_wrapper = v8::Object::new(scope);
     let fd_value = to_v8(scope, fd as f64);
-    binding::set_constant_to(scope, file_wrapper, fs_file::FD, fd_value);
+    binding::set_constant_to(scope, file_wrapper, handle::FD, fd_value);
 
     self
       .promise
