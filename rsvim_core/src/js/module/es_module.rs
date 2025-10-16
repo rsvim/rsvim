@@ -201,11 +201,6 @@ impl JsFuture for EsModuleFuture {
     let result = self.maybe_result.take().unwrap();
     let (source, _source_len) = match result {
       Ok(data) => decode_bytes::<String>(&data),
-      // Ok(source) => bincode::decode_from_slice::<
-      //   String,
-      //   bincode::config::Configuration,
-      // >(&source, bincode::config::standard())
-      // .unwrap(),
       Err(e) => {
         self.handle_failure(&state, e);
         return;
