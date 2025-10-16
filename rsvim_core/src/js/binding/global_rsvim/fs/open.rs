@@ -7,7 +7,6 @@ use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::fs_file;
 use crate::js::converter::*;
 use crate::prelude::*;
-use std::fs::OpenOptions;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -172,8 +171,8 @@ impl ToV8 for FsOpenOptions {
   }
 }
 
-fn open_file_impl(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
-  match OpenOptions::new()
+fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+  match std::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
     .create_new(opts.create_new())
@@ -182,7 +181,26 @@ fn open_file_impl(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(fs_file::to_fd(file)),
+    Ok(file) => Ok(fs_file::std_to_fd(file)),
+    Err(e) => bail!(TheErr::OpenFileFailed(
+      path.to_string_lossy().to_string(),
+      e
+    )),
+  }
+}
+
+async fn async_fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
+  match tokio::fs::OpenOptions::new()
+    .append(opts.append())
+    .create(opts.create())
+    .create_new(opts.create_new())
+    .read(opts.read())
+    .truncate(opts.truncate())
+    .write(opts.write())
+    .open(path)
+    .await
+  {
+    Ok(file) => Ok(fs_file::std_to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e

@@ -8,10 +8,10 @@ use crate::js::converter::*;
 use crate::prelude::*;
 
 /// `Rsvim.fs.open` API.
-pub fn open(
-  scope: &mut v8::PinScope,
-  args: v8::FunctionCallbackArguments,
-  mut _rv: v8::ReturnValue,
+pub fn open<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
