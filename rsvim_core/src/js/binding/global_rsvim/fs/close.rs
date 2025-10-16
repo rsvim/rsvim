@@ -8,7 +8,7 @@ use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
 pub fn fs_close(fd: usize) {
-  let file_handle = handle::from_fd::<std::fs::File>(fd);
+  let _file_handle = handle::from_fd::<std::fs::File>(fd);
   // It will be dropped/closed when go out of scope.
 }
 
