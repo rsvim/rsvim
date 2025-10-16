@@ -208,9 +208,9 @@ async fn async_fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   }
 }
 
-struct FsOpenFuture {
-  promise: v8::Global<v8::PromiseResolver>,
-  maybe_result: Option<TheResult<Vec<u8>>>,
+pub struct FsOpenFuture {
+  pub promise: v8::Global<v8::PromiseResolver>,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 impl JsFuture for FsOpenFuture {
