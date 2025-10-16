@@ -13,7 +13,7 @@ where
 }
 
 #[cfg(target_family = "windows")]
-pub fn to_fd(file: F) -> usize
+pub fn to_fd<F>(file: F) -> usize
 where
   F: std::os::windows::io::AsRawHandle,
 {
