@@ -7,7 +7,6 @@ use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::fs_file;
 use crate::js::converter::*;
 use crate::prelude::*;
-use std::fs::File;
 use std::fs::OpenOptions;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
@@ -22,10 +21,21 @@ flags_impl!(
   WRITE
 );
 
-const FD: &str = "fd";
+pub const APPEND: &str = "append";
+pub const CREATE: &str = "create";
+pub const CREATE_NEW: &str = "create_new";
+pub const READ: &str = "read";
+pub const TRUNCATE: &str = "truncate";
+pub const WRITE: &str = "write";
 
+pub const APPEND_DEFAULT: bool = false;
+pub const CREATE_DEFAULT: bool = false;
+pub const CREATE_NEW_DEFAULT: bool = false;
+pub const READ_DEFAULT: bool = false;
+pub const TRUNCATE: &str = "truncate";
+pub const WRITE: &str = "write";
 // All flags are false
-const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
+pub const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct FsOpenOptions {
@@ -75,6 +85,22 @@ impl FsOpenOptions {
 
   pub fn write(&self) -> bool {
     self.flags.contains(FsOpenOptionFlags::WRITE)
+  }
+}
+
+impl FromV8 for FsOpenOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    let mut builder = FsOpenOptionsBuilder::default();
+    let obj = value.to_object(scope).unwrap();
+
+    // bang
+    let bang_name = to_v8(scope, BANG);
+    if let Some(bang_value) = obj.get(scope, bang_name) {
+      builder.bang(from_v8::<bool>(scope, bang_value));
+    }
   }
 }
 
@@ -128,7 +154,7 @@ impl JsFuture for FsOpenFuture {
 
     let file_wrapper = v8::Object::new(scope);
     let fd_value = to_v8(scope, fd as f64);
-    binding::set_constant_to(scope, file_wrapper, FD, fd_value);
+    binding::set_constant_to(scope, file_wrapper, fs_file::FD, fd_value);
 
     self
       .promise

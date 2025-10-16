@@ -28,9 +28,10 @@ pub fn open(
   args: v8::FunctionCallbackArguments,
   mut _rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 1);
-  let message = args.get(0).to_rust_string_lossy(scope);
-  trace!("Rsvim.cmd.echo:{:?}", message);
+  debug_assert!(args.length() == 2);
+  let filename = args.get(0).to_rust_string_lossy(scope);
+  let options = args.get(1);
+  trace!("Rsvim.cmd.echo:{:?}", filename);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow();

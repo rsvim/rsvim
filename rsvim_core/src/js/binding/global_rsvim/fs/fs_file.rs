@@ -2,6 +2,8 @@
 
 use std::fs::File;
 
+pub const FD: &str = "fd";
+
 #[cfg(not(target_family = "windows"))]
 pub fn to_fd(file: File) -> usize {
   use std::os::fd::IntoRawFd;
