@@ -1,29 +1,14 @@
 //! `Rsvim.fs.open` and `Rsvim.fs.openSync` APIs.
 
-use crate::buf::opt;
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::js;
 use crate::js::JsFuture;
-use crate::js::JsRuntime;
-use crate::js::JsRuntimeState;
-use crate::js::JsTimerId;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::fs_file;
-use crate::js::command::def::CommandDefinition;
 use crate::js::converter::*;
-use crate::js::converter::*;
-use crate::js::pending;
 use crate::prelude::*;
-use crate::state::ops::cmdline_ops;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
-use ringbuf::traits::RingBuffer;
-use std::cell::Cell;
-use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
-use std::rc::Rc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
