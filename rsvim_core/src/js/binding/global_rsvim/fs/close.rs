@@ -7,25 +7,14 @@ use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
-pub fn fs_close(fd: usize) -> TheResult<usize> {
-  match std::fs::OpenOptions::new()
-    .append(opts.append())
-    .create(opts.create())
-    .create_new(opts.create_new())
-    .read(opts.read())
-    .truncate(opts.truncate())
-    .write(opts.write())
-    .open(path)
-  {
-    Ok(file) => Ok(handle::to_fd(file)),
-    Err(e) => bail!(TheErr::OpenFileFailed(
-      path.to_string_lossy().to_string(),
-      e
-    )),
-  }
+pub fn fs_close(fd: usize) {
+  let file_handle = handle::from_fd::<std::fs::File>(fd);
+  // It will be dropped/closed when go out of scope.
 }
 
 pub async fn async_fs_close(fd: usize) -> TheResult<usize> {
+  let file_handle = handle::from_fd::<tokio::fs::File>(fd);
+
   match tokio::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
