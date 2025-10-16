@@ -10,7 +10,7 @@ where
   bincode::encode_to_vec(input, BINCODE_CONFIG).unwrap()
 }
 
-pub fn decode_bytes<T>(bytes: &Vec<u8>) -> (T, usize)
+pub fn decode_bytes<T>(bytes: &[u8]) -> (T, usize)
 where
   T: bincode::de::Decode<()>,
 {
