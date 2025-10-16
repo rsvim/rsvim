@@ -25,7 +25,7 @@ pub fn fs_close(fd: usize) -> TheResult<usize> {
   }
 }
 
-pub async fn async_fs_open(path: &Path) -> TheResult<usize> {
+pub async fn async_fs_close(fd: usize) -> TheResult<usize> {
   match tokio::fs::OpenOptions::new()
     .append(opts.append())
     .create(opts.create())
