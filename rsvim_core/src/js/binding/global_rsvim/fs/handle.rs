@@ -1,4 +1,4 @@
-//! File descriptor utilities.
+//! File handle.
 
 pub const FD: &str = "fd";
 
