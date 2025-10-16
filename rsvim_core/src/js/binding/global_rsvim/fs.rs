@@ -29,10 +29,9 @@ pub fn open<'s>(
   let open_cb = {
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
-
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
       let fut = FsOpenFuture {
-        promise,
+        promise: promise.clone(),
         maybe_result,
       };
       let mut state = state_rc.borrow_mut();
