@@ -698,6 +698,18 @@ pub mod boost {
             loader_cb(resp.maybe_source);
           }
           JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+          JsMessage::FsOpenResp(resp) => {
+            trace!("Recv FsOpenResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut open_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            open_cb(resp.maybe_result);
+          }
         }
       }
 
