@@ -6,6 +6,7 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::fs_file;
 use crate::js::converter::*;
+use crate::js::pending::decode_bytes;
 use crate::prelude::*;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
@@ -235,11 +236,7 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let (fd, _fd_len) = bincode::decode_from_slice::<
-      usize,
-      bincode::config::Configuration,
-    >(&result, bincode::config::standard())
-    .unwrap();
+    let (fd, _fd_len) = decode_bytes::<usize>(&result);
 
     let file_wrapper = v8::Object::new(scope);
     let fd_value = to_v8(scope, fd as f64);
