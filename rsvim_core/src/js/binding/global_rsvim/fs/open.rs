@@ -97,11 +97,19 @@ impl FromV8 for FsOpenOptions {
     let mut builder = FsOpenOptionsBuilder::default();
     let obj = value.to_object(scope).unwrap();
 
-    // bang
-    let bang_name = to_v8(scope, BANG);
-    if let Some(bang_value) = obj.get(scope, bang_name) {
-      builder.bang(from_v8::<bool>(scope, bang_value));
+    // append
+    let append_name = to_v8(scope, APPEND);
+    if let Some(append_value) = obj.get(scope, append_name) {
+      builder.append(from_v8::<bool>(scope, append_value));
     }
+
+    // create
+    let create_name = to_v8(scope, CREATE);
+    if let Some(append_value) = obj.get(scope, create_name) {
+      builder.append(from_v8::<bool>(scope, append_value));
+    }
+
+    builder.build().unwrap()
   }
 }
 
