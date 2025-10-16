@@ -32,8 +32,5 @@ pub fn open(
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
   let options = FsOpenOptions::from_v8(scope, args.get(1));
-  trace!("Rsvim.cmd.echo:{:?}", filename);
-
-  let state_rc = JsRuntime::state(scope);
-  let state = state_rc.borrow();
+  trace!("Rsvim.fs.open:{:?}", filename);
 }
