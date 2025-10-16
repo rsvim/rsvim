@@ -106,6 +106,12 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "cmd_remove", global_rsvim::cmd::remove);
   }
 
+  // For `Rsvim.fs`
+  {
+    set_function_to(scope, vim, "fs_open", global_rsvim::fs::open);
+    set_function_to(scope, vim, "fs_open_sync", global_rsvim::fs::open_sync);
+  }
+
   // For `Rsvim.opt`
   {
     set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);
