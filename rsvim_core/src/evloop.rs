@@ -752,7 +752,10 @@ impl EventLoop {
             let _ = jsrt_forwarder_tx
               .send(JsMessage::FsOpenResp(msg::FsOpenResp {
                 task_id: req.task_id,
-                maybe_result: Some(maybe_result),
+                maybe_result: match maybe_result {
+                  Ok(fd) => Some(Ok(encode_bytes(fd))),
+                  Err(e) => Some(Err(e)),
+                },
               }))
               .await;
           });
