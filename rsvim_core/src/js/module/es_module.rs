@@ -11,6 +11,7 @@ use crate::js::module::ModuleStatus;
 use crate::js::module::create_origin;
 use crate::js::module::resolve_import;
 use crate::js::pending;
+use crate::js::pending::decode_bytes;
 use crate::prelude::*;
 use crate::util::paths;
 use std::cell::RefCell;
@@ -199,11 +200,12 @@ impl JsFuture for EsModuleFuture {
     debug_assert!(self.maybe_result.is_some());
     let source = self.maybe_result.take().unwrap();
     let (source, _source_len) = match source {
-      Ok(source) => bincode::decode_from_slice::<
-        String,
-        bincode::config::Configuration,
-      >(&source, bincode::config::standard())
-      .unwrap(),
+      Ok(data) => decode_bytes::<String>(&data),
+      // Ok(source) => bincode::decode_from_slice::<
+      //   String,
+      //   bincode::config::Configuration,
+      // >(&source, bincode::config::standard())
+      // .unwrap(),
       Err(e) => {
         self.handle_failure(&state, e);
         return;

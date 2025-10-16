@@ -22,12 +22,12 @@ where
   bincode::encode_to_vec(input, BINCODE_CONFIG).unwrap()
 }
 
-pub fn decode_bytes<T>(bytes: Vec<u8>) -> (T, usize)
+pub fn decode_bytes<T>(bytes: &Vec<u8>) -> (T, usize)
 where
   T: bincode::de::Decode<()>,
 {
   bincode::decode_from_slice::<T, bincode::config::Configuration>(
-    &bytes,
+    bytes,
     BINCODE_CONFIG,
   )
   .unwrap()

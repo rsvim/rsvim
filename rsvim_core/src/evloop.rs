@@ -14,6 +14,7 @@ use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
 use crate::js::module::async_load_import;
+use crate::js::pending::encode_bytes;
 use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
@@ -729,10 +730,7 @@ impl EventLoop {
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
-                  Ok(source) => Some(Ok(
-                    bincode::encode_to_vec(source, bincode::config::standard())
-                      .unwrap(),
-                  )),
+                  Ok(source) => Some(Ok(encode_bytes(source))),
                   Err(e) => Some(Err(e)),
                 },
               }))
