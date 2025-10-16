@@ -141,39 +141,9 @@ impl JsFuture for FsOpenFuture {
     >(&result, bincode::config::standard())
     .unwrap();
 
-    let file_ref = fs_file::from_fd(fd);
-
     let file_wrapper = v8::Object::new(scope);
     let fd_value = to_v8(scope, fd as f64);
     binding::set_constant_to(scope, file_wrapper, FD, fd_value);
-
-    let file_wrapper = file_wrapper.new_instance(scope).unwrap();
-    let fd = v8::Number::new(scope, fd as f64);
-
-    binding::set_constant_to(scope, file_wrapper, "fd", fd.into());
-
-    let file_ptr =
-      binding::set_internal_ref(scope, file_wrapper, 0, Some(file_ref));
-    let weak_rc = Rc::new(Cell::new(None));
-
-    // Note: To automatically close the file (i.e., drop the instance) when
-    // V8 garbage collects the object that internally holds the Rust file,
-    // we use a Weak reference with a finalizer callback.
-    let file_weak = v8::Weak::with_finalizer(
-      scope,
-      file_wrapper,
-      Box::new({
-        let weak_rc = weak_rc.clone();
-        move |isolate| unsafe {
-          drop(Box::from_raw(file_ptr));
-          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-        }
-      }),
-    );
-
-    // Store the weak ref pointer into the "shared" cell.
-    weak_rc.set(file_weak.into_raw());
-    binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
 
     self
       .promise
