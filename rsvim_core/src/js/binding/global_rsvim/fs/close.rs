@@ -12,11 +12,6 @@ pub fn fs_close(fd: usize) {
   // It will be dropped/closed when go out of scope.
 }
 
-pub async fn async_fs_close(fd: usize) {
-  let _file_handle = handle::from_fd::<tokio::fs::File>(fd);
-  // It will be dropped/closed when go out of scope.
-}
-
 pub struct FsCloseFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
