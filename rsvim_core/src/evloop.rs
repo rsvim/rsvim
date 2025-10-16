@@ -10,6 +10,7 @@ use crate::content::TextContentsArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
+use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
 use crate::js::module::async_load_import;
@@ -749,7 +750,13 @@ impl EventLoop {
           trace!("Recv FsOpenReq");
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+            let maybe_result = async_fs_open(&req.path, req.options).await;
+            let _ = jsrt_forwarder_tx
+              .send(JsMessage::FsOpenResp(msg::FsOpenResp {
+                task_id: req.task_id,
+                maybe_result: Some(maybe_result),
+              }))
+              .await;
           });
         }
       }
