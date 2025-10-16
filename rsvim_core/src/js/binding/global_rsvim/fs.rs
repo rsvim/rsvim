@@ -72,7 +72,7 @@ pub fn open_sync<'s>(
     Ok(fd) => {
       let file_wrapper = v8::Object::new(scope);
       let fd_value = to_v8(scope, fd as f64);
-      binding::set_constant_to(scope, file_wrapper, fs_file::FD, fd_value);
+      binding::set_constant_to(scope, file_wrapper, handle::FD, fd_value);
       rv.set(file_wrapper.into());
     }
     Err(e) => {
