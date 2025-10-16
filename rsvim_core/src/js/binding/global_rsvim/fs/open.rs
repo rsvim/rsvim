@@ -37,6 +37,8 @@ flags_impl!(
   WRITE
 );
 
+const FD: &str = "fd";
+
 // All flags are false
 const FS_OPEN_OPTION_FLAGS: FsOpenOptionFlags = FsOpenOptionFlags::empty();
 
@@ -139,12 +141,11 @@ impl JsFuture for FsOpenFuture {
     >(&result, bincode::config::standard())
     .unwrap();
 
-    let file = fs_file::from_fd(fd);
+    let file_ref = fs_file::from_fd(fd);
 
-    let file_wrapper = v8::ObjectTemplate::new(scope);
-
-    // Allocate space for the wrapped Rust type.
-    file_wrapper.set_internal_field_count(2);
+    let file_wrapper = v8::Object::new(scope);
+    let fd_value = to_v8(scope, fd as f64);
+    binding::set_constant_to(scope, file_wrapper, FD, fd_value);
 
     let file_wrapper = file_wrapper.new_instance(scope).unwrap();
     let fd = v8::Number::new(scope, fd as f64);
@@ -152,7 +153,7 @@ impl JsFuture for FsOpenFuture {
     binding::set_constant_to(scope, file_wrapper, "fd", fd.into());
 
     let file_ptr =
-      binding::set_internal_ref(scope, file_wrapper, 0, Some(file));
+      binding::set_internal_ref(scope, file_wrapper, 0, Some(file_ref));
     let weak_rc = Rc::new(Cell::new(None));
 
     // Note: To automatically close the file (i.e., drop the instance) when
