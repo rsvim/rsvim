@@ -6,7 +6,7 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::fs_file;
 use crate::js::converter::*;
-use crate::js::pending::decode_bytes;
+use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.

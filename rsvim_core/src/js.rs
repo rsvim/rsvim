@@ -13,6 +13,7 @@
 pub mod binding;
 pub mod command;
 pub mod converter;
+pub mod encdec;
 pub mod err;
 pub mod exception;
 pub mod hook;
