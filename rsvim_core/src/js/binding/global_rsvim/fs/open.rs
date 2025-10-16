@@ -181,7 +181,7 @@ fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(fs_file::std_to_fd(file)),
+    Ok(file) => Ok(fs_file::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
@@ -200,7 +200,7 @@ async fn async_fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .open(path)
     .await
   {
-    Ok(file) => Ok(fs_file::std_to_fd(file)),
+    Ok(file) => Ok(fs_file::to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
