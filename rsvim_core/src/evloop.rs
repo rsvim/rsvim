@@ -745,6 +745,13 @@ impl EventLoop {
             let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
           });
         }
+        MasterMessage::FsOpenReq(req) => {
+          trace!("Recv FsOpenReq");
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+          });
+        }
       }
     }
   }
