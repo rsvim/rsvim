@@ -75,7 +75,6 @@ pub fn open_sync<'s>(
       rv.set(file_wrapper.into());
     }
     Err(e) => {
-      rv.set_undefined();
       binding::throw_exception(scope, &e);
     }
   }

@@ -66,7 +66,6 @@ pub fn create<'s>(
     Ok(Some(removed)) => rv.set(removed.to_v8(scope)),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
-      rv.set_undefined();
       binding::throw_exception(scope, &e);
     }
   }

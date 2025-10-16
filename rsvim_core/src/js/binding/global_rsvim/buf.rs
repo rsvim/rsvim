@@ -69,7 +69,6 @@ pub fn write_sync<'s>(
     }
     Err(e) => {
       trace!("write_sync failed, bufId:{:?}, error:{:?}", buf_id, e);
-      rv.set_undefined();
       binding::throw_exception(scope, &e);
     }
   }
