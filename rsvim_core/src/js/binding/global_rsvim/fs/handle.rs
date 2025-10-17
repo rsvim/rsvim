@@ -29,6 +29,3 @@ where
   use std::os::windows::io::FromRawHandle;
   unsafe { File::from_raw_handle(handle as std::os::windows::io::RawHandle) }
 }
-
-#[derive(Debug)]
-pub struct FsFile {}
