@@ -628,11 +628,11 @@ export namespace RsvimFs {
    */
   export class File {
     /** @hidden */
-    __file_handle: any;
+    __handle: any;
 
     /** @hidden */
-    constructor(__file_handle: any) {
-      this.__file_handle = __file_handle;
+    constructor(handle: any) {
+      this.__handle = handle;
     }
 
     /**
@@ -650,7 +650,7 @@ export namespace RsvimFs {
      */
     close(): void {
       // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.fs_close(this.__file_handle);
+      __InternalRsvimGlobalObject.fs_close(this.__handle);
     }
 
     /**
@@ -666,7 +666,7 @@ export namespace RsvimFs {
      */
     isClosed(): boolean {
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_is_closed(this.__file_handle);
+      return __InternalRsvimGlobalObject.fs_is_closed(this.__handle);
     }
   }
 }
