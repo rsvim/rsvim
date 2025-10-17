@@ -501,7 +501,43 @@ export namespace RsvimCmd {
  *
  * @category General APIs
  */
-export interface RsvimFs {}
+export interface RsvimFs {
+  /**
+   * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to
+   * previously exist if using
+   *
+   * :::warning
+   * The builtin command `js` cannot be override.
+   * :::
+   *
+   * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
+   * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
+   * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
+   *
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
+   *
+   * @example
+   * ```javascript
+   * function write(ctx: any): void {
+   *   try {
+   *     const bytes = Rsvim.buf.writeSync(bufId);
+   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   *   } catch (e) {
+   *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
+   *   }
+   * }
+   * Rsvim.cmd.create("write", write);
+   * ```
+   */
+  create(
+    name: string,
+    callback: RsvimCmd.CommandCallback,
+    attributes?: RsvimCmd.CommandAttributes,
+    options?: RsvimCmd.CommandOptions,
+  ): RsvimCmd.CommandDefinition | undefined;
+}
 
 /**
  * @inline
