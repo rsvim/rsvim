@@ -21,7 +21,7 @@ async fn test_open_close1() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = await Rsvim.fs.open("{}");
+  const f = await Rsvim.fs.open({:?});
   if (f.isClosed()) {{
     throw new Error("It cannot be closed");
   }}
@@ -30,7 +30,7 @@ async fn test_open_close1() -> IoResult<()> {
     throw new Error("It must be closed");
   }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
@@ -70,7 +70,7 @@ async fn test_open_close2() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = Rsvim.fs.openSync("{}");
+  const f = Rsvim.fs.openSync({:?});
   if (f.isClosed()) {{
     throw new Error("It cannot be closed");
   }}
@@ -79,7 +79,7 @@ async fn test_open_close2() -> IoResult<()> {
     throw new Error("It must be closed");
   }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
@@ -118,7 +118,7 @@ async fn test_open_close3() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = await Rsvim.fs.open("{}", {{ create: true, write: true }});
+  const f = await Rsvim.fs.open({:?}, {{ create: true, write: true }});
   if (f.isClosed()) {{
     throw new Error("It cannot be closed");
   }}
@@ -127,7 +127,7 @@ async fn test_open_close3() -> IoResult<()> {
     throw new Error("It must be closed");
   }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
@@ -167,7 +167,7 @@ async fn test_open_close4() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = Rsvim.fs.openSync("{}", {{ create: true, write: true }});
+  const f = Rsvim.fs.openSync({:?}, {{ create: true, write: true }});
   if (f.isClosed()) {{
     throw new Error("It cannot be closed");
   }}
@@ -176,7 +176,7 @@ async fn test_open_close4() -> IoResult<()> {
     throw new Error("It must be closed");
   }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
@@ -217,12 +217,12 @@ async fn test_open_close_failed1() -> IoResult<()> {
   let src = format!(
     r#"
 try {{
-  const f = await Rsvim.fs.open("{}");
+  const f = await Rsvim.fs.open({:?});
 }} catch (e) {{
   Rsvim.cmd.echo(e);
 }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
@@ -268,12 +268,12 @@ async fn test_open_close_failed2() -> IoResult<()> {
   let src = format!(
     r#"
 try {{
-  const f = Rsvim.fs.openSync("{}");
+  const f = Rsvim.fs.openSync({:?});
 }} catch (e) {{
   Rsvim.cmd.echo(e);
 }}
     "#,
-    tmpfile.to_string_lossy()
+    tmpfile.path()
   );
   info!("src:{:?}", src);
 
