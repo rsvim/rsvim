@@ -143,9 +143,9 @@ export class RsvimFs {
         if (!Object.hasOwn(options, "write")) {
             options.write = false;
         }
-        return __InternalRsvimGlobalObject.fs_open(path, options).then((handle) => new RsvimFs.File(handle), (error) => {
-            throw error;
-        });
+        return __InternalRsvimGlobalObject
+            .fs_open(path, options)
+            .then((handle) => new RsvimFs.File(handle));
     }
     openSync(path, options) {
         checkIsString(path, `"Rsvim.fs.openSync" path`);
