@@ -530,13 +530,7 @@ export interface RsvimFs {
    *
    * @example
    * ```javascript
-   * try {
-   *   const filename = "README.md";
-   *   const file = Rsvim.fs.open(filename);
-   *   Rsvim.cmd.echo(`Opened file: ${filename}`);
-   * } catch (e) {
-   *   Rsvim.cmd.echo(`Failed to open file: ${e}`);
-   * }
+   * const file = await Rsvim.fs.open("README.md");
    * ```
    */
   open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
