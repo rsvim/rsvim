@@ -173,8 +173,21 @@ impl ToV8 for FsOpenOptions {
 }
 
 pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
-  tokio::runtime::Handle::current()
-    .spawn_blocking(async move || async_fs_open(path, opts).await)
+  match std::fs::OpenOptions::new()
+    .append(opts.append())
+    .create(opts.create())
+    .create_new(opts.create_new())
+    .read(opts.read())
+    .truncate(opts.truncate())
+    .write(opts.write())
+    .open(path)
+  {
+    Ok(file) => Ok(handle::to_fd(file)),
+    Err(e) => bail!(TheErr::OpenFileFailed(
+      path.to_string_lossy().to_string(),
+      e
+    )),
+  }
 }
 
 pub async fn async_fs_open(
