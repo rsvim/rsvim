@@ -111,7 +111,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  */
 export class Rsvim {
   readonly buf = new RsvimBuf();
-  readonly cmd = new RsvimCmdImpl();
+  readonly cmd = new RsvimCmd();
   readonly fs = new RsvimFsImpl();
   readonly opt = new RsvimOptImpl();
   readonly rt = new RsvimRtImpl();
@@ -218,7 +218,7 @@ export class RsvimBuf {
  *
  * @category Editor APIs
  */
-export interface RsvimCmd {
+export class RsvimCmd {
   /**
    * Create a ex command with a callback function.
    *
@@ -247,86 +247,6 @@ export interface RsvimCmd {
    * Rsvim.cmd.create("write", write);
    * ```
    */
-  create(
-    name: string,
-    callback: RsvimCmd.CommandCallback,
-    attributes?: RsvimCmd.CommandAttributes,
-    options?: RsvimCmd.CommandOptions,
-  ): RsvimCmd.CommandDefinition | undefined;
-
-  /**
-   * Echo message to the command-line.
-   *
-   * @param {any} message - It accepts string and other primitive types, except `null` and `undefined`.
-   *
-   * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
-   *
-   * @example
-   * ```javascript
-   * Rsvim.cmd.echo("Hello Rsvim!");
-   * ```
-   */
-  echo(message: any): void;
-
-  /**
-   * List all registered ex command names.
-   *
-   * :::warning
-   * The builtin `js` command will not be listed here.
-   * :::
-   *
-   * @returns {string[]} Returns all registered ex command names, except the `js` command.
-   *
-   * @example
-   * ```javascript
-   * Rsvim.cmd.list().forEach((name) => {
-   *   Rsvim.cmd.echo(`Command: ${name}`);
-   * });
-   * ```
-   */
-  list(): string[];
-
-  /**
-   * Get ex command definition by name.
-   *
-   * :::warning
-   * The builtin `js` command cannot be get.
-   * :::
-   *
-   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns command definition by its name, except the `js` command.
-   *
-   * @example
-   * ```javascript
-   * const def = Rsvim.cmd.get("write");
-   * Rsvim.cmd.echo(`Command: ${def.name}`);
-   * ```
-   */
-  get(name: string): RsvimCmd.CommandDefinition | undefined;
-
-  /**
-   * Remove an ex command by name.
-   *
-   * :::warning
-   * The builtin command `js` cannot be removed.
-   * :::
-   *
-   * @param {string} name - The command name to be removed.
-   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
-   *
-   * @throws Throws {@link !TypeError} if name is not a string.
-   *
-   * @example
-   * ```javascript
-   * Rsvim.cmd.list().forEach((cmd) => {
-   *   // Remove all registered commands.
-   *   Rsvim.cmd.remove(cmd.name);
-   * });
-   * ```
-   */
-  remove(name: string): RsvimCmd.CommandDefinition | undefined;
-}
-
-class RsvimCmdImpl implements RsvimCmd {
   create(
     name: string,
     callback: RsvimCmd.CommandCallback,
@@ -379,6 +299,18 @@ class RsvimCmdImpl implements RsvimCmd {
     );
   }
 
+  /**
+   * Echo message to the command-line.
+   *
+   * @param {any} message - It accepts string and other primitive types, except `null` and `undefined`.
+   *
+   * @throws Throws {@link !TypeError} if the parameter is `null` or `undefined` or no parameter provided.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.echo("Hello Rsvim!");
+   * ```
+   */
   echo(message: any): void {
     checkNotNull(message, `"Rsvim.cmd.echo" message`);
 
@@ -386,11 +318,42 @@ class RsvimCmdImpl implements RsvimCmd {
     __InternalRsvimGlobalObject.cmd_echo(message);
   }
 
+  /**
+   * List all registered ex command names.
+   *
+   * :::warning
+   * The builtin `js` command will not be listed here.
+   * :::
+   *
+   * @returns {string[]} Returns all registered ex command names, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((name) => {
+   *   Rsvim.cmd.echo(`Command: ${name}`);
+   * });
+   * ```
+   */
   list(): string[] {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_list();
   }
 
+  /**
+   * Get ex command definition by name.
+   *
+   * :::warning
+   * The builtin `js` command cannot be get.
+   * :::
+   *
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns command definition by its name, except the `js` command.
+   *
+   * @example
+   * ```javascript
+   * const def = Rsvim.cmd.get("write");
+   * Rsvim.cmd.echo(`Command: ${def.name}`);
+   * ```
+   */
   get(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.get" name`);
 
@@ -398,6 +361,26 @@ class RsvimCmdImpl implements RsvimCmd {
     return __InternalRsvimGlobalObject.cmd_get(name);
   }
 
+  /**
+   * Remove an ex command by name.
+   *
+   * :::warning
+   * The builtin command `js` cannot be removed.
+   * :::
+   *
+   * @param {string} name - The command name to be removed.
+   * @returns {(RsvimCmd.CommandDefinition | undefined)} Returns the removed {@link RsvimCmd.CommandDefinition}, or `undefined` if no command is been removed.
+   *
+   * @throws Throws {@link !TypeError} if name is not a string.
+   *
+   * @example
+   * ```javascript
+   * Rsvim.cmd.list().forEach((cmd) => {
+   *   // Remove all registered commands.
+   *   Rsvim.cmd.remove(cmd.name);
+   * });
+   * ```
+   */
   remove(name: string): RsvimCmd.CommandDefinition | undefined {
     checkIsString(name, `"Rsvim.cmd.remove" name`);
 
