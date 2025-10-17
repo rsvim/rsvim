@@ -113,8 +113,8 @@ export class Rsvim {
   readonly buf = new RsvimBuf();
   readonly cmd = new RsvimCmd();
   readonly fs = new RsvimFs();
-  readonly opt = new RsvimOptImpl();
-  readonly rt = new RsvimRtImpl();
+  readonly opt = new RsvimOpt();
+  readonly rt = new RsvimRt();
 }
 
 /**
@@ -899,7 +899,10 @@ export class RsvimOpt {
    * const value = Rsvim.opt.shiftWidth;
    * ```
    */
-  get shiftWidth(): number;
+  get shiftWidth(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_shift_width();
+  }
 
   /**
    * Set the _expand-tab_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
@@ -914,7 +917,12 @@ export class RsvimOpt {
    * Rsvim.opt.shiftWidth = 4;
    * ```
    */
-  set shiftWidth(value: number);
+  set shiftWidth(value: number) {
+    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
+    value = boundByIntegers(value, [1, 255]);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_shift_width(value);
+  }
 
   /**
    * Get the _tab-stop_ option. This option is also known as
@@ -937,7 +945,10 @@ export class RsvimOpt {
    * const value = Rsvim.opt.tabStop;
    * ```
    */
-  get tabStop(): number;
+  get tabStop(): number {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_tab_stop();
+  }
 
   /**
    * Set the _tab-stop_ option. It only accepts an integer between `[1,255]`, if the value is out of range, it will be bound to this range.
@@ -951,7 +962,12 @@ export class RsvimOpt {
    * Rsvim.opt.tabStop = 4;
    * ```
    */
-  set tabStop(value: number);
+  set tabStop(value: number) {
+    checkIsInteger(value, `"Rsvim.opt.tabStop" value`);
+    value = boundByIntegers(value, [1, 255]);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
+  }
 
   /**
    * Get the _wrap_ option. This option is also known as
@@ -977,7 +993,10 @@ export class RsvimOpt {
    * const value = Rsvim.opt.wrap;
    * ```
    */
-  get wrap(): boolean;
+  get wrap(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_wrap();
+  }
 
   /**
    * Set the _wrap_ option.
@@ -991,39 +1010,6 @@ export class RsvimOpt {
    * Rsvim.opt.wrap = true;
    * ```
    */
-  set wrap(value: boolean);
-}
-
-class RsvimOptImpl implements RsvimOpt {
-  get shiftWidth(): number {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_shift_width();
-  }
-
-  set shiftWidth(value: number) {
-    checkIsInteger(value, `"Rsvim.opt.shiftWidth" value`);
-    value = boundByIntegers(value, [1, 255]);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_shift_width(value);
-  }
-
-  get tabStop(): number {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_tab_stop();
-  }
-
-  set tabStop(value: number) {
-    checkIsInteger(value, `"Rsvim.opt.tabStop" value`);
-    value = boundByIntegers(value, [1, 255]);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_tab_stop(value);
-  }
-
-  get wrap(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_wrap();
-  }
-
   set wrap(value: boolean) {
     checkIsBoolean(value, `"Rsvim.opt.wrap" value`);
     // @ts-ignore Ignore warning
@@ -1042,7 +1028,7 @@ class RsvimOptImpl implements RsvimOpt {
  *
  * @category General APIs
  */
-export interface RsvimRt {
+export class RsvimRt {
   /**
    * Exit editor.
    *
@@ -1065,10 +1051,6 @@ export interface RsvimRt {
    * Rsvim.rt.exit(-1);
    * ```
    */
-  exit(exitCode?: number): void;
-}
-
-class RsvimRtImpl implements RsvimRt {
   exit(exitCode?: number): void {
     if (exitCode === undefined || exitCode === null) {
       exitCode = 0;

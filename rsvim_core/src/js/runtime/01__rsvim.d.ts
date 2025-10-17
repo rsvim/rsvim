@@ -56,7 +56,7 @@ export declare namespace RsvimFs {
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
-export interface RsvimOpt {
+export declare class RsvimOpt {
     get expandTab(): boolean;
     set expandTab(value: boolean);
     get fileEncoding(): FileEncodingOption;
@@ -73,14 +73,6 @@ export interface RsvimOpt {
     set wrap(value: boolean);
 }
 declare class RsvimOptImpl implements RsvimOpt {
-    get expandTab(): boolean;
-    set expandTab(value: boolean);
-    get fileEncoding(): FileEncodingOption;
-    set fileEncoding(value: FileEncodingOption);
-    get fileFormat(): FileFormatOption;
-    set fileFormat(value: FileFormatOption);
-    get lineBreak(): boolean;
-    set lineBreak(value: boolean);
     get shiftWidth(): number;
     set shiftWidth(value: number);
     get tabStop(): number;

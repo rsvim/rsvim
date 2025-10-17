@@ -190,7 +190,7 @@ export class RsvimFs {
     }
     RsvimFs.File = File;
 })(RsvimFs || (RsvimFs = {}));
-class RsvimOptImpl {
+export class RsvimOpt {
     get expandTab() {
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
     }
@@ -219,6 +219,14 @@ class RsvimOptImpl {
         checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
+    get shiftWidth() { }
+    set shiftWidth(value) { }
+    get tabStop() { }
+    set tabStop(value) { }
+    get wrap() { }
+    set wrap(value) { }
+}
+class RsvimOptImpl {
     get shiftWidth() {
         return __InternalRsvimGlobalObject.opt_get_shift_width();
     }
