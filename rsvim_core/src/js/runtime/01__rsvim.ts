@@ -499,7 +499,7 @@ export namespace RsvimCmd {
  * const fs = Rsvim.fs;
  * ```
  *
- * @category Editor APIs
+ * @category General APIs
  */
 export interface RsvimFs {}
 
