@@ -186,7 +186,7 @@ pub fn create_fs_file_wrapper<'s>(
   // Allocate internal field for the wrapped `std::fs::File`:
   // 0-index: The `file_handle`, i.e. the `std::fs::File`
   // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
-  file_wrapper.set_internal_field_count(3);
+  file_wrapper.set_internal_field_count(2);
   let file_wrapper = file_wrapper.new_instance(scope).unwrap();
 
   let file_ptr = binding::set_internal_ref::<Option<File>>(
