@@ -523,10 +523,7 @@ export interface RsvimFs {
    * }
    * ```
    */
-  create(
-    path: string,
-    options?: RsvimFs.OpenOptions,
-  ): RsvimCmd.CommandDefinition | undefined;
+  create(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
 }
 
 /**
