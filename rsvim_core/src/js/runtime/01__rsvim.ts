@@ -587,7 +587,21 @@ export namespace RsvimFs {
     write?: boolean;
   };
 
+  /**
+   * The File object that access to an open file on filesystem.
+   */
   export interface File {
+    /**
+     * Close the file.
+     *
+     * @throws Throws {@link !Error} if the file is already been closed.
+     *
+     * @example
+     * ```javascript
+     * // Set the 'expand-tab' option.
+     * Rsvim.opt.expandTab = true;
+     * ```
+     */
     close(): void;
   }
 
