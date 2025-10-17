@@ -6,7 +6,7 @@ use std::time::Duration;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn test_open1() -> IoResult<()> {
+async fn test_open_close1() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;
@@ -14,7 +14,7 @@ async fn test_open1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
 
   let src: &str = r#"
-    Rsvim.cmd.echo();
+  const f1 = Rsvim.fs.open();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
