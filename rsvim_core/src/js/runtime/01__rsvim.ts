@@ -573,8 +573,34 @@ class RsvimFsImpl implements RsvimFs {
   }
 
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
+    checkIsString(path, `"Rsvim.fs.openSync" path`);
+
+    if (options === undefined || options === null) {
+      options = { read: true };
+    }
+    checkIsObject(options, `"Rsvim.fs.openSync" options`);
+    if (!Object.hasOwn(options, "append")) {
+      options.append = false;
+    }
+    if (!Object.hasOwn(options, "create")) {
+      options.create = false;
+    }
+    if (!Object.hasOwn(options, "createNew")) {
+      options.createNew = false;
+    }
+    if (!Object.hasOwn(options, "read")) {
+      options.read = false;
+    }
+    if (!Object.hasOwn(options, "truncate")) {
+      options.truncate = false;
+    }
+    if (!Object.hasOwn(options, "write")) {
+      options.write = false;
+    }
+
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.fs_open_sync(this.__file_handle);
+    const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
+    return new RsvimFs.File(handle);
   }
 }
 
