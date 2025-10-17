@@ -8,7 +8,7 @@ use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use std::fs::File;
 
-pub fn fs_close(
+pub fn fs_close<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   file_wrapper: v8::Local<'s, v8::Object>,
 ) {
