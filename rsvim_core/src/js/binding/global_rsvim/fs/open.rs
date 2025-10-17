@@ -8,6 +8,7 @@ use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
+use std::fs::File;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -238,14 +239,19 @@ impl JsFuture for FsOpenFuture {
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
 
-    let file_handle_wrapper = v8::Object::new(scope);
-    let fd_value = to_v8(scope, fd as f64);
-    binding::set_constant_to(scope, file_handle_wrapper, handle::FD, fd_value);
+    // Allocate internal field for the wrapped `std::fs::File`.
+    // This would help us do GC to release the `std::fs::File`.
+    let file_obj = v8::ObjectTemplate::new(scope);
+    file_obj.set_internal_field_count(1);
+    let file_obj = file_obj.new_instance(scope).unwrap();
+
+    let file_ptr =
+      binding::set_internal_ref::<Option<File>>(scope, file_obj, 0, Some(file));
 
     self
       .promise
       .open(scope)
-      .resolve(scope, file_handle_wrapper.into())
+      .resolve(scope, file_obj.into())
       .unwrap();
   }
 }
