@@ -8,7 +8,9 @@ use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
+use std::cell::Cell;
 use std::fs::File;
+use std::rc::Rc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -243,7 +245,7 @@ impl JsFuture for FsOpenFuture {
     // Allocate internal field for the wrapped `std::fs::File`.
     // This would help us do GC to release the `std::fs::File`.
     let file_obj = v8::ObjectTemplate::new(scope);
-    file_obj.set_internal_field_count(1);
+    file_obj.set_internal_field_count(2);
     let file_obj = file_obj.new_instance(scope).unwrap();
 
     let file_ptr = binding::set_internal_ref::<Option<File>>(
@@ -252,6 +254,26 @@ impl JsFuture for FsOpenFuture {
       0,
       Some(file_handle),
     );
+    let weak_rc = Rc::new(Cell::new(None));
+
+    // To automatically drop the file_handle instance when
+    // V8 garbage collects the object that internally holds the Rust instance,
+    // we use a Weak reference with a finalizer callback.
+    let file_weak = v8::Weak::with_finalizer(
+      scope,
+      file_obj,
+      Box::new({
+        let weak_rc = weak_rc.clone();
+        move |isolate| unsafe {
+          drop(Box::from_raw(file_ptr));
+          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+        }
+      }),
+    );
+
+    // Store the weak ref pointer into the "shared" cell.
+    weak_rc.set(file_weak.into_raw());
+    binding::set_internal_ref(scope, file_obj, 1, weak_rc);
 
     self
       .promise
