@@ -448,6 +448,7 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
+      blocked_tracker.clone(),
       master_tx.clone(),
       jsrt_rx,
       cli_opts.clone(),

@@ -10,9 +10,11 @@ use std::time::Instant;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 use tokio::sync::mpsc::channel;
+use tokio_util::task::TaskTracker;
 
 pub fn make_js_runtime() -> JsRuntime {
   let canvas_size = U16Size::new(10, 10);
+  let blocked_tracker = TaskTracker::new();
   let (master_tx, _master_rx) = channel(1);
   let (_jsrt_tx, jsrt_rx) = channel(1);
 
@@ -34,6 +36,7 @@ pub fn make_js_runtime() -> JsRuntime {
     JsRuntimeOptions::default(),
     startup_moment,
     startup_unix_epoch,
+    blocked_tracker,
     master_tx,
     jsrt_rx,
     cli_opts,
