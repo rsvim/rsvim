@@ -110,7 +110,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  * @category Global Object
  */
 export class Rsvim {
-  readonly buf = new RsvimBufImpl();
+  readonly buf = new RsvimBuf();
   readonly cmd = new RsvimCmdImpl();
   readonly fs = new RsvimFsImpl();
   readonly opt = new RsvimOptImpl();
@@ -128,7 +128,7 @@ export class Rsvim {
  *
  * @category Editor APIs
  */
-export interface RsvimBuf {
+export class RsvimBuf {
   /**
    * Get current buffer's ID.
    *
@@ -150,7 +150,10 @@ export interface RsvimBuf {
    * const bufId = Rsvim.buf.current();
    * ```
    */
-  current(): number | undefined;
+  current(): number | undefined {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_current();
+  }
 
   /**
    * List all buffers' IDs.
@@ -170,7 +173,10 @@ export interface RsvimBuf {
    * const bufIds = Rsvim.buf.list();
    * ```
    */
-  list(): number[];
+  list(): number[] {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.buf_list();
+  }
 
   /**
    * Write (save) buffer's text contents to local filesystem synchronizely.
@@ -193,20 +199,6 @@ export interface RsvimBuf {
    * }
    * ```
    */
-  writeSync(bufId: number): number;
-}
-
-class RsvimBufImpl implements RsvimBuf {
-  current(): number | undefined {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_current();
-  }
-
-  list(): number[] {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.buf_list();
-  }
-
   writeSync(bufId: number): number {
     checkIsInteger(bufId, `"Rsvim.buf.writeSync" bufId`);
 
@@ -1127,5 +1119,5 @@ class RsvimRtImpl implements RsvimRt {
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = new RsvimImpl();
+  globalThis.Rsvim = new Rsvim();
 })(globalThis as unknown as { Rsvim: Rsvim });

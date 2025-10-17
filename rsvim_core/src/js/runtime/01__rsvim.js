@@ -54,7 +54,7 @@ function boundByIntegers(arg, bound) {
     }
     return arg;
 }
-class RsvimImpl {
+export class Rsvim {
     buf = new RsvimBufImpl();
     cmd = new RsvimCmdImpl();
     fs = new RsvimFsImpl();
@@ -254,5 +254,5 @@ class RsvimRtImpl {
     }
 }
 (function (globalThis) {
-    globalThis.Rsvim = new RsvimImpl();
+    globalThis.Rsvim = new Rsvim();
 })(globalThis);
