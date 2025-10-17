@@ -22,6 +22,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of tick again
   TickAgainResp,
+
+  /// Master send js runtime the result of fs open
+  FsOpenResp(FsOpenResp),
 }
 
 #[derive(Debug)]
@@ -41,6 +44,12 @@ pub struct ExCommandReq {
 pub struct LoadImportResp {
   pub task_id: JsTaskId,
   pub maybe_source: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct FsOpenResp {
+  pub task_id: JsTaskId,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".

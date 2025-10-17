@@ -2,6 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::js::binding;
 use crate::js::converter::*;
 use compact_str::CompactString;
 
@@ -29,7 +30,7 @@ pub struct CommandOptions {
   alias: Option<CompactString>,
 }
 
-flags_builder_impl!(CommandOptionsBuilder, flags, force);
+flags_builder_impl!(CommandOptionsBuilder, flags, Flags, force);
 
 impl CommandOptions {
   pub fn force(&self) -> bool {
@@ -77,15 +78,13 @@ impl ToV8 for CommandOptions {
     let obj = v8::Object::new(scope);
 
     // force
-    let force_field = to_v8(scope, FORCE);
     let force_value = to_v8(scope, self.force());
-    obj.set(scope, force_field, force_value);
+    binding::set_property_to(scope, obj, FORCE, force_value);
 
     // alias
     if let Some(alias) = &self.alias {
-      let alias_field = to_v8(scope, ALIAS);
       let alias_value = to_v8(scope, alias.clone());
-      obj.set(scope, alias_field, alias_value);
+      binding::set_property_to(scope, obj, ALIAS, alias_value);
     }
 
     obj.into()

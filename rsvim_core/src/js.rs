@@ -13,6 +13,7 @@
 pub mod binding;
 pub mod command;
 pub mod converter;
+pub mod encdec;
 pub mod err;
 pub mod exception;
 pub mod hook;
@@ -356,6 +357,8 @@ pub mod boost {
     pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
+    /// Pending tasks.
+    pub pending_tasks: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -462,6 +465,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -536,6 +540,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -693,6 +698,18 @@ pub mod boost {
             loader_cb(resp.maybe_source);
           }
           JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+          JsMessage::FsOpenResp(resp) => {
+            trace!("Recv FsOpenResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut open_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            open_cb(resp.maybe_result);
+          }
         }
       }
 

@@ -28,7 +28,7 @@ fn test1() {
     tp.xdg_config_home.join("rsvim").join("rsvim.js")
   );
 
-  if cfg!(target_os = "windows") {
+  if cfg!(target_family = "windows") {
     assert_eq!(
       PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
@@ -73,7 +73,7 @@ fn test2() {
     tp.home_dir.join(".rsvim").join("rsvim.js")
   );
 
-  if cfg!(target_os = "windows") {
+  if cfg!(target_family = "windows") {
     assert_eq!(
       PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")
@@ -117,7 +117,7 @@ fn test3() {
     tp.home_dir.join(".rsvim.js")
   );
 
-  if cfg!(target_os = "windows") {
+  if cfg!(target_family = "windows") {
     assert_eq!(
       PATH_CONFIG.cache_home().to_path_buf(),
       tp.xdg_cache_home.join("rsvim-cache")

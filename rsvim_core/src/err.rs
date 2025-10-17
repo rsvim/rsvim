@@ -25,6 +25,7 @@ pub type IoResult<T> = std::io::Result<T>;
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
   // buf {
+  //
   #[error("Buffer `{0}` doesn't have a filename.")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
@@ -33,16 +34,14 @@ pub enum TheErr {
   /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("Failed to save buffer {0}: {1}")]
+  #[error("Failed to save buffer {0}({1}): {2}")]
   /// Buffer failed to write file
-  SaveBufferFailed(BufferId, IoErr),
-
-  #[error("Failed to open(w) file `{0}`: {1}")]
-  /// Failed to open file for write
-  OpenFileForWriteFailed(String, IoErr),
+  SaveBufferFailed(BufferId, String, IoErr),
+  //
   // buf }
 
   // js {
+  //
   #[error("Command `{0}` not found.")]
   /// Command not found
   CommandNotFound(CompactString),
@@ -74,7 +73,20 @@ pub enum TheErr {
   #[error("Not enough function arguments specified.")]
   /// Failed to compile typescript
   FunctionArgumentsNotEnough,
+  //
   // js }
+
+  // js Rsvim.fs {
+  //
+  #[error("Failed to open file `{0}`: {1}.")]
+  // Failed to open file.
+  OpenFileFailed(String, IoErr),
+
+  #[error("File is already closed.")]
+  // File is already been closed.
+  FileAlreadyClosed,
+  //
+  // js Rsvim.fs }
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.
