@@ -618,7 +618,21 @@ export namespace RsvimFs {
   }
 
   class FileImpl implements File {
-    close(): void {}
+    __file_handle: any;
+
+    constructor(__file_handle: any) {
+      this.__file_handle = __file_handle;
+    }
+
+    close(): void {
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.fs_close(this.__file_handle);
+    }
+
+    isClosed(): boolean {
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_is_closed(this.__file_handle);
+    }
   }
 }
 
