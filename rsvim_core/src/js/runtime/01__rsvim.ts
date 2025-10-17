@@ -491,6 +491,19 @@ export namespace RsvimCmd {
 }
 
 /**
+ * The `Rsvim.fs` global object for file system and file IO.
+ *
+ * @example
+ * ```javascript
+ * // Create a alias to 'Rsvim.cmd'.
+ * const cmd = Rsvim.cmd;
+ * ```
+ *
+ * @category Editor APIs
+ */
+export interface RsvimFs {}
+
+/**
  * @inline
  */
 type FileEncodingOption = "utf-8";
