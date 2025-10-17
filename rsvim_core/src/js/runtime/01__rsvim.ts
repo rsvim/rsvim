@@ -508,7 +508,7 @@ export interface RsvimFs {
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
    * @param {string} path - File path.
-   * @param {RsvimFs.OpenOptions?} options - Open options, this option can be omitted, by default it is `{open: true}`. See {@link RsvimFs.OpenOptions}.
+   * @param {RsvimFs.OpenOptions?} options - Open options, this option can be omitted, by default it is `{read: true}`. See {@link RsvimFs.OpenOptions}.
    * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
