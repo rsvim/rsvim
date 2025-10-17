@@ -90,7 +90,7 @@ pub fn close<'s>(
 ) {
   debug_assert!(args.length() == 1);
   let file_wrapper = args.get(0);
-  trace!("Rsvim.fs.close:{:?}", file_wrapper);
+  trace!("Rsvim.fs.close");
 
   let filename = Path::new(&file_wrapper);
   match fs_open(filename, options) {
