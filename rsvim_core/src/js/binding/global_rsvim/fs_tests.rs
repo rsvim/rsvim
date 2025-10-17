@@ -239,7 +239,7 @@ try {{
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 1);
     let actual = contents.command_line_message_history_mut().try_pop();
@@ -290,7 +290,7 @@ try {{
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
+    let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
     assert_eq!(n, 1);
     let actual = contents.command_line_message_history_mut().try_pop();
