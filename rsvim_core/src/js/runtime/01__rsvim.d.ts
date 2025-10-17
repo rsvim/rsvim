@@ -1,28 +1,16 @@
 export declare class Rsvim {
-    readonly buf: RsvimBufImpl;
-    readonly cmd: RsvimCmdImpl;
-    readonly fs: RsvimFsImpl;
+    readonly buf: RsvimBuf;
+    readonly cmd: RsvimCmd;
+    readonly fs: RsvimFs;
     readonly opt: RsvimOptImpl;
     readonly rt: RsvimRtImpl;
 }
-export interface RsvimBuf {
+export declare class RsvimBuf {
     current(): number | undefined;
     list(): number[];
     writeSync(bufId: number): number;
 }
-declare class RsvimBufImpl implements RsvimBuf {
-    current(): number | undefined;
-    list(): number[];
-    writeSync(bufId: number): number;
-}
-export interface RsvimCmd {
-    create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
-    echo(message: any): void;
-    list(): string[];
-    get(name: string): RsvimCmd.CommandDefinition | undefined;
-    remove(name: string): RsvimCmd.CommandDefinition | undefined;
-}
-declare class RsvimCmdImpl implements RsvimCmd {
+export declare class RsvimCmd {
     create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     echo(message: any): void;
     list(): string[];
@@ -46,11 +34,7 @@ export declare namespace RsvimCmd {
         options: CommandOptions;
     };
 }
-export interface RsvimFs {
-    open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
-    openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
-}
-declare class RsvimFsImpl implements RsvimFs {
+export declare class RsvimFs {
     open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
     openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
 }

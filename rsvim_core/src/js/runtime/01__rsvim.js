@@ -55,13 +55,13 @@ function boundByIntegers(arg, bound) {
     return arg;
 }
 export class Rsvim {
-    buf = new RsvimBufImpl();
-    cmd = new RsvimCmdImpl();
-    fs = new RsvimFsImpl();
+    buf = new RsvimBuf();
+    cmd = new RsvimCmd();
+    fs = new RsvimFs();
     opt = new RsvimOptImpl();
     rt = new RsvimRtImpl();
 }
-class RsvimBufImpl {
+export class RsvimBuf {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
@@ -73,7 +73,7 @@ class RsvimBufImpl {
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
 }
-class RsvimCmdImpl {
+export class RsvimCmd {
     create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
@@ -118,7 +118,7 @@ class RsvimCmdImpl {
         return __InternalRsvimGlobalObject.cmd_remove(name);
     }
 }
-class RsvimFsImpl {
+export class RsvimFs {
     open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         if (options === undefined || options === null) {
@@ -175,7 +175,6 @@ class RsvimFsImpl {
         return new RsvimFs.File(handle);
     }
 }
-export var RsvimFs;
 (function (RsvimFs) {
     class File {
         __file_handle;
