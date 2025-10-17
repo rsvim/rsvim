@@ -13,7 +13,7 @@ pub fn to_fd(file: File) -> usize {
 #[cfg(target_family = "windows")]
 pub fn to_fd(file: File) -> usize {
   use std::os::windows::io::IntoRawHandle;
-  file.as_raw_handle() as usize
+  file.into_raw_handle() as usize
 }
 
 #[cfg(not(target_family = "windows"))]
