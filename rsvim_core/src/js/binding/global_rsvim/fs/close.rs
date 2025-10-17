@@ -6,10 +6,22 @@ use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
+use std::fs::File;
 
-pub fn fs_close(fd: usize) {
-  let _file_handle = handle::from_fd::<std::fs::File>(fd);
-  // It will be dropped/closed when go out of scope.
+pub fn fs_close(
+  scope: &mut v8::PinScope<'s, '_>,
+  file_wrapper: v8::Local<'s, v8::Object>,
+) {
+  if let Some(file) =
+    binding::get_internal_ref::<Option<File>>(scope, file_wrapper, 0).take()
+  {
+    // Note: By taking the file reference out of the option and immediately dropping
+    // it will make rust to close the file.
+    drop(file);
+  } else {
+    let exception = TheErr::FileAlreadyClosed;
+    binding::throw_exception(scope, &exception);
+  }
 }
 
 pub struct FsCloseFuture {

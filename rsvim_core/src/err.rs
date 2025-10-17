@@ -79,7 +79,12 @@ pub enum TheErr {
   // js Rsvim.fs {
   //
   #[error("Failed to open file `{0}`: {1}.")]
+  // Failed to open file.
   OpenFileFailed(String, IoErr),
+
+  #[error("File is already closed.")]
+  // File is already been closed.
+  FileAlreadyClosed,
   //
   // js Rsvim.fs }
 }
