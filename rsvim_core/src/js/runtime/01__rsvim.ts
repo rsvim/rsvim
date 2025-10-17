@@ -524,10 +524,8 @@ export interface RsvimFs {
    * ```
    */
   create(
-    name: string,
-    callback: RsvimCmd.CommandCallback,
-    attributes?: RsvimCmd.CommandAttributes,
-    options?: RsvimCmd.CommandOptions,
+    path: string,
+    options?: RsvimFs.OpenOptions,
   ): RsvimCmd.CommandDefinition | undefined;
 }
 
