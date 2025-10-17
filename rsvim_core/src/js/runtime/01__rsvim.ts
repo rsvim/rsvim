@@ -538,6 +538,31 @@ export interface RsvimFs {
 
 class RsvimFsImpl implements RsvimFs {
   open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+    checkIsString(path, `"Rsvim.fs.open" path`);
+
+    if (options === undefined || options === null) {
+      options = { read: true };
+    }
+    checkIsObject(options, `"Rsvim.fs.open" options`);
+    if (!Object.hasOwn(options, "append")) {
+      options.append = false;
+    }
+    if (!Object.hasOwn(options, "create")) {
+      options.create = false;
+    }
+    if (!Object.hasOwn(options, "createNew")) {
+      options.createNew = false;
+    }
+    if (!Object.hasOwn(options, "read")) {
+      options.read = false;
+    }
+    if (!Object.hasOwn(options, "truncate")) {
+      options.truncate = false;
+    }
+    if (!Object.hasOwn(options, "write")) {
+      options.write = false;
+    }
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject
       .fs_open(path, options)
@@ -582,7 +607,7 @@ export namespace RsvimFs {
      *
      * @defaultValue `false`
 ,    */
-    create_new?: boolean;
+    createNew?: boolean;
 
     /**
      * Set the file for read access.
