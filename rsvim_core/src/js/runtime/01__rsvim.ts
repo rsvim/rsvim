@@ -540,7 +540,7 @@ export namespace RsvimFs {
    */
   export type OpenOptions = {
     /**
-     * Open the file in append mode.
+     * Set the file for append mode.
      *
      * @defaultValue `false`
 ,    */
@@ -563,6 +563,28 @@ export namespace RsvimFs {
      * @defaultValue `false`
 ,    */
     create_new?: boolean;
+
+    /**
+     * Set the file for read access.
+     *
+     * @defaultValue `false`
+,    */
+    read?: boolean;
+
+    /**
+     * Open the file and truncate the file to `0` length if it already exists.
+     *
+     * @defaultValue `false`
+,    */
+    truncate?: boolean;
+
+    /**
+     * Set the file for write access. If the file already exists, any "write" calls on it will 
+     * overwrite the contents, without truncating it.
+     *
+     * @defaultValue `false`
+,    */
+    write?: boolean;
   };
 
   export interface File {
