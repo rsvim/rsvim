@@ -243,8 +243,8 @@ export interface RsvimCmd {
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
-   * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
+   * @param {RsvimCmd.CommandAttributes?} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions?} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
    * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
@@ -507,22 +507,20 @@ export interface RsvimFs {
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
    * @param {string} path - File path.
-   * @param {RsvimFs.OpenOptions} options - Open options.
+   * @param {RsvimFs.OpenOptions?} options - Open options, this option can be omitted, by default it is `{open: true}`. See {@link RsvimFs.OpenOptions}.
    * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
    *
    * @example
    * ```javascript
-   * function write(ctx: any): void {
-   *   try {
-   *     const bytes = Rsvim.buf.writeSync(bufId);
-   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
-   *   } catch (e) {
-   *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
-   *   }
+   * try {
+   *   const filename = "README.md";
+   *   const file = Rsvim.fs.open(filename);
+   *   Rsvim.cmd.echo(`Opened file: ${filename}`);
+   * } catch (e) {
+   *   Rsvim.cmd.echo(`Failed to open file: ${e}`);
    * }
-   * Rsvim.cmd.create("write", write);
    * ```
    */
   create(
