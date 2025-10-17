@@ -62,7 +62,6 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
-use tokio_util::task::TaskTracker;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
