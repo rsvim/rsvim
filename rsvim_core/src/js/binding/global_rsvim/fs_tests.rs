@@ -3,7 +3,8 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
-use ringbuf::traits::{Consumer, Observer};
+use ringbuf::traits::Consumer;
+use ringbuf::traits::Observer;
 use std::time::Duration;
 
 #[tokio::test]
