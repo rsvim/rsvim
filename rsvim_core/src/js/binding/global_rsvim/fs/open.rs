@@ -250,6 +250,7 @@ pub async fn async_fs_open(
     .await
   {
     Ok(file) => {
+      // Here we convert tokio File into std File.
       let f = file.into_std().await;
       Ok(handle::to_fd(f))
     }
