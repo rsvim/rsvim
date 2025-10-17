@@ -13,7 +13,7 @@ async fn test_open_close1() -> IoResult<()> {
 
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
 
   let src: &str = r#"
   const f1 = await Rsvim.fs.open("README.md");
