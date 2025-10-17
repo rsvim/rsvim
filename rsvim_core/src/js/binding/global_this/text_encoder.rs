@@ -23,6 +23,6 @@ pub fn encode<'s>(
 
   let nfc = ComposingNormalizerBorrowed::new_nfc();
   let normalized = nfc.normalize(&payload);
-  let (result, encoding, had_unmappable) =
+  let (result, actual_encoding, had_unmappable) =
     encoding_rs::UTF_8.encode(&normalized);
 }
