@@ -179,7 +179,7 @@ pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   fd: usize,
 ) -> v8::Local<'s, v8::Object> {
-  let file_handle = handle::from_fd(fd);
+  let file_handle = handle::std_from_fd(fd);
 
   let file_wrapper = v8::ObjectTemplate::new(scope);
 
@@ -230,7 +230,7 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .write(opts.write())
     .open(path)
   {
-    Ok(file) => Ok(handle::to_fd(file)),
+    Ok(file) => Ok(handle::std_to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
       e
@@ -254,7 +254,7 @@ pub async fn async_fs_open(
   {
     Ok(file) => {
       let file = file.into_std().await;
-      Ok(handle::to_fd(file))
+      Ok(handle::std_to_fd(file))
     }
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
