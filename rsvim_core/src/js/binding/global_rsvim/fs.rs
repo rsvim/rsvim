@@ -66,9 +66,33 @@ pub fn open_sync<'s>(
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
   let options = FsOpenOptions::from_v8(scope, args.get(1));
-  trace!("Rsvim.fs.open:{:?} {:?}", filename, options);
+  trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
   let filename = Path::new(&filename);
+  match fs_open(filename, options) {
+    Ok(fd) => {
+      let file_wrapper = create_fs_file_wrapper(scope, fd);
+      rv.set(file_wrapper.into());
+    }
+    Err(e) => {
+      binding::throw_exception(scope, &e);
+    }
+  }
+}
+
+/// `Rsvim.fs.close` API.
+///
+/// NOTE: This is a "sync" API.
+pub fn close<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut _rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let file_wrapper = args.get(0);
+  trace!("Rsvim.fs.close:{:?}", file_wrapper);
+
+  let filename = Path::new(&file_wrapper);
   match fs_open(filename, options) {
     Ok(fd) => {
       let file_wrapper = create_fs_file_wrapper(scope, fd);
