@@ -93,5 +93,5 @@ pub fn close<'s>(
   let file_wrapper = args.get(0);
   trace!("Rsvim.fs.close");
 
-  fs_close(scope, file_wrapper);
+  fs_close(scope, file_wrapper.to_object(scope).unwrap());
 }
