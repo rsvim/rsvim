@@ -14,7 +14,7 @@ async fn test_open_close1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(30))];
 
   let src: &str = r#"
-  const f1 = Rsvim.fs.open();
+  const f1 = await Rsvim.fs.open("README.md");
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
