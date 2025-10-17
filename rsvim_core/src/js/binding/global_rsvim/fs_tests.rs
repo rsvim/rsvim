@@ -24,6 +24,7 @@ async fn test_open_close1() -> IoResult<()> {
     "#,
     tmpfile.to_string_lossy()
   );
+  info!("src:{:?}", src);
 
   // Prepare $RSVIM_CONFIG/rsvim.js
   let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
@@ -55,14 +56,20 @@ async fn test_open_close2() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  tmpfile.touch().unwrap();
 
-  let src: &str = r#"
-  const f = Rsvim.fs.openSync("README.md");
+  let src = format!(
+    r#"
+  const f = Rsvim.fs.openSync("{}");
   f.close();
-    "#;
+    "#,
+    tmpfile.to_string_lossy()
+  );
+  info!("src:{:?}", src);
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
