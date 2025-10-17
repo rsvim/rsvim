@@ -598,7 +598,6 @@ export namespace RsvimFs {
      *
      * @example
      * ```javascript
-     * // Set the 'expand-tab' option.
      * Rsvim.opt.expandTab = true;
      * ```
      */
