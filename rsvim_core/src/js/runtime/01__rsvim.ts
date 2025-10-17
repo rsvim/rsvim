@@ -534,28 +534,31 @@ export namespace RsvimFs {
   /**
    * Open options.
    *
+   * Note: It is the same with [std::fs::OpenOptions](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) in rust standard library.
+   *
    * @see {@link RsvimFs.open}
    */
   export type OpenOptions = {
     /**
-     * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
+     * Whether open the file in append mode.
      *
      * @defaultValue `false`
 ,    */
-    bang?: boolean;
+    append?: boolean;
 
     /**
-     * Whether The command can take any arguments, and how many it can take:
+     * Whether open the file in create mode.
      *
-     * - `0`: No arguments are allowed.
-     * - `1`: Exactly 1 argument is required.
-     * - `*`: Any number of arguments are allowed, i.e. 0, 1 or more.
-     * - `?`: 0 or 1 arguments are allowed.
-     * - `+`: At least 1 arguments are required.
-     *
-     * @defaultValue `0`
+     * @defaultValue `false`
 ,    */
-    nargs?: "0" | "1" | "*" | "+" | "?";
+    create?: boolean;
+
+    /**
+     * Whether open the file in create_new mode.
+     *
+     * @defaultValue `false`
+,    */
+    create_new?: boolean;
   };
 
   export interface File {
