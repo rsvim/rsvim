@@ -602,6 +602,19 @@ export namespace RsvimFs {
      * ```
      */
     close(): void;
+
+    /**
+     * Whether the file is already been closed.
+     *
+     * @example
+     * ```javascript
+     * const file = await Rsvim.fs.open("README.md");
+     * if (!file.isClosed()) {
+     *   file.close();
+     * }
+     * ```
+     */
+    isClosed(): boolean;
   }
 
   class FileImpl implements File {

@@ -82,9 +82,20 @@ pub fn open_sync<'s>(
 }
 
 /// `Rsvim.fs.close` API.
-///
-/// NOTE: This is a "sync" API.
 pub fn close<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut _rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  let file_wrapper = args.get(0);
+  trace!("Rsvim.fs.close");
+
+  fs_close(scope, file_wrapper.to_object(scope).unwrap());
+}
+
+/// `Rsvim.fs.isClosed` API.
+pub fn is_closed<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut _rv: v8::ReturnValue,
