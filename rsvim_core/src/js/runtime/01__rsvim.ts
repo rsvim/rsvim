@@ -694,7 +694,7 @@ type FileFormatOption = "dos" | "unix" | "mac";
  *
  * @category Editor APIs
  */
-export interface RsvimOpt {
+export class RsvimOpt {
   /**
    * Get the _expand-tab_ option. Local to buffer.
    *
@@ -713,7 +713,10 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.expandTab;
    * ```
    */
-  get expandTab(): boolean;
+  get expandTab(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_expand_tab();
+  }
 
   /**
    * Set the _expand-tab_ option.
@@ -727,7 +730,11 @@ export interface RsvimOpt {
    * Rsvim.opt.expandTab = true;
    * ```
    */
-  set expandTab(value: boolean);
+  set expandTab(value: boolean) {
+    checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
+  }
 
   /**
    * Get the _file-encoding_ option. Local to buffer.
@@ -749,7 +756,10 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): FileEncodingOption;
+  get fileEncoding(): FileEncodingOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_encoding();
+  }
 
   /**
    * Set the _file-encoding_ option.
@@ -763,7 +773,11 @@ export interface RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: FileEncodingOption);
+  set fileEncoding(value: FileEncodingOption) {
+    checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
+  }
 
   /**
    * Get the _file-format_ option. Local to buffer.
@@ -797,7 +811,10 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileFormat(): FileFormatOption;
+  get fileFormat(): FileFormatOption {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_file_format();
+  }
 
   /**
    * Set the _file-format_ option.
@@ -811,7 +828,15 @@ export interface RsvimOpt {
    * Rsvim.opt.fileFormat = "unix";
    * ```
    */
-  set fileFormat(value: FileFormatOption);
+  set fileFormat(value: FileFormatOption) {
+    checkIsOptions(
+      value,
+      ["dos", "unix", "mac"],
+      `"Rsvim.opt.fileFormat" value`,
+    );
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_file_format(value);
+  }
 
   /**
    * Get the _line-break_ option. This options is also known as
@@ -832,7 +857,10 @@ export interface RsvimOpt {
    * const value = Rsvim.opt.lineBreak;
    * ```
    */
-  get lineBreak(): boolean;
+  get lineBreak(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
 
   /**
    * Set the _line-break_ option.
@@ -846,7 +874,11 @@ export interface RsvimOpt {
    * Rsvim.opt.lineBreak = true;
    * ```
    */
-  set lineBreak(value: boolean);
+  set lineBreak(value: boolean) {
+    checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
 
   /**
    * Get the _shift-width_ option. Local to buffer.
@@ -963,54 +995,6 @@ export interface RsvimOpt {
 }
 
 class RsvimOptImpl implements RsvimOpt {
-  get expandTab(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_expand_tab();
-  }
-
-  set expandTab(value: boolean) {
-    checkIsBoolean(value, `"Rsvim.opt.expandTab" value`);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_expand_tab(value);
-  }
-
-  get fileEncoding(): FileEncodingOption {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_file_encoding();
-  }
-
-  set fileEncoding(value: FileEncodingOption) {
-    checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_file_encoding(value);
-  }
-
-  get fileFormat(): FileFormatOption {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_file_format();
-  }
-
-  set fileFormat(value: FileFormatOption) {
-    checkIsOptions(
-      value,
-      ["dos", "unix", "mac"],
-      `"Rsvim.opt.fileFormat" value`,
-    );
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_file_format(value);
-  }
-
-  get lineBreak(): boolean {
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.opt_get_line_break();
-  }
-
-  set lineBreak(value: boolean) {
-    checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.opt_set_line_break(value);
-  }
-
   get shiftWidth(): number {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_shift_width();
