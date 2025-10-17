@@ -186,8 +186,7 @@ pub fn create_fs_file_wrapper<'s>(
 
   // Allocate internal field for the wrapped `std::fs::File`:
   // 0-index: The `file_handle`, i.e. the `std::fs::File`
-  // 1-index: The `filename`
-  // 2-index: The `file_weak` finalizer, it helps release the `file_handle`
+  // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
   file_wrapper.set_internal_field_count(3);
   let file_wrapper = file_wrapper.new_instance(scope).unwrap();
 
@@ -216,11 +215,7 @@ pub fn create_fs_file_wrapper<'s>(
 
   // Store the weak ref pointer into the "shared" cell.
   weak_rc.set(file_weak.into_raw());
-  binding::set_internal_ref(scope, file_wrapper, 2, weak_rc);
-
-  // Store the `filename`
-  let path = path.to_string_lossy().to_string();
-  binding::set_internal_ref(scope, file_wrapper, 1, path);
+  binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
 
   file_wrapper
 }
