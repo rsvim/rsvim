@@ -121,10 +121,12 @@ jobs:
       - name: Test
         run: |
           cargo test --color=never --workspace
+      - name: Nextest Run
+        run: |
           cargo nextest run --color=never --no-capture --all
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Test with code coverage
+      - name: Nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info
