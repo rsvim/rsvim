@@ -175,6 +175,48 @@ impl ToV8 for FsOpenOptions {
   }
 }
 
+fn create_file_wrapper<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  fd: usize,
+) -> v8::Local<'s, v8::Object> {
+  let file_handle = handle::from_fd(fd);
+
+  // Allocate internal field for the wrapped `std::fs::File`.
+  // This would help us do GC to release the `std::fs::File`.
+  let file_wrapper = v8::ObjectTemplate::new(scope);
+  file_wrapper.set_internal_field_count(2);
+  let file_wrapper = file_wrapper.new_instance(scope).unwrap();
+
+  let file_ptr = binding::set_internal_ref::<Option<File>>(
+    scope,
+    file_wrapper,
+    0,
+    Some(file_handle),
+  );
+  let weak_rc = Rc::new(Cell::new(None));
+
+  // To automatically drop the file_handle instance when
+  // V8 garbage collects the object that internally holds the Rust instance,
+  // we use a Weak reference with a finalizer callback.
+  let file_weak = v8::Weak::with_finalizer(
+    scope,
+    file_wrapper,
+    Box::new({
+      let weak_rc = weak_rc.clone();
+      move |isolate| unsafe {
+        drop(Box::from_raw(file_ptr));
+        drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+      }
+    }),
+  );
+
+  // Store the weak ref pointer into the "shared" cell.
+  weak_rc.set(file_weak.into_raw());
+  binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
+
+  file_wrapper
+}
+
 pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
@@ -240,45 +282,12 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_handle = handle::from_fd(fd);
-
-    // Allocate internal field for the wrapped `std::fs::File`.
-    // This would help us do GC to release the `std::fs::File`.
-    let file_obj = v8::ObjectTemplate::new(scope);
-    file_obj.set_internal_field_count(2);
-    let file_obj = file_obj.new_instance(scope).unwrap();
-
-    let file_ptr = binding::set_internal_ref::<Option<File>>(
-      scope,
-      file_obj,
-      0,
-      Some(file_handle),
-    );
-    let weak_rc = Rc::new(Cell::new(None));
-
-    // To automatically drop the file_handle instance when
-    // V8 garbage collects the object that internally holds the Rust instance,
-    // we use a Weak reference with a finalizer callback.
-    let file_weak = v8::Weak::with_finalizer(
-      scope,
-      file_obj,
-      Box::new({
-        let weak_rc = weak_rc.clone();
-        move |isolate| unsafe {
-          drop(Box::from_raw(file_ptr));
-          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-        }
-      }),
-    );
-
-    // Store the weak ref pointer into the "shared" cell.
-    weak_rc.set(file_weak.into_raw());
-    binding::set_internal_ref(scope, file_obj, 1, weak_rc);
+    let file_wrapper = create_file_wrapper(scope, fd);
 
     self
       .promise
       .open(scope)
-      .resolve(scope, file_obj.into())
+      .resolve(scope, file_wrapper.into())
       .unwrap();
   }
 }
