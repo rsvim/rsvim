@@ -93,13 +93,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 }
 
 /**
- * The `Rsvim` global object, it contains multiple sub fields:
- *
- * - `Rsvim.buf`: Buffer APIs.
- * - `Rsvim.cmd`: Ex command APIs.
- * - `Rsvim.fs`: File system APIs.
- * - `Rsvim.opt`: Global options.
- * - `Rsvim.rt`: JavaScript runtime (editor process) APIs.
+ * The `Rsvim` global object.
  *
  * @example
  * ```javascript
