@@ -541,6 +541,11 @@ class RsvimFsImpl implements RsvimFs {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.fs_open(this.__file_handle);
   }
+
+  openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_open_sync(this.__file_handle);
+  }
 }
 
 export namespace RsvimFs {
