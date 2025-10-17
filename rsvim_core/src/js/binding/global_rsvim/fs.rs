@@ -8,6 +8,7 @@ use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::close::fs_close;
+use crate::js::binding::global_rsvim::fs::close::fs_is_closed;
 use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::create_fs_file_wrapper;
@@ -98,11 +99,12 @@ pub fn close<'s>(
 pub fn is_closed<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  mut _rv: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   let file_wrapper = args.get(0);
-  trace!("Rsvim.fs.close");
+  trace!("Rsvim.fs.isClosed");
 
-  fs_close(scope, file_wrapper.to_object(scope).unwrap());
+  let result = fs_is_closed(scope, file_wrapper.to_object(scope).unwrap());
+  rv.set_bool(result);
 }
