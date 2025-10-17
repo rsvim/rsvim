@@ -13,7 +13,7 @@ use std::rc::Rc;
 pub fn create_text_encoder<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  _: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
   // Get timer ID, and remove it.
