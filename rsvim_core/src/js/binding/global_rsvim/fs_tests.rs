@@ -215,11 +215,11 @@ async fn test_open_close_failed1() -> IoResult<()> {
 
   let src = format!(
     r#"
-try {
+try {{
   const f = await Rsvim.fs.open("{}");
-} catch (e) {
+}} catch (e) {{
   Rsvim.cmd.echo(e);
-}
+}}
     "#,
     tmpfile.to_string_lossy()
   );
@@ -266,11 +266,11 @@ async fn test_open_close_failed2() -> IoResult<()> {
 
   let src = format!(
     r#"
-try {
+try {{
   const f = Rsvim.fs.openSync("{}");
-} catch (e) {
+}} catch (e) {{
   Rsvim.cmd.echo(e);
-}
+}}
     "#,
     tmpfile.to_string_lossy()
   );
