@@ -539,7 +539,9 @@ export interface RsvimFs {
 class RsvimFsImpl implements RsvimFs {
   open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.fs_open(this.__file_handle);
+    return __InternalRsvimGlobalObject
+      .fs_open(path, options)
+      .then((handle: any) => new RsvimFs.FileImpl(handle));
   }
 
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
@@ -608,7 +610,13 @@ export namespace RsvimFs {
   /**
    * The File object that access to an open file on filesystem.
    */
-  export interface File {
+  export class File {
+    __file_handle: any;
+
+    constructor(__file_handle: any) {
+      this.__file_handle = __file_handle;
+    }
+
     /**
      * Close the file.
      *
@@ -622,7 +630,10 @@ export namespace RsvimFs {
      * }
      * ```
      */
-    close(): void;
+    close(): void {
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.fs_close(this.__file_handle);
+    }
 
     /**
      * Whether the file is already been closed.
@@ -635,21 +646,6 @@ export namespace RsvimFs {
      * }
      * ```
      */
-    isClosed(): boolean;
-  }
-
-  class FileImpl implements File {
-    __file_handle: any;
-
-    constructor(__file_handle: any) {
-      this.__file_handle = __file_handle;
-    }
-
-    close(): void {
-      // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.fs_close(this.__file_handle);
-    }
-
     isClosed(): boolean {
       // @ts-ignore Ignore warning
       return __InternalRsvimGlobalObject.fs_is_closed(this.__file_handle);
