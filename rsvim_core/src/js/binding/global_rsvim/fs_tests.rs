@@ -15,6 +15,7 @@ async fn test_open_close1() -> IoResult<()> {
 
   let src: &str = r#"
   const f1 = await Rsvim.fs.open("README.md");
+  f1.close();
     "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
