@@ -1,9 +1,9 @@
-use ringbuf::traits::Observer;
-
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
+use assert_fs::prelude::FileTouch;
+use ringbuf::traits::Observer;
 use std::time::Duration;
 
 #[tokio::test]
@@ -14,14 +14,19 @@ async fn test_open_close1() -> IoResult<()> {
   let terminal_cols = 10_u16;
   let terminal_rows = 10_u16;
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  tmpfile.touch().unwrap();
 
-  let src: &str = r#"
-  const f = await Rsvim.fs.open("README.md");
+  let src = format!(
+    r#"
+  const f = await Rsvim.fs.open("{}");
   f.close();
-    "#;
+    "#,
+    tmpfile.to_string_lossy()
+  );
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
 
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
