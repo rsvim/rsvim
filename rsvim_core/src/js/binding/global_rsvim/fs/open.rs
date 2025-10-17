@@ -178,13 +178,17 @@ impl ToV8 for FsOpenOptions {
 pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   fd: usize,
+  path: &Path,
 ) -> v8::Local<'s, v8::Object> {
   let file_handle = handle::from_fd(fd);
 
-  // Allocate internal field for the wrapped `std::fs::File`.
-  // This would help us do GC to release the `std::fs::File`.
   let file_wrapper = v8::ObjectTemplate::new(scope);
-  file_wrapper.set_internal_field_count(2);
+
+  // Allocate internal field for the wrapped `std::fs::File`:
+  // 0-index: The `file_handle`, i.e. the `std::fs::File`
+  // 1-index: The `filename`
+  // 2-index: The `file_weak` finalizer, it helps release the `file_handle`
+  file_wrapper.set_internal_field_count(3);
   let file_wrapper = file_wrapper.new_instance(scope).unwrap();
 
   let file_ptr = binding::set_internal_ref::<Option<File>>(
@@ -212,7 +216,11 @@ pub fn create_fs_file_wrapper<'s>(
 
   // Store the weak ref pointer into the "shared" cell.
   weak_rc.set(file_weak.into_raw());
-  binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
+  binding::set_internal_ref(scope, file_wrapper, 2, weak_rc);
+
+  // Store the `filename`
+  let path = path.to_string_lossy().to_string();
+  binding::set_internal_ref(scope, file_wrapper, 1, path);
 
   file_wrapper
 }
