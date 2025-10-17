@@ -1,4 +1,4 @@
-//! TextEncoder/TextDecoder APIs.
+//! `TextEncoder` APIs.
 
 use crate::js;
 use crate::js::JsFuture;
@@ -9,8 +9,8 @@ use crate::js::pending;
 use crate::prelude::*;
 use std::rc::Rc;
 
-/// `TextEncoder.constructor` API.
-pub fn create_text_encoder<'s>(
+/// `TextEncoder.encode` API.
+pub fn encode<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
