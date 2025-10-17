@@ -514,6 +514,22 @@ export interface RsvimFs {
    *
    * @example
    * ```javascript
+   * const file = await Rsvim.fs.open("README.md");
+   * ```
+   */
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+
+  /**
+   * The sync version of {@link open}.
+   *
+   * @param {string} path - Same with {@link open}.
+   * @param {RsvimFs.OpenOptions?} options - Same with {@link open}.
+   * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
+   *
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+   *
+   * @example
+   * ```javascript
    * try {
    *   const filename = "README.md";
    *   const file = Rsvim.fs.open(filename);
@@ -527,7 +543,10 @@ export interface RsvimFs {
 }
 
 class RsvimFsImpl implements RsvimFs {
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {}
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.fs_open(this.__file_handle);
+  }
 }
 
 export namespace RsvimFs {
