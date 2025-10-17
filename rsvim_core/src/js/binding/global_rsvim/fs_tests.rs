@@ -20,7 +20,13 @@ async fn test_open_close1() -> IoResult<()> {
   let src = format!(
     r#"
   const f = await Rsvim.fs.open("{}");
+  if (f.isClosed()) {
+    throw new Error("It cannot be closed");
+  }
   f.close();
+  if (!f.isClosed()) {
+    throw new Error("It must be closed");
+  }
     "#,
     tmpfile.to_string_lossy()
   );
@@ -62,7 +68,13 @@ async fn test_open_close2() -> IoResult<()> {
   let src = format!(
     r#"
   const f = Rsvim.fs.openSync("{}");
+  if (f.isClosed()) {
+    throw new Error("It cannot be closed");
+  }
   f.close();
+  if (!f.isClosed()) {
+    throw new Error("It must be closed");
+  }
     "#,
     tmpfile.to_string_lossy()
   );
