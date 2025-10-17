@@ -18,13 +18,43 @@ pub fn encode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let payload = from_v8::<String>(scope, args.get(0));
-  trace!("|encode| payload:{:?}", payload);
+  let payload = args.get(0).to_string(scope).unwrap();
+  trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
+
+  let payload = payload.write_utf8_v2());
 
   let nfc = ComposingNormalizerBorrowed::new_nfc();
   let normalized = nfc.normalize(&payload);
   let (result, _actual_encoding, _had_unmappable) =
     encoding_rs::UTF_8.encode(&normalized);
-  let buf = to_v8_uint8_array(scope, result.into_owned());
+
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(result.into_owned());
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
+
+  rv.set(buf.into());
+}
+
+/// `TextEncoder.encodeInto` API.
+pub fn encode_into<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  let payload = from_v8::<String>(scope, args.get(0));
+  let buf = args.get(1);
+  debug_assert!(buf.is_uint8_array());
+  trace!("|encode_into| payload:{:?}", payload);
+
+  let nfc = ComposingNormalizerBorrowed::new_nfc();
+  let normalized = nfc.normalize(&payload);
+  let (result, _actual_encoding, _had_unmappable) =
+    encoding_rs::UTF_8.encode(&normalized);
+
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(result.into_owned());
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
+
   rv.set(buf.into());
 }
