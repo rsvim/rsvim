@@ -68,6 +68,7 @@ bincode = { workspace = true }
 oxc_resolver = { workspace = true }
 encoding_rs = { workspace = true }
 codepage = { workspace = true }
+charset = { workspace = true }
 
 # NOTE: Javascript dependencies {
 
