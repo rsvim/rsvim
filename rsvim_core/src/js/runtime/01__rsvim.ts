@@ -510,12 +510,9 @@ export class RsvimFs {
     }
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.fs_open(path, options).then(
-      (handle: any) => new RsvimFs.File(handle),
-      (error: Error) => {
-        throw error;
-      },
-    );
+    return __InternalRsvimGlobalObject
+      .fs_open(path, options)
+      .then((handle: any) => new RsvimFs.File(handle));
   }
 
   /**
