@@ -540,21 +540,25 @@ export namespace RsvimFs {
    */
   export type OpenOptions = {
     /**
-     * Whether open the file in append mode.
+     * Open the file in append mode.
      *
      * @defaultValue `false`
 ,    */
     append?: boolean;
 
     /**
-     * Whether open the file in create mode.
+     * Create a new file or open it if it already exists.
+     *
+     * In order for the file to be created, `write` or `append` access must be used.
      *
      * @defaultValue `false`
 ,    */
     create?: boolean;
 
     /**
-     * Whether open the file in create_new mode.
+     * Create a new file, failing if it already exists.
+     *
+     * If this option is set, `create` and `truncate` options are ignored.
      *
      * @defaultValue `false`
 ,    */
