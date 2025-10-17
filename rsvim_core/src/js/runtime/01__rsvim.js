@@ -60,10 +60,8 @@ export class Rsvim {
     fs = new RsvimFs();
     opt = new RsvimOpt();
     rt = new RsvimRt();
-    constructor() { }
 }
 export class RsvimBuf {
-    constructor() { }
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
@@ -76,7 +74,6 @@ export class RsvimBuf {
     }
 }
 export class RsvimCmd {
-    constructor() { }
     create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
@@ -122,7 +119,6 @@ export class RsvimCmd {
     }
 }
 export class RsvimFs {
-    constructor() { }
     open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         if (options === undefined || options === null) {
@@ -195,7 +191,6 @@ export class RsvimFs {
     RsvimFs.File = File;
 })(RsvimFs || (RsvimFs = {}));
 export class RsvimOpt {
-    constructor() { }
     get expandTab() {
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
     }
@@ -249,7 +244,6 @@ export class RsvimOpt {
     }
 }
 export class RsvimRt {
-    constructor() { }
     exit(exitCode) {
         if (exitCode === undefined || exitCode === null) {
             exitCode = 0;
