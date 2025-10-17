@@ -178,7 +178,6 @@ impl ToV8 for FsOpenOptions {
 pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   fd: usize,
-  path: &Path,
 ) -> v8::Local<'s, v8::Object> {
   let file_handle = handle::from_fd(fd);
 
