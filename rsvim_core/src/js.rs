@@ -62,6 +62,7 @@ use std::sync::atomic::Ordering;
 use std::time::Instant;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::mpsc::Sender;
+use tokio_util::task::TaskTracker;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
@@ -375,6 +376,7 @@ pub mod boost {
     // pub wake_event_queued: bool,
 
     // Data Access for RSVIM {
+    pub blocked_tracker: TaskTracker,
     pub master_tx: Sender<MasterMessage>,
     pub jsrt_rx: Receiver<JsMessage>,
     pub cli_opts: CliOptions,
@@ -419,6 +421,7 @@ pub mod boost {
       snapshot: SnapshotData,
       startup_moment: Instant,
       time_origin: u128,
+      blocked_tracker: TaskTracker,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opts: CliOptions,
@@ -473,6 +476,7 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
+        blocked_tracker,
         master_tx,
         jsrt_rx,
         cli_opts,
@@ -510,6 +514,7 @@ pub mod boost {
       options: JsRuntimeOptions,
       startup_moment: Instant,
       time_origin: u128,
+      blocked_tracker: TaskTracker,
       master_tx: Sender<MasterMessage>,
       jsrt_rx: Receiver<JsMessage>,
       cli_opt: CliOptions,
@@ -548,6 +553,7 @@ pub mod boost {
         exceptions: ExceptionState::new(),
         options,
         // wake_event_queued: false,
+        blocked_tracker,
         master_tx,
         jsrt_rx,
         cli_opts: cli_opt,
