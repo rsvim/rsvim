@@ -23,7 +23,7 @@ pub fn from_fd(fd: usize) -> File {
 }
 
 #[cfg(target_family = "windows")]
-pub fn from_fd<F>(handle: usize) -> File
+pub fn from_fd(handle: usize) -> File
 where
 {
   use std::os::windows::io::FromRawHandle;
