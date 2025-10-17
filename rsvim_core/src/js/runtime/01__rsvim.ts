@@ -503,8 +503,7 @@ export namespace RsvimCmd {
  */
 export interface RsvimFs {
   /**
-   * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to
-   * previously exist if using
+   * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using
    *
    * :::warning
    * The builtin command `js` cannot be override.
