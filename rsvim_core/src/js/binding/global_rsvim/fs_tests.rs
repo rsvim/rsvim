@@ -70,8 +70,8 @@ async fn test_open_close2() -> IoResult<()> {
 
   let a = format!("{:?}", tmpfile.path());
   let b = tmpfile.path().to_string_lossy().to_string();
-  info!("a:{a:?}, b:{b:?}, a.contains(b):{}", a.contains(b));
-  assert!(a.contains(b));
+  info!("a:{a:?}, b:{b:?}, a.contains(b):{}", a.contains(&b));
+  assert!(a.contains(&b));
 
   let src = format!(
     r#"
