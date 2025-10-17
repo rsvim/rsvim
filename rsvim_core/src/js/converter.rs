@@ -203,3 +203,12 @@ where
     v
   }
 }
+
+pub fn to_v8_uint8_array_with_boxed_slice<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  input: Box<[u8]>,
+) -> v8::Local<'s, v8::Uint8Array> {
+  let store = v8::ArrayBuffer::new_backing_store_from_boxed_slice(input);
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+  v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap()
+}

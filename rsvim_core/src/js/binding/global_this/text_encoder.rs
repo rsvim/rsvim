@@ -23,6 +23,11 @@ pub fn encode<'s>(
 
   let nfc = ComposingNormalizerBorrowed::new_nfc();
   let normalized = nfc.normalize(&payload);
-  let (result, actual_encoding, had_unmappable) =
+  let (result, _actual_encoding, _had_unmappable) =
     encoding_rs::UTF_8.encode(&normalized);
+
+  let result = Box::new(result);
+  let u8_array = v8::Uint8Array::new(scope, buf, byte_offset, length);
+
+  rv.set(u8_array.into());
 }
