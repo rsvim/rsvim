@@ -253,8 +253,8 @@ pub async fn async_fs_open(
     .await
   {
     Ok(file) => {
-      let file = file.into_std().await;
-      Ok(handle::std_to_fd(file))
+      let fd = handle::tokio_to_fd(file).await;
+      Ok(fd)
     }
     Err(e) => bail!(TheErr::OpenFileFailed(
       path.to_string_lossy().to_string(),
