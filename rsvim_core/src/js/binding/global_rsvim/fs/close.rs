@@ -19,8 +19,7 @@ pub fn fs_close(
     // it will make rust to close the file.
     drop(file);
   } else {
-    let exception = TheErr::FileAlreadyClosed;
-    binding::throw_exception(scope, &exception);
+    binding::throw_exception(scope, &TheErr::FileAlreadyClosed);
   }
 }
 
