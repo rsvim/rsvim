@@ -495,8 +495,8 @@ export namespace RsvimCmd {
  *
  * @example
  * ```javascript
- * // Create a alias to 'Rsvim.cmd'.
- * const cmd = Rsvim.cmd;
+ * // Create a alias to 'Rsvim.fs'.
+ * const fs = Rsvim.fs;
  * ```
  *
  * @category Editor APIs
