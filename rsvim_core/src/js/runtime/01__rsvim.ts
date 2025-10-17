@@ -533,7 +533,7 @@ export interface RsvimFs {
    * const file = Rsvim.fs.openSync("README.md");
    * ```
    */
-  openSync(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+  openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
 }
 
 class RsvimFsImpl implements RsvimFs {
