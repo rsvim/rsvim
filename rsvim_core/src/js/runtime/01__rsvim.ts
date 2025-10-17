@@ -102,6 +102,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  * ```
  *
  * @category Global Object
+ * @hideconstructor
  */
 export class Rsvim {
   readonly buf = new RsvimBuf();
@@ -109,9 +110,6 @@ export class Rsvim {
   readonly fs = new RsvimFs();
   readonly opt = new RsvimOpt();
   readonly rt = new RsvimRt();
-
-  /** hidden */
-  constructor() {}
 }
 
 /**
@@ -124,11 +122,9 @@ export class Rsvim {
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export class RsvimBuf {
-  /** hidden */
-  constructor() {}
-
   /**
    * Get current buffer's ID.
    *
@@ -217,11 +213,9 @@ export class RsvimBuf {
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export class RsvimCmd {
-  /** hidden */
-  constructor() {}
-
   /**
    * Create a ex command with a callback function.
    *
@@ -471,11 +465,9 @@ export namespace RsvimCmd {
  * ```
  *
  * @category General APIs
+ * @hideconstructor
  */
 export class RsvimFs {
-  /** hidden */
-  constructor() {}
-
   /**
    * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
    * The caller have to close the file to prevent resource leaking, see {@link close}.
@@ -699,11 +691,9 @@ type FileFormatOption = "dos" | "unix" | "mac";
  * ```
  *
  * @category Editor APIs
+ * @hideconstructor
  */
 export class RsvimOpt {
-  /** hidden */
-  constructor() {}
-
   /**
    * Get the _expand-tab_ option. Local to buffer.
    *
@@ -1036,11 +1026,9 @@ export class RsvimOpt {
  * ```
  *
  * @category General APIs
+ * @hideconstructor
  */
 export class RsvimRt {
-  /** hidden */
-  constructor() {}
-
   /**
    * Exit editor.
    *
