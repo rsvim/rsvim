@@ -112,7 +112,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 export class Rsvim {
   readonly buf = new RsvimBuf();
   readonly cmd = new RsvimCmd();
-  readonly fs = new RsvimFsImpl();
+  readonly fs = new RsvimFs();
   readonly opt = new RsvimOptImpl();
   readonly rt = new RsvimRtImpl();
 }
@@ -469,7 +469,7 @@ export namespace RsvimCmd {
  *
  * @category General APIs
  */
-export interface RsvimFs {
+export class RsvimFs {
   /**
    * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
    * The caller have to close the file to prevent resource leaking, see {@link close}.
@@ -485,26 +485,6 @@ export interface RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
-
-  /**
-   * The sync version of {@link open}.
-   *
-   * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions?} options - Same with {@link open}.
-   * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
-   *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
-   *
-   * @example
-   * ```javascript
-   * const file = Rsvim.fs.openSync("README.md");
-   * ```
-   */
-  openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
-}
-
-class RsvimFsImpl implements RsvimFs {
   open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
@@ -540,6 +520,20 @@ class RsvimFsImpl implements RsvimFs {
     );
   }
 
+  /**
+   * The sync version of {@link open}.
+   *
+   * @param {string} path - Same with {@link open}.
+   * @param {RsvimFs.OpenOptions?} options - Same with {@link open}.
+   * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
+   *
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+   *
+   * @example
+   * ```javascript
+   * const file = Rsvim.fs.openSync("README.md");
+   * ```
+   */
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
     checkIsString(path, `"Rsvim.fs.openSync" path`);
 
