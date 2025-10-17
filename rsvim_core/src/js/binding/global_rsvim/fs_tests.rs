@@ -246,7 +246,7 @@ try {{
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Uncaught Error"));
+    assert!(actual.contains("Failed to open file"));
     assert!(!tmpfile.exists());
   }
 
@@ -297,7 +297,7 @@ try {{
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();
-    assert!(actual.contains("Uncaught Error"));
+    assert!(actual.contains("Failed to open file"));
     assert!(!tmpfile.exists());
   }
 
