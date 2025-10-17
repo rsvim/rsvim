@@ -238,6 +238,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
+    let file_handle = handle::from_fd(fd);
 
     // Allocate internal field for the wrapped `std::fs::File`.
     // This would help us do GC to release the `std::fs::File`.
@@ -245,8 +246,12 @@ impl JsFuture for FsOpenFuture {
     file_obj.set_internal_field_count(1);
     let file_obj = file_obj.new_instance(scope).unwrap();
 
-    let file_ptr =
-      binding::set_internal_ref::<Option<File>>(scope, file_obj, 0, Some(file));
+    let file_ptr = binding::set_internal_ref::<Option<File>>(
+      scope,
+      file_obj,
+      0,
+      Some(file_handle),
+    );
 
     self
       .promise
