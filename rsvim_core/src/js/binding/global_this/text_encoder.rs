@@ -16,11 +16,6 @@ pub fn encode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  // Get timer ID, and remove it.
-  let timer_id = from_v8::<JsTimerId>(scope, args.get(0));
-  let state_rc = JsRuntime::state(scope);
-
-  let mut state = state_rc.borrow_mut();
-  pending::remove_timer(&mut state, timer_id);
-  trace!("|clear_timer| timer_id:{:?}", timer_id);
+  let payload = from_v8::<String>(scope, args.get(0));
+  trace!("|encode| payload:{:?}", payload);
 }
