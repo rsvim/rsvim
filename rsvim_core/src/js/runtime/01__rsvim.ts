@@ -109,20 +109,12 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  *
  * @category Global Object
  */
-export interface Rsvim {
-  readonly buf: RsvimBuf;
-  readonly cmd: RsvimCmd;
-  readonly fs: RsvimFs;
-  readonly opt: RsvimOpt;
-  readonly rt: RsvimRt;
-}
-
-class RsvimImpl implements Rsvim {
-  buf = new RsvimBufImpl();
-  cmd = new RsvimCmdImpl();
-  fs = new RsvimFsImpl();
-  opt = new RsvimOptImpl();
-  rt = new RsvimRtImpl();
+export class Rsvim {
+  readonly buf = new RsvimBufImpl();
+  readonly cmd = new RsvimCmdImpl();
+  readonly fs = new RsvimFsImpl();
+  readonly opt = new RsvimOptImpl();
+  readonly rt = new RsvimRtImpl();
 }
 
 /**
