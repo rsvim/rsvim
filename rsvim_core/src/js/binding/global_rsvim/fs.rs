@@ -9,6 +9,7 @@ use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use crate::js::binding::global_rsvim::fs::open::create_file_wrapper;
 use crate::js::binding::global_rsvim::fs::open::fs_open;
 use crate::js::converter::*;
 use crate::js::pending;
@@ -70,9 +71,7 @@ pub fn open_sync<'s>(
   let filename = Path::new(&filename);
   match fs_open(filename, options) {
     Ok(fd) => {
-      let file_wrapper = v8::Object::new(scope);
-      let fd_value = to_v8(scope, fd as f64);
-      binding::set_constant_to(scope, file_wrapper, handle::FD, fd_value);
+      let file_wrapper = create_file_wrapper(scope, fd);
       rv.set(file_wrapper.into());
     }
     Err(e) => {

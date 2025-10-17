@@ -175,7 +175,7 @@ impl ToV8 for FsOpenOptions {
   }
 }
 
-fn create_file_wrapper<'s>(
+pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   fd: usize,
 ) -> v8::Local<'s, v8::Object> {
@@ -285,7 +285,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_wrapper = create_file_wrapper(scope, fd);
+    let file_wrapper = create_fs_file_wrapper(scope, fd);
 
     self
       .promise
