@@ -541,7 +541,7 @@ class RsvimFsImpl implements RsvimFs {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject
       .fs_open(path, options)
-      .then((handle: any) => new RsvimFs.FileImpl(handle));
+      .then((handle: any) => new RsvimFs.File(handle));
   }
 
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
@@ -611,8 +611,10 @@ export namespace RsvimFs {
    * The File object that access to an open file on filesystem.
    */
   export class File {
+    /** @hidden */
     __file_handle: any;
 
+    /** @hidden */
     constructor(__file_handle: any) {
       this.__file_handle = __file_handle;
     }
