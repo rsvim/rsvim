@@ -2,8 +2,8 @@ export declare class Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
     readonly fs: RsvimFs;
-    readonly opt: RsvimOptImpl;
-    readonly rt: RsvimRtImpl;
+    readonly opt: RsvimOpt;
+    readonly rt: RsvimRt;
 }
 export declare class RsvimBuf {
     current(): number | undefined;
@@ -72,18 +72,7 @@ export declare class RsvimOpt {
     get wrap(): boolean;
     set wrap(value: boolean);
 }
-declare class RsvimOptImpl implements RsvimOpt {
-    get shiftWidth(): number;
-    set shiftWidth(value: number);
-    get tabStop(): number;
-    set tabStop(value: number);
-    get wrap(): boolean;
-    set wrap(value: boolean);
-}
-export interface RsvimRt {
-    exit(exitCode?: number): void;
-}
-declare class RsvimRtImpl implements RsvimRt {
+export declare class RsvimRt {
     exit(exitCode?: number): void;
 }
 export {};

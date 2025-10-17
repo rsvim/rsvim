@@ -58,8 +58,8 @@ export class Rsvim {
     buf = new RsvimBuf();
     cmd = new RsvimCmd();
     fs = new RsvimFs();
-    opt = new RsvimOptImpl();
-    rt = new RsvimRtImpl();
+    opt = new RsvimOpt();
+    rt = new RsvimRt();
 }
 export class RsvimBuf {
     current() {
@@ -219,14 +219,6 @@ export class RsvimOpt {
         checkIsBoolean(value, `"Rsvim.opt.lineBreak" value`);
         __InternalRsvimGlobalObject.opt_set_line_break(value);
     }
-    get shiftWidth() { }
-    set shiftWidth(value) { }
-    get tabStop() { }
-    set tabStop(value) { }
-    get wrap() { }
-    set wrap(value) { }
-}
-class RsvimOptImpl {
     get shiftWidth() {
         return __InternalRsvimGlobalObject.opt_get_shift_width();
     }
@@ -251,7 +243,7 @@ class RsvimOptImpl {
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }
 }
-class RsvimRtImpl {
+export class RsvimRt {
     exit(exitCode) {
         if (exitCode === undefined || exitCode === null) {
             exitCode = 0;
