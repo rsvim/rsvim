@@ -523,7 +523,48 @@ export interface RsvimFs {
    * }
    * ```
    */
-  create(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+}
+
+class RsvimFsImpl implements RsvimFs {
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {}
+}
+
+export namespace RsvimFs {
+  /**
+   * Open options.
+   *
+   * @see {@link RsvimFs.open}
+   */
+  export type OpenOptions = {
+    /**
+     * Whether the command can take a `!` modifier, for example: `:w!`, `:qall!`.
+     *
+     * @defaultValue `false`
+,    */
+    bang?: boolean;
+
+    /**
+     * Whether The command can take any arguments, and how many it can take:
+     *
+     * - `0`: No arguments are allowed.
+     * - `1`: Exactly 1 argument is required.
+     * - `*`: Any number of arguments are allowed, i.e. 0, 1 or more.
+     * - `?`: 0 or 1 arguments are allowed.
+     * - `+`: At least 1 arguments are required.
+     *
+     * @defaultValue `0`
+,    */
+    nargs?: "0" | "1" | "*" | "+" | "?";
+  };
+
+  export interface File {
+    close(): void;
+  }
+
+  class FileImpl implements File {
+    close(): void {}
+  }
 }
 
 /**
