@@ -25,8 +25,6 @@ pub fn encode<'s>(
   let normalized = nfc.normalize(&payload);
   let (result, _actual_encoding, _had_unmappable) =
     encoding_rs::UTF_8.encode(&normalized);
-
   let buf = to_v8_uint8_array(scope, result.into_owned());
-
   rv.set(buf.into());
 }
