@@ -7,6 +7,7 @@ pub mod open;
 use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::close::fs_close;
 use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::create_fs_file_wrapper;
@@ -92,14 +93,5 @@ pub fn close<'s>(
   let file_wrapper = args.get(0);
   trace!("Rsvim.fs.close");
 
-  let filename = Path::new(&file_wrapper);
-  match fs_open(filename, options) {
-    Ok(fd) => {
-      let file_wrapper = create_fs_file_wrapper(scope, fd);
-      rv.set(file_wrapper.into());
-    }
-    Err(e) => {
-      binding::throw_exception(scope, &e);
-    }
-  }
+  fs_close(scope, file_wrapper);
 }
