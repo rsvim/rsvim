@@ -1,6 +1,7 @@
 export interface Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
+    readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
@@ -32,6 +33,26 @@ export declare namespace RsvimCmd {
         attributes: CommandAttributes;
         options: CommandOptions;
     };
+}
+export interface RsvimFs {
+    open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+    openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
+}
+export declare namespace RsvimFs {
+    type OpenOptions = {
+        append?: boolean;
+        create?: boolean;
+        createNew?: boolean;
+        read?: boolean;
+        truncate?: boolean;
+        write?: boolean;
+    };
+    class File {
+        __file_handle: any;
+        constructor(__file_handle: any);
+        close(): void;
+        isClosed(): boolean;
+    }
 }
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
