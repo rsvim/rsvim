@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
-use ringbuf::traits::Observer;
+use ringbuf::traits::{Consumer, Observer};
 use std::time::Duration;
 
 #[tokio::test]
@@ -215,14 +215,11 @@ async fn test_open_close_failed1() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = Rsvim.fs.openSync("{}");
-  if (f.isClosed()) {{
-    throw new Error("It cannot be closed");
-  }}
-  f.close();
-  if (!f.isClosed()) {{
-    throw new Error("It must be closed");
-  }}
+try {
+  const f = await Rsvim.fs.open("{}");
+} catch (e) {
+  Rsvim.cmd.echo(e);
+}
     "#,
     tmpfile.to_string_lossy()
   );
@@ -243,9 +240,14 @@ async fn test_open_close_failed1() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
-    assert!(tmpfile.exists());
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+    let actual = contents.command_line_message_history_mut().try_pop();
+    info!("actual:{:?}", actual);
+    assert!(actual.is_some());
+    let actual = actual.unwrap();
+    assert!(actual.contains("Uncaught Error"));
+    assert!(!tmpfile.exists());
   }
 
   Ok(())
