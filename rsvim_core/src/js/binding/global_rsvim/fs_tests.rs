@@ -17,7 +17,12 @@ async fn test_open_close1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
   tmpfile.touch().unwrap();
-  info!("tmpfile:{:?}", tmpfile);
+  info!("tmpfile:{:?}", tmpfile.path());
+
+  let a = format!("{:?}", tmpfile.path());
+  let b = format!("{:?}", tmpfile.path().to_string_lossy().to_string());
+  info!("a:{a:?}, b:{b:?}, a.contains(b):{}", a.contains(&b));
+  assert!(a.contains(&b));
 
   let src = format!(
     r#"
