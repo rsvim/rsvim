@@ -664,6 +664,8 @@ export namespace RsvimFs {
 
   /**
    * The File object that access to an open file on filesystem.
+   *
+   * @see {@link RsvimFs.open}
    */
   export class File {
     /** @hidden */
