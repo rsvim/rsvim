@@ -97,6 +97,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  *
  * - `Rsvim.buf`: Buffer APIs.
  * - `Rsvim.cmd`: Ex command APIs.
+ * - `Rsvim.fs`: File system APIs.
  * - `Rsvim.opt`: Global options.
  * - `Rsvim.rt`: JavaScript runtime (editor process) APIs.
  *
