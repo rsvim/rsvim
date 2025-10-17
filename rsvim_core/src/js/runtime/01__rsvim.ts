@@ -598,7 +598,10 @@ export namespace RsvimFs {
      *
      * @example
      * ```javascript
-     * Rsvim.opt.expandTab = true;
+     * const file = await Rsvim.fs.open("README.md");
+     * if (!file.isClosed()) {
+     *   file.close();
+     * }
      * ```
      */
     close(): void;
