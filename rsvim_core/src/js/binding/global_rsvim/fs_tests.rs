@@ -1,3 +1,5 @@
+use ringbuf::traits::Observer;
+
 use crate::cli::CliOptions;
 use crate::prelude::*;
 use crate::tests::evloop::*;
@@ -24,18 +26,6 @@ async fn test_open_close1() -> IoResult<()> {
   let mut event_loop =
     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
 
-  // Before running
-  {
-    let contents = lock!(event_loop.contents);
-    assert!(
-      contents
-        .command_line_message()
-        .rope()
-        .to_string()
-        .is_empty()
-    );
-  }
-
   event_loop.initialize()?;
   event_loop
     .run_with_mock_events(MockEventReader::new(mocked_events))
@@ -45,12 +35,8 @@ async fn test_open_close1() -> IoResult<()> {
   // After running
   {
     let contents = lock!(event_loop.contents);
-    let payload = contents.command_line_message().rope().to_string();
-    let payload = payload.trim();
-    assert!(
-      payload
-        .contains("\"Rsvim.cmd.echo\" message cannot be undefined or null")
-    );
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
   }
 
   Ok(())
