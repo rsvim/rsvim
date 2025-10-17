@@ -1,4 +1,4 @@
-//! `Rsvim.fs.open` and `Rsvim.fs.openSync` APIs.
+//! Open file APIs.
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
