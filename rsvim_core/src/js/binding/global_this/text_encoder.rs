@@ -7,6 +7,8 @@ use crate::js::JsTimerId;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use icu::normalizer::ComposingNormalizerBorrowed;
+use icu::normalizer::DecomposingNormalizerBorrowed;
 use std::rc::Rc;
 
 /// `TextEncoder.encode` API.
@@ -18,4 +20,9 @@ pub fn encode<'s>(
   debug_assert!(args.length() == 1);
   let payload = from_v8::<String>(scope, args.get(0));
   trace!("|encode| payload:{:?}", payload);
+
+  let nfc = ComposingNormalizerBorrowed::new_nfc();
+  let normalized = nfc.normalize(&payload);
+  let (result, encoding, had_unmappable) =
+    encoding_rs::UTF_8.encode(&normalized);
 }
