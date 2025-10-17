@@ -5,21 +5,17 @@ pub const FD: &str = "fd";
 #[cfg(not(target_family = "windows"))]
 pub fn to_fd<F>(file: F) -> usize
 where
-  F: std::os::fd::AsRawFd,
+  F: std::os::fd::IntoRawFd,
 {
-  let fd = file.as_raw_fd();
-  std::mem::forget(file);
-  fd as usize
+  file.into_raw_fd() as usize
 }
 
 #[cfg(target_family = "windows")]
 pub fn to_fd<F>(file: F) -> usize
 where
-  F: std::os::windows::io::AsRawHandle,
+  F: std::os::windows::io::IntoRawHandle,
 {
-  let handle = file.as_raw_handle();
-  std::mem::forget(file);
-  handle as usize
+  file.as_raw_handle() as usize
 }
 
 #[cfg(not(target_family = "windows"))]
