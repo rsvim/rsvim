@@ -26,8 +26,8 @@ pub fn encode<'s>(
   let (result, _actual_encoding, _had_unmappable) =
     encoding_rs::UTF_8.encode(&normalized);
 
-  let result = Box::new(result);
-  let u8_array = v8::Uint8Array::new(scope, buf, byte_offset, length);
+  let result = Box::new(result.into_owned());
+  let buf = to_v8_uint8_array(scope, result);
 
-  rv.set(u8_array.into());
+  rv.set(buf.into());
 }
