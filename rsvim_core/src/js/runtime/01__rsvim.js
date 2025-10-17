@@ -177,15 +177,15 @@ export class RsvimFs {
 }
 (function (RsvimFs) {
     class File {
-        __file_handle;
-        constructor(__file_handle) {
-            this.__file_handle = __file_handle;
+        __handle;
+        constructor(handle) {
+            this.__handle = handle;
         }
         close() {
-            __InternalRsvimGlobalObject.fs_close(this.__file_handle);
+            __InternalRsvimGlobalObject.fs_close(this.__handle);
         }
         isClosed() {
-            return __InternalRsvimGlobalObject.fs_is_closed(this.__file_handle);
+            return __InternalRsvimGlobalObject.fs_is_closed(this.__handle);
         }
     }
     RsvimFs.File = File;
