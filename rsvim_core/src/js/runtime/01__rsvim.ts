@@ -564,9 +564,12 @@ class RsvimFsImpl implements RsvimFs {
     }
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject
-      .fs_open(path, options)
-      .then((handle: any) => new RsvimFs.File(handle));
+    return __InternalRsvimGlobalObject.fs_open(path, options).then(
+      (handle: any) => new RsvimFs.File(handle),
+      (error: Error) => {
+        throw error;
+      },
+    );
   }
 
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
