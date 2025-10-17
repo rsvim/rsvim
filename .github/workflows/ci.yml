@@ -120,7 +120,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Test
         run: |
-          cargo test --color=never --workspace -- --nocapture
+          cargo test --color=never --workspace
           cargo nextest run --color=never --no-capture --all
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
