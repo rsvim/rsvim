@@ -506,17 +506,11 @@ export interface RsvimFs {
    * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
-   * :::warning
-   * The builtin command `js` cannot be override.
-   * :::
+   * @param {string} path - File path.
+   * @param {RsvimFs.OpenOptions} options - Open options.
+   * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
-   * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
-   * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
-   * @param {RsvimCmd.CommandAttributes} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CommandOptions} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
-   * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
-   *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
+   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
    *
    * @example
    * ```javascript
