@@ -47,7 +47,7 @@ impl I32ToV8 for i32 {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer> {
-    v8::Integer::new(scope, value)
+    v8::Integer::new(scope, *self)
   }
 }
 
@@ -67,11 +67,20 @@ impl I32FromV8 for i32 {
   }
 }
 
-pub fn f64_to_v8<'s>(
-  value: f64,
-  scope: &mut v8::PinScope<'s, '_>,
-) -> v8::Local<'s, v8::Number> {
-  v8::Number::new(scope, value)
+pub trait F64ToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Number>;
+}
+
+impl F64ToV8 for f64 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Number> {
+    v8::Number::new(scope, *self)
+  }
 }
 
 pub fn bool_to_v8<'s>(
