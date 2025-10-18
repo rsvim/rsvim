@@ -5,6 +5,7 @@ use crate::flags_impl;
 use crate::js::binding;
 use crate::js::converter::*;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -153,7 +154,8 @@ impl DecoderFromV8 for Decoder {
     let encoding_name = ENCODING.to_v8(scope);
     debug_assert!(obj.has_own_property(scope, encoding_name).unwrap_or(false));
     let encoding_value = obj.get(scope, encoding_name).unwrap();
-    let encoding_value = CompactString::from_v8(scope, encoding_value);
+    let encoding_value =
+      String::from_v8(scope, encoding_value).to_compact_string();
 
     // fatal
     let fatal_name = to_v8(scope, FATAL);
