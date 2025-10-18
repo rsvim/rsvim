@@ -158,16 +158,16 @@ impl EventLoop {
     /* blocked_tracker */ TaskTracker,
     /* exit_code */ i32,
     (
-      /* master_tx */ Sender<MasterMessage>,
-      /* master_rx */ Receiver<MasterMessage>,
+      /* master_tx */ UnboundedSender<MasterMessage>,
+      /* master_rx */ UnboundedReceiver<MasterMessage>,
     ),
     (
-      /* jsrt_forwarder_tx */ Sender<JsMessage>,
-      /* jsrt_forwarder_rx */ Receiver<JsMessage>,
+      /* jsrt_forwarder_tx */ UnboundedSender<JsMessage>,
+      /* jsrt_forwarder_rx */ UnboundedReceiver<JsMessage>,
     ),
     (
-      /* jsrt_tx */ Sender<JsMessage>,
-      /* jsrt_rx */ Receiver<JsMessage>,
+      /* jsrt_tx */ UnboundedSender<JsMessage>,
+      /* jsrt_rx */ UnboundedReceiver<JsMessage>,
     ),
     /* master_messages */ Vec<MasterMessage>,
     /* js_messages */ Vec<JsMessage>,
@@ -245,8 +245,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ))
   }
 
