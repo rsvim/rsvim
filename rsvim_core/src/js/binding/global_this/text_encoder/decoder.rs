@@ -135,19 +135,25 @@ impl DecoderToV8 for Decoder {
   }
 }
 
-impl FromV8 for Decoder {
+pub trait DecoderFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    value: v8::Local<'s, v8::Object>,
+  ) -> Self;
+}
+
+impl DecoderFromV8 for Decoder {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let obj = value.to_object(scope).unwrap();
 
     // encoding
-    let encoding_name = to_v8(scope, ENCODING);
-    // let encoding_name = v8::String::new(scope, ENCODING).unwrap();
-    debug_assert!(obj.get(scope, encoding_name).is_some());
+    let encoding_name = ENCODING.to_v8(scope);
+    debug_assert!(obj.has_own_property(scope, encoding_name).unwrap_or(false));
     let encoding_value = obj.get(scope, encoding_name).unwrap();
-    let encoding_value = from_v8::<CompactString>(scope, encoding_value);
+    let encoding_value = CompactString::from_v8(scope, encoding_value);
 
     // fatal
     let fatal_name = to_v8(scope, FATAL);
