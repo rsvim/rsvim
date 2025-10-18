@@ -1,16 +1,11 @@
 //! `TextEncoder` APIs.
 
-use crate::js;
-use crate::js::JsFuture;
-use crate::js::JsRuntime;
-use crate::js::JsTimerId;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
-use icu::normalizer::ComposingNormalizerBorrowed;
-use icu::normalizer::DecomposingNormalizerBorrowed;
-use std::rc::Rc;
+// use icu::normalizer::ComposingNormalizerBorrowed;
+// use icu::normalizer::DecomposingNormalizerBorrowed;
 
 #[allow(deprecated)]
 /// `TextEncoder.encode` API.
