@@ -235,30 +235,3 @@ impl<T> VecFromV8<T> for Vec<T> {
     v
   }
 }
-
-pub trait UInt8ArrayToV8 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Uint8Array>;
-}
-
-impl UInt8ArrayToV8 for Vec<u8> {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Uint8Array> {
-    let store = v8::ArrayBuffer::new_backing_store_from_vec(self);
-    let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
-    v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap()
-  }
-}
-
-pub fn uint8array_to_v8<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  input: Vec<u8>,
-) -> v8::Local<'s, v8::Uint8Array> {
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(input);
-  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
-  v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap()
-}
