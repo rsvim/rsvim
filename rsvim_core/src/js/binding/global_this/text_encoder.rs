@@ -120,3 +120,28 @@ pub fn create_decoder<'s>(
 
   rv.set(decoder_obj.into());
 }
+
+/// `TextDecoder.decode` API.
+pub fn decode<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  let name = from_v8::<CompactString>(scope, args.get(0));
+  let options = args.get(1);
+  debug_assert!(options.is_object());
+  let options = DecoderOptions::from_v8(scope, options);
+
+  let decoder_obj = v8::Object::new(scope);
+
+  // encoding
+  let encoding_value = to_v8(scope, name);
+  binding::set_property_to(scope, decoder_obj, "encoding", encoding_value);
+
+  // options
+  let options_value = options.to_v8(scope);
+  binding::set_property_to(scope, decoder_obj, "options", options_value);
+
+  rv.set(decoder_obj.into());
+}
