@@ -11,6 +11,7 @@ flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 pub const FATAL: &str = "fatal";
 pub const IGNORE_BOM: &str = "ignoreBOM";
 
+#[allow(dead_code)]
 /// Default attribute values.
 pub const FATAL_DEFAULT: bool = false;
 pub const IGNORE_BOM_DEFAULT: bool = false;
