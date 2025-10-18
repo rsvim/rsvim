@@ -812,17 +812,11 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, self.master_messages.len());
-          if master_n > 0 {
-            self.process_master_message().await;
-          }
+        master_msg = self.master_rx.recv() => {
+          self.process_master_message(master_msg).await;
         }
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, self.js_messages.len());
-          if js_n > 0 {
-             self.forward_js_message().await;
-          }
+        js_msg = self.jsrt_forwarder_rx.recv() => {
+          self.forward_js_message(js_msg).await;
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
