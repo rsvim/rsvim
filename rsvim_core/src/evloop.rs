@@ -35,9 +35,9 @@ use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::channel;
+use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::unbounded_channel;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
@@ -120,10 +120,6 @@ pub struct EventLoop {
   /// Channel-3
   pub jsrt_tx: Sender<JsMessage>,
   // pub jsrt_rx: Receiver<JsMessage>,
-
-  // Received messages buffer
-  master_messages: Vec<MasterMessage>,
-  js_messages: Vec<JsMessage>,
 }
 
 #[cfg(test)]
@@ -229,15 +225,11 @@ impl EventLoop {
     // they're simply for trigger the `tokio::select!` loop.
 
     // Channel-1
-    let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
+    let (master_tx, master_rx) = unbounded_channel();
     // Channel-2
-    let (jsrt_forwarder_tx, jsrt_forwarder_rx) = channel(*CHANNEL_BUF_SIZE);
+    let (jsrt_forwarder_tx, jsrt_forwarder_rx) = unbounded_channel();
     // Channel-3
-    let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
-
-    let master_messages: Vec<MasterMessage> =
-      Vec::with_capacity(*CHANNEL_BUF_SIZE);
-    let js_messages: Vec<JsMessage> = Vec::with_capacity(*CHANNEL_BUF_SIZE);
+    let (jsrt_tx, jsrt_rx) = unbounded_channel();
 
     Ok((
       canvas,
