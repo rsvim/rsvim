@@ -20,9 +20,9 @@ pub const TAB_STOP: u8 = 8;
 pub const EXPAND_TAB: bool = false;
 pub const SHIFT_WIDTH: u8 = 8;
 pub const FILE_ENCODING: FileEncodingOption = FileEncodingOption::Utf8;
-#[cfg(target_os = "windows")]
+#[cfg(target_family = "windows")]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
-#[cfg(not(target_os = "windows"))]
+#[cfg(not(target_family = "windows"))]
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
 
 // expand_tab=false
@@ -49,7 +49,7 @@ pub struct BufferOptions {
   file_format: FileFormatOption,
 }
 
-flags_builder_impl!(BufferOptionsBuilder, flags, expand_tab);
+flags_builder_impl!(BufferOptionsBuilder, flags, Flags, expand_tab);
 
 impl BufferOptions {
   /// Buffer 'tab-stop' option.

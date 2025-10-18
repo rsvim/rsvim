@@ -1,15 +1,16 @@
-export interface Rsvim {
+export declare class Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;
+    readonly fs: RsvimFs;
     readonly opt: RsvimOpt;
     readonly rt: RsvimRt;
 }
-export interface RsvimBuf {
+export declare class RsvimBuf {
     current(): number | undefined;
     list(): number[];
     writeSync(bufId: number): number;
 }
-export interface RsvimCmd {
+export declare class RsvimCmd {
     create(name: string, callback: RsvimCmd.CommandCallback, attributes?: RsvimCmd.CommandAttributes, options?: RsvimCmd.CommandOptions): RsvimCmd.CommandDefinition | undefined;
     echo(message: any): void;
     list(): string[];
@@ -33,9 +34,29 @@ export declare namespace RsvimCmd {
         options: CommandOptions;
     };
 }
+export declare class RsvimFs {
+    open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File>;
+    openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File;
+}
+export declare namespace RsvimFs {
+    type OpenOptions = {
+        append?: boolean;
+        create?: boolean;
+        createNew?: boolean;
+        read?: boolean;
+        truncate?: boolean;
+        write?: boolean;
+    };
+    class File {
+        __handle: any;
+        constructor(handle: any);
+        close(): void;
+        isClosed(): boolean;
+    }
+}
 type FileEncodingOption = "utf-8";
 type FileFormatOption = "dos" | "unix" | "mac";
-export interface RsvimOpt {
+export declare class RsvimOpt {
     get expandTab(): boolean;
     set expandTab(value: boolean);
     get fileEncoding(): FileEncodingOption;
@@ -51,7 +72,7 @@ export interface RsvimOpt {
     get wrap(): boolean;
     set wrap(value: boolean);
 }
-export interface RsvimRt {
+export declare class RsvimRt {
     exit(exitCode?: number): void;
 }
 export {};

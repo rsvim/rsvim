@@ -1,5 +1,6 @@
 //! Ex command definition.
 
+use crate::js::binding;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
@@ -67,24 +68,20 @@ impl ToV8 for CommandDefinition {
     let obj = v8::Object::new(scope);
 
     // name
-    let name_field = to_v8(scope, NAME);
     let name_value = to_v8(scope, self.name.clone());
-    obj.set(scope, name_field, name_value);
+    binding::set_property_to(scope, obj, NAME, name_value);
 
     // callback
-    let callback_field = to_v8(scope, CALLBACK);
     let callback_value = v8::Local::new(scope, (*self.callback).clone());
-    obj.set(scope, callback_field, callback_value.into());
+    binding::set_property_to(scope, obj, CALLBACK, callback_value.into());
 
     // attributes
-    let attr_field = to_v8(scope, ATTRIBUTES);
     let attr_value = to_v8(scope, self.attributes.clone());
-    obj.set(scope, attr_field, attr_value);
+    binding::set_property_to(scope, obj, ATTRIBUTES, attr_value);
 
     // options
-    let opts_field = to_v8(scope, OPTIONS);
     let opts_value = to_v8(scope, self.options.clone());
-    obj.set(scope, opts_field, opts_value);
+    binding::set_property_to(scope, obj, OPTIONS, opts_value);
 
     obj.into()
   }

@@ -9,12 +9,12 @@ use crate::ui::tree::Tree;
 use std::time::Instant;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
-use tokio::sync::mpsc::channel;
+use tokio::sync::mpsc::unbounded_channel;
 
 pub fn make_js_runtime() -> JsRuntime {
   let canvas_size = U16Size::new(10, 10);
-  let (master_tx, _master_rx) = channel(1);
-  let (_jsrt_tx, jsrt_rx) = channel(1);
+  let (master_tx, _master_rx) = unbounded_channel();
+  let (_jsrt_tx, jsrt_rx) = unbounded_channel();
 
   let cli_opts =
     CliOptions::from_args::<&Vec<std::ffi::OsString>>(&vec![]).unwrap();

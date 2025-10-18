@@ -54,13 +54,14 @@ function boundByIntegers(arg, bound) {
     }
     return arg;
 }
-class RsvimImpl {
-    buf = new RsvimBufImpl();
-    cmd = new RsvimCmdImpl();
-    opt = new RsvimOptImpl();
-    rt = new RsvimRtImpl();
+export class Rsvim {
+    buf = new RsvimBuf();
+    cmd = new RsvimCmd();
+    fs = new RsvimFs();
+    opt = new RsvimOpt();
+    rt = new RsvimRt();
 }
-class RsvimBufImpl {
+export class RsvimBuf {
     current() {
         return __InternalRsvimGlobalObject.buf_current();
     }
@@ -72,7 +73,7 @@ class RsvimBufImpl {
         return __InternalRsvimGlobalObject.buf_write_sync(bufId);
     }
 }
-class RsvimCmdImpl {
+export class RsvimCmd {
     create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
@@ -117,7 +118,79 @@ class RsvimCmdImpl {
         return __InternalRsvimGlobalObject.cmd_remove(name);
     }
 }
-class RsvimOptImpl {
+export class RsvimFs {
+    open(path, options) {
+        checkIsString(path, `"Rsvim.fs.open" path`);
+        if (options === undefined || options === null) {
+            options = { read: true };
+        }
+        checkIsObject(options, `"Rsvim.fs.open" options`);
+        if (!Object.hasOwn(options, "append")) {
+            options.append = false;
+        }
+        if (!Object.hasOwn(options, "create")) {
+            options.create = false;
+        }
+        if (!Object.hasOwn(options, "createNew")) {
+            options.createNew = false;
+        }
+        if (!Object.hasOwn(options, "read")) {
+            options.read = false;
+        }
+        if (!Object.hasOwn(options, "truncate")) {
+            options.truncate = false;
+        }
+        if (!Object.hasOwn(options, "write")) {
+            options.write = false;
+        }
+        return __InternalRsvimGlobalObject
+            .fs_open(path, options)
+            .then((handle) => new RsvimFs.File(handle));
+    }
+    openSync(path, options) {
+        checkIsString(path, `"Rsvim.fs.openSync" path`);
+        if (options === undefined || options === null) {
+            options = { read: true };
+        }
+        checkIsObject(options, `"Rsvim.fs.openSync" options`);
+        if (!Object.hasOwn(options, "append")) {
+            options.append = false;
+        }
+        if (!Object.hasOwn(options, "create")) {
+            options.create = false;
+        }
+        if (!Object.hasOwn(options, "createNew")) {
+            options.createNew = false;
+        }
+        if (!Object.hasOwn(options, "read")) {
+            options.read = false;
+        }
+        if (!Object.hasOwn(options, "truncate")) {
+            options.truncate = false;
+        }
+        if (!Object.hasOwn(options, "write")) {
+            options.write = false;
+        }
+        const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
+        return new RsvimFs.File(handle);
+    }
+}
+(function (RsvimFs) {
+    class File {
+        __handle;
+        constructor(handle) {
+            this.__handle = handle;
+        }
+        close() {
+            __InternalRsvimGlobalObject.fs_close(this.__handle);
+        }
+        isClosed() {
+            return __InternalRsvimGlobalObject.fs_is_closed(this.__handle);
+        }
+    }
+    RsvimFs.File = File;
+})(RsvimFs || (RsvimFs = {}));
+export class RsvimOpt {
     get expandTab() {
         return __InternalRsvimGlobalObject.opt_get_expand_tab();
     }
@@ -170,7 +243,7 @@ class RsvimOptImpl {
         __InternalRsvimGlobalObject.opt_set_wrap(value);
     }
 }
-class RsvimRtImpl {
+export class RsvimRt {
     exit(exitCode) {
         if (exitCode === undefined || exitCode === null) {
             exitCode = 0;
@@ -180,6 +253,5 @@ class RsvimRtImpl {
     }
 }
 (function (globalThis) {
-    globalThis.Rsvim = new RsvimImpl();
+    globalThis.Rsvim = new Rsvim();
 })(globalThis);
-export {};

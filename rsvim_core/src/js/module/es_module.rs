@@ -4,6 +4,7 @@ use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
+use crate::js::encdec::decode_bytes;
 use crate::js::err::JsError;
 use crate::js::err::report_js_error;
 use crate::js::module::ModulePath;
@@ -164,7 +165,7 @@ impl EsModule {
 pub struct EsModuleFuture {
   pub path: ModulePath,
   pub module: Rc<RefCell<EsModule>>,
-  pub maybe_source: Option<TheResult<Vec<u8>>>,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 impl EsModuleFuture {
@@ -196,14 +197,10 @@ impl JsFuture for EsModuleFuture {
     }
 
     // Extract module's source code.
-    debug_assert!(self.maybe_source.is_some());
-    let source = self.maybe_source.take().unwrap();
-    let (source, _source_len) = match source {
-      Ok(source) => bincode::decode_from_slice::<
-        String,
-        bincode::config::Configuration,
-      >(&source, bincode::config::standard())
-      .unwrap(),
+    debug_assert!(self.maybe_result.is_some());
+    let result = self.maybe_result.take().unwrap();
+    let (source, _source_len) = match result {
+      Ok(data) => decode_bytes::<String>(&data),
       Err(e) => {
         self.handle_failure(&state, e);
         return;
@@ -300,7 +297,7 @@ impl JsFuture for EsModuleFuture {
             let fut = EsModuleFuture {
               path: specifier.clone(),
               module: Rc::clone(&module),
-              maybe_source: maybe_result,
+              maybe_result,
             };
             let mut state = state_rc.borrow_mut();
             state.pending_futures.insert(0, Box::new(fut));

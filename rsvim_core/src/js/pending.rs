@@ -3,6 +3,7 @@
 use crate::js::JsRuntimeState;
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
+use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::msg;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
@@ -50,6 +51,25 @@ pub fn create_import_loader(
     MasterMessage::LoadImportReq(msg::LoadImportReq {
       task_id,
       specifier: specifier.to_string(),
+    }),
+  );
+}
+
+pub fn create_fs_open(
+  state: &mut JsRuntimeState,
+  task_id: JsTaskId,
+  path: &Path,
+  options: FsOpenOptions,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  let path = path.to_path_buf();
+  msg::sync_send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsOpenReq(msg::FsOpenReq {
+      task_id,
+      path,
+      options,
     }),
   );
 }

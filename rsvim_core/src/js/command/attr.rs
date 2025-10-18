@@ -2,6 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::js::binding;
 use crate::js::converter::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -65,7 +66,7 @@ pub struct CommandAttributes {
   nargs: Nargs,
 }
 
-flags_builder_impl!(CommandAttributesBuilder, flags, bang);
+flags_builder_impl!(CommandAttributesBuilder, flags, Flags, bang);
 
 impl CommandAttributes {
   pub fn bang(&self) -> bool {
@@ -110,14 +111,12 @@ impl ToV8 for CommandAttributes {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = to_v8(scope, BANG);
     let bang_value = to_v8(scope, self.bang());
-    obj.set(scope, bang_field, bang_value);
+    binding::set_property_to(scope, obj, BANG, bang_value);
 
     // nargs
-    let nargs_field = to_v8(scope, NARGS);
     let nargs_value = to_v8(scope, self.nargs.to_compact_string());
-    obj.set(scope, nargs_field, nargs_value);
+    binding::set_property_to(scope, obj, NARGS, nargs_value);
 
     obj.into()
   }

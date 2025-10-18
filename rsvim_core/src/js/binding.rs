@@ -106,6 +106,14 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "cmd_remove", global_rsvim::cmd::remove);
   }
 
+  // For `Rsvim.fs`
+  {
+    set_function_to(scope, vim, "fs_open", global_rsvim::fs::open);
+    set_function_to(scope, vim, "fs_open_sync", global_rsvim::fs::open_sync);
+    set_function_to(scope, vim, "fs_close", global_rsvim::fs::close);
+    set_function_to(scope, vim, "fs_is_closed", global_rsvim::fs::is_closed);
+  }
+
   // For `Rsvim.opt`
   {
     set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);
@@ -253,12 +261,13 @@ pub fn set_internal_ref<T>(
   target: v8::Local<v8::Object>,
   index: usize,
   data: T,
-) {
+) -> *mut T {
   let boxed_ref = Box::new(data);
-  let addr = Box::leak(boxed_ref) as *mut T as *mut c_void;
-  let v8_ext = v8::External::new(scope, addr);
+  let addr = Box::leak(boxed_ref) as *mut T;
+  let v8_ext = v8::External::new(scope, addr as *mut c_void);
 
   target.set_internal_field(index, v8_ext.into());
+  addr
 }
 
 /// Gets a previously stored Rust type from a v8 object.
@@ -281,10 +290,13 @@ pub fn set_exception_code(
   error: &TheErr,
 ) {
   let exception = exception.to_object(scope).unwrap();
-  if let TheErr::LoadModuleFailed(_, e) = error {
-    let key = v8::String::new(scope, "code").unwrap();
-    let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
-    exception.set(scope, key.into(), value.into());
+  match error {
+    TheErr::LoadModuleFailed(_, e) | TheErr::OpenFileFailed(_, e) => {
+      let key = v8::String::new(scope, "code").unwrap();
+      let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
+      exception.set(scope, key.into(), value.into());
+    }
+    _ => { /* do nothing */ }
   }
 }
 

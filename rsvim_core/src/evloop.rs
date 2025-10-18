@@ -10,8 +10,10 @@ use crate::content::TextContentsArc;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
+use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
+use crate::js::encdec::encode_bytes;
 use crate::js::module::async_load_import;
 use crate::msg;
 use crate::msg::JsMessage;
@@ -33,9 +35,9 @@ use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::channel;
+use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::unbounded_channel;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use writer::StdoutWritable;
@@ -108,20 +110,16 @@ pub struct EventLoop {
   pub js_runtime: JsRuntime,
 
   /// Channel-1
-  pub master_tx: Sender<MasterMessage>,
-  pub master_rx: Receiver<MasterMessage>,
+  pub master_tx: UnboundedSender<MasterMessage>,
+  pub master_rx: UnboundedReceiver<MasterMessage>,
 
   /// Channel-2
-  pub jsrt_forwarder_tx: Sender<JsMessage>,
-  pub jsrt_forwarder_rx: Receiver<JsMessage>,
+  pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
+  pub jsrt_forwarder_rx: UnboundedReceiver<JsMessage>,
 
   /// Channel-3
-  pub jsrt_tx: Sender<JsMessage>,
-  // pub jsrt_rx: Receiver<JsMessage>,
-
-  // Received messages buffer
-  master_messages: Vec<MasterMessage>,
-  js_messages: Vec<JsMessage>,
+  pub jsrt_tx: UnboundedSender<JsMessage>,
+  // pub jsrt_rx: UnboundedReceiver<JsMessage>,
 }
 
 #[cfg(test)]
@@ -160,19 +158,17 @@ impl EventLoop {
     /* blocked_tracker */ TaskTracker,
     /* exit_code */ i32,
     (
-      /* master_tx */ Sender<MasterMessage>,
-      /* master_rx */ Receiver<MasterMessage>,
+      /* master_tx */ UnboundedSender<MasterMessage>,
+      /* master_rx */ UnboundedReceiver<MasterMessage>,
     ),
     (
-      /* jsrt_forwarder_tx */ Sender<JsMessage>,
-      /* jsrt_forwarder_rx */ Receiver<JsMessage>,
+      /* jsrt_forwarder_tx */ UnboundedSender<JsMessage>,
+      /* jsrt_forwarder_rx */ UnboundedReceiver<JsMessage>,
     ),
     (
-      /* jsrt_tx */ Sender<JsMessage>,
-      /* jsrt_rx */ Receiver<JsMessage>,
+      /* jsrt_tx */ UnboundedSender<JsMessage>,
+      /* jsrt_rx */ UnboundedReceiver<JsMessage>,
     ),
-    /* master_messages */ Vec<MasterMessage>,
-    /* js_messages */ Vec<JsMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -227,15 +223,11 @@ impl EventLoop {
     // they're simply for trigger the `tokio::select!` loop.
 
     // Channel-1
-    let (master_tx, master_rx) = channel(*CHANNEL_BUF_SIZE);
+    let (master_tx, master_rx) = unbounded_channel();
     // Channel-2
-    let (jsrt_forwarder_tx, jsrt_forwarder_rx) = channel(*CHANNEL_BUF_SIZE);
+    let (jsrt_forwarder_tx, jsrt_forwarder_rx) = unbounded_channel();
     // Channel-3
-    let (jsrt_tx, jsrt_rx) = channel(*CHANNEL_BUF_SIZE);
-
-    let master_messages: Vec<MasterMessage> =
-      Vec::with_capacity(*CHANNEL_BUF_SIZE);
-    let js_messages: Vec<JsMessage> = Vec::with_capacity(*CHANNEL_BUF_SIZE);
+    let (jsrt_tx, jsrt_rx) = unbounded_channel();
 
     Ok((
       canvas,
@@ -251,8 +243,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ))
   }
 
@@ -278,8 +268,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -323,8 +311,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
@@ -352,8 +338,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let startup_moment = Instant::now();
@@ -397,8 +381,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
@@ -427,8 +409,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let startup_moment = Instant::now();
@@ -473,8 +453,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
@@ -694,8 +672,8 @@ impl EventLoop {
     }
   }
 
-  async fn process_master_message(&mut self) {
-    for message in self.master_messages.drain(..) {
+  async fn process_master_message(&mut self, message: Option<MasterMessage>) {
+    if let Some(message) = message {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Recv ExitReq:{:?}", req.exit_code);
@@ -709,14 +687,14 @@ impl EventLoop {
             let expire_at = req.start_at
               + tokio::time::Duration::from_millis(req.delay as u64);
             tokio::time::sleep_until(expire_at).await;
-            let _ = jsrt_forwarder_tx
+            jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp {
                 timer_id: req.timer_id,
                 expire_at,
                 delay: req.delay,
                 repeated: req.repeated,
               }))
-              .await;
+              .unwrap();
           });
         }
         MasterMessage::LoadImportReq(req) => {
@@ -724,35 +702,48 @@ impl EventLoop {
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             let maybe_source = async_load_import(&req.specifier, false).await;
-            let _ = jsrt_forwarder_tx
+            jsrt_forwarder_tx
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
-                  Ok(source) => Some(Ok(
-                    bincode::encode_to_vec(source, bincode::config::standard())
-                      .unwrap(),
-                  )),
+                  Ok(source) => Some(Ok(encode_bytes(source))),
                   Err(e) => Some(Err(e)),
                 },
               }))
-              .await;
+              .unwrap();
           });
         }
         MasterMessage::TickAgainReq => {
           trace!("Recv TickAgainReq");
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+            jsrt_forwarder_tx.send(JsMessage::TickAgainResp).unwrap();
+          });
+        }
+        MasterMessage::FsOpenReq(req) => {
+          trace!("Recv FsOpenReq");
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_result = async_fs_open(&req.path, req.options).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsOpenResp(msg::FsOpenResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(fd) => Some(Ok(encode_bytes(fd))),
+                  Err(e) => Some(Err(e)),
+                },
+              }))
+              .unwrap();
           });
         }
       }
     }
   }
 
-  async fn forward_js_message(&mut self) {
-    for message in self.js_messages.drain(..) {
+  async fn forward_js_message(&mut self, message: Option<JsMessage>) {
+    if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
-      let _ = self.jsrt_tx.send(message).await;
+      self.jsrt_tx.send(message).unwrap();
       self.js_runtime.tick_event_loop();
     }
   }
@@ -781,18 +772,12 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive master message
-        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n , self.master_messages.len());
-          if master_n > 0 {
-            self.process_master_message().await;
-          }
+        master_msg = self.master_rx.recv() => {
+          self.process_master_message(master_msg).await;
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, self.js_messages.len());
-          if js_n > 0 {
-            self.forward_js_message().await;
-          }
+        js_msg = self.jsrt_forwarder_rx.recv() => {
+          self.forward_js_message(js_msg).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
@@ -823,17 +808,11 @@ impl EventLoop {
           }
           self.process_event(event).await;
         }
-        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, self.master_messages.len());
-          if master_n > 0 {
-            self.process_master_message().await;
-          }
+        master_msg = self.master_rx.recv() => {
+          self.process_master_message(master_msg).await;
         }
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, self.js_messages.len());
-          if js_n > 0 {
-             self.forward_js_message().await;
-          }
+        js_msg = self.jsrt_forwarder_rx.recv() => {
+          self.forward_js_message(js_msg).await;
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;
@@ -860,17 +839,11 @@ impl EventLoop {
         op = reader.next() => {
           self._process_mocked_operations(op).await;
         }
-        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n, self.master_messages.len());
-          if master_n> 0 {
-             self.process_master_message().await;
-          }
+        master_msg = self.master_rx.recv() => {
+          self.process_master_message(master_msg).await;
         }
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, self.js_messages.len());
-          if js_n > 0 {
-             self.forward_js_message().await;
-          }
+        js_msg = self.jsrt_forwarder_rx.recv() => {
+          self.forward_js_message(js_msg).await;
         }
         _ = self.cancellation_token.cancelled() => {
           self.process_cancellation_notify().await;

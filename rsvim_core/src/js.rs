@@ -13,6 +13,7 @@
 pub mod binding;
 pub mod command;
 pub mod converter;
+pub mod encdec;
 pub mod err;
 pub mod exception;
 pub mod hook;
@@ -59,8 +60,8 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::UnboundedSender;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
@@ -356,6 +357,8 @@ pub mod boost {
     pub pending_timers: FoldMap<JsTimerId, TimerCallback>,
     /// Pending load import tasks.
     pub pending_import_loaders: FoldMap<JsTaskId, TaskCallback>,
+    /// Pending tasks.
+    pub pending_tasks: FoldMap<JsTaskId, TaskCallback>,
     /// Holds JS pending futures scheduled by the event-loop.
     pub pending_futures: Vec<Box<dyn JsFuture>>,
     /// Indicates the start time of the process.
@@ -372,8 +375,8 @@ pub mod boost {
     // pub wake_event_queued: bool,
 
     // Data Access for RSVIM {
-    pub master_tx: Sender<MasterMessage>,
-    pub jsrt_rx: Receiver<JsMessage>,
+    pub master_tx: UnboundedSender<MasterMessage>,
+    pub jsrt_rx: UnboundedReceiver<JsMessage>,
     pub cli_opts: CliOptions,
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
@@ -416,8 +419,8 @@ pub mod boost {
       snapshot: SnapshotData,
       startup_moment: Instant,
       time_origin: u128,
-      master_tx: Sender<MasterMessage>,
-      jsrt_rx: Receiver<JsMessage>,
+      master_tx: UnboundedSender<MasterMessage>,
+      jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opts: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
@@ -462,6 +465,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -506,8 +510,8 @@ pub mod boost {
       options: JsRuntimeOptions,
       startup_moment: Instant,
       time_origin: u128,
-      master_tx: Sender<MasterMessage>,
-      jsrt_rx: Receiver<JsMessage>,
+      master_tx: UnboundedSender<MasterMessage>,
+      jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opt: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
@@ -536,6 +540,7 @@ pub mod boost {
         module_map: ModuleMap::new(),
         pending_timers: FoldMap::new(),
         pending_import_loaders: FoldMap::new(),
+        pending_tasks: FoldMap::new(),
         pending_futures: vec![],
         startup_moment,
         time_origin,
@@ -693,6 +698,18 @@ pub mod boost {
             loader_cb(resp.maybe_source);
           }
           JsMessage::TickAgainResp => trace!("Recv TickAgainResp"),
+          JsMessage::FsOpenResp(resp) => {
+            trace!("Recv FsOpenResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut open_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            open_cb(resp.maybe_result);
+          }
         }
       }
 

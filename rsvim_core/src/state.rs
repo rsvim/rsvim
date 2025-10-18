@@ -33,7 +33,7 @@ use fsm::OperatorPendingStateful;
 use fsm::SelectStateful;
 use fsm::TerminalStateful;
 use fsm::VisualStateful;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
@@ -41,8 +41,8 @@ pub struct StateDataAccess {
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub contents: TextContentsArc,
-  pub master_tx: Sender<MasterMessage>,
-  pub jsrt_forwarder_tx: Sender<JsMessage>,
+  pub master_tx: UnboundedSender<MasterMessage>,
+  pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
 }
 
 impl StateDataAccess {
@@ -51,8 +51,8 @@ impl StateDataAccess {
     tree: TreeArc,
     buffers: BuffersManagerArc,
     contents: TextContentsArc,
-    master_tx: Sender<MasterMessage>,
-    jsrt_forwarder_tx: Sender<JsMessage>,
+    master_tx: UnboundedSender<MasterMessage>,
+    jsrt_forwarder_tx: UnboundedSender<JsMessage>,
   ) -> Self {
     StateDataAccess {
       tree,

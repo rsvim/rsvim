@@ -3,8 +3,9 @@
 
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
-use tokio::sync::mpsc::Sender;
-use tokio::task::JoinHandle;
+use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
+use std::path::PathBuf;
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
 
 #[derive(Debug)]
@@ -21,6 +22,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to tick loop again.
   TickAgainReq,
+
+  /// Js runtime ask master to open file.
+  FsOpenReq(FsOpenReq),
 }
 
 #[derive(Debug)]
@@ -42,12 +46,17 @@ pub struct LoadImportReq {
   pub specifier: String,
 }
 
+#[derive(Debug)]
+pub struct FsOpenReq {
+  pub task_id: JsTaskId,
+  pub path: PathBuf,
+  pub options: FsOpenOptions,
+}
+
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
 pub fn sync_send_to_master(
-  master_tx: Sender<MasterMessage>,
+  master_tx: UnboundedSender<MasterMessage>,
   message: MasterMessage,
-) -> JoinHandle<()> {
-  tokio::runtime::Handle::current().spawn_blocking(move || {
-    master_tx.blocking_send(message).unwrap();
-  })
+) {
+  master_tx.send(message).unwrap();
 }

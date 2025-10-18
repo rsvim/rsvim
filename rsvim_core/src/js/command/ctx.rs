@@ -1,5 +1,6 @@
 //! Ex command runtime context.
 
+use crate::js::binding;
 use crate::js::converter::*;
 use compact_str::CompactString;
 
@@ -29,14 +30,12 @@ impl ToV8 for CommandContext {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_field = to_v8(scope, BANG);
     let bang_value = to_v8(scope, self.bang);
-    obj.set(scope, bang_field, bang_value);
+    binding::set_property_to(scope, obj, BANG, bang_value);
 
     // args
-    let args_field = to_v8(scope, ARGS);
     let args_value = to_v8(scope, self.args.clone());
-    obj.set(scope, args_field, args_value);
+    binding::set_property_to(scope, obj, ARGS, args_value);
 
     obj.into()
   }
