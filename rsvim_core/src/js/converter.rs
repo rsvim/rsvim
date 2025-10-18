@@ -131,29 +131,51 @@ impl BoolFromV8 for bool {
   }
 }
 
-fn str_to_v8<'s>(
-  value: &str,
-  scope: &mut v8::PinScope<'s, '_>,
-) -> v8::Local<'s, v8::String> {
-  v8::String::new(scope, value).unwrap()
+pub trait StringToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String>;
 }
 
-fn vec_to_v8<'s, T, F>(
-  value: &Vec<T>,
-  scope: &mut v8::PinScope<'s, '_>,
-  f: F,
-) -> v8::Local<'s, v8::Array>
-where
-  F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
-{
-  let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
-  v8::Array::new_with_elements(scope, &elements).into()
+impl StringToV8 for str {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String> {
+    v8::String::new(scope, self).unwrap()
+  }
 }
 
-impl FromV8 for String {
+impl StringToV8 for String {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String> {
+    v8::String::new(scope, self).unwrap()
+  }
+}
+
+impl StringToV8 for CompactString {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String> {
+    v8::String::new(scope, self).unwrap()
+  }
+}
+
+pub trait StringFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    value: v8::Local<'s, v8::String>,
+  ) -> Self;
+}
+
+impl StringFromV8 for String {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::String>,
   ) -> Self {
     value.to_rust_string_lossy(scope)
   }
@@ -166,6 +188,18 @@ impl FromV8 for CompactString {
   ) -> Self {
     value.to_rust_string_lossy(scope).to_compact_string()
   }
+}
+
+fn vec_to_v8<'s, T, F>(
+  value: &Vec<T>,
+  scope: &mut v8::PinScope<'s, '_>,
+  f: F,
+) -> v8::Local<'s, v8::Array>
+where
+  F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
+{
+  let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
+  v8::Array::new_with_elements(scope, &elements).into()
 }
 
 impl<T> FromV8 for Vec<T>
