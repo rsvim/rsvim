@@ -6,6 +6,7 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
+use decoder_options::DecoderOptions;
 // use icu::normalizer::ComposingNormalizerBorrowed;
 // use icu::normalizer::DecomposingNormalizerBorrowed;
 
@@ -105,6 +106,7 @@ pub fn create_decoder<'s>(
   let name = from_v8::<CompactString>(scope, args.get(0));
   let options = args.get(1);
   debug_assert!(options.is_object());
+  let options = DecoderOptions::from_v8(scope, options);
 
   let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
   rv.set(encoding_value);
