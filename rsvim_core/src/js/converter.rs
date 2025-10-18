@@ -1,7 +1,6 @@
 //! Converters between rust and v8 values.
 
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 pub trait U32ToV8 {
   fn to_v8<'s>(
