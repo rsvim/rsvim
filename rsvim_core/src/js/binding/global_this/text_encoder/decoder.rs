@@ -93,7 +93,7 @@ impl DecoderOptionsToV8 for DecoderOptions {
     let ignore_bom_value = self.ignore_bom().to_v8(scope);
     binding::set_property_to(scope, obj, IGNORE_BOM, ignore_bom_value);
 
-    obj.into()
+    obj
   }
 }
 
