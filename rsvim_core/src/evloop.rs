@@ -311,8 +311,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
@@ -383,8 +381,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
