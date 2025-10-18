@@ -1,10 +1,11 @@
 //! `TextEncoder` APIs.
 
-use compact_str::CompactString;
+mod decoder_options;
 
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
+use compact_str::CompactString;
 // use icu::normalizer::ComposingNormalizerBorrowed;
 // use icu::normalizer::DecomposingNormalizerBorrowed;
 
@@ -102,6 +103,8 @@ pub fn create_decoder<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let name = from_v8::<CompactString>(scope, args.get(0));
+  let options = args.get(1);
+  debug_assert!(options.is_object());
 
   let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
   rv.set(encoding_value);
