@@ -1,5 +1,7 @@
 //! `TextEncoder` APIs.
 
+use compact_str::CompactString;
+
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -87,6 +89,19 @@ pub fn encoding<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 0);
+
+  let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
+  rv.set(encoding_value);
+}
+
+/// `new TextDecoder()` API.
+pub fn create_decoder<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  let name = from_v8::<CompactString>(scope, args.get(0));
 
   let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
   rv.set(encoding_value);
