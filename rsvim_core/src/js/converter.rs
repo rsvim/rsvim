@@ -99,11 +99,36 @@ impl F64FromV8 for f64 {
   }
 }
 
-pub fn bool_to_v8<'s>(
-  value: bool,
-  scope: &mut v8::PinScope<'s, '_>,
-) -> v8::Local<'s, v8::Boolean> {
-  v8::Boolean::new(scope, value)
+pub trait BoolToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Boolean>;
+}
+
+impl BoolToV8 for bool {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Boolean> {
+    v8::Boolean::new(scope, value)
+  }
+}
+
+pub trait BoolFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Boolean>,
+  ) -> Self;
+}
+
+impl BoolFromV8 for bool {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Boolean>,
+  ) -> Self {
+    value.boolean_value(scope)
+  }
 }
 
 fn str_to_v8<'s>(
@@ -123,15 +148,6 @@ where
 {
   let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
   v8::Array::new_with_elements(scope, &elements).into()
-}
-
-impl FromV8 for bool {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    value.boolean_value(scope)
-  }
 }
 
 impl FromV8 for String {
