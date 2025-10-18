@@ -3,6 +3,38 @@
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
+pub trait U32ToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
+}
+
+impl U32ToV8 for u32 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new_from_unsigned(scope, *self)
+  }
+}
+
+pub trait U32FromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self;
+}
+
+impl U32FromV8 for u32 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Integer>,
+  ) -> Self {
+    value.uint32_value(scope).unwrap()
+  }
+}
+
 pub fn u32_to_v8<'s>(
   value: u32,
   scope: &mut v8::PinScope<'s, '_>,
