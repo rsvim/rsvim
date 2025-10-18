@@ -56,8 +56,6 @@ pub struct FsOpenResp {
 pub fn sync_send_to_js(
   master_tx: UnboundedSender<JsMessage>,
   message: JsMessage,
-) -> JoinHandle<()> {
-  tokio::runtime::Handle::current().spawn_blocking(move || {
-    master_tx.send(message).unwrap();
-  })
+) {
+  master_tx.send(message).unwrap();
 }

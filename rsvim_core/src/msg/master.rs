@@ -58,8 +58,6 @@ pub struct FsOpenReq {
 pub fn sync_send_to_master(
   master_tx: UnboundedSender<MasterMessage>,
   message: MasterMessage,
-) -> JoinHandle<()> {
-  tokio::runtime::Handle::current().spawn_blocking(move || {
-    master_tx.send(message).unwrap();
-  })
+) {
+  master_tx.send(message).unwrap();
 }
