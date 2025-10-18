@@ -181,15 +181,6 @@ impl StringFromV8 for String {
   }
 }
 
-impl FromV8 for CompactString {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    value.to_rust_string_lossy(scope).to_compact_string()
-  }
-}
-
 fn vec_to_v8<'s, T, F>(
   value: &Vec<T>,
   scope: &mut v8::PinScope<'s, '_>,
