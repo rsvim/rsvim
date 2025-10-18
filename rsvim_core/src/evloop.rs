@@ -110,16 +110,16 @@ pub struct EventLoop {
   pub js_runtime: JsRuntime,
 
   /// Channel-1
-  pub master_tx: Sender<MasterMessage>,
-  pub master_rx: Receiver<MasterMessage>,
+  pub master_tx: UnboundedSender<MasterMessage>,
+  pub master_rx: UnboundedReceiver<MasterMessage>,
 
   /// Channel-2
-  pub jsrt_forwarder_tx: Sender<JsMessage>,
-  pub jsrt_forwarder_rx: Receiver<JsMessage>,
+  pub jsrt_forwarder_tx: UnboundedSender<JsMessage>,
+  pub jsrt_forwarder_rx: UnboundedReceiver<JsMessage>,
 
   /// Channel-3
-  pub jsrt_tx: Sender<JsMessage>,
-  // pub jsrt_rx: Receiver<JsMessage>,
+  pub jsrt_tx: UnboundedSender<JsMessage>,
+  // pub jsrt_rx: UnboundedReceiver<JsMessage>,
 }
 
 #[cfg(test)]
