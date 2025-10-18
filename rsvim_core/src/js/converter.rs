@@ -35,18 +35,20 @@ impl U32FromV8 for u32 {
   }
 }
 
-pub fn u32_to_v8<'s>(
-  value: u32,
-  scope: &mut v8::PinScope<'s, '_>,
-) -> v8::Local<'s, v8::Integer> {
-  v8::Integer::new_from_unsigned(scope, value)
+pub trait I32ToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer>;
 }
 
-pub fn i32_to_v8<'s>(
-  value: i32,
-  scope: &mut v8::PinScope<'s, '_>,
-) -> v8::Local<'s, v8::Integer> {
-  v8::Integer::new(scope, value)
+impl I32ToV8 for i32 {
+  fn to_v8<'s>(
+    value: i32,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Integer> {
+    v8::Integer::new(scope, value)
+  }
 }
 
 pub fn f64_to_v8<'s>(
