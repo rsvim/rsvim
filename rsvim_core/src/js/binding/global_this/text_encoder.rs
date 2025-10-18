@@ -112,11 +112,15 @@ pub fn create_decoder<'s>(
 
   // encoding
   let encoding_value = to_v8(scope, name);
-  binding::set_property_to(scope, decoder_obj, "encoding", encoding_value);
+  binding::set_constant_to(scope, decoder_obj, "encoding", encoding_value);
 
-  // options
-  let options_value = options.to_v8(scope);
-  binding::set_property_to(scope, decoder_obj, "options", options_value);
+  // fatal
+  let fatal_value = to_v8(scope, options.fatal());
+  binding::set_constant_to(scope, decoder_obj, "fatal", fatal_value);
+
+  // ignoreBOM
+  let ignore_bom_value = to_v8(scope, options.ignore_bom());
+  binding::set_constant_to(scope, decoder_obj, "ignoreBOM", ignore_bom_value);
 
   rv.set(decoder_obj.into());
 }
