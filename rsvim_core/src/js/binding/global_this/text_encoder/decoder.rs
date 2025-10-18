@@ -56,9 +56,9 @@ impl DecoderOptionsFromV8 for DecoderOptions {
     let mut builder = DecoderOptionsBuilder::default();
 
     // fatal
-    let fatal_name = to_v8(scope, FATAL);
+    let fatal_name = FATAL.to_v8(scope);
     if let Some(fatal_value) = value.get(scope, fatal_name) {
-      builder.fatal(from_v8::<bool>(scope, fatal_value));
+      builder.fatal(bool::from_v8(scope, fatal_value));
     }
 
     // ignoreBOM
