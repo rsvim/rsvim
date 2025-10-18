@@ -71,15 +71,22 @@ impl DecoderOptionsFromV8 for DecoderOptions {
   }
 }
 
-impl ToV8 for DecoderOptions {
+pub trait DecoderOptionsToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> v8::Local<'s, v8::Object>;
+}
+
+impl DecoderOptionsToV8 for DecoderOptions {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
     // fatal
-    let fatal_value = to_v8(scope, self.fatal());
+    let fatal_value = self.fatal().to_v8(scope);
     binding::set_property_to(scope, obj, FATAL, fatal_value);
 
     // ignoreBOM
