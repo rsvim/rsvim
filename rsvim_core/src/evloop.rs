@@ -169,8 +169,6 @@ impl EventLoop {
       /* jsrt_tx */ UnboundedSender<JsMessage>,
       /* jsrt_rx */ UnboundedReceiver<JsMessage>,
     ),
-    /* master_messages */ Vec<MasterMessage>,
-    /* js_messages */ Vec<JsMessage>,
   )> {
     // Canvas
     let canvas_size = U16Size::new(terminal_cols, terminal_rows);
@@ -270,8 +268,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(cols, rows)?;
 
     let writer = if cli_opts.headless() {
@@ -344,8 +340,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let startup_moment = Instant::now();
@@ -419,8 +413,6 @@ impl EventLoop {
       (master_tx, master_rx),
       (jsrt_forwarder_tx, jsrt_forwarder_rx),
       (jsrt_tx, jsrt_rx),
-      master_messages,
-      js_messages,
     ) = Self::_internal_new(terminal_columns, terminal_rows)?;
 
     let startup_moment = Instant::now();

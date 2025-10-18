@@ -60,8 +60,8 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::UnboundedSender;
 
 pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
@@ -375,8 +375,8 @@ pub mod boost {
     // pub wake_event_queued: bool,
 
     // Data Access for RSVIM {
-    pub master_tx: Sender<MasterMessage>,
-    pub jsrt_rx: Receiver<JsMessage>,
+    pub master_tx: UnboundedSender<MasterMessage>,
+    pub jsrt_rx: UnboundedReceiver<JsMessage>,
     pub cli_opts: CliOptions,
     pub tree: TreeArc,
     pub buffers: BuffersManagerArc,
@@ -419,8 +419,8 @@ pub mod boost {
       snapshot: SnapshotData,
       startup_moment: Instant,
       time_origin: u128,
-      master_tx: Sender<MasterMessage>,
-      jsrt_rx: Receiver<JsMessage>,
+      master_tx: UnboundedSender<MasterMessage>,
+      jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opts: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
@@ -510,8 +510,8 @@ pub mod boost {
       options: JsRuntimeOptions,
       startup_moment: Instant,
       time_origin: u128,
-      master_tx: Sender<MasterMessage>,
-      jsrt_rx: Receiver<JsMessage>,
+      master_tx: UnboundedSender<MasterMessage>,
+      jsrt_rx: UnboundedReceiver<JsMessage>,
       cli_opt: CliOptions,
       tree: TreeArc,
       buffers: BuffersManagerArc,
