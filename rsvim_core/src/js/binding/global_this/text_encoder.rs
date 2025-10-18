@@ -108,6 +108,15 @@ pub fn create_decoder<'s>(
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
-  rv.set(encoding_value);
+  let decoder_obj = v8::Object::new(scope);
+
+  // encoding
+  let encoding_value = to_v8(scope, name);
+  binding::set_property_to(scope, decoder_obj, "encoding", encoding_value);
+
+  // options
+  let options_value = options.to_v8(scope);
+  binding::set_property_to(scope, decoder_obj, "options", options_value);
+
+  rv.set(decoder_obj.into());
 }
