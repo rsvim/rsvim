@@ -5,7 +5,7 @@ mod decoder;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
-use compact_str::CompactString;
+use compact_str::ToCompactString;
 use decoder::Decoder;
 use decoder::DecoderOptions;
 // use icu::normalizer::ComposingNormalizerBorrowed;
@@ -104,7 +104,7 @@ pub fn create_decoder<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  let encoding = from_v8::<CompactString>(scope, args.get(0));
+  let encoding = String::from_v8(scope, args.get(0)).to_compact_string();
   let options = args.get(1);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);

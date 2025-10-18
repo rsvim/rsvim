@@ -41,23 +41,29 @@ impl DecoderOptions {
   }
 }
 
-impl FromV8 for DecoderOptions {
+pub trait DecoderOptionsFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    value: v8::Local<'s, v8::Object>,
+  ) -> Self;
+}
+
+impl DecoderOptionsFromV8 for DecoderOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = DecoderOptionsBuilder::default();
-    let obj = value.to_object(scope).unwrap();
 
     // fatal
     let fatal_name = to_v8(scope, FATAL);
-    if let Some(fatal_value) = obj.get(scope, fatal_name) {
+    if let Some(fatal_value) = value.get(scope, fatal_name) {
       builder.fatal(from_v8::<bool>(scope, fatal_value));
     }
 
     // ignoreBOM
     let ignore_bom_name = to_v8(scope, IGNORE_BOM);
-    if let Some(ignore_bom_value) = obj.get(scope, ignore_bom_name) {
+    if let Some(ignore_bom_value) = value.get(scope, ignore_bom_name) {
       builder.ignore_bom(from_v8::<bool>(scope, ignore_bom_value));
     }
 
