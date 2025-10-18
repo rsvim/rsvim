@@ -733,7 +733,7 @@ impl EventLoop {
                   Err(e) => Some(Err(e)),
                 },
               }))
-              .await;
+              .unwrap();
           });
         }
       }
@@ -743,7 +743,7 @@ impl EventLoop {
   async fn forward_js_message(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
-      let _ = self.jsrt_tx.send(message).await;
+      let _ = self.jsrt_tx.send(message).unwrap();
       self.js_runtime.tick_event_loop();
     }
   }
