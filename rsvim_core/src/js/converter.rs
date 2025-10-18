@@ -111,7 +111,7 @@ impl BoolToV8 for bool {
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Boolean> {
-    v8::Boolean::new(scope, value)
+    v8::Boolean::new(scope, *self)
   }
 }
 
