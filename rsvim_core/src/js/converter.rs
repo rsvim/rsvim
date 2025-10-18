@@ -83,6 +83,22 @@ impl F64ToV8 for f64 {
   }
 }
 
+pub trait F64FromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Number>,
+  ) -> Self;
+}
+
+impl F64FromV8 for f64 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Number>,
+  ) -> Self {
+    value.number_value(scope).unwrap()
+  }
+}
+
 pub fn bool_to_v8<'s>(
   value: bool,
   scope: &mut v8::PinScope<'s, '_>,
@@ -107,15 +123,6 @@ where
 {
   let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
   v8::Array::new_with_elements(scope, &elements).into()
-}
-
-impl FromV8 for f64 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    value.number_value(scope).unwrap()
-  }
 }
 
 impl FromV8 for bool {
