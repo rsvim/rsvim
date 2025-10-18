@@ -8,7 +8,7 @@ use crate::prelude::*;
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
-fn encode_utf8<'s>(
+fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
 ) -> (v8::SharedRef<v8::BackingStore>, usize, usize) {
@@ -33,7 +33,6 @@ fn encode_utf8<'s>(
   (store.make_shared(), read, written)
 }
 
-#[allow(deprecated)]
 /// `TextEncoder.encode` API.
 pub fn encode<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -44,7 +43,7 @@ pub fn encode<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let (store, _read, _written) = encode_utf8(scope, payload);
+  let (store, _read, _written) = encode_impl(scope, payload);
 
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
@@ -52,7 +51,6 @@ pub fn encode<'s>(
   rv.set(buf.into());
 }
 
-#[allow(deprecated)]
 /// `TextEncoder.encodeInto` API.
 pub fn encode_into<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -70,7 +68,7 @@ pub fn encode_into<'s>(
   debug_assert!(store.is_some());
   let mut store = store.unwrap();
 
-  let (new_store, read, written) = encode_utf8(scope, payload);
+  let (new_store, read, written) = encode_impl(scope, payload);
   store.clone_from(&new_store);
 
   let rv_obj = v8::Object::new(scope);
@@ -80,4 +78,16 @@ pub fn encode_into<'s>(
   binding::set_property_to(scope, rv_obj, "written", written_value);
 
   rv.set(rv_obj.into());
+}
+
+/// `TextEncoder.encoding` property.
+pub fn encoding<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 0);
+
+  let encoding_value = to_v8(scope, encoding_rs::UTF_8.name());
+  rv.set(encoding_value);
 }
