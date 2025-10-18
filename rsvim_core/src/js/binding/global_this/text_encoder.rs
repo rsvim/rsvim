@@ -2,10 +2,36 @@
 
 use crate::js::binding;
 use crate::js::converter::*;
-use crate::js::pending;
 use crate::prelude::*;
 // use icu::normalizer::ComposingNormalizerBorrowed;
 // use icu::normalizer::DecomposingNormalizerBorrowed;
+
+#[allow(deprecated)]
+// Returns v8 BackingStore data, read (chars), written (bytes)
+fn encode_utf8<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  payload: v8::Local<'s, v8::String>,
+) -> (v8::SharedRef<v8::BackingStore>, usize, usize) {
+  let mut buf: Vec<u8> = vec![];
+  let mut read: usize = 0;
+
+  // FIXME: Update to `write_utf8_v8` follow deno's implementation:
+  //
+  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
+  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
+  let written = payload.write_utf8(
+    scope,
+    &mut buf,
+    Some(&mut read),
+    v8::WriteOptions::NO_NULL_TERMINATION
+      | v8::WriteOptions::REPLACE_INVALID_UTF8,
+  );
+  trace!("|encode_utf8| written:{:?}, read:{:?}", written, read);
+
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(buf);
+
+  (store.make_shared(), read, written)
+}
 
 #[allow(deprecated)]
 /// `TextEncoder.encode` API.
@@ -18,29 +44,9 @@ pub fn encode<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let mut buf: Vec<u8> = vec![];
-  let mut _read: usize = 0;
+  let (store, _read, _written) = encode_utf8(scope, payload);
 
-  // FIXME: Update to `write_utf8_v8` follow deno's implementation:
-  //
-  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
-  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
-  let _written = payload.write_utf8(
-    scope,
-    &mut buf,
-    Some(&mut _read),
-    v8::WriteOptions::NO_NULL_TERMINATION
-      | v8::WriteOptions::REPLACE_INVALID_UTF8,
-  );
-  trace!("|encode| written:{:?}, read:{:?}", _written, _read);
-
-  // let nfc = ComposingNormalizerBorrowed::new_nfc();
-  // let normalized = nfc.normalize(&payload);
-  // let (result, _actual_encoding, _had_unmappable) =
-  //   encoding_rs::UTF_8.encode(&normalized);
-
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(buf);
-  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
 
   rv.set(buf.into());
@@ -64,24 +70,8 @@ pub fn encode_into<'s>(
   debug_assert!(store.is_some());
   let mut store = store.unwrap();
 
-  let mut buf: Vec<u8> = vec![];
-  let mut read: usize = 0;
-
-  // FIXME: Update to `write_utf8_v8` follow deno's implementation:
-  //
-  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
-  // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
-  let written = payload.write_utf8(
-    scope,
-    &mut buf,
-    Some(&mut read),
-    v8::WriteOptions::NO_NULL_TERMINATION
-      | v8::WriteOptions::REPLACE_INVALID_UTF8,
-  );
-  trace!("|encode_into| written:{:?}, read:{:?}", written, read);
-
-  let new_store = v8::ArrayBuffer::new_backing_store_from_vec(buf);
-  store.clone_from(&new_store.make_shared());
+  let (new_store, read, written) = encode_utf8(scope, payload);
+  store.clone_from(&new_store);
 
   let rv_obj = v8::Object::new(scope);
   let read_value = to_v8(scope, read as f64);
