@@ -128,3 +128,26 @@ impl FromV8 for Decoder {
     }
   }
 }
+
+impl ToV8 for Decoder {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Value> {
+    let obj = v8::Object::new(scope);
+
+    // encoding
+    let encoding_value = to_v8(scope, self.encoding);
+    binding::set_constant_to(scope, obj, ENCODING, encoding_value);
+
+    // fatal
+    let fatal_value = to_v8(scope, self.options.fatal());
+    binding::set_constant_to(scope, obj, FATAL, fatal_value);
+
+    // ignoreBOM
+    let ignore_bom_value = to_v8(scope, self.options.ignore_bom());
+    binding::set_constant_to(scope, obj, IGNORE_BOM, ignore_bom_value);
+
+    obj.into()
+  }
+}

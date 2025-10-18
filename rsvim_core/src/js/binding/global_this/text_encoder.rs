@@ -104,26 +104,15 @@ pub fn create_decoder<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  let name = from_v8::<CompactString>(scope, args.get(0));
+  let encoding = from_v8::<CompactString>(scope, args.get(0));
   let options = args.get(1);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let decoder_obj = v8::Object::new(scope);
+  let decoder = Decoder { options, encoding };
+  let decoder_wrapper = decoder.to_v8(scope);
 
-  // encoding
-  let encoding_value = to_v8(scope, name);
-  binding::set_constant_to(scope, decoder_obj, "encoding", encoding_value);
-
-  // fatal
-  let fatal_value = to_v8(scope, options.fatal());
-  binding::set_constant_to(scope, decoder_obj, "fatal", fatal_value);
-
-  // ignoreBOM
-  let ignore_bom_value = to_v8(scope, options.ignore_bom());
-  binding::set_constant_to(scope, decoder_obj, "ignoreBOM", ignore_bom_value);
-
-  rv.set(decoder_obj.into());
+  rv.set(decoder_wrapper.into());
 }
 
 /// `TextDecoder.decode` API.
@@ -133,6 +122,7 @@ pub fn decode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
+  let deocder_wrapper = Decoder::from_v8(scope, args.get(0));
   let name = from_v8::<CompactString>(scope, args.get(0));
   let options = args.get(1);
   debug_assert!(options.is_object());
