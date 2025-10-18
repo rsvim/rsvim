@@ -124,11 +124,11 @@ impl DecoderToV8 for Decoder {
     binding::set_constant_to(scope, obj, ENCODING, encoding_value);
 
     // fatal
-    let fatal_value = to_v8(scope, self.options.fatal());
+    let fatal_value = self.options.fatal().to_v8(scope);
     binding::set_constant_to(scope, obj, FATAL, fatal_value);
 
     // ignoreBOM
-    let ignore_bom_value = to_v8(scope, self.options.ignore_bom());
+    let ignore_bom_value = self.options.ignore_bom().to_v8(scope);
     binding::set_constant_to(scope, obj, IGNORE_BOM, ignore_bom_value);
 
     obj
