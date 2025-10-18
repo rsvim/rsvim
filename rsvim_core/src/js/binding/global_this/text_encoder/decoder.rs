@@ -64,7 +64,7 @@ impl DecoderOptionsFromV8 for DecoderOptions {
     // ignoreBOM
     let ignore_bom_name = IGNORE_BOM.to_v8(scope);
     if let Some(ignore_bom_value) = value.get(scope, ignore_bom_name) {
-      builder.ignore_bom(from_v8::<bool>(scope, ignore_bom_value));
+      builder.ignore_bom(bool::from_v8(scope, ignore_bom_value));
     }
 
     builder.build().unwrap()
