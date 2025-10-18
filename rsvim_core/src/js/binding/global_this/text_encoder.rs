@@ -86,7 +86,7 @@ pub fn encode_into<'s>(
 }
 
 /// `TextEncoder.encoding` property.
-pub fn encoding<'s>(
+pub fn encoder_encoding<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
@@ -123,7 +123,7 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   let deocder_wrapper = Decoder::from_v8(scope, args.get(0));
-  let payload = from_v8::<CompactString>(scope, args.get(1));
+  let payload = from_v8(scope, args.get(1));
   let options = args.get(1);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);

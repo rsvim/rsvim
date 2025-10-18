@@ -3,73 +3,18 @@
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-pub trait ToV8 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value>;
+fn u32_to_v8<'s>(
+  value: u32,
+  scope: &mut v8::PinScope<'s, '_>,
+) -> v8::Local<'s, v8::Integer> {
+  v8::Integer::new_from_unsigned(scope, value)
 }
 
-pub trait FromV8CallbackArguments {
-  fn from_v8_callback_arguments<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    args: v8::FunctionCallbackArguments<'s>,
-  ) -> Self;
-}
-
-pub trait FromV8 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self;
-}
-
-pub fn to_v8<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
-  input: T,
-) -> v8::Local<'s, v8::Value>
-where
-  T: ToV8,
-{
-  input.to_v8(scope)
-}
-
-pub fn from_v8_callback_arguments<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
-  value: v8::FunctionCallbackArguments<'s>,
-) -> T
-where
-  T: FromV8CallbackArguments,
-{
-  T::from_v8_callback_arguments(scope, value)
-}
-
-pub fn from_v8<'s, 'b, T>(
-  scope: &mut v8::PinScope<'s, 'b>,
-  value: v8::Local<'s, v8::Value>,
-) -> T
-where
-  T: FromV8,
-{
-  T::from_v8(scope, value)
-}
-
-impl ToV8 for u32 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::Integer::new_from_unsigned(scope, *self).into()
-  }
-}
-
-impl ToV8 for i32 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::Integer::new(scope, *self).into()
-  }
+fn i32_to_v8<'s>(
+  value: i32,
+  scope: &mut v8::PinScope<'s, '_>,
+) -> v8::Local<'s, v8::Integer> {
+  v8::Integer::new(scope, value)
 }
 
 impl ToV8 for f64 {
