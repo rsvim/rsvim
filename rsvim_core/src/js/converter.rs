@@ -181,26 +181,49 @@ impl StringFromV8 for String {
   }
 }
 
-fn vec_to_v8<'s, T, F>(
-  value: &Vec<T>,
-  scope: &mut v8::PinScope<'s, '_>,
-  f: F,
-) -> v8::Local<'s, v8::Array>
-where
-  F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
-{
-  let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
-  v8::Array::new_with_elements(scope, &elements).into()
+pub trait VecToV8<T> {
+  fn to_v8<'s, F>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+    f: F,
+  ) -> v8::Local<'s, v8::Array>
+  where
+    F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>;
 }
 
-impl<T> FromV8 for Vec<T>
-where
-  T: FromV8,
-{
-  fn from_v8<'s>(
+impl<T> VecToV8<T> for Vec<T> {
+  fn to_v8<'s, F>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+    f: F,
+  ) -> v8::Local<'s, v8::Array>
+  where
+    F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
+  {
+    let elements = self.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
+    v8::Array::new_with_elements(scope, &elements).into()
+  }
+}
+
+pub trait VecFromV8<T> {
+  fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-  ) -> Self {
+    f: F,
+  ) -> Self
+  where
+    F: FnOnce(&T, &mut v8::PinScope) -> T;
+}
+
+impl<T> VecFromV8<T> for Vec<T> {
+  fn from_v8<'s, F>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+    f: F,
+  ) -> Self
+  where
+    F: FnOnce(&T, &mut v8::PinScope) -> T,
+  {
     let elements = v8::Local::<v8::Array>::try_from(value).unwrap();
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
@@ -213,7 +236,25 @@ where
   }
 }
 
-pub fn to_v8_uint8_array<'s>(
+pub trait UInt8ArrayToV8 {
+  pub fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Uint8Array>;
+}
+
+impl UInt8ArrayToV8 for Vec<u8> {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Uint8Array> {
+    let store = v8::ArrayBuffer::new_backing_store_from_vec(self);
+    let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+    v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap()
+  }
+}
+
+pub fn uint8array_to_v8<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   input: Vec<u8>,
 ) -> v8::Local<'s, v8::Uint8Array> {
