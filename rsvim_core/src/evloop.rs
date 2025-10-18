@@ -694,7 +694,7 @@ impl EventLoop {
                 delay: req.delay,
                 repeated: req.repeated,
               }))
-              .await;
+              .unwrap();
           });
         }
         MasterMessage::LoadImportReq(req) => {
@@ -710,14 +710,14 @@ impl EventLoop {
                   Err(e) => Some(Err(e)),
                 },
               }))
-              .await;
+              .unwrap();
           });
         }
         MasterMessage::TickAgainReq => {
           trace!("Recv TickAgainReq");
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).await;
+            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).unwrap();
           });
         }
         MasterMessage::FsOpenReq(req) => {
