@@ -3,63 +3,39 @@
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
-fn u32_to_v8<'s>(
+pub fn u32_to_v8<'s>(
   value: u32,
   scope: &mut v8::PinScope<'s, '_>,
 ) -> v8::Local<'s, v8::Integer> {
   v8::Integer::new_from_unsigned(scope, value)
 }
 
-fn i32_to_v8<'s>(
+pub fn i32_to_v8<'s>(
   value: i32,
   scope: &mut v8::PinScope<'s, '_>,
 ) -> v8::Local<'s, v8::Integer> {
   v8::Integer::new(scope, value)
 }
 
-impl ToV8 for f64 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::Number::new(scope, *self).into()
-  }
+pub fn f64_to_v8<'s>(
+  value: f64,
+  scope: &mut v8::PinScope<'s, '_>,
+) -> v8::Local<'s, v8::Number> {
+  v8::Number::new(scope, value)
 }
 
-impl ToV8 for bool {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::Boolean::new(scope, *self).into()
-  }
+pub fn bool_to_v8<'s>(
+  value: bool,
+  scope: &mut v8::PinScope<'s, '_>,
+) -> v8::Local<'s, v8::Boolean> {
+  v8::Boolean::new(scope, value)
 }
 
-impl ToV8 for &'static str {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::String::new(scope, self).unwrap().into()
-  }
-}
-
-impl ToV8 for String {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::String::new(scope, self).unwrap().into()
-  }
-}
-
-impl ToV8 for CompactString {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    v8::String::new(scope, self).unwrap().into()
-  }
+fn str_to_v8<'s>(
+  value: &str,
+  scope: &mut v8::PinScope<'s, '_>,
+) -> v8::Local<'s, v8::String> {
+  v8::String::new(scope, value).unwrap()
 }
 
 impl<T> ToV8 for Vec<T>
