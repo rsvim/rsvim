@@ -237,7 +237,7 @@ impl<T> VecFromV8<T> for Vec<T> {
 }
 
 pub trait UInt8ArrayToV8 {
-  pub fn to_v8<'s>(
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Uint8Array>;
