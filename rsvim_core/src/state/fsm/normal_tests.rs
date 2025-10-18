@@ -39,9 +39,9 @@ use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::channel;
+use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::unbounded_channel;
 
 pub fn make_tree_with_buffer_opts(
   terminal_size: U16Size,
@@ -71,8 +71,8 @@ pub fn make_tree_with_buffer_opts(
   );
   let event = Event::Key(key_event);
 
-  let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
-  let (master_tx, _master_rx) = channel(1);
+  let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
+  let (master_tx, _master_rx) = unbounded_channel();
   let data_access = StateDataAccess::new(
     tree.clone(),
     bufs.clone(),
@@ -131,8 +131,8 @@ pub fn make_tree_with_cmdline(
     KeyEventKind::Press,
   );
   let event = Event::Key(key_event);
-  let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = channel(1);
-  let (master_tx, _master_rx) = channel(1);
+  let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
+  let (master_tx, _master_rx) = unbounded_channel();
   let data_access = StateDataAccess::new(
     tree.clone(),
     bufs.clone(),
