@@ -1,11 +1,10 @@
 //! TextDecoder and its options
 
-use compact_str::CompactString;
-
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js::binding;
 use crate::js::converter::*;
+use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -13,10 +12,9 @@ flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 pub const FATAL: &str = "fatal";
 pub const IGNORE_BOM: &str = "ignoreBOM";
 
-#[allow(dead_code)]
 /// Default option values.
-pub const FATAL_DEFAULT: bool = false;
-pub const IGNORE_BOM_DEFAULT: bool = false;
+pub const _FATAL_DEFAULT: bool = false;
+pub const _IGNORE_BOM_DEFAULT: bool = false;
 
 // fatal=false
 // ignoreBOM=false
