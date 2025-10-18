@@ -161,13 +161,13 @@ impl DecoderFromV8 for Decoder {
     let fatal_name = FATAL.to_v8(scope);
     debug_assert!(obj.has_own_property(scope, fatal_name).unwrap_or(false));
     let fatal_value = obj.get(scope, fatal_name).unwrap();
-    let fatal_value = from_v8::<bool>(scope, fatal_value);
+    let fatal_value = bool::from_v8(scope, fatal_value);
 
     // ignoreBOM
-    let ignore_bom_name = to_v8(scope, IGNORE_BOM);
-    debug_assert!(obj.get(scope, ignore_bom_name).is_some());
+    let ignore_bom_name = IGNORE_BOM.to_v8(scope);
+    debug_assert!(obj.has_own_property(scope, ignore_bom_name).is_some());
     let ignore_bom_value = obj.get(scope, ignore_bom_name).unwrap();
-    let ignore_bom_value = from_v8::<bool>(scope, ignore_bom_value);
+    let ignore_bom_value = bool::from_v8(scope, ignore_bom_value);
 
     Self {
       options: DecoderOptionsBuilder::default()
