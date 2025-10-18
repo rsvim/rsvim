@@ -4,9 +4,6 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js::binding;
 use crate::js::converter::*;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
-use std::str::FromStr;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
