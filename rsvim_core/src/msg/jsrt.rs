@@ -4,8 +4,7 @@ use crate::js::JsTaskId;
 use crate::js::JsTimerId;
 use crate::prelude::*;
 use compact_str::CompactString;
-use tokio::sync::mpsc::Sender;
-use tokio::task::JoinHandle;
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
 
 #[derive(Debug)]
@@ -54,10 +53,8 @@ pub struct FsOpenResp {
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
 pub fn sync_send_to_js(
-  master_tx: Sender<JsMessage>,
+  master_tx: UnboundedSender<JsMessage>,
   message: JsMessage,
-) -> JoinHandle<()> {
-  tokio::runtime::Handle::current().spawn_blocking(move || {
-    master_tx.blocking_send(message).unwrap();
-  })
+) {
+  master_tx.send(message).unwrap();
 }
