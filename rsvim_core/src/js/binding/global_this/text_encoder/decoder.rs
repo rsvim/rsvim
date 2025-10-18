@@ -104,11 +104,7 @@ impl FromV8 for Decoder {
     // encoding
     // let encoding_name = to_v8(scope, ENCODING);
     let encoding_name = v8::String::new(scope, ENCODING).unwrap();
-    debug_assert!(
-      obj
-        .has_own_property(scope, encoding_name.into())
-        .unwrap_or(false)
-    );
+    debug_assert!(obj.get(scope, encoding_name.into()).is_some());
     let encoding_value = obj.get(scope, encoding_name.into()).unwrap();
     let encoding_value = from_v8::<CompactString>(scope, encoding_value);
 
