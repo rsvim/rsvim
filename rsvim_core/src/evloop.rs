@@ -687,7 +687,7 @@ impl EventLoop {
             let expire_at = req.start_at
               + tokio::time::Duration::from_millis(req.delay as u64);
             tokio::time::sleep_until(expire_at).await;
-            let _ = jsrt_forwarder_tx
+            jsrt_forwarder_tx
               .send(JsMessage::TimeoutResp(msg::TimeoutResp {
                 timer_id: req.timer_id,
                 expire_at,
@@ -702,7 +702,7 @@ impl EventLoop {
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             let maybe_source = async_load_import(&req.specifier, false).await;
-            let _ = jsrt_forwarder_tx
+            jsrt_forwarder_tx
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
@@ -717,7 +717,7 @@ impl EventLoop {
           trace!("Recv TickAgainReq");
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
-            let _ = jsrt_forwarder_tx.send(JsMessage::TickAgainResp).unwrap();
+            jsrt_forwarder_tx.send(JsMessage::TickAgainResp).unwrap();
           });
         }
         MasterMessage::FsOpenReq(req) => {
@@ -725,7 +725,7 @@ impl EventLoop {
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_open(&req.path, req.options).await;
-            let _ = jsrt_forwarder_tx
+            jsrt_forwarder_tx
               .send(JsMessage::FsOpenResp(msg::FsOpenResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
@@ -743,7 +743,7 @@ impl EventLoop {
   async fn forward_js_message(&mut self, message: Option<JsMessage>) {
     if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
-      let _ = self.jsrt_tx.send(message).unwrap();
+      self.jsrt_tx.send(message).unwrap();
       self.js_runtime.tick_event_loop();
     }
   }
