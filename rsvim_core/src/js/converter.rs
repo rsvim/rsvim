@@ -50,22 +50,18 @@ where
   v8::Array::new_with_elements(scope, &elements).into()
 }
 
-impl FromV8 for u32 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    value.uint32_value(scope).unwrap()
-  }
+fn u32_from_v8<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  value: v8::Local<'s, v8::Integer>,
+) -> u32 {
+  value.uint32_value(scope).unwrap()
 }
 
-impl FromV8 for i32 {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    value.int32_value(scope).unwrap()
-  }
+fn i32_from_v8<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  value: v8::Local<'s, v8::Integer>,
+) -> i32 {
+  value.int32_value(scope).unwrap()
 }
 
 impl FromV8 for f64 {
