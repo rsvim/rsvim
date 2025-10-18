@@ -44,7 +44,7 @@ pub trait I32ToV8 {
 
 impl I32ToV8 for i32 {
   fn to_v8<'s>(
-    value: i32,
+    &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Integer> {
     v8::Integer::new(scope, value)
