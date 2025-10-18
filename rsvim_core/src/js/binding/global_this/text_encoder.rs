@@ -77,9 +77,9 @@ pub fn encode_into<'s>(
   store.clone_from(&new_store);
 
   let rv_obj = v8::Object::new(scope);
-  let read_value = to_v8(scope, read as f64);
+  let read_value = (read as f64).to_v8(scope);
   binding::set_property_to(scope, rv_obj, "read", read_value);
-  let written_value = to_v8(scope, written as f64);
+  let written_value = (written as f64).to_v8(scope);
   binding::set_property_to(scope, rv_obj, "written", written_value);
 
   rv.set(rv_obj.into());
