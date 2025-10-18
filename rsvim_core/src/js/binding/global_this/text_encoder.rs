@@ -1,12 +1,13 @@
 //! `TextEncoder` APIs.
 
-mod decoder_options;
+mod decoder;
 
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::CompactString;
-use decoder_options::DecoderOptions;
+use decoder::Decoder;
+use decoder::DecoderOptions;
 // use icu::normalizer::ComposingNormalizerBorrowed;
 // use icu::normalizer::DecomposingNormalizerBorrowed;
 
@@ -131,7 +132,7 @@ pub fn decode<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 2);
+  debug_assert!(args.length() == 3);
   let name = from_v8::<CompactString>(scope, args.get(0));
   let options = args.get(1);
   debug_assert!(options.is_object());

@@ -1,4 +1,6 @@
-//! TextDecoder options
+//! TextDecoder and its options
+
+use compact_str::CompactString;
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
@@ -7,12 +9,12 @@ use crate::js::converter::*;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
-/// Attribute names.
+/// Option names.
 pub const FATAL: &str = "fatal";
 pub const IGNORE_BOM: &str = "ignoreBOM";
 
 #[allow(dead_code)]
-/// Default attribute values.
+/// Default option values.
 pub const FATAL_DEFAULT: bool = false;
 pub const IGNORE_BOM_DEFAULT: bool = false;
 
@@ -81,5 +83,47 @@ impl ToV8 for DecoderOptions {
     binding::set_property_to(scope, obj, IGNORE_BOM, ignore_bom_value);
 
     obj.into()
+  }
+}
+
+pub const ENCODING: &str = "encoding";
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Decoder {
+  pub options: DecoderOptions,
+  pub encoding: CompactString,
+}
+
+impl FromV8 for Decoder {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Value>,
+  ) -> Self {
+    let obj = value.to_object(scope).unwrap();
+
+    // encoding
+    // let encoding_name = to_v8(scope, ENCODING);
+    let encoding_name = v8::String::new(scope, ENCODING).unwrap();
+    debug_assert!(
+      obj
+        .has_own_property(scope, encoding_name.into())
+        .unwrap_or(false)
+    );
+    let encoding_value = obj.get(scope, encoding_name.into()).unwrap();
+    let encoding_value = from_v8::<CompactString>(scope, encoding_value);
+
+    // fatal
+    let fatal_name = to_v8(scope, FATAL);
+    if let Some(fatal_value) = obj.get(scope, fatal_name) {
+      builder.fatal(from_v8::<bool>(scope, fatal_value));
+    }
+
+    // ignoreBOM
+    let ignore_bom_name = to_v8(scope, IGNORE_BOM);
+    if let Some(ignore_bom_value) = obj.get(scope, ignore_bom_name) {
+      builder.ignore_bom(from_v8::<bool>(scope, ignore_bom_value));
+    }
+
+    builder.build().unwrap()
   }
 }
