@@ -5,7 +5,6 @@ use crate::js::JsTimerId;
 use crate::prelude::*;
 use compact_str::CompactString;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::task::JoinHandle;
 use tokio::time::Instant;
 
 #[derive(Debug)]

@@ -6,7 +6,6 @@ use crate::js::JsTimerId;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use std::path::PathBuf;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::task::JoinHandle;
 use tokio::time::Instant;
 
 #[derive(Debug)]
