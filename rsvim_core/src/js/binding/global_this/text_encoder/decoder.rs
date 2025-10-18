@@ -102,24 +102,31 @@ impl FromV8 for Decoder {
     let obj = value.to_object(scope).unwrap();
 
     // encoding
-    // let encoding_name = to_v8(scope, ENCODING);
-    let encoding_name = v8::String::new(scope, ENCODING).unwrap();
-    debug_assert!(obj.get(scope, encoding_name.into()).is_some());
-    let encoding_value = obj.get(scope, encoding_name.into()).unwrap();
+    let encoding_name = to_v8(scope, ENCODING);
+    // let encoding_name = v8::String::new(scope, ENCODING).unwrap();
+    debug_assert!(obj.get(scope, encoding_name).is_some());
+    let encoding_value = obj.get(scope, encoding_name).unwrap();
     let encoding_value = from_v8::<CompactString>(scope, encoding_value);
 
     // fatal
     let fatal_name = to_v8(scope, FATAL);
-    if let Some(fatal_value) = obj.get(scope, fatal_name) {
-      builder.fatal(from_v8::<bool>(scope, fatal_value));
-    }
+    debug_assert!(obj.get(scope, fatal_name).is_some());
+    let fatal_value = obj.get(scope, fatal_name).unwrap();
+    let fatal_value = from_v8::<bool>(scope, fatal_value);
 
     // ignoreBOM
     let ignore_bom_name = to_v8(scope, IGNORE_BOM);
-    if let Some(ignore_bom_value) = obj.get(scope, ignore_bom_name) {
-      builder.ignore_bom(from_v8::<bool>(scope, ignore_bom_value));
-    }
+    debug_assert!(obj.get(scope, ignore_bom_name).is_some());
+    let ignore_bom_value = obj.get(scope, ignore_bom_name).unwrap();
+    let ignore_bom_value = from_v8::<bool>(scope, ignore_bom_value);
 
-    builder.build().unwrap()
+    Self {
+      options: DecoderOptionsBuilder::default()
+        .fatal(fatal_value)
+        .ignore_bom(ignore_bom_value)
+        .build()
+        .unwrap(),
+      encoding: encoding_value,
+    }
   }
 }
