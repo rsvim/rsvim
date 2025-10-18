@@ -158,8 +158,8 @@ impl DecoderFromV8 for Decoder {
       String::from_v8(scope, encoding_value).to_compact_string();
 
     // fatal
-    let fatal_name = to_v8(scope, FATAL);
-    debug_assert!(obj.get(scope, fatal_name).is_some());
+    let fatal_name = FATAL.to_v8(scope);
+    debug_assert!(obj.has_own_property(scope, fatal_name).unwrap_or(false));
     let fatal_value = obj.get(scope, fatal_name).unwrap();
     let fatal_value = from_v8::<bool>(scope, fatal_value);
 
