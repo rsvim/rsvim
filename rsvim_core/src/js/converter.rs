@@ -38,17 +38,16 @@ fn str_to_v8<'s>(
   v8::String::new(scope, value).unwrap()
 }
 
-impl<T> ToV8 for Vec<T>
+fn vec_to_v8<'s, T, F>(
+  value: &Vec<T>,
+  scope: &mut v8::PinScope<'s, '_>,
+  f: F,
+) -> v8::Local<'s, v8::Array>
 where
-  T: ToV8,
+  F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
 {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    let elements = self.iter().map(|v| v.to_v8(scope)).collect::<Vec<_>>();
-    v8::Array::new_with_elements(scope, &elements).into()
-  }
+  let elements = value.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
+  v8::Array::new_with_elements(scope, &elements).into()
 }
 
 impl FromV8 for u32 {
