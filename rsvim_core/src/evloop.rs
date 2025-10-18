@@ -457,8 +457,6 @@ impl EventLoop {
       jsrt_forwarder_tx,
       jsrt_forwarder_rx,
       jsrt_tx,
-      master_messages,
-      js_messages,
     })
   }
 
@@ -678,8 +676,8 @@ impl EventLoop {
     }
   }
 
-  async fn process_master_message(&mut self) {
-    for message in self.master_messages.drain(..) {
+  async fn process_master_message(&mut self, message: Option<MasterMessage>) {
+    if let Some(message) = message {
       match message {
         MasterMessage::ExitReq(req) => {
           trace!("Recv ExitReq:{:?}", req.exit_code);
@@ -746,8 +744,8 @@ impl EventLoop {
     }
   }
 
-  async fn forward_js_message(&mut self) {
-    for message in self.js_messages.drain(..) {
+  async fn forward_js_message(&mut self, message: Option<JsMessage>) {
+    if let Some(message) = message {
       trace!("Process resp msg:{:?}", message);
       let _ = self.jsrt_tx.send(message).await;
       self.js_runtime.tick_event_loop();
@@ -778,18 +776,12 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive master message
-        master_n = self.master_rx.recv_many(&mut self.master_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(master_n , self.master_messages.len());
-          if master_n > 0 {
-            self.process_master_message().await;
-          }
+        master_msg = self.master_rx.recv() => {
+          self.process_master_message(master_msg).await;
         }
         // Receive loopback js message (should be sent to js runtime)
-        js_n = self.jsrt_forwarder_rx.recv_many(&mut self.js_messages, *CHANNEL_BUF_SIZE) => {
-          debug_assert_eq!(js_n, self.js_messages.len());
-          if js_n > 0 {
-            self.forward_js_message().await;
-          }
+        js_msg = self.jsrt_forwarder_rx.recv() => {
+          self.forward_js_message(js_msg).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
