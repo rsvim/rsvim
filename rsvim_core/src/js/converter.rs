@@ -200,16 +200,15 @@ impl<T> VecToV8<T> for Vec<T> {
 pub trait VecFromV8<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    value: v8::Local<'s, v8::Array>,
   ) -> Self;
 }
 
 impl<T> VecFromV8<T> for Vec<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    elements: v8::Local<'s, v8::Array>,
   ) -> Self {
-    let elements = v8::Local::<v8::Array>::try_from(value).unwrap();
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
     for i in 0..n {

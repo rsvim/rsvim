@@ -2,9 +2,11 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::from_v8_impl;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::to_v8;
+use crate::to_v8_impl;
 use compact_str::CompactString;
 use std::str::FromStr;
 
@@ -55,6 +57,16 @@ pub enum Nargs {
   Any,
 }
 
+impl StringFromV8 for Nargs {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::String>,
+  ) -> Self {
+    let nargs = CompactString::from_v8(scope, value);
+    Nargs::from_str(&nargs).unwrap()
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
   #[builder(default = FLAGS)]
@@ -78,46 +90,5 @@ impl CommandAttributes {
   }
 }
 
-impl FromV8 for CommandAttributes {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    let mut builder = CommandAttributesBuilder::default();
-    let obj = value.to_object(scope).unwrap();
-
-    // bang
-    let bang_name = to_v8(scope, BANG);
-    if let Some(bang_value) = obj.get(scope, bang_name) {
-      builder.bang(from_v8::<bool>(scope, bang_value));
-    }
-
-    // nargs
-    let nargs_name = to_v8(scope, NARGS);
-    if let Some(nargs_value) = obj.get(scope, nargs_name) {
-      let nargs = from_v8::<CompactString>(scope, nargs_value);
-      builder.nargs(Nargs::from_str(&nargs).unwrap());
-    }
-
-    builder.build().unwrap()
-  }
-}
-
-impl ToV8 for CommandAttributes {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    let obj = v8::Object::new(scope);
-
-    // bang
-    let bang_value = to_v8!(bool scope, self.bang());
-    binding::set_property_to(scope, obj, BANG, bang_value);
-
-    // nargs
-    let nargs_value = to_v8!(bool scope, self.nargs.to_compact_string());
-    binding::set_property_to(scope, obj, NARGS, nargs_value);
-
-    obj.into()
-  }
-}
+from_v8_impl!(CommandAttributes [(bool, bang) (Nargs, nargs)] []);
+to_v8_impl!(CommandAttributes [bang nargs] [] [] []);
