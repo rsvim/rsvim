@@ -238,7 +238,7 @@ pub trait StructFromV8 {
 /// Implement struct to/from v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident [$($property:tt),*] [$($constant:tt),*]) => {
+  ($name:ident [$($property:tt),*] [$($optional_property:tt),*] [$($constant:tt),*] [$($optional_constant:tt),*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -251,6 +251,14 @@ macro_rules! to_v8_impl {
           $(
             let [< $property _value >] = self.$property.to_v8(scope);
             $crate::js::binding::set_property_to(scope, obj, [< $property:snake:upper >], [< $property _value >]);
+          )*
+
+          // optional properties
+          $(
+            if let Some($optional_property) = &self.$optional_property {
+              let [< $optional_property _value >] = $optional_property.to_v8(scope);
+              $crate::js::binding::set_property_to(scope, obj, [< $optional_property:snake:upper >], [< $optional_property _value >]);
+            }
           )*
 
           // constants
