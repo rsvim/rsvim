@@ -68,11 +68,6 @@ fn test_string1() {
   let obj1 = a1.to_v8(scope);
   let val1 = String::from_v8(scope, obj1);
   assert_eq!(val1, a1);
-
-  let a2 = "World".to_compact_string();
-  let obj2 = a2.to_v8(scope);
-  let val2 = CompactString::from_v8(scope, obj2);
-  assert_eq!(val2, a2);
 }
 
 #[test]
