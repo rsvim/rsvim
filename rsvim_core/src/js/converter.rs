@@ -201,21 +201,14 @@ pub trait VecFromV8<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-    f: F,
-  ) -> Self
-  where
-    F: FnOnce(&T, &mut v8::PinScope) -> T;
+  ) -> Self;
 }
 
 impl<T> VecFromV8<T> for Vec<T> {
   fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Value>,
-    f: F,
-  ) -> Self
-  where
-    F: FnOnce(&T, &mut v8::PinScope) -> T,
-  {
+  ) -> Self {
     let elements = v8::Local::<v8::Array>::try_from(value).unwrap();
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
@@ -226,4 +219,18 @@ impl<T> VecFromV8<T> for Vec<T> {
     }
     v
   }
+}
+
+pub trait StructToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object>;
+}
+
+pub trait StructFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Object>,
+  ) -> Self;
 }
