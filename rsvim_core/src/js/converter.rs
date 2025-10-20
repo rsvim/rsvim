@@ -234,3 +234,43 @@ impl<T> VecFromV8<T> for Vec<T> {
     v
   }
 }
+
+/// Convert rust to v8.
+#[macro_export]
+macro_rules! to_v8 {
+  (bool $value:expr) => {
+    v8::Boolean::new(scope, $value)
+  };
+
+  (u32 $value:expr) => {
+    v8::Integer::new_from_unsigned(scope, $value)
+  };
+
+  (i32 $value:expr) => {
+    v8::Integer::new(scope, $value)
+  };
+
+  (f64 $value:expr) => {
+    v8::Number::new(scope, $value)
+  };
+
+  ($enum:ident, $($variant:tt),*) => {
+    impl Stateful for $enum {
+      fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+        match self {
+          $(
+            $enum::$variant(e) => e.handle(data_access, event),
+          )*
+        }
+      }
+
+      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> StateMachine {
+        match self {
+          $(
+            $enum::$variant(e) => e.handle_op(data_access, op),
+          )*
+        }
+      }
+    }
+  }
+}
