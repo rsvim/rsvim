@@ -1,6 +1,5 @@
 use super::converter::*;
 use crate::tests::js::*;
-use crate::to_v8_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
