@@ -285,44 +285,35 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident [$($property:tt),*] [$($optional_property:tt),*] [$($constant:tt),*] [$($optional_constant:tt),*]) => {
+  ($name:ident [$($property:tt),*] [$($optional_property:tt),*]) => {
     paste::paste! {
       impl StructFromV8 for $name {
         fn from_v8<'s>(
           scope: &mut v8::PinScope<'s, '_>,
-          value: v8::Local<'s, v8::Object>,
+          obj: v8::Local<'s, v8::Object>,
         ) -> Self {
           let mut builder = [< $name Builder >]::default();
 
           // properties
           $(
-            let [< $property _value >] = self.$property.to_v8(scope);
-            $crate::js::binding::set_property_to(scope, obj, [< $property:snake:upper >], [< $property _value >]);
+            let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
+            debug_assert!(obj.has_own_property(scope, [< $property _name >]).unwrap_or(false));
+            let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
+            builder.$property(from_v8(scope, [< $property _value >]));
           )*
 
           // optional properties
           $(
-            if let Some($optional_property) = &self.$optional_property {
-              let [< $optional_property _value >] = $optional_property.to_v8(scope);
-              $crate::js::binding::set_property_to(scope, obj, [< $optional_property:snake:upper >], [< $optional_property _value >]);
+            let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
+            if obj.has_own_property(scope, [< $property _name >]).unwrap_or(false) {
+              let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
+              builder.$property(Some(from_v8(scope, [< $property _value >])));
+            } else {
+              builder.$property(None);
             }
           )*
 
-          // constants
-          $(
-            let [< $constant _value >] = self.$constant.to_v8(scope);
-            $crate::js::binding::set_constant_to(scope, obj, [< $constant:snake:upper >], [< $constant _value >]);
-          )*
-
-          // optional constants
-          $(
-            if let Some($optional_constant) = &self.$optional_constant {
-              let [< $optional_constant _value >] = $optional_constant.to_v8(scope);
-              $crate::js::binding::set_constant_to(scope, obj, [< $optional_constant:snake:upper >], [< $optional_constant _value >]);
-            }
-          )*
-
-          obj
+          builder.build().unwrap()
         }
       }
     }
