@@ -79,9 +79,9 @@ pub fn encode_into<'s>(
 
   let rv_obj = v8::Object::new(scope);
   let read_value = (read as f64).to_v8(scope);
-  binding::set_property_to(scope, rv_obj, "read", read_value);
+  binding::set_property_to(scope, rv_obj, "read", read_value.into());
   let written_value = (written as f64).to_v8(scope);
-  binding::set_property_to(scope, rv_obj, "written", written_value);
+  binding::set_property_to(scope, rv_obj, "written", written_value.into());
 
   rv.set(rv_obj.into());
 }
