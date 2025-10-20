@@ -286,83 +286,36 @@ macro_rules! to_v8_impl {
 #[macro_export]
 macro_rules! from_v8_impl {
   ($name:ident [$(($ty:tt,$prop:tt))*] [$(($opt_ty:tt,$opt_prop:tt))*]) => {
+    paste::paste!{
       impl StructFromV8 for $name {
         fn from_v8<'s>(
           scope: &mut v8::PinScope<'s, '_>,
           obj: v8::Local<'s, v8::Object>,
         ) -> Self {
-          paste::paste!{
           let mut builder = [< $name Builder >]::default();
-          }
 
           // properties
-          from_v8_impl! {@each_prop {} $(($ty,$prop))*}
+          $(
+            let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
+            debug_assert!(obj.has_own_prop(scope, [< $prop _name >]).unwrap_or(false));
+            let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
+            builder.$prop($ty::from_v8(scope, [< $prop _value >]));
+          )*
 
           // optional properties
-          from_v8_impl! {@each_optional_prop {} $(($opt_ty,$opt_prop))*}
+          $(
+            let [< $opt_prop _name >] = [< $opt_prop:snake:upper >].to_v8(scope);
+            if obj.has_own_prop(scope, [< $opt_prop _name >]).unwrap_or(false) {
+              let [< $opt_prop _value >] = obj.get(scope, [< $opt_prop _name >]).unwrap();
+              builder.$opt_prop(Some($opt_ty::from_v8(scope, [< $opt_prop _value >])));
+            } else {
+              builder.$opt_prop(None);
+            }
+          )*
 
           builder.build().unwrap()
         }
-    }
-  };
-
-  (@each_prop {$($collect:tt)*} ($ty:tt,$prop:tt) $(($rest_ty:tt,$rest_prop:tt))+) => {
-    from_v8_impl! {@each_prop{
-      $($collect)*
-
-    paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
-      debug_assert!(obj.has_own_prop(scope, [< $prop _name >]).unwrap_or(false));
-      let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
-      builder.$prop($ty::from_v8(scope, [< $prop _value >]));
-        }
-
-    } $(($rest_ty,$rest_prop))+}
-  };
-
-  (@each_prop{$($collect:tt)*} ($ty:tt,$prop:tt)) => {
-    from_v8_impl! {@each_prop{
-      $($collect)*
-
-      paste::paste! {
-        let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
-        debug_assert!(obj.has_own_prop(scope, [< $prop _name >]).unwrap_or(false));
-        let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
-        builder.$prop($ty::from_v8(scope, [< $prop _value >]));
-      }
-    }}
-  };
-
-  (@each_optional_prop{$($collect:tt)*} ($ty:tt,$prop:tt) $(($rest_ty:tt,$rest_prop:tt))+) => {
-    from_v8_impl! {@each_optional_prop{
-      $($collect)*
-
-    paste::paste! {
-      let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
-      if obj.has_own_prop(scope, [< $prop _name >]).unwrap_or(false) {
-        let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
-        builder.$prop(Some($ty::from_v8(scope, [< $prop _value >])));
-      } else {
-        builder.$prop(None);
       }
     }
-
-    } $(($rest_ty,$rest_prop))+}
-  };
-
-  (@each_optional_prop{$($collect:tt)*} ($ty:tt,$prop:tt)) => {
-    from_v8_impl! {@each_optional_prop{
-      $($collect)*
-
-      paste::paste! {
-        let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
-        if obj.has_own_prop(scope, [< $prop _name >]).unwrap_or(false) {
-          let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
-          builder.$prop(Some($ty::from_v8(scope, [< $prop _value >])));
-        } else {
-          builder.$prop(None);
-        }
-      }
-    }}
   };
 }
