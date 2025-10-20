@@ -254,6 +254,10 @@ macro_rules! to_v8 {
     v8::Number::new(scope, $value)
   };
 
+  (str $value:expr) => {
+    v8::String::new(scope, $value).unwrap()
+  };
+
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
       fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
