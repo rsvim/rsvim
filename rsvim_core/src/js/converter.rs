@@ -234,3 +234,34 @@ pub trait StructFromV8 {
     value: v8::Local<'s, v8::Object>,
   ) -> Self;
 }
+
+/// Implement struct to/from v8 helpers
+#[macro_export]
+macro_rules! to_v8_impl {
+  ($name:ident [$($property:tt),*] [$($constant:tt),*]) => {
+    paste::paste! {
+      impl StructToV8 for $name {
+        fn to_v8<'s>(
+          &self,
+          scope: &mut v8::PinScope<'s, '_>,
+        ) -> v8::Local<'s, v8::Object> {
+          let obj = v8::Object::new(scope);
+
+          // properties
+          $(
+            let [< $property _value >] = self.$property.to_v8(scope);
+            $crate::js::binding::set_property_to(scope, obj, [< $property:snake:upper >], [< $property _value >]);
+          )*
+
+          // constants
+          $(
+            let [< $constant _value >] = self.$constant.to_v8(scope);
+            $crate::js::binding::set_constant_to(scope, obj, [< $constant:snake:upper >], [< $constant _value >]);
+          )*
+
+          obj
+        }
+      }
+    }
+  };
+}
