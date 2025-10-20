@@ -292,7 +292,7 @@ macro_rules! from_v8_impl {
           scope: &mut v8::PinScope<'s, '_>,
           value: v8::Local<'s, v8::Object>,
         ) -> Self {
-          let obj = v8::Object::new(scope);
+          let mut builder = [< $name Builder >]::default();
 
           // properties
           $(
