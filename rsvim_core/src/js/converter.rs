@@ -234,6 +234,13 @@ pub trait StructFromV8 {
   ) -> Self;
 }
 
+pub trait StructFromV8CallbackArguments {
+  fn from_v8_callback_arguments<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    args: v8::FunctionCallbackArguments<'s>,
+  ) -> Self;
+}
+
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {

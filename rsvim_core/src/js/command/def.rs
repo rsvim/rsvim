@@ -39,13 +39,13 @@ impl Debug for CommandDefinition {
   }
 }
 
-impl FromV8CallbackArguments for CommandDefinition {
+impl StructFromV8CallbackArguments for CommandDefinition {
   fn from_v8_callback_arguments<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Self {
     debug_assert!(args.length() == 4);
-    let name = args.get(0).to_rust_string_lossy(scope);
+    let name = String::from_v8(scope, args.get(0));
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     let attributes = CommandAttributes::from_v8(scope, args.get(2));
