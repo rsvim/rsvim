@@ -353,3 +353,10 @@ macro_rules! is_v8_nil {
     $value.is_null_or_undefined()
   };
 }
+
+#[macro_export]
+macro_rules! is_v8_int {
+  ($value:expr) => {
+    $value.is_int32() || $value.is_uint32()
+  };
+}

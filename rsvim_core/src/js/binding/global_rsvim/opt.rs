@@ -3,6 +3,7 @@
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::is_v8_bool;
+use crate::is_v8_int;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -49,7 +50,6 @@ pub fn get_line_break(
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(_args.length() == 0);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
   let tree = lock!(tree);
@@ -96,7 +96,8 @@ pub fn set_tab_stop<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0));
+  debug_assert!(is_v8_int!(args.get(0)));
+  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
