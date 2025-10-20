@@ -304,5 +304,7 @@ macro_rules! to_v8 {
 
     to_v8!{@each_prop($scope,obj,$value){} $($property)*}
     to_v8!{@each_const($scope,obj,$value){} $($constant)*}
+
+    obj
   };
 }
