@@ -42,9 +42,9 @@ pub fn list(
   let buffers = lock!(buffers);
   trace!("Rsvim.buf.list: {:?}", buffers.keys());
 
-  let bufs = to_v8::<Vec<BufferId>>(scope, buffers.keys().copied().collect());
+  let bufs = buffers.keys().collect::<Vec<_>>().to_v8(scope);
 
-  rv.set(bufs);
+  rv.set(bufs.into());
 }
 
 /// `Rsvim.buf.writeSync` API.
@@ -54,7 +54,8 @@ pub fn write_sync<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let buf_id = from_v8::<BufferId>(scope, args.get(0));
+  debug_assert!(args.get(0).is_int32());
+  let buf_id = BufferId::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("Rsvim.buf.writeSync: {:?}", buf_id);
 
   let state_rc = JsRuntime::state(scope);

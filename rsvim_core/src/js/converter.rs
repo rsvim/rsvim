@@ -182,14 +182,14 @@ impl StringFromV8 for String {
 }
 
 pub trait VecToV8<T> {
-  fn to_v8<'s, F>(
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Array>;
 }
 
 impl<T> VecToV8<T> for Vec<T> {
-  fn to_v8<'s, F>(
+  fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Array> {
@@ -199,14 +199,14 @@ impl<T> VecToV8<T> for Vec<T> {
 }
 
 pub trait VecFromV8<T> {
-  fn from_v8<'s, F>(
+  fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Array>,
   ) -> Self;
 }
 
 impl<T> VecFromV8<T> for Vec<T> {
-  fn from_v8<'s, F>(
+  fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     elements: v8::Local<'s, v8::Array>,
   ) -> Self {
