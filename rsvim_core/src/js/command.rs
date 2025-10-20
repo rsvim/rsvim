@@ -10,7 +10,6 @@ mod attr_tests;
 #[cfg(test)]
 mod opt_tests;
 
-use crate::from_v8_impl;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsTaskId;
@@ -20,7 +19,6 @@ use crate::js::converter::*;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
-use crate::to_v8_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
