@@ -285,7 +285,7 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident [$($property:tt)*] [$($optional_property:tt)*]) => {
+  ($name:ident [$($property:tt)+] [$($optional_property:tt)+]) => {
     paste::paste! {
       impl StructFromV8 for $name {
         fn from_v8<'s>(
@@ -295,10 +295,10 @@ macro_rules! from_v8_impl {
           let mut builder = [< $name Builder >]::default();
 
           // properties
-          from_v8_impl! {@each_prop($name){} $($property)*}
+          from_v8_impl! {@each_prop($name){} $($property)+}
 
           // optional properties
-          from_v8_impl! {@each_optional_prop($name){} $($optional_property)*}
+          from_v8_impl! {@each_optional_prop($name){} $($optional_property)+}
 
           builder.build().unwrap()
         }
@@ -306,7 +306,7 @@ macro_rules! from_v8_impl {
     }
   };
 
-  (@each_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)*) => {
+  (@each_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
     from_v8_impl! {@each_prop($name){
       $($collect)*
 
@@ -324,7 +324,7 @@ macro_rules! from_v8_impl {
     }}
   };
 
-  (@each_optional_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)*) => {
+  (@each_optional_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
     from_v8_impl! {@each_optional_prop($name){
       $($collect)*
 
