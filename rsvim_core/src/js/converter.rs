@@ -1,6 +1,7 @@
 //! Converters between rust and v8 values.
 
 use compact_str::CompactString;
+use std::rc::Rc;
 
 pub trait U32ToV8 {
   fn to_v8<'s>(
@@ -177,6 +178,38 @@ impl StringFromV8 for String {
     value: v8::Local<'s, v8::String>,
   ) -> Self {
     value.to_rust_string_lossy(scope)
+  }
+}
+
+pub trait CallbackToV8 {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Function>;
+}
+
+impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Function> {
+    v8::Local::new(scope, (*self.callback).clone())
+  }
+}
+
+pub trait CallbackFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Function>,
+  ) -> Self;
+}
+
+impl CallbackFromV8 for Rc<v8::Global<v8::Function>> {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    callback: v8::Local<'s, v8::Function>,
+  ) -> Self {
+    Rc::new(v8::Global::new(scope, callback))
   }
 }
 
