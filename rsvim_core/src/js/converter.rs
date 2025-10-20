@@ -201,14 +201,14 @@ pub trait VecFromV8<T> {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Array>,
-  ) -> Self;
+  ) -> Vec<T>;
 }
 
 impl<T> VecFromV8<T> for Vec<T> {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     elements: v8::Local<'s, v8::Array>,
-  ) -> Self {
+  ) -> Vec<T> {
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
     for i in 0..n {

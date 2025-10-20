@@ -1,7 +1,5 @@
 use super::converter::*;
 use crate::tests::js::*;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 #[test]
 #[cfg_attr(miri, ignore)]
