@@ -85,10 +85,13 @@ pub fn list(
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
 
-  let commands =
-    to_v8::<Vec<CompactString>>(scope, commands.keys().cloned().collect());
+  let commands = commands
+    .keys()
+    .cloned()
+    .collect::<Vec<CompactString>>()
+    .to_v8(scope);
 
-  rv.set(commands);
+  rv.set(commands.into());
 }
 
 /// `Rsvim.cmd.get` API.
