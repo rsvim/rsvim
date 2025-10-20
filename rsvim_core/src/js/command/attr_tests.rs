@@ -29,15 +29,15 @@ fn test_converter1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = CommandAttributesBuilder::default().build().unwrap();
-  let obj1 = to_v8(scope, a1.clone());
-  let val1 = from_v8::<CommandAttributes>(scope, obj1);
+  let obj1 = a1.to_v8(scope);
+  let val1 = CommandAttributes::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
   let a2 = CommandAttributesBuilder::default()
     .nargs(Nargs::Any)
     .build()
     .unwrap();
-  let obj2 = to_v8(scope, a2.clone());
-  let val2 = from_v8::<CommandAttributes>(scope, obj2);
+  let obj2 = a2.to_v8(scope);
+  let val2 = CommandAttributes::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }
