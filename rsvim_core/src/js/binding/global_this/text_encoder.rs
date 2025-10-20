@@ -3,6 +3,7 @@
 mod decoder;
 
 use crate::js::binding;
+use crate::js::binding::global_this::text_encoder::decoder::TextDecoderBuilder;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
@@ -126,7 +127,13 @@ pub fn create_decoder<'s>(
     .unwrap()
     .boolean_value(scope);
 
-  let decoder = TextDecoder::new(options._internal_flags(), encoding);
+  let decoder = TextDecoderBuilder::default()
+    .encoding(encoding)
+    .fatal(fatal)
+    .ignore_bom(ignore_bom)
+    .build()
+    .unwrap();
+
   let decoder = decoder.to_v8(scope);
   rv.set(decoder.into());
 }
