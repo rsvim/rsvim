@@ -184,22 +184,15 @@ pub trait VecToV8<T> {
   fn to_v8<'s, F>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-    f: F,
-  ) -> v8::Local<'s, v8::Array>
-  where
-    F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>;
+  ) -> v8::Local<'s, v8::Array>;
 }
 
 impl<T> VecToV8<T> for Vec<T> {
   fn to_v8<'s, F>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-    f: F,
-  ) -> v8::Local<'s, v8::Array>
-  where
-    F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
-  {
-    let elements = self.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
+  ) -> v8::Local<'s, v8::Array> {
+    let elements = self.iter().map(|v| v.to_v8(scope)).collect::<Vec<_>>();
     v8::Array::new_with_elements(scope, &elements)
   }
 }

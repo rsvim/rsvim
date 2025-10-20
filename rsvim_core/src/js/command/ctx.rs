@@ -34,10 +34,8 @@ impl ToV8 for CommandContext {
     binding::set_property_to(scope, obj, BANG, bang_value);
 
     // args
-    if let Some(args) = self.args.clone() {
-      let args_value = args.to_v8(scope);
-      binding::set_property_to(scope, obj, ARGS, args_value);
-    }
+    let args_value = self.args.to_v8(scope, |scope, a| a.to_v8(scope));
+    binding::set_property_to(scope, obj, ARGS, args_value);
 
     obj.into()
   }
