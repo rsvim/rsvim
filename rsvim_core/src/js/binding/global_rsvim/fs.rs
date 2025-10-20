@@ -25,7 +25,8 @@ pub fn open<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
-  let options = FsOpenOptions::from_v8(scope, args.get(1));
+  let options =
+    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.open:{:?} {:?}", filename, options);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
@@ -67,7 +68,8 @@ pub fn open_sync<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let filename = args.get(0).to_rust_string_lossy(scope);
-  let options = FsOpenOptions::from_v8(scope, args.get(1));
+  let options =
+    FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.openSync:{:?} {:?}", filename, options);
 
   let filename = Path::new(&filename);
