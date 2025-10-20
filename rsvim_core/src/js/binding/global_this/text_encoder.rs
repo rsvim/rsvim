@@ -121,8 +121,10 @@ pub fn decode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
-  let decoder_wrapper = Decoder::from_v8(scope, args.get(0));
+  let decoder = Decoder::from_v8(scope, args.get(0));
   let payload = args.get(1);
+  debug_assert!(payload.is_uint8_array());
+  let payload = payload.cast::<v8::Uint8Array>();
   let options = args.get(2);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
