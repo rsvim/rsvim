@@ -238,7 +238,7 @@ pub trait StructFromV8 {
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident [$($prop:tt)*] [$($opt_prop:tt)*] [$($constant:tt)*] [$($opt_constant:tt)*]) => {
+  ($name:ident [$($prop:tt)*] [$($optional_prop:tt)*] [$($constant:tt)*] [$($opt_constant:tt)*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -255,9 +255,9 @@ macro_rules! to_v8_impl {
 
           // optional properties
           $(
-            if let Some($opt_prop) = &self.$opt_prop {
-              let [< $opt_prop _value >] = $opt_prop.to_v8(scope);
-              $crate::js::binding::set_property_to(scope, obj, [< $opt_prop:snake:upper >], [< $opt_prop _value >]);
+            if let Some($optional_prop) = &self.$optional_prop {
+              let [< $optional_prop _value >] = $optional_prop.to_v8(scope);
+              $crate::js::binding::set_property_to(scope, obj, [< $optional_prop:snake:upper >], [< $optional_prop _value >]);
             }
           )*
 
@@ -285,7 +285,7 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident [$(($ty:tt,$prop:tt))*] [$(($opt_ty:tt,$opt_prop:tt))*]) => {
+  ($name:ident [$(($ty:tt,$prop:tt))*] [$(($optional_ty:tt,$optional_prop:tt))*]) => {
     paste::paste!{
       impl StructFromV8 for $name {
         fn from_v8<'s>(
@@ -304,12 +304,12 @@ macro_rules! from_v8_impl {
 
           // optional properties
           $(
-            let [< $opt_prop _name >] = [< $opt_prop:snake:upper >].to_v8(scope);
-            if obj.has_own_prop(scope, [< $opt_prop _name >]).unwrap_or(false) {
-              let [< $opt_prop _value >] = obj.get(scope, [< $opt_prop _name >]).unwrap();
-              builder.$opt_prop(Some($opt_ty::from_v8(scope, [< $opt_prop _value >])));
+            let [< $optional_prop _name >] = [< $optional_prop:snake:upper >].to_v8(scope);
+            if obj.has_own_prop(scope, [< $optional_prop _name >]).unwrap_or(false) {
+              let [< $optional_prop _value >] = obj.get(scope, [< $optional_prop _name >]).unwrap();
+              builder.$optional_prop(Some($opt_ty::from_v8(scope, [< $optional_prop _value >])));
             } else {
-              builder.$opt_prop(None);
+              builder.$optional_prop(None);
             }
           )*
 
