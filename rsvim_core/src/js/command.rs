@@ -10,6 +10,7 @@ mod attr_tests;
 #[cfg(test)]
 mod opt_tests;
 
+use crate::from_v8_impl;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsTaskId;
@@ -19,6 +20,7 @@ use crate::js::converter::*;
 use crate::js::execute_module;
 use crate::js::next_task_id;
 use crate::prelude::*;
+use crate::to_v8_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use def::CommandDefinitionRc;
@@ -47,8 +49,7 @@ impl JsFuture for CommandFuture {
       let def = self.definition.clone().unwrap();
       let undefined = v8::undefined(scope).into();
       let callback = v8::Local::new(scope, (*def.callback).clone());
-      let args: Vec<v8::Local<v8::Value>> =
-        vec![to_v8(scope, self.context.clone())];
+      let args: Vec<v8::Local<v8::Value>> = vec![self.context.to_v8(scope)];
 
       v8::tc_scope!(let tc_scope, scope);
 
