@@ -24,23 +24,19 @@ pub const ENCODING_DEFAULT: &str = "utf-8";
 const FLAGS: Flags = Flags::empty();
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
-pub struct Decoder {
+pub struct TextDecoder {
   #[builder(default = FLAGS)]
   #[builder(setter(custom))]
   // fatal
   // ignoreBOM
   flags: Flags,
 
-  pub encoding: CompactString,
+  encoding: CompactString,
 }
 
-flags_builder_impl!(Decoder, flags, Flags, fatal, ignore_bom);
+flags_builder_impl!(TextDecoder, flags, Flags, fatal, ignore_bom);
 
-impl Decoder {
-  pub fn new(flags: Flags, encoding: CompactString) -> Self {
-    Self { flags, encoding }
-  }
-
+impl TextDecoder {
   pub fn fatal(&self) -> bool {
     self.flags.contains(Flags::FATAL)
   }
@@ -48,11 +44,15 @@ impl Decoder {
   pub fn ignore_bom(&self) -> bool {
     self.flags.contains(Flags::IGNORE_BOM)
   }
+
+  pub fn encoding(&self) -> &str {
+    &self.encoding
+  }
 }
 
 from_v8_impl!(
-  Decoder,
+  TextDecoder,
   [(String, encoding), (bool, fatal), (bool, ignore_bom)],
   []
 );
-to_v8_impl!(Decoder, [encoding, fatal, ignore_bom], [], [], []);
+to_v8_impl!(TextDecoder, [encoding, fatal, ignore_bom], [], [], []);

@@ -6,7 +6,7 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
-use decoder::Decoder;
+use decoder::TextDecoder;
 use decoder::DecoderOptions;
 
 #[allow(deprecated)]
@@ -116,7 +116,7 @@ pub fn create_decoder<'s>(
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let decoder = Decoder::new(options._internal_flags(), encoding);
+  let decoder = TextDecoder::new(options._internal_flags(), encoding);
   let decoder = decoder.to_v8(scope);
   rv.set(decoder.into());
 }
@@ -128,7 +128,7 @@ pub fn decode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
-  let decoder = Decoder::from_v8(scope, args.get(0));
+  let decoder = TextDecoder::from_v8(scope, args.get(0));
 
   let payload = args.get(1);
   debug_assert!(payload.is_uint8_array());
