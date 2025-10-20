@@ -263,12 +263,30 @@ macro_rules! to_v8 {
     v8::Array::new_with_elements($scope, &elements)
   };
 
+  (@each_const($scope:ident, $object:ident, $value:expr){$($collect:tt)*} $i:ident $name:tt $($rest:tt)*) => {
+    to_v8! {@each_const($scope,$object,$value){
+      $($collect)*
+
+    paste::paste! {
+      let [< $i _value >] = to_v8!($scope, $value.$i);
+      binding::set_constant_to($scope, $object, $name, [< $i _value >]);
+    }
+
+    } $($rest)*}
+  };
+
+  (@each_const($scope:ident, $object:ident, $value:expr){$($collect:tt)*}) => {
+    to_v8! {@each_const($scope,$object,$value){
+      $($collect)*
+    }}
+  };
+
   (@each_prop($scope:ident, $object:ident, $value:expr){$($collect:tt)*} $i:ident $name:tt $($rest:tt)*) => {
     to_v8! {@each_prop($scope,$object,$value){
       $($collect)*
 
     paste::paste! {
-      let [< $i _value >] = to_v8!($scope, self.$i);
+      let [< $i _value >] = to_v8!($scope, $value.$i);
       binding::set_property_to($scope, $object, $name, [< $i _value >]);
     }
 
@@ -282,6 +300,9 @@ macro_rules! to_v8 {
   };
 
   (obj $scope:ident, $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
+    let obj = v8::Object::new($scope);
 
+    to_v8!{@each_prop($scope,obj,$value){} $($prop)*}
+    to_v8!{@each_const($scope,obj,$value){} $($constant)*}
   };
 }
