@@ -5,7 +5,6 @@ use crate::flags_impl;
 use crate::from_v8_impl;
 use crate::js::converter::*;
 use crate::to_v8_impl;
-use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -31,7 +30,7 @@ pub struct TextDecoder {
   // ignoreBOM
   flags: Flags,
 
-  encoding: CompactString,
+  encoding: String,
 }
 
 flags_builder_impl!(TextDecoder, flags, fatal, ignore_bom);
