@@ -102,13 +102,14 @@ pub fn create_decoder<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  let encoding = String::from_v8(scope, args.get(0)).to_compact_string();
+  let mut encoding = String::from_v8(scope, args.get(0)).to_compact_string();
 
   if let Ok(cp) = str::parse::<u16>(&encoding) {
 
   } else if {
 
-  }
+  };
+
   if codepage::to_encoding(code_page::)
 
 
