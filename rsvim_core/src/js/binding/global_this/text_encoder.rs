@@ -2,6 +2,7 @@
 
 mod decoder;
 
+use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::decoder::TextDecoderBuilder;
@@ -109,24 +110,26 @@ pub fn create_decoder<'s>(
   let mut encoding =
     args.get(0).to_rust_string_lossy(scope).to_compact_string();
 
-  debug_assert!(args.get(1).is_object());
+  debug_assert!(is_v8_obj!(args.get(1)));
   let options = args.get(1).to_object(scope).unwrap();
+  let fatal_name = FATAL.to_v8(scope);
   debug_assert!(
     options
-      .has_own_property(scope, FATAL.to_v8(scope))
+      .has_own_property(scope, fatal_name.into())
       .unwrap_or(false)
   );
   let fatal = options
-    .get(scope, FATAL.to_v8(scope))
+    .get(scope, fatal_name.into())
     .unwrap()
     .boolean_value(scope);
+  let ignore_bom_name = IGNORE_BOM.to_v8(scope);
   debug_assert!(
     options
-      .has_own_property(scope, IGNORE_BOM.to_v8(scope))
+      .has_own_property(scope, ignore_bom_name.into())
       .unwrap_or(false)
   );
   let ignore_bom = options
-    .get(scope, IGNORE_BOM.to_v8(scope))
+    .get(scope, ignore_bom_name.into())
     .unwrap()
     .boolean_value(scope);
 
