@@ -6,8 +6,9 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
+use decoder::FATAL;
+use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
-use decoder::DecoderOptions;
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
@@ -104,18 +105,26 @@ pub fn create_decoder<'s>(
   debug_assert!(args.length() == 2);
   let mut encoding = String::from_v8(scope, args.get(0)).to_compact_string();
 
-  if let Ok(cp) = str::parse::<u16>(&encoding) {
-
-  } else if {
-
-  };
-
-  if codepage::to_encoding(code_page::)
-
-
-  let options = args.get(1);
-  debug_assert!(options.is_object());
-  let options = DecoderOptions::from_v8(scope, options);
+  debug_assert!(args.get(1).is_object());
+  let options = args.get(1).to_object(scope).unwrap();
+  debug_assert!(
+    options
+      .has_own_property(scope, FATAL.to_v8(scope))
+      .unwrap_or(false)
+  );
+  let fatal = options
+    .get(scope, FATAL.to_v8(scope))
+    .unwrap()
+    .boolean_value(scope);
+  debug_assert!(
+    options
+      .has_own_property(scope, IGNORE_BOM.to_v8(scope))
+      .unwrap_or(false)
+  );
+  let ignore_bom = options
+    .get(scope, IGNORE_BOM.to_v8(scope))
+    .unwrap()
+    .boolean_value(scope);
 
   let decoder = TextDecoder::new(options._internal_flags(), encoding);
   let decoder = decoder.to_v8(scope);
