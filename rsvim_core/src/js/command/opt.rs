@@ -43,5 +43,5 @@ impl CommandOptions {
   }
 }
 
-from_v8_impl!(CommandOptions[force][alias]);
-to_v8_impl!(CommandOptions [force] [alias] [] []);
+from_v8_impl!(CommandOptions, [force], [alias]);
+to_v8_impl!(CommandOptions, [force], [alias], [], []);
