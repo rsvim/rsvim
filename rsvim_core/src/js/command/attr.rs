@@ -4,6 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js::binding;
 use crate::js::converter::*;
+use crate::to_v8;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use std::str::FromStr;
@@ -111,11 +112,11 @@ impl ToV8 for CommandAttributes {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_value = to_v8(scope, self.bang());
+    let bang_value = to_v8!(bool scope, self.bang());
     binding::set_property_to(scope, obj, BANG, bang_value);
 
     // nargs
-    let nargs_value = to_v8(scope, self.nargs.to_compact_string());
+    let nargs_value = to_v8!(bool scope, self.nargs.to_compact_string());
     binding::set_property_to(scope, obj, NARGS, nargs_value);
 
     obj.into()
