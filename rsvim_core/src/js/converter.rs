@@ -235,7 +235,7 @@ pub trait StructFromV8 {
   ) -> Self;
 }
 
-/// Implement struct to/from v8 helpers
+/// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
   ($name:ident [$($property:tt),*] [$($optional_property:tt),*] [$($constant:tt),*] [$($optional_constant:tt),*]) => {
@@ -245,6 +245,53 @@ macro_rules! to_v8_impl {
           &self,
           scope: &mut v8::PinScope<'s, '_>,
         ) -> v8::Local<'s, v8::Object> {
+          let obj = v8::Object::new(scope);
+
+          // properties
+          $(
+            let [< $property _value >] = self.$property.to_v8(scope);
+            $crate::js::binding::set_property_to(scope, obj, [< $property:snake:upper >], [< $property _value >]);
+          )*
+
+          // optional properties
+          $(
+            if let Some($optional_property) = &self.$optional_property {
+              let [< $optional_property _value >] = $optional_property.to_v8(scope);
+              $crate::js::binding::set_property_to(scope, obj, [< $optional_property:snake:upper >], [< $optional_property _value >]);
+            }
+          )*
+
+          // constants
+          $(
+            let [< $constant _value >] = self.$constant.to_v8(scope);
+            $crate::js::binding::set_constant_to(scope, obj, [< $constant:snake:upper >], [< $constant _value >]);
+          )*
+
+          // optional constants
+          $(
+            if let Some($optional_constant) = &self.$optional_constant {
+              let [< $optional_constant _value >] = $optional_constant.to_v8(scope);
+              $crate::js::binding::set_constant_to(scope, obj, [< $optional_constant:snake:upper >], [< $optional_constant _value >]);
+            }
+          )*
+
+          obj
+        }
+      }
+    }
+  };
+}
+
+/// Implement struct's from_v8 helpers
+#[macro_export]
+macro_rules! from_v8_impl {
+  ($name:ident [$($property:tt),*] [$($optional_property:tt),*] [$($constant:tt),*] [$($optional_constant:tt),*]) => {
+    paste::paste! {
+      impl StructFromV8 for $name {
+        fn from_v8<'s>(
+          scope: &mut v8::PinScope<'s, '_>,
+          value: v8::Local<'s, v8::Object>,
+        ) -> Self {
           let obj = v8::Object::new(scope);
 
           // properties
