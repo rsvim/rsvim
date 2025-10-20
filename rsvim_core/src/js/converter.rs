@@ -267,6 +267,14 @@ macro_rules! to_v8_impl {
             $crate::js::binding::set_constant_to(scope, obj, [< $constant:snake:upper >], [< $constant _value >]);
           )*
 
+          // optional constants
+          $(
+            if let Some($optional_constant) = &self.$optional_constant {
+              let [< $optional_constant _value >] = $optional_constant.to_v8(scope);
+              $crate::js::binding::set_constant_to(scope, obj, [< $optional_constant:snake:upper >], [< $optional_constant _value >]);
+            }
+          )*
+
           obj
         }
       }
