@@ -76,12 +76,15 @@ fn test_array1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1: Vec<i32> = vec![1, 2, 3];
-  let obj1 = a1.to_v8(scope);
-  let val1 = Vec::from_v8::<Vec<i32>>(scope, obj1);
+  let obj1 = a1.to_v8(scope, |scope, a| a.to_v8(scope).into());
+  let val1 = Vec::from_v8(scope, obj1, |scope, v| {
+    i32::from_v8(scope, v.to_integer(scope).unwrap())
+  });
   assert_eq!(val1, a1);
 
   let a2: Vec<String> = vec!["a".to_string(), "b".to_string(), "c".to_string()];
-  let obj2 = a2.to_v8(scope);
-  let val2 = Vec::from_v8::<Vec<String>>(scope, obj2);
+  let obj2 = a2.to_v8(scope, |scope, a| a.to_v8(scope).into());
+  let val2 =
+    Vec::from_v8(scope, obj2, |scope, v| v.to_rust_string_lossy(scope));
   assert_eq!(val2, a2);
 }
