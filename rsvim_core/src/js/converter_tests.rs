@@ -30,13 +30,13 @@ fn test_number1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = 1.23_f64;
-  let obj1 = to_v8(scope, a1);
-  let val1 = from_v8::<f64>(scope, obj1);
+  let obj1 = a1.to_v8(scope);
+  let val1 = f64::from_v8(scope, obj1);
   assert_eq!(val1, a1);
 
   let a2 = 8_f64;
-  let obj2 = to_v8(scope, a2);
-  let val2 = from_v8::<f64>(scope, obj2);
+  let obj2 = a2.to_v8(scope);
+  let val2 = f64::from_v8(scope, obj2);
   assert_eq!(val2, a2);
 }
 
