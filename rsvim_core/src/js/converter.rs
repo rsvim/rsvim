@@ -237,7 +237,7 @@ pub trait StructFromV8 {
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident [$($prop:tt)*] [$($optional_prop:tt)*] [$($constant:tt)*] [$($opt_constant:tt)*]) => {
+  ($name:ident, [$($prop:tt),*], [$($optional_prop:tt),*], [$($constant:tt),*], [$($opt_constant:tt),*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -284,7 +284,7 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident [$(($ty:tt,$prop:tt))*] [$(($optional_ty:tt,$optional_prop:tt))*]) => {
+  ($name:ident, [$(($ty:tt,$prop:tt)),*], [$(($optional_ty:tt,$optional_prop:tt)),*]) => {
     paste::paste!{
       impl StructFromV8 for $name {
         fn from_v8<'s>(
