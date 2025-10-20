@@ -181,18 +181,28 @@ impl StringFromV8 for String {
 }
 
 pub trait VecToV8<T> {
-  fn to_v8<'s>(
+  fn to_v8<'s, F>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Array>;
+    f: F,
+  ) -> v8::Local<'s, v8::Array>
+  where
+    F: FnMut(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
 }
 
 impl<T> VecToV8<T> for Vec<T> {
-  fn to_v8<'s>(
+  fn to_v8<'s, F>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Array> {
-    let elements = self.iter().map(|v| v.to_v8(scope)).collect::<Vec<_>>();
+    f: F,
+  ) -> v8::Local<'s, v8::Array>
+  where
+    F: FnMut(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
+  {
+    let elements = self
+      .iter()
+      .map(|v| f(scope, v))
+      .collect::<Vec<v8::Local<'s, v8::Value>>>();
     v8::Array::new_with_elements(scope, &elements)
   }
 }
