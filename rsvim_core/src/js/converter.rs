@@ -298,15 +298,7 @@ macro_rules! from_v8_impl {
           from_v8_impl! {@each_prop($name){} $($property)*}
 
           // optional properties
-          $(
-            let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
-            if obj.has_own_property(scope, [< $property _name >]).unwrap_or(false) {
-              let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
-              builder.$property(Some(from_v8(scope, [< $property _value >])));
-            } else {
-              builder.$property(None);
-            }
-          )*
+          from_v8_impl! {@each_optional_prop($name){} $($optional_property)*}
 
           builder.build().unwrap()
         }
