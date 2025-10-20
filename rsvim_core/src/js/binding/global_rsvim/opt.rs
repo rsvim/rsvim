@@ -4,6 +4,7 @@ use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
 use crate::is_v8_bool;
 use crate::is_v8_int;
+use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -161,7 +162,8 @@ pub fn set_shift_width<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0));
+  debug_assert!(is_v8_int!(args.get(0)));
+  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -185,7 +187,8 @@ pub fn get_file_encoding(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
-  rv.set(to_v8(scope, value.to_compact_string()));
+  let value = value.to_compact_string().to_v8(scope);
+  rv.set(value.into());
 }
 
 /// Set the _file-encoding_ option.
@@ -195,7 +198,8 @@ pub fn set_file_encoding<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -217,7 +221,8 @@ pub fn get_file_format(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
-  rv.set(to_v8(scope, value.to_compact_string()));
+  let value = value.to_compact_string().to_v8(scope);
+  rv.set(value.into());
 }
 
 /// Set the _file-format_ option.
@@ -227,7 +232,8 @@ pub fn set_file_format<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
