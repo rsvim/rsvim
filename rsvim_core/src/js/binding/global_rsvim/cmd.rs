@@ -100,17 +100,16 @@ pub fn get<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = from_v8::<CompactString>(scope, args.get(0));
+  debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
+  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap())
+    .to_compact_string();
   trace!("Rsvim.cmd.get:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
   match commands.get(&name) {
-    Some(def) => {
-      let def = to_v8(scope, Rc::unwrap_or_clone(def));
-      rv.set(def);
-    }
+    Some(def) => rv.set(def.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
 }
