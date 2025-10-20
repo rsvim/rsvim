@@ -123,7 +123,7 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   let decoder_wrapper = Decoder::from_v8(scope, args.get(0));
-  let payload = from_v8(scope, args.get(1));
+  let payload = String::from_v8(scope, args.get(1));
   let options = args.get(1);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
