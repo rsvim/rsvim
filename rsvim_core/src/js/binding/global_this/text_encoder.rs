@@ -127,8 +127,6 @@ pub fn decode<'s>(
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let decoder = 
-
   // encoding
   let encoding_value = name.to_v8(scope);
   binding::set_property_to(scope, decoder, "encoding", encoding_value);
