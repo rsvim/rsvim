@@ -250,14 +250,14 @@ macro_rules! to_v8_impl {
           // properties
           $(
             let [< $prop _value >] = self.$prop.to_v8(scope);
-            $crate::js::binding::set_prop_to(scope, obj, [< $prop:snake:upper >], [< $prop _value >]);
+            $crate::js::binding::set_property_to(scope, obj, [< $prop:snake:upper >], [< $prop _value >]);
           )*
 
           // optional properties
           $(
             if let Some($opt_prop) = &self.$opt_prop {
               let [< $opt_prop _value >] = $opt_prop.to_v8(scope);
-              $crate::js::binding::set_prop_to(scope, obj, [< $opt_prop:snake:upper >], [< $opt_prop _value >]);
+              $crate::js::binding::set_property_to(scope, obj, [< $opt_prop:snake:upper >], [< $opt_prop _value >]);
             }
           )*
 
