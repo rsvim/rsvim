@@ -8,7 +8,6 @@ use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 /// Get the _wrap_ option.
