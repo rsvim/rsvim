@@ -49,6 +49,7 @@ pub fn get_line_break(
   _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
+  debug_assert!(_args.length() == 0);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
   let tree = lock!(tree);
@@ -64,7 +65,8 @@ pub fn set_line_break<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0));
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
