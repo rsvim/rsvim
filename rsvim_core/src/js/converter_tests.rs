@@ -1,5 +1,6 @@
 use super::converter::*;
 use crate::tests::js::*;
+use crate::to_v8_impl;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 
@@ -11,7 +12,7 @@ fn test_integer1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = 10_i32;
-  let obj1 = to_v8(scope, a1);
+  let obj1 = a1.to_v8(scope);
   let val1 = from_v8::<i32>(scope, obj1);
   assert_eq!(val1, a1);
 
