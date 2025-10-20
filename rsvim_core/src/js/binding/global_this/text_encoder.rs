@@ -12,6 +12,7 @@ use compact_str::ToCompactString;
 use decoder::FATAL;
 use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
+use std::cell::Cell;
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
@@ -156,18 +157,22 @@ pub fn decode<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
-  let decoder = TextDecoder::from_v8(scope, args.get(0));
+  debug_assert!(is_v8_obj!(args.get(0)));
+  let decoder =
+    TextDecoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
 
-  let payload = args.get(1);
-  debug_assert!(payload.is_uint8_array());
-  let payload = payload.cast::<v8::Uint8Array>();
-  let buf = payload.get_backing_store().unwrap().to_vec::<Vec<u8>>();
+  debug_assert!(args.get(1).is_uint8_array());
+  let buf = args.get(1).cast::<v8::Uint8Array>();
+  let buf: Vec<Cell<u8>> = buf.get_backing_store().unwrap().to_vec();
 
-  let options = args.get(2);
-  debug_assert!(options.is_object());
-  let options = options.to_object(scope).unwrap();
-  let stream = if options.has_own_property(scope, "stream").unwrap_or(false) {
-    let stream = options.get(scope, "stream").unwrap();
+  debug_assert!(is_v8_obj!(args.get(2)));
+  let options = args.get(2).to_object(scope).unwrap();
+  let stream_name = "stream".to_v8(scope);
+  let stream = if options
+    .has_own_property(scope, stream_name.into())
+    .unwrap_or(false)
+  {
+    let stream = options.get(scope, stream_name.into()).unwrap();
     bool::from_v8(scope, stream)
   } else {
     false
