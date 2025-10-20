@@ -307,7 +307,7 @@ macro_rules! from_v8_impl {
             let [< $optional_prop _name >] = [< $optional_prop:snake:upper >].to_v8(scope);
             if obj.has_own_prop(scope, [< $optional_prop _name >]).unwrap_or(false) {
               let [< $optional_prop _value >] = obj.get(scope, [< $optional_prop _name >]).unwrap();
-              builder.$optional_prop(Some($opt_ty::from_v8(scope, [< $optional_prop _value >])));
+              builder.$optional_prop(Some($optional_ty::from_v8(scope, [< $optional_prop _value >])));
             } else {
               builder.$optional_prop(None);
             }
