@@ -200,7 +200,7 @@ impl<T> VecToV8<T> for Vec<T> {
     F: FnOnce(&mut v8::PinScope, &T) -> v8::Local<'s, v8::Value>,
   {
     let elements = self.iter().map(|v| f(scope, v)).collect::<Vec<_>>();
-    v8::Array::new_with_elements(scope, &elements).into()
+    v8::Array::new_with_elements(scope, &elements)
   }
 }
 
@@ -258,23 +258,27 @@ macro_rules! to_v8 {
     v8::String::new(scope, $value).unwrap()
   };
 
-  ($enum:ident, $($variant:tt),*) => {
-    impl Stateful for $enum {
-      fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
-        match self {
-          $(
-            $enum::$variant(e) => e.handle(data_access, event),
-          )*
-        }
-      }
+  (vec $value:expr, $func:tt) => {
+    let elements = $value.iter().map(|v| $func(scope, v)).collect::<Vec<_>>();
+    v8::Array::new_with_elements(scope, &elements)
+  };
 
-      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> StateMachine {
-        match self {
-          $(
-            $enum::$variant(e) => e.handle_op(data_access, op),
-          )*
-        }
-      }
-    }
-  }
+  (@each($value:expr, [ $prop:tt ], [ $constant:tt ]) => {
+    flags_impl! {@each($name,$unsigned,$($inc)*<<1){
+      $($collect)*
+      const $i = $($inc)*;
+    } $($rest)*}
+  };
+
+  (obj $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
+
+  };
+
+  (obj $value:expr, [], [ $($constant:tt),* ]) => {
+
+  };
+
+  (obj $value:expr, [ $($prop:tt),* ], [ ]) => {
+
+  };
 }
