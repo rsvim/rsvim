@@ -3,7 +3,6 @@
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_impl;
-use crate::js::binding;
 use crate::js::converter::*;
 use crate::to_v8_impl;
 use compact_str::CompactString;
