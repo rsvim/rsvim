@@ -306,29 +306,29 @@ macro_rules! from_v8_impl {
     }
   };
 
-  (@each_prop {$($collect:tt)*} ($ty:tt,$property:tt) $(($rest_ty:tt,$rest_prop:tt))+) => {
+  (@each_prop {$($collect:tt)*} ($ty:tt,$prop:tt) $(($rest_ty:tt,$rest_prop:tt))+) => {
     from_v8_impl! {@each_prop{
       $($collect)*
 
     paste::paste! {
-      let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
-      debug_assert!(obj.has_own_property(scope, [< $property _name >]).unwrap_or(false));
-      let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
-      builder.$property($ty::from_v8(scope, [< $property _value >]));
+      let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
+      debug_assert!(obj.has_own_property(scope, [< $prop _name >]).unwrap_or(false));
+      let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
+      builder.$prop($ty::from_v8(scope, [< $prop _value >]));
         }
 
     } $(($rest_ty,$rest_prop))+}
   };
 
-  (@each_prop{$($collect:tt)*} ($ty:tt,$property:tt)) => {
+  (@each_prop{$($collect:tt)*} ($ty:tt,$prop:tt)) => {
     from_v8_impl! {@each_prop{
       $($collect)*
 
       paste::paste! {
-        let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
-        debug_assert!(obj.has_own_property(scope, [< $property _name >]).unwrap_or(false));
-        let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
-        builder.$property($ty::from_v8(scope, [< $property _value >]));
+        let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
+        debug_assert!(obj.has_own_property(scope, [< $prop _name >]).unwrap_or(false));
+        let [< $prop _value >] = obj.get(scope, [< $prop _name >]).unwrap();
+        builder.$prop($ty::from_v8(scope, [< $prop _value >]));
       }
     }}
   };
@@ -350,7 +350,7 @@ macro_rules! from_v8_impl {
     } $(($rest_ty,$rest_prop))+}
   };
 
-  (@each_optional_prop{$($collect:tt)*} ($ty:tt,$prop:tt)) => {
+  (@each_optional_prop{$($collect:tt)*} ($ty:tt,$property:tt)) => {
     from_v8_impl! {@each_optional_prop{
       $($collect)*
 
