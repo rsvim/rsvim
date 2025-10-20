@@ -48,13 +48,13 @@ fn test_bool1() {
   v8::scope_with_context!(scope, &mut jsrt.isolate, context);
 
   let a1 = true;
-  let obj1 = to_v8(scope, a1);
-  let val1 = from_v8::<bool>(scope, obj1);
+  let obj1 = a1.to_v8(scope);
+  let val1 = bool::from_v8(scope, obj1);
   assert!(val1);
 
   let a2 = false;
-  let obj2 = to_v8(scope, a2);
-  let val2 = from_v8::<bool>(scope, obj2);
+  let obj2 = a2.to_v8(scope);
+  let val2 = bool::from_v8(scope, obj2);
   assert!(!val2);
 }
 
