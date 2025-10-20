@@ -87,8 +87,7 @@ pub fn list(
 
   let commands = commands
     .keys()
-    .cloned()
-    .collect::<Vec<CompactString>>()
+    .collect::<Vec<&CompactString>>()
     .to_v8(scope);
 
   rv.set(commands.into());
