@@ -238,7 +238,7 @@ pub trait StructFromV8 {
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident, [$($property:tt),*], [$($optional_property:tt),*], [$($constant:tt),*], [$($optional_constant:tt),*]) => {
+  ($name:ident [$($property:tt)*] [$($optional_property:tt)*] [$($constant:tt)*] [$($optional_constant:tt)*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -285,7 +285,7 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident, [$($property:tt),*], [$($optional_property:tt),*]) => {
+  ($name:ident [$($property:tt)*] [$($optional_property:tt)*]) => {
     paste::paste! {
       impl StructFromV8 for $name {
         fn from_v8<'s>(
@@ -295,12 +295,7 @@ macro_rules! from_v8_impl {
           let mut builder = [< $name Builder >]::default();
 
           // properties
-          $(
-            let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
-            debug_assert!(obj.has_own_property(scope, [< $property _name >]).unwrap_or(false));
-            let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
-            builder.$property(from_v8(scope, [< $property _value >]));
-          )*
+          from_v8_impl! {@each_prop($name){} $($property)*}
 
           // optional properties
           $(
@@ -317,5 +312,44 @@ macro_rules! from_v8_impl {
         }
       }
     }
+  };
+
+  (@each_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)*) => {
+    from_v8_impl! {@each_prop($name){
+      $($collect)*
+
+      let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
+      debug_assert!(obj.has_own_property(scope, [< $property _name >]).unwrap_or(false));
+      let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
+      builder.$property($type::from_v8(scope, [< $property _value >]));
+
+    } $($rest)*}
+  };
+
+  (@each_prop($name:ident){$($collect:tt)*}) => {
+    from_v8_impl! {@each_prop($name){
+      $($collect)*
+    }}
+  };
+
+  (@each_optional_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)*) => {
+    from_v8_impl! {@each_optional_prop($name){
+      $($collect)*
+
+      let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
+      if obj.has_own_property(scope, [< $property _name >]).unwrap_or(false) {
+        let [< $property _value >] = obj.get(scope, [< $property _name >]).unwrap();
+        builder.$property(Some($type::from_v8(scope, [< $property _value >])));
+      } else {
+        builder.$property(None);
+      }
+
+    } $($rest)*}
+  };
+
+  (@each_optional_prop($name:ident){$($collect:tt)*}) => {
+    from_v8_impl! {@each_optional_prop($name){
+      $($collect)*
+    }}
   };
 }
