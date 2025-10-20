@@ -187,7 +187,7 @@ pub trait VecToV8<T> {
     f: F,
   ) -> v8::Local<'s, v8::Array>
   where
-    F: FnMut(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
+    F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>;
 }
 
 impl<T> VecToV8<T> for Vec<T> {
@@ -197,7 +197,7 @@ impl<T> VecToV8<T> for Vec<T> {
     f: F,
   ) -> v8::Local<'s, v8::Array>
   where
-    F: FnMut(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
+    F: Fn(&mut v8::PinScope<'s, '_>, &T) -> v8::Local<'s, v8::Value>,
   {
     let elements = self
       .iter()
@@ -208,22 +208,29 @@ impl<T> VecToV8<T> for Vec<T> {
 }
 
 pub trait VecFromV8<T> {
-  fn from_v8<'s>(
+  fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Array>,
-  ) -> Vec<T>;
+    f: F,
+  ) -> Vec<T>
+  where
+    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T;
 }
 
 impl<T> VecFromV8<T> for Vec<T> {
-  fn from_v8<'s>(
+  fn from_v8<'s, F>(
     scope: &mut v8::PinScope<'s, '_>,
     elements: v8::Local<'s, v8::Array>,
-  ) -> Vec<T> {
+    f: F,
+  ) -> Vec<T>
+  where
+    F: Fn(&mut v8::PinScope<'s, '_>, v8::Local<'s, v8::Value>) -> T,
+  {
     let n = elements.length();
     let mut v: Vec<T> = Vec::with_capacity(n as usize);
     for i in 0..n {
       let e = elements.get_index(scope, i).unwrap();
-      let t = T::from_v8(scope, e);
+      let t = f(scope, e);
       v.push(t);
     }
     v
