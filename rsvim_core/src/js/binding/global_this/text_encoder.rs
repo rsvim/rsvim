@@ -8,8 +8,6 @@ use crate::prelude::*;
 use compact_str::ToCompactString;
 use decoder::Decoder;
 use decoder::DecoderOptions;
-// use icu::normalizer::ComposingNormalizerBorrowed;
-use icu::normalizer::DecomposingNormalizerBorrowed;
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
