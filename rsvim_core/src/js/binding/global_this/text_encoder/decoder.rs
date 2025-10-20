@@ -51,8 +51,25 @@ pub const ENCODING: &str = "encoding";
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct Decoder {
-  pub options: DecoderOptions,
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // fatal
+  // ignoreBOM
+  flags: Flags,
+
   pub encoding: CompactString,
+}
+
+flags_builder_impl!(DecoderBuilder, flags, Flags, fatal, ignore_bom);
+
+impl Decoder {
+  pub fn fatal(&self) -> bool {
+    self.flags.contains(Flags::FATAL)
+  }
+
+  pub fn ignore_bom(&self) -> bool {
+    self.flags.contains(Flags::IGNORE_BOM)
+  }
 }
 
 from_v8_impl!(
