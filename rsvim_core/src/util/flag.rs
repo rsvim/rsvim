@@ -34,7 +34,7 @@ macro_rules! flags_impl {
 macro_rules! flags_builder_impl {
   ($builder:ident,$member:ident,$flags:ident,$($field:ident),+) => {
     paste::paste! {
-      impl $builder {
+      impl [< $builder Builder >] {
         $(
           pub fn $field(&mut self, value: bool) -> &mut Self {
             let mut flags = self.$member.unwrap_or( [< $flags:snake:upper >] );

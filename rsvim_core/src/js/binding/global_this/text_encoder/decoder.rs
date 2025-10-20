@@ -12,44 +12,16 @@ flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 /// Option names.
 pub const FATAL: &str = "fatal";
 pub const IGNORE_BOM: &str = "ignoreBOM";
+pub const ENCODING: &str = "encoding";
 
 /// Default option values.
-pub const _FATAL_DEFAULT: bool = false;
-pub const _IGNORE_BOM_DEFAULT: bool = false;
+pub const FATAL_DEFAULT: bool = false;
+pub const IGNORE_BOM_DEFAULT: bool = false;
+pub const ENCODING_DEFAULT: &str = "utf-8";
 
 // fatal=false
 // ignoreBOM=false
 const FLAGS: Flags = Flags::empty();
-
-#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
-pub struct DecoderOptions {
-  #[builder(default = FLAGS)]
-  #[builder(setter(custom))]
-  // fatal
-  // ignoreBOM
-  flags: Flags,
-}
-
-flags_builder_impl!(DecoderOptionsBuilder, flags, Flags, fatal, ignore_bom);
-
-impl DecoderOptions {
-  pub fn fatal(&self) -> bool {
-    self.flags.contains(Flags::FATAL)
-  }
-
-  pub fn ignore_bom(&self) -> bool {
-    self.flags.contains(Flags::IGNORE_BOM)
-  }
-
-  pub fn _internal_flags(&self) -> Flags {
-    self.flags
-  }
-}
-
-from_v8_impl!(DecoderOptions, [(bool, fatal), (bool, ignore_bom)], []);
-to_v8_impl!(DecoderOptions, [fatal, ignore_bom], [], [], []);
-
-pub const ENCODING: &str = "encoding";
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct Decoder {
@@ -62,7 +34,7 @@ pub struct Decoder {
   pub encoding: CompactString,
 }
 
-flags_builder_impl!(DecoderBuilder, flags, Flags, fatal, ignore_bom);
+flags_builder_impl!(Decoder, flags, Flags, fatal, ignore_bom);
 
 impl Decoder {
   pub fn new(flags: Flags, encoding: CompactString) -> Self {
