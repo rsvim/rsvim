@@ -238,7 +238,7 @@ pub trait StructFromV8 {
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident [$($prop:tt)*] [$($optional_prop:tt)*] [$($constant:tt)*] [$($optional_constant:tt)*]) => {
+  ($name:ident [$($prop:tt)*] [$($opt_prop:tt)*] [$($constant:tt)*] [$($opt_constant:tt)*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -255,9 +255,9 @@ macro_rules! to_v8_impl {
 
           // optional properties
           $(
-            if let Some($optional_prop) = &self.$optional_prop {
-              let [< $optional_prop _value >] = $optional_prop.to_v8(scope);
-              $crate::js::binding::set_prop_to(scope, obj, [< $optional_prop:snake:upper >], [< $optional_prop _value >]);
+            if let Some($opt_prop) = &self.$opt_prop {
+              let [< $opt_prop _value >] = $opt_prop.to_v8(scope);
+              $crate::js::binding::set_prop_to(scope, obj, [< $opt_prop:snake:upper >], [< $opt_prop _value >]);
             }
           )*
 
@@ -269,9 +269,9 @@ macro_rules! to_v8_impl {
 
           // optional constants
           $(
-            if let Some($optional_constant) = &self.$optional_constant {
-              let [< $optional_constant _value >] = $optional_constant.to_v8(scope);
-              $crate::js::binding::set_constant_to(scope, obj, [< $optional_constant:snake:upper >], [< $optional_constant _value >]);
+            if let Some($opt_constant) = &self.$opt_constant {
+              let [< $opt_constant _value >] = $opt_constant.to_v8(scope);
+              $crate::js::binding::set_constant_to(scope, obj, [< $opt_constant:snake:upper >], [< $opt_constant _value >]);
             }
           )*
 
@@ -285,7 +285,7 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
-  ($name:ident [$(($ty:tt,$prop:tt))*] [$(($optional_ty:tt,$optional_prop:tt))*]) => {
+  ($name:ident [$(($ty:tt,$prop:tt))*] [$(($opt_ty:tt,$opt_prop:tt))*]) => {
       impl StructFromV8 for $name {
         fn from_v8<'s>(
           scope: &mut v8::PinScope<'s, '_>,
@@ -299,7 +299,7 @@ macro_rules! from_v8_impl {
           from_v8_impl! {@each_prop {} $(($ty,$prop))*}
 
           // optional properties
-          from_v8_impl! {@each_optional_prop {} $(($optional_ty,$optional_prop))*}
+          from_v8_impl! {@each_optional_prop {} $(($opt_ty,$opt_prop))*}
 
           builder.build().unwrap()
         }
