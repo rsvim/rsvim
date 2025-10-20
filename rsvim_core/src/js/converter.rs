@@ -238,39 +238,50 @@ impl<T> VecFromV8<T> for Vec<T> {
 /// Convert rust to v8.
 #[macro_export]
 macro_rules! to_v8 {
-  (bool $value:expr) => {
-    v8::Boolean::new(scope, $value)
+  (bool $scope:ident, $value:expr) => {
+    v8::Boolean::new($scope, $value)
   };
 
-  (u32 $value:expr) => {
-    v8::Integer::new_from_unsigned(scope, $value)
+  (u32 $scope:ident, $value:expr) => {
+    v8::Integer::new_from_unsigned($scope, $value)
   };
 
-  (i32 $value:expr) => {
-    v8::Integer::new(scope, $value)
+  (i32 $scope:ident, $value:expr) => {
+    v8::Integer::new($scope, $value)
   };
 
-  (f64 $value:expr) => {
-    v8::Number::new(scope, $value)
+  (f64 $scope:ident, $value:expr) => {
+    v8::Number::new($scope, $value)
   };
 
-  (str $value:expr) => {
-    v8::String::new(scope, $value).unwrap()
+  (str $scope:ident, $value:expr) => {
+    v8::String::new($scope, $value).unwrap()
   };
 
-  (vec $value:expr, $func:tt) => {
-    let elements = $value.iter().map(|v| $func(scope, v)).collect::<Vec<_>>();
-    v8::Array::new_with_elements(scope, &elements)
+  (vec $scope:ident, $value:expr, $func:tt) => {
+    let elements = $value.iter().map(|v| $func($scope, v)).collect::<Vec<_>>();
+    v8::Array::new_with_elements($scope, &elements)
   };
 
-  (@each($value:expr, [ $prop:tt ], [ $constant:tt ]) => {
-    flags_impl! {@each($name,$unsigned,$($inc)*<<1){
+  (@each_prop($scope:ident, $object:ident, $value:expr){$($collect:tt)*} $i:ident $name:tt $($rest:tt)*) => {
+    to_v8! {@each_prop($scope,$object,$value){
       $($collect)*
-      const $i = $($inc)*;
+
+    paste::paste! {
+      let [< $i _value >] = to_v8!($scope, self.$i);
+      binding::set_property_to($scope, $object, $name, [< $i _value >]);
+    }
+
     } $($rest)*}
   };
 
-  (obj $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
+  (@each_prop($scope:ident, $object:ident, $value:expr){$($collect:tt)*}) => {
+    to_v8! {@each_prop($scope,$object,$value){
+      $($collect)*
+    }}
+  };
+
+  (obj $scope:ident, $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
 
   };
 }
