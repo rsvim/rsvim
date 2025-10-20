@@ -3,7 +3,6 @@
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_impl;
-use crate::js::binding;
 use crate::js::converter::*;
 use crate::to_v8_impl;
 use compact_str::CompactString;
@@ -42,6 +41,10 @@ impl DecoderOptions {
   pub fn ignore_bom(&self) -> bool {
     self.flags.contains(Flags::IGNORE_BOM)
   }
+
+  pub fn flags(&self) -> Flags {
+    self.flags
+  }
 }
 
 from_v8_impl!(DecoderOptions, [(bool, fatal), (bool, ignore_bom)], []);
@@ -51,30 +54,9 @@ pub const ENCODING: &str = "encoding";
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct Decoder {
-  #[builder(default = FLAGS)]
-  #[builder(setter(custom))]
-  // fatal
-  // ignoreBOM
-  flags: Flags,
-
   pub encoding: CompactString,
+  pub options: DecoderOptions,
 }
 
-flags_builder_impl!(DecoderBuilder, flags, Flags, fatal, ignore_bom);
-
-impl Decoder {
-  pub fn fatal(&self) -> bool {
-    self.flags.contains(Flags::FATAL)
-  }
-
-  pub fn ignore_bom(&self) -> bool {
-    self.flags.contains(Flags::IGNORE_BOM)
-  }
-}
-
-from_v8_impl!(
-  Decoder,
-  [(String, encoding), (bool, fatal), (bool, ignore_bom)],
-  []
-);
+from_v8_impl!(Decoder, [(String, encoding), (DecoderOptions, options)], []);
 to_v8_impl!(Decoder, [encoding, fatal, ignore_bom], [], [], []);
