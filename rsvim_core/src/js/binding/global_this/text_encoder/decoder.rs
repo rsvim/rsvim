@@ -49,7 +49,7 @@ to_v8_impl!(DecoderOptions, [fatal, ignore_bom], [], [], []);
 
 pub const ENCODING: &str = "encoding";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct Decoder {
   pub options: DecoderOptions,
   pub encoding: CompactString,
