@@ -34,7 +34,7 @@ pub struct TextDecoder {
   encoding: CompactString,
 }
 
-flags_builder_impl!(TextDecoder, flags, Flags, fatal, ignore_bom);
+flags_builder_impl!(TextDecoder, flags, fatal, ignore_bom);
 
 impl TextDecoder {
   pub fn fatal(&self) -> bool {

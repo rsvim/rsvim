@@ -31,7 +31,7 @@ pub struct CommandOptions {
   alias: Option<CompactString>,
 }
 
-flags_builder_impl!(CommandOptions, flags, Flags, force);
+flags_builder_impl!(CommandOptions, flags, force);
 
 impl CommandOptions {
   pub fn force(&self) -> bool {

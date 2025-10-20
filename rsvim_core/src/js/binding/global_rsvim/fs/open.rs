@@ -51,13 +51,12 @@ pub struct FsOpenOptions {
   // read
   // truncate
   // write
-  flags: FsOpenOptionFlags,
+  fs_open_option_flags: FsOpenOptionFlags,
 }
 
 flags_builder_impl!(
-  FsOpenOptionsBuilder,
-  flags,
-  FsOpenOptionFlags,
+  FsOpenOptions,
+  fs_open_option_flags,
   append,
   create,
   create_new,
@@ -68,27 +67,35 @@ flags_builder_impl!(
 
 impl FsOpenOptions {
   pub fn append(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::APPEND)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::APPEND)
   }
 
   pub fn create(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::CREATE)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::CREATE)
   }
 
   pub fn create_new(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::CREATE_NEW)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::CREATE_NEW)
   }
 
   pub fn read(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::READ)
+    self.fs_open_option_flags.contains(FsOpenOptionFlags::READ)
   }
 
   pub fn truncate(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::TRUNCATE)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::TRUNCATE)
   }
 
   pub fn write(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::WRITE)
+    self.fs_open_option_flags.contains(FsOpenOptionFlags::WRITE)
   }
 }
 
