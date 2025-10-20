@@ -299,10 +299,10 @@ macro_rules! to_v8 {
     }}
   };
 
-  (obj $scope:ident, $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
+  (obj $scope:ident, $value:expr, [ $($property:tt),* ], [ $($constant:tt),* ]) => {
     let obj = v8::Object::new($scope);
 
-    to_v8!{@each_prop($scope,obj,$value){} $($prop)*}
+    to_v8!{@each_prop($scope,obj,$value){} $($property)*}
     to_v8!{@each_const($scope,obj,$value){} $($constant)*}
   };
 }
