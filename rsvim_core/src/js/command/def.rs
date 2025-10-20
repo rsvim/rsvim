@@ -45,7 +45,8 @@ impl StructFromV8CallbackArguments for CommandDefinition {
     args: v8::FunctionCallbackArguments<'s>,
   ) -> Self {
     debug_assert!(args.length() == 4);
-    let name = String::from_v8(scope, args.get(0));
+    debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
+    let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap());
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
     let callback = Rc::new(v8::Global::new(scope, callback));
     let attributes = CommandAttributes::from_v8(scope, args.get(2));
