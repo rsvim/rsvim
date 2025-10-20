@@ -47,7 +47,8 @@ impl JsFuture for CommandFuture {
       let def = self.definition.clone().unwrap();
       let undefined = v8::undefined(scope).into();
       let callback = v8::Local::new(scope, (*def.callback).clone());
-      let args: Vec<v8::Local<v8::Value>> = vec![self.context.to_v8(scope)];
+      let args: Vec<v8::Local<v8::Value>> =
+        vec![self.context.to_v8(scope).into()];
 
       v8::tc_scope!(let tc_scope, scope);
 
