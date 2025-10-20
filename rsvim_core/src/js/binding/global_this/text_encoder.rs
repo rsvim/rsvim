@@ -111,7 +111,6 @@ pub fn create_decoder<'s>(
 
   let decoder = Decoder::new(options.flags(), encoding);
   let decoder_wrapper = decoder.to_v8(scope);
-
   rv.set(decoder_wrapper.into());
 }
 
@@ -128,15 +127,15 @@ pub fn decode<'s>(
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let decoder_obj = v8::Object::new(scope);
+  let decoder = 
 
   // encoding
   let encoding_value = name.to_v8(scope);
-  binding::set_property_to(scope, decoder_obj, "encoding", encoding_value);
+  binding::set_property_to(scope, decoder, "encoding", encoding_value);
 
   // options
   let options_value = options.to_v8(scope);
-  binding::set_property_to(scope, decoder_obj, "options", options_value);
+  binding::set_property_to(scope, decoder, "options", options_value);
 
-  rv.set(decoder_obj.into());
+  rv.set(decoder.into());
 }
