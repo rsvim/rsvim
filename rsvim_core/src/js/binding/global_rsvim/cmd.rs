@@ -101,8 +101,7 @@ pub fn get<'s>(
 ) {
   debug_assert!(args.length() == 1);
   debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
-  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap())
-    .to_compact_string();
+  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap());
   trace!("Rsvim.cmd.get:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
@@ -121,14 +120,15 @@ pub fn remove<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = from_v8::<CompactString>(scope, args.get(0));
+  debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
+  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap());
   trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
   match commands.remove(&name) {
-    Some(removed) => rv.set(removed.to_v8(scope)),
+    Some(removed) => rv.set(removed.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
 }
