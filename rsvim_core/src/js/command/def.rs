@@ -1,6 +1,5 @@
 //! Ex command definition.
 
-use crate::js::binding;
 use crate::js::command::attr::*;
 use crate::js::command::opt::*;
 use crate::js::converter::*;
@@ -61,31 +60,10 @@ impl StructFromV8CallbackArguments for CommandDefinition {
   }
 }
 
-to_v8_impl!(CommandDefinition, [name, callback]);
-
-impl ToV8 for CommandDefinition {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    let obj = v8::Object::new(scope);
-
-    // name
-    let name_value = to_v8(scope, self.name.clone());
-    binding::set_property_to(scope, obj, NAME, name_value);
-
-    // callback
-    let callback_value = v8::Local::new(scope, (*self.callback).clone());
-    binding::set_property_to(scope, obj, CALLBACK, callback_value.into());
-
-    // attributes
-    let attr_value = to_v8(scope, self.attributes.clone());
-    binding::set_property_to(scope, obj, ATTRIBUTES, attr_value);
-
-    // options
-    let opts_value = to_v8(scope, self.options.clone());
-    binding::set_property_to(scope, obj, OPTIONS, opts_value);
-
-    obj.into()
-  }
-}
+to_v8_impl!(
+  CommandDefinition,
+  [name, callback, attributes, options],
+  [],
+  [],
+  []
+);
