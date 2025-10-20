@@ -181,14 +181,14 @@ impl StringFromV8 for String {
   }
 }
 
-pub trait CallbackToV8 {
+pub trait FuncToV8 {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
   ) -> v8::Local<'s, v8::Function>;
 }
 
-impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
+impl FuncToV8 for Rc<v8::Global<v8::Function>> {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
@@ -197,14 +197,14 @@ impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
   }
 }
 
-pub trait CallbackFromV8 {
+pub trait FuncFromV8 {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::Function>,
   ) -> Self;
 }
 
-impl CallbackFromV8 for Rc<v8::Global<v8::Function>> {
+impl FuncFromV8 for Rc<v8::Global<v8::Function>> {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
     callback: v8::Local<'s, v8::Function>,

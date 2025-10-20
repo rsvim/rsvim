@@ -47,7 +47,7 @@ impl StructFromV8CallbackArguments for CommandDefinition {
     debug_assert!(args.length() == 4);
     let name = String::from_v8(scope, args.get(0));
     let callback = v8::Local::<v8::Function>::try_from(args.get(1)).unwrap();
-    let callback = CallbackFromV8::from_v8(scope, callback);
+    let callback = FuncFromV8::from_v8(scope, callback);
     let attributes = CommandAttributes::from_v8(scope, args.get(2));
     let options = CommandOptions::from_v8(scope, args.get(3));
 
