@@ -2,6 +2,7 @@
 
 use crate::js::binding;
 use crate::js::converter::*;
+use crate::to_v8;
 use compact_str::CompactString;
 
 /// Command attribute name.
@@ -30,12 +31,14 @@ impl ToV8 for CommandContext {
     let obj = v8::Object::new(scope);
 
     // bang
-    let bang_value = to_v8(scope, self.bang);
+    let bang_value = to_v8!(bool scope, self.bang);
     binding::set_property_to(scope, obj, BANG, bang_value);
 
     // args
-    let args_value = to_v8(scope, self.args.clone());
-    binding::set_property_to(scope, obj, ARGS, args_value);
+    if let Some(args) = self.args.clone() {
+      let args_value = to_v8!(bool scope, args);
+      binding::set_property_to(scope, obj, ARGS, args_value);
+    }
 
     obj.into()
   }
