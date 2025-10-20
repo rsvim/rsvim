@@ -9,7 +9,7 @@ use compact_str::ToCompactString;
 use decoder::Decoder;
 use decoder::DecoderOptions;
 // use icu::normalizer::ComposingNormalizerBorrowed;
-// use icu::normalizer::DecomposingNormalizerBorrowed;
+use icu::normalizer::DecomposingNormalizerBorrowed;
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
@@ -109,7 +109,7 @@ pub fn create_decoder<'s>(
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
-  let decoder = Decoder::new(options.flags(), encoding);
+  let decoder = Decoder::new(options._internal_flags(), encoding);
   let decoder = decoder.to_v8(scope);
   rv.set(decoder.into());
 }
@@ -122,20 +122,21 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   let decoder = Decoder::from_v8(scope, args.get(0));
+
   let payload = args.get(1);
   debug_assert!(payload.is_uint8_array());
   let payload = payload.cast::<v8::Uint8Array>();
+  let buf = payload.get_backing_store().unwrap().to_vec::<Vec<u8>>();
+
   let options = args.get(2);
   debug_assert!(options.is_object());
-  let options = DecoderOptions::from_v8(scope, options);
+  let options = options.to_object(scope).unwrap();
+  let stream = if options.has_own_property(scope, "stream").unwrap_or(false) {
+    let stream = options.get(scope, "stream").unwrap();
+    bool::from_v8(scope, stream)
+  } else {
+    false
+  };
 
-  // encoding
-  let encoding_value = name.to_v8(scope);
-  binding::set_property_to(scope, decoder, "encoding", encoding_value);
-
-  // options
-  let options_value = options.to_v8(scope);
-  binding::set_property_to(scope, decoder, "options", options_value);
-
-  rv.set(decoder.into());
+  // rv.set(decoder.into());
 }

@@ -6,7 +6,6 @@ use crate::from_v8_impl;
 use crate::js::converter::*;
 use crate::to_v8_impl;
 use compact_str::CompactString;
-use compact_str::ToCompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -42,7 +41,7 @@ impl DecoderOptions {
     self.flags.contains(Flags::IGNORE_BOM)
   }
 
-  pub fn flags(&self) -> Flags {
+  pub fn _internal_flags(&self) -> Flags {
     self.flags
   }
 }
