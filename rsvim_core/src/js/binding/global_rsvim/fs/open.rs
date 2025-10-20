@@ -2,12 +2,14 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::from_v8_impl;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
+use crate::to_v8_impl;
 use std::cell::Cell;
 use std::fs::File;
 use std::rc::Rc;
@@ -99,88 +101,26 @@ impl FsOpenOptions {
   }
 }
 
-impl FromV8 for FsOpenOptions {
-  fn from_v8<'s>(
-    scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
-  ) -> Self {
-    let mut builder = FsOpenOptionsBuilder::default();
-    let obj = value.to_object(scope).unwrap();
+from_v8_impl!(
+  FsOpenOptions,
+  [
+    (bool, append),
+    (bool, create),
+    (bool, create_new),
+    (bool, read),
+    (bool, truncate),
+    (bool, write)
+  ],
+  []
+);
 
-    // append
-    let append_name = to_v8(scope, APPEND);
-    if let Some(append_value) = obj.get(scope, append_name) {
-      builder.append(from_v8::<bool>(scope, append_value));
-    }
-
-    // create
-    let create_name = to_v8(scope, CREATE);
-    if let Some(create_value) = obj.get(scope, create_name) {
-      builder.create(from_v8::<bool>(scope, create_value));
-    }
-
-    // create_new
-    let create_new_name = to_v8(scope, CREATE_NEW);
-    if let Some(create_new_value) = obj.get(scope, create_new_name) {
-      builder.create_new(from_v8::<bool>(scope, create_new_value));
-    }
-
-    // read
-    let read_name = to_v8(scope, READ);
-    if let Some(read_value) = obj.get(scope, read_name) {
-      builder.read(from_v8::<bool>(scope, read_value));
-    }
-
-    // truncate
-    let truncate_name = to_v8(scope, TRUNCATE);
-    if let Some(truncate_value) = obj.get(scope, truncate_name) {
-      builder.truncate(from_v8::<bool>(scope, truncate_value));
-    }
-
-    // write
-    let write_name = to_v8(scope, WRITE);
-    if let Some(write_value) = obj.get(scope, write_name) {
-      builder.write(from_v8::<bool>(scope, write_value));
-    }
-
-    builder.build().unwrap()
-  }
-}
-
-impl ToV8 for FsOpenOptions {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    let obj = v8::Object::new(scope);
-
-    // append
-    let append_value = to_v8(scope, self.append());
-    binding::set_property_to(scope, obj, APPEND, append_value);
-
-    // create
-    let create_value = to_v8(scope, self.create());
-    binding::set_property_to(scope, obj, CREATE, create_value);
-
-    // create_new
-    let create_new_value = to_v8(scope, self.create_new());
-    binding::set_property_to(scope, obj, CREATE_NEW, create_new_value);
-
-    // read
-    let read_value = to_v8(scope, self.read());
-    binding::set_property_to(scope, obj, READ, read_value);
-
-    // truncate
-    let truncate_value = to_v8(scope, self.truncate());
-    binding::set_property_to(scope, obj, TRUNCATE, truncate_value);
-
-    // write
-    let write_value = to_v8(scope, self.write());
-    binding::set_property_to(scope, obj, WRITE, write_value);
-
-    obj.into()
-  }
-}
+to_v8_impl!(
+  FsOpenOptions,
+  [append, create, create_new, read, truncate, write],
+  [],
+  [],
+  []
+);
 
 pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
