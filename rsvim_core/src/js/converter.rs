@@ -273,12 +273,4 @@ macro_rules! to_v8 {
   (obj $value:expr, [ $($prop:tt),* ], [ $($constant:tt),* ]) => {
 
   };
-
-  (obj $value:expr, [], [ $($constant:tt),* ]) => {
-
-  };
-
-  (obj $value:expr, [ $($prop:tt),* ], [ ]) => {
-
-  };
 }
