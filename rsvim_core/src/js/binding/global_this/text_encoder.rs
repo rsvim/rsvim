@@ -2,6 +2,7 @@
 
 mod decoder;
 
+use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
@@ -173,7 +174,8 @@ pub fn decode<'s>(
     .unwrap_or(false)
   {
     let stream = options.get(scope, stream_name.into()).unwrap();
-    bool::from_v8(scope, stream)
+    debug_assert!(is_v8_bool!(stream));
+    bool::from_v8(scope, stream.to_boolean(scope))
   } else {
     false
   };
