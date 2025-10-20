@@ -64,7 +64,7 @@ pub fn create<'s>(
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match result {
-    Ok(Some(removed)) => rv.set(removed.to_v8(scope)),
+    Ok(Some(removed)) => rv.set(removed.to_v8(scope).into()),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
       binding::throw_exception(scope, &e);
