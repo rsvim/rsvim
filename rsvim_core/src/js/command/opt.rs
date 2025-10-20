@@ -4,6 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::js::binding;
 use crate::js::converter::*;
+use crate::to_v8_impl;
 use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FORCE);
@@ -70,23 +71,4 @@ impl FromV8 for CommandOptions {
   }
 }
 
-impl ToV8 for CommandOptions {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
-    let obj = v8::Object::new(scope);
-
-    // force
-    let force_value = to_v8(scope, self.force());
-    binding::set_property_to(scope, obj, FORCE, force_value);
-
-    // alias
-    if let Some(alias) = &self.alias {
-      let alias_value = to_v8(scope, alias.clone());
-      binding::set_property_to(scope, obj, ALIAS, alias_value);
-    }
-
-    obj.into()
-  }
-}
+to_v8_impl!(CommandOptions [force] [alias] [] []);

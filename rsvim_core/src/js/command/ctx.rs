@@ -22,4 +22,4 @@ pub struct CommandContext {
   pub args: Vec<CompactString>,
 }
 
-to_v8_impl!(CommandContext [bang, args] []);
+to_v8_impl!(CommandContext [bang, args] [] [] []);
