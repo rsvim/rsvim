@@ -103,6 +103,15 @@ pub fn create_decoder<'s>(
 ) {
   debug_assert!(args.length() == 2);
   let encoding = String::from_v8(scope, args.get(0)).to_compact_string();
+
+  if let Ok(cp) = str::parse::<u16>(&encoding) {
+
+  } else if {
+
+  }
+  if codepage::to_encoding(code_page::)
+
+
   let options = args.get(1);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
