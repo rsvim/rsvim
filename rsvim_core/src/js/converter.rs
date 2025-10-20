@@ -295,10 +295,10 @@ macro_rules! from_v8_impl {
           let mut builder = [< $name Builder >]::default();
 
           // properties
-          from_v8_impl! {@each_prop($name){} $($property)+}
+          from_v8_impl! {@each_prop {} $($property)+}
 
           // optional properties
-          from_v8_impl! {@each_optional_prop($name){} $($optional_property)+}
+          from_v8_impl! {@each_optional_prop {} $($optional_property)+}
 
           builder.build().unwrap()
         }
@@ -306,8 +306,8 @@ macro_rules! from_v8_impl {
     }
   };
 
-  (@each_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
-    from_v8_impl! {@each_prop($name){
+  (@each_prop {$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
+    from_v8_impl! {@each_prop{
       $($collect)*
 
       let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
@@ -318,14 +318,14 @@ macro_rules! from_v8_impl {
     } $($rest)*}
   };
 
-  (@each_prop($name:ident){$($collect:tt)*}) => {
-    from_v8_impl! {@each_prop($name){
+  (@each_prop{$($collect:tt)*}) => {
+    from_v8_impl! {@each_prop{
       $($collect)*
     }}
   };
 
-  (@each_optional_prop($name:ident){$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
-    from_v8_impl! {@each_optional_prop($name){
+  (@each_optional_prop{$($collect:tt)*} $type:tt $property:tt $($rest:tt)+) => {
+    from_v8_impl! {@each_optional_prop{
       $($collect)*
 
       let [< $property _name >] = [< $property:snake:upper >].to_v8(scope);
@@ -339,8 +339,8 @@ macro_rules! from_v8_impl {
     } $($rest)*}
   };
 
-  (@each_optional_prop($name:ident){$($collect:tt)*}) => {
-    from_v8_impl! {@each_optional_prop($name){
+  (@each_optional_prop{$($collect:tt)*}) => {
+    from_v8_impl! {@each_optional_prop{
       $($collect)*
     }}
   };
