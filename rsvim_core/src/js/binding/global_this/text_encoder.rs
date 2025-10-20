@@ -110,8 +110,8 @@ pub fn create_decoder<'s>(
   let options = DecoderOptions::from_v8(scope, options);
 
   let decoder = Decoder::new(options.flags(), encoding);
-  let decoder_wrapper = decoder.to_v8(scope);
-  rv.set(decoder_wrapper.into());
+  let decoder = decoder.to_v8(scope);
+  rv.set(decoder.into());
 }
 
 /// `TextDecoder.decode` API.
@@ -122,8 +122,8 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   let decoder_wrapper = Decoder::from_v8(scope, args.get(0));
-  let payload = Vec::from_v8::<Vec<u8>>(scope, args.get(1));
-  let options = args.get(1);
+  let payload = args.get(1);
+  let options = args.get(2);
   debug_assert!(options.is_object());
   let options = DecoderOptions::from_v8(scope, options);
 
