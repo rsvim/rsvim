@@ -60,7 +60,7 @@ impl StringFromV8 for Nargs {
     scope: &mut v8::PinScope<'s, '_>,
     value: v8::Local<'s, v8::String>,
   ) -> Self {
-    let nargs = CompactString::from_v8(scope, value);
+    let nargs = value.to_rust_string_lossy(scope);
     Nargs::from_str(&nargs).unwrap()
   }
 }

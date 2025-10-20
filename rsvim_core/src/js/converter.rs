@@ -1,7 +1,6 @@
 //! Converters between rust and v8 values.
 
 use compact_str::CompactString;
-use std::rc::Rc;
 
 pub trait U32ToV8 {
   fn to_v8<'s>(
@@ -324,5 +323,33 @@ macro_rules! from_v8_impl {
         }
       }
     }
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_str {
+  ($value:expr) => {
+    $value.is_string() || $value.is_string_object()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_bool {
+  ($value:expr) => {
+    $value.is_boolean() || $value.is_boolean_object()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_obj {
+  ($value:expr) => {
+    $value.is_object()
+  };
+}
+
+#[macro_export]
+macro_rules! is_v8_nil {
+  ($value:expr) => {
+    $value.is_null_or_undefined()
   };
 }

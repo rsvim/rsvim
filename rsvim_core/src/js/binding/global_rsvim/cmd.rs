@@ -1,5 +1,7 @@
 //! APIs for `Rsvim.cmd` namespace.
 
+use crate::is_v8_nil;
+use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::binding;
@@ -10,7 +12,6 @@ use crate::state::ops::cmdline_ops;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
-use std::rc::Rc;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
@@ -38,7 +39,7 @@ pub fn echo(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  debug_assert!(!args.get(0).is_null_or_undefined());
+  debug_assert!(!is_v8_nil!(args.get(0)));
   let message = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.echo:{:?}", message);
 
@@ -100,8 +101,8 @@ pub fn get<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
-  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap());
+  debug_assert!(is_v8_str!(args.get(0)));
+  let name = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.get:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
@@ -120,8 +121,8 @@ pub fn remove<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  debug_assert!(args.get(0).is_string() || args.get(0).is_string_object());
-  let name = String::from_v8(scope, args.get(0).to_string(scope).unwrap());
+  debug_assert!(is_v8_str!(args.get(0)));
+  let name = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);

@@ -4,6 +4,8 @@ pub mod close;
 pub mod handle;
 pub mod open;
 
+use crate::is_v8_obj;
+use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
@@ -24,7 +26,9 @@ pub fn open<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
+  debug_assert!(is_v8_str!(args.get(0)));
   let filename = args.get(0).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_obj!(args.get(1)));
   let options =
     FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.open:{:?} {:?}", filename, options);

@@ -2,6 +2,7 @@
 
 mod decoder;
 
+use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::decoder::TextDecoderBuilder;
 use crate::js::converter::*;
@@ -104,7 +105,9 @@ pub fn create_decoder<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  let mut encoding = String::from_v8(scope, args.get(0)).to_compact_string();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let mut encoding =
+    args.get(0).to_rust_string_lossy(scope).to_compact_string();
 
   debug_assert!(args.get(1).is_object());
   let options = args.get(1).to_object(scope).unwrap();

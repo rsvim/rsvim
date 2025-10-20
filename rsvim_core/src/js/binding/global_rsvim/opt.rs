@@ -2,6 +2,7 @@
 
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
+use crate::is_v8_bool;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -31,7 +32,8 @@ pub fn set_wrap<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0));
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
