@@ -14,9 +14,9 @@ pub const IGNORE_BOM: &str = "ignoreBOM";
 pub const ENCODING: &str = "encoding";
 
 /// Default option values.
-pub const FATAL_DEFAULT: bool = false;
-pub const IGNORE_BOM_DEFAULT: bool = false;
-pub const ENCODING_DEFAULT: &str = "utf-8";
+pub const _FATAL_DEFAULT: bool = false;
+pub const _IGNORE_BOM_DEFAULT: bool = false;
+pub const _ENCODING_DEFAULT: &str = "utf-8";
 
 // fatal=false
 // ignoreBOM=false
