@@ -54,4 +54,4 @@ from_v8_impl!(
   [(String, encoding), (bool, fatal), (bool, ignore_bom)],
   []
 );
-to_v8_impl!(TextDecoder, [encoding, fatal, ignore_bom], [], [], []);
+to_v8_impl!(TextDecoder, [encoding, fatal, ignore_bom], [], []);

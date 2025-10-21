@@ -118,7 +118,6 @@ to_v8_impl!(
   FsOpenOptions,
   [append, create, create_new, read, truncate, write],
   [],
-  [],
   []
 );
 
