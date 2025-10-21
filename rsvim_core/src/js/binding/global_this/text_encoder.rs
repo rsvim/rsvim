@@ -144,7 +144,7 @@ pub fn create_decoder<'s>(
     let decoder = decoder.to_v8(scope);
     rv.set(decoder.into());
   } else {
-    let exception = TheErr::TextEncodingInvalid(encoding);
+    let exception = TheErr::InvalidTextEncoding(encoding);
     binding::throw_range_error(scope, &exception);
   }
 }
