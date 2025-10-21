@@ -151,11 +151,11 @@ pub fn create_decoder<'s>(
 
       let decoder_handle = coding.new_decoder();
 
-      let decoder_ptr = binding::set_internal_ref::<Option<encoding_rs::Decoder>>(
+      let decoder_ptr = binding::set_internal_ref::<encoding_rs::Decoder>(
         scope,
         decoder_wrapper,
         0,
-        Some(decoder_handle),
+        decoder_handle,
       );
       let weak_rc = Rc::new(Cell::new(None));
 
