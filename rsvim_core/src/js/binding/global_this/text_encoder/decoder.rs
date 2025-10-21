@@ -5,6 +5,7 @@ use crate::flags_impl;
 use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
+use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -14,9 +15,9 @@ pub const IGNORE_BOM: &str = "ignoreBOM";
 pub const ENCODING: &str = "encoding";
 
 /// Default option values.
-pub const _FATAL_DEFAULT: bool = false;
-pub const _IGNORE_BOM_DEFAULT: bool = false;
-pub const _ENCODING_DEFAULT: &str = "utf-8";
+pub const FATAL_DEFAULT: bool = false;
+pub const IGNORE_BOM_DEFAULT: bool = false;
+pub const ENCODING_DEFAULT: CompactString = CompactString::const_new("utf-8");
 
 // fatal=false
 // ignoreBOM=false
@@ -68,7 +69,8 @@ pub struct TextDecoder {
   // ignoreBOM
   flags: Flags,
 
-  pub encoding: String,
+  #[builder(default = ENCODING_DEFAULT)]
+  pub encoding: CompactString,
 }
 
 impl TextDecoderBuilder {

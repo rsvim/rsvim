@@ -3,14 +3,16 @@
 use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
+use compact_str::CompactString;
 
 /// Option names.
 pub const ENCODING: &str = "encoding";
 
-pub const _ENCODING_DEFAULT: &str = "utf-8";
+pub const ENCODING_DEFAULT: CompactString = CompactString::const_new("utf-8");
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct TextEncoder {
+  #[builder(default = ENCODING_DEFAULT)]
   pub encoding: String,
 }
 
