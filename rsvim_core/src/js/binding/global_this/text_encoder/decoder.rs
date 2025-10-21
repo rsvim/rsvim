@@ -15,8 +15,8 @@ pub const IGNORE_BOM: &str = "ignoreBOM";
 pub const ENCODING: &str = "encoding";
 
 /// Default option values.
-pub const FATAL_DEFAULT: bool = false;
-pub const IGNORE_BOM_DEFAULT: bool = false;
+pub const _FATAL_DEFAULT: bool = false;
+pub const _IGNORE_BOM_DEFAULT: bool = false;
 pub const ENCODING_DEFAULT: CompactString = CompactString::const_new("utf-8");
 
 // fatal=false
