@@ -86,9 +86,9 @@ pub enum TheErr {
   // File is already been closed.
   FileAlreadyClosed,
 
-  #[error("Invalid text encoding `{0}`.")]
-  // Invalid text encoding.
-  InvalidTextEncoding(CompactString),
+  #[error("Invalid data.")]
+  // Invalid data.
+  DataInvalid,
 
   #[error("Invalid encoding label `{0}`.")]
   // Invalid encoding label (name).

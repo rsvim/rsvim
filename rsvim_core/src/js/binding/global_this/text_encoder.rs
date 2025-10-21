@@ -166,7 +166,10 @@ pub fn create_decoder<'s>(
       rv.set(decoder_wrapper.into());
     }
     None => {
-      binding::throw_range_error(scope, &TheErr::InvalidTextEncoding(encoding));
+      binding::throw_range_error(
+        scope,
+        &TheErr::InvalidEncodingLabel(encoding),
+      );
     }
   }
 }
@@ -214,18 +217,24 @@ pub fn decode<'s>(
   let mut output = String::with_capacity(max_buffer_length);
 
   if decoder.fatal() {
-    let (result, _, written) =
-      decoder_handle.decode_to_string(&buf, &mut output, !options.stream());
+    let (result, _) = decoder_handle.decode_to_string_without_replacement(
+      &buf,
+      &mut output,
+      !options.stream(),
+    );
     match result {
-      encoding_rs::CoderResult::InputEmpty => {
+      encoding_rs::DecoderResult::InputEmpty => {
         let output = output.to_v8(scope);
         rv.set(output.into());
       }
-      encoding_rs::CoderResult::OutputFull => {
+      encoding_rs::DecoderResult::OutputFull => {
         binding::throw_type_error(
           scope,
-          &&&TheErr::BufferTooSmall(max_buffer_length),
+          &TheErr::BufferTooSmall(max_buffer_length),
         );
+      }
+      encoding_rs::DecoderResult::Malformed(_, _) => {
+        binding::throw_type_error(scope, &TheErr::DataInvalid);
       }
     }
   } else {
