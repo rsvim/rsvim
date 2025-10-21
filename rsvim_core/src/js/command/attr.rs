@@ -87,5 +87,11 @@ impl CommandAttributes {
   }
 }
 
-from_v8_impl!(CommandAttributes, [(bool, bang), (Nargs, nargs)], []);
+type js_command_attr_Nargs = Nargs;
+
+from_v8_impl!(
+  CommandAttributes,
+  [(bool, bang), (js_command_attr_Nargs, nargs)],
+  []
+);
 to_v8_impl!(CommandAttributes, [bang, nargs], [], []);

@@ -316,7 +316,11 @@ macro_rules! from_v8_impl {
     $prop.to_string($scope).unwrap()
   };
 
-  (@each($scope:ident, Nargs, $prop:tt)) => {
+  (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
     $prop.to_string($scope).unwrap()
   };
 
