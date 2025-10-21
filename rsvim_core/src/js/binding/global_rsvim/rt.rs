@@ -1,5 +1,6 @@
 //! APIs for `Rsvim.rt` namespace.
 
+use crate::is_v8_int;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::msg;
@@ -13,7 +14,8 @@ pub fn exit<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let exit_code = from_v8::<i32>(scope, args.get(0));
+  debug_assert!(is_v8_int!(args.get(0)));
+  let exit_code = i32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("exit: {:?}", exit_code);
 
   let state_rc = JsRuntime::state(scope);

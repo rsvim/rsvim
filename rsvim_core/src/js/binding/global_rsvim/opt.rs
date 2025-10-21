@@ -2,10 +2,12 @@
 
 use crate::buf::opt::FileEncodingOption;
 use crate::buf::opt::FileFormatOption;
+use crate::is_v8_bool;
+use crate::is_v8_int;
+use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::converter::*;
 use crate::prelude::*;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 
 /// Get the _wrap_ option.
@@ -31,7 +33,8 @@ pub fn set_wrap<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0));
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_wrap: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -62,7 +65,8 @@ pub fn set_line_break<'s>(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0));
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_line_break: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
@@ -92,7 +96,8 @@ pub fn set_tab_stop<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0));
+  debug_assert!(is_v8_int!(args.get(0)));
+  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_tab_stop: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -124,7 +129,8 @@ pub fn set_expand_tab<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<bool>(scope, args.get(0));
+  debug_assert!(is_v8_bool!(args.get(0)));
+  let value = bool::from_v8(scope, args.get(0).to_boolean(scope));
   trace!("set_expand_tab: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -155,7 +161,8 @@ pub fn set_shift_width<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<u32>(scope, args.get(0));
+  debug_assert!(is_v8_int!(args.get(0)));
+  let value = u32::from_v8(scope, args.get(0).to_integer(scope).unwrap());
   trace!("set_shift_width: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -179,7 +186,8 @@ pub fn get_file_encoding(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_encoding();
   trace!("get_file_encoding: {:?}", value);
-  rv.set(to_v8(scope, value.to_compact_string()));
+  let value = value.to_compact_string().to_v8(scope);
+  rv.set(value.into());
 }
 
 /// Set the _file-encoding_ option.
@@ -189,7 +197,8 @@ pub fn set_file_encoding<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_encoding: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();
@@ -211,7 +220,8 @@ pub fn get_file_format(
   let buffers = lock!(buffers);
   let value = buffers.global_local_options().file_format();
   trace!("get_file_format: {:?}", value);
-  rv.set(to_v8(scope, value.to_compact_string()));
+  let value = value.to_compact_string().to_v8(scope);
+  rv.set(value.into());
 }
 
 /// Set the _file-format_ option.
@@ -221,7 +231,8 @@ pub fn set_file_format<'s>(
   _: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let value = from_v8::<CompactString>(scope, args.get(0)).to_lowercase();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let value = args.get(0).to_rust_string_lossy(scope).to_lowercase();
   trace!("set_file_format: {:?}", value);
   let state_rc = JsRuntime::state(scope);
   let buffers = state_rc.borrow().buffers.clone();

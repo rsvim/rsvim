@@ -1,5 +1,7 @@
 //! APIs for `Rsvim.cmd` namespace.
 
+use crate::is_v8_nil;
+use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
 use crate::js::binding;
@@ -10,7 +12,6 @@ use crate::state::ops::cmdline_ops;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use ringbuf::traits::RingBuffer;
-use std::rc::Rc;
 
 pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
@@ -38,6 +39,7 @@ pub fn echo(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
+  debug_assert!(!is_v8_nil!(args.get(0)));
   let message = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.echo:{:?}", message);
 
@@ -63,7 +65,7 @@ pub fn create<'s>(
     .insert(def.name.to_compact_string(), CommandDefinition::to_rc(def));
 
   match result {
-    Ok(Some(removed)) => rv.set(removed.to_v8(scope)),
+    Ok(Some(removed)) => rv.set(removed.to_v8(scope).into()),
     Ok(None) => rv.set_undefined(),
     Err(e) => {
       binding::throw_exception(scope, &e);
@@ -84,10 +86,12 @@ pub fn list(
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
 
-  let commands =
-    to_v8::<Vec<CompactString>>(scope, commands.keys().cloned().collect());
+  let commands = commands
+    .keys()
+    .collect::<Vec<&CompactString>>()
+    .to_v8(scope, |scope, cmd| cmd.to_v8(scope).into());
 
-  rv.set(commands);
+  rv.set(commands.into());
 }
 
 /// `Rsvim.cmd.get` API.
@@ -97,17 +101,15 @@ pub fn get<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = from_v8::<CompactString>(scope, args.get(0));
+  debug_assert!(is_v8_str!(args.get(0)));
+  let name = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.get:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let commands = lock!(state.commands);
   match commands.get(&name) {
-    Some(def) => {
-      let def = to_v8(scope, Rc::unwrap_or_clone(def));
-      rv.set(def);
-    }
+    Some(def) => rv.set(def.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
 }
@@ -119,14 +121,15 @@ pub fn remove<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  let name = from_v8::<CompactString>(scope, args.get(0));
+  debug_assert!(is_v8_str!(args.get(0)));
+  let name = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.remove:{:?}", name);
 
   let state_rc = JsRuntime::state(scope);
   let state = state_rc.borrow_mut();
   let mut commands = lock!(state.commands);
   match commands.remove(&name) {
-    Some(removed) => rv.set(removed.to_v8(scope)),
+    Some(removed) => rv.set(removed.to_v8(scope).into()),
     None => rv.set_undefined(),
   }
 }

@@ -2,12 +2,14 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
+use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
+use crate::to_v8_prop;
 use std::cell::Cell;
 use std::fs::File;
 use std::rc::Rc;
@@ -26,7 +28,7 @@ flags_impl!(
 
 pub const APPEND: &str = "append";
 pub const CREATE: &str = "create";
-pub const CREATE_NEW: &str = "create_new";
+pub const CREATE_NEW: &str = "createNew";
 pub const READ: &str = "read";
 pub const TRUNCATE: &str = "truncate";
 pub const WRITE: &str = "write";
@@ -51,127 +53,85 @@ pub struct FsOpenOptions {
   // read
   // truncate
   // write
-  flags: FsOpenOptionFlags,
+  fs_open_option_flags: FsOpenOptionFlags,
 }
 
-flags_builder_impl!(
-  FsOpenOptionsBuilder,
-  flags,
-  FsOpenOptionFlags,
-  append,
-  create,
-  create_new,
-  read,
-  truncate,
-  write
-);
+impl FsOpenOptionsBuilder {
+  flags_builder_impl!(fs_open_option_flags, append);
+  flags_builder_impl!(fs_open_option_flags, create);
+  flags_builder_impl!(fs_open_option_flags, create_new);
+  flags_builder_impl!(fs_open_option_flags, read);
+  flags_builder_impl!(fs_open_option_flags, truncate);
+  flags_builder_impl!(fs_open_option_flags, write);
+}
 
 impl FsOpenOptions {
   pub fn append(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::APPEND)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::APPEND)
   }
 
   pub fn create(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::CREATE)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::CREATE)
   }
 
   pub fn create_new(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::CREATE_NEW)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::CREATE_NEW)
   }
 
   pub fn read(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::READ)
+    self.fs_open_option_flags.contains(FsOpenOptionFlags::READ)
   }
 
   pub fn truncate(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::TRUNCATE)
+    self
+      .fs_open_option_flags
+      .contains(FsOpenOptionFlags::TRUNCATE)
   }
 
   pub fn write(&self) -> bool {
-    self.flags.contains(FsOpenOptionFlags::WRITE)
+    self.fs_open_option_flags.contains(FsOpenOptionFlags::WRITE)
   }
 }
 
-impl FromV8 for FsOpenOptions {
+impl StructFromV8 for FsOpenOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    obj: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = FsOpenOptionsBuilder::default();
-    let obj = value.to_object(scope).unwrap();
 
-    // append
-    let append_name = to_v8(scope, APPEND);
-    if let Some(append_value) = obj.get(scope, append_name) {
-      builder.append(from_v8::<bool>(scope, append_value));
-    }
-
-    // create
-    let create_name = to_v8(scope, CREATE);
-    if let Some(create_value) = obj.get(scope, create_name) {
-      builder.create(from_v8::<bool>(scope, create_value));
-    }
-
-    // create_new
-    let create_new_name = to_v8(scope, CREATE_NEW);
-    if let Some(create_new_value) = obj.get(scope, create_new_name) {
-      builder.create_new(from_v8::<bool>(scope, create_new_value));
-    }
-
-    // read
-    let read_name = to_v8(scope, READ);
-    if let Some(read_value) = obj.get(scope, read_name) {
-      builder.read(from_v8::<bool>(scope, read_value));
-    }
-
-    // truncate
-    let truncate_name = to_v8(scope, TRUNCATE);
-    if let Some(truncate_value) = obj.get(scope, truncate_name) {
-      builder.truncate(from_v8::<bool>(scope, truncate_value));
-    }
-
-    // write
-    let write_name = to_v8(scope, WRITE);
-    if let Some(write_value) = obj.get(scope, write_name) {
-      builder.write(from_v8::<bool>(scope, write_value));
-    }
+    from_v8_prop!(builder, obj, scope, bool, append);
+    from_v8_prop!(builder, obj, scope, bool, create);
+    from_v8_prop!(builder, obj, scope, bool, create_new);
+    from_v8_prop!(builder, obj, scope, bool, read);
+    from_v8_prop!(builder, obj, scope, bool, truncate);
+    from_v8_prop!(builder, obj, scope, bool, write);
 
     builder.build().unwrap()
   }
 }
 
-impl ToV8 for FsOpenOptions {
+impl StructToV8 for FsOpenOptions {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    // append
-    let append_value = to_v8(scope, self.append());
-    binding::set_property_to(scope, obj, APPEND, append_value);
+    to_v8_prop!(self, obj, scope, append, ());
+    to_v8_prop!(self, obj, scope, create, ());
+    to_v8_prop!(self, obj, scope, create_new, ());
+    to_v8_prop!(self, obj, scope, read, ());
+    to_v8_prop!(self, obj, scope, truncate, ());
+    to_v8_prop!(self, obj, scope, write, ());
 
-    // create
-    let create_value = to_v8(scope, self.create());
-    binding::set_property_to(scope, obj, CREATE, create_value);
-
-    // create_new
-    let create_new_value = to_v8(scope, self.create_new());
-    binding::set_property_to(scope, obj, CREATE_NEW, create_new_value);
-
-    // read
-    let read_value = to_v8(scope, self.read());
-    binding::set_property_to(scope, obj, READ, read_value);
-
-    // truncate
-    let truncate_value = to_v8(scope, self.truncate());
-    binding::set_property_to(scope, obj, TRUNCATE, truncate_value);
-
-    // write
-    let write_value = to_v8(scope, self.write());
-    binding::set_property_to(scope, obj, WRITE, write_value);
-
-    obj.into()
+    obj
   }
 }
 

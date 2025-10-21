@@ -2,8 +2,9 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::js::binding;
+use crate::from_v8_prop;
 use crate::js::converter::*;
+use crate::to_v8_prop;
 use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FORCE);
@@ -27,66 +28,43 @@ pub struct CommandOptions {
   flags: Flags,
 
   #[builder(default = ALIAS_DEFAULT)]
-  alias: Option<CompactString>,
+  pub alias: Option<CompactString>,
 }
 
-flags_builder_impl!(CommandOptionsBuilder, flags, Flags, force);
+impl CommandOptionsBuilder {
+  flags_builder_impl!(flags, force);
+}
 
 impl CommandOptions {
   pub fn force(&self) -> bool {
     self.flags.contains(Flags::FORCE)
   }
-
-  pub fn alias(&self) -> &Option<CompactString> {
-    &self.alias
-  }
 }
 
-impl FromV8 for CommandOptions {
+impl StructFromV8 for CommandOptions {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    obj: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandOptionsBuilder::default();
-    let obj = value.to_object(scope).unwrap();
 
-    // force
-    let force = to_v8(scope, FORCE);
-    if let Some(force_value) = obj.get(scope, force) {
-      builder.force(from_v8::<bool>(scope, force_value));
-    }
-
-    // alias
-    let alias = to_v8(scope, ALIAS);
-    if let Some(has_alias) = obj.has(scope, alias) {
-      if has_alias {
-        if let Some(alias_value) = obj.get(scope, alias) {
-          builder.alias(Some(from_v8::<CompactString>(scope, alias_value)));
-        }
-      }
-    }
+    from_v8_prop!(builder, obj, scope, bool, force);
+    from_v8_prop!(builder, obj, scope, CompactString, alias, optional);
 
     builder.build().unwrap()
   }
 }
 
-impl ToV8 for CommandOptions {
+impl StructToV8 for CommandOptions {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    // force
-    let force_value = to_v8(scope, self.force());
-    binding::set_property_to(scope, obj, FORCE, force_value);
+    to_v8_prop!(self, obj, scope, force, ());
+    to_v8_prop!(self, obj, scope, alias, optional);
 
-    // alias
-    if let Some(alias) = &self.alias {
-      let alias_value = to_v8(scope, alias.clone());
-      binding::set_property_to(scope, obj, ALIAS, alias_value);
-    }
-
-    obj.into()
+    obj
   }
 }

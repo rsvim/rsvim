@@ -48,7 +48,7 @@ impl JsFuture for CommandFuture {
       let undefined = v8::undefined(scope).into();
       let callback = v8::Local::new(scope, (*def.callback).clone());
       let args: Vec<v8::Local<v8::Value>> =
-        vec![to_v8(scope, self.context.clone())];
+        vec![self.context.to_v8(scope).into()];
 
       v8::tc_scope!(let tc_scope, scope);
 
@@ -119,7 +119,7 @@ impl CommandsManager {
     name: CompactString,
     definition: CommandDefinitionRc,
   ) -> TheResult<Option<CommandDefinitionRc>> {
-    let alias = definition.options.alias().clone();
+    let alias = definition.options.alias.clone();
 
     if !definition.options.force() {
       if self.commands.contains_key(&name) {

@@ -2,10 +2,9 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::js::binding;
+use crate::from_v8_prop;
 use crate::js::converter::*;
-use compact_str::CompactString;
-use compact_str::ToCompactString;
+use crate::to_v8_prop;
 use std::str::FromStr;
 
 flags_impl!(Flags, u8, BANG);
@@ -55,6 +54,25 @@ pub enum Nargs {
   Any,
 }
 
+impl StringFromV8 for Nargs {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::String>,
+  ) -> Self {
+    let nargs = value.to_rust_string_lossy(scope);
+    Nargs::from_str(&nargs).unwrap()
+  }
+}
+
+impl StringToV8 for Nargs {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String> {
+    self.to_string().to_v8(scope)
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
   #[builder(default = FLAGS)]
@@ -63,61 +81,46 @@ pub struct CommandAttributes {
   flags: Flags,
 
   #[builder(default = NARGS_DEFAULT)]
-  nargs: Nargs,
+  pub nargs: Nargs,
 }
 
-flags_builder_impl!(CommandAttributesBuilder, flags, Flags, bang);
+impl CommandAttributesBuilder {
+  flags_builder_impl!(flags, bang);
+}
 
 impl CommandAttributes {
   pub fn bang(&self) -> bool {
     self.flags.contains(Flags::BANG)
   }
-
-  pub fn nargs(&self) -> Nargs {
-    self.nargs
-  }
 }
 
-impl FromV8 for CommandAttributes {
+#[allow(non_camel_case_types)]
+type js_command_attr_Nargs = Nargs;
+
+impl StructFromV8 for CommandAttributes {
   fn from_v8<'s>(
     scope: &mut v8::PinScope<'s, '_>,
-    value: v8::Local<'s, v8::Value>,
+    obj: v8::Local<'s, v8::Object>,
   ) -> Self {
     let mut builder = CommandAttributesBuilder::default();
-    let obj = value.to_object(scope).unwrap();
 
-    // bang
-    let bang_name = to_v8(scope, BANG);
-    if let Some(bang_value) = obj.get(scope, bang_name) {
-      builder.bang(from_v8::<bool>(scope, bang_value));
-    }
-
-    // nargs
-    let nargs_name = to_v8(scope, NARGS);
-    if let Some(nargs_value) = obj.get(scope, nargs_name) {
-      let nargs = from_v8::<CompactString>(scope, nargs_value);
-      builder.nargs(Nargs::from_str(&nargs).unwrap());
-    }
+    from_v8_prop!(builder, obj, scope, bool, bang);
+    from_v8_prop!(builder, obj, scope, js_command_attr_Nargs, nargs);
 
     builder.build().unwrap()
   }
 }
 
-impl ToV8 for CommandAttributes {
+impl StructToV8 for CommandAttributes {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    // bang
-    let bang_value = to_v8(scope, self.bang());
-    binding::set_property_to(scope, obj, BANG, bang_value);
+    to_v8_prop!(self, obj, scope, bang, ());
+    to_v8_prop!(self, obj, scope, nargs);
 
-    // nargs
-    let nargs_value = to_v8(scope, self.nargs.to_compact_string());
-    binding::set_property_to(scope, obj, NARGS, nargs_value);
-
-    obj.into()
+    obj
   }
 }

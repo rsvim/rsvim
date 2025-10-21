@@ -1,7 +1,7 @@
 //! Ex command runtime context.
 
-use crate::js::binding;
 use crate::js::converter::*;
+use crate::to_v8_prop;
 use compact_str::CompactString;
 
 /// Command attribute name.
@@ -22,21 +22,16 @@ pub struct CommandContext {
   pub args: Vec<CompactString>,
 }
 
-impl ToV8 for CommandContext {
+impl StructToV8 for CommandContext {
   fn to_v8<'s>(
     &self,
     scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Value> {
+  ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    // bang
-    let bang_value = to_v8(scope, self.bang);
-    binding::set_property_to(scope, obj, BANG, bang_value);
+    to_v8_prop!(self, obj, scope, bang);
+    to_v8_prop!(self, obj, scope, args, Vec);
 
-    // args
-    let args_value = to_v8(scope, self.args.clone());
-    binding::set_property_to(scope, obj, ARGS, args_value);
-
-    obj.into()
+    obj
   }
 }
