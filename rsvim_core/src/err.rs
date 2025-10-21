@@ -70,9 +70,9 @@ pub enum TheErr {
   /// Failed to compile typescript
   CompileTypeScriptFailed(Cow<'static, str>),
 
-  #[error("Not enough function arguments specified.")]
+  #[error("Not enough arguments specified.")]
   /// Failed to compile typescript
-  FunctionArgumentsNotEnough,
+  ArgumentsNotEnough,
   //
   // js }
 
