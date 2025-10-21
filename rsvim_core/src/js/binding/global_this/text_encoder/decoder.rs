@@ -136,3 +136,7 @@ pub struct DecodeOptions {
   // stream
   decode_option_flags: DecodeOptionFlags,
 }
+
+impl DecodeOptionsBuilder {
+  flags_builder_impl!(decode_option_flags, stream);
+}
