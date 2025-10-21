@@ -100,9 +100,8 @@ pub fn encode_into<'s>(
   debug_assert!(is_v8_str!(args.get(1)));
   let payload = args.get(1).to_string(scope).unwrap();
   trace!("|encode_into| payload:{:?}", payload);
-  let buf = args.get(2);
-  debug_assert!(buf.is_uint8_array());
-  let buf = buf.cast::<v8::Uint8Array>();
+  debug_assert!(args.get(2).is_uint8_array());
+  let buf = args.get(2).cast::<v8::Uint8Array>();
 
   let store = buf.get_backing_store();
   debug_assert!(store.is_some());
