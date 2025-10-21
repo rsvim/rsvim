@@ -33,7 +33,10 @@ pub struct TextDecoder {
   pub encoding: String,
 }
 
-flags_builder_impl!(TextDecoder, flags, fatal, ignore_bom);
+impl TextDecoderBuilder {
+  flags_builder_impl!(flags, fatal);
+  flags_builder_impl!(flags, ignore_bom);
+}
 
 impl TextDecoder {
   pub fn fatal(&self) -> bool {

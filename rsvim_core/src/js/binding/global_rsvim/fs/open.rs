@@ -56,16 +56,14 @@ pub struct FsOpenOptions {
   fs_open_option_flags: FsOpenOptionFlags,
 }
 
-flags_builder_impl!(
-  FsOpenOptions,
-  fs_open_option_flags,
-  append,
-  create,
-  create_new,
-  read,
-  truncate,
-  write
-);
+impl FsOpenOptionsBuilder {
+  flags_builder_impl!(fs_open_option_flags, append);
+  flags_builder_impl!(fs_open_option_flags, create);
+  flags_builder_impl!(fs_open_option_flags, create_new);
+  flags_builder_impl!(fs_open_option_flags, read);
+  flags_builder_impl!(fs_open_option_flags, truncate);
+  flags_builder_impl!(fs_open_option_flags, write);
+}
 
 impl FsOpenOptions {
   pub fn append(&self) -> bool {
