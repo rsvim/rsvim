@@ -7,8 +7,6 @@ use crate::js::converter::*;
 use crate::to_v8_const;
 use compact_str::CompactString;
 
-flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
-
 /// Option names.
 pub const FATAL: &str = "fatal";
 pub const IGNORE_BOM: &str = "ignoreBOM";
@@ -18,6 +16,8 @@ pub const ENCODING: &str = "encoding";
 pub const _FATAL_DEFAULT: bool = false;
 pub const _IGNORE_BOM_DEFAULT: bool = false;
 pub const ENCODING_DEFAULT: CompactString = CompactString::const_new("utf-8");
+
+flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
 // fatal=false
 // ignoreBOM=false
@@ -116,4 +116,23 @@ impl StructToV8 for TextDecoder {
 
     obj
   }
+}
+
+/// Decode option names.
+pub const STREAM: &str = "stream";
+
+/// Default decode option values.
+pub const _STREAM_DEFAULT: bool = false;
+
+flags_impl!(DecodeOptionFlags, u8, STREAM);
+
+// stream=false
+const DECODE_OPTION_FLAGS: DecodeOptionFlags = DecodeOptionFlags::empty();
+
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+pub struct DecodeOptions {
+  #[builder(default = DECODE_OPTION_FLAGS)]
+  #[builder(setter(custom))]
+  // stream
+  decode_option_flags: DecodeOptionFlags,
 }
