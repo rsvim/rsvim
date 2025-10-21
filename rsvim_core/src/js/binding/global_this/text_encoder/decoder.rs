@@ -4,7 +4,6 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
 use crate::js::converter::*;
-use crate::to_v8_const;
 use compact_str::CompactString;
 
 /// Option names.
