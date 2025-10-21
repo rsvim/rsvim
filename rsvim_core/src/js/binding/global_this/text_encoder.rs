@@ -10,7 +10,6 @@ use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::encoder::TextEncoder;
 use crate::js::converter::*;
 use crate::prelude::*;
-use compact_str::CompactString;
 use compact_str::ToCompactString;
 use decoder::TextDecoder;
 use decoder::TextDecoderBuilder;
