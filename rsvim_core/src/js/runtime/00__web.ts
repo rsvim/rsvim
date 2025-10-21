@@ -77,6 +77,9 @@ export class TextEncoder {
       __InternalRsvimGlobalObject.global_encoding_create_encoder();
   }
 
+  /**
+   * Encode string text into {@link !Uint8Array}.
+   */
   encode(input: string): Uint8Array {
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     return __InternalRsvimGlobalObject.global_encoding_encode(
