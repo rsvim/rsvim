@@ -1,6 +1,5 @@
 //! TextEncoder.
 
-use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
 
