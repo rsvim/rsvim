@@ -82,6 +82,7 @@ impl TextDecoder {
     self.flags.contains(Flags::FATAL)
   }
 
+  #[allow(dead_code)]
   pub fn ignore_bom(&self) -> bool {
     self.flags.contains(Flags::IGNORE_BOM)
   }
