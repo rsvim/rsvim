@@ -318,6 +318,15 @@ macro_rules! to_v8_prop {
     }
   };
 
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, optional) => {
+    paste::paste! {
+      if let Some($prop) = &$self.$prop {
+        let [< $prop _value >] = $prop.to_v8($scope);
+        $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      }
+    }
+  };
+
   ($self:ident, $obj:ident, $scope:ident, $prop:tt, Vec) => {
     paste::paste! {
       let [< $prop _value >] = $self.$prop.to_v8($scope, |scope, i| i.to_v8(scope).into());
@@ -329,19 +338,6 @@ macro_rules! to_v8_prop {
     paste::paste! {
       let [< $prop _value >] = $self.$prop().to_v8($scope, |scope, i| i.to_v8(scope).into());
       $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
-    }
-  };
-}
-
-/// Optional property to_v8 helper
-#[macro_export]
-macro_rules! to_v8_opt_prop {
-  ($self:ident, $obj:ident, $scope:ident, $prop:tt) => {
-    paste::paste! {
-      if let Some($prop) = &$self.$prop {
-        let [< $prop _value >] = $prop.to_v8($scope);
-        $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
-      }
     }
   };
 }
@@ -388,6 +384,17 @@ macro_rules! from_v8_prop {
       let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
       from_v8_prop!{@assert_each($ty, [< $prop _value>])};
       $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
+    }
+  };
+
+  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt, optional) => {
+    paste::paste! {
+      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      if $obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false) {
+        let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
+        from_v8_prop!{@assert_each($ty, [< $prop _value>])};
+        $builder.$prop(Some($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} )));
+      }
     }
   };
 }
