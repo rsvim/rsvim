@@ -2,7 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::from_v8_impl;
+use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
 
@@ -45,11 +45,20 @@ impl TextDecoder {
   }
 }
 
-from_v8_impl!(
-  TextDecoder,
-  [(String, encoding), (bool, fatal), (bool, ignore_bom)],
-  []
-);
+impl StructFromV8 for TextDecoder {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = TextDecoderBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, String, encoding);
+    from_v8_prop!(builder, obj, scope, bool, fatal);
+    from_v8_prop!(builder, obj, scope, bool, ignore_bom);
+
+    builder.build().unwrap()
+  }
+}
 
 impl StructToV8 for TextDecoder {
   fn to_v8<'s>(
