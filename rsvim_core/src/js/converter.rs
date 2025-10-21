@@ -333,6 +333,19 @@ macro_rules! to_v8_prop {
   };
 }
 
+/// Optional property to_v8 helper
+#[macro_export]
+macro_rules! to_v8_opt_prop {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt) => {
+    paste::paste! {
+      if let Some($prop) = &$self.$prop {
+        let [< $prop _value >] = $prop.to_v8($scope);
+        $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      }
+    }
+  };
+}
+
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {

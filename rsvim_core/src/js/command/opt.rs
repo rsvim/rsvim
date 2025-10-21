@@ -4,6 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_impl;
 use crate::js::converter::*;
+use crate::to_v8_opt_prop;
 use crate::to_v8_prop;
 use compact_str::CompactString;
 
@@ -51,10 +52,7 @@ impl StructToV8 for CommandOptions {
     let obj = v8::Object::new(scope);
 
     to_v8_prop!(self, obj, scope, force, ());
-
-    if let Some(alias) = &self.alias {
-      to_v8_prop!(self, obj, scope, alias);
-    }
+    to_v8_opt_prop!(self, obj, scope, alias);
 
     obj
   }
