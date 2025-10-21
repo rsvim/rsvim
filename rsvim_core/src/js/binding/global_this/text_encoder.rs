@@ -70,7 +70,8 @@ pub fn encode<'s>(
     debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
   }
 
-  let payload = args.get(0).to_string(scope).unwrap();
+  debug_assert!(is_v8_str!(args.get(1)));
+  let payload = args.get(1).to_rust_string_lossy(scope);
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
   let (store, _read, _written) = encode_impl(scope, payload);
