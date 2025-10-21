@@ -213,7 +213,6 @@ pub fn decode<'s>(
   }
 
   let max_buffer_length = max_buffer_length.unwrap();
-
   let mut output = String::with_capacity(max_buffer_length);
 
   if decoder.fatal() {
