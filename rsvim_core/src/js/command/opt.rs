@@ -42,8 +42,6 @@ impl CommandOptions {
 
 from_v8_impl!(CommandOptions, [(bool, force)], [(CompactString, alias)]);
 
-// to_v8_impl!(CommandOptions, [force], [alias], []);
-
 impl StructToV8 for CommandOptions {
   fn to_v8<'s>(
     &self,
