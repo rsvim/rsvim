@@ -93,6 +93,14 @@ pub enum TheErr {
   #[error("Invalid encoding label `{0}`.")]
   // Invalid encoding label (name).
   InvalidEncodingLabel(CompactString),
+
+  #[error("Value too large `{0}`.")]
+  // Value too large.
+  ValueTooLarge(usize),
+
+  #[error("Buffer too small `{0}`.")]
+  // Buffer too small.
+  BufferTooSmall(usize),
   //
   // js Rsvim.fs }
 }

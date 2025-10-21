@@ -19,6 +19,7 @@ use decoder::TextDecoderBuilder;
 use decoder::TextDecoderOptions;
 use encoder::TextEncoderBuilder;
 use std::cell::Cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// `new TextEncoder()` API.
@@ -87,43 +88,6 @@ pub fn encode<'s>(
   rv.set(buf.into());
 }
 
-/// `TextEncoder.encodeInto` API.
-pub fn encode_into<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 3);
-  debug_assert!(is_v8_obj!(args.get(0)));
-
-  if cfg!(debug_assertions) {
-    let encoder =
-      TextEncoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
-    debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
-  }
-
-  debug_assert!(is_v8_str!(args.get(1)));
-  let payload = args.get(1).to_string(scope).unwrap();
-  trace!("|encode_into| payload:{:?}", payload);
-  debug_assert!(args.get(2).is_uint8_array());
-  let buf = args.get(2).cast::<v8::Uint8Array>();
-
-  let store = buf.get_backing_store();
-  debug_assert!(store.is_some());
-  let mut store = store.unwrap();
-
-  let (new_store, read, written) = encode_impl(scope, payload);
-  store.clone_from(&new_store);
-
-  let rv_obj = v8::Object::new(scope);
-  let read_value = (read as f64).to_v8(scope);
-  binding::set_property_to(scope, rv_obj, "read", read_value.into());
-  let written_value = (written as f64).to_v8(scope);
-  binding::set_property_to(scope, rv_obj, "written", written_value.into());
-
-  rv.set(rv_obj.into());
-}
-
 /// `new TextDecoder()` API.
 pub fn create_decoder<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -140,7 +104,11 @@ pub fn create_decoder<'s>(
 
   match encoding_rs::Encoding::for_label(encoding.as_bytes()) {
     Some(coding) => {
-      let decoder_handle = coding.new_decoder();
+      let decoder_handle = if options.ignore_bom() {
+        RefCell::new(coding.new_decoder_without_bom_handling())
+      } else {
+        RefCell::new(coding.new_decoder_with_bom_removal())
+      };
 
       let decoder_wrapper = v8::ObjectTemplate::new(scope);
 
@@ -149,12 +117,9 @@ pub fn create_decoder<'s>(
       // 2. weak_rc
       decoder_wrapper.set_internal_field_count(2);
       let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
-      let decoder_ptr = binding::set_internal_ref::<encoding_rs::Decoder>(
-        scope,
-        decoder_wrapper,
-        0,
-        decoder_handle,
-      );
+      let decoder_ptr = binding::set_internal_ref::<
+        RefCell<encoding_rs::Decoder>,
+      >(scope, decoder_wrapper, 0, decoder_handle);
       let weak_rc = Rc::new(Cell::new(None));
 
       // To automatically drop the decoder_handle instance when
@@ -215,12 +180,13 @@ pub fn decode<'s>(
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
   let decoder_wrapper = args.get(0).to_object(scope).unwrap();
-  let decoder_handle = binding::get_internal_ref::<encoding_rs::Decoder>(
+  let decoder = TextDecoder::from_v8(scope, decoder_wrapper);
+  let decoder_handle = binding::get_internal_ref::<RefCell<encoding_rs::Decoder>>(
     scope,
     decoder_wrapper,
     0,
   );
-  let decoder = TextDecoder::from_v8(scope, decoder_wrapper);
+  let mut decoder_handle = decoder_handle.borrow_mut();
 
   debug_assert!(args.get(1).is_uint8_array());
   let buf = args.get(1).cast::<v8::Uint8Array>();
@@ -236,25 +202,46 @@ pub fn decode<'s>(
   let options =
     DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
 
-  let (payload, had_errors) = if options.stream() {
-    let mut dest = String::with_capacity(buf.len() + 1);
-    let (_result, _read, had_errors) =
-      decoder_handle.decode_to_string(&buf, &mut dest, false);
-    (dest, had_errors)
-  } else {
-    let (payload, _used_encoding, had_errors) =
-      encoding_rs::Encoding::for_label(decoder.encoding.as_bytes())
-        .unwrap()
-        .decode(&buf);
-    (payload.to_string(), had_errors)
-  };
+  let max_buffer_length = decoder_handle.max_utf16_buffer_length(buf.len());
 
-  if had_errors && decoder.fatal() {
-    binding::throw_type_error(
-      scope,
-      &TheErr::InvalidTextEncoding(decoder.encoding),
-    );
+  if max_buffer_length.is_none() {
+    binding::throw_range_error(scope, &TheErr::ValueTooLarge(buf.len()));
+    return;
+  }
+
+  let max_buffer_length = max_buffer_length.unwrap();
+
+  let mut output = String::with_capacity(max_buffer_length);
+
+  if decoder.fatal() {
+    let (result, _, written) =
+      decoder_handle.decode_to_string(&buf, &mut output, !options.stream());
+    match result {
+      encoding_rs::CoderResult::InputEmpty => {
+        let output = output.to_v8(scope);
+        rv.set(output.into());
+      }
+      encoding_rs::CoderResult::OutputFull => {
+        binding::throw_type_error(
+          scope,
+          &&&TheErr::BufferTooSmall(max_buffer_length),
+        );
+      }
+    }
   } else {
-    rv.set(payload.to_v8(scope).into());
+    let (result, _, written) =
+      decoder_handle.decode_to_string(&buf, &mut output, !options.stream());
+    match result {
+      encoding_rs::CoderResult::InputEmpty => {
+        let output = output.to_v8(scope);
+        rv.set(output.into());
+      }
+      encoding_rs::CoderResult::OutputFull => {
+        binding::throw_type_error(
+          scope,
+          &&&TheErr::BufferTooSmall(max_buffer_length),
+        );
+      }
+    }
   }
 }
