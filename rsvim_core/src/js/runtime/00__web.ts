@@ -71,7 +71,7 @@ export class TextEncoder {
   #__handle: any;
 
   /** @hidden */
-  constructor(handle: any) {
+  constructor() {
     this.#__handle = handle;
   }
 }

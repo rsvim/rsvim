@@ -74,6 +74,30 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
+      "global_encoding_create_encoder",
+      global_this::text_encoder::create_encoder,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_encode",
+      global_this::text_encoder::encode,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_create_decoder",
+      global_this::text_encoder::create_decoder,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_decode",
+      global_this::text_encoder::decode,
+    );
+    set_function_to(
+      scope,
+      vim,
       "global_queue_microtask",
       global_this::microtask::queue_microtask,
     );
