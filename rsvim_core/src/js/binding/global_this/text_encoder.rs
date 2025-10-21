@@ -11,6 +11,7 @@ use crate::js::binding::global_this::text_encoder::encoder::TextEncoder;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
+use decoder::DecodeOptions;
 use decoder::TextDecoder;
 use decoder::TextDecoderBuilder;
 use decoder::TextDecoderOptions;
@@ -165,18 +166,8 @@ pub fn decode<'s>(
   let _buf: Vec<Cell<u8>> = buf.get_backing_store().unwrap().to_vec();
 
   debug_assert!(is_v8_obj!(args.get(2)));
-  let options = args.get(2).to_object(scope).unwrap();
-  let stream_name = "stream".to_v8(scope);
-  let _stream = if options
-    .has_own_property(scope, stream_name.into())
-    .unwrap_or(false)
-  {
-    let stream = options.get(scope, stream_name.into()).unwrap();
-    debug_assert!(is_v8_bool!(stream));
-    bool::from_v8(scope, stream.to_boolean(scope))
-  } else {
-    false
-  };
+  let options =
+    DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
 
   // rv.set(decoder.into());
 }
