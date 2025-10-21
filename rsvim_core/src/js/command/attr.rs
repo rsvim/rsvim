@@ -64,6 +64,15 @@ impl StringFromV8 for Nargs {
   }
 }
 
+impl StringToV8 for Nargs {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::String> {
+    self.to_string().to_v8(scope)
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandAttributes {
   #[builder(default = FLAGS)]
