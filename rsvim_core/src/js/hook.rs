@@ -113,7 +113,7 @@ fn import_meta_resolve(
 ) {
   // Check for provided arguments.
   if args.length() == 0 {
-    throw_type_error(scope, &TheErr::FunctionArgumentsNotEnough);
+    throw_type_error(scope, &TheErr::ArgumentsNotEnough);
     return;
   }
 
