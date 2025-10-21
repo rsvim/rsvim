@@ -85,6 +85,10 @@ pub enum TheErr {
   #[error("File is already closed.")]
   // File is already been closed.
   FileAlreadyClosed,
+
+  #[error("Invalid text encoding.")]
+  // File is already been closed.
+  InvalidTextEncoding(CompactString),
   //
   // js Rsvim.fs }
 }

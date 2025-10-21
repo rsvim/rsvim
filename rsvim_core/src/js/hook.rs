@@ -113,8 +113,7 @@ fn import_meta_resolve(
 ) {
   // Check for provided arguments.
   if args.length() == 0 {
-    let e = TheErr::FunctionArgumentsNotEnough;
-    throw_type_error(scope, &e.to_string());
+    throw_type_error(scope, &TheErr::FunctionArgumentsNotEnough);
     return;
   }
 
@@ -131,7 +130,7 @@ fn import_meta_resolve(
 
   match resolve_import(&base, &specifier, import_map) {
     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
-    Err(e) => throw_type_error(scope, &e.to_string()),
+    Err(e) => throw_type_error(scope, &e),
   };
 }
 
