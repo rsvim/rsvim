@@ -73,8 +73,16 @@ export class TextEncoder {
   /** @hidden */
   constructor() {
     this.#__handle =
-      // @ts-ignore Ignore warning
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
       __InternalRsvimGlobalObject.global_encoding_create_encoder();
+  }
+
+  encode(input: string): Uint8Array {
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.global_encoding_encode(
+      this.#__handle,
+      input,
+    );
   }
 }
 
