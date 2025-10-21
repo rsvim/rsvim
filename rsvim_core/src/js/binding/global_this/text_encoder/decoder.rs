@@ -103,21 +103,6 @@ impl StructFromV8 for TextDecoder {
   }
 }
 
-impl StructToV8 for TextDecoder {
-  fn to_v8<'s>(
-    &self,
-    scope: &mut v8::PinScope<'s, '_>,
-  ) -> v8::Local<'s, v8::Object> {
-    let obj = v8::Object::new(scope);
-
-    to_v8_const!(self, obj, scope, encoding);
-    to_v8_const!(self, obj, scope, fatal, ());
-    to_v8_const!(self, obj, scope, ignore_bom, ());
-
-    obj
-  }
-}
-
 /// Decode option names.
 pub const STREAM: &str = "stream";
 

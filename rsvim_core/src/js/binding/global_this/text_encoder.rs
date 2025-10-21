@@ -3,7 +3,6 @@
 mod decoder;
 mod encoder;
 
-use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
@@ -12,11 +11,15 @@ use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
 use decoder::DecodeOptions;
+use decoder::ENCODING;
+use decoder::FATAL;
+use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
 use decoder::TextDecoderBuilder;
 use decoder::TextDecoderOptions;
 use encoder::TextEncoderBuilder;
 use std::cell::Cell;
+use std::rc::Rc;
 
 /// `new TextEncoder()` API.
 pub fn create_encoder<'s>(
@@ -135,19 +138,89 @@ pub fn create_decoder<'s>(
   let options =
     TextDecoderOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
 
-  if encoding_rs::Encoding::for_label(encoding.as_bytes()).is_some() {
-    let decoder = TextDecoderBuilder::default()
-      .encoding(encoding)
-      .fatal(options.fatal())
-      .ignore_bom(options.ignore_bom())
-      .build()
-      .unwrap();
-    let decoder = decoder.to_v8(scope);
-    rv.set(decoder.into());
-  } else {
-    let exception = TheErr::InvalidTextEncoding(encoding);
-    binding::throw_range_error(scope, &exception);
+  match encoding_rs::Encoding::for_label(encoding.as_bytes()) {
+    Some(coding) => {
+      let decoder_wrapper = v8::ObjectTemplate::new(scope);
+
+      // Allocate internal field:
+      // 1. encoding_rs::Decoder
+      // 2. weak_rc
+      decoder_wrapper.set_internal_field_count(2);
+
+      let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
+
+      let decoder_handle = coding.new_decoder();
+
+      let decoder_ptr = binding::set_internal_ref::<Option<encoding_rs::Decoder>>(
+        scope,
+        decoder_wrapper,
+        0,
+        Some(decoder_handle),
+      );
+      let weak_rc = Rc::new(Cell::new(None));
+
+      // To automatically drop the decoder_handle instance when
+      // V8 garbage collects the object that internally holds the Rust instance,
+      // we use a Weak reference with a finalizer callback.
+      let decoder_weak = v8::Weak::with_finalizer(
+        scope,
+        decoder_wrapper,
+        Box::new({
+          let weak_rc = weak_rc.clone();
+          move |isolate| unsafe {
+            drop(Box::from_raw(decoder_ptr));
+            drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+          }
+        }),
+      );
+
+      // Store the weak ref pointer into the "shared" cell.
+      weak_rc.set(decoder_weak.into_raw());
+      binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
+
+      let encoding_value = encoding.to_v8(scope);
+      binding::set_constant_to(
+        scope,
+        decoder_wrapper,
+        ENCODING,
+        encoding_value.into(),
+      );
+      let fatal_value = options.fatal().to_v8(scope);
+      binding::set_constant_to(
+        scope,
+        decoder_wrapper,
+        ENCODING,
+        fatal_value.into(),
+      );
+      let ignore_bom_value = options.ignore_bom().to_v8(scope);
+      binding::set_constant_to(
+        scope,
+        decoder_wrapper,
+        ENCODING,
+        ignore_bom_value.into(),
+      );
+
+      rv.set(decoder_wrapper.into());
+    }
+    None => {
+      let exception = TheErr::InvalidTextEncoding(encoding);
+      binding::throw_range_error(scope, &exception);
+    }
   }
+
+  // if encoding_rs::Encoding::for_label(encoding.as_bytes()).is_some() {
+  //   let decoder = TextDecoderBuilder::default()
+  //     .encoding(encoding)
+  //     .fatal(options.fatal())
+  //     .ignore_bom(options.ignore_bom())
+  //     .build()
+  //     .unwrap();
+  //   let decoder = decoder.to_v8(scope);
+  //   rv.set(decoder.into());
+  // } else {
+  //   let exception = TheErr::InvalidTextEncoding(encoding);
+  //   binding::throw_range_error(scope, &exception);
+  // }
 }
 
 /// `TextDecoder.decode` API.
@@ -158,16 +231,30 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
-  let _decoder =
+  let decoder =
     TextDecoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
 
   debug_assert!(args.get(1).is_uint8_array());
   let buf = args.get(1).cast::<v8::Uint8Array>();
-  let _buf: Vec<Cell<u8>> = buf.get_backing_store().unwrap().to_vec();
+  let buf: Vec<u8> = buf
+    .get_backing_store()
+    .unwrap()
+    .to_vec()
+    .iter()
+    .map(|c| c.get())
+    .collect();
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
     DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
+
+  if options.stream() {
+  } else {
+    let (payload, used_encoding, had_errors) =
+      encoding_rs::Encoding::for_label(decoder.encoding.as_bytes())
+        .unwrap()
+        .decode(&buf);
+  }
 
   // rv.set(decoder.into());
 }
