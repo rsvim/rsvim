@@ -8,6 +8,7 @@ use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::decoder::TextDecoderBuilder;
+use crate::js::binding::global_this::text_encoder::decoder::TextDecoderOptions;
 use crate::js::converter::*;
 use crate::prelude::*;
 use decoder::FATAL;
@@ -112,34 +113,14 @@ pub fn create_decoder<'s>(
   let encoding = args.get(0).to_rust_string_lossy(scope);
 
   debug_assert!(is_v8_obj!(args.get(1)));
-  let options = args.get(1).to_object(scope).unwrap();
-
-  let fatal_name = FATAL.to_v8(scope);
-  debug_assert!(
-    options
-      .has_own_property(scope, fatal_name.into())
-      .unwrap_or(false)
-  );
-  let fatal = options
-    .get(scope, fatal_name.into())
-    .unwrap()
-    .boolean_value(scope);
-  let ignore_bom_name = IGNORE_BOM.to_v8(scope);
-  debug_assert!(
-    options
-      .has_own_property(scope, ignore_bom_name.into())
-      .unwrap_or(false)
-  );
-  let ignore_bom = options
-    .get(scope, ignore_bom_name.into())
-    .unwrap()
-    .boolean_value(scope);
+  let options =
+    TextDecoderOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
 
   if encoding_rs::Encoding::for_label(encoding.as_bytes()).is_some() {
     let decoder = TextDecoderBuilder::default()
       .encoding(encoding)
-      .fatal(fatal)
-      .ignore_bom(ignore_bom)
+      .fatal(options.fatal())
+      .ignore_bom(options.ignore_bom())
       .build()
       .unwrap();
     let decoder = decoder.to_v8(scope);
