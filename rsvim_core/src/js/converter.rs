@@ -286,14 +286,14 @@ macro_rules! to_v8_prop {
 
   ($self:ident, $obj:ident, $scope:ident, $prop:tt, Vec) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop.to_v8($scope, |scope, i| i.to_v8(scope));
+      let [< $prop _value >] = $self.$prop.to_v8($scope, |scope, i| i.to_v8(scope).into());
       $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
 
   ($self:ident, $obj:ident, $scope:ident, $prop:tt, (), Vec) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop().to_v8($scope, |scope, i| i.to_v8(scope));
+      let [< $prop _value >] = $self.$prop().to_v8($scope, |scope, i| i.to_v8(scope).into());
       $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
