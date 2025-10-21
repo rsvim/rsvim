@@ -4,7 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_impl;
 use crate::js::converter::*;
-use crate::to_v8_impl;
+use crate::to_v8_prop;
 use std::str::FromStr;
 
 flags_impl!(Flags, u8, BANG);
@@ -72,7 +72,7 @@ pub struct CommandAttributes {
   flags: Flags,
 
   #[builder(default = NARGS_DEFAULT)]
-  nargs: Nargs,
+  pub nargs: Nargs,
 }
 
 flags_builder_impl!(CommandAttributes, flags, bang);
@@ -80,10 +80,6 @@ flags_builder_impl!(CommandAttributes, flags, bang);
 impl CommandAttributes {
   pub fn bang(&self) -> bool {
     self.flags.contains(Flags::BANG)
-  }
-
-  pub fn nargs(&self) -> Nargs {
-    self.nargs
   }
 }
 
@@ -94,4 +90,17 @@ from_v8_impl!(
   [(bool, bang), (js_command_attr_Nargs, nargs)],
   []
 );
-to_v8_impl!(CommandAttributes, [bang, nargs], [], []);
+
+impl StructToV8 for CommandAttributes {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
+    let obj = v8::Object::new(scope);
+
+    to_v8_prop!(self, obj, scope, bang, ());
+    to_v8_prop!(self, obj, scope, nargs);
+
+    obj
+  }
+}
