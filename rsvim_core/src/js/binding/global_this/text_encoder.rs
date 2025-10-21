@@ -10,6 +10,8 @@ use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::encoder::TextEncoder;
 use crate::js::converter::*;
 use crate::prelude::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use decoder::TextDecoder;
 use decoder::TextDecoderBuilder;
 use decoder::TextDecoderOptions;
@@ -127,7 +129,7 @@ pub fn create_decoder<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
-  let encoding = args.get(0).to_rust_string_lossy(scope);
+  let encoding = args.get(0).to_rust_string_lossy(scope).to_compact_string();
 
   debug_assert!(is_v8_obj!(args.get(1)));
   let options =
