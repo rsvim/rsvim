@@ -84,7 +84,9 @@ pub struct CommandAttributes {
   pub nargs: Nargs,
 }
 
-flags_builder_impl!(CommandAttributes, flags, bang);
+impl CommandAttributesBuilder {
+  flags_builder_impl!(flags, bang);
+}
 
 impl CommandAttributes {
   pub fn bang(&self) -> bool {
