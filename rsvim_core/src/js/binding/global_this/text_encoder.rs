@@ -9,7 +9,6 @@ use crate::js::binding;
 use crate::js::binding::global_this::text_encoder::encoder::TextEncoder;
 use crate::js::converter::*;
 use crate::prelude::*;
-use crate::to_v8_const;
 use compact_str::ToCompactString;
 use decoder::DecodeOptions;
 use decoder::ENCODING;
