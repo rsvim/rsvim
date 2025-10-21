@@ -207,6 +207,22 @@ impl CallbackToV8 for Rc<v8::Global<v8::Function>> {
   }
 }
 
+pub trait CallbackFromV8 {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Function>,
+  ) -> Self;
+}
+
+impl CallbackFromV8 for Rc<v8::Global<v8::Function>> {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::Function>,
+  ) -> Self {
+    Rc::new(v8::Global::new(scope, value))
+  }
+}
+
 pub trait VecToV8<T> {
   fn to_v8<'s, F>(
     &self,
