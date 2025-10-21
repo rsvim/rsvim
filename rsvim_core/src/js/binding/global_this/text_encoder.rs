@@ -154,21 +154,21 @@ pub fn create_decoder<'s>(
 pub fn decode<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
+  mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
-  let decoder =
+  let _decoder =
     TextDecoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
 
   debug_assert!(args.get(1).is_uint8_array());
   let buf = args.get(1).cast::<v8::Uint8Array>();
-  let buf: Vec<Cell<u8>> = buf.get_backing_store().unwrap().to_vec();
+  let _buf: Vec<Cell<u8>> = buf.get_backing_store().unwrap().to_vec();
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options = args.get(2).to_object(scope).unwrap();
   let stream_name = "stream".to_v8(scope);
-  let stream = if options
+  let _stream = if options
     .has_own_property(scope, stream_name.into())
     .unwrap_or(false)
   {
