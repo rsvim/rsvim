@@ -270,31 +270,31 @@ pub trait StructFromV8CallbackArguments {
 /// Property to_v8 helper
 #[macro_export]
 macro_rules! to_v8_prop {
-  ($self:ident, $obj:ident, $prop:tt) => {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop.to_v8(scope);
-      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      let [< $prop _value >] = $self.$prop.to_v8($scope);
+      $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
 
-  ($self:ident, $obj:ident, $prop:tt, ()) => {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, ()) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop().to_v8(scope);
-      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      let [< $prop _value >] = $self.$prop().to_v8($scope);
+      $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
 
-  ($self:ident, $obj:ident, $prop:tt, Vec) => {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, Vec) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop.to_v8(scope, |scope, i| i.to_v8(scope));
-      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      let [< $prop _value >] = $self.$prop.to_v8($scope, |scope, i| i.to_v8(scope));
+      $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
 
-  ($self:ident, $obj:ident, $prop:tt, (), Vec) => {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, (), Vec) => {
     paste::paste! {
-      let [< $prop _value >] = $self.$prop().to_v8(scope, |scope, i| i.to_v8(scope));
-      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      let [< $prop _value >] = $self.$prop().to_v8($scope, |scope, i| i.to_v8(scope));
+      $crate::js::binding::set_property_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
     }
   };
 }
