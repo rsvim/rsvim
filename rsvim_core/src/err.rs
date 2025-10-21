@@ -88,7 +88,7 @@ pub enum TheErr {
 
   #[error("Invalid text encoding.")]
   // File is already been closed.
-  InvalidTextEncoding(CompactString),
+  TextEncodingInvalid(CompactString),
   //
   // js Rsvim.fs }
 }
