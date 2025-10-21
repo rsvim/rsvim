@@ -140,3 +140,22 @@ pub struct DecodeOptions {
 impl DecodeOptionsBuilder {
   flags_builder_impl!(decode_option_flags, stream);
 }
+
+impl DecodeOptions {
+  pub fn stream(&self) -> bool {
+    self.decode_option_flags.contains(DecodeOptionFlags::STREAM)
+  }
+}
+
+impl StructFromV8 for DecodeOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = DecodeOptionsBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, bool, stream);
+
+    builder.build().unwrap()
+  }
+}
