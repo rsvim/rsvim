@@ -2,7 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::from_v8_impl;
+use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
 use std::str::FromStr;
@@ -92,13 +92,22 @@ impl CommandAttributes {
   }
 }
 
+#[allow(non_camel_case_types)]
 type js_command_attr_Nargs = Nargs;
 
-from_v8_impl!(
-  CommandAttributes,
-  [(bool, bang), (js_command_attr_Nargs, nargs)],
-  []
-);
+impl StructFromV8 for CommandAttributes {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = CommandAttributesBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, bool, bang);
+    from_v8_prop!(builder, obj, scope, js_command_attr_Nargs, nargs);
+
+    builder.build().unwrap()
+  }
+}
 
 impl StructToV8 for CommandAttributes {
   fn to_v8<'s>(

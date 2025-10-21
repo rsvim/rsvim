@@ -346,6 +346,52 @@ macro_rules! to_v8_opt_prop {
   };
 }
 
+/// Property from_v8 helpers
+#[macro_export]
+macro_rules! from_v8_prop {
+  (@assert_each(bool, $prop:tt)) => {
+    debug_assert!($prop.is_boolean() || $prop.is_boolean_object());
+  };
+
+  (@each($scope:ident, bool, $prop:tt)) => {
+    $prop.to_boolean($scope)
+  };
+
+  (@assert_each(String, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, String, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
+  (@assert_each(CompactString, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, CompactString, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
+  (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
+  ($builder:ident, $obj:ident, $scope:ident, $ty:tt, $prop:tt) => {
+    paste::paste! {
+      let [< $prop _name >] = [< $prop:snake:upper >].to_v8($scope);
+      debug_assert!($obj.has_own_property($scope, [< $prop _name >].into()).unwrap_or(false));
+      let [< $prop _value >] = $obj.get($scope, [< $prop _name >].into()).unwrap();
+      from_v8_prop!{@assert_each($ty, [< $prop _value>])};
+      $builder.$prop($ty::from_v8($scope, from_v8_prop!{@each($scope, $ty, [< $prop _value>])} ));
+    }
+  };
+}
+
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
