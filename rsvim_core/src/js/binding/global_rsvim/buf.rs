@@ -42,7 +42,10 @@ pub fn list(
   let buffers = lock!(buffers);
   trace!("Rsvim.buf.list: {:?}", buffers.keys());
 
-  let bufs = buffers.keys().collect::<Vec<&BufferId>>().to_v8(scope);
+  let bufs = buffers
+    .keys()
+    .collect::<Vec<&BufferId>>()
+    .to_v8(scope, |scope, buf_id| buf_id.to_v8(scope).into());
 
   rv.set(bufs.into());
 }
