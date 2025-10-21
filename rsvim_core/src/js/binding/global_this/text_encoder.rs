@@ -12,7 +12,21 @@ use crate::prelude::*;
 use decoder::TextDecoder;
 use decoder::TextDecoderBuilder;
 use decoder::TextDecoderOptions;
+use encoder::TextEncoderBuilder;
 use std::cell::Cell;
+
+/// `new TextEncoder()` API.
+pub fn create_encoder<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 0);
+
+  let encoder = TextEncoderBuilder::default().build().unwrap();
+  let encoder = encoder.to_v8(scope);
+  rv.set(encoder.into());
+}
 
 #[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)

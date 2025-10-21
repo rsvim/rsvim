@@ -1,5 +1,6 @@
 //! TextEncoder.
 
+use crate::from_v8_prop;
 use crate::js::converter::*;
 use crate::to_v8_prop;
 
@@ -11,6 +12,19 @@ pub const _ENCODING_DEFAULT: &str = "utf-8";
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct TextEncoder {
   pub encoding: String,
+}
+
+impl StructFromV8 for TextEncoder {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = TextEncoderBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, String, encoding);
+
+    builder.build().unwrap()
+  }
 }
 
 impl StructToV8 for TextEncoder {
