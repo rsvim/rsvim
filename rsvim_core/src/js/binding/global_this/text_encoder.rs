@@ -151,11 +151,11 @@ pub fn create_decoder<'s>(
 
       let decoder_handle = coding.new_decoder();
 
-      let decoder_ptr = binding::set_internal_ref::<Option<encoding_rs::Decoder>>(
+      let decoder_ptr = binding::set_internal_ref::<encoding_rs::Decoder>(
         scope,
         decoder_wrapper,
         0,
-        Some(decoder_handle),
+        decoder_handle,
       );
       let weak_rc = Rc::new(Cell::new(None));
 
@@ -168,9 +168,7 @@ pub fn create_decoder<'s>(
         Box::new({
           let weak_rc = weak_rc.clone();
           move |isolate| unsafe {
-            let mut decoder_handle = Box::from_raw(decoder_ptr);
-            decoder_handle.take();
-            drop(decoder_handle);
+            drop(Box::from_raw(decoder_ptr));
             drop(v8::Weak::from_raw(isolate, weak_rc.get()));
           }
         }),
