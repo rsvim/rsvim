@@ -13,7 +13,7 @@ pub const ENCODING_DEFAULT: CompactString = CompactString::const_new("utf-8");
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct TextEncoder {
   #[builder(default = ENCODING_DEFAULT)]
-  pub encoding: String,
+  pub encoding: CompactString,
 }
 
 impl StructFromV8 for TextEncoder {
