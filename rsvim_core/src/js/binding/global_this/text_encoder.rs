@@ -201,36 +201,26 @@ pub fn create_decoder<'s>(
       rv.set(decoder_wrapper.into());
     }
     None => {
-      let exception = TheErr::InvalidTextEncoding(encoding);
-      binding::throw_range_error(scope, &exception);
+      binding::throw_range_error(scope, &TheErr::InvalidTextEncoding(encoding));
     }
   }
-
-  // if encoding_rs::Encoding::for_label(encoding.as_bytes()).is_some() {
-  //   let decoder = TextDecoderBuilder::default()
-  //     .encoding(encoding)
-  //     .fatal(options.fatal())
-  //     .ignore_bom(options.ignore_bom())
-  //     .build()
-  //     .unwrap();
-  //   let decoder = decoder.to_v8(scope);
-  //   rv.set(decoder.into());
-  // } else {
-  //   let exception = TheErr::InvalidTextEncoding(encoding);
-  //   binding::throw_range_error(scope, &exception);
-  // }
 }
 
 /// `TextDecoder.decode` API.
 pub fn decode<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
-  mut _rv: v8::ReturnValue,
+  mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
-  let decoder =
-    TextDecoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
+  let decoder_wrapper = args.get(0).to_object(scope).unwrap();
+  let decoder_handle = binding::get_internal_ref::<encoding_rs::Decoder>(
+    scope,
+    decoder_wrapper,
+    0,
+  );
+  let decoder = TextDecoder::from_v8(scope, decoder_wrapper);
 
   debug_assert!(args.get(1).is_uint8_array());
   let buf = args.get(1).cast::<v8::Uint8Array>();
@@ -246,13 +236,25 @@ pub fn decode<'s>(
   let options =
     DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
 
-  if options.stream() {
+  let (payload, had_errors) = if options.stream() {
+    let mut dest = String::with_capacity(buf.len() + 1);
+    let (_result, _read, had_errors) =
+      decoder_handle.decode_to_string(&buf, &mut dest, false);
+    (dest, had_errors)
   } else {
-    let (payload, used_encoding, had_errors) =
+    let (payload, _used_encoding, had_errors) =
       encoding_rs::Encoding::for_label(decoder.encoding.as_bytes())
         .unwrap()
         .decode(&buf);
-  }
+    (payload.to_string(), had_errors)
+  };
 
-  // rv.set(decoder.into());
+  if had_errors && decoder.fatal() {
+    binding::throw_type_error(
+      scope,
+      &TheErr::InvalidTextEncoding(decoder.encoding),
+    );
+  } else {
+    rv.set(payload.to_v8(scope).into());
+  }
 }
