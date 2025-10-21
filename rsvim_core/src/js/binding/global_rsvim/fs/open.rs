@@ -9,7 +9,7 @@ use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
-use crate::to_v8_impl;
+use crate::to_v8_prop;
 use std::cell::Cell;
 use std::fs::File;
 use std::rc::Rc;
@@ -114,12 +114,23 @@ from_v8_impl!(
   []
 );
 
-to_v8_impl!(
-  FsOpenOptions,
-  [append, create, create_new, read, truncate, write],
-  [],
-  []
-);
+impl StructToV8 for FsOpenOptions {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
+    let obj = v8::Object::new(scope);
+
+    to_v8_prop!(self, obj, scope, append, ());
+    to_v8_prop!(self, obj, scope, create, ());
+    to_v8_prop!(self, obj, scope, create_new, ());
+    to_v8_prop!(self, obj, scope, read, ());
+    to_v8_prop!(self, obj, scope, truncate, ());
+    to_v8_prop!(self, obj, scope, write, ());
+
+    obj
+  }
+}
 
 pub fn create_fs_file_wrapper<'s>(
   scope: &mut v8::PinScope<'s, '_>,
