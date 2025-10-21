@@ -316,6 +316,14 @@ macro_rules! from_v8_impl {
     $prop.to_string($scope).unwrap()
   };
 
+  (@assert_each(CompactString, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, CompactString, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
   (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
     debug_assert!($prop.is_string() || $prop.is_string_object());
   };
