@@ -39,7 +39,8 @@ macro_rules! flags_impl {
 /// Would generate:
 ///
 /// ```rust
-/// // line_break
+/// pub const FLAGS = Flags::empty(); // default value
+///
 /// pub fn line_break(&mut self, value: bool) -> &mut Self { // <- "line_break"
 ///   let mut flags = self.flags.unwrap_or( FLAGS ); // <- self."flags", "FLAGS"
 ///   flags.set( Flags::LINE_BREAK , value); // <- "Flags"::"LINE_BREAK"
