@@ -88,4 +88,4 @@ impl CommandAttributes {
 }
 
 from_v8_impl!(CommandAttributes, [(bool, bang), (Nargs, nargs)], []);
-to_v8_impl!(CommandAttributes, [bang, nargs], [], [], []);
+to_v8_impl!(CommandAttributes, [bang, nargs], [], []);

@@ -44,4 +44,4 @@ impl CommandOptions {
 }
 
 from_v8_impl!(CommandOptions, [(bool, force)], [(CompactString, alias)]);
-to_v8_impl!(CommandOptions, [force], [alias], [], []);
+to_v8_impl!(CommandOptions, [force], [alias], []);

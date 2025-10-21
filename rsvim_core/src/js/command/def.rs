@@ -71,6 +71,5 @@ to_v8_impl!(
   CommandDefinition,
   [name, callback, attributes, options],
   [],
-  [],
   []
 );
