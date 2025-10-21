@@ -2,6 +2,7 @@
 
 mod decoder;
 
+use crate::from_v8_prop;
 use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;

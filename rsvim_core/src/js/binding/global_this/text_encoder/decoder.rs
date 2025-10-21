@@ -23,6 +23,45 @@ pub const _ENCODING_DEFAULT: &str = "utf-8";
 const FLAGS: Flags = Flags::empty();
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
+pub struct TextDecoderOptions {
+  #[builder(default = FLAGS)]
+  #[builder(setter(custom))]
+  // fatal
+  // ignoreBOM
+  flags: Flags,
+}
+
+impl TextDecoderOptionsBuilder {
+  flags_builder_impl!(flags, fatal);
+  flags_builder_impl!(flags, ignore_bom);
+}
+
+impl TextDecoderOptions {
+  pub fn fatal(&self) -> bool {
+    self.flags.contains(Flags::FATAL)
+  }
+
+  pub fn ignore_bom(&self) -> bool {
+    self.flags.contains(Flags::IGNORE_BOM)
+  }
+}
+
+impl StructFromV8 for TextDecoderOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = TextDecoderOptionsBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, String, encoding);
+    from_v8_prop!(builder, obj, scope, bool, fatal);
+    from_v8_prop!(builder, obj, scope, bool, ignore_bom);
+
+    builder.build().unwrap()
+  }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct TextDecoder {
   #[builder(default = FLAGS)]
   #[builder(setter(custom))]
