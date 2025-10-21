@@ -72,7 +72,9 @@ export class TextEncoder {
 
   /** @hidden */
   constructor() {
-    this.#__handle = handle;
+    this.#__handle =
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      __InternalRsvimGlobalObject.global_encoding_create_encoder();
   }
 }
 
