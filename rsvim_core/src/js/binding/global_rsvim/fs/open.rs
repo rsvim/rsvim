@@ -2,7 +2,7 @@
 
 use crate::flags_builder_impl;
 use crate::flags_impl;
-use crate::from_v8_impl;
+use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
@@ -101,18 +101,23 @@ impl FsOpenOptions {
   }
 }
 
-from_v8_impl!(
-  FsOpenOptions,
-  [
-    (bool, append),
-    (bool, create),
-    (bool, create_new),
-    (bool, read),
-    (bool, truncate),
-    (bool, write)
-  ],
-  []
-);
+impl StructFromV8 for FsOpenOptions {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    obj: v8::Local<'s, v8::Object>,
+  ) -> Self {
+    let mut builder = FsOpenOptionsBuilder::default();
+
+    from_v8_prop!(builder, obj, scope, bool, append);
+    from_v8_prop!(builder, obj, scope, bool, create);
+    from_v8_prop!(builder, obj, scope, bool, create_new);
+    from_v8_prop!(builder, obj, scope, bool, read);
+    from_v8_prop!(builder, obj, scope, bool, truncate);
+    from_v8_prop!(builder, obj, scope, bool, write);
+
+    builder.build().unwrap()
+  }
+}
 
 impl StructToV8 for FsOpenOptions {
   fn to_v8<'s>(
