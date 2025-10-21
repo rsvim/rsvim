@@ -30,24 +30,6 @@ macro_rules! flags_impl {
   };
 }
 
-/// Usage Example:
-///
-/// ```rust
-/// flags_builder_impl!(WinOptions, flags, line_break, wrap);
-/// ```
-///
-/// Would generate:
-///
-/// ```rust
-/// pub const FLAGS = Flags::empty(); // default value
-///
-/// pub fn line_break(&mut self, value: bool) -> &mut Self { // <- "line_break"
-///   let mut flags = self.flags.unwrap_or( FLAGS ); // <- self."flags", "FLAGS"
-///   flags.set( Flags::LINE_BREAK , value); // <- "Flags"::"LINE_BREAK"
-///   self.flags = Some(flags); // <- self."flags"
-///   self
-/// }
-/// ```
 #[macro_export]
 macro_rules! flags_builder_impl {
   ($member:ident,$field:ident) => {
