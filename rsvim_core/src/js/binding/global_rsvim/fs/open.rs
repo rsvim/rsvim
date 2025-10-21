@@ -28,7 +28,7 @@ flags_impl!(
 
 pub const APPEND: &str = "append";
 pub const CREATE: &str = "create";
-pub const CREATE_NEW: &str = "create_new";
+pub const CREATE_NEW: &str = "createNew";
 pub const READ: &str = "read";
 pub const TRUNCATE: &str = "truncate";
 pub const WRITE: &str = "write";
