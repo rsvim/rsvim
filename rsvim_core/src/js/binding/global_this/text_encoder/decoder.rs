@@ -4,7 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
 use crate::js::converter::*;
-use crate::to_v8_prop;
+use crate::to_v8_const;
 use compact_str::CompactString;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
@@ -110,9 +110,9 @@ impl StructToV8 for TextDecoder {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, encoding);
-    to_v8_prop!(self, obj, scope, fatal, ());
-    to_v8_prop!(self, obj, scope, ignore_bom, ());
+    to_v8_const!(self, obj, scope, encoding);
+    to_v8_const!(self, obj, scope, fatal, ());
+    to_v8_const!(self, obj, scope, ignore_bom, ());
 
     obj
   }

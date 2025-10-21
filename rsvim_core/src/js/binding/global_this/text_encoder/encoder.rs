@@ -2,7 +2,7 @@
 
 use crate::from_v8_prop;
 use crate::js::converter::*;
-use crate::to_v8_prop;
+use crate::to_v8_const;
 use compact_str::CompactString;
 
 /// Option names.
@@ -36,7 +36,7 @@ impl StructToV8 for TextEncoder {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, encoding);
+    to_v8_const!(self, obj, scope, encoding);
 
     obj
   }
