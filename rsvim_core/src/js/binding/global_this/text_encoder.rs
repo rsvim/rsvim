@@ -119,18 +119,6 @@ pub fn encode_into<'s>(
   rv.set(rv_obj.into());
 }
 
-/// `TextEncoder.encoding` property.
-pub fn encoder_encoding<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 0);
-
-  let encoding_value = encoding_rs::UTF_8.name().to_v8(scope);
-  rv.set(encoding_value.into());
-}
-
 /// `new TextDecoder()` API.
 pub fn create_decoder<'s>(
   scope: &mut v8::PinScope<'s, '_>,
