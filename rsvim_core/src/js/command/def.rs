@@ -74,7 +74,7 @@ impl StructToV8 for CommandDefinition {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
-    to_v8_prop!(self, obj, scope, name, ());
+    to_v8_prop!(self, obj, scope, name);
     to_v8_prop!(self, obj, scope, callback);
     to_v8_prop!(self, obj, scope, attributes);
     to_v8_prop!(self, obj, scope, options);
