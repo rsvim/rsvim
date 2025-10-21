@@ -89,6 +89,10 @@ pub enum TheErr {
   #[error("Invalid text encoding `{0}`.")]
   // Invalid text encoding.
   InvalidTextEncoding(CompactString),
+
+  #[error("Invalid encoding label `{0}`.")]
+  // Invalid encoding label (name).
+  InvalidEncodingLabel(CompactString),
   //
   // js Rsvim.fs }
 }
