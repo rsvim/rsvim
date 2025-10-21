@@ -1,7 +1,7 @@
 //! Ex command runtime context.
 
 use crate::js::converter::*;
-use crate::to_v8_impl;
+use crate::to_v8_prop;
 use compact_str::CompactString;
 
 /// Command attribute name.
@@ -16,20 +16,22 @@ pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 pub struct CommandContext {
   #[builder(default = BANG_DEFAULT)]
   // bang
-  bang: bool,
+  pub bang: bool,
 
   #[builder(default = ARGS_DEFAULT)]
-  args: Vec<CompactString>,
+  pub args: Vec<CompactString>,
 }
 
-impl CommandContext {
-  pub fn bang(&self) -> bool {
-    self.bang
-  }
+impl StructToV8 for CommandContext {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
+    let obj = v8::Object::new(scope);
 
-  pub fn args(&self) -> &Vec<CompactString> {
-    &self.args
+    to_v8_prop!(obj, self, bang);
+    to_v8_prop!(obj, self, args, Vec);
+
+    obj
   }
 }
-
-to_v8_impl!(CommandContext, [bang], [], [args]);

@@ -267,40 +267,65 @@ pub trait StructFromV8CallbackArguments {
   ) -> Self;
 }
 
+/// Property to_v8 helper
+#[macro_export]
+macro_rules! to_v8_prop {
+  ($self:ident, $obj:ident, $prop:tt) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop.to_v8(scope);
+      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $prop:tt, ()) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop().to_v8(scope);
+      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $prop:tt, Vec) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop.to_v8(scope, |scope, i| i.to_v8(scope));
+      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $prop:tt, (), Vec) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop().to_v8(scope, |scope, i| i.to_v8(scope));
+      $crate::js::binding::set_property_to(scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+}
+
+/// Optional property to_v8 helper
+#[macro_export]
+macro_rules! to_v8_prop_optional {
+  ($obj:ident, $prop:expr) => {
+    paste::paste! {
+      if let Some($prop) = &$prop {
+        let [< $prop _value >] = $prop.to_v8(scope);
+        $crate::js::binding::set_property_to(scope, obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      }
+    }
+  };
+}
+
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident, [$($prop:tt),*], [$($optional_prop:tt),*], [$($vec_prop:tt),*]) => {
-    paste::paste! {
-      impl StructToV8 for $name {
-        fn to_v8<'s>(
-          &self,
-          scope: &mut v8::PinScope<'s, '_>,
-        ) -> v8::Local<'s, v8::Object> {
-          let obj = v8::Object::new(scope);
+  ($name:ident, $($body:tt)+) => {
+    impl StructToV8 for $name {
+      fn to_v8<'s>(
+        &self,
+        scope: &mut v8::PinScope<'s, '_>,
+      ) -> v8::Local<'s, v8::Object> {
+        let obj = v8::Object::new(scope);
 
-          // properties
-          $(
-            let [< $prop _value >] = self.$prop().to_v8(scope);
-            $crate::js::binding::set_property_to(scope, obj, [< $prop:snake:upper >], [< $prop _value >].into());
-          )*
+        $($body)+
 
-          // optional properties
-          $(
-            if let Some($optional_prop) = &self.$optional_prop {
-              let [< $optional_prop _value >] = $optional_prop.to_v8(scope);
-              $crate::js::binding::set_property_to(scope, obj, [< $optional_prop:snake:upper >], [< $optional_prop _value >].into());
-            }
-          )*
-
-          // Vec properties
-          $(
-            let [< $vec_prop _value >] = self.$vec_prop().to_v8(scope, |scope, i| i.to_v8(scope));
-            $crate::js::binding::set_property_to(scope, obj, [< $vec_prop:snake:upper >], [< $vec_prop _value >].into());
-          )*
-
-          obj
-        }
+        obj
       }
     }
   };
