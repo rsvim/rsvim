@@ -119,7 +119,7 @@ impl CommandsManager {
     name: CompactString,
     definition: CommandDefinitionRc,
   ) -> TheResult<Option<CommandDefinitionRc>> {
-    let alias = definition.options.alias().clone();
+    let alias = definition.options.alias.clone();
 
     if !definition.options.force() {
       if self.commands.contains_key(&name) {
