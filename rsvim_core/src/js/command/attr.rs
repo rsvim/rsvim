@@ -5,7 +5,6 @@ use crate::flags_impl;
 use crate::from_v8_impl;
 use crate::js::converter::*;
 use crate::to_v8_impl;
-use compact_str::CompactString;
 use std::str::FromStr;
 
 flags_impl!(Flags, u8, BANG);
