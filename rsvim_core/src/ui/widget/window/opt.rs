@@ -26,7 +26,10 @@ pub struct WindowOptions {
   scroll_off: u8,
 }
 
-flags_builder_impl!(WindowOptions, flags, wrap, line_break);
+impl WindowOptionsBuilder {
+  flags_builder_impl!(flags, wrap);
+  flags_builder_impl!(flags, line_break);
+}
 
 impl WindowOptions {
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
