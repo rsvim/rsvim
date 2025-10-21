@@ -7,6 +7,7 @@ use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
+use crate::js::binding::global_this::text_encoder::encoder::TextEncoder;
 use crate::js::converter::*;
 use crate::prelude::*;
 use decoder::TextDecoder;
@@ -60,7 +61,15 @@ pub fn encode<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 1);
+  debug_assert!(args.length() == 2);
+  debug_assert!(is_v8_obj!(args.get(0)));
+
+  if cfg!(debug_assertions) {
+    let encoder =
+      TextEncoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
+    debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
+  }
+
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
