@@ -346,7 +346,7 @@ macro_rules! to_v8_prop {
 #[macro_export]
 macro_rules! from_v8_prop {
   (@assert_each(bool, $prop:tt)) => {
-    debug_assert!($prop.is_boolean() || $prop.is_boolean_object());
+    debug_assert!($crate::is_v8_bool!($prop));
   };
 
   (@each($scope:ident, bool, $prop:tt)) => {
@@ -354,7 +354,7 @@ macro_rules! from_v8_prop {
   };
 
   (@assert_each(String, $prop:tt)) => {
-    debug_assert!($prop.is_string() || $prop.is_string_object());
+    debug_assert!($crate::is_v8_str!($prop));
   };
 
   (@each($scope:ident, String, $prop:tt)) => {
@@ -362,7 +362,7 @@ macro_rules! from_v8_prop {
   };
 
   (@assert_each(CompactString, $prop:tt)) => {
-    debug_assert!($prop.is_string() || $prop.is_string_object());
+    debug_assert!($crate::is_v8_str!($prop));
   };
 
   (@each($scope:ident, CompactString, $prop:tt)) => {
@@ -370,7 +370,7 @@ macro_rules! from_v8_prop {
   };
 
   (@assert_each(js_command_attr_Nargs, $prop:tt)) => {
-    debug_assert!($prop.is_string() || $prop.is_string_object());
+    debug_assert!($crate::is_v8_str!($prop));
   };
 
   (@each($scope:ident, js_command_attr_Nargs, $prop:tt)) => {

@@ -112,6 +112,7 @@ pub fn create_decoder<'s>(
 
   debug_assert!(is_v8_obj!(args.get(1)));
   let options = args.get(1).to_object(scope).unwrap();
+
   let fatal_name = FATAL.to_v8(scope);
   debug_assert!(
     options
