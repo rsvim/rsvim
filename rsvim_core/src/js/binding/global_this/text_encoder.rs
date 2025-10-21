@@ -88,11 +88,20 @@ pub fn encode_into<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 2);
-  let payload = args.get(0).to_string(scope).unwrap();
-  let buf = args.get(1);
-  debug_assert!(buf.is_uint8_array());
+  debug_assert!(args.length() == 3);
+  debug_assert!(is_v8_obj!(args.get(0)));
+
+  if cfg!(debug_assertions) {
+    let encoder =
+      TextEncoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
+    debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
+  }
+
+  debug_assert!(is_v8_str!(args.get(1)));
+  let payload = args.get(1).to_string(scope).unwrap();
   trace!("|encode_into| payload:{:?}", payload);
+  let buf = args.get(2);
+  debug_assert!(buf.is_uint8_array());
   let buf = buf.cast::<v8::Uint8Array>();
 
   let store = buf.get_backing_store();
