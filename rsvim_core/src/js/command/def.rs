@@ -67,13 +67,6 @@ impl StructFromV8CallbackArguments for CommandDefinition {
   }
 }
 
-to_v8_impl!(
-  CommandDefinition,
-  [name, callback, attributes, options],
-  [],
-  []
-);
-
 impl StructToV8 for CommandDefinition {
   fn to_v8<'s>(
     &self,
