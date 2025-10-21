@@ -16,10 +16,20 @@ pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
 pub struct CommandContext {
   #[builder(default = BANG_DEFAULT)]
   // bang
-  pub bang: bool,
+  bang: bool,
 
   #[builder(default = ARGS_DEFAULT)]
-  pub args: Vec<CompactString>,
+  args: Vec<CompactString>,
 }
 
-to_v8_impl!(CommandContext, [bang, args], [], [], []);
+impl CommandContext {
+  pub fn bang(&self) -> bool {
+    self.bang
+  }
+
+  pub fn args(&self) -> &Vec<CompactString> {
+    &self.args
+  }
+}
+
+to_v8_impl!(CommandContext, [bang], [], [args]);

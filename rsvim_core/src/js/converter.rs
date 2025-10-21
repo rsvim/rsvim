@@ -261,7 +261,7 @@ pub trait StructFromV8CallbackArguments {
 /// Implement struct's to_v8 helpers
 #[macro_export]
 macro_rules! to_v8_impl {
-  ($name:ident, [$($prop:tt),*], [$($optional_prop:tt),*], [$($constant:tt),*], [$($opt_constant:tt),*]) => {
+  ($name:ident, [$($prop:tt),*], [$($optional_prop:tt),*], [$($vec_prop:tt),*]) => {
     paste::paste! {
       impl StructToV8 for $name {
         fn to_v8<'s>(
@@ -272,7 +272,7 @@ macro_rules! to_v8_impl {
 
           // properties
           $(
-            let [< $prop _value >] = self.$prop.to_v8(scope);
+            let [< $prop _value >] = self.$prop().to_v8(scope);
             $crate::js::binding::set_property_to(scope, obj, [< $prop:snake:upper >], [< $prop _value >].into());
           )*
 
@@ -284,18 +284,10 @@ macro_rules! to_v8_impl {
             }
           )*
 
-          // constants
+          // Vec properties
           $(
-            let [< $constant _value >] = self.$constant.to_v8(scope);
-            $crate::js::binding::set_constant_to(scope, obj, [< $constant:snake:upper >], [< $constant _value >].into());
-          )*
-
-          // optional constants
-          $(
-            if let Some($opt_constant) = &self.$opt_constant {
-              let [< $opt_constant _value >] = $opt_constant.to_v8(scope);
-              $crate::js::binding::set_constant_to(scope, obj, [< $opt_constant:snake:upper >], [< $opt_constant _value >].into());
-            }
+            let [< $vec_prop _value >] = self.$vec_prop().to_v8(scope, |scope, i| i.to_v8(scope));
+            $crate::js::binding::set_property_to(scope, obj, [< $vec_prop:snake:upper >], [< $vec_prop _value >].into());
           )*
 
           obj
