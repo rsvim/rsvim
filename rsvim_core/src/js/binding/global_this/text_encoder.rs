@@ -140,17 +140,15 @@ pub fn create_decoder<'s>(
 
   match encoding_rs::Encoding::for_label(encoding.as_bytes()) {
     Some(coding) => {
+      let decoder_handle = coding.new_decoder();
+
       let decoder_wrapper = v8::ObjectTemplate::new(scope);
 
       // Allocate internal field:
       // 1. encoding_rs::Decoder
       // 2. weak_rc
       decoder_wrapper.set_internal_field_count(2);
-
       let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
-
-      let decoder_handle = coding.new_decoder();
-
       let decoder_ptr = binding::set_internal_ref::<encoding_rs::Decoder>(
         scope,
         decoder_wrapper,
