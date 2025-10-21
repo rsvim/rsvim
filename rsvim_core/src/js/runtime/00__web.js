@@ -38,6 +38,16 @@ function boundByIntegers(arg, bound) {
     }
     return arg;
 }
+export class TextEncoder {
+    #__handle;
+    constructor() {
+        this.#__handle =
+            __InternalRsvimGlobalObject.global_encoding_create_encoder();
+    }
+    encode(input) {
+        return __InternalRsvimGlobalObject.global_encoding_encode(this.#__handle, input);
+    }
+}
 ((globalThis) => {
     const TIMEOUT_MAX = Math.pow(2, 31) - 1;
     let nextTimerId = 1;
@@ -107,5 +117,5 @@ function boundByIntegers(arg, bound) {
     globalThis.setInterval = setInterval;
     globalThis.queueMicrotask = queueMicrotask;
     globalThis.reportError = reportError;
+    globalThis.TextEncoder = TextEncoder;
 })(globalThis);
-export {};

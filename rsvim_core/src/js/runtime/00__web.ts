@@ -159,6 +159,11 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number;
+
+  /**
+   * Create new {@link TextEncoder} instance.
+   */
+  TextEncoder: typeof TextEncoder;
 }
 
 ((globalThis: GlobalThis) => {
@@ -300,4 +305,5 @@ export interface GlobalThis {
   globalThis.setInterval = setInterval;
   globalThis.queueMicrotask = queueMicrotask;
   globalThis.reportError = reportError;
+  globalThis.TextEncoder = TextEncoder;
 })(globalThis as unknown as GlobalThis);
