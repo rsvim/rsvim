@@ -2,18 +2,15 @@
 
 mod decoder;
 
-use crate::from_v8_prop;
 use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
-use crate::js::binding::global_this::text_encoder::decoder::TextDecoderBuilder;
-use crate::js::binding::global_this::text_encoder::decoder::TextDecoderOptions;
 use crate::js::converter::*;
 use crate::prelude::*;
-use decoder::FATAL;
-use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
+use decoder::TextDecoderBuilder;
+use decoder::TextDecoderOptions;
 use std::cell::Cell;
 
 #[allow(deprecated)]
