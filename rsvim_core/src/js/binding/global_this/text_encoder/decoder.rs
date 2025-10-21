@@ -4,7 +4,7 @@ use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_impl;
 use crate::js::converter::*;
-use crate::to_v8_impl;
+use crate::to_v8_prop;
 
 flags_impl!(Flags, u8, FATAL, IGNORE_BOM);
 
@@ -30,7 +30,7 @@ pub struct TextDecoder {
   // ignoreBOM
   flags: Flags,
 
-  encoding: String,
+  pub encoding: String,
 }
 
 flags_builder_impl!(TextDecoder, flags, fatal, ignore_bom);
@@ -43,10 +43,6 @@ impl TextDecoder {
   pub fn ignore_bom(&self) -> bool {
     self.flags.contains(Flags::IGNORE_BOM)
   }
-
-  pub fn encoding(&self) -> &str {
-    &self.encoding
-  }
 }
 
 from_v8_impl!(
@@ -54,4 +50,18 @@ from_v8_impl!(
   [(String, encoding), (bool, fatal), (bool, ignore_bom)],
   []
 );
-to_v8_impl!(TextDecoder, [encoding, fatal, ignore_bom], [], []);
+
+impl StructToV8 for TextDecoder {
+  fn to_v8<'s>(
+    &self,
+    scope: &mut v8::PinScope<'s, '_>,
+  ) -> v8::Local<'s, v8::Object> {
+    let obj = v8::Object::new(scope);
+
+    to_v8_prop!(self, obj, scope, encoding);
+    to_v8_prop!(self, obj, scope, fatal, ());
+    to_v8_prop!(self, obj, scope, ignore_bom, ());
+
+    obj
+  }
+}
