@@ -333,25 +333,6 @@ macro_rules! to_v8_prop {
   };
 }
 
-/// Implement struct's to_v8 helpers
-#[macro_export]
-macro_rules! to_v8_impl {
-  ($name:ident, $($body:tt)+) => {
-    impl StructToV8 for $name {
-      fn to_v8<'s>(
-        &self,
-        scope: &mut v8::PinScope<'s, '_>,
-      ) -> v8::Local<'s, v8::Object> {
-        let obj = v8::Object::new(scope);
-
-        $($body)+
-
-        obj
-      }
-    }
-  };
-}
-
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
