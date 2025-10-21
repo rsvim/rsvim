@@ -62,6 +62,21 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 }
 
 /**
+ * Encode string text into bytes, it only supports "utf-8" string.
+ *
+ * @see {@link !TextEncoder}
+ */
+export class TextEncoder {
+  /** @hidden */
+  #__handle: any;
+
+  /** @hidden */
+  constructor(handle: any) {
+    this.#__handle = handle;
+  }
+}
+
+/**
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
 export interface GlobalThis {
