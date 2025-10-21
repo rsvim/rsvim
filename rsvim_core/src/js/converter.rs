@@ -300,6 +300,26 @@ macro_rules! to_v8_impl {
 /// Implement struct's from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_impl {
+  (@assert_each(bool, $prop:tt)) => {
+    debug_assert!($prop.is_boolean() || $prop.is_boolean_object());
+  };
+
+  (@each($scope:ident, bool, $prop:tt)) => {
+    $prop.to_boolean($scope)
+  };
+
+  (@assert_each(String, $prop:tt)) => {
+    debug_assert!($prop.is_string() || $prop.is_string_object());
+  };
+
+  (@each($scope:ident, String, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
+  (@each($scope:ident, Nargs, $prop:tt)) => {
+    $prop.to_string($scope).unwrap()
+  };
+
   ($name:ident, [$(($ty:tt,$prop:tt)),*], [$(($optional_ty:tt,$optional_prop:tt)),*]) => {
     paste::paste!{
       impl StructFromV8 for $name {
@@ -314,7 +334,8 @@ macro_rules! from_v8_impl {
             let [< $prop _name >] = [< $prop:snake:upper >].to_v8(scope);
             debug_assert!(obj.has_own_property(scope, [< $prop _name >].into()).unwrap_or(false));
             let [< $prop _value >] = obj.get(scope, [< $prop _name >].into()).unwrap();
-            builder.$prop($ty::from_v8(scope, [< $prop _value >]));
+            from_v8_impl!{@assert_each($ty, [< $prop _value>])};
+            builder.$prop($ty::from_v8(scope, from_v8_impl!{@each(scope, $ty, [< $prop _value>])} ));
           )*
 
           // optional properties
@@ -322,7 +343,8 @@ macro_rules! from_v8_impl {
             let [< $optional_prop _name >] = [< $optional_prop:snake:upper >].to_v8(scope);
             if obj.has_own_property(scope, [< $optional_prop _name >].into()).unwrap_or(false) {
               let [< $optional_prop _value >] = obj.get(scope, [< $optional_prop _name >].into()).unwrap();
-              builder.$optional_prop(Some($optional_ty::from_v8(scope, [< $optional_prop _value >])));
+              from_v8_impl!{@assert_each($optional_ty, [< $optional_prop _value>])};
+              builder.$optional_prop(Some($optional_ty::from_v8(scope, from_v8_impl!{@each($optional_ty, [< $optional_prop _value>])} )));
             } else {
               builder.$optional_prop(None);
             }
