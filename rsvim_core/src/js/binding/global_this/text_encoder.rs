@@ -238,7 +238,7 @@ pub fn decode<'s>(
       }
     }
   } else {
-    let (result, _, written) =
+    let (result, _, _written) =
       decoder_handle.decode_to_string(&buf, &mut output, !options.stream());
     match result {
       encoding_rs::CoderResult::InputEmpty => {
@@ -248,7 +248,7 @@ pub fn decode<'s>(
       encoding_rs::CoderResult::OutputFull => {
         binding::throw_type_error(
           scope,
-          &&&TheErr::BufferTooSmall(max_buffer_length),
+          &TheErr::BufferTooSmall(max_buffer_length),
         );
       }
     }
