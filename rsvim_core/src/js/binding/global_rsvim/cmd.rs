@@ -89,7 +89,7 @@ pub fn list(
   let commands = commands
     .keys()
     .collect::<Vec<&CompactString>>()
-    .to_v8(scope);
+    .to_v8(scope, |scope, cmd| cmd.to_v8(scope).into());
 
   rv.set(commands.into());
 }
