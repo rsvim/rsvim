@@ -1,6 +1,6 @@
 //! Converters between rust and v8 values.
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 
 pub trait U32ToV8 {
   fn to_v8<'s>(
@@ -180,6 +180,15 @@ impl StringFromV8 for String {
   }
 }
 
+impl StringFromV8 for CompactString {
+  fn from_v8<'s>(
+    scope: &mut v8::PinScope<'s, '_>,
+    value: v8::Local<'s, v8::String>,
+  ) -> Self {
+    value.to_rust_string_lossy(scope).to_compact_string()
+  }
+}
+
 pub trait VecToV8<T> {
   fn to_v8<'s, F>(
     &self,
@@ -356,7 +365,7 @@ macro_rules! from_v8_impl {
             if obj.has_own_property(scope, [< $optional_prop _name >].into()).unwrap_or(false) {
               let [< $optional_prop _value >] = obj.get(scope, [< $optional_prop _name >].into()).unwrap();
               from_v8_impl!{@assert_each($optional_ty, [< $optional_prop _value>])};
-              builder.$optional_prop(Some($optional_ty::from_v8(scope, from_v8_impl!{@each($optional_ty, [< $optional_prop _value>])} )));
+              builder.$optional_prop(Some($optional_ty::from_v8(scope, from_v8_impl!{@each(scope, $optional_ty, [< $optional_prop _value>])} )));
             } else {
               builder.$optional_prop(None);
             }
