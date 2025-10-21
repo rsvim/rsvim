@@ -95,7 +95,7 @@ impl StructFromV8 for TextDecoder {
   ) -> Self {
     let mut builder = TextDecoderBuilder::default();
 
-    from_v8_prop!(builder, obj, scope, String, encoding);
+    from_v8_prop!(builder, obj, scope, CompactString, encoding);
     from_v8_prop!(builder, obj, scope, bool, fatal);
     from_v8_prop!(builder, obj, scope, bool, ignore_bom);
 

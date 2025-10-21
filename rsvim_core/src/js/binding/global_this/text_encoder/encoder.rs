@@ -23,7 +23,7 @@ impl StructFromV8 for TextEncoder {
   ) -> Self {
     let mut builder = TextEncoderBuilder::default();
 
-    from_v8_prop!(builder, obj, scope, String, encoding);
+    from_v8_prop!(builder, obj, scope, CompactString, encoding);
 
     builder.build().unwrap()
   }
