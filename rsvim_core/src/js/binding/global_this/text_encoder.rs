@@ -23,7 +23,6 @@ fn encode_impl<'s>(
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v8` follow deno's implementation:
-  //
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
   let written = payload.write_utf8(
