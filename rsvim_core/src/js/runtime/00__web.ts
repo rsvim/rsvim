@@ -136,7 +136,7 @@ export class TextEncoder {
 /**
  * @inline
  */
-type TextDecoderOptions = { fatal: boolean; ignoreBOM: boolean };
+type TextDecoderOptions = { fatal?: boolean; ignoreBOM?: boolean };
 
 /**
  * Decode bytes array into string text.

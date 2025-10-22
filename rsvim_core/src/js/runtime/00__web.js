@@ -19,9 +19,24 @@ function checkIsBoolean(arg, msg) {
         throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
     }
 }
+function checkIsString(arg, msg) {
+    if (typeof arg !== "string") {
+        throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+    }
+}
+function checkIsUint8Array(arg, msg) {
+    if (arg instanceof Uint8Array) {
+        throw new TypeError(`${msg} must be a Uint8Array, but found ${typeof arg}`);
+    }
+}
 function checkIsFunction(arg, msg) {
     if (typeof arg !== "function") {
         throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
+    }
+}
+function checkIsObject(arg, msg) {
+    if (typeof arg !== "object") {
+        throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
     }
 }
 function checkIsOptions(arg, options, msg) {
@@ -39,13 +54,45 @@ function boundByIntegers(arg, bound) {
     return arg;
 }
 export class TextEncoder {
-    #__handle;
-    constructor() {
-        this.#__handle =
-            __InternalRsvimGlobalObject.global_encoding_create_encoder();
+    constructor() { }
+    get encoding() {
+        return "utf-8";
     }
     encode(input) {
-        return __InternalRsvimGlobalObject.global_encoding_encode(this.#__handle, input);
+        checkIsString(input, `"TextEncoder.encode" input`);
+        return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    }
+    encodeInto(src, dest) {
+        checkIsString(src, `"TextEncoder.encodeInto" src`);
+        checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
+        return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+    }
+}
+export class TextDecoder {
+    #handle;
+    constructor(encoding, options) {
+        checkIsString(encoding, `"TextDecoder.constructor" encoding`);
+        if (options === undefined || options === null) {
+            options = { fatal: false, ignoreBOM: false };
+        }
+        checkIsObject(options, `"TextDecoder.constructor" options`);
+        if (!Object.hasOwn(options, "fatal")) {
+            options.fatal = false;
+        }
+        if (!Object.hasOwn(options, "ignoreBOM")) {
+            options.ignoreBOM = false;
+        }
+        const handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
+        this.#handle = handle;
+    }
+    encode(input) {
+        checkIsString(input, `"TextEncoder.encode" input`);
+        return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    }
+    encodeInto(src, dest) {
+        checkIsString(src, `"TextEncoder.encodeInto" src`);
+        checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
+        return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
     }
 }
 ((globalThis) => {
@@ -118,4 +165,5 @@ export class TextEncoder {
     globalThis.queueMicrotask = queueMicrotask;
     globalThis.reportError = reportError;
     globalThis.TextEncoder = TextEncoder;
+    globalThis.TextDecoder = TextDecoder;
 })(globalThis);
