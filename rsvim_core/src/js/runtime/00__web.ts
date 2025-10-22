@@ -225,27 +225,11 @@ export class TextDecoder {
    * @returns {Uint8Array} Encoded uint8 bytes array.
    * @throws Throws {@link !TypeError} if input is not a string.
    */
-  encode(input: string): Uint8Array {
+  decode(input: string): Uint8Array {
     checkIsString(input, `"TextEncoder.encode" input`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
-  }
-
-  /**
-   * Encode string text into {@link !Uint8Array}.
-   *
-   * @param {string} src - Text that need encode.
-   * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
-   * @returns {TextEncoderEncodeIntoResult} Encode result, "read": the read Unicode code units from `src`, "written": the written UTF-8/uint8 bytes to `dest`.
-   * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
-   */
-  encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
-    checkIsString(src, `"TextEncoder.encodeInto" src`);
-    checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
-
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
   }
 }
 
