@@ -7,7 +7,7 @@ use std::time::Duration;
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
-async fn test_queue_microtask1() -> IoResult<()> {
+async fn test_encode1() -> IoResult<()> {
   test_log_init();
 
   let terminal_cols = 10_u16;
