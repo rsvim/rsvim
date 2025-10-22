@@ -62,6 +62,11 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 }
 
 /**
+ * @inline
+ */
+type TextEncoderEncodeIntoResult = { read: number; written: number };
+
+/**
  * Encode string text into bytes, it only supports "utf-8" string.
  *
  * @see {@link !TextEncoder}
@@ -84,9 +89,9 @@ export class TextEncoder {
   /**
    * Encode string text into {@link !Uint8Array}.
    *
-   * @param {string} input - Text that need encode.
+   * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
-   * @returns {Uint8Array} Encoded uint8 bytes array.
+   * @returns {TextEncoderEncodeIntoResult} Encode result, "read": the read Unicode code units from `src`, "written": the written UTF-8 bytes to `dest`.
    * @throws Throws {@link !TypeError} if input is not a string.
    */
   encodeInto(src: string, dest: Uint8Array): Uint8Array {
