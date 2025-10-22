@@ -225,6 +225,10 @@ pub fn decode<'s>(
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
     DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
+  trace!(
+    "|decode| decoder_obj:{:?}, buf:{:?}, options:{:?}",
+    decoder_obj, buf, options
+  );
 
   let max_buffer_length = decoder_handle.max_utf16_buffer_length(buf.len());
 
