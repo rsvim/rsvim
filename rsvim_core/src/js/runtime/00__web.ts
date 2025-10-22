@@ -219,7 +219,7 @@ export class TextDecoder {
   }
 
   /**
-   * Encode string text to {@link !Uint8Array}.
+   * Decode {@link !Uint8Array} bytes array to string text.
    *
    * @param {string} input - Text that need encode.
    * @returns {Uint8Array} Encoded uint8 bytes array.
