@@ -14,25 +14,10 @@ use decoder::ENCODING;
 use decoder::TextDecoder;
 use decoder::TextDecoderOptions;
 use encoder::TextEncoder;
-use encoder::TextEncoderBuilder;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// `new TextEncoder()` API.
-pub fn create_encoder<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 0);
-
-  let encoder = TextEncoderBuilder::default().build().unwrap();
-  let encoder = encoder.to_v8(scope);
-  rv.set(encoder.into());
-}
-
-#[allow(deprecated)]
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -44,6 +29,7 @@ fn encode_impl<'s>(
   // FIXME: Update to `write_utf8_v8` follow deno's implementation:
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
+  #[allow(deprecated)]
   let written = payload.write_utf8(
     scope,
     &mut buf,
