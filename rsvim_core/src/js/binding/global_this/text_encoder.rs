@@ -136,11 +136,11 @@ pub fn create_decoder<'s>(
         decoder_wrapper,
         Box::new({
           let weak_rc = weak_rc.clone();
-          let encoding = encoding.clone();
+          let _encoding = encoding.clone();
           move |isolate| unsafe {
             drop(Box::from_raw(decoder_ptr));
             drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-            trace!("dropped TextDecoder:{:?}", encoding);
+            trace!("dropped TextDecoder:{:?}", _encoding);
           }
         }),
       );
