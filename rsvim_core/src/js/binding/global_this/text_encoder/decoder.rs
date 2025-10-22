@@ -1,4 +1,4 @@
-//! TextDecoder and its options
+//! TextDecoder related.
 
 use crate::flags_builder_impl;
 use crate::flags_impl;

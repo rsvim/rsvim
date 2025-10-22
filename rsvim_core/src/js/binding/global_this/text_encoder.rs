@@ -1,6 +1,7 @@
 //! `TextEncoder` APIs.
 
 mod decoder;
+mod encoder;
 
 use crate::is_v8_obj;
 use crate::is_v8_str;
