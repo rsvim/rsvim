@@ -74,12 +74,6 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
-      "global_encoding_create_encoder",
-      global_this::text_encoder::create_encoder,
-    );
-    set_function_to(
-      scope,
-      vim,
       "global_encoding_encode",
       global_this::text_encoder::encode,
     );
