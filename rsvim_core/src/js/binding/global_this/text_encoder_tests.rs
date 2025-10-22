@@ -59,13 +59,22 @@ async fn test_decode1() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
+  const s1 = "This is some data";
+  const s2 = "你好，世界！";
   const encoder = new TextEncoder();
-  const bytes1 = encoder.encode("This is some data");
-  const bytes2 = encoder.encode("你好，世界！");
+  const bytes1 = encoder.encode(s1);
+  const bytes2 = encoder.encode(s2);
 
   const decoder = new TextDecoder();
-  const s1 = decoder.decode(bytes1);
-  const s2 = encoder.encode(bytes2);
+  const s3 = decoder.decode(bytes1);
+  const s4 = encoder.encode(bytes2);
+
+  if (s1 !== s3) {
+    Rsvim.cmd.echo("bytes1 failed");
+  }
+  if (s2 !== s4) {
+    Rsvim.cmd.echo("bytes2 failed");
+  }
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
