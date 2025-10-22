@@ -240,7 +240,11 @@ export class TextDecoder {
     }
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.global_encoding_decode(input);
+    return __InternalRsvimGlobalObject.global_encoding_decode(
+      this.#handle,
+      input,
+      options,
+    );
   }
 
   /**
