@@ -90,6 +90,10 @@ pub enum TheErr {
   // Invalid data.
   DataInvalid,
 
+  #[error("Invalid buffer.")]
+  // Invalid buffer.
+  BufferInvalid,
+
   #[error("Invalid encoding label `{0}`.")]
   // Invalid encoding label (name).
   InvalidEncodingLabel(CompactString),

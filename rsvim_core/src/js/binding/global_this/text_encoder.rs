@@ -28,7 +28,7 @@ use std::rc::Rc;
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
-) -> (v8::SharedRef<v8::BackingStore>, usize, usize) {
+) -> (Vec<u8>, usize, usize) {
   let mut buf: Vec<u8> = vec![];
   let mut read: usize = 0;
 
@@ -45,9 +45,7 @@ fn encode_impl<'s>(
   );
   trace!("|encode_impl| written:{:?}, read:{:?}", written, read);
 
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(buf).make_shared();
-
-  (store, read, written)
+  (buf, read, written)
 }
 
 /// `TextEncoder.encode` API.
@@ -61,8 +59,9 @@ pub fn encode<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let (store, _read, _written) = encode_impl(scope, payload);
+  let (data, _read, _written) = encode_impl(scope, payload);
 
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(data).make_shared();
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
 
@@ -83,9 +82,14 @@ pub fn encode_into<'s>(
     payload.to_rust_string_lossy(scope)
   );
 
-  let (store, read, written) = encode_impl(scope, payload);
+  let (data, read, written) = encode_impl(scope, payload);
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(data).make_shared();
 
-  debug_assert!(args.get(1).is_array_buffer_view());
+  if !args.get(1).is_array_buffer_view() {
+    binding::throw_type_error(scope, &TheErr::BufferInvalid);
+    return;
+  }
+
   let output = args.get(1).cast::<v8::ArrayBufferView>();
 
   let mut output_store = output.get_backing_store().unwrap();
