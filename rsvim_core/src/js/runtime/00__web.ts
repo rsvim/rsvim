@@ -67,18 +67,10 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  * @see {@link !TextEncoder}
  */
 export class TextEncoder {
-  /** @hidden */
-  #__handle: any;
-
-  /** @hidden */
-  constructor() {
-    this.#__handle =
-      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-      __InternalRsvimGlobalObject.global_encoding_create_encoder();
-  }
+  constructor() {}
 
   /**
-   * Encode string text into {@link !Uint8Array}.
+   * Encode string text to {@link !Uint8Array}.
    *
    * @param {string} input - Text that need encode.
    * @returns {Uint8Array} Encoded uint8 bytes array.
@@ -86,10 +78,20 @@ export class TextEncoder {
    */
   encode(input: string): Uint8Array {
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-    return __InternalRsvimGlobalObject.global_encoding_encode(
-      this.#__handle,
-      input,
-    );
+    return __InternalRsvimGlobalObject.global_encoding_encode(input);
+  }
+
+  /**
+   * Encode string text into {@link !Uint8Array}.
+   *
+   * @param {string} input - Text that need encode.
+   * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
+   * @returns {Uint8Array} Encoded uint8 bytes array.
+   * @throws Throws {@link !TypeError} if input is not a string.
+   */
+  encodeInto(src: string, dest: Uint8Array): Uint8Array {
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.global_encoding_encode(input);
   }
 }
 
