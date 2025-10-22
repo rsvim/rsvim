@@ -55,9 +55,6 @@ function boundByIntegers(arg, bound) {
 }
 export class TextEncoder {
     constructor() { }
-    get encoding() {
-        return "utf-8";
-    }
     encode(input) {
         checkIsString(input, `"TextEncoder.encode" input`);
         return __InternalRsvimGlobalObject.global_encoding_encode(input);
@@ -67,10 +64,16 @@ export class TextEncoder {
         checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
         return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
     }
+    get encoding() {
+        return "utf-8";
+    }
 }
 export class TextDecoder {
     #handle;
     constructor(encoding, options) {
+        if (encoding === undefined || encoding === null) {
+            encoding = "utf-8";
+        }
         checkIsString(encoding, `"TextDecoder.constructor" encoding`);
         if (options === undefined || options === null) {
             options = { fatal: false, ignoreBOM: false };
@@ -85,14 +88,25 @@ export class TextDecoder {
         const handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
         this.#handle = handle;
     }
-    encode(input) {
-        checkIsString(input, `"TextEncoder.encode" input`);
-        return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    decode(input, options) {
+        checkIsUint8Array(input, `"TextDecoder.decode" input`);
+        if (options === undefined || options === null) {
+            options = { stream: false };
+        }
+        checkIsObject(options, `"TextDecoder.constructor" options`);
+        if (!Object.hasOwn(options, "stream")) {
+            options.stream = false;
+        }
+        return __InternalRsvimGlobalObject.global_encoding_decode(this.#handle, input, options);
     }
-    encodeInto(src, dest) {
-        checkIsString(src, `"TextEncoder.encodeInto" src`);
-        checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
-        return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+    get encoding() {
+        return this.#handle.encoding;
+    }
+    get fatal() {
+        return this.#handle.fatal;
+    }
+    get ignoreBOM() {
+        return this.#handle.ignoreBOM;
     }
 }
 ((globalThis) => {

@@ -4,19 +4,24 @@ type TextEncoderEncodeIntoResult = {
 };
 export declare class TextEncoder {
     constructor();
-    get encoding(): string;
     encode(input: string): Uint8Array;
     encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult;
+    get encoding(): string;
 }
 type TextDecoderOptions = {
     fatal?: boolean;
     ignoreBOM?: boolean;
 };
+type TextDecoderDecodeOptions = {
+    stream?: boolean;
+};
 export declare class TextDecoder {
     #private;
     constructor(encoding?: string, options?: TextDecoderOptions);
-    encode(input: string): Uint8Array;
-    encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult;
+    decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string;
+    get encoding(): string;
+    get fatal(): boolean;
+    get ignoreBOM(): string;
 }
 export interface GlobalThis {
     clearInterval(id: number): void;
