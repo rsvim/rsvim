@@ -233,6 +233,7 @@ pub fn decode<'s>(
         !options.stream(),
       );
     match result {
+      // Decode success
       encoding_rs::DecoderResult::InputEmpty => {
         output.truncate(written);
         let output = v8::String::new_from_two_byte(
@@ -243,22 +244,30 @@ pub fn decode<'s>(
         .unwrap();
         rv.set(output.into());
       }
+      // Decode not finished, since buffer is too small
       encoding_rs::DecoderResult::OutputFull => {
         binding::throw_type_error(
           scope,
           &TheErr::BufferTooSmall(max_buffer_length),
         );
       }
+      // Decode not finished, since invalid input data
       encoding_rs::DecoderResult::Malformed(_, _) => {
         binding::throw_type_error(scope, &TheErr::DataInvalid);
       }
     }
   } else {
-    let (result, _, _written) =
+    let (result, _read, written, _had_errors) =
       decoder_handle.decode_to_utf16(&buf, &mut output, !options.stream());
     match result {
       encoding_rs::CoderResult::InputEmpty => {
-        let output = output.to_v8(scope);
+        output.truncate(written);
+        let output = v8::String::new_from_two_byte(
+          scope,
+          &output,
+          v8::NewStringType::Normal,
+        )
+        .unwrap();
         rv.set(output.into());
       }
       encoding_rs::CoderResult::OutputFull => {
