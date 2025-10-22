@@ -12,6 +12,8 @@ use crate::prelude::*;
 use compact_str::ToCompactString;
 use decoder::DecodeOptions;
 use decoder::ENCODING;
+use decoder::FATAL;
+use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
 use decoder::TextDecoderOptions;
 use encoder::EncodeIntoResultBuilder;
@@ -160,14 +162,14 @@ pub fn create_decoder<'s>(
       binding::set_constant_to(
         scope,
         decoder_wrapper,
-        ENCODING,
+        FATAL,
         fatal_value.into(),
       );
       let ignore_bom_value = options.ignore_bom().to_v8(scope);
       binding::set_constant_to(
         scope,
         decoder_wrapper,
-        ENCODING,
+        IGNORE_BOM,
         ignore_bom_value.into(),
       );
 
