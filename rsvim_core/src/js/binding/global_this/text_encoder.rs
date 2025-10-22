@@ -87,8 +87,12 @@ pub fn encode<'s>(
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
 
   unsafe {
-    let buf_slice = get_array_buffer_view_raw_slice(buf);
-    buf_slice.copy_from_slice(&data);
+    let slice =
+      std::slice::from_raw_parts_mut(buf.data() as *mut u8, buf.byte_length());
+    let (before, slice, after) = slice.align_to_mut();
+    debug_assert!(before.is_empty());
+    debug_assert!(after.is_empty());
+    slice.copy_from_slice(&data);
   }
 
   rv.set(buf.into());
