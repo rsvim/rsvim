@@ -62,8 +62,8 @@ async fn test_decode1() -> IoResult<()> {
   const s1 = "This is some data";
   const s2 = "你好，世界！";
   const encoder = new TextEncoder();
-  const bytes1 = encoder.encode(s1);
-  const bytes2 = encoder.encode(s2);
+  var bytes1 = encoder.encode(s1);
+  var bytes2 = encoder.encode(s2);
 
   const decoder = new TextDecoder();
   const s3 = decoder.decode(bytes1);
