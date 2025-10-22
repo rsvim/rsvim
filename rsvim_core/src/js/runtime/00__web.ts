@@ -117,7 +117,7 @@ export class TextEncoder {
   }
 
   /**
-   * Encode string text into {@link !Uint8Array}. Note: For now the parameter `dest` only accepts `Uint8Array`.
+   * Encode string text into {@link !Uint8Array}. Note: For now only `Uint8Array` is supported.
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
@@ -219,13 +219,15 @@ export class TextDecoder {
   }
 
   /**
-   * Decode {@link !Uint8Array} bytes array to string text.
+   * Decode {@link !Uint8Array} bytes array to string text. Note: For now only `Uint8Array` is supported.
    *
-   * @param {string} input - Text that need encode.
+   * @see {@link !TextDecoder}
+   *
+   * @param {Uint8Array} input - Bytes array that need decode.
    * @returns {Uint8Array} Encoded uint8 bytes array.
    * @throws Throws {@link !TypeError} if input is not a string.
    */
-  decode(input: string): Uint8Array {
+  decode(input: Uint8Array): Uint8Array {
     checkIsString(input, `"TextEncoder.encode" input`);
 
     // @ts-ignore Ignore warning
