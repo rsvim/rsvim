@@ -117,7 +117,7 @@ export class TextEncoder {
   }
 
   /**
-   * Encode string text into {@link !Uint8Array}.
+   * Encode string text into {@link !Uint8Array}. Note: For now the parameter `dest` only accepts `Uint8Array`.
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
