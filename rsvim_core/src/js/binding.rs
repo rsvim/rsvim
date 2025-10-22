@@ -80,6 +80,12 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
+      "global_encoding_encode_into",
+      global_this::text_encoder::encode_into,
+    );
+    set_function_to(
+      scope,
+      vim,
       "global_encoding_create_decoder",
       global_this::text_encoder::create_decoder,
     );

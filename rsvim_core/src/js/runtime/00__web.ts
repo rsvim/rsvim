@@ -96,7 +96,7 @@ export class TextEncoder {
    */
   encodeInto(src: string, dest: Uint8Array): Uint8Array {
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-    return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
   }
 }
 
