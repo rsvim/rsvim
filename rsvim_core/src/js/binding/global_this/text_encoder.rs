@@ -201,7 +201,7 @@ pub fn decode<'s>(
   );
   let mut decoder_handle = decoder_handle.borrow_mut();
 
-  debug_assert!(args.get(1).is_uint8_array());
+  debug_assert!(is_v8_u8array!(args.get(1)));
   let buf = args.get(1).cast::<v8::Uint8Array>();
   let buf: Vec<u8> = buf
     .get_backing_store()
