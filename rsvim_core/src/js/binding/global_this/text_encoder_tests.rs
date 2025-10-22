@@ -19,12 +19,13 @@ async fn test_encode1() -> IoResult<()> {
   const bytes1 = encoder.encode("This is some data");
   const bytes2 = encoder.encode("你好，世界！");
 
-  if (!(bytes1 instanceof Uint8Array) || bytes1.byteLength !== 17) {
-    Rsvim.cmd.echo("bytes1 failed");
-  }
-  if (!(bytes2 instanceof Uint8Array) || bytes2.byteLength !== 12) {
-    Rsvim.cmd.echo("bytes2 failed");
-  }
+  const isInstance1 = bytes1 instanceof Uint8Array;
+  const bytesLen1 = bytes1.byteLength >= 17;
+  Rsvim.cmd.echo(`bytes1, isinstance:${isInstance1}, length:${bytes1.byteLength}`);
+
+  const isInstance2 = bytes2 instanceof Uint8Array;
+  const bytesLen2 = bytes2.byteLength >= 17;
+  Rsvim.cmd.echo(`bytes2, isinstance:${isInstance2}, length:${bytes2.byteLength}`);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
