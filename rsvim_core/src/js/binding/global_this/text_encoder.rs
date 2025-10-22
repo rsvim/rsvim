@@ -46,6 +46,29 @@ unsafe fn get_array_buffer_view_raw_slice<'s>(
   }
 }
 
+pub fn slice_to_uint8array<'a, 'b>(
+  scope: &mut v8::PinScope<'a, 'b>,
+  buf: &[u8],
+) -> v8::Local<'a, v8::Uint8Array> {
+  let buffer = if buf.is_empty() {
+    v8::ArrayBuffer::new(scope, 0)
+  } else {
+    let store: v8::UniqueRef<_> =
+      v8::ArrayBuffer::new_backing_store(scope, buf.len());
+    // SAFETY: raw memory copy into the v8 ArrayBuffer allocated above
+    unsafe {
+      std::ptr::copy_nonoverlapping(
+        buf.as_ptr(),
+        store.data().unwrap().as_ptr() as *mut u8,
+        buf.len(),
+      )
+    }
+    v8::ArrayBuffer::with_backing_store(scope, &store.make_shared())
+  };
+  v8::Uint8Array::new(scope, buffer, 0, buf.len())
+    .expect("Failed to create UintArray8")
+}
+
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -82,18 +105,7 @@ pub fn encode<'s>(
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
   let (data, _read, _written) = encode_impl(scope, payload);
-
-  let buf = v8::ArrayBuffer::new(scope, data.len());
-  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
-
-  unsafe {
-    let slice =
-      std::slice::from_raw_parts_mut(buf.data() as *mut u8, buf.byte_length());
-    let (before, slice, after) = slice.align_to_mut();
-    debug_assert!(before.is_empty());
-    debug_assert!(after.is_empty());
-    slice.copy_from_slice(&data);
-  }
+  let buf = slice_to_uint8array(scope, data.as_slice());
 
   rv.set(buf.into());
 }
