@@ -111,8 +111,8 @@ export class TextEncoder {
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
-    checkIsString(src, `"TextEncoder.encode" input`);
-    checkIsString(src, `"TextEncoder.encode" input`);
+    checkIsString(src, `"TextEncoder.encodeInto" src`);
+    checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
 
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
