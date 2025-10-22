@@ -112,7 +112,7 @@ export class TextEncoder {
   encode(input: string): Uint8Array {
     checkIsString(input, `"TextEncoder.encode" input`);
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
   }
 
@@ -128,7 +128,7 @@ export class TextEncoder {
     checkIsString(src, `"TextEncoder.encodeInto" src`);
     checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
   }
 }
@@ -207,7 +207,7 @@ export class TextDecoder {
       options.ignoreBOM = false;
     }
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     const handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(
       encoding,
       options,
@@ -226,7 +226,7 @@ export class TextDecoder {
   encode(input: string): Uint8Array {
     checkIsString(input, `"TextEncoder.encode" input`);
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
   }
 
@@ -242,7 +242,7 @@ export class TextDecoder {
     checkIsString(src, `"TextEncoder.encodeInto" src`);
     checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
   }
 }
@@ -313,11 +313,6 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number;
-
-  /**
-   * Create new {@link TextEncoder} instance.
-   */
-  TextEncoder: typeof TextEncoder;
 }
 
 ((globalThis: GlobalThis) => {
@@ -337,7 +332,7 @@ export interface GlobalThis {
     checkIsInteger(id, `"clearInterval" ID`);
 
     if (activeTimers.has(id)) {
-      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      // @ts-ignore Ignore warning
       __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
       activeTimers.delete(id);
     }
@@ -365,7 +360,7 @@ export interface GlobalThis {
     // Pin down the correct ID value.
     const id = nextTimerId++;
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     const timer = __InternalRsvimGlobalObject.global_create_timer(
       () => {
         callback(...args);
@@ -385,7 +380,7 @@ export interface GlobalThis {
     checkIsInteger(id, `"clearTimeout" ID`);
 
     if (activeTimers.has(id)) {
-      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      // @ts-ignore Ignore warning
       __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
       activeTimers.delete(id);
     }
@@ -413,7 +408,7 @@ export interface GlobalThis {
     // Pin down the correct ID value.
     const id = nextTimerId++;
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     const timer = __InternalRsvimGlobalObject.global_create_timer(
       () => {
         callback(...args);
@@ -438,7 +433,7 @@ export interface GlobalThis {
     // Check if the callback argument is a valid type.
     checkIsFunction(callback, `"queueMicrotask" callback`);
 
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.global_queue_microtask(() => {
       try {
         callback();
@@ -449,7 +444,7 @@ export interface GlobalThis {
   }
 
   function reportError(error: any): void {
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.global_report_error(error);
   }
 
@@ -459,5 +454,9 @@ export interface GlobalThis {
   globalThis.setInterval = setInterval;
   globalThis.queueMicrotask = queueMicrotask;
   globalThis.reportError = reportError;
+
+  // @ts-ignore Ignore warning
   globalThis.TextEncoder = TextEncoder;
+  // @ts-ignore Ignore warning
+  globalThis.TextDecoder = TextDecoder;
 })(globalThis as unknown as GlobalThis);
