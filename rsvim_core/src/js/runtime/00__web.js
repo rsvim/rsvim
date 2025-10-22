@@ -24,11 +24,6 @@ function checkIsString(arg, msg) {
         throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
     }
 }
-function checkIsUint8Array(arg, msg) {
-    if (!(arg instanceof Uint8Array)) {
-        throw new TypeError(`${msg} must be a Uint8Array, but found ${typeof arg}`);
-    }
-}
 function checkIsFunction(arg, msg) {
     if (typeof arg !== "function") {
         throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
@@ -61,7 +56,6 @@ export class TextEncoder {
     }
     encodeInto(src, dest) {
         checkIsString(src, `"TextEncoder.encodeInto" src`);
-        checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
         return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
     }
     get encoding() {
@@ -89,7 +83,6 @@ export class TextDecoder {
         this.#handle = handle;
     }
     decode(input, options) {
-        checkIsUint8Array(input, `"TextDecoder.decode" input`);
         if (options === undefined || options === null) {
             options = { stream: false };
         }

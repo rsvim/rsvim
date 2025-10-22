@@ -1,3 +1,6 @@
+export declare namespace GlobalThis {
+    type TypedArray = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array | BigInt64Array | BigUint64Array;
+}
 type TextEncoderEncodeIntoResult = {
     read: number;
     written: number;
@@ -18,7 +21,7 @@ type TextDecoderDecodeOptions = {
 export declare class TextDecoder {
     #private;
     constructor(encoding?: string, options?: TextDecoderOptions);
-    decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string;
+    decode(input: ArrayBuffer | GlobalThis.TypedArray | DataView, options?: TextDecoderDecodeOptions): string;
     get encoding(): string;
     get fatal(): boolean;
     get ignoreBOM(): string;
