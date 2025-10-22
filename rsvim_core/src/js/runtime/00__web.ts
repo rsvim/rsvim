@@ -37,6 +37,20 @@ function checkIsBoolean(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsString(arg: any, msg: string) {
+  if (typeof arg !== "string") {
+    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
+function checkIsUint8Array(arg: any, msg: string) {
+  if (arg instanceof Uint8Array) {
+    throw new TypeError(`${msg} must be a Uint8Array, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsFunction(arg: any, msg: string) {
   if (typeof arg !== "function") {
     throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
@@ -82,6 +96,8 @@ export class TextEncoder {
    * @throws Throws {@link !TypeError} if input is not a string.
    */
   encode(input: string): Uint8Array {
+    checkIsString(input, `"TextEncoder.encode" input`);
+
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
   }
@@ -94,7 +110,10 @@ export class TextEncoder {
    * @returns {TextEncoderEncodeIntoResult} Encode result, "read": the read Unicode code units from `src`, "written": the written UTF-8/uint8 bytes to `dest`.
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
-  encodeInto(src: string, dest: Uint8Array): Uint8Array {
+  encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
+    checkIsString(src, `"TextEncoder.encode" input`);
+    checkIsString(src, `"TextEncoder.encode" input`);
+
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
   }
