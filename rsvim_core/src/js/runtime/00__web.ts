@@ -235,15 +235,12 @@ export class TextDecoder {
       options = { stream: false };
     }
     checkIsObject(options, `"TextDecoder.constructor" options`);
-    if (!Object.hasOwn(options, "fatal")) {
-      options.fatal = false;
-    }
-    if (!Object.hasOwn(options, "ignoreBOM")) {
-      options.ignoreBOM = false;
+    if (!Object.hasOwn(options, "stream")) {
+      options.stream = false;
     }
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    return __InternalRsvimGlobalObject.global_encoding_decode(input);
   }
 
   /**
