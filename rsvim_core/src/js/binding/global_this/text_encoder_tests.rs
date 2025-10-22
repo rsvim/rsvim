@@ -15,9 +15,9 @@ async fn test_encode1() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  queueMicrotask(() => {
-    Rsvim.cmd.echo(1);
-  });
+  const encoder = new TextEncoder();
+  const bytes1 = encoder.encode("This is some data");
+  const bytes2 = encoder.encode("你好，世界！");
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
