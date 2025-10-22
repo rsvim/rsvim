@@ -223,17 +223,24 @@ pub fn decode<'s>(
   }
 
   let max_buffer_length = max_buffer_length.unwrap();
-  let mut output = String::with_capacity(max_buffer_length);
+  let mut output = vec![0; max_buffer_length];
 
   if decoder_obj.fatal() {
-    let (result, _) = decoder_handle.decode_to_string_without_replacement(
-      &buf,
-      &mut output,
-      !options.stream(),
-    );
+    let (result, _read, written) = decoder_handle
+      .decode_to_utf16_without_replacement(
+        &buf,
+        &mut output,
+        !options.stream(),
+      );
     match result {
       encoding_rs::DecoderResult::InputEmpty => {
-        let output = output.to_v8(scope);
+        output.truncate(written);
+        let output = v8::String::new_from_two_byte(
+          scope,
+          &output,
+          v8::NewStringType::Normal,
+        )
+        .unwrap();
         rv.set(output.into());
       }
       encoding_rs::DecoderResult::OutputFull => {
@@ -248,7 +255,7 @@ pub fn decode<'s>(
     }
   } else {
     let (result, _, _written) =
-      decoder_handle.decode_to_string(&buf, &mut output, !options.stream());
+      decoder_handle.decode_to_utf16(&buf, &mut output, !options.stream());
     match result {
       encoding_rs::CoderResult::InputEmpty => {
         let output = output.to_v8(scope);
