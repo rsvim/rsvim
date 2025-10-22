@@ -122,6 +122,7 @@ pub fn create_decoder<'s>(
       // 2. weak_rc
       decoder_wrapper.set_internal_field_count(2);
       let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
+
       let decoder_ptr = binding::set_internal_ref::<
         RefCell<encoding_rs::Decoder>,
       >(scope, decoder_wrapper, 0, decoder_handle);
@@ -135,9 +136,11 @@ pub fn create_decoder<'s>(
         decoder_wrapper,
         Box::new({
           let weak_rc = weak_rc.clone();
+          let encoding = encoding.clone();
           move |isolate| unsafe {
             drop(Box::from_raw(decoder_ptr));
             drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+            trace!("dropped TextDecoder:{:?}", encoding);
           }
         }),
       );
