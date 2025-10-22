@@ -44,7 +44,7 @@ fn encode_impl<'s>(
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
-  trace!("|encode_utf8| written:{:?}, read:{:?}", written, read);
+  trace!("|encode_impl| written:{:?}, read:{:?}", written, read);
 
   let store = v8::ArrayBuffer::new_backing_store_from_vec(buf).make_shared();
 
@@ -79,7 +79,10 @@ pub fn encode_into<'s>(
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
   let payload = args.get(0).to_string(scope).unwrap();
-  trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
+  trace!(
+    "|encode_into| payload:{:?}",
+    payload.to_rust_string_lossy(scope)
+  );
 
   let (store, read, written) = encode_impl(scope, payload);
 
@@ -150,7 +153,10 @@ pub fn create_decoder<'s>(
           move |isolate| unsafe {
             drop(Box::from_raw(decoder_ptr));
             drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-            trace!("dropped TextDecoder:{:?}", _encoding_label);
+            trace!(
+              "|create_decoder| dropped TextDecoder:{:?}",
+              _encoding_label
+            );
           }
         }),
       );
