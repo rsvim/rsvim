@@ -1,7 +1,6 @@
 //! `TextEncoder` APIs.
 
 mod decoder;
-mod encoder;
 
 use crate::is_v8_obj;
 use crate::is_v8_str;
@@ -13,7 +12,6 @@ use decoder::DecodeOptions;
 use decoder::ENCODING;
 use decoder::TextDecoder;
 use decoder::TextDecoderOptions;
-use encoder::TextEncoder;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -46,6 +44,33 @@ fn encode_impl<'s>(
 
 /// `TextEncoder.encode` API.
 pub fn encode<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  debug_assert!(is_v8_obj!(args.get(0)));
+
+  if cfg!(debug_assertions) {
+    let encoder =
+      TextEncoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
+    debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
+  }
+
+  debug_assert!(is_v8_str!(args.get(1)));
+  let payload = args.get(1).to_string(scope).unwrap();
+  trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
+
+  let (store, _read, _written) = encode_impl(scope, payload);
+
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
+  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
+
+  rv.set(buf.into());
+}
+
+/// `TextEncoder.encodeInto` API.
+pub fn encode_into<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
