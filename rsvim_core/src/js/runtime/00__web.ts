@@ -196,6 +196,9 @@ export class TextDecoder {
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is invalid or not support.
    */
   constructor(encoding?: string, options?: TextDecoderOptions) {
+    if (encoding === undefined || encoding === null) {
+      encoding = "utf-8";
+    }
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
     if (options === undefined || options === null) {
