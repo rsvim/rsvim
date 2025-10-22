@@ -96,13 +96,6 @@ export class TextEncoder {
   constructor() {}
 
   /**
-   * Get encoding, this will always returns "utf-8".
-   */
-  get encoding(): string {
-    return "utf-8";
-  }
-
-  /**
    * Encode string text to {@link !Uint8Array}.
    *
    * @param {string} input - Text that need encode.
@@ -130,6 +123,13 @@ export class TextEncoder {
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+  }
+
+  /**
+   * The encoding used by encoder, this will always returns "utf-8".
+   */
+  get encoding(): string {
+    return "utf-8";
   }
 }
 
@@ -233,6 +233,24 @@ export class TextDecoder {
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
+  }
+
+  /**
+   * The encoding used by decoder.
+   */
+  get encoding(): string {
+    return this.#handle.encoding;
+  }
+
+  /**
+   * The encoding used by decoder.
+   */
+  get fatal(): string {
+    return this.#handle.fatal;
+  }
+
+  get ignoreBOM(): string {
+    return this.#handle.ignoreBOM;
   }
 }
 
