@@ -140,7 +140,14 @@ export class TextDecoder {
   /** @hidden */
   #handle: any;
 
-  constructor(encoding: string, options?: TextDecoderOptions) {
+  /**
+   * Create a TextDecoder instance with specified encoding.
+   *
+   * @param {string} encoding - Decoder encoding, this argument can be omitted, by default is "utf-8".
+   * @param {TextDecoderOptions} options - Decode options, this argument can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
+   * @throws Throws {@link !TypeError} if input is not a string.
+   */
+  constructor(encoding?: string, options?: TextDecoderOptions) {
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
     if (options === undefined || options === null) {
