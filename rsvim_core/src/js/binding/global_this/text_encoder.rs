@@ -5,7 +5,6 @@ mod encoder;
 
 use crate::is_v8_obj;
 use crate::is_v8_str;
-use crate::is_v8_u8array;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -86,8 +85,8 @@ pub fn encode_into<'s>(
 
   let (store, read, written) = encode_impl(scope, payload);
 
-  debug_assert!(is_v8_u8array!(args.get(1)));
-  let output = args.get(1).cast::<v8::Uint8Array>();
+  debug_assert!(args.get(1).is_array_buffer_view());
+  let output = args.get(1).cast::<v8::ArrayBufferView>();
 
   let mut output_store = output.get_backing_store().unwrap();
   output_store.clone_from(&store);
@@ -212,15 +211,11 @@ pub fn decode<'s>(
     binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
   let mut decoder_handle = decoder_handle.borrow_mut();
 
-  debug_assert!(is_v8_u8array!(args.get(1)));
-  let buf = args.get(1).cast::<v8::Uint8Array>();
-  let buf: Vec<u8> = buf
-    .get_backing_store()
-    .unwrap()
-    .to_vec()
-    .iter()
-    .map(|c| c.get())
-    .collect();
+  debug_assert!(args.get(1).is_array_buffer_view());
+  let buf = args.get(1).cast::<v8::ArrayBufferView>();
+  let mut storage: Vec<u8> =
+    Vec::with_capacity(v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP);
+  let buf = buf.get_contents(&mut storage);
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
@@ -242,11 +237,7 @@ pub fn decode<'s>(
 
   if decoder_obj.fatal() {
     let (result, _read, written) = decoder_handle
-      .decode_to_utf16_without_replacement(
-        &buf,
-        &mut output,
-        !options.stream(),
-      );
+      .decode_to_utf16_without_replacement(buf, &mut output, !options.stream());
     match result {
       DecoderResult::InputEmpty => {
         output.truncate(written);
@@ -270,7 +261,7 @@ pub fn decode<'s>(
     }
   } else {
     let (result, _read, written, _had_errors) =
-      decoder_handle.decode_to_utf16(&buf, &mut output, !options.stream());
+      decoder_handle.decode_to_utf16(buf, &mut output, !options.stream());
     match result {
       CoderResult::InputEmpty => {
         output.truncate(written);

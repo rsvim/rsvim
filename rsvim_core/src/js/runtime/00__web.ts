@@ -44,13 +44,6 @@ function checkIsString(arg: any, msg: string) {
 }
 
 /** @hidden */
-function checkIsUint8Array(arg: any, msg: string) {
-  if (!(arg instanceof Uint8Array)) {
-    throw new TypeError(`${msg} must be a Uint8Array, but found ${typeof arg}`);
-  }
-}
-
-/** @hidden */
 function checkIsFunction(arg: any, msg: string) {
   if (typeof arg !== "function") {
     throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
@@ -83,6 +76,27 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 }
 
 /**
+ * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
+ */
+export namespace GlobalThis {
+  /**
+   * @see {@link !TypedArray}
+   */
+  export type TypedArray =
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
+    | BigInt64Array
+    | BigUint64Array;
+}
+
+/**
  * @inline
  */
 type TextEncoderEncodeIntoResult = { read: number; written: number };
@@ -110,16 +124,15 @@ export class TextEncoder {
   }
 
   /**
-   * Encode string text into {@link !Uint8Array}. Note: For now only `Uint8Array` is supported.
+   * Encode string text into {@link !Uint8Array}.
    *
    * @param {string} src - Text that need encode.
-   * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
+   * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array.
    * @returns {TextEncoderEncodeIntoResult} Encode result, "read": the read Unicode code units from `src`, "written": the written UTF-8/uint8 bytes to `dest`.
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
     checkIsString(src, `"TextEncoder.encodeInto" src`);
-    checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
@@ -222,18 +235,19 @@ export class TextDecoder {
   }
 
   /**
-   * Decode {@link !Uint8Array} bytes array to string text. Note: For now only `Uint8Array` is supported.
+   * Decode a bytes array to string text. The bytes array can be a {@link !ArrayBuffer}, {@link !TypedArray} or {@link !DataView}.
    *
    * @see {@link !TextDecoder}
    *
-   * @param {Uint8Array} input - Bytes array that need decode.
+   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array.
    * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
-  decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string {
-    checkIsUint8Array(input, `"TextDecoder.decode" input`);
-
+  decode(
+    input: ArrayBuffer | GlobalThis.TypedArray | DataView,
+    options?: TextDecoderDecodeOptions,
+  ): string {
     if (options === undefined || options === null) {
       options = { stream: false };
     }

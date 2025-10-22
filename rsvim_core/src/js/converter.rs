@@ -481,10 +481,3 @@ macro_rules! is_v8_func {
     $value.is_function()
   };
 }
-
-#[macro_export]
-macro_rules! is_v8_u8array {
-  ($value:expr) => {
-    $value.is_uint8_array()
-  };
-}
