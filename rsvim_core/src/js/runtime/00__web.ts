@@ -224,12 +224,23 @@ export class TextDecoder {
    * @see {@link !TextDecoder}
    *
    * @param {Uint8Array} input - Bytes array that need decode.
-   * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`.
+   * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string {
-    checkIsString(input, `"TextEncoder.encode" input`);
+    checkIsUint8Array(input, `"TextDecoder.decode" input`);
+
+    if (options === undefined || options === null) {
+      options = { stream: false };
+    }
+    checkIsObject(options, `"TextDecoder.constructor" options`);
+    if (!Object.hasOwn(options, "fatal")) {
+      options.fatal = false;
+    }
+    if (!Object.hasOwn(options, "ignoreBOM")) {
+      options.ignoreBOM = false;
+    }
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_encode(input);
