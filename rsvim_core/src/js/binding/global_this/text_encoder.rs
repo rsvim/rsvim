@@ -193,7 +193,7 @@ pub fn decode<'s>(
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
   let decoder_wrapper = args.get(0).to_object(scope).unwrap();
-  let decoder = TextDecoder::from_v8(scope, decoder_wrapper);
+  let decoder_obj = TextDecoder::from_v8(scope, decoder_wrapper);
   let decoder_handle = binding::get_internal_ref::<RefCell<encoding_rs::Decoder>>(
     scope,
     decoder_wrapper,
@@ -225,7 +225,7 @@ pub fn decode<'s>(
   let max_buffer_length = max_buffer_length.unwrap();
   let mut output = String::with_capacity(max_buffer_length);
 
-  if decoder.fatal() {
+  if decoder_obj.fatal() {
     let (result, _) = decoder_handle.decode_to_string_without_replacement(
       &buf,
       &mut output,
