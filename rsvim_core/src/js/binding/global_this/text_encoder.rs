@@ -39,9 +39,9 @@ fn encode_impl<'s>(
   );
   trace!("|encode_utf8| written:{:?}, read:{:?}", written, read);
 
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(buf);
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(buf).make_shared();
 
-  (store.make_shared(), read, written)
+  (store, read, written)
 }
 
 /// `TextEncoder.encode` API.
