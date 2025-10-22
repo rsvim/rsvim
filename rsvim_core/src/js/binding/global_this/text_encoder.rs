@@ -17,6 +17,10 @@ use decoder::IGNORE_BOM;
 use decoder::TextDecoder;
 use decoder::TextDecoderOptions;
 use encoder::EncodeIntoResultBuilder;
+use encoding_rs::CoderResult;
+use encoding_rs::Decoder;
+use encoding_rs::DecoderResult;
+use encoding_rs::Encoding;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -110,7 +114,7 @@ pub fn create_decoder<'s>(
   let options =
     TextDecoderOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
 
-  match encoding_rs::Encoding::for_label(encoding_label.as_bytes()) {
+  match Encoding::for_label(encoding_label.as_bytes()) {
     Some(coding) => {
       let decoder_handle = if options.ignore_bom() {
         RefCell::new(coding.new_decoder_without_bom_handling())
@@ -126,9 +130,12 @@ pub fn create_decoder<'s>(
       decoder_wrapper.set_internal_field_count(2);
       let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
 
-      let decoder_ptr = binding::set_internal_ref::<
-        RefCell<encoding_rs::Decoder>,
-      >(scope, decoder_wrapper, 0, decoder_handle);
+      let decoder_ptr = binding::set_internal_ref::<RefCell<Decoder>>(
+        scope,
+        decoder_wrapper,
+        0,
+        decoder_handle,
+      );
       let weak_rc = Rc::new(Cell::new(None));
 
       // To automatically drop the decoder_handle instance when
@@ -195,11 +202,8 @@ pub fn decode<'s>(
   debug_assert!(is_v8_obj!(args.get(0)));
   let decoder_wrapper = args.get(0).to_object(scope).unwrap();
   let decoder_obj = TextDecoder::from_v8(scope, decoder_wrapper);
-  let decoder_handle = binding::get_internal_ref::<RefCell<encoding_rs::Decoder>>(
-    scope,
-    decoder_wrapper,
-    0,
-  );
+  let decoder_handle =
+    binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
   let mut decoder_handle = decoder_handle.borrow_mut();
 
   debug_assert!(is_v8_u8array!(args.get(1)));
@@ -234,7 +238,7 @@ pub fn decode<'s>(
         !options.stream(),
       );
     match result {
-      encoding_rs::DecoderResult::InputEmpty => {
+      DecoderResult::InputEmpty => {
         output.truncate(written);
         let output = v8::String::new_from_two_byte(
           scope,
@@ -244,13 +248,13 @@ pub fn decode<'s>(
         .unwrap();
         rv.set(output.into());
       }
-      encoding_rs::DecoderResult::OutputFull => {
+      DecoderResult::OutputFull => {
         binding::throw_type_error(
           scope,
           &TheErr::BufferTooSmall(max_buffer_length),
         );
       }
-      encoding_rs::DecoderResult::Malformed(_, _) => {
+      DecoderResult::Malformed(_, _) => {
         binding::throw_type_error(scope, &TheErr::DataInvalid);
       }
     }
@@ -258,7 +262,7 @@ pub fn decode<'s>(
     let (result, _read, written, _had_errors) =
       decoder_handle.decode_to_utf16(&buf, &mut output, !options.stream());
     match result {
-      encoding_rs::CoderResult::InputEmpty => {
+      CoderResult::InputEmpty => {
         output.truncate(written);
         let output = v8::String::new_from_two_byte(
           scope,
@@ -268,7 +272,7 @@ pub fn decode<'s>(
         .unwrap();
         rv.set(output.into());
       }
-      encoding_rs::CoderResult::OutputFull => {
+      CoderResult::OutputFull => {
         binding::throw_type_error(
           scope,
           &TheErr::BufferTooSmall(max_buffer_length),
