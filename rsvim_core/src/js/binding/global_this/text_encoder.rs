@@ -24,6 +24,28 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+// See: https://github.com/denoland/deno_core/blob/e51d3618a62735158f6c4c930eafe1ff3769ec7d/ops/op2/dispatch_fast.rs?plain=1#L621
+unsafe fn get_array_buffer_view_raw_slice<'s>(
+  input: v8::Local<'s, v8::Uint8Array>,
+) -> &'s mut [u8] {
+  let mut buffer = [0; v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP];
+  // SAFETY: we are certain the implied lifetime is valid here as the slices never escape the
+  // fastcall.
+  unsafe {
+    let (input_ptr, input_len) = input.get_contents_raw_parts(&mut buffer);
+    let input_ptr = if input_ptr.is_null() {
+      std::ptr::dangling_mut()
+    } else {
+      input_ptr
+    };
+    let slice = std::slice::from_raw_parts_mut::<'s>(input_ptr, input_len);
+    let (before, slice, after) = slice.align_to_mut();
+    debug_assert!(before.is_empty());
+    debug_assert!(after.is_empty());
+    slice
+  }
+}
+
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -61,9 +83,13 @@ pub fn encode<'s>(
 
   let (data, _read, _written) = encode_impl(scope, payload);
 
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(data).make_shared();
-  let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
+  let buf = v8::ArrayBuffer::new(scope, data.len());
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
+
+  unsafe {
+    let buf_slice = get_array_buffer_view_raw_slice(buf);
+    buf_slice.copy_from_slice(&data);
+  }
 
   rv.set(buf.into());
 }

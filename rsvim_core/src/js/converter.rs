@@ -481,3 +481,10 @@ macro_rules! is_v8_func {
     $value.is_function()
   };
 }
+
+// #[macro_export]
+// macro_rules! get_v8_array_buffer_view_data {
+//   ($value:expr) => {
+//     let $value = $value.cast::<v8::ArrayBufferView>()
+//   };
+// }
