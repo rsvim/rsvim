@@ -20,12 +20,14 @@ async fn test_encode1() -> IoResult<()> {
   const bytes2 = encoder.encode("你好，世界！");
 
   const isInstance1 = bytes1 instanceof Uint8Array;
-  const bytesLen1 = bytes1.byteLength >= 17;
-  Rsvim.cmd.echo(`bytes1, isinstance:${isInstance1}, length:${bytes1.byteLength}`);
+  if (!isInstance1 || bytes1.byteLength < 17) {
+    Rsvim.cmd.echo(`bytes1 failed, isinstance:${isInstance1}, bytesLen:${bytes1.byteLength}`);
+  }
 
   const isInstance2 = bytes2 instanceof Uint8Array;
-  const bytesLen2 = bytes2.byteLength >= 17;
-  Rsvim.cmd.echo(`bytes2, isinstance:${isInstance2}, length:${bytes2.byteLength}`);
+  if (!isInstance2 || bytes2.byteLength < 12) {
+    Rsvim.cmd.echo(`bytes2 failed, isinstance:${isInstance1}, bytesLen:${bytes2.byteLength}`);
+  }
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -42,15 +44,9 @@ async fn test_encode1() -> IoResult<()> {
 
   // After
   {
-    let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 2);
-    for i in 0..2 {
-      let actual = contents.command_line_message_history_mut().try_pop();
-      assert!(actual.is_some());
-      let actual = actual.unwrap();
-      info!("actual[{}]:{:?}", i, actual);
-    }
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
   }
 
   Ok(())
