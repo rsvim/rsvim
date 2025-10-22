@@ -103,13 +103,14 @@ pub fn create_decoder<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
-  let encoding = args.get(0).to_rust_string_lossy(scope).to_compact_string();
+  let encoding_label =
+    args.get(0).to_rust_string_lossy(scope).to_compact_string();
 
   debug_assert!(is_v8_obj!(args.get(1)));
   let options =
     TextDecoderOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
 
-  match encoding_rs::Encoding::for_label(encoding.as_bytes()) {
+  match encoding_rs::Encoding::for_label(encoding_label.as_bytes()) {
     Some(coding) => {
       let decoder_handle = if options.ignore_bom() {
         RefCell::new(coding.new_decoder_without_bom_handling())
@@ -138,11 +139,11 @@ pub fn create_decoder<'s>(
         decoder_wrapper,
         Box::new({
           let weak_rc = weak_rc.clone();
-          let _encoding = encoding.clone();
+          let _encoding_label = encoding_label.clone();
           move |isolate| unsafe {
             drop(Box::from_raw(decoder_ptr));
             drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-            trace!("dropped TextDecoder:{:?}", _encoding);
+            trace!("dropped TextDecoder:{:?}", _encoding_label);
           }
         }),
       );
@@ -151,7 +152,7 @@ pub fn create_decoder<'s>(
       weak_rc.set(decoder_weak.into_raw());
       binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
 
-      let encoding_value = encoding.to_v8(scope);
+      let encoding_value = encoding_label.to_v8(scope);
       binding::set_constant_to(
         scope,
         decoder_wrapper,
@@ -178,7 +179,7 @@ pub fn create_decoder<'s>(
     None => {
       binding::throw_range_error(
         scope,
-        &TheErr::InvalidEncodingLabel(encoding),
+        &TheErr::InvalidEncodingLabel(encoding_label),
       );
     }
   }
