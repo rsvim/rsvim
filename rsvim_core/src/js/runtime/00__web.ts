@@ -338,6 +338,9 @@ export interface GlobalThis {
     delay?: number,
     ...args: any[]
   ): number;
+
+  TextEncoder: typeof TextEncoder;
+  TextDecoder: typeof TextDecoder;
 }
 
 ((globalThis: GlobalThis) => {
@@ -480,8 +483,6 @@ export interface GlobalThis {
   globalThis.queueMicrotask = queueMicrotask;
   globalThis.reportError = reportError;
 
-  // @ts-ignore Ignore warning
   globalThis.TextEncoder = TextEncoder;
-  // @ts-ignore Ignore warning
   globalThis.TextDecoder = TextDecoder;
 })(globalThis as unknown as GlobalThis);
