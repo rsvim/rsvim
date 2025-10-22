@@ -58,6 +58,13 @@ function checkIsFunction(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsObject(arg: any, msg: string) {
+  if (typeof arg !== "object") {
+    throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -87,6 +94,72 @@ type TextEncoderEncodeIntoResult = { read: number; written: number };
  */
 export class TextEncoder {
   constructor() {}
+
+  /**
+   * Encode string text to {@link !Uint8Array}.
+   *
+   * @param {string} input - Text that need encode.
+   * @returns {Uint8Array} Encoded uint8 bytes array.
+   * @throws Throws {@link !TypeError} if input is not a string.
+   */
+  encode(input: string): Uint8Array {
+    checkIsString(input, `"TextEncoder.encode" input`);
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.global_encoding_encode(input);
+  }
+
+  /**
+   * Encode string text into {@link !Uint8Array}.
+   *
+   * @param {string} src - Text that need encode.
+   * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array .
+   * @returns {TextEncoderEncodeIntoResult} Encode result, "read": the read Unicode code units from `src`, "written": the written UTF-8/uint8 bytes to `dest`.
+   * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
+   */
+  encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
+    checkIsString(src, `"TextEncoder.encodeInto" src`);
+    checkIsUint8Array(src, `"TextEncoder.encodeInto" dest`);
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+  }
+}
+
+/**
+ * @inline
+ */
+type TextDecoderOptions = { fatal: boolean; ignoreBOM: boolean };
+
+/**
+ * Decode bytes array into string text.
+ *
+ * @see {@link !TextDecoder}
+ */
+export class TextDecoder {
+  /** @hidden */
+  #handle: any;
+
+  constructor(encoding: string, options?: TextDecoderOptions) {
+    checkIsString(encoding, `"TextDecoder.constructor" encoding`);
+
+    if (options === undefined || options === null) {
+      options = { fatal: false, ignoreBOM: false };
+    }
+    checkIsObject(options, `"TextDecoder.constructor" options`);
+    if (!Object.hasOwn(options, "fatal")) {
+      options.fatal = false;
+    }
+    if (!Object.hasOwn(options, "ignoreBOM")) {
+      options.ignoreBOM = false;
+    }
+
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.global_encoding_create_decoder(
+      encoding,
+      options,
+    );
+  }
 
   /**
    * Encode string text to {@link !Uint8Array}.
