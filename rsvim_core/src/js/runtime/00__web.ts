@@ -133,10 +133,10 @@ export class TextEncoder {
   }
 }
 
-/**
- * @inline
- */
+/** @inline */
 type TextDecoderOptions = { fatal?: boolean; ignoreBOM?: boolean };
+/** @inline */
+type TextDecoderDecodeOptions = { stream?: boolean };
 
 /**
  * Decode bytes array into string text.
@@ -192,7 +192,7 @@ export class TextDecoder {
    * @see [Node.js - WHATWG supported encodings](https://nodejs.org/api/util.html#whatwg-supported-encodings)
    *
    * @param {string} encoding - Decoder encoding, this argument can be omitted, by default is "utf-8".
-   * @param {TextDecoderOptions} options - Decode options, this argument can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
+   * @param {TextDecoderOptions} options - Decode options, this parameter can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is invalid or not support.
    */
   constructor(encoding?: string, options?: TextDecoderOptions) {
@@ -224,10 +224,11 @@ export class TextDecoder {
    * @see {@link !TextDecoder}
    *
    * @param {Uint8Array} input - Bytes array that need decode.
+   * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`.
    * @returns {Uint8Array} Encoded uint8 bytes array.
    * @throws Throws {@link !TypeError} if input is not a string.
    */
-  decode(input: Uint8Array): Uint8Array {
+  decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string {
     checkIsString(input, `"TextEncoder.encode" input`);
 
     // @ts-ignore Ignore warning
