@@ -42,9 +42,15 @@ async fn test_encode1() -> IoResult<()> {
 
   // After
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 2);
+    for i in 0..2 {
+      let actual = contents.command_line_message_history_mut().try_pop();
+      assert!(actual.is_some());
+      let actual = actual.unwrap();
+      info!("actual[{}]:{:?}", i, actual);
+    }
   }
 
   Ok(())
