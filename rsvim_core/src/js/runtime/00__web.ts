@@ -126,7 +126,7 @@ export class TextEncoder {
   }
 
   /**
-   * The encoding used by encoder, this will always returns "utf-8".
+   * The encoding used by encoder, this always returns "utf-8".
    */
   get encoding(): string {
     return "utf-8";
