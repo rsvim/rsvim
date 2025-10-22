@@ -76,10 +76,10 @@ pub fn encode_into<'s>(
   let (store, _read, _written) = encode_impl(scope, payload);
 
   debug_assert!(is_v8_u8array!(args.get(1)));
-  let payload = args.get(0).to_string(scope).unwrap();
+  let output = args.get(1).cast::<v8::Uint8Array>();
 
-  let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
-  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
+  let output_store = output.get_backing_store().unwrap();
+  output_store.clone_from(&store);
 
   rv.set(buf.into());
 }
