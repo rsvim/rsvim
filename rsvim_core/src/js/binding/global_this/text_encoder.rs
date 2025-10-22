@@ -4,6 +4,7 @@ mod decoder;
 
 use crate::is_v8_obj;
 use crate::is_v8_str;
+use crate::is_v8_u8array;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
@@ -68,19 +69,14 @@ pub fn encode_into<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(is_v8_obj!(args.get(0)));
-
-  if cfg!(debug_assertions) {
-    let encoder =
-      TextEncoder::from_v8(scope, args.get(0).to_object(scope).unwrap());
-    debug_assert_eq!(encoder.encoding, encoder::ENCODING_DEFAULT);
-  }
-
-  debug_assert!(is_v8_str!(args.get(1)));
-  let payload = args.get(1).to_string(scope).unwrap();
+  debug_assert!(is_v8_str!(args.get(0)));
+  let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
   let (store, _read, _written) = encode_impl(scope, payload);
+
+  debug_assert!(is_v8_u8array!(args.get(1)));
+  let payload = args.get(0).to_string(scope).unwrap();
 
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store);
   let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
