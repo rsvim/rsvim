@@ -67,7 +67,7 @@ async fn test_decode1() -> IoResult<()> {
 
   const decoder = new TextDecoder();
   const s3 = decoder.decode(bytes1);
-  const s4 = encoder.encode(bytes2);
+  const s4 = decoder.decode(bytes2);
 
   if (s1 !== s3) {
     Rsvim.cmd.echo("bytes1 failed");
