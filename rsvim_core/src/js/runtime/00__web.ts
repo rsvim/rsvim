@@ -225,8 +225,8 @@ export class TextDecoder {
    *
    * @param {Uint8Array} input - Bytes array that need decode.
    * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`.
-   * @returns {Uint8Array} Encoded uint8 bytes array.
-   * @throws Throws {@link !TypeError} if input is not a string.
+   * @returns {string} Decoded string text.
+   * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(input: Uint8Array, options?: TextDecoderDecodeOptions): string {
     checkIsString(input, `"TextEncoder.encode" input`);
