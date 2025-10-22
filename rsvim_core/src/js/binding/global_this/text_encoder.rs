@@ -7,6 +7,7 @@ use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::is_v8_u8array;
 use crate::js::binding;
+use crate::js::binding::global_this::text_encoder::encoder::EncodeIntoResultBuilder;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
@@ -14,6 +15,7 @@ use decoder::DecodeOptions;
 use decoder::ENCODING;
 use decoder::TextDecoder;
 use decoder::TextDecoderOptions;
+use encoder::EncodeIntoResult;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -74,15 +76,22 @@ pub fn encode_into<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let (store, _read, _written) = encode_impl(scope, payload);
+  let (store, read, written) = encode_impl(scope, payload);
 
   debug_assert!(is_v8_u8array!(args.get(1)));
   let output = args.get(1).cast::<v8::Uint8Array>();
 
-  let output_store = output.get_backing_store().unwrap();
+  let mut output_store = output.get_backing_store().unwrap();
   output_store.clone_from(&store);
 
-  rv.set(buf.into());
+  let encode_result = EncodeIntoResultBuilder::default()
+    .read(read as u32)
+    .written(written as u32)
+    .build()
+    .unwrap();
+  let encode_result = encode_result.to_v8(scope);
+
+  rv.set(encode_result.into());
 }
 
 /// `new TextDecoder()` API.
