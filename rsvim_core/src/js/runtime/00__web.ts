@@ -143,9 +143,11 @@ export class TextDecoder {
   /**
    * Create a TextDecoder instance with specified encoding.
    *
+   * Per the [WHATWG Encoding Standard](https://encoding.spec.whatwg.org/), the encodings supported by the TextDecoder API are outlined in the tables below. For each encoding, one or more aliases may be used.
+   *
    * @param {string} encoding - Decoder encoding, this argument can be omitted, by default is "utf-8".
    * @param {TextDecoderOptions} options - Decode options, this argument can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
-   * @throws Throws {@link !TypeError} if input is not a string.
+   * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is invalid or not support.
    */
   constructor(encoding?: string, options?: TextDecoderOptions) {
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
