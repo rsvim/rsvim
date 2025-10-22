@@ -339,7 +339,18 @@ export interface GlobalThis {
     ...args: any[]
   ): number;
 
+  /**
+   * Encode string text into bytes, it only supports "utf-8" string.
+   *
+   * @see {@link !TextEncoder}
+   */
   TextEncoder: typeof TextEncoder;
+
+  /**
+   * Decode bytes array into string text.
+   *
+   * @see {@link !TextDecoder}
+   */
   TextDecoder: typeof TextDecoder;
 }
 
