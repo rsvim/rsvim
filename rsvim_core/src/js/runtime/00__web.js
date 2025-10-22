@@ -25,7 +25,7 @@ function checkIsString(arg, msg) {
     }
 }
 function checkIsUint8Array(arg, msg) {
-    if (arg instanceof Uint8Array) {
+    if (!(arg instanceof Uint8Array)) {
         throw new TypeError(`${msg} must be a Uint8Array, but found ${typeof arg}`);
     }
 }
