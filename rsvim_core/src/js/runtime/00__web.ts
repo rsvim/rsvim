@@ -88,7 +88,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 type TextEncoderEncodeIntoResult = { read: number; written: number };
 
 /**
- * Encode string text into bytes, it only supports "utf-8" string.
+ * Encode string text into bytes, it only supports "utf-8" encoding.
  *
  * @see {@link !TextEncoder}
  */
@@ -340,16 +340,12 @@ export interface GlobalThis {
   ): number;
 
   /**
-   * Encode string text into bytes, it only supports "utf-8" string.
-   *
-   * @see {@link !TextEncoder}
+   * Encode string text into bytes array, it only supports "utf-8" encoding.
    */
   TextEncoder: typeof TextEncoder;
 
   /**
-   * Decode bytes array into string text.
-   *
-   * @see {@link !TextDecoder}
+   * Decode bytes array into string text, with specified encoding.
    */
   TextDecoder: typeof TextDecoder;
 }
