@@ -86,11 +86,6 @@ pub fn encode_into<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
-  if !args.get(1).is_array_buffer_view() {
-    binding::throw_type_error(scope, &TheErr::BufferInvalid);
-    return;
-  }
-
   let payload = args.get(0).to_string(scope).unwrap();
   trace!(
     "|encode_into| payload:{:?}",
@@ -100,6 +95,7 @@ pub fn encode_into<'s>(
   let (data, read, written) = encode_impl(scope, payload);
   let store = v8::ArrayBuffer::new_backing_store_from_vec(data).make_shared();
 
+  debug_assert!(args.get(0).is_uint8_array());
   let output = args.get(1).cast::<v8::ArrayBufferView>();
 
   let mut output_store = output.get_backing_store().unwrap();
