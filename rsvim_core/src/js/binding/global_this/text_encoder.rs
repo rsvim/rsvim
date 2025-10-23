@@ -272,7 +272,10 @@ pub fn create_stream_decoder<'s>(
       move |isolate| unsafe {
         drop(Box::from_raw(decoder_ptr));
         drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-        trace!("|create_decoder| dropped TextDecoder:{:?}", _encoding_label);
+        trace!(
+          "|create_stream_decoder| dropped TextDecoder:{:?}",
+          _encoding_label
+        );
       }
     }),
   );
