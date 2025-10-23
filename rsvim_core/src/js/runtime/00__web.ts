@@ -304,6 +304,15 @@ export class TextDecoder {
       `"TextDecoder.decode" input`,
     );
 
+    let buffer = input as ArrayBuffer;
+    if (isTypedArray(input)) {
+      // @ts-ignore Ignore warning
+      buffer = input.buffer as ArrayBuffer;
+    } else if (isDataView(input)) {
+      // @ts-ignore Ignore warning
+      buffer = input.buffer as ArrayBuffer;
+    }
+
     if (options === undefined || options === null) {
       options = { stream: false };
     }
