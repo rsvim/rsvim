@@ -28,8 +28,9 @@ use std::rc::Rc;
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
+  buf_size: usize,
 ) -> (Vec<u8>, usize, usize) {
-  let mut buf: Vec<u8> = Vec::with_capacity(payload.utf8_length(scope));
+  let mut buf: Vec<u8> = Vec::with_capacity();
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v2` API.
@@ -70,7 +71,8 @@ pub fn encode<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let (data, _read, _written) = encode_impl(scope, payload);
+  let written_size = payload.utf8_length(scope);
+  let (data, _read, _written) = encode_impl(scope, payload, written_size);
 
   let store = v8::ArrayBuffer::new_backing_store_from_vec(data);
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
@@ -92,14 +94,20 @@ pub fn encode_into<'s>(
     payload.to_rust_string_lossy(scope)
   );
 
-  let (data, read, written) = encode_impl(scope, payload);
-  let store = v8::ArrayBuffer::new_backing_store_from_vec(data).make_shared();
+  debug_assert!(args.get(0).is_array_buffer());
+  let buf = args.get(1).cast::<v8::ArrayBuffer>();
+  let buf_size = buf.byte_length();
+  let buf_store = buf.get_backing_store();
 
-  debug_assert!(args.get(0).is_uint8_array());
-  let output = args.get(1).cast::<v8::ArrayBufferView>();
+  let written_size = std::cmp::min(payload.utf8_length(scope), buf_size);
+  let (data, read, written) = encode_impl(scope, payload, written_size);
 
-  let mut output_store = output.get_backing_store().unwrap();
-  output_store.clone_from(&store);
+  for (i, b) in data.iter().enumerate() {
+    if i >= written {
+      break;
+    }
+    buf_store[i].set(*b);
+  }
 
   let encode_result = EncodeIntoResultBuilder::default()
     .read(read as u32)
