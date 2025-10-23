@@ -285,6 +285,45 @@ async fn test_decode3() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
+  const fixture = new Uint8Array([0x89, 0x95, 0x9f, 0xbf]);
+  const decoder = new TextDecoder("ascii");
+  if (decoder.decode(fixture) !== "‰•Ÿ¿") {
+    Rsvim.cmd.echo("failed");
+  }
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After
+  {
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_decode_failed1() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let src: &str = r#"
   const decoder = new TextDecoder("FooEncoding");
 "#;
 
