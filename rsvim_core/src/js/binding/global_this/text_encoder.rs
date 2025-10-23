@@ -230,22 +230,22 @@ pub fn decode<'s>(
   let mut decoder_handle = decoder_handle.borrow_mut();
 
   debug_assert!(args.get(1).is_array_buffer_view());
-  let buf = args.get(1).cast::<v8::ArrayBufferView>();
-  let mut storage = vec![0; buf.byte_length()];
-  let buf = buf.get_contents(&mut storage);
+  let data = args.get(1).cast::<v8::ArrayBufferView>();
+  let mut storage = [0; v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP];
+  let data = data.get_contents(&mut storage);
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
     DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
   trace!(
-    "|decode| decoder_obj:{:?}, buf:{:?}, options:{:?}",
-    decoder_obj, buf, options
+    "|decode| decoder_obj:{:?}, data:{:?}, options:{:?}",
+    decoder_obj, data, options
   );
 
-  let max_buffer_length = decoder_handle.max_utf16_buffer_length(buf.len());
+  let max_buffer_length = decoder_handle.max_utf16_buffer_length(data.len());
 
   if max_buffer_length.is_none() {
-    binding::throw_range_error(scope, &TheErr::ValueTooLarge(buf.len()));
+    binding::throw_range_error(scope, &TheErr::ValueTooLarge(data.len()));
     return;
   }
 
@@ -254,7 +254,11 @@ pub fn decode<'s>(
 
   if decoder_obj.fatal() {
     let (result, _read, written) = decoder_handle
-      .decode_to_utf16_without_replacement(buf, &mut output, !options.stream());
+      .decode_to_utf16_without_replacement(
+        data,
+        &mut output,
+        !options.stream(),
+      );
     match result {
       DecoderResult::InputEmpty => {
         output.truncate(written);
@@ -278,7 +282,7 @@ pub fn decode<'s>(
     }
   } else {
     let (result, _read, written, _had_errors) =
-      decoder_handle.decode_to_utf16(buf, &mut output, !options.stream());
+      decoder_handle.decode_to_utf16(data, &mut output, !options.stream());
     match result {
       CoderResult::InputEmpty => {
         output.truncate(written);
