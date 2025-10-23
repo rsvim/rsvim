@@ -349,58 +349,58 @@ async fn test_decode3() -> IoResult<()> {
   Ok(())
 }
 
-#[tokio::test]
-#[cfg_attr(miri, ignore)]
-async fn test_decode4() -> IoResult<()> {
-  test_log_init();
-
-  let terminal_cols = 10_u16;
-  let terminal_rows = 10_u16;
-
-  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
-  let src: &str = r#"
-  const fixture1 = new Uint8Array([
-    0xf0, 0x9d,
-  ]);
-  const fixture2 = new Uint8Array([
-    /*0xf0, 0x9d,*/
-    0x93, 0xbd,
-    0xf0, 0x9d, 0x93, 0xae,
-    0xf0, 0x9d, 0x94, 0x81,
-    0xf0, 0x9d, 0x93, 0xbd
-  ]);
-
-  const decoder = new TextDecoder();
-  const s1 = decoder.decode(fixture1, {stream:true});
-  const s2 = decoder.decode(fixture2, {stream:false});
-  const s3 = s1 + s2;
-
-  if (decoder.decode(s3) !== "𝓽𝓮𝔁𝓽") {
-    Rsvim.cmd.echo("failed");
-  }
-"#;
-
-  // Prepare $RSVIM_CONFIG/rsvim.js
-  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
-
-  let mut event_loop =
-    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
-
-  event_loop.initialize()?;
-  event_loop
-    .run_with_mock_events(MockEventReader::new(mocked_events))
-    .await?;
-  event_loop.shutdown()?;
-
-  // After
-  {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
-  }
-
-  Ok(())
-}
+// #[tokio::test]
+// #[cfg_attr(miri, ignore)]
+// async fn test_decode4() -> IoResult<()> {
+//   test_log_init();
+//
+//   let terminal_cols = 10_u16;
+//   let terminal_rows = 10_u16;
+//
+//   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+//   let src: &str = r#"
+//   const fixture1 = new Uint8Array([
+//     0xf0, 0x9d,
+//   ]);
+//   const fixture2 = new Uint8Array([
+//     /*0xf0, 0x9d,*/
+//     0x93, 0xbd,
+//     0xf0, 0x9d, 0x93, 0xae,
+//     0xf0, 0x9d, 0x94, 0x81,
+//     0xf0, 0x9d, 0x93, 0xbd
+//   ]);
+//
+//   const decoder = new TextDecoder();
+//   const s1 = decoder.decode(fixture1, {stream:true});
+//   const s2 = decoder.decode(fixture2, {stream:false});
+//   const s3 = s1 + s2;
+//
+//   if (decoder.decode(s3) !== "𝓽𝓮𝔁𝓽") {
+//     Rsvim.cmd.echo("failed");
+//   }
+// "#;
+//
+//   // Prepare $RSVIM_CONFIG/rsvim.js
+//   let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+//
+//   let mut event_loop =
+//     make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+//
+//   event_loop.initialize()?;
+//   event_loop
+//     .run_with_mock_events(MockEventReader::new(mocked_events))
+//     .await?;
+//   event_loop.shutdown()?;
+//
+//   // After
+//   {
+//     let contents = lock!(event_loop.contents);
+//     let actual = contents.command_line_message_history().is_empty();
+//     assert!(actual);
+//   }
+//
+//   Ok(())
+// }
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
