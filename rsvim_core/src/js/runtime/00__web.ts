@@ -127,9 +127,6 @@ function boundByIntegers(arg: any, bound: [number, number]) {
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
 export namespace GlobalThis {
-  /**
-   * @see {@link !TypedArray}
-   */
   export type TypedArray =
     | Int8Array
     | Uint8Array
