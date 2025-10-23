@@ -73,11 +73,11 @@ async fn test_encode2() -> IoResult<()> {
   const res2 = encoder.encodeInto(s2, buf2);
 
   if (res1.read !== s1.length || res1.written < s1.length || res1.written <= buf1.byteLength) {
-    Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s.length}, buf1.byteLength:${buf1.byteLength}`);
+    Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s1.length}, buf1.byteLength:${buf1.byteLength}`);
   }
 
   if (res2.read !== s2.length || res2.written < s2.length || res2.written <= buf2.byteLength) {
-    Rsvim.cmd.echo(`buf2 failed, res2.read:${res2.read}, res2.written:${res2.written}, s2.length:${s.length}, buf2.byteLength:${buf2.byteLength}`);
+    Rsvim.cmd.echo(`buf2 failed, res2.read:${res2.read}, res2.written:${res2.written}, s2.length:${s2.length}, buf2.byteLength:${buf2.byteLength}`);
   }
 "#;
 
