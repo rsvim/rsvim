@@ -97,7 +97,9 @@ function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
       isTypedArray(arg)
     )
   ) {
-    throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+    throw new TypeError(
+      `${msg} must be either ArrayBuffer or DataView or TypedArray, buf found ${typeof arg}`,
+    );
   }
 }
 
