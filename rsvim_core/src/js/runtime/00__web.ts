@@ -189,7 +189,7 @@ export class TextEncoder {
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array.
-   * @returns {object} Encode result, it contains two fields "read" and "written".
+   * @returns {object} Encode result, it contains two numbers: "read" and "written".
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
