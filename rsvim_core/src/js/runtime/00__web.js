@@ -34,6 +34,11 @@ function checkIsObject(arg, msg) {
         throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
     }
 }
+function checkIsUint8Array(arg, msg) {
+    if (!(arg instanceof Uint8Array)) {
+        throw new TypeError(`${msg} must be a Uint8Array`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
         throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -56,7 +61,8 @@ export class TextEncoder {
     }
     encodeInto(src, dest) {
         checkIsString(src, `"TextEncoder.encodeInto" src`);
-        return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+        checkIsUint8Array(dest, `"TextEncoder.encodeInto" dest`);
+        return __InternalRsvimGlobalObject.global_encoding_encode_into(src, dest.buffer);
     }
     get encoding() {
         return "utf-8";
