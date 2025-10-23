@@ -203,7 +203,7 @@ pub fn decode_single<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 2);
+  debug_assert!(args.length() == 4);
   debug_assert!(args.get(0).is_array_buffer());
   let data = args.get(0).cast::<v8::ArrayBuffer>();
   let data: Vec<u8> = data
