@@ -348,6 +348,10 @@ export class TextDecoder {
 
     const stream = options.stream || false;
 
+    if (stream) {
+      throw new TypeError(`"TextDecoder.decode" stream is not supported`);
+    }
+
     try {
       // For non-stream, single pass decoding,
       if (!stream && this.#handle === null) {
