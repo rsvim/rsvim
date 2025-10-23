@@ -133,7 +133,16 @@ pub fn check_encoding_label<'s>(
   rv.set_bool(valid);
 }
 
-pub fn decode_impl<'s>(
+fn create_decoder_impl(label: &str, ignore_bom: bool) -> Decoder {
+  let encoding = Encoding::for_label(label.as_bytes()).unwrap();
+  if ignore_bom {
+    encoding.new_decoder_without_bom_handling()
+  } else {
+    encoding.new_decoder_with_bom_removal()
+  }
+}
+
+fn decode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   mut rv: v8::ReturnValue,
   decoder: &mut Decoder,
