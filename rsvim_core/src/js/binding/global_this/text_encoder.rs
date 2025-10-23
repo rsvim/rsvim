@@ -229,8 +229,8 @@ pub fn decode<'s>(
     binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
   let mut decoder_handle = decoder_handle.borrow_mut();
 
-  debug_assert!(args.get(1).is_array_buffer_view());
-  let data = args.get(1).cast::<v8::ArrayBufferView>();
+  debug_assert!(args.get(1).is_array_buffer());
+  let data = args.get(1).cast::<v8::ArrayBuffer>();
   let mut storage = [0; v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP];
   let data = data.get_contents(&mut storage);
 
