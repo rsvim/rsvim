@@ -297,10 +297,15 @@ export class TextDecoder {
     input: ArrayBuffer | GlobalThis.TypedArray | DataView,
     options?: TextDecoderDecodeOptions,
   ): string {
+    checkIsArrayBufferOrTypedArrayOrDataView(
+      input,
+      `"TextDecoder.decode" input`,
+    );
+
     if (options === undefined || options === null) {
       options = { stream: false };
     }
-    checkIsObject(options, `"TextDecoder.constructor" options`);
+    checkIsObject(options, `"TextDecoder.decode" options`);
     if (!Object.hasOwn(options, "stream")) {
       options.stream = false;
     }
