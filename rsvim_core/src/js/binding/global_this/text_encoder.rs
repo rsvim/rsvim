@@ -73,6 +73,7 @@ pub fn encode<'s>(
 
   let buf_size = payload.utf8_length(scope);
   let (data, _read, _written) = encode_impl(scope, payload, buf_size);
+  debug_assert_eq!(_written, data.len());
 
   let store = v8::ArrayBuffer::new_backing_store_from_vec(data);
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
@@ -99,9 +100,7 @@ pub fn encode_into<'s>(
   let buf_size = buf.byte_length();
   let buf_store = buf.get_backing_store();
 
-  // Maximal bytes size can be write
-  let max_write_size = std::cmp::min(payload.utf8_length(scope), buf_size);
-  let (data, read, written) = encode_impl(scope, payload, max_write_size);
+  let (data, read, written) = encode_impl(scope, payload, buf_size);
 
   debug_assert_eq!(written, data.len());
   debug_assert!(data.len() <= buf_size);

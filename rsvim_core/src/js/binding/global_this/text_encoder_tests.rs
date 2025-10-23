@@ -56,6 +56,56 @@ async fn test_encode1() -> IoResult<()> {
 
 #[tokio::test]
 #[cfg_attr(miri, ignore)]
+async fn test_encode2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let src: &str = r#"
+  const encoder = new TextEncoder();
+  const s1 = "This is some data";
+  const s2 = "你好，世界！";
+  const buf1 = new Uint8Array();
+  const bytes1 = encoder.encode(s1);
+  const bytes2 = encoder.encode(s2);
+
+  const isInstance1 = bytes1 instanceof Uint8Array;
+  if (!isInstance1 || bytes1.byteLength < s1.length) {
+    Rsvim.cmd.echo(`bytes1 failed, isinstance:${isInstance1}, bytesLen:${bytes1.byteLength}`);
+  }
+
+  const isInstance2 = bytes2 instanceof Uint8Array;
+  if (!isInstance2 || bytes2.byteLength < s2 * 2) {
+    Rsvim.cmd.echo(`bytes2 failed, isinstance:${isInstance1}, bytesLen:${bytes2.byteLength}`);
+  }
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After
+  {
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
 async fn test_decode1() -> IoResult<()> {
   test_log_init();
 
