@@ -472,12 +472,12 @@ export interface GlobalThis {
   /**
    * Encode string text into bytes array, it only supports "utf-8" encoding.
    */
-  TextEncoder: typeof TextEncoder;
+  TextEncoder: TextEncoder;
 
   /**
    * Decode bytes array into string text, with specified encoding.
    */
-  TextDecoder: typeof TextDecoder;
+  TextDecoder: TextDecoder;
 }
 
 ((globalThis: GlobalThis) => {
