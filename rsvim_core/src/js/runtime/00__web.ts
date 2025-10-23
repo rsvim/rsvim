@@ -319,6 +319,8 @@ export class TextDecoder {
       options.stream = false;
     }
 
+    const stream = options.stream || false;
+
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.global_encoding_decode(
       this.#handle,
