@@ -315,5 +315,5 @@ pub fn decode_stream<'s>(
     data, fatal, stream
   );
 
-  decode_impl(scope, &mut rv, &mut decoder, &data, fatal, false);
+  decode_impl(scope, &mut rv, &mut decoder, &data, fatal, stream);
 }

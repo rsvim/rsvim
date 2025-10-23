@@ -144,6 +144,7 @@ export class TextDecoder {
             checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         }
         const stream = options.stream;
+        Rsvim.cmd.echo(`stream:${stream}`);
         try {
             if (!stream && this.#handle === null) {
                 return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
