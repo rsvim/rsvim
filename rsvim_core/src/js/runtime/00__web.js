@@ -36,7 +36,7 @@ function checkIsObject(arg, msg) {
 }
 function checkIsUint8Array(arg, msg) {
     if (!(arg instanceof Uint8Array)) {
-        throw new TypeError(`${msg} must be a Uint8Array`);
+        throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
     }
 }
 function checkIsOptions(arg, options, msg) {
