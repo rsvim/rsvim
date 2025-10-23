@@ -1,7 +1,5 @@
 //! `TextEncoder` APIs.
 
-mod encoder;
-
 use crate::is_v8_bool;
 use crate::is_v8_obj;
 use crate::is_v8_str;
@@ -9,7 +7,6 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
-use encoder::EncodeIntoResultBuilder;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
