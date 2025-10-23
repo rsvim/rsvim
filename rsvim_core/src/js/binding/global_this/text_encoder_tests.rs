@@ -53,7 +53,7 @@ async fn test_encode1() -> IoResult<()> {
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    asesrt_eq!(actual, "utf-8");
+    assert_eq!(actual, "utf-8");
   }
 
   Ok(())

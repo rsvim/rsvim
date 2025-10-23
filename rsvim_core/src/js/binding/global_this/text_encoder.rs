@@ -222,10 +222,6 @@ pub fn decode<'s>(
 ) {
   debug_assert!(args.length() == 3);
   debug_assert!(is_v8_obj!(args.get(0)));
-  if !args.get(1).is_array_buffer_view() {
-    binding::throw_type_error(scope, &TheErr::BufferInvalid);
-    return;
-  }
 
   let decoder_wrapper = args.get(0).to_object(scope).unwrap();
   let decoder_obj = TextDecoder::from_v8(scope, decoder_wrapper);
@@ -233,6 +229,7 @@ pub fn decode<'s>(
     binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
   let mut decoder_handle = decoder_handle.borrow_mut();
 
+  debug_assert!(args.get(1).is_array_buffer_view());
   let buf = args.get(1).cast::<v8::ArrayBufferView>();
   let mut storage: Vec<u8> =
     Vec::with_capacity(v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP);

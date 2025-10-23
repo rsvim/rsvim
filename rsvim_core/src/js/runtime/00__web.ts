@@ -65,6 +65,28 @@ function checkIsUint8Array(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsTypedArray(arg: any, msg: string) {
+  if (
+    !(
+      arg instanceof Int8Array ||
+      arg instanceof Uint8Array ||
+      arg instanceof Uint8ClampedArray ||
+      arg instanceof Int16Array ||
+      arg instanceof Uint16Array ||
+      arg instanceof Int32Array ||
+      arg instanceof Uint32Array ||
+      arg instanceof Float16Array ||
+      arg instanceof Float32Array ||
+      arg instanceof Float64Array ||
+      arg instanceof BigInt64Array ||
+      arg instanceof BigUint64Array
+    )
+  ) {
+    throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -97,6 +119,7 @@ export namespace GlobalThis {
     | Uint16Array
     | Int32Array
     | Uint32Array
+    | Float16Array
     | Float32Array
     | Float64Array
     | BigInt64Array
