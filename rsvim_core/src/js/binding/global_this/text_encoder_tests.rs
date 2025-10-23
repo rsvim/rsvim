@@ -69,8 +69,8 @@ async fn test_encode2() -> IoResult<()> {
   const s2 = "你好，世界！";
   const buf1 = new Uint8Array(s1.length * 4);
   const buf2 = new Uint8Array(s2.length * 4);
-  const res1 = encoder.encodeInto(s1);
-  const res2 = encoder.encodeInto(s2);
+  const res1 = encoder.encodeInto(s1, buf1);
+  const res2 = encoder.encodeInto(s2, buf2);
 
   if (res1.read !== s1.length || res1.written < s1.length || res1.written <= buf1.byteLength) {
     Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s.length}, buf1.byteLength:${buf1.byteLength}`);

@@ -60,7 +60,7 @@ function checkIsObject(arg: any, msg: string) {
 /** @hidden */
 function checkIsUint8Array(arg: any, msg: string) {
   if (!(arg instanceof Uint8Array)) {
-    throw new TypeError(`${msg} must be a Uint8Array`);
+    throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
   }
 }
 
