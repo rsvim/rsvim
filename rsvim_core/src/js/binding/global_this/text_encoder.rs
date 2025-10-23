@@ -103,14 +103,13 @@ pub fn encode_into<'s>(
     buf_store[i].set(*b);
   }
 
-  let encode_result = EncodeIntoResultBuilder::default()
-    .read(read as u32)
-    .written(written as u32)
-    .build()
-    .unwrap();
-  let encode_result = encode_result.to_v8(scope);
+  let obj = v8::Object::new(scope);
+  let read_value = (read as u32).to_v8(scope);
+  binding::set_property_to(scope, obj, "read", read_value.into());
+  let written_value = (written as u32).to_v8(scope);
+  binding::set_property_to(scope, obj, "written", written_value.into());
 
-  rv.set(encode_result.into());
+  rv.set(obj.into());
 }
 
 /// Check whether encoding label is valid.
