@@ -100,7 +100,7 @@ function checkIsTypedArray(arg: any, msg: string) {
 function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
   if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
     throw new TypeError(
-      `${msg} must be either ArrayBuffer or DataView or TypedArray, buf found ${typeof arg}`,
+      `${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`,
     );
   }
 }
