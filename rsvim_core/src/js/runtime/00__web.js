@@ -1,5 +1,8 @@
+function isNullOrUndefined(arg) {
+    return arg === undefined || arg === null;
+}
 function checkNotNull(arg, msg) {
-    if (arg === undefined || arg === null) {
+    if (isNullOrUndefined(arg)) {
         throw new TypeError(`${msg} cannot be undefined or null`);
     }
 }
@@ -59,12 +62,12 @@ function isArrayBuffer(arg) {
 function isDataView(arg) {
     return arg instanceof DataView;
 }
-function checkIsTypedArray(arg, msg) {
-    if (!isTypedArray(arg)) {
-        throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+function checkIsArrayBufferOrTypedArrayOrDataView(arg, msg) {
+    if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
+        throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
     }
 }
-function checkIsArrayBufferOrTypedArrayOrDataView(arg, msg) {
+function checkIsArrayBufferFamilyOrNull(arg, msg) {
     if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
         throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
     }
@@ -127,8 +130,13 @@ export class TextDecoder {
         this.#ignoreBOM = options.ignoreBOM;
         this.#handle = null;
     }
-    decode(input, options) {
-        checkIsArrayBufferOrTypedArrayOrDataView(input, `"TextDecoder.decode" input`);
+    decode(input = new Uint8Array(), options = { stream: false }) {
+        if (!(isArrayBuffer(input) ||
+            isDataView(input) ||
+            isTypedArray(input) ||
+            isNullOrUndefined(input))) {
+            throw new TypeError(`"TextDecoder.decode" input is invalid, found ${typeof input}`);
+        }
         let buffer = input;
         if (isTypedArray(input)) {
             buffer = input.buffer;
@@ -144,7 +152,6 @@ export class TextDecoder {
             checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         }
         const stream = options.stream;
-        Rsvim.cmd.echo(`stream:${stream}`);
         try {
             if (!stream && this.#handle === null) {
                 return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
@@ -182,7 +189,7 @@ export class TextDecoder {
             activeTimers.delete(id);
         }
     }
-    function setInterval(callback, delay, ...args) {
+    function setInterval(callback, delay = 1, ...args) {
         if (delay === undefined || delay === null) {
             delay = 1;
         }

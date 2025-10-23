@@ -272,11 +272,14 @@ export class TextDecoder {
    *
    * @see [Node.js - WHATWG supported encodings](https://nodejs.org/api/util.html#whatwg-supported-encodings)
    *
-   * @param {string} encoding - Decoder encoding, this argument can be omitted, by default is "utf-8".
-   * @param {TextDecoderOptions} options - Decode options, this parameter can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
+   * @param {string} encoding - Decoder encoding, by default is "utf-8".
+   * @param {TextDecoderOptions} options - Decode options, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
-  constructor(encoding?: string, options?: TextDecoderOptions) {
+  constructor(
+    encoding: string = "utf-8",
+    options: TextDecoderOptions = { fatal: false, ignoreBOM: false },
+  ) {
     if (encoding === undefined || encoding === null) {
       encoding = "utf-8";
     }
@@ -522,7 +525,7 @@ export interface GlobalThis {
 
   function setInterval(
     callback: (...args: any[]) => void,
-    delay?: number,
+    delay: number = 1,
     ...args: any[]
   ): number {
     if (delay === undefined || delay === null) {

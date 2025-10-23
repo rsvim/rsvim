@@ -21,7 +21,7 @@ type TextDecoderDecodeOptions = {
 export declare class TextDecoder {
     #private;
     constructor(encoding?: string, options?: TextDecoderOptions);
-    decode(input: ArrayBuffer | GlobalThis.TypedArray | DataView, options?: TextDecoderDecodeOptions): string;
+    decode(input?: ArrayBuffer | GlobalThis.TypedArray | DataView, options?: TextDecoderDecodeOptions): string;
     get encoding(): string;
     get fatal(): boolean;
     get ignoreBOM(): boolean;
