@@ -85,8 +85,7 @@ export class TextDecoder {
         if (!Object.hasOwn(options, "ignoreBOM")) {
             options.ignoreBOM = false;
         }
-        const handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
-        this.#handle = handle;
+        this.#handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
     }
     decode(input, options) {
         if (options === undefined || options === null) {
