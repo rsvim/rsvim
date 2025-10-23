@@ -188,6 +188,10 @@ async fn test_decode1() -> IoResult<()> {
   if (s2 !== s5) {
     Rsvim.cmd.echo("failed-3");
   }
+
+  Rsvim.cmd.echo(decoder3.encoding);
+  Rsvim.cmd.echo(decoder3.fatal);
+  Rsvim.cmd.echo(decoder3.ignoreBOM);
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -204,9 +208,24 @@ async fn test_decode1() -> IoResult<()> {
 
   // After
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 3);
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "utf-8");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "false");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "false");
   }
 
   Ok(())
@@ -222,27 +241,14 @@ async fn test_decode2() -> IoResult<()> {
 
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
-  const s1 = "This is some data";
-  const s2 = "你好，世界！";
-  const encoder = new TextEncoder();
-  const bytes1 = encoder.encode(s1);
-  const bytes2 = encoder.encode(s2);
-
-  const decoder3 = new TextDecoder();
-  const s3 = decoder3.decode(bytes1);
-  const decoder4 = new TextDecoder();
-  const s4 = decoder4.decode(bytes2);
-  const s5 = decoder4.decode(bytes2);
-
-  if (s1 !== s3) {
-    Rsvim.cmd.echo("failed-1");
-  }
-  if (s2 !== s4) {
-    Rsvim.cmd.echo("failed-2");
-  }
-  if (s2 !== s5) {
-    Rsvim.cmd.echo("failed-3");
-  }
+  const fixture = new Uint8Array([
+    0xf0, 0x9d, 0x93, 0xbd,
+    0xf0, 0x9d, 0x93, 0xae,
+    0xf0, 0x9d, 0x94, 0x81,
+    0xf0, 0x9d, 0x93, 0xbd
+  ]);
+  const decoder = new TextDecoder();
+  assertEquals(decoder.decode(fixture), "𝓽𝓮𝔁𝓽");
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -260,8 +266,8 @@ async fn test_decode2() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n);
   }
 
   Ok(())
