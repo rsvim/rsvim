@@ -39,6 +39,36 @@ function checkIsUint8Array(arg, msg) {
         throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
     }
 }
+function isTypedArray(arg) {
+    return (arg instanceof Int8Array ||
+        arg instanceof Uint8Array ||
+        arg instanceof Uint8ClampedArray ||
+        arg instanceof Int16Array ||
+        arg instanceof Uint16Array ||
+        arg instanceof Int32Array ||
+        arg instanceof Uint32Array ||
+        arg instanceof Float16Array ||
+        arg instanceof Float32Array ||
+        arg instanceof Float64Array ||
+        arg instanceof BigInt64Array ||
+        arg instanceof BigUint64Array);
+}
+function isArrayBuffer(arg) {
+    return arg instanceof ArrayBuffer;
+}
+function isDataView(arg) {
+    return arg instanceof DataView;
+}
+function checkIsTypedArray(arg, msg) {
+    if (!isTypedArray(arg)) {
+        throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+    }
+}
+function checkIsArrayBufferOrTypedArrayOrDataView(arg, msg) {
+    if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
+        throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
         throw new RangeError(`${msg} is invalid option: ${arg}`);
@@ -88,14 +118,22 @@ export class TextDecoder {
         this.#handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
     }
     decode(input, options) {
+        checkIsArrayBufferOrTypedArrayOrDataView(input, `"TextDecoder.decode" input`);
+        let buffer = input;
+        if (isTypedArray(input)) {
+            buffer = input.buffer;
+        }
+        else if (isDataView(input)) {
+            buffer = input.buffer;
+        }
         if (options === undefined || options === null) {
             options = { stream: false };
         }
-        checkIsObject(options, `"TextDecoder.constructor" options`);
+        checkIsObject(options, `"TextDecoder.decode" options`);
         if (!Object.hasOwn(options, "stream")) {
             options.stream = false;
         }
-        return __InternalRsvimGlobalObject.global_encoding_decode(this.#handle, input, options);
+        return __InternalRsvimGlobalObject.global_encoding_decode(this.#handle, buffer, options);
     }
     get encoding() {
         return this.#handle.encoding;
