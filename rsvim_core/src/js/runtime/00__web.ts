@@ -294,14 +294,11 @@ export class TextDecoder {
     }
 
     checkIsObject(options, `"TextDecoder.constructor" options`);
-    if (Object.hasOwn(options, "fatal")) {
-      checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
+    if (!Object.hasOwn(options, "fatal")) {
+      options.fatal = false;
     }
-    if (Object.hasOwn(options, "ignoreBOM")) {
-      checkIsBoolean(
-        options.ignoreBOM,
-        `"TextDecoder.constructor" ignoreBOM option`,
-      );
+    if (!Object.hasOwn(options, "ignoreBOM")) {
+      options.ignoreBOM = false;
     }
 
     this.#encoding = encoding;
