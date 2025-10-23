@@ -67,7 +67,8 @@ async fn test_encode2() -> IoResult<()> {
   const encoder = new TextEncoder();
   const s1 = "This is some data";
   const s2 = "你好，世界！";
-  const buf1 = new Uint8Array();
+  const buf1 = new Uint8Array(s1.length * 4);
+  const buf2 = new Uint8Array(s2.length * 4);
   const bytes1 = encoder.encode(s1);
   const bytes2 = encoder.encode(s2);
 
