@@ -502,6 +502,12 @@ export class RsvimFs {
     if (!Object.hasOwn(options, "write")) {
       options.write = false;
     }
+    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject
