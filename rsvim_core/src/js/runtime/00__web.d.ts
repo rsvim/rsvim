@@ -33,7 +33,7 @@ export interface GlobalThis {
     reportError(error: any): void;
     setInterval(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
     setTimeout(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
-    TextEncoder: typeof TextEncoder;
-    TextDecoder: typeof TextDecoder;
+    TextEncoder: TextEncoder;
+    TextDecoder: TextDecoder;
 }
 export {};
