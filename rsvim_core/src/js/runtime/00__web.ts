@@ -348,6 +348,12 @@ export class TextDecoder {
     try {
       // For non-stream, single pass decoding,
       if (!stream && this.#handle === null) {
+        // @ts-ignore Ignore warning
+        return __InternalRsvimGlobalObject.global_encoding_decode_single(
+          this.#handle,
+          buffer,
+          options,
+        );
       }
 
       // @ts-ignore Ignore warning

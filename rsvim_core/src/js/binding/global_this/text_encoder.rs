@@ -140,15 +140,15 @@ pub fn decode_single<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(is_v8_str!(args.get(0)));
-  let label = args.get(0).to_rust_string_lossy(scope);
-  debug_assert!(is_v8_bool!(args.get(1)));
-  let fatal = args.get(1).to_boolean(scope);
+  debug_assert!(args.get(0).is_array_buffer());
+  let data = args.get(0).cast::<v8::ArrayBuffer>();
+  debug_assert!(is_v8_str!(args.get(1)));
+  let label = args.get(1).to_rust_string_lossy(scope);
   debug_assert!(is_v8_bool!(args.get(2)));
-  let ignore_bom = args.get(2).to_boolean(scope);
+  let fatal = args.get(2).to_boolean(scope);
+  debug_assert!(is_v8_bool!(args.get(3)));
+  let ignore_bom = args.get(3).to_boolean(scope);
 
-  debug_assert!(args.get(1).is_array_buffer());
-  let data = args.get(1).cast::<v8::ArrayBuffer>();
   let data: Vec<u8> = data
     .get_backing_store()
     .iter()
