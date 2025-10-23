@@ -300,6 +300,11 @@ export class TextDecoder {
     if (!Object.hasOwn(options, "ignoreBOM")) {
       options.ignoreBOM = false;
     }
+    checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
+    checkIsBoolean(
+      options.ignoreBOM,
+      `"TextDecoder.constructor" ignoreBOM option`,
+    );
 
     this.#encoding = encoding;
     this.#fatal = options.fatal as boolean;
