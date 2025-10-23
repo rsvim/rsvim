@@ -30,7 +30,7 @@ fn encode_impl<'s>(
   payload: v8::Local<'s, v8::String>,
   buf_size: usize,
 ) -> (Vec<u8>, usize, usize) {
-  let mut buf: Vec<u8> = Vec::with_capacity();
+  let mut buf: Vec<u8> = Vec::with_capacity(buf_size);
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v2` API.
@@ -103,10 +103,9 @@ pub fn encode_into<'s>(
   let max_write_size = std::cmp::min(payload.utf8_length(scope), buf_size);
   let (data, read, written) = encode_impl(scope, payload, max_write_size);
 
+  debug_assert_eq!(written, data.len());
+  debug_assert!(data.len() <= buf_size);
   for (i, b) in data.iter().enumerate() {
-    if i >= written {
-      break;
-    }
     buf_store[i].set(*b);
   }
 
