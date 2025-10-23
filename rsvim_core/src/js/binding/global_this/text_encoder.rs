@@ -144,7 +144,7 @@ fn create_decoder_impl(label: &str, ignore_bom: bool) -> Decoder {
 
 fn decode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
-  mut rv: v8::ReturnValue,
+  rv: &mut v8::ReturnValue,
   decoder: &mut Decoder,
   data: &[u8],
   fatal: bool,
@@ -233,69 +233,8 @@ pub fn decode_single<'s>(
     data, label, fatal, ignore_bom
   );
 
-  let encoding = Encoding::for_label(label.as_bytes()).unwrap();
-  let mut decoder_handle = if ignore_bom {
-    encoding.new_decoder_without_bom_handling()
-  } else {
-    encoding.new_decoder_with_bom_removal()
-  };
-
-  let max_buffer_length = decoder_handle.max_utf16_buffer_length(data.len());
-
-  if max_buffer_length.is_none() {
-    binding::throw_range_error(scope, &TheErr::ValueTooLarge(data.len()));
-    return;
-  }
-
-  let max_buffer_length = max_buffer_length.unwrap();
-  let mut output = vec![0; max_buffer_length];
-
-  if fatal {
-    let (result, _read, written) = decoder_handle
-      .decode_to_utf16_without_replacement(&data, &mut output, true);
-    match result {
-      DecoderResult::InputEmpty => {
-        output.truncate(written);
-        let output = v8::String::new_from_two_byte(
-          scope,
-          &output,
-          v8::NewStringType::Normal,
-        )
-        .unwrap();
-        rv.set(output.into());
-      }
-      DecoderResult::OutputFull => {
-        binding::throw_type_error(
-          scope,
-          &TheErr::BufferTooSmall(max_buffer_length),
-        );
-      }
-      DecoderResult::Malformed(_, _) => {
-        binding::throw_type_error(scope, &TheErr::DataInvalid);
-      }
-    }
-  } else {
-    let (result, _read, written, _had_errors) =
-      decoder_handle.decode_to_utf16(&data, &mut output, true);
-    match result {
-      CoderResult::InputEmpty => {
-        output.truncate(written);
-        let output = v8::String::new_from_two_byte(
-          scope,
-          &output,
-          v8::NewStringType::Normal,
-        )
-        .unwrap();
-        rv.set(output.into());
-      }
-      CoderResult::OutputFull => {
-        binding::throw_type_error(
-          scope,
-          &TheErr::BufferTooSmall(max_buffer_length),
-        );
-      }
-    }
-  }
+  let mut decoder_handle = create_decoder_impl(&label, ignore_bom);
+  decode_impl(scope, &mut rv, &mut decoder_handle, &data, fatal, false);
 }
 
 /// `new TextDecoder()` API for stream decoding.
