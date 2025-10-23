@@ -150,17 +150,7 @@ export namespace GlobalThis {
  *
  * Encode result.
  */
-type TextEncoderEncodeIntoResult = {
-  /**
-   * The read Unicode code units.
-   */
-  read: number;
-
-  /**
-   * The written UTF-8 bytes.
-   */
-  written: number;
-};
+type TextEncoderEncodeIntoResult = { read: number; written: number };
 
 /**
  * Encode string text into bytes, it only supports "utf-8" encoding.
@@ -189,7 +179,7 @@ export class TextEncoder {
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array.
-   * @returns {TextEncoderEncodeIntoResult} Encode result, it contains two numbers: "read" and "written".
+   * @returns {TextEncoderEncodeIntoResult} Encode result, it contains two numbers: the "read" Unicode code units from src string, and the "written" UTF-8 bytes into the dest buffer.
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
