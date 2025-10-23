@@ -265,7 +265,7 @@ export class TextDecoder {
    *
    * @param {string} encoding - Decoder encoding, this argument can be omitted, by default is "utf-8".
    * @param {TextDecoderOptions} options - Decode options, this parameter can be omitted, by default is `{fatal: false, ignoreBOM: false}`.
-   * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is invalid or not support.
+   * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
   constructor(encoding?: string, options?: TextDecoderOptions) {
     if (encoding === undefined || encoding === null) {
