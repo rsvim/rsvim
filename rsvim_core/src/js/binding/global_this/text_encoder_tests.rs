@@ -211,3 +211,58 @@ async fn test_decode1() -> IoResult<()> {
 
   Ok(())
 }
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_decode2() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let src: &str = r#"
+  const s1 = "This is some data";
+  const s2 = "你好，世界！";
+  const encoder = new TextEncoder();
+  const bytes1 = encoder.encode(s1);
+  const bytes2 = encoder.encode(s2);
+
+  const decoder3 = new TextDecoder();
+  const s3 = decoder3.decode(bytes1);
+  const decoder4 = new TextDecoder();
+  const s4 = decoder4.decode(bytes2);
+  const s5 = decoder4.decode(bytes2);
+
+  if (s1 !== s3) {
+    Rsvim.cmd.echo("failed-1");
+  }
+  if (s2 !== s4) {
+    Rsvim.cmd.echo("failed-2");
+  }
+  if (s2 !== s5) {
+    Rsvim.cmd.echo("failed-3");
+  }
+"#;
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After
+  {
+    let contents = lock!(event_loop.contents);
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
+  }
+
+  Ok(())
+}

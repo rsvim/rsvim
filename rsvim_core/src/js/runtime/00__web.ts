@@ -384,21 +384,21 @@ export class TextDecoder {
    * The encoding used by decoder.
    */
   get encoding(): string {
-    return this.#handle.encoding;
+    return this.#encoding;
   }
 
   /**
    * Whether throw {@link !TypeError} when decoding error because the data is malformed.
    */
   get fatal(): boolean {
-    return this.#handle.fatal;
+    return this.#fatal;
   }
 
   /**
    * Whether ignore unicode "Byte-Order-Mark" (BOM) when decoding the data.
    */
-  get ignoreBOM(): string {
-    return this.#handle.ignoreBOM;
+  get ignoreBOM(): boolean {
+    return this.#ignoreBOM;
   }
 }
 
