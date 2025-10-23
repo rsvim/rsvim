@@ -43,7 +43,12 @@ fn encode_impl<'s>(
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
-  trace!("|encode_impl| written:{:?}, read:{:?}", written, read);
+  trace!(
+    "|encode_impl| written:{:?}, read:{:?}, buf.len:{:?}",
+    written,
+    read,
+    buf.len()
+  );
 
   (buf, read, written)
 }
