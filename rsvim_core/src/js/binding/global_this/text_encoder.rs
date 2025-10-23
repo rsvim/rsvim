@@ -288,23 +288,6 @@ pub fn create_stream_decoder<'s>(
   weak_rc.set(decoder_weak.into_raw());
   binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
 
-  let encoding_value = label.to_v8(scope);
-  binding::set_constant_to(
-    scope,
-    decoder_wrapper,
-    ENCODING,
-    encoding_value.into(),
-  );
-  let fatal_value = ignore_bom.fatal().to_v8(scope);
-  binding::set_constant_to(scope, decoder_wrapper, FATAL, fatal_value.into());
-  let ignore_bom_value = ignore_bom.ignore_bom().to_v8(scope);
-  binding::set_constant_to(
-    scope,
-    decoder_wrapper,
-    IGNORE_BOM,
-    ignore_bom_value.into(),
-  );
-
   rv.set(decoder_wrapper.into());
 }
 
