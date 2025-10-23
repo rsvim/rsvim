@@ -1034,8 +1034,7 @@ export class RsvimRt {
    * to complete before actually exiting, however any new write requests will be rejected.
    * :::
    *
-   * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
-   * by default uses `0` to indicate no error.
+   * @param {exitCode?} exitCode - The editor process exit with this exit code, by default with code `0`.
    *
    * @throws Throws {@link !TypeError} if `exitCode` is neither an integer nor `undefined`.
    *
@@ -1048,10 +1047,7 @@ export class RsvimRt {
    * Rsvim.rt.exit(-1);
    * ```
    */
-  exit(exitCode?: number): void {
-    if (exitCode === undefined || exitCode === null) {
-      exitCode = 0;
-    }
+  exit(exitCode: number = 0): void {
     checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
