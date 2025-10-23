@@ -54,9 +54,8 @@ pub fn encode<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 2);
-  debug_assert!(args.get(0).is_array_buffer());
-  debug_assert!(is_v8_str!(args.get(1)));
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
