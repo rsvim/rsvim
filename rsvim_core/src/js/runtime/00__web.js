@@ -127,7 +127,7 @@ export class TextDecoder {
         this.#ignoreBOM = options.ignoreBOM || false;
         this.#handle = null;
     }
-    decode(input) {
+    decode(input, options) {
         checkIsArrayBufferOrTypedArrayOrDataView(input, `"TextDecoder.decode" input`);
         let buffer = input;
         if (isTypedArray(input)) {
@@ -136,7 +136,14 @@ export class TextDecoder {
         else if (isDataView(input)) {
             buffer = input.buffer;
         }
-        const stream = false;
+        if (options === undefined || options === null) {
+            options = { stream: false };
+        }
+        checkIsObject(options, `"TextDecoder.decode" options`);
+        if (Object.hasOwn(options, "stream")) {
+            checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
+        }
+        const stream = options.stream || false;
         try {
             if (!stream && this.#handle === null) {
                 return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
