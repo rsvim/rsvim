@@ -24,51 +24,6 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-// See: https://github.com/denoland/deno_core/blob/e51d3618a62735158f6c4c930eafe1ff3769ec7d/ops/op2/dispatch_fast.rs?plain=1#L621
-unsafe fn get_array_buffer_view_raw_slice<'s>(
-  input: v8::Local<'s, v8::Uint8Array>,
-) -> &'s mut [u8] {
-  let mut buffer = [0; v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP];
-  // SAFETY: we are certain the implied lifetime is valid here as the slices never escape the
-  // fastcall.
-  unsafe {
-    let (input_ptr, input_len) = input.get_contents_raw_parts(&mut buffer);
-    let input_ptr = if input_ptr.is_null() {
-      std::ptr::dangling_mut()
-    } else {
-      input_ptr
-    };
-    let slice = std::slice::from_raw_parts_mut::<'s>(input_ptr, input_len);
-    let (before, slice, after) = slice.align_to_mut();
-    debug_assert!(before.is_empty());
-    debug_assert!(after.is_empty());
-    slice
-  }
-}
-
-pub fn slice_to_uint8array<'a, 'b>(
-  scope: &mut v8::PinScope<'a, 'b>,
-  buf: &[u8],
-) -> v8::Local<'a, v8::Uint8Array> {
-  let buffer = if buf.is_empty() {
-    v8::ArrayBuffer::new(scope, 0)
-  } else {
-    let store: v8::UniqueRef<_> =
-      v8::ArrayBuffer::new_backing_store(scope, buf.len());
-    // SAFETY: raw memory copy into the v8 ArrayBuffer allocated above
-    unsafe {
-      std::ptr::copy_nonoverlapping(
-        buf.as_ptr(),
-        store.data().unwrap().as_ptr() as *mut u8,
-        buf.len(),
-      )
-    }
-    v8::ArrayBuffer::with_backing_store(scope, &store.make_shared())
-  };
-  v8::Uint8Array::new(scope, buffer, 0, buf.len())
-    .expect("Failed to create UintArray8")
-}
-
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -99,14 +54,17 @@ pub fn encode<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 1);
-  debug_assert!(is_v8_str!(args.get(0)));
+  debug_assert!(args.length() == 2);
+  debug_assert!(args.get(0).is_array_buffer());
+  debug_assert!(is_v8_str!(args.get(1)));
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
   let (data, _read, _written) = encode_impl(scope, payload);
-  let buf = slice_to_uint8array(scope, data.as_slice());
 
+  let store = v8::ArrayBuffer::new_backing_store_from_vec(data);
+  let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
+  let buf = v8::Uint8Array::new(scope, buf, 0, buf.byte_length()).unwrap();
   rv.set(buf.into());
 }
 
