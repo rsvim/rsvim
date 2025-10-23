@@ -393,7 +393,7 @@ async fn test_decode4() -> IoResult<()> {
 
   // After
   {
-    let mut contents = lock!(event_loop.contents);
+    let contents = lock!(event_loop.contents);
     let actual = contents.command_line_message_history().is_empty();
     assert!(actual);
   }
