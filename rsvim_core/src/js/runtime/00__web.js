@@ -123,8 +123,8 @@ export class TextDecoder {
             checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
         }
         this.#encoding = encoding;
-        this.#fatal = options.fatal || false;
-        this.#ignoreBOM = options.ignoreBOM || false;
+        this.#fatal = options.fatal;
+        this.#ignoreBOM = options.ignoreBOM;
         this.#handle = null;
     }
     decode(input, options) {
@@ -143,7 +143,7 @@ export class TextDecoder {
         if (Object.hasOwn(options, "stream")) {
             checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         }
-        const stream = options.stream || false;
+        const stream = options.stream;
         try {
             if (!stream && this.#handle === null) {
                 return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);

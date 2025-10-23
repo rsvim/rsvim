@@ -302,8 +302,8 @@ export class TextDecoder {
     }
 
     this.#encoding = encoding;
-    this.#fatal = options.fatal || false;
-    this.#ignoreBOM = options.ignoreBOM || false;
+    this.#fatal = options.fatal as boolean;
+    this.#ignoreBOM = options.ignoreBOM as boolean;
 
     // The #handle is actually created when calling `decode` API.
     // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
@@ -346,7 +346,7 @@ export class TextDecoder {
       checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
     }
 
-    const stream = options.stream || false;
+    const stream = options.stream as boolean;
 
     // if (stream) {
     //   throw new TypeError(`"TextDecoder.decode" stream is not supported`);
