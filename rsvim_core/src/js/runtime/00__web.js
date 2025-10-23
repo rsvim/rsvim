@@ -106,7 +106,7 @@ export class TextDecoder {
     #encoding;
     #fatal;
     #ignoreBOM;
-    constructor(encoding, options) {
+    constructor(encoding = "utf-8", options = { fatal: false, ignoreBOM: false }) {
         if (encoding === undefined || encoding === null) {
             encoding = "utf-8";
         }
@@ -211,7 +211,7 @@ export class TextDecoder {
             activeTimers.delete(id);
         }
     }
-    function setTimeout(callback, delay, ...args) {
+    function setTimeout(callback, delay = 1, ...args) {
         if (delay === undefined || delay === null) {
             delay = 1;
         }
