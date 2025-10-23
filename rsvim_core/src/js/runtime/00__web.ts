@@ -213,6 +213,8 @@ export class TextDecoder {
   /** @hidden */
   #handle: any;
   /** @hidden */
+  #encoding: string;
+  /** @hidden */
   #fatal: boolean;
   /** @hidden */
   #ignoreBOM: boolean;

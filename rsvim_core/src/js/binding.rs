@@ -87,7 +87,7 @@ pub fn create_new_context<'s, 'b>(
       scope,
       vim,
       "global_encoding_create_decoder",
-      global_this::text_encoder::create_decoder,
+      global_this::text_encoder::create_stream_decoder,
     );
     set_function_to(
       scope,
