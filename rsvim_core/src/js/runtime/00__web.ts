@@ -237,12 +237,10 @@ export class TextDecoder {
     }
 
     // @ts-ignore Ignore warning
-    const handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(
+    this.#handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(
       encoding,
       options,
     );
-
-    this.#handle = handle;
   }
 
   /**
