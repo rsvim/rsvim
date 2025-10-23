@@ -285,11 +285,12 @@ export class TextDecoder {
       );
     }
 
+    this.#fatal = options.fatal || false;
+    this.#ignoreBOM = options.ignoreBOM || false;
+
     // The #handle is actually created when calling `decode` API.
     // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
     this.#handle = null;
-    this.#fatal = options.fatal || false;
-    this.#ignoreBOM = options.ignoreBOM || false;
   }
 
   /**
