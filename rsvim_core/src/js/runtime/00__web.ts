@@ -64,22 +64,37 @@ function checkIsUint8Array(arg: any, msg: string) {
   }
 }
 
+function isTypedArray(arg: any): boolean {
+  return (
+    arg instanceof Int8Array ||
+    arg instanceof Uint8Array ||
+    arg instanceof Uint8ClampedArray ||
+    arg instanceof Int16Array ||
+    arg instanceof Uint16Array ||
+    arg instanceof Int32Array ||
+    arg instanceof Uint32Array ||
+    arg instanceof Float16Array ||
+    arg instanceof Float32Array ||
+    arg instanceof Float64Array ||
+    arg instanceof BigInt64Array ||
+    arg instanceof BigUint64Array
+  );
+}
+
 /** @hidden */
 function checkIsTypedArray(arg: any, msg: string) {
+  if (!isTypedArray(arg)) {
+    throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
+function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
   if (
     !(
-      arg instanceof Int8Array ||
-      arg instanceof Uint8Array ||
-      arg instanceof Uint8ClampedArray ||
-      arg instanceof Int16Array ||
-      arg instanceof Uint16Array ||
-      arg instanceof Int32Array ||
-      arg instanceof Uint32Array ||
-      arg instanceof Float16Array ||
-      arg instanceof Float32Array ||
-      arg instanceof Float64Array ||
-      arg instanceof BigInt64Array ||
-      arg instanceof BigUint64Array
+      arg instanceof ArrayBuffer ||
+      arg instanceof DataView ||
+      isTypedArray(arg)
     )
   ) {
     throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
