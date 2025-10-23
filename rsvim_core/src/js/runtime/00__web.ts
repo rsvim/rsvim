@@ -327,10 +327,17 @@ export class TextDecoder {
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
-    input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
-    options?: TextDecoderDecodeOptions,
+    input: ArrayBuffer | GlobalThis.TypedArray | DataView = new Uint8Array(),
+    options: TextDecoderDecodeOptions = { stream: false },
   ): string {
-    if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
+    if (
+      !(
+        isArrayBuffer(input) ||
+        isDataView(input) ||
+        isTypedArray(input) ||
+        isNullOrUndefined(input)
+      )
+    ) {
       throw new TypeError(
         `"TextDecoder.decode" input is invalid, found ${typeof input}`,
       );
