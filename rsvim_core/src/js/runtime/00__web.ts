@@ -279,7 +279,9 @@ export class TextDecoder {
         encoding,
       );
     if (!encodingIsValid) {
-      throw new RangeError(`"TextDecoder.constructor" encoding is invalid`);
+      throw new RangeError(
+        `"TextDecoder.constructor" encoding is unknown ${encoding}`,
+      );
     }
 
     if (options === undefined || options === null) {
