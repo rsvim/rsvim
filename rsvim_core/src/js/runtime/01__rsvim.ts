@@ -1048,7 +1048,7 @@ export class RsvimRt {
    * ```
    */
   exit(exitCode: number = 0): void {
-    checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
+    checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
   }
