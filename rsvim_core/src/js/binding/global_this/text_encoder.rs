@@ -231,9 +231,8 @@ pub fn decode<'s>(
 
   debug_assert!(args.get(1).is_array_buffer_view());
   let buf = args.get(1).cast::<v8::ArrayBufferView>();
-  let mut storage: Vec<u8> =
-    Vec::with_capacity(v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP);
-  let buf = buf.get_contents(storage.as_mut_slice());
+  let mut storage = vec![0; buf.byte_length()];
+  let buf = buf.get_contents(&mut storage);
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
