@@ -212,6 +212,10 @@ type TextDecoderDecodeOptions = { stream?: boolean };
 export class TextDecoder {
   /** @hidden */
   #handle: any;
+  /** @hidden */
+  #fatal: boolean;
+  /** @hidden */
+  #ignoreBOM: boolean;
 
   /**
    * Create a TextDecoder instance with specified encoding.
@@ -271,16 +275,21 @@ export class TextDecoder {
       options = { fatal: false, ignoreBOM: false };
     }
     checkIsObject(options, `"TextDecoder.constructor" options`);
-    if (!Object.hasOwn(options, "fatal")) {
-      options.fatal = false;
+    if (Object.hasOwn(options, "fatal")) {
+      checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
     }
-    if (!Object.hasOwn(options, "ignoreBOM")) {
-      options.ignoreBOM = false;
+    if (Object.hasOwn(options, "ignoreBOM")) {
+      checkIsBoolean(
+        options.ignoreBOM,
+        `"TextDecoder.constructor" ignoreBOM option`,
+      );
     }
 
     // The #handle is actually created when calling `decode` API.
     // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
     this.#handle = null;
+    this.#fatal = options.fatal || false;
+    this.#ignoreBOM = options.ignoreBOM || false;
   }
 
   /**
@@ -321,12 +330,22 @@ export class TextDecoder {
 
     const stream = options.stream || false;
 
-    // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.global_encoding_decode(
-      this.#handle,
-      buffer,
-      options,
-    );
+    try {
+      // For non-stream, single pass decoding,
+      if (!stream && this.#handle === null) {
+      }
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.global_encoding_decode(
+        this.#handle,
+        buffer,
+        options,
+      );
+    } finally {
+      if (!stream && this.#handle !== null) {
+        this.#handle = null;
+      }
+    }
   }
 
   /**

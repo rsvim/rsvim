@@ -215,8 +215,101 @@ pub fn create_decoder<'s>(
   }
 }
 
+/// `TextDecoder.decode` API on non-stream, single pass.
+pub fn decode_single<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 3);
+  debug_assert!(is_v8_obj!(args.get(0)));
+
+  let decoder_wrapper = args.get(0).to_object(scope).unwrap();
+  let decoder_obj = TextDecoder::from_v8(scope, decoder_wrapper);
+  let decoder_handle =
+    binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
+  let mut decoder_handle = decoder_handle.borrow_mut();
+
+  debug_assert!(args.get(1).is_array_buffer());
+  let data = args.get(1).cast::<v8::ArrayBuffer>();
+  let data: Vec<u8> = data
+    .get_backing_store()
+    .iter()
+    .map(|b| b.get())
+    .collect_vec();
+
+  debug_assert!(is_v8_obj!(args.get(2)));
+  let options =
+    DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
+  trace!(
+    "|decode| decoder_obj:{:?}, data:{:?}, options:{:?}",
+    decoder_obj, data, options
+  );
+
+  let max_buffer_length = decoder_handle.max_utf16_buffer_length(data.len());
+
+  if max_buffer_length.is_none() {
+    binding::throw_range_error(scope, &TheErr::ValueTooLarge(data.len()));
+    return;
+  }
+
+  let max_buffer_length = max_buffer_length.unwrap();
+  let mut output = vec![0; max_buffer_length];
+
+  if decoder_obj.fatal() {
+    let (result, _read, written) = decoder_handle
+      .decode_to_utf16_without_replacement(
+        &data,
+        &mut output,
+        !options.stream(),
+      );
+    match result {
+      DecoderResult::InputEmpty => {
+        output.truncate(written);
+        let output = v8::String::new_from_two_byte(
+          scope,
+          &output,
+          v8::NewStringType::Normal,
+        )
+        .unwrap();
+        rv.set(output.into());
+      }
+      DecoderResult::OutputFull => {
+        binding::throw_type_error(
+          scope,
+          &TheErr::BufferTooSmall(max_buffer_length),
+        );
+      }
+      DecoderResult::Malformed(_, _) => {
+        binding::throw_type_error(scope, &TheErr::DataInvalid);
+      }
+    }
+  } else {
+    let (result, _read, written, _had_errors) =
+      decoder_handle.decode_to_utf16(&data, &mut output, !options.stream());
+    match result {
+      CoderResult::InputEmpty => {
+        output.truncate(written);
+        let output = v8::String::new_from_two_byte(
+          scope,
+          &output,
+          v8::NewStringType::Normal,
+        )
+        .unwrap();
+        rv.set(output.into());
+      }
+      CoderResult::OutputFull => {
+        binding::throw_type_error(
+          scope,
+          &TheErr::BufferTooSmall(max_buffer_length),
+        );
+      }
+    }
+  }
+}
+
 /// `TextDecoder.decode` API.
-pub fn decode<'s>(
+pub fn decode_stream<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
