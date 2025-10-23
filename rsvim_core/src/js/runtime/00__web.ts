@@ -140,9 +140,13 @@ export class TextEncoder {
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
     checkIsString(src, `"TextEncoder.encodeInto" src`);
+    checkIsUint8Array(dest, `"TextEncoder.encodeInto" dest`);
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject.global_encoding_encode_into(input, dest);
+    return __InternalRsvimGlobalObject.global_encoding_encode_into(
+      src,
+      dest.buffer,
+    );
   }
 
   /**
