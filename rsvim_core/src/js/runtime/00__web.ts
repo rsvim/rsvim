@@ -280,7 +280,7 @@ export class TextDecoder {
       );
     if (!encodingIsValid) {
       throw new RangeError(
-        `"TextDecoder.constructor" encoding is unknown ${encoding}`,
+        `"TextDecoder.constructor" encoding is unknown: ${encoding}`,
       );
     }
 
