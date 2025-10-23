@@ -36,9 +36,9 @@ fn encode_impl<'s>(
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/08_text_encoding.js#L256
   // https://github.com/denoland/deno/blob/v2.5.4/ext/web/lib.rs#L367
   #[allow(deprecated)]
-  let written = payload.write_utf8(
+  let written = payload.write_utf8_uninit(
     scope,
-    buf.spare_capacity_mut(),
+    buf.spare_capacity_mut(), // Set **length** to capacity
     Some(&mut read),
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
