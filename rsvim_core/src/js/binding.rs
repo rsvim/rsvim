@@ -92,14 +92,20 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
-      "global_encoding_create_decoder",
+      "global_encoding_create_stream_decoder",
       global_this::text_encoder::create_stream_decoder,
     );
     set_function_to(
       scope,
       vim,
-      "global_encoding_decode",
-      global_this::text_encoder::decode,
+      "global_encoding_decode_stream",
+      global_this::text_encoder::decode_stream,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_decode_single",
+      global_this::text_encoder::decode_single,
     );
     set_function_to(
       scope,

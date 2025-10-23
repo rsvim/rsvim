@@ -94,10 +94,6 @@ pub enum TheErr {
   // Invalid buffer.
   BufferInvalid,
 
-  #[error("Invalid encoding label `{0}`.")]
-  // Invalid encoding label (name).
-  InvalidEncodingLabel(CompactString),
-
   #[error("Value too large `{0}`.")]
   // Value too large.
   ValueTooLarge(usize),

@@ -83,19 +83,6 @@ pub fn encode<'s>(
   rv.set(buf.into());
 }
 
-/// Check whether encoding label is valid.
-pub fn check_encoding_label<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 1);
-  debug_assert!(is_v8_str!(args.get(0)));
-  let label = args.get(0).to_rust_string_lossy(scope).to_compact_string();
-  let valid = Encoding::for_label(label.as_bytes()).is_some();
-  rv.set_bool(valid);
-}
-
 /// `TextEncoder.encodeInto` API.
 pub fn encode_into<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -133,6 +120,19 @@ pub fn encode_into<'s>(
   rv.set(encode_result.into());
 }
 
+/// Check whether encoding label is valid.
+pub fn check_encoding_label<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 1);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let label = args.get(0).to_rust_string_lossy(scope).to_compact_string();
+  let valid = Encoding::for_label(label.as_bytes()).is_some();
+  rv.set_bool(valid);
+}
+
 /// `TextDecoder.decode` API on non-stream, single pass.
 pub fn decode_single<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -140,10 +140,12 @@ pub fn decode_single<'s>(
   mut rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 2);
-  debug_assert!(is_v8_bool!(args.get(0)));
-  let fatal = args.get(0).to_boolean(scope);
+  debug_assert!(is_v8_str!(args.get(0)));
+  let label = args.get(0).to_rust_string_lossy(scope);
   debug_assert!(is_v8_bool!(args.get(1)));
-  let ignore_bom = args.get(1).to_boolean(scope);
+  let fatal = args.get(1).to_boolean(scope);
+  debug_assert!(is_v8_bool!(args.get(2)));
+  let ignore_bom = args.get(2).to_boolean(scope);
 
   debug_assert!(args.get(1).is_array_buffer());
   let data = args.get(1).cast::<v8::ArrayBuffer>();
@@ -311,10 +313,10 @@ pub fn create_stream_decoder<'s>(
       rv.set(decoder_wrapper.into());
     }
     None => {
-      binding::throw_range_error(
-        scope,
-        &TheErr::InvalidEncodingLabel(encoding_label),
-      );
+      // binding::throw_range_error(
+      //   scope,
+      //   &TheErr::InvalidEncodingLabel(encoding_label),
+      // );
     }
   }
 }
