@@ -71,8 +71,8 @@ pub fn encode<'s>(
   let payload = args.get(0).to_string(scope).unwrap();
   trace!("|encode| payload:{:?}", payload.to_rust_string_lossy(scope));
 
-  let written_size = payload.utf8_length(scope);
-  let (data, _read, _written) = encode_impl(scope, payload, written_size);
+  let buf_size = payload.utf8_length(scope);
+  let (data, _read, _written) = encode_impl(scope, payload, buf_size);
 
   let store = v8::ArrayBuffer::new_backing_store_from_vec(data);
   let buf = v8::ArrayBuffer::with_backing_store(scope, &store.make_shared());
@@ -99,8 +99,9 @@ pub fn encode_into<'s>(
   let buf_size = buf.byte_length();
   let buf_store = buf.get_backing_store();
 
-  let written_size = std::cmp::min(payload.utf8_length(scope), buf_size);
-  let (data, read, written) = encode_impl(scope, payload, written_size);
+  // Maximal bytes size can be write
+  let max_write_size = std::cmp::min(payload.utf8_length(scope), buf_size);
+  let (data, read, written) = encode_impl(scope, payload, max_write_size);
 
   for (i, b) in data.iter().enumerate() {
     if i >= written {
