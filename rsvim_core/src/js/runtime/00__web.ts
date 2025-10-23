@@ -187,7 +187,7 @@ export class TextEncoder {
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array.
-   * @returns {TextEncoderEncodeIntoResult} Encode result: the "read" Unicode code units from source string, the "written" UTF-8 bytes to destination buffer.
+   * @returns {TextEncoderEncodeIntoResult} Encode result: the "read" Unicode code units from src string, the "written" UTF-8 bytes to dest buffer.
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
   encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
