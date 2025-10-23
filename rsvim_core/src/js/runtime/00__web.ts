@@ -279,7 +279,7 @@ export class TextDecoder {
     }
 
     // The #handle is actually created when calling `decode` API.
-    // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream.
+    // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream, otherwise it will panic.
     this.#handle = null;
   }
 
