@@ -203,6 +203,7 @@ export class TextEncoder {
 
 /** @inline */
 type TextDecoderOptions = { fatal?: boolean; ignoreBOM?: boolean };
+
 // /** @inline */
 // type TextDecoderDecodeOptions = { stream?: boolean };
 
