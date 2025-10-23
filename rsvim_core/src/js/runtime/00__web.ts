@@ -81,6 +81,14 @@ function isTypedArray(arg: any): boolean {
   );
 }
 
+function isArrayBuffer(arg: any): boolean {
+  return arg instanceof ArrayBuffer;
+}
+
+function isDataView(arg: any): boolean {
+  return arg instanceof DataView;
+}
+
 /** @hidden */
 function checkIsTypedArray(arg: any, msg: string) {
   if (!isTypedArray(arg)) {
@@ -90,13 +98,7 @@ function checkIsTypedArray(arg: any, msg: string) {
 
 /** @hidden */
 function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
-  if (
-    !(
-      arg instanceof ArrayBuffer ||
-      arg instanceof DataView ||
-      isTypedArray(arg)
-    )
-  ) {
+  if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
     throw new TypeError(
       `${msg} must be either ArrayBuffer or DataView or TypedArray, buf found ${typeof arg}`,
     );
