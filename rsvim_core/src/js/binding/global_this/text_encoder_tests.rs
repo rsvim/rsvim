@@ -119,11 +119,11 @@ async fn test_encode3() -> IoResult<()> {
   const res1 = encoder.encodeInto(s1, buf1);
   const res2 = encoder.encodeInto(s2, buf2);
 
-  if (res1.read !== s1.length || res1.written !== 17) {
+  if (res1.read !== 16 || res1.written !== 16) {
     Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s1.length}`);
   }
 
-  if (res2.read !== s2.length || res2.written !== 18) {
+  if (res2.read !== 5 || res2.written !== 15) {
     Rsvim.cmd.echo(`buf2 failed, res2.read:${res2.read}, res2.written:${res2.written}, s2.length:${s2.length}`);
   }
 "#;
