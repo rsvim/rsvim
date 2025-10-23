@@ -107,16 +107,10 @@ export class TextDecoder {
     #fatal;
     #ignoreBOM;
     constructor(encoding = "utf-8", options = { fatal: false, ignoreBOM: false }) {
-        if (encoding === undefined || encoding === null) {
-            encoding = "utf-8";
-        }
         checkIsString(encoding, `"TextDecoder.constructor" encoding`);
         const encodingIsValid = __InternalRsvimGlobalObject.global_encoding_check_encoding_label(encoding);
         if (!encodingIsValid) {
             throw new RangeError(`"TextDecoder.constructor" encoding is unknown: ${encoding}`);
-        }
-        if (options === undefined || options === null) {
-            options = { fatal: false, ignoreBOM: false };
         }
         checkIsObject(options, `"TextDecoder.constructor" options`);
         if (Object.hasOwn(options, "fatal")) {
@@ -131,10 +125,7 @@ export class TextDecoder {
         this.#handle = null;
     }
     decode(input = new Uint8Array(), options = { stream: false }) {
-        if (!(isArrayBuffer(input) ||
-            isDataView(input) ||
-            isTypedArray(input) ||
-            isNullOrUndefined(input))) {
+        if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
             throw new TypeError(`"TextDecoder.decode" input is invalid, found ${typeof input}`);
         }
         let buffer = input;
@@ -143,9 +134,6 @@ export class TextDecoder {
         }
         else if (isDataView(input)) {
             buffer = input.buffer;
-        }
-        if (options === undefined || options === null) {
-            options = { stream: false };
         }
         checkIsObject(options, `"TextDecoder.decode" options`);
         if (Object.hasOwn(options, "stream")) {
@@ -190,9 +178,6 @@ export class TextDecoder {
         }
     }
     function setInterval(callback, delay = 1, ...args) {
-        if (delay === undefined || delay === null) {
-            delay = 1;
-        }
         checkIsNumber(delay, `"setInterval" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
@@ -212,9 +197,6 @@ export class TextDecoder {
         }
     }
     function setTimeout(callback, delay = 1, ...args) {
-        if (delay === undefined || delay === null) {
-            delay = 1;
-        }
         checkIsNumber(delay, `"setTimeout" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
