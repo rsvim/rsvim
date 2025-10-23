@@ -21,14 +21,12 @@ async fn test_encode1() -> IoResult<()> {
   const bytes1 = encoder.encode(s1);
   const bytes2 = encoder.encode(s2);
 
-  const isInstance1 = bytes1 instanceof Uint8Array;
-  if (!isInstance1 || bytes1.byteLength < s1.length) {
-    Rsvim.cmd.echo(`bytes1 failed, isinstance:${isInstance1}, bytesLen:${bytes1.byteLength}`);
+  if (bytes1.byteLength !== 17) {
+    Rsvim.cmd.echo(`bytes1 failed, bytesLen:${bytes1.byteLength}`);
   }
 
-  const isInstance2 = bytes2 instanceof Uint8Array;
-  if (!isInstance2 || bytes2.byteLength < s2 * 2) {
-    Rsvim.cmd.echo(`bytes2 failed, isinstance:${isInstance1}, bytesLen:${bytes2.byteLength}`);
+  if (bytes2.byteLength !== 18 ) {
+    Rsvim.cmd.echo(`bytes2 failed, bytesLen:${bytes2.byteLength}`);
   }
 "#;
 
@@ -72,12 +70,12 @@ async fn test_encode2() -> IoResult<()> {
   const res1 = encoder.encodeInto(s1, buf1);
   const res2 = encoder.encodeInto(s2, buf2);
 
-  if (res1.read !== s1.length || res1.written < s1.length || res1.written <= buf1.byteLength) {
-    Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s1.length}, buf1.byteLength:${buf1.byteLength}`);
+  if (res1.read !== s1.length || res1.written !== 17) {
+    Rsvim.cmd.echo(`buf1 failed, res1.read:${res1.read}, res1.written:${res1.written}, s1.length:${s1.length}`);
   }
 
-  if (res2.read !== s2.length || res2.written < s2.length || res2.written <= buf2.byteLength) {
-    Rsvim.cmd.echo(`buf2 failed, res2.read:${res2.read}, res2.written:${res2.written}, s2.length:${s2.length}, buf2.byteLength:${buf2.byteLength}`);
+  if (res2.read !== s2.length || res2.written !== 18) {
+    Rsvim.cmd.echo(`buf2 failed, res2.read:${res2.read}, res2.written:${res2.written}, s2.length:${s2.length}`);
   }
 "#;
 
