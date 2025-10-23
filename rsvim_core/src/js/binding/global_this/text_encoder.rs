@@ -28,8 +28,8 @@ use std::rc::Rc;
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
-  buf: &mut Vec<u8>,
-) -> (usize, usize) {
+) -> (Vec<u8>, usize, usize) {
+  let mut buf: Vec<u8> = Vec::with_capacity(payload.utf8_length(scope));
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v8` follow deno's implementation:
@@ -38,14 +38,14 @@ fn encode_impl<'s>(
   #[allow(deprecated)]
   let written = payload.write_utf8(
     scope,
-    buf,
+    &mut buf,
     Some(&mut read),
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
   trace!("|encode_impl| written:{:?}, read:{:?}", written, read);
 
-  (read, written)
+  (buf, read, written)
 }
 
 /// `TextEncoder.encode` API.
