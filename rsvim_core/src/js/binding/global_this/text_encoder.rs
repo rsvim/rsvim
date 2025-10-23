@@ -95,7 +95,7 @@ pub fn encode_into<'s>(
     payload.to_rust_string_lossy(scope)
   );
 
-  debug_assert!(args.get(0).is_array_buffer());
+  debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
   let buf_size = buf.byte_length();
   let buf_store = buf.get_backing_store();
