@@ -20,6 +20,7 @@ use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
 use encoding_rs::Encoding;
+use itertools::Itertools;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -231,8 +232,11 @@ pub fn decode<'s>(
 
   debug_assert!(args.get(1).is_array_buffer());
   let data = args.get(1).cast::<v8::ArrayBuffer>();
-  let mut storage = [0; v8::TYPED_ARRAY_MAX_SIZE_IN_HEAP];
-  let data = data.get_contents(&mut storage);
+  let data: Vec<u8> = data
+    .get_backing_store()
+    .iter()
+    .map(|b| b.get())
+    .collect_vec();
 
   debug_assert!(is_v8_obj!(args.get(2)));
   let options =
@@ -255,7 +259,7 @@ pub fn decode<'s>(
   if decoder_obj.fatal() {
     let (result, _read, written) = decoder_handle
       .decode_to_utf16_without_replacement(
-        data,
+        &data,
         &mut output,
         !options.stream(),
       );
@@ -282,7 +286,7 @@ pub fn decode<'s>(
     }
   } else {
     let (result, _read, written, _had_errors) =
-      decoder_handle.decode_to_utf16(data, &mut output, !options.stream());
+      decoder_handle.decode_to_utf16(&data, &mut output, !options.stream());
     match result {
       CoderResult::InputEmpty => {
         output.truncate(written);
