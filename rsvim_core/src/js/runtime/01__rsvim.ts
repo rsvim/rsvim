@@ -272,15 +272,12 @@ export class RsvimCmd {
       `"Rsvim.cmd.create" attributes.nargs`,
     );
 
-    if (options === undefined || options === null) {
-      options = {};
-    }
     checkIsObject(options, `"Rsvim.cmd.create" options`);
     if (!Object.hasOwn(options, "force")) {
       options.force = true;
     }
     checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
-    if (options.alias !== undefined) {
+    if (Object.hasOwn(options, "alias")) {
       checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
     }
 
