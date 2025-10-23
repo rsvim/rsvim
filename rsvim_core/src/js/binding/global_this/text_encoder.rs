@@ -245,92 +245,67 @@ pub fn create_stream_decoder<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
-  let encoding_label =
-    args.get(0).to_rust_string_lossy(scope).to_compact_string();
+  let label = args.get(0).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_bool!(args.get(1)));
+  let ignore_bom = bool::from_v8(scope, args.get(1).to_boolean(scope));
 
-  debug_assert!(is_v8_obj!(args.get(1)));
-  let options =
-    TextDecoderOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
+  let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
 
-  match Encoding::for_label(encoding_label.as_bytes()) {
-    Some(coding) => {
-      let decoder_handle = if options.ignore_bom() {
-        RefCell::new(coding.new_decoder_without_bom_handling())
-      } else {
-        RefCell::new(coding.new_decoder_with_bom_removal())
-      };
+  let decoder_wrapper = v8::ObjectTemplate::new(scope);
 
-      let decoder_wrapper = v8::ObjectTemplate::new(scope);
+  // Allocate internal field:
+  // 1. encoding_rs::Decoder
+  // 2. weak_rc
+  decoder_wrapper.set_internal_field_count(2);
+  let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
 
-      // Allocate internal field:
-      // 1. encoding_rs::Decoder
-      // 2. weak_rc
-      decoder_wrapper.set_internal_field_count(2);
-      let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
+  let decoder_ptr = binding::set_internal_ref::<RefCell<Decoder>>(
+    scope,
+    decoder_wrapper,
+    0,
+    decoder_handle,
+  );
+  let weak_rc = Rc::new(Cell::new(None));
 
-      let decoder_ptr = binding::set_internal_ref::<RefCell<Decoder>>(
-        scope,
-        decoder_wrapper,
-        0,
-        decoder_handle,
-      );
-      let weak_rc = Rc::new(Cell::new(None));
+  // To automatically drop the decoder_handle instance when
+  // V8 garbage collects the object that internally holds the Rust instance,
+  // we use a Weak reference with a finalizer callback.
+  let decoder_weak = v8::Weak::with_finalizer(
+    scope,
+    decoder_wrapper,
+    Box::new({
+      let weak_rc = weak_rc.clone();
+      let _encoding_label = label.clone();
+      move |isolate| unsafe {
+        drop(Box::from_raw(decoder_ptr));
+        drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+        trace!("|create_decoder| dropped TextDecoder:{:?}", _encoding_label);
+      }
+    }),
+  );
 
-      // To automatically drop the decoder_handle instance when
-      // V8 garbage collects the object that internally holds the Rust instance,
-      // we use a Weak reference with a finalizer callback.
-      let decoder_weak = v8::Weak::with_finalizer(
-        scope,
-        decoder_wrapper,
-        Box::new({
-          let weak_rc = weak_rc.clone();
-          let _encoding_label = encoding_label.clone();
-          move |isolate| unsafe {
-            drop(Box::from_raw(decoder_ptr));
-            drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-            trace!(
-              "|create_decoder| dropped TextDecoder:{:?}",
-              _encoding_label
-            );
-          }
-        }),
-      );
+  // Store the weak ref pointer into the "shared" cell.
+  weak_rc.set(decoder_weak.into_raw());
+  binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
 
-      // Store the weak ref pointer into the "shared" cell.
-      weak_rc.set(decoder_weak.into_raw());
-      binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
+  let encoding_value = label.to_v8(scope);
+  binding::set_constant_to(
+    scope,
+    decoder_wrapper,
+    ENCODING,
+    encoding_value.into(),
+  );
+  let fatal_value = ignore_bom.fatal().to_v8(scope);
+  binding::set_constant_to(scope, decoder_wrapper, FATAL, fatal_value.into());
+  let ignore_bom_value = ignore_bom.ignore_bom().to_v8(scope);
+  binding::set_constant_to(
+    scope,
+    decoder_wrapper,
+    IGNORE_BOM,
+    ignore_bom_value.into(),
+  );
 
-      let encoding_value = encoding_label.to_v8(scope);
-      binding::set_constant_to(
-        scope,
-        decoder_wrapper,
-        ENCODING,
-        encoding_value.into(),
-      );
-      let fatal_value = options.fatal().to_v8(scope);
-      binding::set_constant_to(
-        scope,
-        decoder_wrapper,
-        FATAL,
-        fatal_value.into(),
-      );
-      let ignore_bom_value = options.ignore_bom().to_v8(scope);
-      binding::set_constant_to(
-        scope,
-        decoder_wrapper,
-        IGNORE_BOM,
-        ignore_bom_value.into(),
-      );
-
-      rv.set(decoder_wrapper.into());
-    }
-    None => {
-      // binding::throw_range_error(
-      //   scope,
-      //   &TheErr::InvalidEncodingLabel(encoding_label),
-      // );
-    }
-  }
+  rv.set(decoder_wrapper.into());
 }
 
 /// `TextDecoder.decode` API.

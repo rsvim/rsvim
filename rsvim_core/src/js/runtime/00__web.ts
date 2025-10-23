@@ -350,10 +350,20 @@ export class TextDecoder {
       if (!stream && this.#handle === null) {
         // @ts-ignore Ignore warning
         return __InternalRsvimGlobalObject.global_encoding_decode_single(
-          this.#handle,
           buffer,
-          options,
+          this.#encoding,
+          this.#fatal,
+          this.#ignoreBOM,
         );
+      }
+
+      if (this.#handle === null) {
+        this.#handle =
+          // @ts-ignore Ignore warning
+          __InternalRsvimGlobalObject.global_encoding_create_stream_decoder(
+            this.#encoding,
+            this.#ignoreBOM,
+          );
       }
 
       // @ts-ignore Ignore warning
