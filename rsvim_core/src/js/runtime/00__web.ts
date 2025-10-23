@@ -278,11 +278,9 @@ export class TextDecoder {
       options.ignoreBOM = false;
     }
 
-    // @ts-ignore Ignore warning
-    this.#handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(
-      encoding,
-      options,
-    );
+    // The #handle is actually created when calling `decode` API.
+    // Since `encoding_rs::Decoder` lifetime only decode one buffer or stream.
+    this.#handle = null;
   }
 
   /**
