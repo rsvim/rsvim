@@ -100,22 +100,32 @@ export class TextEncoder {
 }
 export class TextDecoder {
     #handle;
+    #encoding;
+    #fatal;
+    #ignoreBOM;
     constructor(encoding, options) {
         if (encoding === undefined || encoding === null) {
             encoding = "utf-8";
         }
         checkIsString(encoding, `"TextDecoder.constructor" encoding`);
+        const encodingIsValid = __InternalRsvimGlobalObject.global_encoding_check_encoding_label(encoding);
+        if (!encodingIsValid) {
+            throw new RangeError(`"TextDecoder.constructor" encoding is unknown ${encoding}`);
+        }
         if (options === undefined || options === null) {
             options = { fatal: false, ignoreBOM: false };
         }
         checkIsObject(options, `"TextDecoder.constructor" options`);
-        if (!Object.hasOwn(options, "fatal")) {
-            options.fatal = false;
+        if (Object.hasOwn(options, "fatal")) {
+            checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
         }
-        if (!Object.hasOwn(options, "ignoreBOM")) {
-            options.ignoreBOM = false;
+        if (Object.hasOwn(options, "ignoreBOM")) {
+            checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
         }
-        this.#handle = __InternalRsvimGlobalObject.global_encoding_create_decoder(encoding, options);
+        this.#encoding = encoding;
+        this.#fatal = options.fatal || false;
+        this.#ignoreBOM = options.ignoreBOM || false;
+        this.#handle = null;
     }
     decode(input, options) {
         checkIsArrayBufferOrTypedArrayOrDataView(input, `"TextDecoder.decode" input`);
@@ -130,10 +140,25 @@ export class TextDecoder {
             options = { stream: false };
         }
         checkIsObject(options, `"TextDecoder.decode" options`);
-        if (!Object.hasOwn(options, "stream")) {
-            options.stream = false;
+        if (Object.hasOwn(options, "stream")) {
+            checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         }
-        return __InternalRsvimGlobalObject.global_encoding_decode(this.#handle, buffer, options);
+        const stream = options.stream || false;
+        try {
+            if (!stream && this.#handle === null) {
+                return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
+            }
+            if (this.#handle === null) {
+                this.#handle =
+                    __InternalRsvimGlobalObject.global_encoding_create_stream_decoder(this.#encoding, this.#ignoreBOM);
+            }
+            return __InternalRsvimGlobalObject.global_encoding_decode_stream(buffer, this.#handle, this.#fatal, stream);
+        }
+        finally {
+            if (!stream && this.#handle !== null) {
+                this.#handle = null;
+            }
+        }
     }
     get encoding() {
         return this.#handle.encoding;
