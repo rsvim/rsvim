@@ -325,8 +325,8 @@ export class TextDecoder {
       options = { stream: false };
     }
     checkIsObject(options, `"TextDecoder.decode" options`);
-    if (!Object.hasOwn(options, "stream")) {
-      options.stream = false;
+    if (Object.hasOwn(options, "stream")) {
+      checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
     }
 
     const stream = options.stream || false;
