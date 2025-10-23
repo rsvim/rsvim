@@ -248,7 +248,9 @@ async fn test_decode2() -> IoResult<()> {
     0xf0, 0x9d, 0x93, 0xbd
   ]);
   const decoder = new TextDecoder();
-  assertEquals(decoder.decode(fixture), "𝓽𝓮𝔁𝓽");
+  if (decoder.decode(fixture) !== "𝓽𝓮𝔁𝓽") {
+    Rsvim.cmd.echo("failed");
+  }
 "#;
 
   // Prepare $RSVIM_CONFIG/rsvim.js
@@ -266,8 +268,8 @@ async fn test_decode2() -> IoResult<()> {
   // After
   {
     let contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n);
+    let actual = contents.command_line_message_history().is_empty();
+    assert!(actual);
   }
 
   Ok(())
