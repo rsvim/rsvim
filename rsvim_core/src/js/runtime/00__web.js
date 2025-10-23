@@ -113,12 +113,14 @@ export class TextDecoder {
             throw new RangeError(`"TextDecoder.constructor" encoding is unknown: ${encoding}`);
         }
         checkIsObject(options, `"TextDecoder.constructor" options`);
-        if (Object.hasOwn(options, "fatal")) {
-            checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
+        if (!Object.hasOwn(options, "fatal")) {
+            options.fatal = false;
         }
-        if (Object.hasOwn(options, "ignoreBOM")) {
-            checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
+        if (!Object.hasOwn(options, "ignoreBOM")) {
+            options.ignoreBOM = false;
         }
+        checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
+        checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
         this.#encoding = encoding;
         this.#fatal = options.fatal;
         this.#ignoreBOM = options.ignoreBOM;
@@ -136,9 +138,10 @@ export class TextDecoder {
             buffer = input.buffer;
         }
         checkIsObject(options, `"TextDecoder.decode" options`);
-        if (Object.hasOwn(options, "stream")) {
-            checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
+        if (!Object.hasOwn(options, "stream")) {
+            options.stream = false;
         }
+        checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         const stream = options.stream;
         try {
             if (!stream && this.#handle === null) {
