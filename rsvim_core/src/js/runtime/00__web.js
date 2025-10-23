@@ -110,7 +110,7 @@ export class TextDecoder {
         checkIsString(encoding, `"TextDecoder.constructor" encoding`);
         const encodingIsValid = __InternalRsvimGlobalObject.global_encoding_check_encoding_label(encoding);
         if (!encodingIsValid) {
-            throw new RangeError(`"TextDecoder.constructor" encoding is unknown ${encoding}`);
+            throw new RangeError(`"TextDecoder.constructor" encoding is unknown: ${encoding}`);
         }
         if (options === undefined || options === null) {
             options = { fatal: false, ignoreBOM: false };
@@ -161,13 +161,13 @@ export class TextDecoder {
         }
     }
     get encoding() {
-        return this.#handle.encoding;
+        return this.#encoding;
     }
     get fatal() {
-        return this.#handle.fatal;
+        return this.#fatal;
     }
     get ignoreBOM() {
-        return this.#handle.ignoreBOM;
+        return this.#ignoreBOM;
     }
 }
 ((globalThis) => {

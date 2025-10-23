@@ -309,6 +309,7 @@ async fn test_decode3() -> IoResult<()> {
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
+    info!("actual:{:?}", actual);
     assert!(actual.contains("encoding is unknown: FooEncoding"));
   }
 

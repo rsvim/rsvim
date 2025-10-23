@@ -24,7 +24,7 @@ export declare class TextDecoder {
     decode(input: ArrayBuffer | GlobalThis.TypedArray | DataView, options?: TextDecoderDecodeOptions): string;
     get encoding(): string;
     get fatal(): boolean;
-    get ignoreBOM(): string;
+    get ignoreBOM(): boolean;
 }
 export interface GlobalThis {
     clearInterval(id: number): void;
