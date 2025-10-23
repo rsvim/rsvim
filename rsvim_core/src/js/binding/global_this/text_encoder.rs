@@ -38,13 +38,16 @@ fn encode_impl<'s>(
   #[allow(deprecated)]
   let written = payload.write_utf8_uninit(
     scope,
-    buf.spare_capacity_mut(), // Step-1: Get internal buffer with capacity
+    // Step-1: Get uninit buffer inside vec
+    buf.spare_capacity_mut(),
     Some(&mut read),
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
   );
   unsafe {
-    buf.set_len(written); // Step-2: Set length for the buffer.
+    // Step-2: Set length for the buffer, because it doesn't know memory
+    // changes made by v8 "writeUtf8" API.
+    buf.set_len(written);
   }
   trace!(
     "|encode_impl| written:{:?}, read:{:?}, buf.len:{:?}",
