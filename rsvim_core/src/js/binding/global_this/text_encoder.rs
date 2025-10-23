@@ -142,25 +142,20 @@ pub fn decode_single<'s>(
   debug_assert!(args.length() == 2);
   debug_assert!(args.get(0).is_array_buffer());
   let data = args.get(0).cast::<v8::ArrayBuffer>();
-  debug_assert!(is_v8_str!(args.get(1)));
-  let label = args.get(1).to_rust_string_lossy(scope);
-  debug_assert!(is_v8_bool!(args.get(2)));
-  let fatal = args.get(2).to_boolean(scope);
-  debug_assert!(is_v8_bool!(args.get(3)));
-  let ignore_bom = args.get(3).to_boolean(scope);
-
   let data: Vec<u8> = data
     .get_backing_store()
     .iter()
     .map(|b| b.get())
     .collect_vec();
-
-  debug_assert!(is_v8_obj!(args.get(2)));
-  let options =
-    DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
+  debug_assert!(is_v8_str!(args.get(1)));
+  let label = args.get(1).to_rust_string_lossy(scope);
+  debug_assert!(is_v8_bool!(args.get(2)));
+  let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
+  debug_assert!(is_v8_bool!(args.get(3)));
+  let ignore_bom = bool::from_v8(scope, args.get(3).to_boolean(scope));
   trace!(
-    "|decode| decoder_obj:{:?}, data:{:?}, options:{:?}",
-    decoder_obj, data, options
+    "|decode_single| data:{:?}, label:{:?}, fatal:{:?}, ignore_bom:{:?}",
+    data, label, fatal, ignore_bom
   );
 
   let max_buffer_length = decoder_handle.max_utf16_buffer_length(data.len());
@@ -173,7 +168,7 @@ pub fn decode_single<'s>(
   let max_buffer_length = max_buffer_length.unwrap();
   let mut output = vec![0; max_buffer_length];
 
-  if decoder_obj.fatal() {
+  if fatal {
     let (result, _read, written) = decoder_handle
       .decode_to_utf16_without_replacement(
         &data,
