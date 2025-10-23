@@ -7,9 +7,13 @@
  * @packageDocumentation
  */
 
+function isNullOrUndefined(arg: any): boolean {
+  return arg === undefined || arg === null;
+}
+
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
-  if (arg === undefined || arg === null) {
+  if (isNullOrUndefined(arg)) {
     throw new TypeError(`${msg} cannot be undefined or null`);
   }
 }
@@ -90,14 +94,16 @@ function isDataView(arg: any): boolean {
 }
 
 /** @hidden */
-function checkIsTypedArray(arg: any, msg: string) {
-  if (!isTypedArray(arg)) {
-    throw new TypeError(`${msg} must be a TypedArray, buf found ${typeof arg}`);
+function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
+  if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
+    throw new TypeError(
+      `${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`,
+    );
   }
 }
 
 /** @hidden */
-function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
+function checkIsArrayBufferFamilyOrNull(arg: any, msg: string) {
   if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
     throw new TypeError(
       `${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`,
@@ -315,19 +321,20 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array.
+   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array, this parameter can be omitted, by default is `new Uint8Array()`.
    * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
-    input: ArrayBuffer | GlobalThis.TypedArray | DataView,
+    input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
     options?: TextDecoderDecodeOptions,
   ): string {
-    checkIsArrayBufferOrTypedArrayOrDataView(
-      input,
-      `"TextDecoder.decode" input`,
-    );
+    if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
+      throw new TypeError(
+        `"TextDecoder.decode" input is invalid, found ${typeof input}`,
+      );
+    }
 
     let buffer = input as ArrayBuffer;
     if (isTypedArray(input)) {
