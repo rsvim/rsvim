@@ -16,16 +16,18 @@ async fn test_encode1() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
   const encoder = new TextEncoder();
-  const bytes1 = encoder.encode("This is some data");
-  const bytes2 = encoder.encode("你好，世界！");
+  const s1 = "This is some data";
+  const s2 = "你好，世界！";
+  const bytes1 = encoder.encode(s1);
+  const bytes2 = encoder.encode(s2);
 
   const isInstance1 = bytes1 instanceof Uint8Array;
-  if (!isInstance1 || bytes1.byteLength < 17) {
+  if (!isInstance1 || bytes1.byteLength < s1.length) {
     Rsvim.cmd.echo(`bytes1 failed, isinstance:${isInstance1}, bytesLen:${bytes1.byteLength}`);
   }
 
   const isInstance2 = bytes2 instanceof Uint8Array;
-  if (!isInstance2 || bytes2.byteLength < 12) {
+  if (!isInstance2 || bytes2.byteLength < s2 * 2) {
     Rsvim.cmd.echo(`bytes2 failed, isinstance:${isInstance1}, bytesLen:${bytes2.byteLength}`);
   }
 "#;
