@@ -203,8 +203,8 @@ export class TextEncoder {
 
 /** @inline */
 type TextDecoderOptions = { fatal?: boolean; ignoreBOM?: boolean };
-/** @inline */
-type TextDecoderDecodeOptions = { stream?: boolean };
+// /** @inline */
+// type TextDecoderDecodeOptions = { stream?: boolean };
 
 /**
  * Decode bytes array into string text.
@@ -309,19 +309,20 @@ export class TextDecoder {
     this.#handle = null;
   }
 
+  // * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
+
   /**
    * Decode a bytes array to string text. The bytes array can be a {@link !ArrayBuffer}, {@link !TypedArray} or {@link !DataView}.
    *
    * @see {@link !TextDecoder}
    *
    * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array.
-   * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
     input: ArrayBuffer | GlobalThis.TypedArray | DataView,
-    options?: TextDecoderDecodeOptions,
+    // options?: TextDecoderDecodeOptions,
   ): string {
     checkIsArrayBufferOrTypedArrayOrDataView(
       input,
@@ -337,15 +338,16 @@ export class TextDecoder {
       buffer = input.buffer as ArrayBuffer;
     }
 
-    if (options === undefined || options === null) {
-      options = { stream: false };
-    }
-    checkIsObject(options, `"TextDecoder.decode" options`);
-    if (Object.hasOwn(options, "stream")) {
-      checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
-    }
+    // if (options === undefined || options === null) {
+    //   options = { stream: false };
+    // }
+    // checkIsObject(options, `"TextDecoder.decode" options`);
+    // if (Object.hasOwn(options, "stream")) {
+    //   checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
+    // }
 
-    const stream = options.stream || false;
+    const stream = false;
+    // const stream = options.stream || false;
 
     try {
       // For non-stream, single pass decoding,
