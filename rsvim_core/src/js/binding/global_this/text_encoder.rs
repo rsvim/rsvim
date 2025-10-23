@@ -308,10 +308,6 @@ pub fn decode_stream<'s>(
   let mut decoder = decoder.borrow_mut();
   debug_assert!(is_v8_bool!(args.get(2)));
   let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
-  trace!(
-    "|decode_stream| data:{:?}, data:{:?}, fatal:{:?}",
-    data, data, fatal
-  );
   debug_assert!(is_v8_bool!(args.get(3)));
   let stream = bool::from_v8(scope, args.get(3).to_boolean(scope));
   trace!(
