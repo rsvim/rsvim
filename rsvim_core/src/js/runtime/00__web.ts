@@ -280,9 +280,6 @@ export class TextDecoder {
     encoding: string = "utf-8",
     options: TextDecoderOptions = { fatal: false, ignoreBOM: false },
   ) {
-    if (encoding === undefined || encoding === null) {
-      encoding = "utf-8";
-    }
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
     const encodingIsValid =
@@ -296,9 +293,6 @@ export class TextDecoder {
       );
     }
 
-    if (options === undefined || options === null) {
-      options = { fatal: false, ignoreBOM: false };
-    }
     checkIsObject(options, `"TextDecoder.constructor" options`);
     if (Object.hasOwn(options, "fatal")) {
       checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
@@ -333,14 +327,7 @@ export class TextDecoder {
     input: ArrayBuffer | GlobalThis.TypedArray | DataView = new Uint8Array(),
     options: TextDecoderDecodeOptions = { stream: false },
   ): string {
-    if (
-      !(
-        isArrayBuffer(input) ||
-        isDataView(input) ||
-        isTypedArray(input) ||
-        isNullOrUndefined(input)
-      )
-    ) {
+    if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
       throw new TypeError(
         `"TextDecoder.decode" input is invalid, found ${typeof input}`,
       );
@@ -355,9 +342,6 @@ export class TextDecoder {
       buffer = input.buffer as ArrayBuffer;
     }
 
-    if (options === undefined || options === null) {
-      options = { stream: false };
-    }
     checkIsObject(options, `"TextDecoder.decode" options`);
     if (Object.hasOwn(options, "stream")) {
       checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
