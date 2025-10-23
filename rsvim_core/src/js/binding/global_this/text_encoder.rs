@@ -1,6 +1,5 @@
 //! `TextEncoder` APIs.
 
-mod decoder;
 mod encoder;
 
 use crate::is_v8_bool;
@@ -10,8 +9,6 @@ use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
 use compact_str::ToCompactString;
-use decoder::DecodeOptions;
-use decoder::TextDecoder;
 use encoder::EncodeIntoResultBuilder;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
@@ -229,8 +226,8 @@ pub fn decode_single<'s>(
     data, label, fatal, ignore_bom
   );
 
-  let mut decoder_handle = create_decoder_impl(&label, ignore_bom);
-  decode_impl(scope, &mut rv, &mut decoder_handle, &data, fatal, false);
+  let mut decoder = create_decoder_impl(&label, ignore_bom);
+  decode_impl(scope, &mut rv, &mut decoder, &data, fatal, false);
 }
 
 /// `new TextDecoder()` API for stream decoding.
@@ -244,6 +241,10 @@ pub fn create_stream_decoder<'s>(
   let label = args.get(0).to_rust_string_lossy(scope);
   debug_assert!(is_v8_bool!(args.get(1)));
   let ignore_bom = bool::from_v8(scope, args.get(1).to_boolean(scope));
+  trace!(
+    "|create_stream_decoder| label:{:?}, ignore_bom:{:?}",
+    label, ignore_bom
+  );
 
   let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
 
@@ -293,89 +294,31 @@ pub fn decode_stream<'s>(
   args: v8::FunctionCallbackArguments<'s>,
   mut rv: v8::ReturnValue,
 ) {
-  debug_assert!(args.length() == 3);
-  debug_assert!(is_v8_obj!(args.get(0)));
-
-  let decoder_wrapper = args.get(0).to_object(scope).unwrap();
-  let decoder_obj = TextDecoder::from_v8(scope, decoder_wrapper);
-  let decoder_handle =
-    binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
-  let mut decoder_handle = decoder_handle.borrow_mut();
-
-  debug_assert!(args.get(1).is_array_buffer());
-  let data = args.get(1).cast::<v8::ArrayBuffer>();
+  debug_assert!(args.length() == 4);
+  debug_assert!(args.get(0).is_array_buffer());
+  let data = args.get(0).cast::<v8::ArrayBuffer>();
   let data: Vec<u8> = data
     .get_backing_store()
     .iter()
     .map(|b| b.get())
     .collect_vec();
-
-  debug_assert!(is_v8_obj!(args.get(2)));
-  let options =
-    DecodeOptions::from_v8(scope, args.get(2).to_object(scope).unwrap());
+  debug_assert!(is_v8_obj!(args.get(1)));
+  let decoder_wrapper = args.get(1).to_object(scope).unwrap();
+  let decoder =
+    binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
+  let mut decoder = decoder.borrow_mut();
+  debug_assert!(is_v8_bool!(args.get(2)));
+  let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));
   trace!(
-    "|decode| decoder_obj:{:?}, data:{:?}, options:{:?}",
-    decoder_obj, data, options
+    "|decode_stream| data:{:?}, data:{:?}, fatal:{:?}",
+    data, data, fatal
+  );
+  debug_assert!(is_v8_bool!(args.get(3)));
+  let stream = bool::from_v8(scope, args.get(3).to_boolean(scope));
+  trace!(
+    "|decode_stream| data:{:?}, data:{:?}, fatal:{:?}, stream:{:?}",
+    data, data, fatal, stream
   );
 
-  let max_buffer_length = decoder_handle.max_utf16_buffer_length(data.len());
-
-  if max_buffer_length.is_none() {
-    binding::throw_range_error(scope, &TheErr::ValueTooLarge(data.len()));
-    return;
-  }
-
-  let max_buffer_length = max_buffer_length.unwrap();
-  let mut output = vec![0; max_buffer_length];
-
-  if decoder_obj.fatal() {
-    let (result, _read, written) = decoder_handle
-      .decode_to_utf16_without_replacement(
-        &data,
-        &mut output,
-        !options.stream(),
-      );
-    match result {
-      DecoderResult::InputEmpty => {
-        output.truncate(written);
-        let output = v8::String::new_from_two_byte(
-          scope,
-          &output,
-          v8::NewStringType::Normal,
-        )
-        .unwrap();
-        rv.set(output.into());
-      }
-      DecoderResult::OutputFull => {
-        binding::throw_type_error(
-          scope,
-          &TheErr::BufferTooSmall(max_buffer_length),
-        );
-      }
-      DecoderResult::Malformed(_, _) => {
-        binding::throw_type_error(scope, &TheErr::DataInvalid);
-      }
-    }
-  } else {
-    let (result, _read, written, _had_errors) =
-      decoder_handle.decode_to_utf16(&data, &mut output, !options.stream());
-    match result {
-      CoderResult::InputEmpty => {
-        output.truncate(written);
-        let output = v8::String::new_from_two_byte(
-          scope,
-          &output,
-          v8::NewStringType::Normal,
-        )
-        .unwrap();
-        rv.set(output.into());
-      }
-      CoderResult::OutputFull => {
-        binding::throw_type_error(
-          scope,
-          &TheErr::BufferTooSmall(max_buffer_length),
-        );
-      }
-    }
-  }
+  decode_impl(scope, &mut rv, &mut decoder, &data, fatal, false);
 }

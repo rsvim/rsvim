@@ -367,10 +367,11 @@ export class TextDecoder {
       }
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.global_encoding_decode(
-        this.#handle,
+      return __InternalRsvimGlobalObject.global_encoding_decode_stream(
         buffer,
-        options,
+        this.#handle,
+        this.#fatal,
+        stream,
       );
     } finally {
       if (!stream && this.#handle !== null) {
