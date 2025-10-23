@@ -324,8 +324,8 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array, this parameter can be omitted, by default is `new Uint8Array()`.
-   * @param {TextDecoderDecodeOptions} options - Decode options, this parameter can be omitted, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
+   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array, by default is `new Uint8Array()`.
+   * @param {TextDecoderDecodeOptions} options - Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
@@ -463,7 +463,7 @@ export interface GlobalThis {
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function. This parameter can be omitted, by default is 1.
+   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
@@ -478,7 +478,7 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
    * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed. This parameter can be omitted, by default is 1.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed, by default is 1.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
@@ -573,7 +573,7 @@ export interface GlobalThis {
 
   function setTimeout(
     callback: (...args: any[]) => void,
-    delay?: number,
+    delay: number = 1,
     ...args: any[]
   ): number {
     if (delay === undefined || delay === null) {
