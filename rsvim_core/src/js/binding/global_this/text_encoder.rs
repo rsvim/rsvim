@@ -38,7 +38,7 @@ fn encode_impl<'s>(
   #[allow(deprecated)]
   let written = payload.write_utf8(
     scope,
-    &mut buf,
+    buf.spare_capacity_mut(),
     Some(&mut read),
     v8::WriteOptions::NO_NULL_TERMINATION
       | v8::WriteOptions::REPLACE_INVALID_UTF8,
