@@ -512,9 +512,6 @@ export interface GlobalThis {
     delay: number = 1,
     ...args: any[]
   ): number {
-    if (delay === undefined || delay === null) {
-      delay = 1;
-    }
     checkIsNumber(delay, `"setInterval" delay`);
 
     // Coalesce to number or NaN.
@@ -560,9 +557,6 @@ export interface GlobalThis {
     delay: number = 1,
     ...args: any[]
   ): number {
-    if (delay === undefined || delay === null) {
-      delay = 1;
-    }
     checkIsNumber(delay, `"setTimeout" delay`);
 
     // Coalesce to number or NaN.
