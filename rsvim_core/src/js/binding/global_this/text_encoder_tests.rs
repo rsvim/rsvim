@@ -374,7 +374,7 @@ async fn test_decode4() -> IoResult<()> {
   s += decoder.decode(fixture2, {stream:true});
   s += decoder.decode(undefined, {stream:false});
 
-  if (decoder.decode(s) !== "𝓽𝓮𝔁𝓽") {
+  if (s !== "𝓽𝓮𝔁𝓽") {
     Rsvim.cmd.echo("failed");
   }
 "#;
