@@ -311,8 +311,8 @@ pub fn decode_stream<'s>(
   debug_assert!(is_v8_bool!(args.get(3)));
   let stream = bool::from_v8(scope, args.get(3).to_boolean(scope));
   trace!(
-    "|decode_stream| data:{:?}, data:{:?}, fatal:{:?}, stream:{:?}",
-    data, data, fatal, stream
+    "|decode_stream| data:{:?}, fatal:{:?}, stream:{:?}",
+    data, fatal, stream
   );
 
   decode_impl(scope, &mut rv, &mut decoder, &data, fatal, false);

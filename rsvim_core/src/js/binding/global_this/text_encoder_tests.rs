@@ -360,7 +360,7 @@ async fn test_decode4() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let src: &str = r#"
   const fixture1 = new Uint8Array([
-    0xf0, 0x9d, 
+    0xf0, 0x9d,
   ]);
   const fixture2 = new Uint8Array([
     /*0xf0, 0x9d,*/
