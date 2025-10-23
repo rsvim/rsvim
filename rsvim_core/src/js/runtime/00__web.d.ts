@@ -15,13 +15,10 @@ type TextDecoderOptions = {
     fatal?: boolean;
     ignoreBOM?: boolean;
 };
-type TextDecoderDecodeOptions = {
-    stream?: boolean;
-};
 export declare class TextDecoder {
     #private;
     constructor(encoding?: string, options?: TextDecoderOptions);
-    decode(input: ArrayBuffer | GlobalThis.TypedArray | DataView, options?: TextDecoderDecodeOptions): string;
+    decode(input: ArrayBuffer | GlobalThis.TypedArray | DataView): string;
     get encoding(): string;
     get fatal(): boolean;
     get ignoreBOM(): boolean;
