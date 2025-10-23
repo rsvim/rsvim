@@ -273,6 +273,15 @@ export class TextDecoder {
     }
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
+    const encodingIsValid =
+      // @ts-ignore Ignore warning
+      __InternalRsvimGlobalObject.global_encoding_check_encoding_label(
+        encoding,
+      );
+    if (!encodingIsValid) {
+      throw new RangeError(`"TextDecoder.constructor" encoding is invalid`);
+    }
+
     if (options === undefined || options === null) {
       options = { fatal: false, ignoreBOM: false };
     }
@@ -287,6 +296,7 @@ export class TextDecoder {
       );
     }
 
+    this.#encoding = encoding;
     this.#fatal = options.fatal || false;
     this.#ignoreBOM = options.ignoreBOM || false;
 

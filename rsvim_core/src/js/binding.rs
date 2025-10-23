@@ -86,6 +86,12 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
+      "global_encoding_check_encoding_label",
+      global_this::text_encoder::check_encoding_label,
+    );
+    set_function_to(
+      scope,
+      vim,
       "global_encoding_create_decoder",
       global_this::text_encoder::create_stream_decoder,
     );
