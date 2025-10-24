@@ -484,7 +484,7 @@ export namespace RsvimCmd {
 export class RsvimFs {
   /**
    * Open a file and resolve to an instance of {@link RsvimFs.File}. The file does not need to previously exist if using the `create` or `createNew` open options.
-   * The caller have to close the file to prevent resource leaking, see {@link close}.
+   * The caller have to close the file to prevent resource leaking, see {@link RsvimFs.File.close}.
    *
    * @param {string} path - File path.
    * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
