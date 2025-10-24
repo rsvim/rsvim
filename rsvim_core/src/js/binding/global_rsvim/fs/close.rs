@@ -27,10 +27,5 @@ pub fn fs_is_closed<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   file_wrapper: v8::Local<'s, v8::Object>,
 ) -> bool {
-  binding::get_internal_ref::<Option<handle::FileHandle>>(
-    scope,
-    file_wrapper,
-    0,
-  )
-  .is_none()
+  get_cppgc_handle!(scope, file_wrapper, Option<handle::FileHandle>).is_none()
 }
