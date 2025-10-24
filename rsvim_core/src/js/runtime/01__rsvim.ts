@@ -523,7 +523,7 @@ export class RsvimFs {
    * The sync version of {@link open}.
    *
    * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions?} options - Same with {@link open}.
+   * @param {RsvimFs.OpenOptions?} options? - Same with {@link open}.
    * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
