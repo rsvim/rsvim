@@ -500,13 +500,13 @@ macro_rules! is_v8_func {
 #[macro_export]
 macro_rules! create_cppgc_handle {
   ($scope:ident, $handle:expr, $ty:ty) => {{
-    let obj_template = v8::ObjectTemplate::new($scope);
+    let wrapper_template = v8::ObjectTemplate::new($scope);
 
     // Allocate internal field for the wrapped `std::fs::File`:
     // 0-index: The `file_handle`, i.e. the `std::fs::File`
     // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
-    obj_template.set_internal_field_count(2);
-    let wrapper = obj_template.new_instance($scope).unwrap();
+    wrapper_template.set_internal_field_count(2);
+    let wrapper = wrapper_template.new_instance($scope).unwrap();
 
     let handle_ptr =
       $crate::js::binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
