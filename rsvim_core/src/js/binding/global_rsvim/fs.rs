@@ -184,13 +184,9 @@ pub fn read_sync<'s>(
       for (i, b) in data.iter().enumerate() {
         buffer_store[i].set(*b);
       }
-
-      rv.set_int32(data.len() as i32);
+      debug_assert_eq!(n, data.len());
+      rv.set_int32(n as i32);
     }
-    Err(e) => {
-      let message = v8::String::new(scope, &e.to_string()).unwrap();
-      let exception = v8::Exception::error(scope, message);
-      binding::throw_exception(scope, &e);
-    }
+    Err(e) => binding::throw_exception(scope, &e),
   }
 }
