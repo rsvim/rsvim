@@ -283,16 +283,30 @@ export class TextDecoder {
    * | 'shift_jis' | 'csshiftjis', 'ms932', 'ms_kanji', 'shift-jis', 'sjis', 'windows-31j', 'x-sjis' |
    * | 'euc-kr' | 'cseuckr', 'csksc56011987', 'iso-ir-149', 'korean', 'ks_c_5601-1987', 'ks_c_5601-1989', 'ksc5601', 'ksc_5601', 'windows-949' |
    *
+   * @example
+   * ```javascript
+   * const bytes = new Uint8Array([
+   *   0xf0, 0x9d, 0x93, 0xbd,
+   *   0xf0, 0x9d, 0x93, 0xae,
+   *   0xf0, 0x9d, 0x94, 0x81,
+   *   0xf0, 0x9d, 0x93, 0xbd
+   * ]);
+   * if (new TextDecoder().decode(bytes) !== "𝓽𝓮𝔁𝓽") {
+   *   Rsvim.cmd.echo("Failed to decode");
+   * }
+   * ```
+   *
    * @see [Node.js - WHATWG supported encodings](https://nodejs.org/api/util.html#whatwg-supported-encodings)
    *
-   * @param {string} encoding - Decoder encoding, by default is "utf-8".
-   * @param {TextDecoderOptions} options - Decode options, by default is `{fatal: false, ignoreBOM: false}`.
+   * @param {string} encoding? - (Optional) Decoder encoding, by default is "utf-8".
+   * @param {TextDecoderOptions} options? - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
   constructor(
-    encoding: string = "utf-8",
+    encoding?: string,
     options: TextDecoderOptions = { fatal: false, ignoreBOM: false },
   ) {
+    encoding = encoding ?? "utf-8";
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
     const encodingIsValid =
