@@ -138,11 +138,11 @@ pub fn read<'s>(
   let read_cb = {
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
-    let buffer_store = buf.get_backing_store();
+    let buffer_store = buf.get_backing_store().clone();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
       let fut = FsReadFuture {
         promise: promise.clone(),
-        buffer_store,
+        buffer_store: buffer_store.clone(),
         maybe_result,
       };
       let mut state = state_rc.borrow_mut();
@@ -151,14 +151,16 @@ pub fn read<'s>(
   };
 
   let file_handle =
-    get_cppgc_handle!(scope, file_wrapper, Option<std::fs::File>);
+    get_cppgc_handle!(scope, file_wrapper, Option<std::fs::File>)
+      .as_ref()
+      .unwrap();
   let mut state = state_rc.borrow_mut();
   let task_id = js::next_task_id();
   pending::create_fs_read(
     &mut state,
     task_id,
-    filename,
-    options,
+    file_handle,
+    buf.byte_length(),
     Box::new(read_cb),
   );
 
