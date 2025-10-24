@@ -168,6 +168,12 @@ type TextEncoderEncodeIntoResult = { read: number; written: number };
  * @see {@link !TextEncoder}
  */
 export class TextEncoder {
+  /**
+   * @example
+   * ```javascript
+   * const encoder = new TextEncoder();
+   * ```
+   */
   constructor() {}
 
   /**
