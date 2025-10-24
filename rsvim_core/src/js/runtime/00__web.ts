@@ -320,13 +320,9 @@ export class TextDecoder {
       );
     }
 
+    options = options ?? { fatal: false, ignoreBOM: false };
     checkIsObject(options, `"TextDecoder.constructor" options`);
-    if (!Object.hasOwn(options, "fatal")) {
-      options.fatal = false;
-    }
-    if (!Object.hasOwn(options, "ignoreBOM")) {
-      options.ignoreBOM = false;
-    }
+    setDefaultFields(options, { fatal: false, ignoreBOM: false });
     checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
     checkIsBoolean(
       options.ignoreBOM,
