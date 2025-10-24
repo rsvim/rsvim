@@ -2,7 +2,6 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
-use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 
 pub fn fs_read(
