@@ -401,9 +401,6 @@ export class RsvimCmd {
   }
 }
 
-/**
- * @document ../docs-api-external/01__rsvim/namespaces/RsvimCmd/README.md
- */
 export namespace RsvimCmd {
   /**
    * Command attributes.
@@ -567,9 +564,6 @@ export class RsvimFs {
   }
 }
 
-/**
- * @document ../docs-api-external/01__rsvim/namespaces/RsvimFs/README.md
- */
 export namespace RsvimFs {
   /**
    * Open options.
