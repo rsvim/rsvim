@@ -1032,7 +1032,7 @@ export class RsvimRt {
    * to complete before actually exiting, however any new write requests will be rejected.
    * :::
    *
-   * @param {exitCode?} exitCode? - (Optional) The editor process exit with this exit code, by default with code `0`.
+   * @param {exitCode?} exitCode - (Optional) The editor process exit with this exit code, by default with code `0`.
    *
    * @throws Throws {@link !TypeError} if `exitCode` is neither an integer nor `undefined`.
    *
