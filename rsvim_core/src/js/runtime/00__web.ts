@@ -299,7 +299,8 @@ export class TextDecoder {
    * ```
    *
    * @see [Node.js - WHATWG supported encodings](https://nodejs.org/api/util.html#whatwg-supported-encodings)
-   * @see [Docs.rs - encoding_rs](https://docs.rs/encoding_rs/latest/encoding_rs/)
+   * @see [encoding_rs - Relationship with Windows Code Pages](https://docs.rs/encoding_rs/latest/encoding_rs/#relationship-with-windows-code-pages)
+   * @see [encoding_rs - Supported Encodings](https://docs.rs/encoding_rs/latest/encoding_rs/#statics)
    *
    * @param {string} encoding - (Optional) Decoder encoding, by default is "utf-8".
    * @param {TextDecoderOptions} options - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
