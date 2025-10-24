@@ -128,7 +128,7 @@ function boundByIntegers(arg: any, bound: [number, number]) {
 function setDefaultFields(arg: object, defaults: object) {
   for (const [key, val] of Object.entries(defaults)) {
     if (!Object.hasOwn(arg, key)) {
-      Object.defineProperty(arg, key, val);
+      Object.defineProperty(arg, key, { value: val, writable: true });
     }
   }
 }
