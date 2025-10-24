@@ -1115,7 +1115,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains(
-      r####""Rsvim.cmd.create" nargs attribute is invalid option"####
+      r####""Rsvim.cmd.create" nargs attribute is an invalid option"####
     ));
 
     let state_rc = event_loop.js_runtime.get_state();
