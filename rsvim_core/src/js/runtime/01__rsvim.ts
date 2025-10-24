@@ -272,12 +272,8 @@ export class RsvimCmd {
 
     attributes = attributes ?? { bang: false, nargs: "0" };
     checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
-    if (!Object.hasOwn(attributes, "bang")) {
-      attributes.bang = false;
-    }
-    if (!Object.hasOwn(attributes, "nargs")) {
-      attributes.nargs = "0";
-    }
+    setDefaultFields(attributes, { bang: false, nargs: "0" });
+    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" bang attribute`);
 
     checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
     checkIsOptions(
