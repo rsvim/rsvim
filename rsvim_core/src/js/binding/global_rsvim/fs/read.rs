@@ -1,11 +1,8 @@
 //! Read file APIs.
 
-// use crate::flags_builder_impl;
-// use crate::flags_impl;
-// use crate::from_v8_prop;
 use crate::js::JsFuture;
 use crate::js::binding;
-// use crate::js::binding::global_rsvim::fs::handle;
+use crate::js::binding::global_rsvim::fs::handle;
 // use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
@@ -13,30 +10,34 @@ use crate::prelude::*;
 // use std::cell::Cell;
 // use std::rc::Rc;
 
-pub fn fs_read(
-  file: &mut std::fs::File,
-  bufsize: usize,
-) -> TheResult<(Vec<u8>, usize)> {
+pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<(Vec<u8>, usize)> {
   use std::io::Read;
 
+  let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  match file.read(&mut buf) {
+  let result = match file.read(&mut buf) {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  }
+  };
+  handle::std_to_fd(file);
+
+  result
 }
 
 pub async fn async_fs_read(
-  file: &mut tokio::fs::File,
+  fd: usize,
   bufsize: usize,
 ) -> TheResult<(Vec<u8>, usize)> {
   use tokio::io::AsyncReadExt;
 
+  let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  match file.read(&mut buf).await {
+  let result = match file.read(&mut buf).await {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  }
+  };
+  handle::tokio_to_fd(file).await;
+  result
 }
 
 pub struct FsReadFuture {
@@ -61,18 +62,14 @@ impl JsFuture for FsReadFuture {
     }
 
     // Otherwise, resolve the promise passing the result.
-    let result = result.unwrap();
-
-    // Deserialize bytes into a file-descriptor.
-    let (data, data_len) = decode_bytes::<Vec<u8>>(&result);
-    debug_assert_eq!(data.len(), data_len);
+    let data = result.unwrap();
 
     // Copy the slice's bytes into v8's typed-array backing store.
     for (i, b) in data.iter().enumerate() {
       self.buffer_store[i].set(*b);
     }
 
-    let bytes_read = v8::Integer::new(scope, data_len as i32);
+    let bytes_read = v8::Integer::new(scope, data.len() as i32);
 
     self
       .promise
