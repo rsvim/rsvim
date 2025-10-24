@@ -368,9 +368,7 @@ export class TextDecoder {
 
     options = options ?? { stream: false };
     checkIsObject(options, `"TextDecoder.decode" options`);
-    if (!Object.hasOwn(options, "stream")) {
-      options.stream = false;
-    }
+    setDefaultFields(options, { stream: false });
     checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
 
     const stream = options.stream as boolean;
