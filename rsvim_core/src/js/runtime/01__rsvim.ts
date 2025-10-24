@@ -1,9 +1,4 @@
 /**
- * @title Rsvim APIs
- * @sidebarPosition 2
- */
-
-/**
  * The `Rsvim` global object, it contains two groups:
  *
  * - General APIs.
@@ -19,6 +14,8 @@
  *
  * @categoryDescription General APIs
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
+ *
+ * @document ../docs-api-external/01__rsvim/README.md
  */
 
 function isNull(arg: any): boolean {
@@ -402,9 +399,7 @@ export class RsvimCmd {
 }
 
 /**
- * ---
- * title: RsvimCmd
- * ---
+ * @document ../docs-api-external/01__rsvim/namespaces/RsvimCmd/README.md
  */
 export namespace RsvimCmd {
   /**
@@ -570,9 +565,7 @@ export class RsvimFs {
 }
 
 /**
- * ---
- * title: RsvimFs
- * ---
+ * @document ../docs-api-external/01__rsvim/namespaces/RsvimFs/README.md
  */
 export namespace RsvimFs {
   /**
