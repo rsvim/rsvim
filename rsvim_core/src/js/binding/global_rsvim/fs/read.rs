@@ -2,14 +2,13 @@
 
 use crate::js::JsFuture;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 
-pub fn fs_read(
-  file: &mut std::fs::File,
-  bufsize: usize,
-) -> TheResult<(Vec<u8>, usize)> {
+pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<(Vec<u8>, usize)> {
   use std::io::Read;
 
+  let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   match file.read(&mut buf) {
     Ok(n) => Ok((buf, n)),
@@ -18,11 +17,12 @@ pub fn fs_read(
 }
 
 pub async fn async_fs_read(
-  file: &mut tokio::fs::File,
+  file: usize,
   bufsize: usize,
 ) -> TheResult<(Vec<u8>, usize)> {
   use tokio::io::AsyncReadExt;
 
+  let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   match file.read(&mut buf).await {
     Ok(n) => Ok((buf, n)),
