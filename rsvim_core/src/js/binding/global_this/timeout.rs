@@ -19,7 +19,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|TimeoutFuture| run");
+    trace!("|TimeoutFuture|");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -96,7 +96,7 @@ pub fn create_timer<'s>(
         params: Rc::clone(&params),
       };
       let mut state = state_rc.borrow_mut();
-      state.pending_futures.insert(0, Box::new(fut));
+      state.pending_futures.push(Box::new(fut));
     }
   };
 

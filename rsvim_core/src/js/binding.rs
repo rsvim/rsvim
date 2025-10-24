@@ -299,7 +299,7 @@ pub fn set_internal_ref<T>(
   data: T,
 ) -> *mut T {
   let boxed_ref = Box::new(data);
-  let addr = Box::leak(boxed_ref) as *mut T;
+  let addr = Box::into_raw(boxed_ref);
   let v8_ext = v8::External::new(scope, addr as *mut c_void);
 
   target.set_internal_field(index, v8_ext.into());
@@ -327,7 +327,9 @@ pub fn set_exception_code(
 ) {
   let exception = exception.to_object(scope).unwrap();
   match error {
-    TheErr::LoadModuleFailed(_, e) | TheErr::OpenFileFailed(_, e) => {
+    TheErr::LoadModuleFailed(_, e)
+    | TheErr::OpenFileFailed(_, e)
+    | TheErr::ReadFileFailed(e) => {
       let key = v8::String::new(scope, "code").unwrap();
       let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
       exception.set(scope, key.into(), value.into());

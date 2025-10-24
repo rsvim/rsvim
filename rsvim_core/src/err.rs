@@ -82,6 +82,10 @@ pub enum TheErr {
   // Failed to open file.
   OpenFileFailed(String, IoErr),
 
+  #[error("Failed to read file: {0}.")]
+  // Failed to read file.
+  ReadFileFailed(IoErr),
+
   #[error("File is already closed.")]
   // File is already been closed.
   FileAlreadyClosed,
