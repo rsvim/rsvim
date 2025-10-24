@@ -126,7 +126,7 @@ pub fn read<'s>(
   let file_wrapper = args.get(0).to_object(scope);
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
-  trace!("RsvimFs.read");
+  trace!("RsvimFs.read: {:?}, {:?}", file_wrapper, buf);
 
   let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
   let promise = promise_resolver.get_promise(scope);
