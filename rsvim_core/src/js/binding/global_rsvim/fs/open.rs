@@ -231,7 +231,7 @@ pub struct FsOpenFuture {
 
 impl JsFuture for FsOpenFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|FsOpenFuture| run");
+    trace!("|FsOpenFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
