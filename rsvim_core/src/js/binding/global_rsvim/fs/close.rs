@@ -2,6 +2,7 @@
 
 use crate::get_cppgc_handle;
 use crate::js::binding;
+use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 use parking_lot::Mutex;
 use std::fs::File;
@@ -12,7 +13,7 @@ pub fn fs_close<'s>(
   file_wrapper: v8::Local<'s, v8::Object>,
 ) {
   if let Some(file) =
-    get_cppgc_handle!(scope, file_wrapper, Option<Arc<Mutex<File>>>).take()
+    get_cppgc_handle!(scope, file_wrapper, Option<handle::FileHandle>).take()
   {
     // Note: By taking the file reference out of the option and immediately dropping
     // it will make rust to close the file.
@@ -26,6 +27,10 @@ pub fn fs_is_closed<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   file_wrapper: v8::Local<'s, v8::Object>,
 ) -> bool {
-  binding::get_internal_ref::<Option<Arc<Mutex<File>>>>(scope, file_wrapper, 0)
-    .is_none()
+  binding::get_internal_ref::<Option<handle::FileHandle>>(
+    scope,
+    file_wrapper,
+    0,
+  )
+  .is_none()
 }
