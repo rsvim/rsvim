@@ -11,9 +11,6 @@ use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use std::cell::Cell;
-use std::fs::File;
-use std::rc::Rc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -136,14 +133,6 @@ impl StructToV8 for FsOpenOptions {
   }
 }
 
-pub fn create_fs_file_wrapper<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  fd: usize,
-) -> v8::Local<'s, v8::Object> {
-  let file_handle = handle::std_from_fd(fd);
-  create_cppgc_handle!(scope, Some(file_handle), Option<File>)
-}
-
 pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
@@ -212,7 +201,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_wrapper = create_fs_file_wrapper(scope, fd);
+    let file_wrapper = create_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
       .promise

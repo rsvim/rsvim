@@ -489,7 +489,7 @@ macro_rules! create_cppgc_handle {
 
     let handle_ptr =
       $crate::js::binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
-    let weak_rc = Rc::new(Cell::new(None));
+    let weak_rc = std::rc::Rc::new(std::cell::Cell::new(None));
 
     // To automatically drop the handle instance when
     // V8 garbage collects the object that internally holds the Rust instance,
