@@ -5,7 +5,6 @@ pub mod handle;
 pub mod open;
 pub mod read;
 
-use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
@@ -29,7 +28,7 @@ pub fn open<'s>(
   debug_assert!(args.length() == 2);
   debug_assert!(is_v8_str!(args.get(0)));
   let filename = args.get(0).to_rust_string_lossy(scope);
-  debug_assert!(is_v8_obj!(args.get(1)));
+  debug_assert!(args.get(1).is_object());
   let options =
     FsOpenOptions::from_v8(scope, args.get(1).to_object(scope).unwrap());
   trace!("Rsvim.fs.open:{:?} {:?}", filename, options);
@@ -114,4 +113,48 @@ pub fn is_closed<'s>(
 
   let result = fs_is_closed(scope, file_wrapper.to_object(scope).unwrap());
   rv.set_bool(result);
+}
+
+/// `File.read` API.
+pub fn read<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  debug_assert!(args.get(0).is_object());
+  let file_wrapper = args.get(0).to_object(scope);
+  debug_assert!(args.get(1).is_array_buffer());
+  let buf = args.get(1).cast::<v8::ArrayBuffer>();
+  trace!("RsvimFs.read");
+
+  let promise_resolver = v8::PromiseResolver::new(scope).unwrap();
+  let promise = promise_resolver.get_promise(scope);
+
+  let state_rc = JsRuntime::state(scope);
+  let open_cb = {
+    let promise = v8::Global::new(scope, promise_resolver);
+    let state_rc = state_rc.clone();
+    move |maybe_result: Option<TheResult<Vec<u8>>>| {
+      let fut = FsOpenFuture {
+        promise: promise.clone(),
+        maybe_result,
+      };
+      let mut state = state_rc.borrow_mut();
+      state.pending_futures.insert(0, Box::new(fut));
+    }
+  };
+
+  let mut state = state_rc.borrow_mut();
+  let task_id = js::next_task_id();
+  let filename = Path::new(&file_wrapper);
+  pending::create_fs_open(
+    &mut state,
+    task_id,
+    filename,
+    options,
+    Box::new(open_cb),
+  );
+
+  rv.set(promise.into());
 }

@@ -455,30 +455,9 @@ macro_rules! is_v8_bool {
 }
 
 #[macro_export]
-macro_rules! is_v8_obj {
-  ($value:expr) => {
-    $value.is_object()
-  };
-}
-
-#[macro_export]
-macro_rules! is_v8_nil {
-  ($value:expr) => {
-    $value.is_null_or_undefined()
-  };
-}
-
-#[macro_export]
 macro_rules! is_v8_int {
   ($value:expr) => {
     $value.is_int32() || $value.is_uint32()
-  };
-}
-
-#[macro_export]
-macro_rules! is_v8_func {
-  ($value:expr) => {
-    $value.is_function()
   };
 }
 
