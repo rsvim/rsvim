@@ -77,7 +77,7 @@ pub fn create_fs_open(
 pub fn create_fs_read(
   state: &mut JsRuntimeState,
   task_id: JsTaskId,
-  file: std::fs::File,
+  fd: usize,
   bufsize: usize,
   cb: TaskCallback,
 ) {
@@ -86,7 +86,7 @@ pub fn create_fs_read(
     state.master_tx.clone(),
     MasterMessage::FsReadReq(msg::FsReadReq {
       task_id,
-      file,
+      fd,
       bufsize,
     }),
   );

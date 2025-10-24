@@ -59,7 +59,7 @@ pub struct FsOpenReq {
 #[derive(Debug)]
 pub struct FsReadReq {
   pub task_id: JsTaskId,
-  pub file: std::fs::File,
+  pub fd: usize,
   pub bufsize: usize,
 }
 
