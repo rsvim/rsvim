@@ -519,7 +519,7 @@ macro_rules! wrap_handle {
         move |isolate| unsafe {
           drop(Box::from_raw(handle_ptr));
           drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-          trace!("|wrap_handle| dropped handle:{}", $handle);
+          trace!("|wrap_handle| dropped handle");
         }
       }),
     );
