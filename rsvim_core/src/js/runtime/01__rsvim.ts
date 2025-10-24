@@ -20,6 +20,10 @@ function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+function isString(arg: any): boolean {
+  return typeof arg === "string";
+}
+
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
   if (isNull(arg)) {
@@ -51,7 +55,14 @@ function checkIsBoolean(arg: any, msg: string) {
 
 /** @hidden */
 function checkIsString(arg: any, msg: string) {
-  if (typeof arg !== "string") {
+  if (!isString(arg)) {
+    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
+function checkOptionalString(arg: any, msg: string) {
+  if (!(isString(arg) || isNull(arg))) {
     throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
   }
 }
@@ -282,9 +293,7 @@ export class RsvimCmd {
 
     options = options ?? { force: true };
     checkIsObject(options, `"Rsvim.cmd.create" options`);
-    if (!Object.hasOwn(options, "force")) {
-      options.force = true;
-    }
+    setDefaultFields(options, { force: true });
     checkIsBoolean(options.force, `"Rsvim.cmd.create" force option`);
     if (Object.hasOwn(options, "alias")) {
       checkIsString(options.alias, `"Rsvim.cmd.create" alias option`);
