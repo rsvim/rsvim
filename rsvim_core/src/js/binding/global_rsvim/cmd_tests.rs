@@ -1307,7 +1307,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains(
-      r####""Rsvim.cmd.create" options.alias must be a string?, but found"####
+      r####""Rsvim.cmd.create" alias option must be a string?, but found"####
     ));
 
     let state_rc = event_loop.js_runtime.get_state();
