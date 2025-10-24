@@ -3,6 +3,7 @@
 pub mod close;
 pub mod handle;
 pub mod open;
+pub mod read;
 
 use crate::is_v8_obj;
 use crate::is_v8_str;
