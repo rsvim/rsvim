@@ -92,7 +92,7 @@ function checkIsObject(arg: any, msg: string) {
 /** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
-    throw new RangeError(`${msg} is invalid option: ${arg}`);
+    throw new RangeError(`${msg} is an invalid option: ${arg}`);
   }
 }
 
