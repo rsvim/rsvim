@@ -1,5 +1,6 @@
 //! Close file APIs.
 
+use crate::get_cppgc_handle;
 use crate::js::binding;
 use crate::prelude::*;
 use std::fs::File;
@@ -9,7 +10,7 @@ pub fn fs_close<'s>(
   file_wrapper: v8::Local<'s, v8::Object>,
 ) {
   if let Some(file) =
-    binding::get_internal_ref::<Option<File>>(scope, file_wrapper, 0).take()
+    get_cppgc_handle!(scope, file_wrapper, Option<File>).take()
   {
     // Note: By taking the file reference out of the option and immediately dropping
     // it will make rust to close the file.
