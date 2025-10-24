@@ -26,11 +26,11 @@ impl JsFuture for FsReadFuture {
 
     let result = self.maybe_result.take().unwrap();
 
-    // Handle when something goes wrong with reading.
+    // Handle when something goes wrong with opening the file.
     if let Err(e) = result {
       let message = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, message);
-      set_exception_code(scope, exception, &e);
+      binding::set_exception_code(scope, exception, &e);
       self.promise.open(scope).reject(scope, exception);
       return;
     }
