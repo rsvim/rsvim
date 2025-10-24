@@ -179,6 +179,11 @@ export class TextEncoder {
   /**
    * Encode string text to {@link !Uint8Array}.
    *
+   * @example
+   * ```javascript
+   * const encodedBytes = new TextEncoder().encode("Hello, World!");
+   * ```
+   *
    * @param {string} input - Text that need encode.
    * @returns {Uint8Array} Encoded uint8 bytes array.
    * @throws Throws {@link !TypeError} if input is not a string.
