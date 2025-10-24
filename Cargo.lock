@@ -295,16 +295,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "charset"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1f927b07c74ba84c7e5fe4db2baeb3e996ab2688992e39ac68ce3220a677c7e"
-dependencies = [
- "base64",
- "encoding_rs",
-]
-
-[[package]]
 name = "clang-sys"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -322,15 +312,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7caa3f9de89ddbe2c607f4101924c5abec803763ae9534e4f4d7d8f84aa81f0"
 dependencies = [
  "cc",
-]
-
-[[package]]
-name = "codepage"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48f68d061bc2828ae826206326e61251aca94c1e4a5305cf52d9138639c918b4"
-dependencies = [
- "encoding_rs",
 ]
 
 [[package]]
@@ -2561,8 +2542,6 @@ dependencies = [
  "async-trait",
  "bincode",
  "bitflags",
- "charset",
- "codepage",
  "compact_str 0.9.0",
  "crossterm",
  "derive_builder",

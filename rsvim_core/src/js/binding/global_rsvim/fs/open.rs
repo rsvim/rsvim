@@ -169,6 +169,7 @@ pub fn create_fs_file_wrapper<'s>(
       move |isolate| unsafe {
         drop(Box::from_raw(file_ptr));
         drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+        trace!("|create_fs_file_wrapper| dropped File:{}", fd);
       }
     }),
   );

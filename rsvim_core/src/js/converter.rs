@@ -342,6 +342,47 @@ macro_rules! to_v8_prop {
   };
 }
 
+/// Constant to_v8 helper
+#[macro_export]
+macro_rules! to_v8_const {
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop.to_v8($scope);
+      $crate::js::binding::set_constant_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, ()) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop().to_v8($scope);
+      $crate::js::binding::set_constant_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, optional) => {
+    paste::paste! {
+      if let Some($prop) = &$self.$prop {
+        let [< $prop _value >] = $prop.to_v8($scope);
+        $crate::js::binding::set_constant_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+      }
+    }
+  };
+
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, Vec) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop.to_v8($scope, |scope, i| i.to_v8(scope).into());
+      $crate::js::binding::set_constant_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+
+  ($self:ident, $obj:ident, $scope:ident, $prop:tt, (), Vec) => {
+    paste::paste! {
+      let [< $prop _value >] = $self.$prop().to_v8($scope, |scope, i| i.to_v8(scope).into());
+      $crate::js::binding::set_constant_to($scope, $obj, [< $prop:snake:upper >], [< $prop _value >].into());
+    }
+  };
+}
+
 /// Property from_v8 helpers
 #[macro_export]
 macro_rules! from_v8_prop {

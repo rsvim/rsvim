@@ -1,5 +1,11 @@
+function isNull(arg) {
+    return arg === undefined || arg === null;
+}
+function isString(arg) {
+    return typeof arg === "string";
+}
 function checkNotNull(arg, msg) {
-    if (arg === undefined || arg === null) {
+    if (isNull(arg)) {
         throw new TypeError(`${msg} cannot be undefined or null`);
     }
 }
@@ -20,8 +26,13 @@ function checkIsBoolean(arg, msg) {
     }
 }
 function checkIsString(arg, msg) {
-    if (typeof arg !== "string") {
+    if (!isString(arg)) {
         throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+    }
+}
+function checkOptionalString(arg, msg) {
+    if (!(isString(arg) || isNull(arg))) {
+        throw new TypeError(`${msg} must be a string?, but found ${typeof arg}`);
     }
 }
 function checkMatchPattern(arg, pat, msg) {
@@ -42,7 +53,7 @@ function checkIsObject(arg, msg) {
 }
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
-        throw new RangeError(`${msg} is invalid option: ${arg}`);
+        throw new RangeError(`${msg} is an invalid option: ${arg}`);
     }
 }
 function boundByIntegers(arg, bound) {
@@ -53,6 +64,13 @@ function boundByIntegers(arg, bound) {
         return bound[1];
     }
     return arg;
+}
+function setDefaultFields(arg, defaults) {
+    for (const [key, val] of Object.entries(defaults)) {
+        if (!Object.hasOwn(arg, key)) {
+            Object.defineProperty(arg, key, { value: val, writable: true });
+        }
+    }
 }
 export class Rsvim {
     buf = new RsvimBuf();
@@ -77,29 +95,16 @@ export class RsvimCmd {
     create(name, callback, attributes, options) {
         checkMatchPattern(name, /^[A-Za-z_!][A-Za-z0-9_!]*$/, `"Rsvim.cmd.create" name`);
         checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
-        if (attributes === undefined || attributes === null) {
-            attributes = {};
-        }
+        attributes = attributes ?? { bang: false, nargs: "0" };
         checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
-        if (!Object.hasOwn(attributes, "bang")) {
-            attributes.bang = false;
-        }
-        if (!Object.hasOwn(attributes, "nargs")) {
-            attributes.nargs = "0";
-        }
-        checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
-        checkIsOptions(attributes.nargs, ["0", "1", "?", "+", "*"], `"Rsvim.cmd.create" attributes.nargs`);
-        if (options === undefined || options === null) {
-            options = {};
-        }
+        setDefaultFields(attributes, { bang: false, nargs: "0" });
+        checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" bang attribute`);
+        checkIsOptions(attributes.nargs, ["0", "1", "?", "+", "*"], `"Rsvim.cmd.create" nargs attribute`);
+        options = options ?? { force: true };
         checkIsObject(options, `"Rsvim.cmd.create" options`);
-        if (!Object.hasOwn(options, "force")) {
-            options.force = true;
-        }
-        checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
-        if (options.alias !== undefined) {
-            checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
-        }
+        setDefaultFields(options, { force: true });
+        checkIsBoolean(options.force, `"Rsvim.cmd.create" force option`);
+        checkOptionalString(options.alias, `"Rsvim.cmd.create" alias option`);
         return __InternalRsvimGlobalObject.cmd_create(name, callback, attributes, options);
     }
     echo(message) {
@@ -121,71 +126,59 @@ export class RsvimCmd {
 export class RsvimFs {
     open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
-        if (options === undefined || options === null) {
-            options = { read: true };
-        }
+        options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
-        if (!Object.hasOwn(options, "append")) {
-            options.append = false;
-        }
-        if (!Object.hasOwn(options, "create")) {
-            options.create = false;
-        }
-        if (!Object.hasOwn(options, "createNew")) {
-            options.createNew = false;
-        }
-        if (!Object.hasOwn(options, "read")) {
-            options.read = false;
-        }
-        if (!Object.hasOwn(options, "truncate")) {
-            options.truncate = false;
-        }
-        if (!Object.hasOwn(options, "write")) {
-            options.write = false;
-        }
+        setDefaultFields(options, {
+            append: false,
+            create: false,
+            createNew: false,
+            read: false,
+            truncate: false,
+            write: false,
+        });
+        checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+        checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+        checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+        checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+        checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+        checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
         return __InternalRsvimGlobalObject
             .fs_open(path, options)
             .then((handle) => new RsvimFs.File(handle));
     }
     openSync(path, options) {
         checkIsString(path, `"Rsvim.fs.openSync" path`);
-        if (options === undefined || options === null) {
-            options = { read: true };
-        }
-        checkIsObject(options, `"Rsvim.fs.openSync" options`);
-        if (!Object.hasOwn(options, "append")) {
-            options.append = false;
-        }
-        if (!Object.hasOwn(options, "create")) {
-            options.create = false;
-        }
-        if (!Object.hasOwn(options, "createNew")) {
-            options.createNew = false;
-        }
-        if (!Object.hasOwn(options, "read")) {
-            options.read = false;
-        }
-        if (!Object.hasOwn(options, "truncate")) {
-            options.truncate = false;
-        }
-        if (!Object.hasOwn(options, "write")) {
-            options.write = false;
-        }
+        options = options ?? { read: true };
+        checkIsObject(options, `"Rsvim.fs.open" options`);
+        setDefaultFields(options, {
+            append: false,
+            create: false,
+            createNew: false,
+            read: false,
+            truncate: false,
+            write: false,
+        });
+        checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+        checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+        checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+        checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+        checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+        checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
         const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
         return new RsvimFs.File(handle);
     }
 }
 (function (RsvimFs) {
     class File {
-        __handle;
+        #handle;
         constructor(handle) {
-            this.__handle = handle;
+            this.#handle = handle;
         }
         close() {
-            __InternalRsvimGlobalObject.fs_close(this.__handle);
+            __InternalRsvimGlobalObject.fs_close(this.#handle);
         }
         isClosed() {
-            return __InternalRsvimGlobalObject.fs_is_closed(this.__handle);
+            return __InternalRsvimGlobalObject.fs_is_closed(this.#handle);
         }
     }
     RsvimFs.File = File;
@@ -245,10 +238,8 @@ export class RsvimOpt {
 }
 export class RsvimRt {
     exit(exitCode) {
-        if (exitCode === undefined || exitCode === null) {
-            exitCode = 0;
-        }
-        checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
+        exitCode = exitCode ?? 0;
+        checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
         __InternalRsvimGlobalObject.rt_exit(exitCode);
     }
 }

@@ -16,9 +16,17 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
+function isNull(arg: any): boolean {
+  return arg === undefined || arg === null;
+}
+
+function isString(arg: any): boolean {
+  return typeof arg === "string";
+}
+
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
-  if (arg === undefined || arg === null) {
+  if (isNull(arg)) {
     throw new TypeError(`${msg} cannot be undefined or null`);
   }
 }
@@ -47,8 +55,15 @@ function checkIsBoolean(arg: any, msg: string) {
 
 /** @hidden */
 function checkIsString(arg: any, msg: string) {
-  if (typeof arg !== "string") {
+  if (!isString(arg)) {
     throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
+function checkOptionalString(arg: any, msg: string) {
+  if (!(isString(arg) || isNull(arg))) {
+    throw new TypeError(`${msg} must be a string?, but found ${typeof arg}`);
   }
 }
 
@@ -77,7 +92,7 @@ function checkIsObject(arg: any, msg: string) {
 /** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
-    throw new RangeError(`${msg} is invalid option: ${arg}`);
+    throw new RangeError(`${msg} is an invalid option: ${arg}`);
   }
 }
 
@@ -90,6 +105,15 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     return bound[1];
   }
   return arg;
+}
+
+/** @hidden */
+function setDefaultFields(arg: object, defaults: object) {
+  for (const [key, val] of Object.entries(defaults)) {
+    if (!Object.hasOwn(arg, key)) {
+      Object.defineProperty(arg, key, { value: val, writable: true });
+    }
+  }
 }
 
 /**
@@ -225,8 +249,8 @@ export class RsvimCmd {
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
-   * @param {RsvimCmd.CommandAttributes?} attributes - Attributes that control the command behavior. This parameter can be omitted, it will use the default attributes, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CommandOptions?} options - Options that control how the command is created. This parameter can be omitted, it will use the default options, see {@link RsvimCmd.CommandOptions}.
+   * @param {RsvimCmd.CommandAttributes} attributes - (Optional) Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions} options - (Optional) Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
    * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
@@ -255,37 +279,23 @@ export class RsvimCmd {
       /^[A-Za-z_!][A-Za-z0-9_!]*$/,
       `"Rsvim.cmd.create" name`,
     );
-
     checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
 
-    if (attributes === undefined || attributes === null) {
-      attributes = {};
-    }
+    attributes = attributes ?? { bang: false, nargs: "0" };
     checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
-    if (!Object.hasOwn(attributes, "bang")) {
-      attributes.bang = false;
-    }
-    if (!Object.hasOwn(attributes, "nargs")) {
-      attributes.nargs = "0";
-    }
-    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
+    setDefaultFields(attributes, { bang: false, nargs: "0" });
+    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" bang attribute`);
     checkIsOptions(
       attributes.nargs,
       ["0", "1", "?", "+", "*"],
-      `"Rsvim.cmd.create" attributes.nargs`,
+      `"Rsvim.cmd.create" nargs attribute`,
     );
 
-    if (options === undefined || options === null) {
-      options = {};
-    }
+    options = options ?? { force: true };
     checkIsObject(options, `"Rsvim.cmd.create" options`);
-    if (!Object.hasOwn(options, "force")) {
-      options.force = true;
-    }
-    checkIsBoolean(options.force, `"Rsvim.cmd.create" options.force`);
-    if (options.alias !== undefined) {
-      checkIsString(options.alias, `"Rsvim.cmd.create" options.alias`);
-    }
+    setDefaultFields(options, { force: true });
+    checkIsBoolean(options.force, `"Rsvim.cmd.create" force option`);
+    checkOptionalString(options.alias, `"Rsvim.cmd.create" alias option`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_create(
@@ -473,7 +483,7 @@ export class RsvimFs {
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
    * @param {string} path - File path.
-   * @param {RsvimFs.OpenOptions?} options - Open options, this option can be omitted, by default it is `{read: true}`. See {@link RsvimFs.OpenOptions}.
+   * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
    * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
@@ -486,28 +496,22 @@ export class RsvimFs {
   open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
-    if (options === undefined || options === null) {
-      options = { read: true };
-    }
+    options = options ?? { read: true };
     checkIsObject(options, `"Rsvim.fs.open" options`);
-    if (!Object.hasOwn(options, "append")) {
-      options.append = false;
-    }
-    if (!Object.hasOwn(options, "create")) {
-      options.create = false;
-    }
-    if (!Object.hasOwn(options, "createNew")) {
-      options.createNew = false;
-    }
-    if (!Object.hasOwn(options, "read")) {
-      options.read = false;
-    }
-    if (!Object.hasOwn(options, "truncate")) {
-      options.truncate = false;
-    }
-    if (!Object.hasOwn(options, "write")) {
-      options.write = false;
-    }
+    setDefaultFields(options, {
+      append: false,
+      create: false,
+      createNew: false,
+      read: false,
+      truncate: false,
+      write: false,
+    });
+    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject
@@ -519,7 +523,7 @@ export class RsvimFs {
    * The sync version of {@link open}.
    *
    * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions?} options - Same with {@link open}.
+   * @param {RsvimFs.OpenOptions} options - Same with {@link open}.
    * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
@@ -532,28 +536,22 @@ export class RsvimFs {
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
     checkIsString(path, `"Rsvim.fs.openSync" path`);
 
-    if (options === undefined || options === null) {
-      options = { read: true };
-    }
-    checkIsObject(options, `"Rsvim.fs.openSync" options`);
-    if (!Object.hasOwn(options, "append")) {
-      options.append = false;
-    }
-    if (!Object.hasOwn(options, "create")) {
-      options.create = false;
-    }
-    if (!Object.hasOwn(options, "createNew")) {
-      options.createNew = false;
-    }
-    if (!Object.hasOwn(options, "read")) {
-      options.read = false;
-    }
-    if (!Object.hasOwn(options, "truncate")) {
-      options.truncate = false;
-    }
-    if (!Object.hasOwn(options, "write")) {
-      options.write = false;
-    }
+    options = options ?? { read: true };
+    checkIsObject(options, `"Rsvim.fs.open" options`);
+    setDefaultFields(options, {
+      append: false,
+      create: false,
+      createNew: false,
+      read: false,
+      truncate: false,
+      write: false,
+    });
+    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
 
     // @ts-ignore Ignore warning
     const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
@@ -625,11 +623,11 @@ export namespace RsvimFs {
    */
   export class File {
     /** @hidden */
-    __handle: any;
+    #handle: any;
 
     /** @hidden */
     constructor(handle: any) {
-      this.__handle = handle;
+      this.#handle = handle;
     }
 
     /**
@@ -647,7 +645,7 @@ export namespace RsvimFs {
      */
     close(): void {
       // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.fs_close(this.__handle);
+      __InternalRsvimGlobalObject.fs_close(this.#handle);
     }
 
     /**
@@ -663,7 +661,7 @@ export namespace RsvimFs {
      */
     isClosed(): boolean {
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_is_closed(this.__handle);
+      return __InternalRsvimGlobalObject.fs_is_closed(this.#handle);
     }
   }
 }
@@ -1034,8 +1032,7 @@ export class RsvimRt {
    * to complete before actually exiting, however any new write requests will be rejected.
    * :::
    *
-   * @param {exitCode?} exitCode - The editor process exit with this exit code. This parameter can be omitted,
-   * by default uses `0` to indicate no error.
+   * @param {exitCode?} exitCode - (Optional) The editor process exit with this exit code, by default with code `0`.
    *
    * @throws Throws {@link !TypeError} if `exitCode` is neither an integer nor `undefined`.
    *
@@ -1049,10 +1046,8 @@ export class RsvimRt {
    * ```
    */
   exit(exitCode?: number): void {
-    if (exitCode === undefined || exitCode === null) {
-      exitCode = 0;
-    }
-    checkIsInteger(exitCode, `"Rsvim.rt.exit" exit code`);
+    exitCode = exitCode ?? 0;
+    checkIsInteger(exitCode, `"Rsvim.rt.exit" code`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.rt_exit(exitCode);
   }

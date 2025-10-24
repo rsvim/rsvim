@@ -48,7 +48,7 @@ export declare namespace RsvimFs {
         write?: boolean;
     };
     class File {
-        __handle: any;
+        #private;
         constructor(handle: any);
         close(): void;
         isClosed(): boolean;

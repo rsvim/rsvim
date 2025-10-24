@@ -1,5 +1,11 @@
+function isNull(arg) {
+    return arg === undefined || arg === null;
+}
+function isString(arg) {
+    return typeof arg === "string";
+}
 function checkNotNull(arg, msg) {
-    if (arg === undefined || arg === null) {
+    if (isNull(arg)) {
         throw new TypeError(`${msg} cannot be undefined or null`);
     }
 }
@@ -19,14 +25,54 @@ function checkIsBoolean(arg, msg) {
         throw new TypeError(`${msg} must be a boolean, but found ${typeof arg}`);
     }
 }
+function checkIsString(arg, msg) {
+    if (!isString(arg)) {
+        throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+    }
+}
 function checkIsFunction(arg, msg) {
     if (typeof arg !== "function") {
         throw new TypeError(`${msg} must be a function, but found ${typeof arg}`);
     }
 }
+function checkIsObject(arg, msg) {
+    if (typeof arg !== "object") {
+        throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
+    }
+}
+function checkIsUint8Array(arg, msg) {
+    if (!(arg instanceof Uint8Array)) {
+        throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
+    }
+}
+function isTypedArray(arg) {
+    return (arg instanceof Int8Array ||
+        arg instanceof Uint8Array ||
+        arg instanceof Uint8ClampedArray ||
+        arg instanceof Int16Array ||
+        arg instanceof Uint16Array ||
+        arg instanceof Int32Array ||
+        arg instanceof Uint32Array ||
+        arg instanceof Float16Array ||
+        arg instanceof Float32Array ||
+        arg instanceof Float64Array ||
+        arg instanceof BigInt64Array ||
+        arg instanceof BigUint64Array);
+}
+function isArrayBuffer(arg) {
+    return arg instanceof ArrayBuffer;
+}
+function isDataView(arg) {
+    return arg instanceof DataView;
+}
+function checkIsArrayBufferFamily(arg, msg) {
+    if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
+        throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
-        throw new RangeError(`${msg} is invalid option: ${arg}`);
+        throw new RangeError(`${msg} is an invalid option: ${arg}`);
     }
 }
 function boundByIntegers(arg, bound) {
@@ -37,6 +83,91 @@ function boundByIntegers(arg, bound) {
         return bound[1];
     }
     return arg;
+}
+function setDefaultFields(arg, defaults) {
+    for (const [key, val] of Object.entries(defaults)) {
+        if (!Object.hasOwn(arg, key)) {
+            Object.defineProperty(arg, key, { value: val, writable: true });
+        }
+    }
+}
+export class TextEncoder {
+    constructor() { }
+    encode(input) {
+        checkIsString(input, `"TextEncoder.encode" input`);
+        return __InternalRsvimGlobalObject.global_encoding_encode(input);
+    }
+    encodeInto(src, dest) {
+        checkIsString(src, `"TextEncoder.encodeInto" src`);
+        checkIsUint8Array(dest, `"TextEncoder.encodeInto" dest`);
+        return __InternalRsvimGlobalObject.global_encoding_encode_into(src, dest.buffer);
+    }
+    get encoding() {
+        return "utf-8";
+    }
+}
+export class TextDecoder {
+    #handle;
+    #encoding;
+    #fatal;
+    #ignoreBOM;
+    constructor(encoding, options) {
+        encoding = encoding ?? "utf-8";
+        checkIsString(encoding, `"TextDecoder.constructor" encoding`);
+        const encodingIsValid = __InternalRsvimGlobalObject.global_encoding_check_encoding_label(encoding);
+        if (!encodingIsValid) {
+            throw new RangeError(`"TextDecoder.constructor" encoding is unknown: ${encoding}`);
+        }
+        options = options ?? { fatal: false, ignoreBOM: false };
+        checkIsObject(options, `"TextDecoder.constructor" options`);
+        setDefaultFields(options, { fatal: false, ignoreBOM: false });
+        checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
+        checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
+        this.#encoding = encoding;
+        this.#fatal = options.fatal;
+        this.#ignoreBOM = options.ignoreBOM;
+        this.#handle = null;
+    }
+    decode(input, options = { stream: false }) {
+        input = input ?? new Uint8Array();
+        checkIsArrayBufferFamily(input, `"TextDecoder.decode" input`);
+        let buffer = input;
+        if (isTypedArray(input)) {
+            buffer = input.buffer;
+        }
+        else if (isDataView(input)) {
+            buffer = input.buffer;
+        }
+        options = options ?? { stream: false };
+        checkIsObject(options, `"TextDecoder.decode" options`);
+        setDefaultFields(options, { stream: false });
+        checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
+        const stream = options.stream;
+        try {
+            if (!stream && this.#handle === null) {
+                return __InternalRsvimGlobalObject.global_encoding_decode_single(buffer, this.#encoding, this.#fatal, this.#ignoreBOM);
+            }
+            if (this.#handle === null) {
+                this.#handle =
+                    __InternalRsvimGlobalObject.global_encoding_create_stream_decoder(this.#encoding, this.#ignoreBOM);
+            }
+            return __InternalRsvimGlobalObject.global_encoding_decode_stream(buffer, this.#handle, this.#fatal, stream);
+        }
+        finally {
+            if (!stream && this.#handle !== null) {
+                this.#handle = null;
+            }
+        }
+    }
+    get encoding() {
+        return this.#encoding;
+    }
+    get fatal() {
+        return this.#fatal;
+    }
+    get ignoreBOM() {
+        return this.#ignoreBOM;
+    }
 }
 ((globalThis) => {
     const TIMEOUT_MAX = Math.pow(2, 31) - 1;
@@ -50,9 +181,7 @@ function boundByIntegers(arg, bound) {
         }
     }
     function setInterval(callback, delay, ...args) {
-        if (delay === undefined || delay === null) {
-            delay = 1;
-        }
+        delay = delay ?? 1;
         checkIsNumber(delay, `"setInterval" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
@@ -72,9 +201,7 @@ function boundByIntegers(arg, bound) {
         }
     }
     function setTimeout(callback, delay, ...args) {
-        if (delay === undefined || delay === null) {
-            delay = 1;
-        }
+        delay = delay ?? 1;
         checkIsNumber(delay, `"setTimeout" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
@@ -107,5 +234,6 @@ function boundByIntegers(arg, bound) {
     globalThis.setInterval = setInterval;
     globalThis.queueMicrotask = queueMicrotask;
     globalThis.reportError = reportError;
+    globalThis.TextEncoder = TextEncoder;
+    globalThis.TextDecoder = TextDecoder;
 })(globalThis);
-export {};

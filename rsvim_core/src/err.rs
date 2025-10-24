@@ -70,9 +70,9 @@ pub enum TheErr {
   /// Failed to compile typescript
   CompileTypeScriptFailed(Cow<'static, str>),
 
-  #[error("Not enough function arguments specified.")]
+  #[error("Not enough arguments specified.")]
   /// Failed to compile typescript
-  FunctionArgumentsNotEnough,
+  ArgumentsNotEnough,
   //
   // js }
 
@@ -85,6 +85,22 @@ pub enum TheErr {
   #[error("File is already closed.")]
   // File is already been closed.
   FileAlreadyClosed,
+
+  #[error("Invalid data.")]
+  // Invalid data.
+  DataInvalid,
+
+  #[error("Invalid buffer.")]
+  // Invalid buffer.
+  BufferInvalid,
+
+  #[error("Value too large `{0}`.")]
+  // Value too large.
+  ValueTooLarge(usize),
+
+  #[error("Buffer too small `{0}`.")]
+  // Buffer too small.
+  BufferTooSmall(usize),
   //
   // js Rsvim.fs }
 }

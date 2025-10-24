@@ -19,17 +19,17 @@ The VIM editor reinvented in Rust+TypeScript.
 
 > [!CAUTION]
 >
-> _**This project is still in the very early stages of development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
+> _**This project is still in very early stage of development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
 
 ## About
 
-RSVIM is an open source terminal based text editor, built from scratch with [Rust](https://www.rust-lang.org/), [Tokio](https://tokio.rs/) and [V8](https://v8.dev/) javascript engine. It strives to be highly extensible by following the main features, concepts, philosophy of ([NEO](https://neovim.io/))[VIM](https://www.vim.org/), while also to be:
+RSVIM is an open source terminal based text editor, built from scratch with [Rust](https://www.rust-lang.org/), [Tokio](https://tokio.rs/) and [V8](https://v8.dev/) javascript engine. It strives to be highly extensible by following main features, concepts, philosophy of ([Neo](https://neovim.io/))[Vim](https://www.vim.org/), while also to be:
 
 - A fast editor that fully utilizes all CPU cores and never freezes.
 - A powerful TUI engine that provides widgets, event handlers, layouts, etc.
 - A consistent JavaScript-based runtime with built-in support for TypeScript.
 - An editing service that allows multiple users to access remotely and work together.
-- A text processing tool that integrates with the shell environment.
+- A text processing tool that integrates with shell environment.
 
 ## Installation
 
@@ -51,13 +51,13 @@ Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
-Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up the development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
+Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
 
 Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
 ## Credits
 
-Source code and technical solutions were studied from following projects for implementing the initial prototype of javascript runtime and the [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
+Source code and technical solutions are studied from following projects for implementing initial prototype of javascript runtime and [Minimum Common Web Platform API](https://min-common-api.proposal.wintertc.org/):
 
 - **[dune](https://github.com/aalykiot/dune)**: A hobby runtime for JavaScript and TypeScript 🚀.
 - **[deno](https://github.com/denoland/deno)**: A modern runtime for JavaScript and TypeScript.

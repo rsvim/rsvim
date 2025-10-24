@@ -74,6 +74,42 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(
       scope,
       vim,
+      "global_encoding_encode",
+      global_this::text_encoder::encode,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_encode_into",
+      global_this::text_encoder::encode_into,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_check_encoding_label",
+      global_this::text_encoder::check_encoding_label,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_decode_single",
+      global_this::text_encoder::decode_single,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_create_stream_decoder",
+      global_this::text_encoder::create_stream_decoder,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_encoding_decode_stream",
+      global_this::text_encoder::decode_stream,
+    );
+    set_function_to(
+      scope,
+      vim,
       "global_queue_microtask",
       global_this::microtask::queue_microtask,
     );
@@ -309,15 +345,15 @@ pub fn throw_exception(scope: &mut v8::PinScope, error: &TheErr) {
 }
 
 /// Useful utility to throw v8 type errors.
-pub fn throw_type_error(scope: &mut v8::PinScope, message: &str) {
-  let message = v8::String::new(scope, message).unwrap();
+pub fn throw_type_error(scope: &mut v8::PinScope, error: &TheErr) {
+  let message = v8::String::new(scope, &error.to_string()).unwrap();
   let exception = v8::Exception::type_error(scope, message);
   scope.throw_exception(exception);
 }
 
 /// Useful utility to throw v8 range errors.
-pub fn throw_range_error(scope: &mut v8::PinScope, message: &str) {
-  let message = v8::String::new(scope, message).unwrap();
+pub fn throw_range_error(scope: &mut v8::PinScope, error: &TheErr) {
+  let message = v8::String::new(scope, &error.to_string()).unwrap();
   let exception = v8::Exception::range_error(scope, message);
   scope.throw_exception(exception);
 }
