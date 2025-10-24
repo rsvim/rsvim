@@ -4,6 +4,7 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 
 pub const FD: &str = "fd";
+pub type FileHandle = Arc<Mutex<std::fs::File>>;
 
 #[cfg(not(target_family = "windows"))]
 pub fn std_to_fd(file: std::fs::File) -> usize {
@@ -42,5 +43,3 @@ pub fn tokio_from_fd(fd: usize) -> tokio::fs::File {
   let file = std_from_fd(fd);
   tokio::fs::File::from_std(file)
 }
-
-pub type FileHandle = Arc<Mutex<std::fs::File>>;
