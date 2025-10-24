@@ -300,7 +300,7 @@ impl JsFuture for EsModuleFuture {
               maybe_result,
             };
             let mut state = state_rc.borrow_mut();
-            state.pending_futures.insert(0, Box::new(fut));
+            state.pending_futures.push(Box::new(fut));
           }
         };
         let task_id = js::next_task_id();

@@ -96,7 +96,7 @@ pub fn create_timer<'s>(
         params: Rc::clone(&params),
       };
       let mut state = state_rc.borrow_mut();
-      state.pending_futures.insert(0, Box::new(fut));
+      state.pending_futures.push(Box::new(fut));
     }
   };
 
