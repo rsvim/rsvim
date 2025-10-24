@@ -481,3 +481,53 @@ macro_rules! is_v8_func {
     $value.is_function()
   };
 }
+
+/// Wrap rust handle with v8's cppgc.
+///
+/// Some resources will be manually managed by users, such as file open/close,
+/// network sockets, etc. Thus we will have to store the resource handler with
+/// v8's cppgc wrapper, so v8 GC will close the resource and free the memory
+/// allocated for us, instead of rust's "safe" resource management.
+///
+/// The basic idea is:
+/// 1. Leak the rust's handler and get raw handler pointer.
+/// 2. Set the raw handler to v8 object's internal reference.
+/// 3. Create a v8::Weak finalizer callback, thus v8 GC will close it for us.
+///
+/// We will create a v8 object and:
+/// 1. Set the handle's raw pointer to its internal field with index-0.
+/// 2. Set a v8::Weak finalizer to its internal field with index-1.
+#[macro_export]
+macro_rules! wrap_handle {
+  ($scope:ident, $handle:expr, $ty:ty) => {
+    let obj_template = v8::ObjectTemplate::new($scope);
+    obj_wrapper.set_internal_field_count(2);
+    let wrapper = obj_wrapper.new_instance($scope).unwrap();
+
+    let handle_ptr =
+      binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
+    let weak_rc = Rc::new(Cell::new(None));
+
+    // To automatically drop the handle instance when
+    // V8 garbage collects the object that internally holds the Rust instance,
+    // we use a Weak reference with a finalizer callback.
+    let file_weak = v8::Weak::with_finalizer(
+      $scope,
+      wrapper,
+      Box::new({
+        let weak_rc = weak_rc.clone();
+        move |isolate| unsafe {
+          drop(Box::from_raw(handle_ptr));
+          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+          trace!("|wrap_handle| dropped handle:{}", $handle);
+        }
+      }),
+    );
+
+    // Store the weak ref pointer into the "shared" cell.
+    weak_rc.set(file_weak.into_raw());
+    binding::set_internal_ref($scope, wrapper, 1, weak_rc);
+
+    wrapper
+  };
+}
