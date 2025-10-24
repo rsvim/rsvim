@@ -31,8 +31,8 @@ pub async fn async_fs_read(
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
-
   handle::tokio_to_fd(file).await;
+
   result
 }
 
