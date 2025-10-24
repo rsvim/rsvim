@@ -1067,7 +1067,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains(
-      r####""Rsvim.cmd.create" attributes.bang must be a boolean, but found"####
+      r####""Rsvim.cmd.create" bang attribute must be a boolean, but found"####
     ));
 
     let state_rc = event_loop.js_runtime.get_state();
