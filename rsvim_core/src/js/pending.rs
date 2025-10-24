@@ -73,3 +73,21 @@ pub fn create_fs_open(
     }),
   );
 }
+
+pub fn create_fs_read(
+  state: &mut JsRuntimeState,
+  task_id: JsTaskId,
+  file: std::fs::File,
+  bufsize: usize,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  msg::sync_send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsReadReq(msg::FsReadReq {
+      task_id,
+      file,
+      bufsize,
+    }),
+  );
+}

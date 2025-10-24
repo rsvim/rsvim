@@ -141,7 +141,6 @@ pub fn create_fs_file_wrapper<'s>(
   fd: usize,
 ) -> v8::Local<'s, v8::Object> {
   let file_handle = handle::std_from_fd(fd);
-
   create_cppgc_handle!(scope, Some(file_handle), Option<File>)
 }
 

@@ -5,6 +5,7 @@ pub mod handle;
 pub mod open;
 pub mod read;
 
+use crate::get_cppgc_handle;
 use crate::is_v8_str;
 use crate::js;
 use crate::js::JsRuntime;
@@ -15,6 +16,8 @@ use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::create_fs_file_wrapper;
 use crate::js::binding::global_rsvim::fs::open::fs_open;
+use crate::js::binding::global_rsvim::fs::read::FsReadFuture;
+use crate::js::binding::global_rsvim::fs::read::fs_read;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
@@ -123,7 +126,7 @@ pub fn read<'s>(
 ) {
   debug_assert!(args.length() == 2);
   debug_assert!(args.get(0).is_object());
-  let file_wrapper = args.get(0).to_object(scope);
+  let file_wrapper = args.get(0).to_object(scope).unwrap();
   debug_assert!(args.get(1).is_array_buffer());
   let buf = args.get(1).cast::<v8::ArrayBuffer>();
   trace!("RsvimFs.read: {:?}, {:?}", file_wrapper, buf);
@@ -132,12 +135,14 @@ pub fn read<'s>(
   let promise = promise_resolver.get_promise(scope);
 
   let state_rc = JsRuntime::state(scope);
-  let open_cb = {
+  let read_cb = {
     let promise = v8::Global::new(scope, promise_resolver);
     let state_rc = state_rc.clone();
+    let buffer_store = buf.get_backing_store();
     move |maybe_result: Option<TheResult<Vec<u8>>>| {
-      let fut = FsOpenFuture {
+      let fut = FsReadFuture {
         promise: promise.clone(),
+        buffer_store,
         maybe_result,
       };
       let mut state = state_rc.borrow_mut();
@@ -145,15 +150,16 @@ pub fn read<'s>(
     }
   };
 
+  let file_handle =
+    get_cppgc_handle!(scope, file_wrapper, Option<std::fs::File>);
   let mut state = state_rc.borrow_mut();
   let task_id = js::next_task_id();
-  let filename = Path::new(&file_wrapper);
-  pending::create_fs_open(
+  pending::create_fs_read(
     &mut state,
     task_id,
     filename,
     options,
-    Box::new(open_cb),
+    Box::new(read_cb),
   );
 
   rv.set(promise.into());
