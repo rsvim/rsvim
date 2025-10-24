@@ -499,10 +499,14 @@ macro_rules! is_v8_func {
 /// 2. Set a v8::Weak finalizer to its internal field with index-1.
 #[macro_export]
 macro_rules! wrap_handle {
-  ($scope:ident, $handle:expr, $ty:ty) => {
+  ($scope:ident, $handle:expr, $ty:ty) => {{
     let obj_template = v8::ObjectTemplate::new($scope);
-    obj_wrapper.set_internal_field_count(2);
-    let wrapper = obj_wrapper.new_instance($scope).unwrap();
+
+    // Allocate internal field for the wrapped `std::fs::File`:
+    // 0-index: The `file_handle`, i.e. the `std::fs::File`
+    // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
+    obj_template.set_internal_field_count(2);
+    let wrapper = obj_template.new_instance($scope).unwrap();
 
     let handle_ptr =
       $crate::js::binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
@@ -529,7 +533,7 @@ macro_rules! wrap_handle {
     $crate::js::binding::set_internal_ref($scope, wrapper, 1, weak_rc);
 
     wrapper
-  };
+  }};
 }
 
 /// Get the wrapped handle from v8 object.
