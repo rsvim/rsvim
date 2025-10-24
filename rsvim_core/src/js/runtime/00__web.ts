@@ -11,6 +11,10 @@ function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+function isString(arg: any): boolean {
+  return typeof arg === "string";
+}
+
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
   if (isNull(arg)) {
@@ -42,7 +46,7 @@ function checkIsBoolean(arg: any, msg: string) {
 
 /** @hidden */
 function checkIsString(arg: any, msg: string) {
-  if (typeof arg !== "string") {
+  if (!isString(arg)) {
     throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
   }
 }
@@ -127,6 +131,15 @@ function boundByIntegers(arg: any, bound: [number, number]) {
     return bound[1];
   }
   return arg;
+}
+
+/** @hidden */
+function setDefaultFields(arg: object, defaults: object) {
+  for (const [key, val] of Object.entries(defaults)) {
+    if (!Object.hasOwn(arg, key)) {
+      Object.defineProperty(arg, key, val);
+    }
+  }
 }
 
 /**
