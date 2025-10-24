@@ -203,9 +203,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file = Arc::new(Mutex::new(handle::std_from_fd(fd)));
-    let file_wrapper =
-      wrap_cppgc_handle!(scope, Some(file), Option<handle::FileHandle>);
+    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
       .promise
