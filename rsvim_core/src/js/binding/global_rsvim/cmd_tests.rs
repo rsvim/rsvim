@@ -1259,7 +1259,7 @@ Rsvim.cmd.echo(`Previous command:${prev}`);
     assert!(actual.is_some());
     let actual = actual.unwrap();
     assert!(actual.contains(
-      r####""Rsvim.cmd.create" options.force must be a boolean, but found"####
+      r####""Rsvim.cmd.create" force option must be a boolean, but found"####
     ));
 
     let state_rc = event_loop.js_runtime.get_state();
