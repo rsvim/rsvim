@@ -96,6 +96,15 @@ function boundByIntegers(arg: any, bound: [number, number]) {
   return arg;
 }
 
+/** @hidden */
+function setDefaultFields(arg: object, defaults: object) {
+  for (const [key, val] of Object.entries(defaults)) {
+    if (!Object.hasOwn(arg, key)) {
+      Object.defineProperty(arg, key, val);
+    }
+  }
+}
+
 /**
  * The `Rsvim` global object.
  *
@@ -229,8 +238,8 @@ export class RsvimCmd {
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
-   * @param {RsvimCmd.CommandAttributes?} attributes - Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CommandOptions?} options - Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
+   * @param {RsvimCmd.CommandAttributes} attributes? - (Optional) Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions} options? - (Optional) Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
    * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
@@ -251,17 +260,17 @@ export class RsvimCmd {
   create(
     name: string,
     callback: RsvimCmd.CommandCallback,
-    attributes: RsvimCmd.CommandAttributes = { bang: false, nargs: "0" },
-    options: RsvimCmd.CommandOptions = { force: true },
+    attributes?: RsvimCmd.CommandAttributes,
+    options?: RsvimCmd.CommandOptions = { force: true },
   ): RsvimCmd.CommandDefinition | undefined {
     checkMatchPattern(
       name,
       /^[A-Za-z_!][A-Za-z0-9_!]*$/,
       `"Rsvim.cmd.create" name`,
     );
-
     checkIsFunction(callback, `"Rsvim.cmd.create" callback`);
 
+    attributes = attributes ?? { bang: false, nargs: "0" };
     checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
     if (!Object.hasOwn(attributes, "bang")) {
       attributes.bang = false;
@@ -269,6 +278,7 @@ export class RsvimCmd {
     if (!Object.hasOwn(attributes, "nargs")) {
       attributes.nargs = "0";
     }
+
     checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
     checkIsOptions(
       attributes.nargs,
