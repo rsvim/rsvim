@@ -483,7 +483,7 @@ export class RsvimFs {
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
    * @param {string} path - File path.
-   * @param {RsvimFs.OpenOptions?} options - Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
+   * @param {RsvimFs.OpenOptions?} options? - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
    * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
@@ -493,31 +493,19 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(
-    path: string,
-    options: RsvimFs.OpenOptions = { read: true },
-  ): Promise<RsvimFs.File> {
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
+    options = options ?? { read: true };
     checkIsObject(options, `"Rsvim.fs.open" options`);
-    if (!Object.hasOwn(options, "append")) {
-      options.append = false;
-    }
-    if (!Object.hasOwn(options, "create")) {
-      options.create = false;
-    }
-    if (!Object.hasOwn(options, "createNew")) {
-      options.createNew = false;
-    }
-    if (!Object.hasOwn(options, "read")) {
-      options.read = false;
-    }
-    if (!Object.hasOwn(options, "truncate")) {
-      options.truncate = false;
-    }
-    if (!Object.hasOwn(options, "write")) {
-      options.write = false;
-    }
+    setDefaultFields(options, {
+      append: false,
+      create: false,
+      createNew: false,
+      read: false,
+      truncate: false,
+      write: false,
+    });
     checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
     checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
     checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
