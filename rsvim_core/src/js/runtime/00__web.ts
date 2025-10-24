@@ -7,13 +7,13 @@
  * @packageDocumentation
  */
 
-function isNullOrUndefined(arg: any): boolean {
+function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
-  if (isNullOrUndefined(arg)) {
+  if (isNull(arg)) {
     throw new TypeError(`${msg} cannot be undefined or null`);
   }
 }

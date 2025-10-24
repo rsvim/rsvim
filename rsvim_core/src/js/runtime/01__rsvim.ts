@@ -16,9 +16,13 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
+function isNull(arg: any): boolean {
+  return arg === undefined || arg === null;
+}
+
 /** @hidden */
 function checkNotNull(arg: any, msg: string) {
-  if (arg === undefined || arg === null) {
+  if (isNull(arg)) {
     throw new TypeError(`${msg} cannot be undefined or null`);
   }
 }
