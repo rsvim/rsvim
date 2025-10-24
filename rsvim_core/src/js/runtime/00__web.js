@@ -72,7 +72,7 @@ function checkIsArrayBufferFamily(arg, msg) {
 }
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
-        throw new RangeError(`${msg} is invalid option: ${arg}`);
+        throw new RangeError(`${msg} is an invalid option: ${arg}`);
     }
 }
 function boundByIntegers(arg, bound) {
