@@ -536,28 +536,22 @@ export class RsvimFs {
   openSync(path: string, options?: RsvimFs.OpenOptions): RsvimFs.File {
     checkIsString(path, `"Rsvim.fs.openSync" path`);
 
-    if (options === undefined || options === null) {
-      options = { read: true };
-    }
-    checkIsObject(options, `"Rsvim.fs.openSync" options`);
-    if (!Object.hasOwn(options, "append")) {
-      options.append = false;
-    }
-    if (!Object.hasOwn(options, "create")) {
-      options.create = false;
-    }
-    if (!Object.hasOwn(options, "createNew")) {
-      options.createNew = false;
-    }
-    if (!Object.hasOwn(options, "read")) {
-      options.read = false;
-    }
-    if (!Object.hasOwn(options, "truncate")) {
-      options.truncate = false;
-    }
-    if (!Object.hasOwn(options, "write")) {
-      options.write = false;
-    }
+    options = options ?? { read: true };
+    checkIsObject(options, `"Rsvim.fs.open" options`);
+    setDefaultFields(options, {
+      append: false,
+      create: false,
+      createNew: false,
+      read: false,
+      truncate: false,
+      write: false,
+    });
+    checkIsBoolean(options.append, `"Rsvim.fs.open" append option`);
+    checkIsBoolean(options.create, `"Rsvim.fs.open" create option`);
+    checkIsBoolean(options.createNew, `"Rsvim.fs.open" createNew option`);
+    checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
+    checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
+    checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
 
     // @ts-ignore Ignore warning
     const handle = __InternalRsvimGlobalObject.fs_open_sync(path, options);
