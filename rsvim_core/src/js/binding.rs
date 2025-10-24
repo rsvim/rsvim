@@ -299,7 +299,7 @@ pub fn set_internal_ref<T>(
   data: T,
 ) -> *mut T {
   let boxed_ref = Box::new(data);
-  let addr = Box::leak(boxed_ref) as *mut T;
+  let addr = Box::into_raw(boxed_ref);
   let v8_ext = v8::External::new(scope, addr as *mut c_void);
 
   target.set_internal_field(index, v8_ext.into());
