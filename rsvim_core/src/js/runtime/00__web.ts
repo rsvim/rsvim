@@ -1,9 +1,9 @@
 /**
- * @title Web APIs
- * @sidebarPosition 3
- */
-
-/**
+ * ---
+ * title: Web API
+ * sidebar_position: 3
+ * ---
+ *
  * The [WinterTC](https://wintertc.org/) compatible web platform APIs.
  *
  * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintertc.org/)
