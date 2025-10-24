@@ -10,10 +10,13 @@ pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<(Vec<u8>, usize)> {
 
   let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  match file.read(&mut buf) {
+  let result = match file.read(&mut buf) {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  }
+  };
+
+  handle::std_to_fd(file);
+  result
 }
 
 pub async fn async_fs_read(
@@ -24,10 +27,13 @@ pub async fn async_fs_read(
 
   let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  match file.read(&mut buf).await {
+  let result = match file.read(&mut buf).await {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  }
+  };
+
+  handle::tokio_to_fd(file).await;
+  result
 }
 
 pub struct FsReadFuture {
