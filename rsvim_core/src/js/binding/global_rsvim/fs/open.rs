@@ -11,6 +11,10 @@ use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
+use parking_lot::Mutex;
+use std::fs::File;
+use std::os::fd::FromRawFd;
+use std::sync::Arc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -201,7 +205,9 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
+    let file = Arc::new(Mutex::new(handle::std_from_fd(fd)));
+    let file_wrapper =
+      wrap_cppgc_handle!(scope, Some(file), Option<Arc<Mutex<File>>>);
 
     self
       .promise
