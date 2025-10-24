@@ -63,7 +63,7 @@ function checkIsString(arg: any, msg: string) {
 /** @hidden */
 function checkOptionalString(arg: any, msg: string) {
   if (!(isString(arg) || isNull(arg))) {
-    throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
+    throw new TypeError(`${msg} must be a string?, but found ${typeof arg}`);
   }
 }
 
