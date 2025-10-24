@@ -340,15 +340,16 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - Bytes array, by default is `new Uint8Array()`.
+   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input? - (Optional) Bytes array, by default is `new Uint8Array()`.
    * @param {TextDecoderDecodeOptions} options - Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
-    input: ArrayBuffer | GlobalThis.TypedArray | DataView = new Uint8Array(),
+    input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
     options: TextDecoderDecodeOptions = { stream: false },
   ): string {
+    input = input ?? new Uint8Array();
     if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
       throw new TypeError(
         `"TextDecoder.decode" input is invalid, found ${typeof input}`,
