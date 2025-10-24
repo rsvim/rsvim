@@ -261,7 +261,7 @@ export class RsvimCmd {
     name: string,
     callback: RsvimCmd.CommandCallback,
     attributes?: RsvimCmd.CommandAttributes,
-    options?: RsvimCmd.CommandOptions = { force: true },
+    options?: RsvimCmd.CommandOptions,
   ): RsvimCmd.CommandDefinition | undefined {
     checkMatchPattern(
       name,
@@ -274,14 +274,13 @@ export class RsvimCmd {
     checkIsObject(attributes, `"Rsvim.cmd.create" attributes`);
     setDefaultFields(attributes, { bang: false, nargs: "0" });
     checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" bang attribute`);
-
-    checkIsBoolean(attributes.bang, `"Rsvim.cmd.create" attributes.bang`);
     checkIsOptions(
       attributes.nargs,
       ["0", "1", "?", "+", "*"],
-      `"Rsvim.cmd.create" attributes.nargs`,
+      `"Rsvim.cmd.create" nargs attribute`,
     );
 
+    options = options ?? { force: true };
     checkIsObject(options, `"Rsvim.cmd.create" options`);
     if (!Object.hasOwn(options, "force")) {
       options.force = true;
