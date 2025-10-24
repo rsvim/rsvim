@@ -38,15 +38,16 @@ impl JsFuture for FsReadFuture {
     // Otherwise, resolve the promise passing the result.
     let result = result.unwrap();
 
-    // Deserialize bincode binary into actual rust types.
-    let (n, data): (usize, Vec<u8>) = bincode::deserialize(&result).unwrap();
+    // Deserialize bytes into a file-descriptor.
+    let (data, data_len) = decode_bytes::<Vec<u8>>(&result);
+    debug_assert_eq!(data.len(), data_len);
 
     // Copy the slice's bytes into v8's typed-array backing store.
-    for (i, value) in data.iter().enumerate() {
-      self.buffer_store[i].set(*value);
+    for (i, b) in data.iter().enumerate() {
+      self.buffer_store[i].set(*b);
     }
 
-    let bytes_read = v8::Integer::new(scope, n as i32);
+    let bytes_read = v8::Integer::new(scope, data_len as i32);
 
     self
       .promise
