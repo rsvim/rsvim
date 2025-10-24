@@ -98,16 +98,7 @@ function isDataView(arg: any): boolean {
 }
 
 /** @hidden */
-function checkIsArrayBufferOrTypedArrayOrDataView(arg: any, msg: string) {
-  if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
-    throw new TypeError(
-      `${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`,
-    );
-  }
-}
-
-/** @hidden */
-function checkIsArrayBufferFamilyOrNull(arg: any, msg: string) {
+function checkIsArrayBufferFamily(arg: any, msg: string) {
   if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
     throw new TypeError(
       `${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`,
@@ -350,11 +341,7 @@ export class TextDecoder {
     options: TextDecoderDecodeOptions = { stream: false },
   ): string {
     input = input ?? new Uint8Array();
-    if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
-      throw new TypeError(
-        `"TextDecoder.decode" input is invalid, found ${typeof input}`,
-      );
-    }
+    checkIsArrayBufferFamily(input, `"TextDecoder.decode" input`);
 
     let buffer = input as ArrayBuffer;
     if (isTypedArray(input)) {
