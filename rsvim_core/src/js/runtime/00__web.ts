@@ -329,6 +329,20 @@ export class TextDecoder {
   /**
    * Decode a bytes array to string text. The bytes array can be a {@link !ArrayBuffer}, {@link !TypedArray} or {@link !DataView}.
    *
+   * @example
+   * ```javascript
+   * // Single pass, non-stream
+   * const str1 = new TextDecoder().decode(new Uint8Array([1,2,3,4]));
+   *
+   * // Stream
+   * const decoder = new TextDecoder();
+   * let str2 = "";
+   * str2 += decoder.decode(new Uint8Array([1]), {stream: true});
+   * str2 += decoder.decode(new Uint8Array([2,3]), {stream: true});
+   * str2 += decoder.decode(new Uint8Array([4]), {stream: true});
+   * str2 += decoder.decode(undefined, {stream: false}); // Flush buffer and finish decoding.
+   * ```
+   *
    * @see {@link !TextDecoder}
    *
    * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input? - (Optional) Bytes array, by default is `new Uint8Array()`.
