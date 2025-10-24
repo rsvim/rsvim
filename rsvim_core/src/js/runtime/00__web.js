@@ -1,8 +1,11 @@
-function isNullOrUndefined(arg) {
+function isNull(arg) {
     return arg === undefined || arg === null;
 }
+function isString(arg) {
+    return typeof arg === "string";
+}
 function checkNotNull(arg, msg) {
-    if (isNullOrUndefined(arg)) {
+    if (isNull(arg)) {
         throw new TypeError(`${msg} cannot be undefined or null`);
     }
 }
@@ -23,7 +26,7 @@ function checkIsBoolean(arg, msg) {
     }
 }
 function checkIsString(arg, msg) {
-    if (typeof arg !== "string") {
+    if (!isString(arg)) {
         throw new TypeError(`${msg} must be a string, but found ${typeof arg}`);
     }
 }
@@ -62,12 +65,7 @@ function isArrayBuffer(arg) {
 function isDataView(arg) {
     return arg instanceof DataView;
 }
-function checkIsArrayBufferOrTypedArrayOrDataView(arg, msg) {
-    if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
-        throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
-    }
-}
-function checkIsArrayBufferFamilyOrNull(arg, msg) {
+function checkIsArrayBufferFamily(arg, msg) {
     if (!(isArrayBuffer(arg) || isDataView(arg) || isTypedArray(arg))) {
         throw new TypeError(`${msg} must be either ArrayBuffer/DataView/TypedArray, buf found ${typeof arg}`);
     }
@@ -85,6 +83,13 @@ function boundByIntegers(arg, bound) {
         return bound[1];
     }
     return arg;
+}
+function setDefaultFields(arg, defaults) {
+    for (const [key, val] of Object.entries(defaults)) {
+        if (!Object.hasOwn(arg, key)) {
+            Object.defineProperty(arg, key, val);
+        }
+    }
 }
 export class TextEncoder {
     constructor() { }
@@ -106,19 +111,16 @@ export class TextDecoder {
     #encoding;
     #fatal;
     #ignoreBOM;
-    constructor(encoding = "utf-8", options = { fatal: false, ignoreBOM: false }) {
+    constructor(encoding, options) {
+        encoding = encoding ?? "utf-8";
         checkIsString(encoding, `"TextDecoder.constructor" encoding`);
         const encodingIsValid = __InternalRsvimGlobalObject.global_encoding_check_encoding_label(encoding);
         if (!encodingIsValid) {
             throw new RangeError(`"TextDecoder.constructor" encoding is unknown: ${encoding}`);
         }
+        options = options ?? { fatal: false, ignoreBOM: false };
         checkIsObject(options, `"TextDecoder.constructor" options`);
-        if (!Object.hasOwn(options, "fatal")) {
-            options.fatal = false;
-        }
-        if (!Object.hasOwn(options, "ignoreBOM")) {
-            options.ignoreBOM = false;
-        }
+        setDefaultFields(options, { fatal: false, ignoreBOM: false });
         checkIsBoolean(options.fatal, `"TextDecoder.constructor" fatal option`);
         checkIsBoolean(options.ignoreBOM, `"TextDecoder.constructor" ignoreBOM option`);
         this.#encoding = encoding;
@@ -126,10 +128,9 @@ export class TextDecoder {
         this.#ignoreBOM = options.ignoreBOM;
         this.#handle = null;
     }
-    decode(input = new Uint8Array(), options = { stream: false }) {
-        if (!(isArrayBuffer(input) || isDataView(input) || isTypedArray(input))) {
-            throw new TypeError(`"TextDecoder.decode" input is invalid, found ${typeof input}`);
-        }
+    decode(input, options = { stream: false }) {
+        input = input ?? new Uint8Array();
+        checkIsArrayBufferFamily(input, `"TextDecoder.decode" input`);
         let buffer = input;
         if (isTypedArray(input)) {
             buffer = input.buffer;
@@ -137,10 +138,9 @@ export class TextDecoder {
         else if (isDataView(input)) {
             buffer = input.buffer;
         }
+        options = options ?? { stream: false };
         checkIsObject(options, `"TextDecoder.decode" options`);
-        if (!Object.hasOwn(options, "stream")) {
-            options.stream = false;
-        }
+        setDefaultFields(options, { stream: false });
         checkIsBoolean(options.stream, `"TextDecoder.decode" stream option`);
         const stream = options.stream;
         try {
@@ -180,7 +180,8 @@ export class TextDecoder {
             activeTimers.delete(id);
         }
     }
-    function setInterval(callback, delay = 1, ...args) {
+    function setInterval(callback, delay, ...args) {
+        delay = delay ?? 1;
         checkIsNumber(delay, `"setInterval" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
@@ -199,7 +200,8 @@ export class TextDecoder {
             activeTimers.delete(id);
         }
     }
-    function setTimeout(callback, delay = 1, ...args) {
+    function setTimeout(callback, delay, ...args) {
+        delay = delay ?? 1;
         checkIsNumber(delay, `"setTimeout" delay`);
         delay *= 1;
         delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
