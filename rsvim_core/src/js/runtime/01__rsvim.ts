@@ -249,8 +249,8 @@ export class RsvimCmd {
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
    * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
-   * @param {RsvimCmd.CommandAttributes} attributes? - (Optional) Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
-   * @param {RsvimCmd.CommandOptions} options? - (Optional) Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
+   * @param {RsvimCmd.CommandAttributes} attributes - (Optional) Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
+   * @param {RsvimCmd.CommandOptions} options - (Optional) Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
    * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if command name or alias already exists, but `force` option is not set to override existing command forcibly.
@@ -483,7 +483,7 @@ export class RsvimFs {
    * The caller have to close the file to prevent resource leaking, see {@link close}.
    *
    * @param {string} path - File path.
-   * @param {RsvimFs.OpenOptions} options? - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
+   * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
    * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
@@ -523,7 +523,7 @@ export class RsvimFs {
    * The sync version of {@link open}.
    *
    * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions} options? - Same with {@link open}.
+   * @param {RsvimFs.OpenOptions} options - Same with {@link open}.
    * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.

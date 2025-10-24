@@ -300,8 +300,8 @@ export class TextDecoder {
    *
    * @see [Node.js - WHATWG supported encodings](https://nodejs.org/api/util.html#whatwg-supported-encodings)
    *
-   * @param {string} encoding? - (Optional) Decoder encoding, by default is "utf-8".
-   * @param {TextDecoderOptions} options? - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
+   * @param {string} encoding - (Optional) Decoder encoding, by default is "utf-8".
+   * @param {TextDecoderOptions} options - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
   constructor(encoding?: string, options?: TextDecoderOptions) {
@@ -356,8 +356,8 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input? - (Optional) Bytes array, by default is `new Uint8Array()`.
-   * @param {TextDecoderDecodeOptions} options? - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
+   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
+   * @param {TextDecoderDecodeOptions} options - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
@@ -482,8 +482,8 @@ export interface GlobalThis {
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay? - (Optional) The milliseconds that the timer should delay in between execution of the function, by default is `1`.
-   * @param {...any} [args]? - (Optional) Additional arguments which are passed through to the function.
+   * @param {number} delay - (Optional) The milliseconds that the timer should delay in between execution of the function, by default is `1`.
+   * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
@@ -497,8 +497,8 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
    * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay? - (Optional) The milliseconds that the timer should wait before the function is executed, by default is `1`.
-   * @param {...any} [args]? - (Optional) Additional arguments which are passed through to the function.
+   * @param {number} delay - (Optional) The milliseconds that the timer should wait before the function is executed, by default is `1`.
+   * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
