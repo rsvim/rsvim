@@ -51,7 +51,7 @@ Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
-Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up the development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
+Contributions to RSVIM are always welcomed. A few guidelines that help quickly set up development environment can be found in [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md).
 
 Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and designs there if they need fairly large efforts.
 
