@@ -1,5 +1,6 @@
 //! Open file APIs.
 
+use crate::create_cppgc_handle;
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
@@ -10,7 +11,6 @@ use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use crate::wrap_cppgc_handle;
 use std::cell::Cell;
 use std::fs::File;
 use std::rc::Rc;
@@ -142,7 +142,7 @@ pub fn create_fs_file_wrapper<'s>(
 ) -> v8::Local<'s, v8::Object> {
   let file_handle = handle::std_from_fd(fd);
 
-  wrap_cppgc_handle!(scope, Some(file_handle), Option<File>)
+  create_cppgc_handle!(scope, Some(file_handle), Option<File>)
 }
 
 pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
