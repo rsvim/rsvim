@@ -295,9 +295,7 @@ export class RsvimCmd {
     checkIsObject(options, `"Rsvim.cmd.create" options`);
     setDefaultFields(options, { force: true });
     checkIsBoolean(options.force, `"Rsvim.cmd.create" force option`);
-    if (Object.hasOwn(options, "alias")) {
-      checkIsString(options.alias, `"Rsvim.cmd.create" alias option`);
-    }
+    checkOptionalString(options.alias, `"Rsvim.cmd.create" alias option`);
 
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.cmd_create(
