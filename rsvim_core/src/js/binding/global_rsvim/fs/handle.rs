@@ -35,7 +35,7 @@ pub async fn tokio_to_fd(file: tokio::fs::File) -> usize {
   std_to_fd(file)
 }
 
-pub fn tokio_from_fd(fd: usize) -> tokio::fs::File {
-  let file = std_from_fd(fd);
+pub unsafe fn tokio_from_fd(fd: usize) -> tokio::fs::File {
+  let file = unsafe { std_from_fd(fd) };
   tokio::fs::File::from_std(file)
 }
