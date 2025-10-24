@@ -5,34 +5,30 @@ use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 
-pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<(Vec<u8>, usize)> {
+pub fn fs_read(
+  file: &mut std::fs::File,
+  bufsize: usize,
+) -> TheResult<(Vec<u8>, usize)> {
   use std::io::Read;
 
-  let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  let result = match file.read(&mut buf) {
+  match file.read(&mut buf) {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  };
-  handle::std_to_fd(file);
-
-  result
+  }
 }
 
 pub async fn async_fs_read(
-  fd: usize,
+  file: &mut tokio::fs::File,
   bufsize: usize,
 ) -> TheResult<(Vec<u8>, usize)> {
   use tokio::io::AsyncReadExt;
 
-  let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  let result = match file.read(&mut buf).await {
+  match file.read(&mut buf).await {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
-  };
-  handle::tokio_to_fd(file).await;
-  result
+  }
 }
 
 pub struct FsReadFuture {
