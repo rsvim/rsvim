@@ -1,7 +1,5 @@
 //! Read file APIs.
 
-use tokio::io::AsyncReadExt;
-
 // use crate::flags_builder_impl;
 // use crate::flags_impl;
 // use crate::from_v8_prop;
@@ -15,10 +13,25 @@ use crate::prelude::*;
 // use std::cell::Cell;
 // use std::rc::Rc;
 
+pub fn fs_read(
+  file: &mut std::fs::File,
+  bufsize: usize,
+) -> TheResult<(Vec<u8>, usize)> {
+  use std::io::Read;
+
+  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
+  match file.read(&mut buf) {
+    Ok(n) => Ok((buf, n)),
+    Err(e) => bail!(TheErr::ReadFileFailed(e)),
+  }
+}
+
 pub async fn async_fs_read(
   file: &mut tokio::fs::File,
   bufsize: usize,
 ) -> TheResult<(Vec<u8>, usize)> {
+  use tokio::io::AsyncReadExt;
+
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   match file.read(&mut buf).await {
     Ok(n) => Ok((buf, n)),
