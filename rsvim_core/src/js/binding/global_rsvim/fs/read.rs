@@ -1,5 +1,7 @@
 //! Read file APIs.
 
+use tokio::io::AsyncReadExt;
+
 // use crate::flags_builder_impl;
 // use crate::flags_impl;
 // use crate::from_v8_prop;
@@ -11,8 +13,18 @@ use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 // use crate::to_v8_prop;
 // use std::cell::Cell;
-// use std::fs::File;
 // use std::rc::Rc;
+
+pub async fn async_fs_read(
+  file: &mut tokio::fs::File,
+  bufsize: usize,
+) -> TheResult<(Vec<u8>, usize)> {
+  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
+  match file.read(&mut buf).await {
+    Ok(n) => Ok((buf, n)),
+    Err(e) => bail!(TheErr::ReadFileFailed(e)),
+  }
+}
 
 pub struct FsReadFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
