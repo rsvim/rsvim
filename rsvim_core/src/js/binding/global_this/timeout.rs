@@ -19,7 +19,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|TimeoutFuture| run");
+    trace!("|TimeoutFuture|");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
