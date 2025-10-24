@@ -4,9 +4,6 @@ use crate::get_cppgc_handle;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
-use parking_lot::Mutex;
-use std::fs::File;
-use std::sync::Arc;
 
 pub fn fs_close<'s>(
   scope: &mut v8::PinScope<'s, '_>,
