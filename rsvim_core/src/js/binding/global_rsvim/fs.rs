@@ -150,16 +150,15 @@ pub fn read<'s>(
     }
   };
 
-  let file_handle =
-    get_cppgc_handle!(scope, file_wrapper, Option<std::fs::File>)
-      .as_ref()
-      .unwrap();
+  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>)
+    .as_ref()
+    .unwrap();
   let mut state = state_rc.borrow_mut();
   let task_id = js::next_task_id();
   pending::create_fs_read(
     &mut state,
     task_id,
-    file_handle,
+    *fd,
     buf.byte_length(),
     Box::new(read_cb),
   );
