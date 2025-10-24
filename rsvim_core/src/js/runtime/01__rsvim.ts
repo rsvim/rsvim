@@ -1,4 +1,9 @@
 /**
+ * ---
+ * title: Rsvim APIs
+ * sidebar_position: 2
+ * ---
+ *
  * The `Rsvim` global object, it contains two groups:
  *
  * - General APIs.
@@ -396,6 +401,11 @@ export class RsvimCmd {
   }
 }
 
+/**
+ * ---
+ * title: RsvimCmd
+ * ---
+ */
 export namespace RsvimCmd {
   /**
    * Command attributes.
@@ -559,6 +569,11 @@ export class RsvimFs {
   }
 }
 
+/**
+ * ---
+ * title: RsvimFs
+ * ---
+ */
 export namespace RsvimFs {
   /**
    * Open options.
