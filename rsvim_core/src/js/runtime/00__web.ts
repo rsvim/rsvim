@@ -302,10 +302,7 @@ export class TextDecoder {
    * @param {TextDecoderOptions} options? - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
-  constructor(
-    encoding?: string,
-    options: TextDecoderOptions = { fatal: false, ignoreBOM: false },
-  ) {
+  constructor(encoding?: string, options?: TextDecoderOptions) {
     encoding = encoding ?? "utf-8";
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
