@@ -505,13 +505,13 @@ macro_rules! wrap_handle {
     let wrapper = obj_wrapper.new_instance($scope).unwrap();
 
     let handle_ptr =
-      binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
+      $crate::js::binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
     let weak_rc = Rc::new(Cell::new(None));
 
     // To automatically drop the handle instance when
     // V8 garbage collects the object that internally holds the Rust instance,
     // we use a Weak reference with a finalizer callback.
-    let file_weak = v8::Weak::with_finalizer(
+    let handle_weak = v8::Weak::with_finalizer(
       $scope,
       wrapper,
       Box::new({
@@ -525,9 +525,17 @@ macro_rules! wrap_handle {
     );
 
     // Store the weak ref pointer into the "shared" cell.
-    weak_rc.set(file_weak.into_raw());
-    binding::set_internal_ref($scope, wrapper, 1, weak_rc);
+    weak_rc.set(handle_weak.into_raw());
+    $crate::js::binding::set_internal_ref($scope, wrapper, 1, weak_rc);
 
     wrapper
+  };
+}
+
+/// Get the wrapped handle from v8 object.
+#[macro_export]
+macro_rules! get_handle {
+  ($scope:ident, $wrapper:ident, $ty:ty) => {
+    $crate::js::binding::get_internal_ref::<$ty>(scope, $wrapper, 0)
   };
 }
