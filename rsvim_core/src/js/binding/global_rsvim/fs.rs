@@ -5,7 +5,6 @@ pub mod handle;
 pub mod open;
 pub mod read;
 
-use crate::create_cppgc_handle;
 use crate::get_cppgc_handle;
 use crate::is_v8_str;
 use crate::js;
@@ -21,6 +20,7 @@ use crate::js::binding::global_rsvim::fs::read::fs_read;
 use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
+use crate::wrap_cppgc_handle;
 
 /// `Rsvim.fs.open` API.
 pub fn open<'s>(
@@ -82,7 +82,7 @@ pub fn open_sync<'s>(
   let filename = Path::new(&filename);
   match fs_open(filename, options) {
     Ok(fd) => {
-      let file_wrapper = create_cppgc_handle!(scope, Some(fd), Option<usize>);
+      let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
       rv.set(file_wrapper.into());
     }
     Err(e) => {
