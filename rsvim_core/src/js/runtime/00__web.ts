@@ -471,8 +471,8 @@ export interface GlobalThis {
    * Set a repeated timer that calls a function, with a fixed time delay between each call.
    *
    * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - The milliseconds that the timer should delay in between execution of the function, by default is `1`.
-   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @param {number} delay? - (Optional) The milliseconds that the timer should delay in between execution of the function, by default is `1`.
+   * @param {...any} [args]? - (Optional) Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
@@ -486,8 +486,8 @@ export interface GlobalThis {
    * Set a timer which executes a function or specified piece of code once the timer expires.
    *
    * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - The milliseconds that the timer should wait before the function is executed, by default is `1`.
-   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @param {number} delay? - (Optional) The milliseconds that the timer should wait before the function is executed, by default is `1`.
+   * @param {...any} [args]? - (Optional) Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
    * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
    */
@@ -533,9 +533,10 @@ export interface GlobalThis {
 
   function setInterval(
     callback: (...args: any[]) => void,
-    delay: number = 1,
+    delay?: number,
     ...args: any[]
   ): number {
+    delay = delay ?? 1;
     checkIsNumber(delay, `"setInterval" delay`);
 
     // Coalesce to number or NaN.
@@ -578,9 +579,10 @@ export interface GlobalThis {
 
   function setTimeout(
     callback: (...args: any[]) => void,
-    delay: number = 1,
+    delay: number,
     ...args: any[]
   ): number {
+    delay = delay ?? 1;
     checkIsNumber(delay, `"setTimeout" delay`);
 
     // Coalesce to number or NaN.
