@@ -163,3 +163,34 @@ pub fn read<'s>(
 
   rv.set(promise.into());
 }
+
+/// `File.readSync` API.
+pub fn read_sync<'s>(
+  scope: &mut v8::PinScope<'s, '_>,
+  args: v8::FunctionCallbackArguments<'s>,
+  mut rv: v8::ReturnValue,
+) {
+  debug_assert!(args.length() == 2);
+  debug_assert!(args.get(0).is_object());
+  let file_wrapper = args.get(0).to_object(scope).unwrap();
+  debug_assert!(args.get(1).is_array_buffer());
+  let buf = args.get(1).cast::<v8::ArrayBuffer>();
+  trace!("RsvimFs.readSync: {:?}, {:?}", file_wrapper, buf);
+
+  let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
+  match fs_read(fd, buf.byte_length()) {
+    Ok((data, n)) => {
+      let buffer_store = buf.get_backing_store();
+      for (i, b) in data.iter().enumerate() {
+        buffer_store[i].set(*b);
+      }
+
+      rv.set_int32(data.len() as i32);
+    }
+    Err(e) => {
+      let message = v8::String::new(scope, &e.to_string()).unwrap();
+      let exception = v8::Exception::error(scope, message);
+      binding::throw_exception(scope, &e);
+    }
+  }
+}
