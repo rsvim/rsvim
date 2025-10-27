@@ -657,6 +657,17 @@ export namespace RsvimFs {
       this.#handle = null;
     }
 
+    /**
+     * Close the file with dispose `using`.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * // do work with the `file` object
+     * ```
+     *
+     * @see {@link close}
+     */
     [Symbol.dispose]() {
       this.close();
     }
