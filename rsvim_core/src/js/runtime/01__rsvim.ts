@@ -755,10 +755,9 @@ export namespace RsvimFs {
      *
      * @example
      * ```javascript
-     * using file = await Rsvim.fs.open("README.md");
-     * const buf = new Uint8Array(100);
-     * const n = await file.read(buf); // read 11 bytes
-     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * using file = await Rsvim.fs.open("README.md", {write:true,create:true});
+     * const buf = new TextEncoder().encode("hello world");
+     * const n = await file.write(buf); // write 11 bytes
      * ```
      */
     async write(buf: Uint8Array): Promise<number> {
@@ -771,15 +770,14 @@ export namespace RsvimFs {
     /**
      * Sync version of {@link write}.
      *
-     * @param {Uint8Array} buf - Same with {@link read}.
-     * @returns {number} Same with {@link read}.
+     * @param {Uint8Array} buf - Same with {@link write}.
+     * @returns {(number | null)} Same with {@link write}.
      *
      * @example
      * ```javascript
-     * using file = await Rsvim.fs.open("README.md");
-     * const buf = new Uint8Array(100);
-     * const n = file.readSync(buf); // read 11 bytes
-     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * using file = await Rsvim.fs.open("README.md", {write:true,create:true});
+     * const buf = new TextEncoder().encode("hello world");
+     * const n = file.writeSync(buf); // write 11 bytes
      * ```
      */
     writeSync(buf: Uint8Array): number | null {
