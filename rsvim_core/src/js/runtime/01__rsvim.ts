@@ -640,7 +640,13 @@ export namespace RsvimFs {
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
+     * // do work with the `file` object
      * file.close();
+     *
+     * // Or
+     *
+     * using file = await Rsvim.fs.open("README.md");
+     * // do work with the `file` object
      * ```
      */
     close(): void {
