@@ -38,10 +38,7 @@ mod sync_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheErr::LoadModuleFailed(
-        path.to_string_lossy().to_string(),
-        e
-      )),
+      Err(e) => bail!(TheErr::IoErr(e)),
     }
   }
 
@@ -72,10 +69,7 @@ mod async_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheErr::LoadModuleFailed(
-        path.to_string_lossy().to_string(),
-        e
-      )),
+      Err(e) => bail!(TheErr::IoErr(e)),
     }
   }
 
