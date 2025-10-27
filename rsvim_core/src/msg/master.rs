@@ -25,6 +25,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to open file.
   FsOpenReq(FsOpenReq),
+
+  /// Js runtime ask master to read file.
+  FsReadReq(FsReadReq),
 }
 
 #[derive(Debug)]
@@ -53,8 +56,15 @@ pub struct FsOpenReq {
   pub options: FsOpenOptions,
 }
 
+#[derive(Debug)]
+pub struct FsReadReq {
+  pub task_id: JsTaskId,
+  pub fd: usize,
+  pub bufsize: usize,
+}
+
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send_to_master(
+pub fn send_to_master(
   master_tx: UnboundedSender<MasterMessage>,
   message: MasterMessage,
 ) {

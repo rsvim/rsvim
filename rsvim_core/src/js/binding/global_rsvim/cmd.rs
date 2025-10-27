@@ -1,6 +1,5 @@
 //! APIs for `Rsvim.cmd` namespace.
 
-use crate::is_v8_nil;
 use crate::is_v8_str;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
@@ -39,7 +38,7 @@ pub fn echo(
   mut _rv: v8::ReturnValue,
 ) {
   debug_assert!(args.length() == 1);
-  debug_assert!(!is_v8_nil!(args.get(0)));
+  debug_assert!(!args.get(0).is_null_or_undefined());
   let message = args.get(0).to_rust_string_lossy(scope);
   trace!("Rsvim.cmd.echo:{:?}", message);
 

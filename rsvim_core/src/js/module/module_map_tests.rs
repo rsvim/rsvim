@@ -892,7 +892,7 @@ export function echoA(value) {
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path"));
+      assert!(actual.contains("Uncaught Error: Module "));
     }
 
     Ok(())
@@ -1160,7 +1160,7 @@ export function echoA(value) {
       info!("actual:{:?}", actual);
       assert!(actual.is_some());
       let actual = actual.unwrap();
-      assert!(actual.contains("Uncaught Error: Module path"));
+      assert!(actual.contains("Uncaught Error: Module "));
     }
 
     Ok(())
@@ -1409,13 +1409,13 @@ setTimeout(() => {
       assert!(url1.is_some());
       let actual = url1.unwrap();
       info!("url1:{:?}", actual);
-      assert!(actual.contains("TypeError: Module path `undefined` not found"));
+      assert!(actual.contains("TypeError: Module `undefined` not found"));
 
       let url2 = contents.command_line_message_history_mut().try_pop();
       assert!(url2.is_some());
       let actual = url2.unwrap();
       info!("url2:{:?}", actual);
-      assert!(actual.contains("TypeError: Module path `null` not found"));
+      assert!(actual.contains("TypeError: Module `null` not found"));
 
       let url3 = contents.command_line_message_history_mut().try_pop();
       assert!(url3.is_some());

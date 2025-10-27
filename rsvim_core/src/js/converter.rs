@@ -455,29 +455,70 @@ macro_rules! is_v8_bool {
 }
 
 #[macro_export]
-macro_rules! is_v8_obj {
-  ($value:expr) => {
-    $value.is_object()
-  };
-}
-
-#[macro_export]
-macro_rules! is_v8_nil {
-  ($value:expr) => {
-    $value.is_null_or_undefined()
-  };
-}
-
-#[macro_export]
 macro_rules! is_v8_int {
   ($value:expr) => {
     $value.is_int32() || $value.is_uint32()
   };
 }
 
+/// Wrap rust handle with v8's cppgc.
+///
+/// Some resources will be manually managed by users, such as file open/close,
+/// network sockets, etc. Thus we will have to store the resource handler with
+/// v8's cppgc wrapper, so v8 GC will close the resource and free the memory
+/// allocated for us, instead of rust's "safe" resource management.
+///
+/// The basic idea is:
+/// 1. Leak the rust's handler and get raw handler pointer.
+/// 2. Set the raw handler to v8 object's internal reference.
+/// 3. Create a v8::Weak finalizer callback, thus v8 GC will close it for us.
+///
+/// We will create a v8 object and:
+/// 1. Set the handle's raw pointer to its internal field with index-0.
+/// 2. Set a v8::Weak finalizer to its internal field with index-1.
 #[macro_export]
-macro_rules! is_v8_func {
-  ($value:expr) => {
-    $value.is_function()
+macro_rules! wrap_cppgc_handle {
+  ($scope:ident, $handle:expr, $ty:ty) => {{
+    let wrapper_template = v8::ObjectTemplate::new($scope);
+
+    // Allocate internal field for the wrapped `std::fs::File`:
+    // 0-index: The `file_handle`, i.e. the `std::fs::File`
+    // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
+    wrapper_template.set_internal_field_count(2);
+    let wrapper = wrapper_template.new_instance($scope).unwrap();
+
+    let handle_ptr =
+      $crate::js::binding::set_internal_ref::<$ty>($scope, wrapper, 0, $handle);
+    let weak_rc = std::rc::Rc::new(std::cell::Cell::new(None));
+
+    // To automatically drop the handle instance when
+    // V8 garbage collects the object that internally holds the Rust instance,
+    // we use a Weak reference with a finalizer callback.
+    let handle_weak = v8::Weak::with_finalizer(
+      $scope,
+      wrapper,
+      Box::new({
+        let weak_rc = weak_rc.clone();
+        move |isolate| unsafe {
+          drop(Box::from_raw(handle_ptr));
+          drop(v8::Weak::from_raw(isolate, weak_rc.get()));
+          trace!("|wrap_handle| dropped handle");
+        }
+      }),
+    );
+
+    // Store the weak ref pointer into the "shared" cell.
+    weak_rc.set(handle_weak.into_raw());
+    $crate::js::binding::set_internal_ref($scope, wrapper, 1, weak_rc);
+
+    wrapper
+  }};
+}
+
+/// Get the wrapped handle from v8 object.
+#[macro_export]
+macro_rules! get_cppgc_handle {
+  ($scope:ident, $wrapper:ident, $ty:ty) => {
+    $crate::js::binding::get_internal_ref::<$ty>($scope, $wrapper, 0)
   };
 }

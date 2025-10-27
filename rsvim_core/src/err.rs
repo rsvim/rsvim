@@ -25,84 +25,54 @@ pub type IoResult<T> = std::io::Result<T>;
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
   // buf {
-  //
   #[error("Buffer `{0}` doesn't have a filename.")]
-  /// Buffer doesn't have a filename.
-  BufferHaveNoFileName(BufferId),
+  BufferNoName(BufferId),
 
   #[error("Buffer `{0}` not exist.")]
-  /// Buffer not found
   BufferNotExist(BufferId),
 
-  #[error("Failed to save buffer {0}({1}): {2}")]
-  /// Buffer failed to write file
+  #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, String, IoErr),
-  //
   // buf }
 
   // js {
   //
   #[error("Command `{0}` not found.")]
-  /// Command not found
   CommandNotFound(CompactString),
 
-  #[error("Command name `{0}` already exist.")]
-  /// Command not found
-  CommandNameAlreadyExist(CompactString),
-
-  #[error("Command alias `{0}` already exist.")]
-  /// Command not found
-  CommandAliasAlreadyExist(CompactString),
+  #[error("Command `{0}` already exist.")]
+  CommandAlreadyExist(CompactString),
 
   #[error("{0}")]
-  /// JavaScript error/exception
   JsError(Box<JsError>),
 
   #[error("Failed to load module `{0}`: {1}.")]
-  /// Failed to load module
   LoadModuleFailed(ModulePath, IoErr),
 
-  #[error("Module path `{0}` not found.")]
-  /// Failed to read script file when loading module
-  ModulePathNotFound(ModulePath),
+  #[error("Module `{0}` not found.")]
+  ModuleNotFound(ModulePath),
 
   #[error("Failed to compile typescript: {0}.")]
-  /// Failed to compile typescript
   CompileTypeScriptFailed(Cow<'static, str>),
 
   #[error("Not enough arguments specified.")]
-  /// Failed to compile typescript
   ArgumentsNotEnough,
-  //
-  // js }
 
-  // js Rsvim.fs {
-  //
   #[error("Failed to open file `{0}`: {1}.")]
-  // Failed to open file.
   OpenFileFailed(String, IoErr),
 
-  #[error("File is already closed.")]
-  // File is already been closed.
-  FileAlreadyClosed,
+  #[error("Failed to read file `{0}`: {1}.")]
+  ReadFileFailed(usize, IoErr),
 
   #[error("Invalid data.")]
-  // Invalid data.
   DataInvalid,
 
-  #[error("Invalid buffer.")]
-  // Invalid buffer.
-  BufferInvalid,
-
-  #[error("Value too large `{0}`.")]
-  // Value too large.
+  #[error("Value too large: `{0}`.")]
   ValueTooLarge(usize),
 
-  #[error("Buffer too small `{0}`.")]
-  // Buffer too small.
+  #[error("Buffer too small: `{0}`.")]
   BufferTooSmall(usize),
-  //
-  // js Rsvim.fs }
+  // js }
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.

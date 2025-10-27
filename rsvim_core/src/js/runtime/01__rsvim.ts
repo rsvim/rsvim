@@ -94,6 +94,13 @@ function checkIsObject(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsUint8Array(arg: any, msg: string) {
+  if (!(arg instanceof Uint8Array)) {
+    throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is an invalid option: ${arg}`);
@@ -488,7 +495,7 @@ export class RsvimFs {
    *
    * @param {string} path - File path.
    * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
-   * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
+   * @returns {Promise<RsvimFs.File>} It resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
    *
@@ -497,7 +504,10 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+  async open(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -637,35 +647,100 @@ export namespace RsvimFs {
     /**
      * Close the file.
      *
-     * @throws Throws {@link !Error} if the file is already been closed.
-     *
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
-     * if (!file.isClosed()) {
-     *   file.close();
-     * }
+     * // do work with the `file` object
+     * file.close();
+     *
+     * // Or
+     *
+     * using file = await Rsvim.fs.open("README.md");
+     * // do work with the `file` object
      * ```
      */
     close(): void {
-      // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.fs_close(this.#handle);
+      if (!isNull(this.#handle)) {
+        // @ts-ignore Ignore warning
+        __InternalRsvimGlobalObject.fs_close(this.#handle);
+      }
+      this.#handle = null;
     }
 
     /**
-     * Whether the file is already been closed.
+     * Close the file with `using` without `close` API.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * // do work with the `file` object
+     * ```
+     *
+     * @see {@link close}
+     */
+    [Symbol.dispose](): void {
+      this.close();
+    }
+
+    /**
+     * File is already been closed.
      *
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
-     * if (!file.isClosed()) {
+     * if (!file.isDisposed()) {
      *   file.close();
      * }
      * ```
      */
-    isClosed(): boolean {
+    get isDisposed(): boolean {
+      return isNull(this.#handle);
+    }
+
+    /**
+     * Read a file into a buffer.
+     *
+     * :::warning
+     * It is not guaranteed that the full buffer will be read in a single call.
+     * :::
+     *
+     * @param {Uint8Array} buf - Read bytes into buffer.
+     * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = await file.read(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * ```
+     */
+    async read(buf: Uint8Array): Promise<number | null> {
+      checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
+
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_is_closed(this.#handle);
+      return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+    }
+
+    /**
+     * Sync version of {@link read}.
+     *
+     * @param {Uint8Array} buf - Same with {@link read}.
+     * @returns {(number | null)} Same with {@link read}.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = file.readSync(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * ```
+     */
+    readSync(buf: Uint8Array): number | null {
+      checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
     }
   }
 }

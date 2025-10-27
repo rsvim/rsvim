@@ -1,7 +1,6 @@
 //! Timeout APIs.
 
 use crate::is_v8_bool;
-use crate::is_v8_func;
 use crate::is_v8_int;
 use crate::js;
 use crate::js::JsFuture;
@@ -19,7 +18,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|TimeoutFuture| run");
+    trace!("|TimeoutFuture|");
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -54,7 +53,7 @@ pub fn create_timer<'s>(
   debug_assert!(args.length() == 3);
 
   // Get timer's callback.
-  debug_assert!(is_v8_func!(args.get(0)));
+  debug_assert!(args.get(0).is_function());
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
 
@@ -96,7 +95,7 @@ pub fn create_timer<'s>(
         params: Rc::clone(&params),
       };
       let mut state = state_rc.borrow_mut();
-      state.pending_futures.insert(0, Box::new(fut));
+      state.pending_futures.push(Box::new(fut));
     }
   };
 

@@ -10,9 +10,7 @@ use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
-use std::cell::Cell;
-use std::fs::File;
-use std::rc::Rc;
+use crate::wrap_cppgc_handle;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -135,52 +133,6 @@ impl StructToV8 for FsOpenOptions {
   }
 }
 
-pub fn create_fs_file_wrapper<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  fd: usize,
-) -> v8::Local<'s, v8::Object> {
-  let file_handle = handle::std_from_fd(fd);
-
-  let file_wrapper = v8::ObjectTemplate::new(scope);
-
-  // Allocate internal field for the wrapped `std::fs::File`:
-  // 0-index: The `file_handle`, i.e. the `std::fs::File`
-  // 1-index: The `file_weak` finalizer, it helps release the `file_handle`
-  file_wrapper.set_internal_field_count(2);
-
-  let file_wrapper = file_wrapper.new_instance(scope).unwrap();
-
-  let file_ptr = binding::set_internal_ref::<Option<File>>(
-    scope,
-    file_wrapper,
-    0,
-    Some(file_handle),
-  );
-  let weak_rc = Rc::new(Cell::new(None));
-
-  // To automatically drop the file_handle instance when
-  // V8 garbage collects the object that internally holds the Rust instance,
-  // we use a Weak reference with a finalizer callback.
-  let file_weak = v8::Weak::with_finalizer(
-    scope,
-    file_wrapper,
-    Box::new({
-      let weak_rc = weak_rc.clone();
-      move |isolate| unsafe {
-        drop(Box::from_raw(file_ptr));
-        drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-        trace!("|create_fs_file_wrapper| dropped File:{}", fd);
-      }
-    }),
-  );
-
-  // Store the weak ref pointer into the "shared" cell.
-  weak_rc.set(file_weak.into_raw());
-  binding::set_internal_ref(scope, file_wrapper, 1, weak_rc);
-
-  file_wrapper
-}
-
 pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   match std::fs::OpenOptions::new()
     .append(opts.append())
@@ -231,7 +183,7 @@ pub struct FsOpenFuture {
 
 impl JsFuture for FsOpenFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|FsOpenFuture| run");
+    trace!("|FsOpenFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
@@ -249,7 +201,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_wrapper = create_fs_file_wrapper(scope, fd);
+    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
       .promise

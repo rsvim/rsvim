@@ -38,7 +38,10 @@ pub struct CommandFuture {
 
 impl JsFuture for CommandFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|CommandFuture| run:{:?}({:?})", self.name, self.task_id);
+    trace!(
+      "|CommandFuture| command name:{:?}({:?})",
+      self.name, self.task_id
+    );
     if self.is_builtin_js {
       let filename = format!("<command-js:{}>", self.task_id);
       debug_assert_eq!(self.context.args.len(), 1);
@@ -123,11 +126,11 @@ impl CommandsManager {
 
     if !definition.options.force() {
       if self.commands.contains_key(&name) {
-        bail!(TheErr::CommandNameAlreadyExist(name));
+        bail!(TheErr::CommandAlreadyExist(name));
       }
       if let Some(ref alias) = alias {
         if self.aliases.contains_key(alias.as_str()) {
-          bail!(TheErr::CommandAliasAlreadyExist(alias.clone()));
+          bail!(TheErr::CommandAlreadyExist(alias.clone()));
         }
       }
     }

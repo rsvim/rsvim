@@ -1,28 +1,27 @@
 //! `TextEncoder` APIs.
 
+use crate::get_cppgc_handle;
 use crate::is_v8_bool;
-use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
+use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
 use encoding_rs::Encoding;
 use itertools::Itertools;
-use std::cell::Cell;
 use std::cell::RefCell;
-use std::rc::Rc;
 
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
-  buf_size: usize,
+  bufsize: usize,
 ) -> (Vec<u8>, usize, usize) {
-  let mut buf: Vec<u8> = Vec::with_capacity(buf_size);
+  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v2` API.
@@ -244,45 +243,8 @@ pub fn create_stream_decoder<'s>(
 
   let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
 
-  let decoder_wrapper = v8::ObjectTemplate::new(scope);
-
-  // Allocate internal field:
-  // 1. encoding_rs::Decoder
-  // 2. weak_rc
-  decoder_wrapper.set_internal_field_count(2);
-  let decoder_wrapper = decoder_wrapper.new_instance(scope).unwrap();
-
-  let decoder_ptr = binding::set_internal_ref::<RefCell<Decoder>>(
-    scope,
-    decoder_wrapper,
-    0,
-    decoder_handle,
-  );
-  let weak_rc = Rc::new(Cell::new(None));
-
-  // To automatically drop the decoder_handle instance when
-  // V8 garbage collects the object that internally holds the Rust instance,
-  // we use a Weak reference with a finalizer callback.
-  let decoder_weak = v8::Weak::with_finalizer(
-    scope,
-    decoder_wrapper,
-    Box::new({
-      let weak_rc = weak_rc.clone();
-      let _encoding_label = label.clone();
-      move |isolate| unsafe {
-        drop(Box::from_raw(decoder_ptr));
-        drop(v8::Weak::from_raw(isolate, weak_rc.get()));
-        trace!(
-          "|create_stream_decoder| dropped TextDecoder:{:?}",
-          _encoding_label
-        );
-      }
-    }),
-  );
-
-  // Store the weak ref pointer into the "shared" cell.
-  weak_rc.set(decoder_weak.into_raw());
-  binding::set_internal_ref(scope, decoder_wrapper, 1, weak_rc);
+  let decoder_wrapper =
+    wrap_cppgc_handle!(scope, decoder_handle, RefCell<Decoder>);
 
   rv.set(decoder_wrapper.into());
 }
@@ -301,10 +263,9 @@ pub fn decode_stream<'s>(
     .iter()
     .map(|b| b.get())
     .collect_vec();
-  debug_assert!(is_v8_obj!(args.get(1)));
+  debug_assert!(args.get(1).is_object());
   let decoder_wrapper = args.get(1).to_object(scope).unwrap();
-  let decoder =
-    binding::get_internal_ref::<RefCell<Decoder>>(scope, decoder_wrapper, 0);
+  let decoder = get_cppgc_handle!(scope, decoder_wrapper, RefCell<Decoder>);
   let mut decoder = decoder.borrow_mut();
   debug_assert!(is_v8_bool!(args.get(2)));
   let fatal = bool::from_v8(scope, args.get(2).to_boolean(scope));

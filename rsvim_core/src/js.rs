@@ -617,7 +617,7 @@ pub mod boost {
           > self.pending_import_loaders_count())
         || (!self.has_unresolved_imports() && self.has_pending_imports())
       {
-        msg::sync_send_to_master(
+        msg::send_to_master(
           self.get_state().borrow().master_tx.clone(),
           MasterMessage::TickAgainReq,
         );
@@ -709,6 +709,18 @@ pub mod boost {
               .remove(&resp.task_id)
               .unwrap();
             open_cb(resp.maybe_result);
+          }
+          JsMessage::FsReadResp(resp) => {
+            trace!("Recv FsReadResp:{:?}", resp.task_id);
+            debug_assert!(
+              state_rc.borrow().pending_tasks.contains_key(&resp.task_id)
+            );
+            let mut read_cb = state_rc
+              .borrow_mut()
+              .pending_tasks
+              .remove(&resp.task_id)
+              .unwrap();
+            read_cb(resp.maybe_result);
           }
         }
       }

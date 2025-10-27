@@ -24,6 +24,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of fs open
   FsOpenResp(FsOpenResp),
+
+  /// Master send js runtime the result of fs read
+  FsReadResp(FsReadResp),
 }
 
 #[derive(Debug)]
@@ -51,10 +54,13 @@ pub struct FsOpenResp {
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
+#[derive(Debug)]
+pub struct FsReadResp {
+  pub task_id: JsTaskId,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send_to_js(
-  master_tx: UnboundedSender<JsMessage>,
-  message: JsMessage,
-) {
+pub fn send_to_jsrt(master_tx: UnboundedSender<JsMessage>, message: JsMessage) {
   master_tx.send(message).unwrap();
 }

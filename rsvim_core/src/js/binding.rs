@@ -147,7 +147,8 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "fs_open", global_rsvim::fs::open);
     set_function_to(scope, vim, "fs_open_sync", global_rsvim::fs::open_sync);
     set_function_to(scope, vim, "fs_close", global_rsvim::fs::close);
-    set_function_to(scope, vim, "fs_is_closed", global_rsvim::fs::is_closed);
+    set_function_to(scope, vim, "fs_read", global_rsvim::fs::read);
+    set_function_to(scope, vim, "fs_read_sync", global_rsvim::fs::read_sync);
   }
 
   // For `Rsvim.opt`
@@ -299,7 +300,7 @@ pub fn set_internal_ref<T>(
   data: T,
 ) -> *mut T {
   let boxed_ref = Box::new(data);
-  let addr = Box::leak(boxed_ref) as *mut T;
+  let addr = Box::into_raw(boxed_ref);
   let v8_ext = v8::External::new(scope, addr as *mut c_void);
 
   target.set_internal_field(index, v8_ext.into());
@@ -327,7 +328,9 @@ pub fn set_exception_code(
 ) {
   let exception = exception.to_object(scope).unwrap();
   match error {
-    TheErr::LoadModuleFailed(_, e) | TheErr::OpenFileFailed(_, e) => {
+    TheErr::LoadModuleFailed(_, e)
+    | TheErr::SaveBufferFailed(_, _, e)
+    | TheErr::OpenFileFailed(_, e) => {
       let key = v8::String::new(scope, "code").unwrap();
       let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
       exception.set(scope, key.into(), value.into());
