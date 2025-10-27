@@ -3,7 +3,6 @@
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
-use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
 pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
