@@ -13,9 +13,7 @@ use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
 use encoding_rs::Encoding;
 use itertools::Itertools;
-use std::cell::Cell;
 use std::cell::RefCell;
-use std::rc::Rc;
 
 // Returns v8 BackingStore data, read (chars), written (bytes)
 fn encode_impl<'s>(

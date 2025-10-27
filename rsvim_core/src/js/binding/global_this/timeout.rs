@@ -1,7 +1,6 @@
 //! Timeout APIs.
 
 use crate::is_v8_bool;
-use crate::is_v8_func;
 use crate::is_v8_int;
 use crate::js;
 use crate::js::JsFuture;
@@ -54,7 +53,7 @@ pub fn create_timer<'s>(
   debug_assert!(args.length() == 3);
 
   // Get timer's callback.
-  debug_assert!(is_v8_func!(args.get(0)));
+  debug_assert!(args.get(0).is_function());
   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
   let callback = Rc::new(v8::Global::new(scope, callback));
 
