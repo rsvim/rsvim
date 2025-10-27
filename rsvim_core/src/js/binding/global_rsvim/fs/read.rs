@@ -39,7 +39,7 @@ pub async fn async_fs_read(
 pub struct FsReadFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub buffer_store: v8::SharedRef<v8::BackingStore>,
-  pub maybe_result: Option<TheResult<Vec<u8>>>,
+  pub maybe_result: Option<TheResult<(Vec<u8>, usize)>>,
 }
 
 impl JsFuture for FsReadFuture {
