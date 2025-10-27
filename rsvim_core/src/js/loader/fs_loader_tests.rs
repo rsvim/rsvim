@@ -611,6 +611,7 @@ export function sayHello() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn folder_path_failed7() {
   test_log_init();
 
