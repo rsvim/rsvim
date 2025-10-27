@@ -93,9 +93,9 @@ impl JsFuture for FsReadFuture {
     // Otherwise, resolve the promise passing the result.
     let (result, _result_len) = decode_bytes::<FsReadResult>(&result.unwrap());
     let data = result.buf;
-    let read = result.read;
+    let _read = result.read;
 
-    debug_assert_eq!(read, data.len());
+    debug_assert_eq!(_read, data.len());
 
     // Copy the slice's bytes into v8's typed-array backing store.
     for (i, b) in data.iter().enumerate() {
