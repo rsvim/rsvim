@@ -95,6 +95,8 @@ impl JsFuture for FsReadFuture {
     let data = result.buf;
     let read = result.read;
 
+    debug_assert_eq!(read, data.len());
+
     // Copy the slice's bytes into v8's typed-array backing store.
     for (i, b) in data.iter().enumerate() {
       self.buffer_store[i].set(*b);
