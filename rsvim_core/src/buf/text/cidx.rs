@@ -383,10 +383,10 @@ impl ColumnIndex {
       return Some(0);
     }
 
-    if let Some(char_idx) = self.char_at(options, buf_line, width) {
-      if char_idx + 1 < n {
-        return Some(char_idx + 1);
-      }
+    if let Some(char_idx) = self.char_at(options, buf_line, width)
+      && char_idx + 1 < n
+    {
+      return Some(char_idx + 1);
     }
 
     None
