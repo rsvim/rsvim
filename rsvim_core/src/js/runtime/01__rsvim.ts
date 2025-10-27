@@ -707,6 +707,8 @@ export namespace RsvimFs {
      * @param {Uint8Array} buf - Read bytes into buffer.
      * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
      *
+     * @throws Throws {@link !TypeError} if buf is not a Uint8Array.
+     *
      * @example
      * ```javascript
      * using file = await Rsvim.fs.open("README.md");
@@ -727,6 +729,8 @@ export namespace RsvimFs {
      *
      * @param {Uint8Array} buf - Same with {@link read}.
      * @returns {(number | null)} Same with {@link read}.
+     *
+     * @throws Same with {@link read}.
      *
      * @example
      * ```javascript
@@ -753,6 +757,8 @@ export namespace RsvimFs {
      * @param {Uint8Array} buf - Read bytes into buffer.
      * @returns {Promise<number | null>} It resolves to either the number of bytes written during the operation or `null` if there was nothing to write.
      *
+     * @throws Throws {@link !TypeError} if buf is not a Uint8Array.
+     *
      * @example
      * ```javascript
      * using file = await Rsvim.fs.open("README.md", {write:true,create:true});
@@ -772,6 +778,8 @@ export namespace RsvimFs {
      *
      * @param {Uint8Array} buf - Same with {@link write}.
      * @returns {(number | null)} Same with {@link write}.
+     *
+     * @throws Same with {@link write}.
      *
      * @example
      * ```javascript

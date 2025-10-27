@@ -454,7 +454,7 @@ async fn test_read_write3() -> IoResult<()> {
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    assert_eq!(actual, "n:13");
+    assert_eq!(actual, "n:11");
     assert_eq!(
       std::fs::read_to_string(tmpfile.path()).unwrap(),
       "Hello World".to_string()
@@ -474,14 +474,12 @@ async fn test_read_write4() -> IoResult<()> {
   let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
   let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
   info!("tmpfile:{:?}", tmpfile);
-  tmpfile.touch().unwrap();
-  tmpfile.write_str("Hello, World!").unwrap();
 
   let src = format!(
     r#"
-  using f = Rsvim.fs.openSync({:?});
-  const buf = new Uint8Array(100);
-  const n = f.readSync(buf);
+  using f = await Rsvim.fs.open({:?}, {{create:true,write:true}});
+  const buf = new TextEncoder().encode("Hello World");
+  const n = f.writeSync(buf);
   Rsvim.cmd.echo(`n:${{n}}`);
     "#,
     tmpfile.path()
@@ -509,7 +507,11 @@ async fn test_read_write4() -> IoResult<()> {
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    assert_eq!(actual, "n:13");
+    assert_eq!(actual, "n:11");
+    assert_eq!(
+      std::fs::read_to_string(tmpfile.path()).unwrap(),
+      "Hello World".to_string()
+    );
   }
 
   Ok(())
