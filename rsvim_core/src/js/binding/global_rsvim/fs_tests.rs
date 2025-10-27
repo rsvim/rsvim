@@ -27,11 +27,11 @@ async fn test_open_close1() -> IoResult<()> {
   let src = format!(
     r#"
   const f = await Rsvim.fs.open({:?});
-  if (f.isDisposed()) {{
+  if (f.isDisposed) {{
     throw new Error("It cannot be closed");
   }}
   f.close();
-  if (!f.isDisposed()) {{
+  if (!f.isDisposed) {{
     throw new Error("It must be closed");
   }}
     "#,
@@ -81,11 +81,11 @@ async fn test_open_close2() -> IoResult<()> {
   let src = format!(
     r#"
   const f = Rsvim.fs.openSync({:?});
-  if (f.isDisposed()) {{
+  if (f.isDisposed) {{
     throw new Error("It cannot be closed");
   }}
   f.close();
-  if (!f.isDisposed()) {{
+  if (!f.isDisposed) {{
     throw new Error("It must be closed");
   }}
     "#,
@@ -129,11 +129,11 @@ async fn test_open_close3() -> IoResult<()> {
   let src = format!(
     r#"
   const f = await Rsvim.fs.open({:?}, {{ create: true, write: true }});
-  if (f.isDisposed()) {{
+  if (f.isDisposed) {{
     throw new Error("It cannot be closed");
   }}
   f.close();
-  if (!f.isDisposed()) {{
+  if (!f.isDisposed) {{
     throw new Error("It must be closed");
   }}
     "#,
@@ -178,11 +178,11 @@ async fn test_open_close4() -> IoResult<()> {
   let src = format!(
     r#"
   const f = Rsvim.fs.openSync({:?}, {{ create: true, write: true }});
-  if (f.isDisposed()) {{
+  if (f.isDisposed) {{
     throw new Error("It cannot be closed");
   }}
   f.close();
-  if (!f.isDisposed()) {{
+  if (!f.isDisposed) {{
     throw new Error("It must be closed");
   }}
     "#,
