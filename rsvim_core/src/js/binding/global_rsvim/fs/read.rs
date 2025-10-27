@@ -28,7 +28,7 @@ pub async fn async_fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
   use tokio::io::AsyncReadExt;
 
   let mut file = handle::tokio_from_fd(fd);
-  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
+  let mut buf: Vec<u8> = vec![0; bufsize];
   let n = match file.read(&mut buf).await {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
