@@ -61,6 +61,9 @@ pub enum TheErr {
   #[error("Failed to open file `{0}`: {1}.")]
   OpenFileFailed(String, IoErr),
 
+  #[error("Failed to read file `{0}`: {1}.")]
+  ReadFileFailed(usize, IoErr),
+
   #[error("Invalid data.")]
   DataInvalid,
 
