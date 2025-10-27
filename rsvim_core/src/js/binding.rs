@@ -328,7 +328,7 @@ pub fn set_exception_code(
 ) {
   let exception = exception.to_object(scope).unwrap();
   match error {
-    TheErr::IoErr(e) => {
+    TheErr::ModuleLoadFailed(_, e) | TheErr::SaveBufferFailed(_, _, e) => {
       let key = v8::String::new(scope, "code").unwrap();
       let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
       exception.set(scope, key.into(), value.into());

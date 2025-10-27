@@ -32,7 +32,7 @@ pub enum TheErr {
   BufferNotExist(BufferId),
 
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
-  BufferSaveFailed(BufferId, String, IoErr),
+  SaveBufferFailed(BufferId, String, IoErr),
   // buf }
 
   // js {
@@ -48,6 +48,9 @@ pub enum TheErr {
 
   #[error("Module `{0}` not found.")]
   ModuleNotFound(ModulePath),
+
+  #[error("Failed to load module `{0}`: {1}.")]
+  LoadModuleFailed(ModulePath, IoErr),
 
   #[error("Failed to compile typescript: {0}.")]
   CompileTypeScriptFailed(Cow<'static, str>),

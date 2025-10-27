@@ -38,7 +38,10 @@ mod sync_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheErr::IoErr(e)),
+      Err(e) => bail!(TheErr::ModuleLoadFailed(
+        path.to_string_lossy().to_string(),
+        e
+      )),
     }
   }
 
