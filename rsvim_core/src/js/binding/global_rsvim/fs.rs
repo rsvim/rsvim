@@ -248,7 +248,11 @@ pub fn write_sync<'s>(
   let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   match fs_write(fd, buf) {
     Ok(bytes_written) => {
-      rv.set_int32(bytes_written as i32);
+      if bytes_written == 0 {
+        rv.set_null();
+      } else {
+        rv.set_int32(bytes_written as i32);
+      }
     }
     Err(e) => binding::throw_exception(scope, &e),
   }
