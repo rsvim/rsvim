@@ -705,7 +705,7 @@ export namespace RsvimFs {
      * :::
      *
      * @param {Uint8Array} buf - Read bytes into buffer.
-     * @returns {Promise<number>} It resolves to either the number of bytes read during the operation or EOF (`0`) if there was no more to read.
+     * @returns {Promise<number>} It resolves to either the number of bytes read during the operation or `0`(EOF) if there was no more to read.
      *
      * @throws Throws {@link !TypeError} if buf is not a Uint8Array.
      *
