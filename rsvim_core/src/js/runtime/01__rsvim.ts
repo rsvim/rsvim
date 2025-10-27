@@ -747,7 +747,7 @@ export namespace RsvimFs {
      * Write a buffer into a file.
      *
      * :::warning
-     * It is not guaranteed that the full buffer will be read in a single call.
+     * It is not guaranteed that the full buffer will be written in a single call.
      * :::
      *
      * @param {Uint8Array} buf - Read bytes into buffer.
@@ -765,14 +765,14 @@ export namespace RsvimFs {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+      return __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
     }
 
     /**
      * Sync version of {@link write}.
      *
      * @param {Uint8Array} buf - Same with {@link read}.
-     * @returns {(number | null)} Same with {@link read}.
+     * @returns {number} Same with {@link read}.
      *
      * @example
      * ```javascript
