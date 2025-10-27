@@ -704,10 +704,7 @@ export namespace RsvimFs {
      * const file = await Rsvim.fs.open("README.md");
      * ```
      */
-    async read(
-      path: string,
-      options?: RsvimFs.OpenOptions,
-    ): Promise<RsvimFs.File> {}
+    async read(buffer: Uint8Array): Promise<number | null> {}
   }
 }
 
