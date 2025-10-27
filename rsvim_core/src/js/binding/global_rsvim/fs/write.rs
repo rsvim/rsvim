@@ -27,7 +27,7 @@ pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
   let mut file = handle::tokio_from_fd(fd);
   let n = match file.write(&buf).await {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
+    Err(e) => bail!(TheErr::WriteFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.len());
   handle::tokio_to_fd(file).await;
@@ -43,7 +43,7 @@ pub struct FsWriteFuture {
 
 impl JsFuture for FsWriteFuture {
   fn run(&mut self, scope: &mut v8::PinScope) {
-    trace!("|FsReadFuture|");
+    trace!("|FsWriteFuture|");
 
     let result = self.maybe_result.take().unwrap();
 
