@@ -126,7 +126,7 @@ impl CommandsManager {
 
     if !definition.options.force() {
       if self.commands.contains_key(&name) {
-        bail!(TheErr::CommandNameAlreadyExist(name));
+        bail!(TheErr::CommandAlreadyExist(name));
       }
       if let Some(ref alias) = alias {
         if self.aliases.contains_key(alias.as_str()) {
