@@ -761,7 +761,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    async write(buf: Uint8Array): Promise<number | null> {
+    async write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
