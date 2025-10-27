@@ -182,7 +182,6 @@ pub fn read_sync<'s>(
     Ok(result) => {
       let data = result.buf;
       let n = result.read;
-      debug_assert_eq!(n, data.len());
       let buffer_store = buf.get_backing_store();
       for (i, b) in data.iter().enumerate() {
         buffer_store[i].set(*b);
