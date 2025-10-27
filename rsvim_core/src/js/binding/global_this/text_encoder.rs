@@ -2,7 +2,6 @@
 
 use crate::get_cppgc_handle;
 use crate::is_v8_bool;
-use crate::is_v8_obj;
 use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::converter::*;
@@ -266,7 +265,7 @@ pub fn decode_stream<'s>(
     .iter()
     .map(|b| b.get())
     .collect_vec();
-  debug_assert!(is_v8_obj!(args.get(1)));
+  debug_assert!(args.get(1).is_object());
   let decoder_wrapper = args.get(1).to_object(scope).unwrap();
   let decoder = get_cppgc_handle!(scope, decoder_wrapper, RefCell<Decoder>);
   let mut decoder = decoder.borrow_mut();
