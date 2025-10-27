@@ -70,5 +70,3 @@ pub fn send_to_master(
 ) {
   master_tx.send(message).unwrap();
 }
-
-pub fn process(message: MasterMessage) {}
