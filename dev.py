@@ -88,7 +88,7 @@ def test(name, miri, jobs):
     if miri:
         set_env(
             "MIRIFLAGS",
-            "-Zmiri-disable-isolation -Zmiri-permissive-provenance",
+            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
         )
         if name is None:
             name = ""
