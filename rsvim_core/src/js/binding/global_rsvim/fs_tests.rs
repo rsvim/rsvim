@@ -377,7 +377,7 @@ async fn test_read_write2() -> IoResult<()> {
     r#"
   using f = Rsvim.fs.openSync({:?});
   const buf = new Uint8Array(100);
-  const n = await f.read(buf);
+  const n = f.readSync(buf);
   Rsvim.cmd.echo(`n:${{n}}`);
     "#,
     tmpfile.path()
