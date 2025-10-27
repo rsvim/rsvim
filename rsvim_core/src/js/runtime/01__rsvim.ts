@@ -94,6 +94,13 @@ function checkIsObject(arg: any, msg: string) {
 }
 
 /** @hidden */
+function checkIsUint8Array(arg: any, msg: string) {
+  if (!(arg instanceof Uint8Array)) {
+    throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
+  }
+}
+
+/** @hidden */
 function checkIsOptions(arg: any, options: any[], msg: string) {
   if (!options.includes(arg)) {
     throw new RangeError(`${msg} is an invalid option: ${arg}`);
@@ -697,7 +704,7 @@ export namespace RsvimFs {
      * It is not guaranteed that the full buffer will be read in a single call.
      * :::
      *
-     * @param {Uint8Array} buffer - Read bytes into buffer.
+     * @param {Uint8Array} buf - Read bytes into buffer.
      * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
      *
      * @example
@@ -708,12 +715,17 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    async read(buffer: Uint8Array): Promise<number | null> {}
+    async read(buf: Uint8Array): Promise<number | null> {
+      checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+    }
 
     /**
      * Sync version of {@link read}.
      *
-     * @param {Uint8Array} buffer - Same with {@link read}.
+     * @param {Uint8Array} buf - Same with {@link read}.
      * @returns {(number | null)} Same with {@link read}.
      *
      * @example
@@ -724,7 +736,12 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    readSync(buffer: Uint8Array): number | null {}
+    readSync(buf: Uint8Array): number | null {
+      checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
+    }
   }
 }
 
