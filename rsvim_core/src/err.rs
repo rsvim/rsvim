@@ -32,69 +32,41 @@ pub enum TheErr {
 
   // buf {
   #[error("Buffer `{0}` doesn't have a filename.")]
-  /// Buffer doesn't have a filename.
-  BufferHaveNoFileName(BufferId),
+  BufferNoName(BufferId),
 
   #[error("Buffer `{0}` not exist.")]
-  /// Buffer not found
   BufferNotExist(BufferId),
   // buf }
 
   // js {
   //
   #[error("Command `{0}` not found.")]
-  /// Command not found
   CommandNotFound(CompactString),
 
   #[error("Command `{0}` already exist.")]
-  /// Command already exist
   CommandAlreadyExist(CompactString),
 
   #[error("{0}")]
-  /// Js exception
   JsError(Box<JsError>),
 
   #[error("Module `{0}` not found.")]
-  /// Failed to read script file when loading module
   ModuleNotFound(ModulePath),
 
   #[error("Failed to compile typescript: {0}.")]
-  /// Failed to compile typescript
   CompileTypeScriptFailed(Cow<'static, str>),
 
   #[error("Not enough arguments specified.")]
-  /// Failed to compile typescript
   ArgumentsNotEnough,
-  //
-  // js }
-
-  // js Rsvim.fs {
-  //
-  #[error("Failed to open file `{0}`: {1}.")]
-  // Failed to open file.
-  OpenFileFailed(String, IoErr),
-
-  #[error("Failed to read file: {0}.")]
-  // Failed to read file.
-  ReadFileFailed(IoErr),
 
   #[error("Invalid data.")]
-  // Invalid data.
   DataInvalid,
 
-  #[error("Invalid buffer.")]
-  // Invalid buffer.
-  BufferInvalid,
-
-  #[error("Value too large `{0}`.")]
-  // Value too large.
+  #[error("Value too large: `{0}`.")]
   ValueTooLarge(usize),
 
-  #[error("Buffer too small `{0}`.")]
-  // Buffer too small.
+  #[error("Buffer too small: `{0}`.")]
   BufferTooSmall(usize),
-  //
-  // js Rsvim.fs }
+  // js }
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.
