@@ -742,6 +742,52 @@ export namespace RsvimFs {
       // @ts-ignore Ignore warning
       return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
     }
+
+    /**
+     * Write a buffer into a file.
+     *
+     * :::warning
+     * It is not guaranteed that the full buffer will be read in a single call.
+     * :::
+     *
+     * @param {Uint8Array} buf - Read bytes into buffer.
+     * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = await file.read(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * ```
+     */
+    async write(buf: Uint8Array): Promise<number | null> {
+      checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+    }
+
+    /**
+     * Sync version of {@link write}.
+     *
+     * @param {Uint8Array} buf - Same with {@link read}.
+     * @returns {(number | null)} Same with {@link read}.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = file.readSync(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * ```
+     */
+    writeSync(buf: Uint8Array): number | null {
+      checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
+
+      // @ts-ignore Ignore warning
+      return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
+    }
   }
 }
 
