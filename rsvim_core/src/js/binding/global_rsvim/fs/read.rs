@@ -6,73 +6,42 @@ use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
-#[derive(Debug)]
-pub struct FsReadResult {
-  pub read: usize,
-  pub buf: Vec<u8>,
-}
-
-impl bincode::Encode for FsReadResult {
-  fn encode<E: bincode::enc::Encoder>(
-    &self,
-    encoder: &mut E,
-  ) -> Result<(), bincode::error::EncodeError> {
-    bincode::Encode::encode(&self.read, encoder)?;
-    bincode::Encode::encode(&self.buf, encoder)?;
-    Ok(())
-  }
-}
-
-impl<Context> bincode::Decode<Context> for FsReadResult {
-  fn decode<D: bincode::de::Decoder<Context = Context>>(
-    decoder: &mut D,
-  ) -> Result<Self, bincode::error::DecodeError> {
-    Ok(Self {
-      read: bincode::Decode::decode(decoder)?,
-      buf: bincode::Decode::decode(decoder)?,
-    })
-  }
-}
-
-pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<FsReadResult> {
+pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
   use std::io::Read;
 
   let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = vec![0; bufsize];
-  let read = match file.read(&mut buf) {
+  let n = match file.read(&mut buf) {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
-  debug_assert!(read <= buf.capacity());
+  debug_assert!(n <= buf.capacity());
   unsafe {
-    buf.set_len(read);
+    buf.set_len(n);
   }
   handle::std_to_fd(file);
-  trace!("|fs_read| bufsize:{},read:{},buf:{:?}", bufsize, read, buf);
+  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
-  debug_assert_eq!(read, buf.len());
-
-  Ok(FsReadResult { read, buf })
+  Ok(buf)
 }
 
-pub async fn async_fs_read(
-  fd: usize,
-  bufsize: usize,
-) -> TheResult<FsReadResult> {
+pub async fn async_fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
   use tokio::io::AsyncReadExt;
 
   let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
-  let read = match file.read(&mut buf).await {
+  let n = match file.read(&mut buf).await {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
+  debug_assert!(n <= buf.capacity());
+  unsafe {
+    buf.set_len(n);
+  }
   handle::tokio_to_fd(file).await;
-  trace!("|fs_read| bufsize:{},read:{},buf:{:?}", bufsize, read, buf);
+  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
-  debug_assert_eq!(read, buf.len());
-
-  Ok(FsReadResult { read, buf })
+  Ok(buf)
 }
 
 pub struct FsReadFuture {
