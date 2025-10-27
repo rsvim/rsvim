@@ -762,7 +762,7 @@ export namespace RsvimFs {
      * ```
      */
     async write(buf: Uint8Array): Promise<number> {
-      checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
+      checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
       return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);

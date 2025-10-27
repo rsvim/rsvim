@@ -149,6 +149,8 @@ pub fn create_new_context<'s, 'b>(
     set_function_to(scope, vim, "fs_close", global_rsvim::fs::close);
     set_function_to(scope, vim, "fs_read", global_rsvim::fs::read);
     set_function_to(scope, vim, "fs_read_sync", global_rsvim::fs::read_sync);
+    set_function_to(scope, vim, "fs_write", global_rsvim::fs::write);
+    set_function_to(scope, vim, "fs_write_sync", global_rsvim::fs::write_sync);
   }
 
   // For `Rsvim.opt`
