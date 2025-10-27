@@ -6,8 +6,6 @@ pub mod open;
 pub mod read;
 pub mod write;
 
-use itertools::Itertools;
-
 use crate::get_cppgc_handle;
 use crate::is_v8_str;
 use crate::js;
@@ -25,6 +23,7 @@ use crate::js::converter::*;
 use crate::js::pending;
 use crate::prelude::*;
 use crate::wrap_cppgc_handle;
+use itertools::Itertools;
 
 /// `Rsvim.fs.open` API.
 pub fn open<'s>(
