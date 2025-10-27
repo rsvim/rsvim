@@ -463,7 +463,7 @@ export namespace RsvimCmd {
    *
    * @see {@link RsvimCmd.create}
 ,  */
-  export type CommandCallback = (ctx: any) => void;
+  export type CommandCallback = (ctx: any) => Promise<void>;
 
   /**
    * Command definition.
