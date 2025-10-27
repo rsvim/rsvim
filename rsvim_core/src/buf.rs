@@ -401,15 +401,15 @@ impl BuffersManager {
             Ok(_) => match writer.flush() {
               Ok(_) => n,
               Err(e) => {
-                bail!(TheErr::IoErr(buf_id, filename, e));
+                bail!(TheErr::IoErr(e));
               }
             },
             Err(e) => {
-              bail!(TheErr::IoErr(buf_id, filename, e));
+              bail!(TheErr::IoErr(e));
             }
           },
           Err(e) => {
-            bail!(TheErr::IoErr(buf_id, filename, e));
+            bail!(TheErr::IoErr(e));
           }
         };
         trace!("Write file {:?}, bytes: {:?}", filename, n);
@@ -422,7 +422,7 @@ impl BuffersManager {
         n
       }
       Err(e) => {
-        bail!(TheErr::IoErr(buf_id, filename, e));
+        bail!(TheErr::IoErr(e));
       }
     };
 

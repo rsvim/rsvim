@@ -27,7 +27,7 @@ pub enum TheErr {
   // common {
   #[error("{0}")]
   /// IoErr
-  IoErr(IoErr),
+  IoErr(#[from] IoErr),
   // common }
 
   // buf {
