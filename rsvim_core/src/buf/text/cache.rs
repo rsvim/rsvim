@@ -107,10 +107,10 @@ impl<K: Copy + Eq + Hash, V> GenericCache<K, V> {
       }
     }
 
-    if !self.cache.contains(k) {
-      if let Some(v) = f() {
-        self.cache.put(*k, v);
-      }
+    if !self.cache.contains(k)
+      && let Some(v) = f()
+    {
+      self.cache.put(*k, v);
     }
   }
 
