@@ -86,10 +86,6 @@ pub enum TheErr {
   // Failed to read file.
   ReadFileFailed(IoErr),
 
-  #[error("File is already closed.")]
-  // File is already been closed.
-  FileAlreadyClosed,
-
   #[error("Invalid data.")]
   // Invalid data.
   DataInvalid,

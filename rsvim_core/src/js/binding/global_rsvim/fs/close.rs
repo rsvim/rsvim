@@ -1,9 +1,7 @@
 //! Close file APIs.
 
 use crate::get_cppgc_handle;
-use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
-use crate::prelude::*;
 
 pub fn fs_close<'s>(
   scope: &mut v8::PinScope<'s, '_>,
@@ -16,7 +14,7 @@ pub fn fs_close<'s>(
     let file = handle::std_from_fd(fd);
     drop(file);
   } else {
-    binding::throw_exception(scope, &TheErr::FileAlreadyClosed);
+    unreachable!();
   }
 }
 

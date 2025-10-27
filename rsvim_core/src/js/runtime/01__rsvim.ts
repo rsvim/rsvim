@@ -648,24 +648,27 @@ export namespace RsvimFs {
      * ```
      */
     close(): void {
+      if (isNull(this.#handle)) {
+        throw new Error(`File is already closed`);
+      }
       // @ts-ignore Ignore warning
       __InternalRsvimGlobalObject.fs_close(this.#handle);
+      this.#handle = null;
     }
 
     /**
-     * Whether the file is already been closed.
+     * File is already been closed.
      *
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
-     * if (!file.isClosed()) {
+     * if (!file.isDisposed()) {
      *   file.close();
      * }
      * ```
      */
-    isClosed(): boolean {
-      // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_is_closed(this.#handle);
+    get isDisposed(): boolean {
+      return isNull(this.#handle);
     }
   }
 }
