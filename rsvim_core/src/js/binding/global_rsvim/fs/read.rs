@@ -87,7 +87,7 @@ impl JsFuture for FsReadFuture {
     }
 
     // Otherwise, resolve the promise passing the result.
-    let (data, _result_len) = decode_bytes::<FsReadResult>(result.unwrap());
+    let (data, _result_len) = decode_bytes::<FsReadResult>(&result.unwrap());
     let data = data.buf;
     let read = data.read;
 
