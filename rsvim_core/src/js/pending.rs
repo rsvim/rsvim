@@ -21,7 +21,7 @@ pub fn create_timer(
 ) {
   state.pending_timers.insert(timer_id, cb);
   let start_at = Instant::now();
-  msg::sync_send_to_master(
+  msg::send_to_master(
     state.master_tx.clone(),
     MasterMessage::TimeoutReq(msg::TimeoutReq {
       timer_id,
@@ -46,7 +46,7 @@ pub fn create_import_loader(
   cb: TaskCallback,
 ) {
   state.pending_import_loaders.insert(task_id, cb);
-  msg::sync_send_to_master(
+  msg::send_to_master(
     state.master_tx.clone(),
     MasterMessage::LoadImportReq(msg::LoadImportReq {
       task_id,
@@ -64,7 +64,7 @@ pub fn create_fs_open(
 ) {
   state.pending_tasks.insert(task_id, cb);
   let path = path.to_path_buf();
-  msg::sync_send_to_master(
+  msg::send_to_master(
     state.master_tx.clone(),
     MasterMessage::FsOpenReq(msg::FsOpenReq {
       task_id,
@@ -82,7 +82,7 @@ pub fn create_fs_read(
   cb: TaskCallback,
 ) {
   state.pending_tasks.insert(task_id, cb);
-  msg::sync_send_to_master(
+  msg::send_to_master(
     state.master_tx.clone(),
     MasterMessage::FsReadReq(msg::FsReadReq {
       task_id,

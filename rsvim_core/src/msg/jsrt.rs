@@ -52,9 +52,6 @@ pub struct FsOpenResp {
 }
 
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send_to_js(
-  master_tx: UnboundedSender<JsMessage>,
-  message: JsMessage,
-) {
+pub fn send_to_jsrt(master_tx: UnboundedSender<JsMessage>, message: JsMessage) {
   master_tx.send(message).unwrap();
 }

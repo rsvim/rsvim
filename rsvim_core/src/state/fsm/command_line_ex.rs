@@ -104,7 +104,7 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
-    msg::sync_send_to_js(
+    msg::send_to_jsrt(
       data_access.jsrt_forwarder_tx.clone(),
       JsMessage::ExCommandReq(ExCommandReq {
         payload: cmdline_input_content,

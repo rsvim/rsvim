@@ -617,7 +617,7 @@ pub mod boost {
           > self.pending_import_loaders_count())
         || (!self.has_unresolved_imports() && self.has_pending_imports())
       {
-        msg::sync_send_to_master(
+        msg::send_to_master(
           self.get_state().borrow().master_tx.clone(),
           MasterMessage::TickAgainReq,
         );

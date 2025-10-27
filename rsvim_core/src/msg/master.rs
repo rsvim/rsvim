@@ -64,9 +64,11 @@ pub struct FsReadReq {
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
-pub fn sync_send_to_master(
+pub fn send_to_master(
   master_tx: UnboundedSender<MasterMessage>,
   message: MasterMessage,
 ) {
   master_tx.send(message).unwrap();
 }
+
+pub fn process(message: MasterMessage) {}
