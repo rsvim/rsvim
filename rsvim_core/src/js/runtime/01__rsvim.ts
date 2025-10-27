@@ -488,7 +488,7 @@ export class RsvimFs {
    *
    * @param {string} path - File path.
    * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
-   * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
+   * @returns {Promise<RsvimFs.File>} It resolves to an instance of {@link RsvimFs.File}.
    *
    * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
    *
@@ -693,18 +693,38 @@ export namespace RsvimFs {
     /**
      * Read a file into a buffer.
      *
-     * @param {Uint8Array} buffer - Read bytes into buffer.
-     * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
-     * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
+     * :::warning
+     * It is not guaranteed that the full buffer will be read in a single call.
+     * :::
      *
-     * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+     * @param {Uint8Array} buffer - Read bytes into buffer.
+     * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
      *
      * @example
      * ```javascript
-     * const file = await Rsvim.fs.open("README.md");
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = await file.read(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
     async read(buffer: Uint8Array): Promise<number | null> {}
+
+    /**
+     * Sync version of {@link read}.
+     *
+     * @param {Uint8Array} buffer - Same with {@link read}.
+     * @returns {(number | null)} Same with {@link read}.
+     *
+     * @example
+     * ```javascript
+     * using file = await Rsvim.fs.open("README.md");
+     * const buf = new Uint8Array(100);
+     * const n = file.readSync(buf); // read 11 bytes
+     * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
+     * ```
+     */
+    readSync(buffer: Uint8Array): number | null {}
   }
 }
 
