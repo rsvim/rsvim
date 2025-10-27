@@ -146,15 +146,15 @@ impl ColumnIndex {
         }
       }
 
-      if let Some(char_idx) = char_idx_bound {
-        if i > char_idx {
-          return;
-        }
+      if let Some(char_idx) = char_idx_bound
+        && i > char_idx
+      {
+        return;
       }
-      if let Some(width) = width_bound {
-        if prefix > width {
-          return;
-        }
+      if let Some(width) = width_bound
+        && prefix > width
+      {
+        return;
       }
     }
   }
@@ -383,10 +383,10 @@ impl ColumnIndex {
       return Some(0);
     }
 
-    if let Some(char_idx) = self.char_at(options, buf_line, width) {
-      if char_idx + 1 < n {
-        return Some(char_idx + 1);
-      }
+    if let Some(char_idx) = self.char_at(options, buf_line, width)
+      && char_idx + 1 < n
+    {
+      return Some(char_idx + 1);
     }
 
     None

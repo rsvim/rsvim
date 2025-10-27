@@ -90,7 +90,7 @@ fn print_text_line_details(text: Text, line_idx: usize, msg: &str) {
     for (_i, c) in line.chars().enumerate() {
       let cw = text.char_width(c);
       w += cw;
-      if w == 1 || w % 5 == 0 {
+      if w == 1 || w.is_multiple_of(5) {
         if builder1.is_empty() || builder1.ends_with(" ") {
           builder1.push_str(&format!("{w}"));
         } else if cw > 0 {

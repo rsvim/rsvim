@@ -128,10 +128,10 @@ impl CommandsManager {
       if self.commands.contains_key(&name) {
         bail!(TheErr::CommandAlreadyExist(name));
       }
-      if let Some(ref alias) = alias {
-        if self.aliases.contains_key(alias.as_str()) {
-          bail!(TheErr::CommandAlreadyExist(alias.clone()));
-        }
+      if let Some(ref alias) = alias
+        && self.aliases.contains_key(alias.as_str())
+      {
+        bail!(TheErr::CommandAlreadyExist(alias.clone()));
       }
     }
 
