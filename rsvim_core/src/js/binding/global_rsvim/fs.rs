@@ -11,7 +11,6 @@ use crate::js;
 use crate::js::JsRuntime;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::close::fs_close;
-use crate::js::binding::global_rsvim::fs::close::fs_is_closed;
 use crate::js::binding::global_rsvim::fs::open::FsOpenFuture;
 use crate::js::binding::global_rsvim::fs::open::FsOpenOptions;
 use crate::js::binding::global_rsvim::fs::open::fs_open;
