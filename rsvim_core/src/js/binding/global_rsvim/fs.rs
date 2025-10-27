@@ -164,15 +164,12 @@ pub fn read_sync<'s>(
 
   let fd = get_cppgc_handle!(scope, file_wrapper, Option<usize>).unwrap();
   match fs_read(fd, buf.byte_length()) {
-    Ok(result) => {
-      let data = result.buf;
-      let n = result.read;
+    Ok(data) => {
       let buffer_store = buf.get_backing_store();
       for (i, b) in data.iter().enumerate() {
         buffer_store[i].set(*b);
       }
-      debug_assert_eq!(n, data.len());
-      rv.set_int32(n as i32);
+      rv.set_int32(data.len() as i32);
     }
     Err(e) => binding::throw_exception(scope, &e),
   }
