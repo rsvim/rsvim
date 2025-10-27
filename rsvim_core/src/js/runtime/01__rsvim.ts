@@ -637,8 +637,6 @@ export namespace RsvimFs {
     /**
      * Close the file.
      *
-     * @throws Throws {@link !Error} if the file is already been closed.
-     *
      * @example
      * ```javascript
      * const file = await Rsvim.fs.open("README.md");
@@ -648,12 +646,15 @@ export namespace RsvimFs {
      * ```
      */
     close(): void {
-      if (isNull(this.#handle)) {
-        throw new Error(`File is already closed`);
+      if (!isNull(this.#handle)) {
+        // @ts-ignore Ignore warning
+        __InternalRsvimGlobalObject.fs_close(this.#handle);
       }
-      // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.fs_close(this.#handle);
       this.#handle = null;
+    }
+
+    [Symbol.dispose]() {
+      this.close();
     }
 
     /**
