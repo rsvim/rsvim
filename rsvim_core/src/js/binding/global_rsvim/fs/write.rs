@@ -37,7 +37,6 @@ pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
 
 pub struct FsWriteFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
-  pub buffer_store: v8::SharedRef<v8::BackingStore>,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
