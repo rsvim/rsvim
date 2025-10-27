@@ -11,13 +11,35 @@ pub struct FsReadResult {
   pub buf: Vec<u8>,
 }
 
+impl bincode::Encode for FsReadResult {
+  fn encode<E: bincode::enc::Encoder>(
+    &self,
+    encoder: &mut E,
+  ) -> Result<(), bincode::error::EncodeError> {
+    bincode::Encode::encode(&self.read, encoder)?;
+    bincode::Encode::encode(&self.buf, encoder)?;
+    Ok(())
+  }
+}
+
+impl bincode::Decode for FsReadResult {
+  fn decode<D: bincode::de::Decoder<Context = Context>>(
+    decoder: &mut D,
+  ) -> Result<Self, bincode::error::DecodeError> {
+    Ok(Self {
+      read: bincode::Decode::decode(decoder)?,
+      buf: bincode::Decode::decode(decoder)?,
+    })
+  }
+}
+
 pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<FsReadResult> {
   use std::io::Read;
 
   let mut file = handle::std_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   let read = match file.read(&mut buf) {
-    Ok(n) => Ok(n),
+    Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
   handle::std_to_fd(file);
@@ -34,7 +56,7 @@ pub async fn async_fs_read(
   let mut file = handle::tokio_from_fd(fd);
   let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   let read = match file.read(&mut buf).await {
-    Ok(n) => Ok(n),
+    Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
   handle::tokio_to_fd(file).await;

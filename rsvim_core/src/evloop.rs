@@ -745,7 +745,10 @@ impl EventLoop {
             jsrt_forwarder_tx
               .send(JsMessage::FsReadResp(msg::FsReadResp {
                 task_id: req.task_id,
-                maybe_result: Some(maybe_result),
+                maybe_result: match maybe_result {
+                  Ok(result) => Some(Ok(encode_bytes(result))),
+                  Err(e) => Some(Err(e)),
+                },
               }))
               .unwrap();
           });
