@@ -46,11 +46,11 @@ pub enum TheErr {
   #[error("{0}")]
   JsError(Box<JsError>),
 
-  #[error("Module `{0}` not found.")]
-  ModuleNotFound(ModulePath),
-
   #[error("Failed to load module `{0}`: {1}.")]
   LoadModuleFailed(ModulePath, IoErr),
+
+  #[error("Module `{0}` not found.")]
+  ModuleNotFound(ModulePath),
 
   #[error("Failed to compile typescript: {0}.")]
   CompileTypeScriptFailed(Cow<'static, str>),
