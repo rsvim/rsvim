@@ -55,6 +55,8 @@ export declare namespace RsvimFs {
         get isDisposed(): boolean;
         read(buf: Uint8Array): Promise<number | null>;
         readSync(buf: Uint8Array): number | null;
+        write(buf: Uint8Array): Promise<number | null>;
+        writeSync(buf: Uint8Array): number | null;
     }
 }
 type FileEncodingOption = "utf-8";

@@ -199,6 +199,14 @@ export class RsvimFs {
             checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
             return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
         }
+        async write(buf) {
+            checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
+            return __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
+        }
+        writeSync(buf) {
+            checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
+            return __InternalRsvimGlobalObject.fs_write_sync(this.#handle, buf.buffer);
+        }
     }
     RsvimFs.File = File;
 })(RsvimFs || (RsvimFs = {}));
