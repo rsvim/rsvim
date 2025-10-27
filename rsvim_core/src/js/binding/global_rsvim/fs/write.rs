@@ -21,18 +21,14 @@ pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
 }
 
 pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
-  use tokio::io::AsyncReadExt;
+  use tokio::io::AsyncWriteExt;
 
   let mut file = handle::tokio_from_fd(fd);
-  let mut buf: Vec<u8> = vec![0; bufsize];
-  let n = match file.read(&mut buf).await {
+  let n = match file.write(&buf).await {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.capacity());
-  unsafe {
-    buf.set_len(n);
-  }
   handle::tokio_to_fd(file).await;
   trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
