@@ -286,6 +286,7 @@ export function sayHello() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn file_path6() {
   test_log_init();
 
