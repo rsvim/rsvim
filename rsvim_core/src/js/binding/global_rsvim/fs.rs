@@ -174,7 +174,11 @@ pub fn read_sync<'s>(
       for (i, b) in data.iter().enumerate() {
         buffer_store[i].set(*b);
       }
-      rv.set_int32(data.len() as i32);
+      if data.is_empty() {
+        rv.set_null();
+      } else {
+        rv.set_int32(data.len() as i32);
+      }
     }
     Err(e) => binding::throw_exception(scope, &e),
   }
