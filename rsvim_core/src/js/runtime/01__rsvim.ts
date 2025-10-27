@@ -751,7 +751,7 @@ export namespace RsvimFs {
      * :::
      *
      * @param {Uint8Array} buf - Read bytes into buffer.
-     * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
+     * @returns {Promise<number | null>} It resolves to either the number of bytes written during the operation or `null` if there was nothing to write.
      *
      * @example
      * ```javascript
