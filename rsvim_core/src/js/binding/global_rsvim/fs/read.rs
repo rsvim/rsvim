@@ -38,11 +38,15 @@ pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<FsReadResult> {
   use std::io::Read;
 
   let mut file = handle::std_from_fd(fd);
-  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
+  let mut buf: Vec<u8> = vec![0; bufsize];
   let read = match file.read(&mut buf) {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
+  debug_assert!(read <= buf.capacity());
+  unsafe {
+    buf.set_len(read);
+  }
   handle::std_to_fd(file);
   trace!("|fs_read| bufsize:{},read:{},buf:{:?}", bufsize, read, buf);
 
