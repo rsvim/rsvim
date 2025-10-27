@@ -72,12 +72,12 @@ impl JsFuture for FsReadFuture {
       self.buffer_store[i].set(*b);
     }
 
-    let bytes_read = v8::Integer::new(scope, data.len() as i32);
+    let bytes_read = if data.is_empty() {
+      v8::null(scope).into()
+    } else {
+      v8::Integer::new(scope, data.len() as i32).into()
+    };
 
-    self
-      .promise
-      .open(scope)
-      .resolve(scope, bytes_read.into())
-      .unwrap();
+    self.promise.open(scope).resolve(scope, bytes_read).unwrap();
   }
 }
