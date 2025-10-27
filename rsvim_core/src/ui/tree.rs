@@ -404,10 +404,10 @@ impl Tree {
       self.command_line_id = None;
     }
     self.window_ids.remove(&id);
-    if self.current_window_id == Some(id) {
-      if let Some(last_window_id) = self.window_ids.last() {
-        self.current_window_id = Some(*last_window_id);
-      }
+    if self.current_window_id == Some(id)
+      && let Some(last_window_id) = self.window_ids.last()
+    {
+      self.current_window_id = Some(*last_window_id);
     }
   }
 
