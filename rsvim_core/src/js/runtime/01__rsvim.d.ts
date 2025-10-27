@@ -53,6 +53,8 @@ export declare namespace RsvimFs {
         close(): void;
         [Symbol.dispose](): void;
         get isDisposed(): boolean;
+        read(buf: Uint8Array): Promise<number | null>;
+        readSync(buf: Uint8Array): number | null;
     }
 }
 type FileEncodingOption = "utf-8";

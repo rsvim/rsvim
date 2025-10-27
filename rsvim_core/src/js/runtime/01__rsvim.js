@@ -51,6 +51,11 @@ function checkIsObject(arg, msg) {
         throw new TypeError(`${msg} must be an object, but found ${typeof arg}`);
     }
 }
+function checkIsUint8Array(arg, msg) {
+    if (!(arg instanceof Uint8Array)) {
+        throw new TypeError(`${msg} must be a Uint8Array, buf found ${typeof arg}`);
+    }
+}
 function checkIsOptions(arg, options, msg) {
     if (!options.includes(arg)) {
         throw new RangeError(`${msg} is an invalid option: ${arg}`);
@@ -124,7 +129,7 @@ export class RsvimCmd {
     }
 }
 export class RsvimFs {
-    open(path, options) {
+    async open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
@@ -185,6 +190,14 @@ export class RsvimFs {
         }
         get isDisposed() {
             return isNull(this.#handle);
+        }
+        async read(buf) {
+            checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
+            return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+        }
+        readSync(buf) {
+            checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
+            return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
         }
     }
     RsvimFs.File = File;
