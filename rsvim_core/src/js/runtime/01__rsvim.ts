@@ -268,7 +268,7 @@ export class RsvimCmd {
    *
    * @example
    * ```javascript
-   * function write(ctx: any): void {
+   * function write(ctx: any): Promise<void> {
    *   try {
    *     const bytes = Rsvim.buf.writeSync(bufId);
    *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
@@ -504,10 +504,7 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  async open(
-    path: string,
-    options?: RsvimFs.OpenOptions,
-  ): Promise<RsvimFs.File> {
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -717,7 +714,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    async read(buf: Uint8Array): Promise<number> {
+    read(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
@@ -766,7 +763,7 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    async write(buf: Uint8Array): Promise<number> {
+    write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
