@@ -3,6 +3,7 @@
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
+use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
 #[derive(Debug)]
@@ -67,7 +68,7 @@ pub async fn async_fs_read(
 pub struct FsReadFuture {
   pub promise: v8::Global<v8::PromiseResolver>,
   pub buffer_store: v8::SharedRef<v8::BackingStore>,
-  pub maybe_result: Option<TheResult<(Vec<u8>, usize)>>,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
 impl JsFuture for FsReadFuture {
@@ -86,7 +87,9 @@ impl JsFuture for FsReadFuture {
     }
 
     // Otherwise, resolve the promise passing the result.
-    let data = result.unwrap();
+    let (data, _result_len) = decode_bytes::<FsReadResult>(result.unwrap());
+    let data = data.buf;
+    let read = data.read;
 
     // Copy the slice's bytes into v8's typed-array backing store.
     for (i, b) in data.iter().enumerate() {
