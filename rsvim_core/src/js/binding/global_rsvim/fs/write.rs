@@ -60,12 +60,16 @@ impl JsFuture for FsWriteFuture {
     let data = result.unwrap();
     let (bytes_written, _bytes_written_len) = decode_bytes::<usize>(&data);
 
-    let bytes_written = v8::Integer::new(scope, bytes_written as i32);
+    let bytes_written = if bytes_written == 0 {
+      v8::null(scope).into()
+    } else {
+      v8::Integer::new(scope, bytes_written as i32).into()
+    };
 
     self
       .promise
       .open(scope)
-      .resolve(scope, bytes_written.into())
+      .resolve(scope, bytes_written)
       .unwrap();
   }
 }
