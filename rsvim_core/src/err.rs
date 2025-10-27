@@ -24,12 +24,6 @@ pub type IoResult<T> = std::io::Result<T>;
 /// All error codes.
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
-  // common {
-  #[error("{0}")]
-  /// IoErr
-  IoErr(#[from] IoErr),
-  // common }
-
   // buf {
   #[error("Buffer `{0}` doesn't have a filename.")]
   BufferNoName(BufferId),
