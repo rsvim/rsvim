@@ -320,11 +320,14 @@ async fn test_read_write1() -> IoResult<()> {
   let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
   info!("tmpfile:{:?}", tmpfile);
   tmpfile.touch().unwrap();
-  tmpfile.write_str("Hello, World!");
+  tmpfile.write_str("Hello, World!").unwrap();
 
   let src = format!(
     r#"
   using f = await Rsvim.fs.open({:?});
+  const buf = new Uint8Array(100);
+  const n = await f.read(buf);
+  Rsvim.cmd.echo(`n:${n}`);
     "#,
     tmpfile.path()
   );
@@ -344,10 +347,14 @@ async fn test_read_write1() -> IoResult<()> {
 
   // After running
   {
-    let contents = lock!(event_loop.contents);
-    let actual = contents.command_line_message_history().is_empty();
-    assert!(actual);
-    assert!(tmpfile.exists());
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 1);
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert!(actual, "n:13");
   }
 
   Ok(())
