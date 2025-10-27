@@ -63,6 +63,12 @@ pub struct FsReadResp {
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }
 
+#[derive(Debug)]
+pub struct FsWriteResp {
+  pub task_id: JsTaskId,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
 /// Send js message in sync/blocking way, with tokio's "current_runtime".
 pub fn send_to_jsrt(master_tx: UnboundedSender<JsMessage>, message: JsMessage) {
   master_tx.send(message).unwrap();

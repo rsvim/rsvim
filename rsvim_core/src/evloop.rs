@@ -757,9 +757,12 @@ impl EventLoop {
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_write(req.fd, req.buf).await;
             jsrt_forwarder_tx
-              .send(JsMessage::FsReadResp(msg::FsReadResp {
+              .send(JsMessage::FsWriteResp(msg::FsWriteResp {
                 task_id: req.task_id,
-                maybe_result: Some(maybe_result),
+                maybe_result: match maybe_result {
+                  Ok(n) => Some(Ok(encode_bytes::<usize>(n))),
+                  Err(e) => Some(Err(e)),
+                },
               }))
               .unwrap();
           });
