@@ -146,15 +146,15 @@ impl ColumnIndex {
         }
       }
 
-      if let Some(char_idx) = char_idx_bound {
-        if i > char_idx {
-          return;
-        }
+      if let Some(char_idx) = char_idx_bound
+        && i > char_idx
+      {
+        return;
       }
-      if let Some(width) = width_bound {
-        if prefix > width {
-          return;
-        }
+      if let Some(width) = width_bound
+        && prefix > width
+      {
+        return;
       }
     }
   }
