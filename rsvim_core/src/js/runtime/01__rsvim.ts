@@ -275,6 +275,7 @@ export class RsvimCmd {
    *   } catch (e) {
    *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
    *   }
+   *   return new Promise((resolve) => resolve());
    * }
    * Rsvim.cmd.create("write", write);
    * ```
