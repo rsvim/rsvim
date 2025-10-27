@@ -3,6 +3,7 @@
 use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
+use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 
 pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
@@ -57,18 +58,14 @@ impl JsFuture for FsWriteFuture {
 
     // Otherwise, resolve the promise passing the result.
     let data = result.unwrap();
+    let (bytes_written, _bytes_written_len) = decode_bytes::<usize>(&data);
 
-    // Copy the slice's bytes into v8's typed-array backing store.
-    for (i, b) in data.iter().enumerate() {
-      self.buffer_store[i].set(*b);
-    }
-
-    let bytes_read = v8::Integer::new(scope, data.len() as i32);
+    let bytes_written = v8::Integer::new(scope, bytes_written as i32);
 
     self
       .promise
       .open(scope)
-      .resolve(scope, bytes_read.into())
+      .resolve(scope, bytes_written.into())
       .unwrap();
   }
 }
