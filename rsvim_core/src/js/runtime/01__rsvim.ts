@@ -280,7 +280,7 @@ export class RsvimCmd {
    * Rsvim.cmd.create("writeSync", writeSync);
    *
    * // For command function that contains async/await:
-   * function write(ctx: any): Promise<void> {
+   * async function write(ctx: any): void {
    *   try {
    *     const file = await Rsvim.fs.open("README");
    *     const buf = new Uint8Array(100);
