@@ -722,7 +722,7 @@ impl EventLoop {
           });
         }
         MasterMessage::FsOpenReq(req) => {
-          trace!("Recv FsOpenReq");
+          trace!("Recv FsOpenReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_open(&req.path, req.options).await;
@@ -738,7 +738,7 @@ impl EventLoop {
           });
         }
         MasterMessage::FsReadReq(req) => {
-          trace!("Recv FsReadReq");
+          trace!("Recv FsReadReq:{:?}", req.task_id);
           let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
           self.detached_tracker.spawn(async move {
             let maybe_result = async_fs_read(req.fd, req.bufsize).await;
