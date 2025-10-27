@@ -14,8 +14,8 @@ pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<(Vec<u8>, usize)> {
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
-
   handle::std_to_fd(file);
+
   result
 }
 
@@ -31,8 +31,8 @@ pub async fn async_fs_read(
     Ok(n) => Ok((buf, n)),
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
-
   handle::tokio_to_fd(file).await;
+
   result
 }
 

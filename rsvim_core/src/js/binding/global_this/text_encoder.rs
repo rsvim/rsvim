@@ -1,6 +1,5 @@
 //! `TextEncoder` APIs.
 
-use crate::create_cppgc_handle;
 use crate::get_cppgc_handle;
 use crate::is_v8_bool;
 use crate::is_v8_obj;
@@ -8,6 +7,7 @@ use crate::is_v8_str;
 use crate::js::binding;
 use crate::js::converter::*;
 use crate::prelude::*;
+use crate::wrap_cppgc_handle;
 use compact_str::ToCompactString;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
@@ -247,7 +247,7 @@ pub fn create_stream_decoder<'s>(
   let decoder_handle = RefCell::new(create_decoder_impl(&label, ignore_bom));
 
   let decoder_wrapper =
-    create_cppgc_handle!(scope, decoder_handle, RefCell<Decoder>);
+    wrap_cppgc_handle!(scope, decoder_handle, RefCell<Decoder>);
 
   rv.set(decoder_wrapper.into());
 }

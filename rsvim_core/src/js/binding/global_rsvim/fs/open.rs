@@ -1,6 +1,5 @@
 //! Open file APIs.
 
-use crate::create_cppgc_handle;
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
@@ -11,6 +10,9 @@ use crate::js::converter::*;
 use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
+use crate::wrap_cppgc_handle;
+use parking_lot::Mutex;
+use std::sync::Arc;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -201,7 +203,7 @@ impl JsFuture for FsOpenFuture {
 
     // Deserialize bytes into a file-descriptor.
     let (fd, _fd_len) = decode_bytes::<usize>(&result);
-    let file_wrapper = create_cppgc_handle!(scope, Some(fd), Option<usize>);
+    let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
       .promise

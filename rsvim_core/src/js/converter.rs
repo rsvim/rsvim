@@ -477,7 +477,7 @@ macro_rules! is_v8_int {
 /// 1. Set the handle's raw pointer to its internal field with index-0.
 /// 2. Set a v8::Weak finalizer to its internal field with index-1.
 #[macro_export]
-macro_rules! create_cppgc_handle {
+macro_rules! wrap_cppgc_handle {
   ($scope:ident, $handle:expr, $ty:ty) => {{
     let wrapper_template = v8::ObjectTemplate::new($scope);
 
