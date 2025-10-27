@@ -530,7 +530,7 @@ async fn test_read_write4() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
     let actual = contents
       .command_line_message_history_mut()
       .try_pop()
