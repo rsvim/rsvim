@@ -4,6 +4,7 @@ pub mod close;
 pub mod handle;
 pub mod open;
 pub mod read;
+pub mod write;
 
 use crate::get_cppgc_handle;
 use crate::is_v8_str;
