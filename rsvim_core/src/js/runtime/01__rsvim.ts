@@ -760,7 +760,7 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    async write(buf: Uint8Array): Promise<number> {
+    async write(buf: Uint8Array): Promise<number | null> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
@@ -781,10 +781,13 @@ export namespace RsvimFs {
      * ```
      */
     writeSync(buf: Uint8Array): number | null {
-      checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
+      checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
+      return __InternalRsvimGlobalObject.fs_write_sync(
+        this.#handle,
+        buf.buffer,
+      );
     }
   }
 }
