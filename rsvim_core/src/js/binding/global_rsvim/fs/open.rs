@@ -144,7 +144,10 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .open(path)
   {
     Ok(file) => Ok(handle::std_to_fd(file)),
-    Err(e) => bail!(TheErr::IoErr(e)),
+    Err(e) => bail!(TheErr::OpenFileFailed(
+      path.to_string_lossy().to_string(),
+      e
+    )),
   }
 }
 
@@ -166,7 +169,10 @@ pub async fn async_fs_open(
       let fd = handle::tokio_to_fd(file).await;
       Ok(fd)
     }
-    Err(e) => bail!(TheErr::IoErr(e)),
+    Err(e) => bail!(TheErr::OpenFileFailed(
+      path.to_string_lossy().to_string(),
+      e
+    )),
   }
 }
 

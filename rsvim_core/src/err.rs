@@ -58,6 +58,9 @@ pub enum TheErr {
   #[error("Not enough arguments specified.")]
   ArgumentsNotEnough,
 
+  #[error("Failed to open file `{0}`: {1}.")]
+  OpenFileFailed(String, IoErr),
+
   #[error("Invalid data.")]
   DataInvalid,
 
