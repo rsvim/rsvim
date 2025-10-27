@@ -24,8 +24,13 @@ pub type IoResult<T> = std::io::Result<T>;
 /// All error codes.
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
+  // common {
+  #[error("{0}")]
+  /// IoErr
+  IoErr(IoErr),
+  // common }
+
   // buf {
-  //
   #[error("Buffer `{0}` doesn't have a filename.")]
   /// Buffer doesn't have a filename.
   BufferHaveNoFileName(BufferId),
@@ -33,11 +38,6 @@ pub enum TheErr {
   #[error("Buffer `{0}` not exist.")]
   /// Buffer not found
   BufferNotExist(BufferId),
-
-  #[error("Failed to save buffer {0}({1}): {2}")]
-  /// Buffer failed to write file
-  SaveBufferFailed(BufferId, String, IoErr),
-  //
   // buf }
 
   // js {
