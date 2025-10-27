@@ -705,7 +705,7 @@ export namespace RsvimFs {
      * :::
      *
      * @param {Uint8Array} buf - Read bytes into buffer.
-     * @returns {Promise<number | null>} It resolves to either the number of bytes read during the operation or EOF (`null`) if there was no more to read.
+     * @returns {Promise<number>} It resolves to either the number of bytes read during the operation or EOF (`0`) if there was no more to read.
      *
      * @throws Throws {@link !TypeError} if buf is not a Uint8Array.
      *
@@ -717,7 +717,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    async read(buf: Uint8Array): Promise<number | null> {
+    async read(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
@@ -728,7 +728,7 @@ export namespace RsvimFs {
      * Sync version of {@link read}.
      *
      * @param {Uint8Array} buf - Same with {@link read}.
-     * @returns {(number | null)} Same with {@link read}.
+     * @returns {number} Same with {@link read}.
      *
      * @throws Same with {@link read}.
      *
@@ -740,7 +740,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    readSync(buf: Uint8Array): number | null {
+    readSync(buf: Uint8Array): number {
       checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
 
       // @ts-ignore Ignore warning
@@ -755,7 +755,7 @@ export namespace RsvimFs {
      * :::
      *
      * @param {Uint8Array} buf - Read bytes into buffer.
-     * @returns {Promise<number | null>} It resolves to either the number of bytes written during the operation or `null` if there was nothing to write.
+     * @returns {Promise<number>} It resolves to either the number of bytes written during the operation or `0` if there was nothing to write.
      *
      * @throws Throws {@link !TypeError} if buf is not a Uint8Array.
      *
@@ -766,7 +766,7 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    async write(buf: Uint8Array): Promise<number | null> {
+    async write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
@@ -777,7 +777,7 @@ export namespace RsvimFs {
      * Sync version of {@link write}.
      *
      * @param {Uint8Array} buf - Same with {@link write}.
-     * @returns {(number | null)} Same with {@link write}.
+     * @returns {number} Same with {@link write}.
      *
      * @throws Same with {@link write}.
      *
@@ -788,7 +788,7 @@ export namespace RsvimFs {
      * const n = file.writeSync(buf); // write 11 bytes
      * ```
      */
-    writeSync(buf: Uint8Array): number | null {
+    writeSync(buf: Uint8Array): number {
       checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
 
       // @ts-ignore Ignore warning
