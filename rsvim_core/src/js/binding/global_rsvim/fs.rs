@@ -104,20 +104,6 @@ pub fn close<'s>(
   fs_close(scope, file_wrapper.to_object(scope).unwrap());
 }
 
-/// `Rsvim.fs.isClosed` API.
-pub fn is_closed<'s>(
-  scope: &mut v8::PinScope<'s, '_>,
-  args: v8::FunctionCallbackArguments<'s>,
-  mut rv: v8::ReturnValue,
-) {
-  debug_assert!(args.length() == 1);
-  let file_wrapper = args.get(0);
-  trace!("Rsvim.fs.isClosed");
-
-  let result = fs_is_closed(scope, file_wrapper.to_object(scope).unwrap());
-  rv.set_bool(result);
-}
-
 /// `File.read` API.
 pub fn read<'s>(
   scope: &mut v8::PinScope<'s, '_>,
