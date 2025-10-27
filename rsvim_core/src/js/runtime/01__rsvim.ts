@@ -658,7 +658,7 @@ export namespace RsvimFs {
     }
 
     /**
-     * Close the file with dispose `using`.
+     * Close the file with `using` without `close` API.
      *
      * @example
      * ```javascript
