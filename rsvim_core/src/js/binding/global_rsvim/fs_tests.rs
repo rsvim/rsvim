@@ -445,7 +445,7 @@ async fn test_read_write3() -> IoResult<()> {
   const buf1 = new TextEncoder().encode("Hello World");
   const n1 = await f.write(buf1);
   Rsvim.cmd.echo(`n1:${{n1}}`);
-  const buf1 = new TextEncoder().encode("");
+  const buf2 = new TextEncoder().encode("");
   const n2 = await f.write(buf2);
   Rsvim.cmd.echo(`n2:${{n2}}`);
     "#,
