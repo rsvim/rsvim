@@ -32,10 +32,10 @@ pub enum TheErr {
 
   // buf {
   #[error("Buffer `{0}` doesn't have a filename.")]
-  BufNoName(BufferId),
+  BufferNoName(BufferId),
 
   #[error("Buffer `{0}` not exist.")]
-  BufNotExist(BufferId),
+  BufferNotExist(BufferId),
   // buf }
 
   // js {
