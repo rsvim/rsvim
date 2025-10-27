@@ -37,8 +37,8 @@ pub enum TheErr {
   #[error("Buffer `{0}` not exist.")]
   BufferNotExist(BufferId),
 
-  #[error("Failed to save buffer `{0}` not exist.")]
-  BufferSaveFiled(BufferId),
+  #[error("Failed to save buffer `{0}`({1}): {2}.")]
+  BufferSaveFailed(BufferId, String, IoErr),
   // buf }
 
   // js {

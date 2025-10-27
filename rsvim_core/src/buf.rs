@@ -376,6 +376,7 @@ impl BuffersManager {
   }
 
   fn write_file(&self, buf: &mut Buffer) -> TheResult<usize> {
+    let buf_id = buf.id();
     let filename = buf
       .filename()
       .as_ref()
@@ -400,15 +401,15 @@ impl BuffersManager {
             Ok(_) => match writer.flush() {
               Ok(_) => n,
               Err(e) => {
-                bail!(TheErr::IoErr(e));
+                bail!(TheErr::BufferSaveFailed(buf_id, filename, e));
               }
             },
             Err(e) => {
-              bail!(TheErr::IoErr(e));
+              bail!(TheErr::BufferSaveFailed(buf_id, filename, e));
             }
           },
           Err(e) => {
-            bail!(TheErr::IoErr(e));
+            bail!(TheErr::BufferSaveFailed(buf_id, filename, e));
           }
         };
         trace!("Write file {:?}, bytes: {:?}", filename, n);
@@ -421,7 +422,7 @@ impl BuffersManager {
         n
       }
       Err(e) => {
-        bail!(TheErr::IoErr(e));
+        bail!(TheErr::BufferSaveFailed(buf_id, filename, e));
       }
     };
 
