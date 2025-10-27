@@ -38,7 +38,7 @@ pub async fn async_fs_read(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
     buf.set_len(n);
   }
   handle::tokio_to_fd(file).await;
-  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
+  trace!("|async_fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
 
   Ok(buf)
 }

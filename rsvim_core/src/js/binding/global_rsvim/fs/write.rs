@@ -13,7 +13,7 @@ pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
     Ok(n) => n,
     Err(e) => bail!(TheErr::WriteFileFailed(fd, e)),
   };
-  debug_assert!(n <= buf.capacity());
+  debug_assert!(n <= buf.len());
   handle::std_to_fd(file);
   trace!("|fs_write| n:{},buf:{:?}", n, buf);
 
@@ -28,11 +28,11 @@ pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
     Ok(n) => n,
     Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
   };
-  debug_assert!(n <= buf.capacity());
+  debug_assert!(n <= buf.len());
   handle::tokio_to_fd(file).await;
-  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
+  trace!("|async_fs_write| n:{},buf:{:?}", n, buf);
 
-  Ok(buf)
+  Ok(n)
 }
 
 pub struct FsWriteFuture {
