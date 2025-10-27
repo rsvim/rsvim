@@ -102,10 +102,6 @@ pub fn create_fs_write(
   state.pending_tasks.insert(task_id, cb);
   msg::send_to_master(
     state.master_tx.clone(),
-    MasterMessage::FsWriteReq(msg::FsWriteReq {
-      task_id,
-      fd,
-      bufsize,
-    }),
+    MasterMessage::FsWriteReq(msg::FsWriteReq { task_id, fd, buf }),
   );
 }
