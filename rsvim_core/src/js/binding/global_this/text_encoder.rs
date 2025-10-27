@@ -19,9 +19,9 @@ use std::cell::RefCell;
 fn encode_impl<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   payload: v8::Local<'s, v8::String>,
-  buf_size: usize,
+  bufsize: usize,
 ) -> (Vec<u8>, usize, usize) {
-  let mut buf: Vec<u8> = Vec::with_capacity(buf_size);
+  let mut buf: Vec<u8> = Vec::with_capacity(bufsize);
   let mut read: usize = 0;
 
   // FIXME: Update to `write_utf8_v2` API.

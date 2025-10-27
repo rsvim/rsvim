@@ -327,7 +327,7 @@ async fn test_read_write1() -> IoResult<()> {
   using f = await Rsvim.fs.open({:?});
   const buf = new Uint8Array(100);
   const n = await f.read(buf);
-  Rsvim.cmd.echo(`n:${n}`);
+  Rsvim.cmd.echo(`n:${{n}}`);
     "#,
     tmpfile.path()
   );
@@ -354,7 +354,7 @@ async fn test_read_write1() -> IoResult<()> {
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    assert!(actual, "n:13");
+    assert_eq!(actual, "n:13");
   }
 
   Ok(())
