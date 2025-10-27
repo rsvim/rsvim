@@ -497,7 +497,10 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+  async open(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -668,7 +671,7 @@ export namespace RsvimFs {
      *
      * @see {@link close}
      */
-    [Symbol.dispose]() {
+    [Symbol.dispose](): void {
       this.close();
     }
 
@@ -686,6 +689,25 @@ export namespace RsvimFs {
     get isDisposed(): boolean {
       return isNull(this.#handle);
     }
+
+    /**
+     * Read a file into a buffer.
+     *
+     * @param {Uint8Array} buffer - Read bytes into buffer.
+     * @param {RsvimFs.OpenOptions} options - (Optional) Open options, by default is `{read: true}`. See {@link RsvimFs.OpenOptions}.
+     * @returns {Promise<RsvimFs.File>} It returns a {@link Promise} that resolves to an instance of {@link RsvimFs.File}.
+     *
+     * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+     *
+     * @example
+     * ```javascript
+     * const file = await Rsvim.fs.open("README.md");
+     * ```
+     */
+    async read(
+      path: string,
+      options?: RsvimFs.OpenOptions,
+    ): Promise<RsvimFs.File> {}
   }
 }
 
