@@ -28,6 +28,9 @@ pub enum MasterMessage {
 
   /// Js runtime ask master to read file.
   FsReadReq(FsReadReq),
+
+  /// Js runtime ask master to write file.
+  FsWriteReq(FsWriteReq),
 }
 
 #[derive(Debug)]
@@ -61,6 +64,13 @@ pub struct FsReadReq {
   pub task_id: JsTaskId,
   pub fd: usize,
   pub bufsize: usize,
+}
+
+#[derive(Debug)]
+pub struct FsWriteReq {
+  pub task_id: JsTaskId,
+  pub fd: usize,
+  pub buf: Vec<u8>,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".

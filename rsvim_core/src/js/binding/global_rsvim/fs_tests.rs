@@ -325,9 +325,13 @@ async fn test_read_write1() -> IoResult<()> {
   let src = format!(
     r#"
   using f = await Rsvim.fs.open({:?});
-  const buf = new Uint8Array(100);
-  const n = await f.read(buf);
-  Rsvim.cmd.echo(`n:${{n}}`);
+  const buf1 = new Uint8Array(100);
+  const n1 = await f.read(buf1);
+  Rsvim.cmd.echo(`n1:${{n1}}`);
+
+  const buf2 = new Uint8Array(100);
+  const n2 = await f.read(buf2);
+  Rsvim.cmd.echo(`n2:${{n2}}`);
     "#,
     tmpfile.path()
   );
@@ -349,12 +353,17 @@ async fn test_read_write1() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
     let actual = contents
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    assert_eq!(actual, "n:13");
+    assert_eq!(actual, "n1:13");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n2:0");
   }
 
   Ok(())
@@ -376,9 +385,12 @@ async fn test_read_write2() -> IoResult<()> {
   let src = format!(
     r#"
   using f = Rsvim.fs.openSync({:?});
-  const buf = new Uint8Array(100);
-  const n = f.readSync(buf);
-  Rsvim.cmd.echo(`n:${{n}}`);
+  const buf1 = new Uint8Array(0);
+  const n1 = f.readSync(buf1);
+  Rsvim.cmd.echo(`n1:${{n1}}`);
+  const buf2 = new Uint8Array(100);
+  const n2 = f.readSync(buf2);
+  Rsvim.cmd.echo(`n2:${{n2}}`);
     "#,
     tmpfile.path()
   );
@@ -400,12 +412,139 @@ async fn test_read_write2() -> IoResult<()> {
   {
     let mut contents = lock!(event_loop.contents);
     let n = contents.command_line_message_history().occupied_len();
-    assert_eq!(n, 1);
+    assert_eq!(n, 2);
     let actual = contents
       .command_line_message_history_mut()
       .try_pop()
       .unwrap();
-    assert_eq!(actual, "n:13");
+    assert_eq!(actual, "n1:0");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n2:13");
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_read_write3() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  info!("tmpfile:{:?}", tmpfile);
+
+  let src = format!(
+    r#"
+  using f = await Rsvim.fs.open({:?}, {{create:true,write:true}});
+  const buf1 = new TextEncoder().encode("Hello World");
+  const n1 = await f.write(buf1);
+  Rsvim.cmd.echo(`n1:${{n1}}`);
+  const buf2 = new TextEncoder().encode("");
+  const n2 = await f.write(buf2);
+  Rsvim.cmd.echo(`n2:${{n2}}`);
+    "#,
+    tmpfile.path()
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 2);
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n1:11");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n2:0");
+    assert_eq!(
+      std::fs::read_to_string(tmpfile.path()).unwrap(),
+      "Hello World".to_string()
+    );
+  }
+
+  Ok(())
+}
+
+#[tokio::test]
+#[cfg_attr(miri, ignore)]
+async fn test_read_write4() -> IoResult<()> {
+  test_log_init();
+
+  let terminal_cols = 10_u16;
+  let terminal_rows = 10_u16;
+  let mocked_events = vec![MockEvent::SleepFor(Duration::from_millis(50))];
+  let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
+  info!("tmpfile:{:?}", tmpfile);
+
+  let src = format!(
+    r#"
+  using f = await Rsvim.fs.open({:?}, {{create:true,write:true}});
+  const buf1 = new TextEncoder().encode("Hello World");
+  const n1 = f.writeSync(buf1);
+  Rsvim.cmd.echo(`n1:${{n1}}`);
+  const buf2 = new TextEncoder().encode("");
+  const n2 = f.writeSync(buf2);
+  Rsvim.cmd.echo(`n2:${{n2}}`);
+    "#,
+    tmpfile.path()
+  );
+  info!("src:{:?}", src);
+
+  // Prepare $RSVIM_CONFIG/rsvim.js
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+
+  let mut event_loop =
+    make_event_loop(terminal_cols, terminal_rows, CliOptions::empty());
+
+  event_loop.initialize()?;
+  event_loop
+    .run_with_mock_events(MockEventReader::new(mocked_events))
+    .await?;
+  event_loop.shutdown()?;
+
+  // After running
+  {
+    let mut contents = lock!(event_loop.contents);
+    let n = contents.command_line_message_history().occupied_len();
+    assert_eq!(n, 2);
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n1:11");
+    let actual = contents
+      .command_line_message_history_mut()
+      .try_pop()
+      .unwrap();
+    assert_eq!(actual, "n2:0");
+    assert_eq!(
+      std::fs::read_to_string(tmpfile.path()).unwrap(),
+      "Hello World".to_string()
+    );
   }
 
   Ok(())

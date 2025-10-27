@@ -27,6 +27,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of fs read
   FsReadResp(FsReadResp),
+
+  /// Master send js runtime the result of fs write
+  FsWriteResp(FsWriteResp),
 }
 
 #[derive(Debug)]
@@ -56,6 +59,12 @@ pub struct FsOpenResp {
 
 #[derive(Debug)]
 pub struct FsReadResp {
+  pub task_id: JsTaskId,
+  pub maybe_result: Option<TheResult<Vec<u8>>>,
+}
+
+#[derive(Debug)]
+pub struct FsWriteResp {
   pub task_id: JsTaskId,
   pub maybe_result: Option<TheResult<Vec<u8>>>,
 }

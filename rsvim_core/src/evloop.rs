@@ -12,6 +12,7 @@ use crate::js::JsRuntimeOptions;
 use crate::js::SnapshotData;
 use crate::js::binding::global_rsvim::fs::open::async_fs_open;
 use crate::js::binding::global_rsvim::fs::read::async_fs_read;
+use crate::js::binding::global_rsvim::fs::write::async_fs_write;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
 use crate::js::encdec::encode_bytes;
@@ -746,6 +747,22 @@ impl EventLoop {
               .send(JsMessage::FsReadResp(msg::FsReadResp {
                 task_id: req.task_id,
                 maybe_result: Some(maybe_result),
+              }))
+              .unwrap();
+          });
+        }
+        MasterMessage::FsWriteReq(req) => {
+          trace!("Recv FsWriteReq:{:?}", req.task_id);
+          let jsrt_forwarder_tx = self.jsrt_forwarder_tx.clone();
+          self.detached_tracker.spawn(async move {
+            let maybe_result = async_fs_write(req.fd, req.buf).await;
+            jsrt_forwarder_tx
+              .send(JsMessage::FsWriteResp(msg::FsWriteResp {
+                task_id: req.task_id,
+                maybe_result: match maybe_result {
+                  Ok(n) => Some(Ok(encode_bytes(n))),
+                  Err(e) => Some(Err(e)),
+                },
               }))
               .unwrap();
           });

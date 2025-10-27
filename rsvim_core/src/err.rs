@@ -64,6 +64,9 @@ pub enum TheErr {
   #[error("Failed to read file `{0}`: {1}.")]
   ReadFileFailed(usize, IoErr),
 
+  #[error("Failed to write file `{0}`: {1}.")]
+  WriteFileFailed(usize, IoErr),
+
   #[error("Invalid data.")]
   DataInvalid,
 
