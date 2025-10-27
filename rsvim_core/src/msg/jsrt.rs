@@ -27,6 +27,9 @@ pub enum JsMessage {
 
   /// Master send js runtime the result of fs read
   FsReadResp(FsReadResp),
+
+  /// Master send js runtime the result of fs write
+  FsWriteResp(FsWriteResp),
 }
 
 #[derive(Debug)]

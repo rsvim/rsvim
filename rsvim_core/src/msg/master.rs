@@ -70,7 +70,7 @@ pub struct FsReadReq {
 pub struct FsWriteReq {
   pub task_id: JsTaskId,
   pub fd: usize,
-  pub buf: Vec<usize>,
+  pub buf: Vec<u8>,
 }
 
 /// Send master message in sync/blocking way, with tokio's "current_runtime".
