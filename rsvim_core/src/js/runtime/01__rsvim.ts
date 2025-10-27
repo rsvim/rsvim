@@ -269,7 +269,7 @@ export class RsvimCmd {
    * @example
    * ```javascript
    * // For command that is pure sync, i.e. doesn't contain async/await:
-   * function write(ctx: any): void {
+   * function writeSync(ctx: any): void {
    *   try {
    *     const bytes = Rsvim.buf.writeSync(bufId);
    *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
@@ -277,7 +277,7 @@ export class RsvimCmd {
    *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
    *   }
    * }
-   * Rsvim.cmd.create("write", write);
+   * Rsvim.cmd.create("writeSync", writeSync);
    *
    * // For command function that contains async/await:
    * function write(ctx: any): Promise<void> {
