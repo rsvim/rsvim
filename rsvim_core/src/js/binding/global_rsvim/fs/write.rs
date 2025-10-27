@@ -5,26 +5,22 @@ use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::prelude::*;
 
-pub fn fs_write(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
-  use std::io::Read;
+pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
+  use std::io::Write;
 
   let mut file = handle::std_from_fd(fd);
-  let mut buf: Vec<u8> = vec![0; bufsize];
-  let n = match file.read(&mut buf) {
+  let n = match file.write(&buf) {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::ReadFileFailed(fd, e)),
+    Err(e) => bail!(TheErr::WriteFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.capacity());
-  unsafe {
-    buf.set_len(n);
-  }
   handle::std_to_fd(file);
-  trace!("|fs_read| bufsize:{},n:{},buf:{:?}", bufsize, n, buf);
+  trace!("|fs_write| n:{},buf:{:?}", n, buf);
 
-  Ok(buf)
+  Ok(n)
 }
 
-pub async fn async_fs_write(fd: usize, bufsize: usize) -> TheResult<Vec<u8>> {
+pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
   use tokio::io::AsyncReadExt;
 
   let mut file = handle::tokio_from_fd(fd);
