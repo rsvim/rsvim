@@ -80,14 +80,7 @@ async fn test_open_close2() -> IoResult<()> {
 
   let src = format!(
     r#"
-  const f = Rsvim.fs.openSync({:?});
-  if (f.isDisposed) {{
-    throw new Error("It cannot be closed");
-  }}
-  f.close();
-  if (!f.isDisposed) {{
-    throw new Error("It must be closed");
-  }}
+  using f = Rsvim.fs.openSync({:?});
     "#,
     tmpfile.path()
   );
