@@ -45,6 +45,8 @@ pub fn fs_read(fd: usize, bufsize: usize) -> TheResult<FsReadResult> {
   };
   handle::std_to_fd(file);
 
+  debug_assert_eq!(read, buf.len());
+
   Ok(FsReadResult { read, buf })
 }
 
@@ -61,6 +63,8 @@ pub async fn async_fs_read(
     Err(e) => bail!(TheErr::ReadFileFailed(e)),
   };
   handle::tokio_to_fd(file).await;
+
+  debug_assert_eq!(read, buf.len());
 
   Ok(FsReadResult { read, buf })
 }
