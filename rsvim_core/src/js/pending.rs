@@ -91,3 +91,21 @@ pub fn create_fs_read(
     }),
   );
 }
+
+pub fn create_fs_write(
+  state: &mut JsRuntimeState,
+  task_id: JsTaskId,
+  fd: usize,
+  buf: Vec<u8>,
+  cb: TaskCallback,
+) {
+  state.pending_tasks.insert(task_id, cb);
+  msg::send_to_master(
+    state.master_tx.clone(),
+    MasterMessage::FsWriteReq(msg::FsWriteReq {
+      task_id,
+      fd,
+      bufsize,
+    }),
+  );
+}
