@@ -80,7 +80,6 @@ jobs:
           cp CHANGELOG.md rsvim-${{ matrix.target }}
           cp LICENSE.txt rsvim-${{ matrix.target }}
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
-          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
       - name: Create Artifact (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
@@ -90,9 +89,7 @@ jobs:
           cp CHANGELOG.md rsvim-${{ matrix.target }}
           cp LICENSE.txt rsvim-${{ matrix.target }}
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim-${{ matrix.target }}
-          shasum -a 256 rsvim-${{ matrix.target }}.tar.gz >rsvim-${{ matrix.target }}.tar.gz.sha256
           7z a rsvim-${{ matrix.target }}.zip rsvim-${{ matrix.target }}
-          shasum -a 256 rsvim-${{ matrix.target }}.zip >rsvim-${{ matrix.target }}.zip.sha256
       - name: Create New Release
         uses: ncipollo/release-action@v1
         if: ${{ matrix.os != 'windows-2022' }}
@@ -105,7 +102,6 @@ jobs:
           omitBody: true
           artifacts: |
             rsvim-${{ matrix.target }}.tar.gz
-            rsvim-${{ matrix.target }}.tar.gz.sha256
       - name: Create New Release (Windows)
         uses: ncipollo/release-action@v1
         if: ${{ matrix.os == 'windows-2022' }}
@@ -118,6 +114,4 @@ jobs:
           omitBody: true
           artifacts: |
             rsvim-${{ matrix.target }}.tar.gz
-            rsvim-${{ matrix.target }}.tar.gz.sha256
             rsvim-${{ matrix.target }}.zip
-            rsvim-${{ matrix.target }}.zip.sha256
