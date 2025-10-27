@@ -51,7 +51,8 @@ export declare namespace RsvimFs {
         #private;
         constructor(handle: any);
         close(): void;
-        isClosed(): boolean;
+        [Symbol.dispose](): void;
+        get isDisposed(): boolean;
     }
 }
 type FileEncodingOption = "utf-8";

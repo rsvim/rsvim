@@ -175,10 +175,16 @@ export class RsvimFs {
             this.#handle = handle;
         }
         close() {
-            __InternalRsvimGlobalObject.fs_close(this.#handle);
+            if (!isNull(this.#handle)) {
+                __InternalRsvimGlobalObject.fs_close(this.#handle);
+            }
+            this.#handle = null;
         }
-        isClosed() {
-            return __InternalRsvimGlobalObject.fs_is_closed(this.#handle);
+        [Symbol.dispose]() {
+            this.close();
+        }
+        get isDisposed() {
+            return isNull(this.#handle);
         }
     }
     RsvimFs.File = File;
