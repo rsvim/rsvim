@@ -22,7 +22,7 @@ impl bincode::Encode for FsReadResult {
   }
 }
 
-impl bincode::Decode for FsReadResult {
+impl<Context> bincode::Decode<Context> for FsReadResult {
   fn decode<D: bincode::de::Decoder<Context = Context>>(
     decoder: &mut D,
   ) -> Result<Self, bincode::error::DecodeError> {
