@@ -26,7 +26,7 @@ export declare namespace RsvimCmd {
         force?: boolean;
         alias?: string;
     };
-    type CommandCallback = (ctx: any) => void;
+    type CommandCallback = (ctx: any) => Promise<void>;
     type CommandDefinition = {
         name: string;
         callback: CommandCallback;

@@ -259,7 +259,7 @@ export class RsvimCmd {
    * :::
    *
    * @param {string} name - Command name that is going to create. Only letters (`a-z` and `A-Z`), digits (`0-9`), underscore (`_`) and exclamation (`!`) are allowed in a command name. Command name must not begin with a digit.
-   * @param {RsvimCmd.CommandCallback} callback - The backend logic that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
+   * @param {RsvimCmd.CommandCallback} callback - Async callback function that implements the command. It accepts an `ctx` parameter that contains all the information when user is running it. See {@link RsvimCmd.CommandCallback}.
    * @param {RsvimCmd.CommandAttributes} attributes - (Optional) Attributes that control the command behavior, by default is `{bang:false, nargs:"0"}`, see {@link RsvimCmd.CommandAttributes}.
    * @param {RsvimCmd.CommandOptions} options - (Optional) Options that control how the command is created, by default is `{force:true}`, see {@link RsvimCmd.CommandOptions}.
    * @returns {(RsvimCmd.CommandDefinition | undefined)} It returns `undefined` is the command is newly created. Or it returns a command definition that was defined previously.
@@ -268,10 +268,17 @@ export class RsvimCmd {
    *
    * @example
    * ```javascript
-   * function write(ctx: any): void {
+   * async function write(ctx: any): void {
    *   try {
    *     const bytes = Rsvim.buf.writeSync(bufId);
-   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   *
+   *     // Call other async APIs
+   *     const file = await Rsvim.fs.open("message.txt");
+   *     const buffer = new Uint8Array(100);
+   *     const read = await file.read(buffer);
+   *     const message = new TextDecoder().decode(buffer);
+   *
+   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written with message: ${message}`);
    *   } catch (e) {
    *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
    *   }
@@ -463,7 +470,7 @@ export namespace RsvimCmd {
    *
    * @see {@link RsvimCmd.create}
 ,  */
-  export type CommandCallback = (ctx: any) => void;
+  export type CommandCallback = (ctx: any) => Promise<void>;
 
   /**
    * Command definition.
@@ -504,10 +511,7 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  async open(
-    path: string,
-    options?: RsvimFs.OpenOptions,
-  ): Promise<RsvimFs.File> {
+  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -536,11 +540,11 @@ export class RsvimFs {
   /**
    * The sync version of {@link open}.
    *
-   * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions} options - Same with {@link open}.
-   * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
+   * @param {string} path
+   * @param {RsvimFs.OpenOptions} options
+   * @returns {RsvimFs.File}
    *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+   * @throws
    *
    * @example
    * ```javascript
@@ -577,7 +581,9 @@ export namespace RsvimFs {
   /**
    * Open options.
    *
-   * Note: It is the same with [std::fs::OpenOptions](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) in rust std library.
+   * :::tip
+   * It is same with [std::fs::OpenOptions](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) in rust std library.
+   * :::
    *
    * @see {@link RsvimFs.open}
    */
@@ -717,7 +723,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    async read(buf: Uint8Array): Promise<number> {
+    read(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
@@ -727,10 +733,10 @@ export namespace RsvimFs {
     /**
      * Sync version of {@link read}.
      *
-     * @param {Uint8Array} buf - Same with {@link read}.
-     * @returns {number} Same with {@link read}.
+     * @param {Uint8Array} buf
+     * @returns {number}
      *
-     * @throws Same with {@link read}.
+     * @throws
      *
      * @example
      * ```javascript
@@ -766,7 +772,7 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    async write(buf: Uint8Array): Promise<number> {
+    write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
@@ -776,10 +782,10 @@ export namespace RsvimFs {
     /**
      * Sync version of {@link write}.
      *
-     * @param {Uint8Array} buf - Same with {@link write}.
-     * @returns {number} Same with {@link write}.
+     * @param {Uint8Array} buf
+     * @returns {number}
      *
-     * @throws Same with {@link write}.
+     * @throws
      *
      * @example
      * ```javascript

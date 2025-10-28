@@ -129,7 +129,7 @@ export class RsvimCmd {
     }
 }
 export class RsvimFs {
-    async open(path, options) {
+    open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
@@ -191,7 +191,7 @@ export class RsvimFs {
         get isDisposed() {
             return isNull(this.#handle);
         }
-        async read(buf) {
+        read(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
             return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
         }
@@ -199,7 +199,7 @@ export class RsvimFs {
             checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
             return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
         }
-        async write(buf) {
+        write(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
             return __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
         }
