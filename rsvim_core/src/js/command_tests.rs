@@ -272,7 +272,7 @@ async fn test_async_command() -> IoResult<()> {
 
   let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
   tmpfile.touch().unwrap();
-  tmpfile.write_str("Hello, World");
+  tmpfile.write_str("Hello, World").unwrap();
   info!("tmpfile:{:?}", tmpfile.path());
 
   let src = format!(
