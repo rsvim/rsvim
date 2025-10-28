@@ -5,10 +5,10 @@
     "allowUnusedLabels": false,
     "checkJs": true,
     "declaration": true,
+    "isolatedModules": true,
     "keyofStringsOnly": false,
     "lib": ["esnext"],
     "module": "esnext",
-    "target": "esnext",
     "moduleResolution": "bundler",
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,
@@ -19,6 +19,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noUncheckedIndexedAccess": false,
+    "removeComments": true,
     "strict": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
@@ -26,11 +27,10 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
+    "target": "esnext",
     "useUnknownInCatchVariables": false,
-    "removeComments": true,
     "useDefineForClassFields": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true
+    "verbatimModuleSyntax": true
   },
   "include": ["./rsvim_core/src/js/runtime/*.ts"],
   "exclude": ["**/*.d.ts"]
