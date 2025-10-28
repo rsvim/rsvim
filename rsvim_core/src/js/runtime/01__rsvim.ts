@@ -271,7 +271,14 @@ export class RsvimCmd {
    * async function write(ctx: any): void {
    *   try {
    *     const bytes = Rsvim.buf.writeSync(bufId);
-   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written`);
+   *
+   *     // Call other async APIs
+   *     const file = await Rsvim.fs.open("message.txt");
+   *     const buffer = new Uint8Array(100);
+   *     const read = await file.read(buffer);
+   *     const message = new TextDecoder().decode(buffer);
+   *
+   *     Rsvim.cmd.echo(`Buffer ${bufId} has been saved, ${bytes} bytes written with message: ${message}`);
    *   } catch (e) {
    *     Rsvim.cmd.echo(`Error: failed to save buffer ${bufId}, exception: ${e}`);
    *   }
