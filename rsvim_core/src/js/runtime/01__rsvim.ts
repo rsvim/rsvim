@@ -535,9 +535,9 @@ export class RsvimFs {
    *
    * @param {string} path - Same with {@link open}.
    * @param {RsvimFs.OpenOptions} options - Same with {@link open}.
-   * @returns {RsvimFs.File} It returns a {@link RsvimFs.File}.
+   * @returns {RsvimFs.File} Same with {@link open}.
    *
-   * @throws Throws {@link !TypeError} if any parameters are invalid. Or throws {@link Error} if failed to open/create the file.
+   * @throws Same with {@link open}.
    *
    * @example
    * ```javascript
