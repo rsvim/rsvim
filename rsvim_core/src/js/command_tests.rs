@@ -7,7 +7,6 @@ use crate::state::ops::Operation;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
-use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::time::Duration;
@@ -312,7 +311,6 @@ Rsvim.cmd.create("msg", msg);
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
-    let actual = actual.unwrap();
     assert_eq!(actual.unwrap(), "n:11");
   }
 
