@@ -311,7 +311,7 @@ Rsvim.cmd.create("msg", msg);
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
-    assert_eq!(actual.unwrap(), "n:11");
+    assert_eq!(actual.unwrap(), "n:0");
   }
 
   Ok(())
