@@ -283,17 +283,17 @@ async function msg() {{
     const n = await f.read(buf);
     Rsvim.cmd.echo(`n:${{n}}`);
   }} catch (e) {{
-    Rsvim.cmd.echo(`Failed:${e}`);
+    Rsvim.cmd.echo(`Failed:${{e}}`);
   }}
 }}
 
-Rsvim.cmd.create("msg", msg});
+Rsvim.cmd.create("msg", msg);
   "#,
     tmpfile.path()
   );
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = make_configs(vec![(Path::new("rsvim.js"), src)]);
+  let tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
 
   let buf_file = tp.xdg_data_home.join("test.txt");
   let cli_opts =
