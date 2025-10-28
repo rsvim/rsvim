@@ -540,11 +540,11 @@ export class RsvimFs {
   /**
    * The sync version of {@link open}.
    *
-   * @param {string} path - Same with {@link open}.
-   * @param {RsvimFs.OpenOptions} options - Same with {@link open}.
-   * @returns {RsvimFs.File} Same with {@link open}.
+   * @param {string} path
+   * @param {RsvimFs.OpenOptions} options
+   * @returns {RsvimFs.File}
    *
-   * @throws Same with {@link open}.
+   * @throws
    *
    * @example
    * ```javascript
@@ -733,10 +733,10 @@ export namespace RsvimFs {
     /**
      * Sync version of {@link read}.
      *
-     * @param {Uint8Array} buf - Same with {@link read}.
-     * @returns {number} Same with {@link read}.
+     * @param {Uint8Array} buf
+     * @returns {number}
      *
-     * @throws Same with {@link read}.
+     * @throws
      *
      * @example
      * ```javascript
@@ -782,10 +782,10 @@ export namespace RsvimFs {
     /**
      * Sync version of {@link write}.
      *
-     * @param {Uint8Array} buf - Same with {@link write}.
-     * @returns {number} Same with {@link write}.
+     * @param {Uint8Array} buf
+     * @returns {number}
      *
-     * @throws Same with {@link write}.
+     * @throws
      *
      * @example
      * ```javascript
