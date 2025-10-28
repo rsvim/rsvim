@@ -20,10 +20,12 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+/** @hidden */
 function isString(arg: any): boolean {
   return typeof arg === "string";
 }
