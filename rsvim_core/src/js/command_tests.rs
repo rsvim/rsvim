@@ -313,7 +313,7 @@ Rsvim.cmd.create("msg", msg);
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     let actual = actual.unwrap();
-    assert!(actual.starts_with("Buffer") && actual.ends_with("bytes written."));
+    assert_eq!(actual.unwrap(), "n:11");
   }
 
   Ok(())
