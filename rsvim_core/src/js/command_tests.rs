@@ -264,7 +264,7 @@ async fn test_async_command() -> IoResult<()> {
   let mocked_ops = vec![
     MockOperation::Operation(Operation::GotoCommandLineExMode),
     MockOperation::Operation(Operation::CursorInsert(
-      CursorInsertPayload::Text("w".to_compact_string()),
+      CursorInsertPayload::Text("msg".to_compact_string()),
     )),
     MockOperation::Operation(Operation::ConfirmExCommandAndGotoNormalMode),
     MockOperation::SleepFor(Duration::from_millis(50)),
@@ -295,10 +295,7 @@ Rsvim.cmd.create("msg", msg);
   // Prepare $RSVIM_CONFIG/rsvim.js
   let tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
 
-  let buf_file = tp.xdg_data_home.join("test.txt");
-  let cli_opts =
-    CliOptions::new(CliSpecialOptions::empty(), vec![buf_file], true);
-
+  let cli_opts = CliOptions::empty();
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows, cli_opts);
 
   event_loop.initialize()?;
