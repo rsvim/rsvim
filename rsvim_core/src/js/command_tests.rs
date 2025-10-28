@@ -292,7 +292,7 @@ Rsvim.cmd.create("msg", msg);
   );
 
   // Prepare $RSVIM_CONFIG/rsvim.js
-  let tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
+  let _tp = make_configs(vec![(Path::new("rsvim.js"), &src)]);
 
   let cli_opts = CliOptions::empty();
   let mut event_loop = make_event_loop(terminal_cols, terminal_rows, cli_opts);
