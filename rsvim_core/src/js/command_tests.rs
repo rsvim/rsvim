@@ -7,6 +7,7 @@ use crate::state::ops::Operation;
 use crate::tests::evloop::*;
 use crate::tests::log::init as test_log_init;
 use assert_fs::prelude::FileTouch;
+use assert_fs::prelude::FileWriteStr;
 use compact_str::ToCompactString;
 use ringbuf::traits::*;
 use std::time::Duration;
@@ -271,6 +272,7 @@ async fn test_async_command() -> IoResult<()> {
 
   let tmpfile = assert_fs::NamedTempFile::new("README.md").unwrap();
   tmpfile.touch().unwrap();
+  tmpfile.write_str("Hello, World");
   info!("tmpfile:{:?}", tmpfile.path());
 
   let src = format!(
@@ -311,7 +313,7 @@ Rsvim.cmd.create("msg", msg);
 
     let actual = contents.command_line_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
-    assert_eq!(actual.unwrap(), "n:0");
+    assert_eq!(actual.unwrap(), "n:12");
   }
 
   Ok(())
