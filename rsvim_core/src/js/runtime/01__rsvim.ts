@@ -581,7 +581,9 @@ export namespace RsvimFs {
   /**
    * Open options.
    *
-   * Note: It is the same with [std::fs::OpenOptions](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) in rust std library.
+   * :::tip
+   * It is same with [std::fs::OpenOptions](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) in rust std library.
+   * :::
    *
    * @see {@link RsvimFs.open}
    */
