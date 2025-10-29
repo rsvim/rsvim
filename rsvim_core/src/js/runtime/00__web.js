@@ -53,7 +53,6 @@ function isTypedArray(arg) {
         arg instanceof Uint16Array ||
         arg instanceof Int32Array ||
         arg instanceof Uint32Array ||
-        arg instanceof Float16Array ||
         arg instanceof Float32Array ||
         arg instanceof Float64Array ||
         arg instanceof BigInt64Array ||
