@@ -136,9 +136,6 @@ function setDefaultFields(arg: object, defaults: object) {
   }
 }
 
-/**
- * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
- */
 export namespace GlobalThis {
   /**
    * {@link !TypedArray}
