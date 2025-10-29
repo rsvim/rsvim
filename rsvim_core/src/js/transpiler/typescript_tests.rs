@@ -8,13 +8,13 @@ fn test1() {
 
   let input: &str = r#"
 function isNull(arg: any): boolean {
-  return arg === undefined || arg === null;
+    return arg === undefined || arg === null;
 }
     "#;
 
   let expect: &str = r#"
 function isNull(arg) {
-  return arg === undefined || arg === null;
+    return arg === undefined || arg === null;
 }
     "#;
 
