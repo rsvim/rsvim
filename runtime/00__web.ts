@@ -9,10 +9,12 @@
  * @packageDocumentation
  */
 
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+/** @hidden */
 function isString(arg: any): boolean {
   return typeof arg === "string";
 }
