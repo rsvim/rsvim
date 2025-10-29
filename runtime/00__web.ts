@@ -76,6 +76,7 @@ function checkIsUint8Array(arg: any, msg: string) {
   }
 }
 
+/** @hidden */
 function isTypedArray(arg: any): boolean {
   return (
     arg instanceof Int8Array ||
@@ -92,10 +93,12 @@ function isTypedArray(arg: any): boolean {
   );
 }
 
+/** @hidden */
 function isArrayBuffer(arg: any): boolean {
   return arg instanceof ArrayBuffer;
 }
 
+/** @hidden */
 function isDataView(arg: any): boolean {
   return arg instanceof DataView;
 }
