@@ -513,7 +513,10 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+  async open(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -725,7 +728,7 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    read(buf: Uint8Array): Promise<number> {
+    async read(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
@@ -774,7 +777,7 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    write(buf: Uint8Array): Promise<number> {
+    async write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
