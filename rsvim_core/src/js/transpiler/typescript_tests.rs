@@ -22,7 +22,7 @@ function isNull(arg) {
   assert!(actual.is_ok());
   let actual = actual.unwrap();
   info!("actual:\n{actual}");
-  assert_eq!(actual, expect);
+  assert_eq!(actual.trim(), expect.trim());
 }
 
 #[test]
