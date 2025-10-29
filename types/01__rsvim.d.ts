@@ -59,13 +59,15 @@ export declare namespace RsvimFs {
         writeSync(buf: Uint8Array): number;
     }
 }
+type FileEncodingOption = "utf-8";
+type FileFormatOption = "dos" | "unix" | "mac";
 export declare class RsvimOpt {
     get expandTab(): boolean;
     set expandTab(value: boolean);
-    get fileEncoding(): RsvimOpt.FileEncodingOption;
-    set fileEncoding(value: RsvimOpt.FileEncodingOption);
-    get fileFormat(): RsvimOpt.FileFormatOption;
-    set fileFormat(value: RsvimOpt.FileFormatOption);
+    get fileEncoding(): FileEncodingOption;
+    set fileEncoding(value: FileEncodingOption);
+    get fileFormat(): FileFormatOption;
+    set fileFormat(value: FileFormatOption);
     get lineBreak(): boolean;
     set lineBreak(value: boolean);
     get shiftWidth(): number;
@@ -75,10 +77,7 @@ export declare class RsvimOpt {
     get wrap(): boolean;
     set wrap(value: boolean);
 }
-export declare namespace RsvimOpt {
-    type FileEncodingOption = "utf-8";
-    type FileFormatOption = "dos" | "unix" | "mac";
-}
 export declare class RsvimRt {
     exit(exitCode?: number): void;
 }
+export {};
