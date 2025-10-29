@@ -423,6 +423,24 @@ export class TextDecoder {
   }
 }
 
+export namespace GlobalThis {
+  /**
+   * {@link !TypedArray}
+   */
+  export type TypedArray =
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
+    | BigInt64Array
+    | BigUint64Array;
+}
+
 /**
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
  */
@@ -499,24 +517,6 @@ export interface GlobalThis {
    * Decode bytes array into string text, with specified encoding.
    */
   TextDecoder: TextDecoder;
-}
-
-export namespace GlobalThis {
-  /**
-   * {@link !TypedArray}
-   */
-  export type TypedArray =
-    | Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array
-    | BigInt64Array
-    | BigUint64Array;
 }
 
 ((globalThis: GlobalThis) => {
