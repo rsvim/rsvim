@@ -136,6 +136,9 @@ function setDefaultFields(arg: object, defaults: object) {
   }
 }
 
+/** @inline */
+type TextEncoderEncodeIntoResult = { read: number; written: number };
+
 /**
  * Encode string text into bytes, it only supports "utf-8" encoding.
  *
@@ -174,10 +177,10 @@ export class TextEncoder {
    *
    * @param {string} src - Text that need encode.
    * @param {Uint8Array} dest - Destination that receives the encoded uint8 bytes array.
-   * @returns {TextEncoder.EncodeIntoResult} Encode result, it contains two numbers: the "read" Unicode code units from src string, and the "written" UTF-8 bytes into the dest buffer.
+   * @returns {TextEncoderEncodeIntoResult} Encode result, it contains two numbers: the "read" Unicode code units from src string, and the "written" UTF-8 bytes into the dest buffer.
    * @throws Throws {@link !TypeError} if src is not a string, or dest is not a {@link !Uint8Array}.
    */
-  encodeInto(src: string, dest: Uint8Array): TextEncoder.EncodeIntoResult {
+  encodeInto(src: string, dest: Uint8Array): TextEncoderEncodeIntoResult {
     checkIsString(src, `"TextEncoder.encodeInto" src`);
     checkIsUint8Array(dest, `"TextEncoder.encodeInto" dest`);
 
@@ -196,10 +199,11 @@ export class TextEncoder {
   }
 }
 
-export namespace TextEncoder {
-  /** @inline */
-  export type EncodeIntoResult = { read: number; written: number };
-}
+/** @inline */
+type TextDecoderOptions = { fatal?: boolean; ignoreBOM?: boolean };
+
+/** @inline */
+type TextDecoderDecodeOptions = { stream?: boolean };
 
 /**
  * Decode bytes array into string text.
@@ -276,10 +280,10 @@ export class TextDecoder {
    * @see [encoding_rs - Supported Encodings](https://docs.rs/encoding_rs/latest/encoding_rs/#statics)
    *
    * @param {string} encoding - (Optional) Decoder encoding, by default is "utf-8".
-   * @param {TextDecoder.Options} options - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
+   * @param {TextDecoderOptions} options - (Optional) Decode options, by default is `{fatal: false, ignoreBOM: false}`.
    * @throws Throws {@link !TypeError} if encoding is not a string or options is invalid. Throw {@link !RangeError} if encoding is unknown or not support.
    */
-  constructor(encoding?: string, options?: TextDecoder.Options) {
+  constructor(encoding?: string, options?: TextDecoderOptions) {
     encoding = encoding ?? "utf-8";
     checkIsString(encoding, `"TextDecoder.constructor" encoding`);
 
@@ -332,13 +336,13 @@ export class TextDecoder {
    * @see {@link !TextDecoder}
    *
    * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
-   * @param {TextDecoder.DecodeOptions} options - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
+   * @param {TextDecoderDecodeOptions} options - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
     input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
-    options?: TextDecoder.DecodeOptions,
+    options?: TextDecoderDecodeOptions,
   ): string {
     input = input ?? new Uint8Array();
     checkIsArrayBufferFamily(input, `"TextDecoder.decode" input`);
@@ -414,14 +418,6 @@ export class TextDecoder {
   get ignoreBOM(): boolean {
     return this.#ignoreBOM;
   }
-}
-
-export namespace TextDecoder {
-  /** @inline */
-  export type Options = { fatal?: boolean; ignoreBOM?: boolean };
-
-  /** @inline */
-  export type DecodeOptions = { stream?: boolean };
 }
 
 /**
