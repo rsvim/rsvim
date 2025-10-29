@@ -157,7 +157,7 @@ def fmt():
     logging.info(command)
     os.system(command)
 
-    command = "prettier --write *.md **/*.ts"
+    command = "prettier --write *.md ./runtime/*.ts"
     logging.info(command)
     os.system(command)
 

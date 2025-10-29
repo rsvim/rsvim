@@ -9,10 +9,12 @@
  * @packageDocumentation
  */
 
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+/** @hidden */
 function isString(arg: any): boolean {
   return typeof arg === "string";
 }
@@ -83,7 +85,6 @@ function isTypedArray(arg: any): boolean {
     arg instanceof Uint16Array ||
     arg instanceof Int32Array ||
     arg instanceof Uint32Array ||
-    arg instanceof Float16Array ||
     arg instanceof Float32Array ||
     arg instanceof Float64Array ||
     arg instanceof BigInt64Array ||
@@ -150,7 +151,6 @@ export namespace GlobalThis {
     | Uint16Array
     | Int32Array
     | Uint32Array
-    | Float16Array
     | Float32Array
     | Float64Array
     | BigInt64Array

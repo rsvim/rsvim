@@ -20,10 +20,12 @@
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
+/** @hidden */
 function isNull(arg: any): boolean {
   return arg === undefined || arg === null;
 }
 
+/** @hidden */
 function isString(arg: any): boolean {
   return typeof arg === "string";
 }
@@ -807,16 +809,6 @@ export namespace RsvimFs {
 }
 
 /**
- * @inline
- */
-type FileEncodingOption = "utf-8";
-
-/**
- * @inline
- */
-type FileFormatOption = "dos" | "unix" | "mac";
-
-/**
  * The `Rsvim.opt` global object for global editor options.
  *
  * @example
@@ -880,7 +872,7 @@ export class RsvimOpt {
    * For now, only **utf-8** encoding is supported.
    * :::
    *
-   * @returns {FileEncodingOption}
+   * @returns {RsvimOpt.FileEncodingOption}
    *
    * @defaultValue `"utf-8"`
    *
@@ -890,7 +882,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileEncoding;
    * ```
    */
-  get fileEncoding(): FileEncodingOption {
+  get fileEncoding(): RsvimOpt.FileEncodingOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_encoding();
   }
@@ -898,7 +890,7 @@ export class RsvimOpt {
   /**
    * Set the _file-encoding_ option.
    *
-   * @param {FileEncodingOption} value - The _file-encoding_ option.
+   * @param {RsvimOpt.FileEncodingOption} value - The _file-encoding_ option.
    * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
@@ -907,7 +899,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileEncoding = "utf-8";
    * ```
    */
-  set fileEncoding(value: FileEncodingOption) {
+  set fileEncoding(value: RsvimOpt.FileEncodingOption) {
     checkIsOptions(value, ["utf-8"], `"Rsvim.opt.fileEncoding" value`);
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_file_encoding(value);
@@ -935,7 +927,7 @@ export class RsvimOpt {
    * - `"unix"`: equivalent to `LF` line end.
    * - `"mac"`: equivalent to `CR` line end.
    *
-   * @returns {FileFormatOption}
+   * @returns {RsvimOpt.FileFormatOption}
    *
    * @defaultValue `"dos"` for Windows/MS-DOS, `"unix"` for Linux/Unix/MacOS.
    *
@@ -945,7 +937,7 @@ export class RsvimOpt {
    * const value = Rsvim.opt.fileFormat;
    * ```
    */
-  get fileFormat(): FileFormatOption {
+  get fileFormat(): RsvimOpt.FileFormatOption {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_file_format();
   }
@@ -953,7 +945,7 @@ export class RsvimOpt {
   /**
    * Set the _file-format_ option.
    *
-   * @param {FileFormatOption} value - The _file-format_ option.
+   * @param {RsvimOpt.FileFormatOption} value - The _file-format_ option.
    * @throws Throws {@link !RangeError} if value is an invalid option.
    *
    * @example
@@ -962,7 +954,7 @@ export class RsvimOpt {
    * Rsvim.opt.fileFormat = "unix";
    * ```
    */
-  set fileFormat(value: FileFormatOption) {
+  set fileFormat(value: RsvimOpt.FileFormatOption) {
     checkIsOptions(
       value,
       ["dos", "unix", "mac"],
@@ -1149,6 +1141,18 @@ export class RsvimOpt {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
+}
+
+export namespace RsvimOpt {
+  /**
+   * @inline
+   */
+  export type FileEncodingOption = "utf-8";
+
+  /**
+   * @inline
+   */
+  export type FileFormatOption = "dos" | "unix" | "mac";
 }
 
 /**

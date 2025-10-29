@@ -6,29 +6,23 @@ use crate::tests::log::init as test_log_init;
 fn test1() {
   test_log_init();
 
-  let m1 = "./runtime/00__web.ts";
-  let actual1 = TypeScript::compile(
-    Some(m1),
-    include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/src/js/runtime/00__web.ts"
-    )),
-  );
-  assert!(actual1.is_ok());
-  let actual1 = actual1.unwrap();
-  info!("{m1}:\n{actual1}");
+  let input: &str = r#"
+function isNull(arg: any): boolean {
+    return arg === undefined || arg === null;
+}
+    "#;
 
-  let m2 = "./runtime/01__rsvim.ts";
-  let actual2 = TypeScript::compile(
-    Some(m2),
-    include_str!(concat!(
-      env!("CARGO_MANIFEST_DIR"),
-      "/src/js/runtime/01__rsvim.ts"
-    )),
-  );
-  assert!(actual2.is_ok());
-  let actual2 = actual2.unwrap();
-  info!("{m2}:\n{actual2}");
+  let expect: &str = r#"
+function isNull(arg) {
+    return arg === undefined || arg === null;
+}
+    "#;
+
+  let actual = TypeScript::compile(None, input);
+  assert!(actual.is_ok());
+  let actual = actual.unwrap();
+  info!("actual:\n{actual}");
+  assert_eq!(actual.trim(), expect.trim());
 }
 
 #[test]
