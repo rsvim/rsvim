@@ -127,7 +127,7 @@ export class TextDecoder {
         this.#ignoreBOM = options.ignoreBOM;
         this.#handle = null;
     }
-    decode(input, options = { stream: false }) {
+    decode(input, options) {
         input = input ?? new Uint8Array();
         checkIsArrayBufferFamily(input, `"TextDecoder.decode" input`);
         let buffer = input;
