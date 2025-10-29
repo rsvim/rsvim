@@ -154,11 +154,7 @@ export namespace GlobalThis {
     | BigUint64Array;
 }
 
-/**
- * @inline
- *
- * Encode result.
- */
+/** @inline */
 type TextEncoderEncodeIntoResult = { read: number; written: number };
 
 /**
