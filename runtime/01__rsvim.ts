@@ -1199,10 +1199,11 @@ export class RsvimRt {
   }
 }
 
-declare global {
-  var Rsvim: Rsvim;
-}
-
 (function (globalThis: { Rsvim: Rsvim }) {
   globalThis.Rsvim = new Rsvim();
 })(globalThis as unknown as { Rsvim: Rsvim });
+
+/// Declarations for .d.ts
+declare global {
+  var Rsvim: Rsvim;
+}
