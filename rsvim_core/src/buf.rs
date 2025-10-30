@@ -364,48 +364,19 @@ impl BuffersManager {
       .to_string();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
-    let written_bytes = match std::fs::OpenOptions::new()
-      .create(true)
-      .truncate(true)
-      .write(true)
-      .open(abs_filename)
-    {
-      Ok(fp) => {
-        let mut writer = std::io::BufWriter::new(fp);
-        let payload = buf.text().rope().to_string();
-        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
-
-        let n = match data.write(payload.as_bytes()) {
-          Ok(n) => match writer.write_all(&data) {
-            Ok(_) => match writer.flush() {
-              Ok(_) => n,
-              Err(e) => {
-                bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-              }
-            },
-            Err(e) => {
-              bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-            }
-          },
-          Err(e) => {
-            bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-          }
-        };
-        trace!("Write file {:?}, bytes: {:?}", filename, n);
-
-        let fp1 = writer.get_ref();
-        let metadata = fp1.metadata().unwrap();
+    let payload = buf.text().rope().to_string();
+    let data = payload.as_bytes();
+    match std::fs::write(abs_filename, data) {
+      Ok(_) => {
+        let metadata = std::fs::metadata(abs_filename).unwrap();
         buf.set_metadata(Some(metadata));
         buf.set_last_sync_time(Some(Instant::now()));
-
-        n
+        Ok(data.len())
       }
       Err(e) => {
         bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
       }
-    };
-
-    Ok(written_bytes)
+    }
   }
 }
 
