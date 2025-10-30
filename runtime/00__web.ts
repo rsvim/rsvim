@@ -4,7 +4,9 @@
  * sidebar_position: 3
  * ---
  *
- * The [WinterTC](https://min-common-api.proposal.wintertc.org/) compatible web platform APIs. Also see [MDN | Web APIs](https://developer.mozilla.org/docs/Web/API).
+ * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object, compatible with [WinterTC](https://min-common-api.proposal.wintertc.org/) web platform APIs.
+ *
+ * @see [MDN - Web APIs](https://developer.mozilla.org/docs/Web/API).
  *
  * @packageDocumentation
  */
@@ -139,14 +141,6 @@ function setDefaultFields(arg: object, defaults: object) {
   }
 }
 
-export namespace TextEncoder {
-  /**
-   * @see {@link TextEncoder}
-   * @inline
-   */
-  export type EncodeIntoResult = { read: number; written: number };
-}
-
 /**
  * Encode string text into bytes, it only supports "utf-8" encoding.
  *
@@ -207,18 +201,12 @@ export class TextEncoder {
   }
 }
 
-export namespace TextDecoder {
+export namespace TextEncoder {
   /**
-   * @see {@link TextDecoder}
+   * @see {@link TextEncoder}
    * @inline
    */
-  export type Options = { fatal?: boolean; ignoreBOM?: boolean };
-
-  /**
-   * @see {@link TextDecoder}
-   * @inline
-   */
-  export type DecodeOptions = { stream?: boolean };
+  export type EncodeIntoResult = { read: number; written: number };
 }
 
 /**
@@ -351,13 +339,13 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
+   * @param {(ArrayBuffer | TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
    * @param {TextDecoder.DecodeOptions} options - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
-    input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
+    input?: ArrayBuffer | TypedArray | DataView,
     options?: TextDecoder.DecodeOptions,
   ): string {
     input = input ?? new Uint8Array();
@@ -436,231 +424,213 @@ export class TextDecoder {
   }
 }
 
-export namespace GlobalThis {
+export namespace TextDecoder {
   /**
-   * {@link !TypedArray}
+   * @see {@link TextDecoder}
+   * @inline
    */
-  export type TypedArray =
-    | Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array
-    | BigInt64Array
-    | BigUint64Array;
+  export type Options = { fatal?: boolean; ignoreBOM?: boolean };
+
+  /**
+   * @see {@link TextDecoder}
+   * @inline
+   */
+  export type DecodeOptions = { stream?: boolean };
 }
 
 /**
- * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
+ * {@link !TypedArray}
  */
-export interface GlobalThis {
-  /**
-   * Cancel a repeated timer previously established by calling {@link setInterval}.
-   *
-   * @param {number} id - The ID (integer) which identifies the schedule.
-   * @throws Throws {@link !TypeError} if ID is not an integer.
-   */
-  clearInterval(id: number): void;
+export type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
 
-  /**
-   * Cancel a timeout previously established by calling {@link setTimeout}.
-   *
-   * @param {number} id - The ID (integer) which identifies the timer.
-   * @throws Throws {@link !TypeError} if ID is not an integer.
-   */
-  clearTimeout(id: number): void;
+// Timer API {
 
-  /**
-   * A microtask is a short function which is executed after the function or module which created it exits and
-   * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
-   * to drive the script's execution environment.
-   *
-   * @param {function} callback - A function to be executed.
-   * @throws Throws {@link !TypeError} if callback is not a function.
-   */
-  queueMicrotask(callback: () => void): void;
+const TIMEOUT_MAX = Math.pow(2, 31) - 1;
+// In javascript side, `nextTimerId` and `activeTimers` maps to the internal
+// timeout ID returned from rust `global_create_timer` api. This is mostly for
+// being compatible with web api standard, as the standard requires the returned
+// value need to be within the range of 1 to 2,147,483,647.
+// See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
+let nextTimerId = 1;
+const activeTimers = new Map();
 
-  /**
-   * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
-   *
-   * @param {any} error - Anything to be thrown.
-   */
-  reportError(error: any): void;
+/**
+ * Cancel a repeated timer previously established by calling {@link setInterval}.
+ *
+ * @param {number} id - The ID (integer) which identifies the schedule.
+ * @throws Throws {@link !TypeError} if ID is not an integer.
+ */
+export function clearInterval(id: number): void {
+  // Check parameter's type.
+  checkIsInteger(id, `"clearInterval" ID`);
 
-  /**
-   * Set a repeated timer that calls a function, with a fixed time delay between each call.
-   *
-   * @param {function} callback - A function to be executed every `delay` milliseconds.
-   * @param {number} delay - (Optional) The milliseconds that the timer should delay in between execution of the function, by default is `1`.
-   * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
-   * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
-   */
-  setInterval(
-    callback: (...args: any[]) => void,
-    delay?: number,
-    ...args: any[]
-  ): number;
-
-  /**
-   * Set a timer which executes a function or specified piece of code once the timer expires.
-   *
-   * @param {function} callback - A function to be executed after the timer expires.
-   * @param {number} delay - (Optional) The milliseconds that the timer should wait before the function is executed, by default is `1`.
-   * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
-   * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
-   */
-  setTimeout(
-    callback: (...args: any[]) => void,
-    delay?: number,
-    ...args: any[]
-  ): number;
-
-  /**
-   * Encode string text into bytes array, it only supports "utf-8" encoding.
-   */
-  TextEncoder: TextEncoder;
-
-  /**
-   * Decode bytes array into string text, with specified encoding.
-   */
-  TextDecoder: TextDecoder;
+  if (activeTimers.has(id)) {
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
+    activeTimers.delete(id);
+  }
 }
 
-((globalThis: GlobalThis) => {
-  // Timer API {
+/**
+ * Set a repeated timer that calls a function, with a fixed time delay between each call.
+ *
+ * @param {function} callback - A function to be executed every `delay` milliseconds.
+ * @param {number} delay - (Optional) The milliseconds that the timer should delay in between execution of the function, by default is `1`.
+ * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
+ * @returns {number} The ID (integer) which identifies the timer created.
+ * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
+ */
+export function setInterval(
+  callback: (...args: any[]) => void,
+  delay?: number,
+  ...args: any[]
+): number {
+  delay = delay ?? 1;
+  checkIsNumber(delay, `"setInterval" delay`);
 
-  const TIMEOUT_MAX = Math.pow(2, 31) - 1;
-  // In javascript side, `nextTimerId` and `activeTimers` maps to the internal
-  // timeout ID returned from rust `global_create_timer` api. This is mostly for
-  // being compatible with web api standard, as the standard requires the returned
-  // value need to be within the range of 1 to 2,147,483,647.
-  // See: <https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout>.
-  let nextTimerId = 1;
-  const activeTimers = new Map();
+  // Coalesce to number or NaN.
+  delay *= 1;
 
-  function clearInterval(id: number): void {
-    // Check parameter's type.
-    checkIsInteger(id, `"clearInterval" ID`);
+  // Check delay's boundaries.
+  delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
 
-    if (activeTimers.has(id)) {
-      // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
-      activeTimers.delete(id);
-    }
-  }
+  // Check if callback is a valid function.
+  checkIsFunction(callback, `"setInterval" callback`);
 
-  function setInterval(
-    callback: (...args: any[]) => void,
-    delay?: number,
-    ...args: any[]
-  ): number {
-    delay = delay ?? 1;
-    checkIsNumber(delay, `"setInterval" delay`);
+  // Pin down the correct ID value.
+  const id = nextTimerId++;
 
-    // Coalesce to number or NaN.
-    delay *= 1;
+  // @ts-ignore Ignore warning
+  const timer = __InternalRsvimGlobalObject.global_create_timer(
+    () => {
+      callback(...args);
+    },
+    delay,
+    true,
+  );
 
-    // Check delay's boundaries.
-    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+  // Update `activeTimers` map.
+  activeTimers.set(id, timer);
 
-    // Check if callback is a valid function.
-    checkIsFunction(callback, `"setInterval" callback`);
+  return id;
+}
 
-    // Pin down the correct ID value.
-    const id = nextTimerId++;
+/**
+ * Cancel a timeout previously established by calling {@link setTimeout}.
+ *
+ * @param {number} id - The ID (integer) which identifies the timer.
+ * @throws Throws {@link !TypeError} if ID is not an integer.
+ */
+export function clearTimeout(id: number): void {
+  // Check parameter's type.
+  checkIsInteger(id, `"clearTimeout" ID`);
 
+  if (activeTimers.has(id)) {
     // @ts-ignore Ignore warning
-    const timer = __InternalRsvimGlobalObject.global_create_timer(
-      () => {
-        callback(...args);
-      },
-      delay,
-      true,
-    );
-
-    // Update `activeTimers` map.
-    activeTimers.set(id, timer);
-
-    return id;
+    __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
+    activeTimers.delete(id);
   }
+}
 
-  function clearTimeout(id: number): void {
-    // Check parameter's type.
-    checkIsInteger(id, `"clearTimeout" ID`);
+/**
+ * Set a timer which executes a function or specified piece of code once the timer expires.
+ *
+ * @param {function} callback - A function to be executed after the timer expires.
+ * @param {number} delay - (Optional) The milliseconds that the timer should wait before the function is executed, by default is `1`.
+ * @param {...any} args - (Optional) Additional arguments which are passed through to the function.
+ * @returns {number} The ID (integer) which identifies the timer created.
+ * @throws Throws {@link !TypeError} if callback is not a function, or delay is neither a number or undefined.
+ */
+export function setTimeout(
+  callback: (...args: any[]) => void,
+  delay: number,
+  ...args: any[]
+): number {
+  delay = delay ?? 1;
+  checkIsNumber(delay, `"setTimeout" delay`);
 
-    if (activeTimers.has(id)) {
-      // @ts-ignore Ignore warning
-      __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
+  // Coalesce to number or NaN.
+  delay *= 1;
+
+  // Check delay's boundaries.
+  delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+
+  // Check if callback is a valid function.
+  checkIsFunction(callback, `"setTimeout" callback`);
+
+  // Pin down the correct ID value.
+  const id = nextTimerId++;
+
+  // @ts-ignore Ignore warning
+  const timer = __InternalRsvimGlobalObject.global_create_timer(
+    () => {
+      callback(...args);
       activeTimers.delete(id);
-    }
-  }
+    },
+    delay,
+    false,
+  );
 
-  function setTimeout(
-    callback: (...args: any[]) => void,
-    delay: number,
-    ...args: any[]
-  ): number {
-    delay = delay ?? 1;
-    checkIsNumber(delay, `"setTimeout" delay`);
+  // Update `activeTimers` map.
+  activeTimers.set(id, timer);
 
-    // Coalesce to number or NaN.
-    delay *= 1;
+  return id;
+}
 
-    // Check delay's boundaries.
-    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+// Timer API }
 
-    // Check if callback is a valid function.
-    checkIsFunction(callback, `"setTimeout" callback`);
+// Misc API {
 
-    // Pin down the correct ID value.
-    const id = nextTimerId++;
-
-    // @ts-ignore Ignore warning
-    const timer = __InternalRsvimGlobalObject.global_create_timer(
-      () => {
-        callback(...args);
-        activeTimers.delete(id);
-      },
-      delay,
-      false,
-    );
-
-    // Update `activeTimers` map.
-    activeTimers.set(id, timer);
-
-    return id;
-  }
-
-  // Timer API }
-
+/**
+ * A microtask is a short function which is executed after the function or module which created it exits and
+ * only if the JavaScript execution stack is empty, but before returning control to the event loop being used
+ * to drive the script's execution environment.
+ *
+ * @param {function} callback - A function to be executed.
+ * @throws Throws {@link !TypeError} if callback is not a function.
+ */
+export function queueMicrotask(callback: () => void): void {
   // Note: We wrap `queueMicrotask` and manually emit the exception because
   // v8 doesn't provide any mechanism to handle callback exceptions during
   // the microtask_checkpoint phase.
-  function queueMicrotask(callback: () => void): void {
-    // Check if the callback argument is a valid type.
-    checkIsFunction(callback, `"queueMicrotask" callback`);
 
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.global_queue_microtask(() => {
-      try {
-        callback();
-      } catch (err) {
-        reportError(err);
-      }
-    });
-  }
+  // Check if the callback argument is a valid type.
+  checkIsFunction(callback, `"queueMicrotask" callback`);
 
-  function reportError(error: any): void {
-    // @ts-ignore Ignore warning
-    __InternalRsvimGlobalObject.global_report_error(error);
-  }
+  // @ts-ignore Ignore warning
+  __InternalRsvimGlobalObject.global_queue_microtask(() => {
+    try {
+      callback();
+    } catch (err) {
+      reportError(err);
+    }
+  });
+}
 
+/**
+ * Dispatch an uncaught exception. Similar to synchronous version of `setTimeout(() => {throw error;}, 0);`.
+ *
+ * @param {any} error - Anything to be thrown.
+ */
+export function reportError(error: any): void {
+  // @ts-ignore Ignore warning
+  __InternalRsvimGlobalObject.global_report_error(error);
+}
+
+// Misc API }
+
+((globalThis: any) => {
   globalThis.clearTimeout = clearTimeout;
   globalThis.setTimeout = setTimeout;
   globalThis.clearInterval = clearInterval;
@@ -668,8 +638,28 @@ export interface GlobalThis {
   globalThis.queueMicrotask = queueMicrotask;
   globalThis.reportError = reportError;
 
-  // @ts-ignore Ignore warning
   globalThis.TextEncoder = TextEncoder;
-  // @ts-ignore Ignore warning
   globalThis.TextDecoder = TextDecoder;
-})(globalThis as unknown as GlobalThis);
+})(globalThis as unknown as any);
+
+/// Declarations for .d.ts
+declare global {
+  // @ts-ignore Ignore warning
+  var TextEncoder: typeof TextEncoder;
+  // @ts-ignore Ignore warning
+  var TextDecoder: typeof TextDecoder;
+  function clearInterval(id: number): void;
+  function setInterval(
+    callback: (...args: any[]) => void,
+    delay?: number,
+    ...args: any[]
+  ): number;
+  function clearTimeout(id: number): void;
+  function setTimeout(
+    callback: (...args: any[]) => void,
+    delay: number,
+    ...args: any[]
+  ): number;
+  function queueMicrotask(callback: () => void): void;
+  function reportError(error: any): void;
+}

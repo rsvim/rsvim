@@ -1,3 +1,3 @@
 CHANGELOG.md
-rsvim_core/src/js/runtime/*.d.ts
+types/*.d.ts
 rsvim_core/src/js/runtime/*.js
