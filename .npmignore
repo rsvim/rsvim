@@ -15,6 +15,6 @@ Cargo.*
 DEVELOPMENT.md
 codecov.yml
 tsconfig.json
-*.cmd
+dev.cmd
 *.py
 *.toml
