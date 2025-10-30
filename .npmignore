@@ -13,6 +13,7 @@ target
 CHANGELOG.md
 Cargo.*
 DEVELOPMENT.md
+*.yml
 *.cmd
 *.py
 *.toml
