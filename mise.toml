@@ -12,6 +12,6 @@ python = "latest"
 
 node = "latest"
 "npm:prettier" = "latest"
-"npm:typescript" = "latest"
+# "npm:typescript" = "latest"
 "npm:browser-sync" = "latest"
 "npm:markdownlint" = "latest"

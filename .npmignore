@@ -1,0 +1,9 @@
+rsvim_cli
+rsvim_core
+runtime
+CHANGELOG.md
+Cargo.*
+DEVELOPMENT.md
+*.cmd
+*.py
+*.toml

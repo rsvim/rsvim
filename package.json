@@ -18,7 +18,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "tsc": "python3 ./dev.py fmt --tsc"
+    "tsc": "tsc"
   },
   "dependencies": {
     "typescript": "^5.9.3"
