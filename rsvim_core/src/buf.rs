@@ -196,7 +196,7 @@ impl BuffersManager {
     &mut self,
     canvas_size: U16Size,
     filename: &Path,
-  ) -> IoResult<BufferId> {
+  ) -> TheResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -215,7 +215,7 @@ impl BuffersManager {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
-        return Err(e);
+        bail!(TheErr::FileNotExist(filename.to_string_lossy().to_string()));
       }
     };
 
