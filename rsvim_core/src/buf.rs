@@ -345,7 +345,6 @@ impl BuffersManager {
           ))
         }
         Err(e) => {
-          error!("Failed to open file {:?}:{:?}", filename, e);
           bail!(TheErr::OpenFileFailed(
             filename.to_string_lossy().to_string(),
             e
@@ -353,7 +352,6 @@ impl BuffersManager {
         }
       },
       Err(e) => {
-        error!("Failed to open file {:?}:{:?}", filename, e);
         bail!(TheErr::OpenFileFailed(
           filename.to_string_lossy().to_string(),
           e
