@@ -218,7 +218,10 @@ impl BuffersManager {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
-        bail!(TheErr::FileNotExist(filename.to_string_lossy().to_string()));
+        bail!(TheErr::FileNotExist(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     };
 

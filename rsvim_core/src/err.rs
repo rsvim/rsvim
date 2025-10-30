@@ -57,8 +57,8 @@ pub enum TheErr {
   #[error("Not enough arguments specified.")]
   ArgumentsNotEnough,
 
-  #[error("File `{0}` not exist.")]
-  FileNotExist(String),
+  #[error("File `{0}` not found: {1}.")]
+  FileNotFound(String, IoErr),
 
   #[error("Failed to open file `{0}`: {1}.")]
   OpenFileFailed(String, IoErr),
