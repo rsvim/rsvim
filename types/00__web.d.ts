@@ -37,4 +37,10 @@ export declare function reportError(error: any): void;
 declare global {
     var TextEncoder: typeof TextEncoder;
     var TextDecoder: typeof TextDecoder;
+    function clearInterval(id: number): void;
+    function setInterval(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;
+    function clearTimeout(id: number): void;
+    function setTimeout(callback: (...args: any[]) => void, delay: number, ...args: any[]): number;
+    function queueMicrotask(callback: () => void): void;
+    function reportError(error: any): void;
 }
