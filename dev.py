@@ -110,32 +110,6 @@ def test(name, miri, jobs):
     os.system(command)
 
 
-def tsc():
-    command = "tsc"
-    logging.info(command)
-    os.system(command)
-    for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
-        src_file = f"types/{filename}"
-        dest_file = f".{filename}"
-        with open(src_file, "r") as src:
-            with open(dest_file, "w") as dest:
-                start_declare_global = False
-                for line in src.readlines():
-                    trimmed_line = line.strip()
-                    if trimmed_line.startswith("declare global"):
-                        start_declare_global = True
-                        dest.write(line)
-                        continue
-                    if start_declare_global:
-                        if "typeof" in trimmed_line:
-                            prefix_spaces = line.find(trimmed_line)
-                            dest.write(f"{' ' * prefix_spaces}// @ts-ignore\n")
-                    dest.write(line)
-        command = f"mv {dest_file} {src_file}"
-        logging.info(command)
-        os.system(command)
-
-
 def list_test():
     set_sccache()
     set_rustflags()
@@ -170,26 +144,70 @@ def build(profile, verbose, features):
     os.system(command)
 
 
-def fmt():
+def typos_formatter():
     command = "typos"
     logging.info(command)
     os.system(command)
 
+
+def rust_formatter():
     command = "cargo +nightly fmt"
     logging.info(command)
     os.system(command)
 
+
+def taplo_formatter():
     command = "taplo fmt"
     logging.info(command)
     os.system(command)
 
+
+def prettier_formatter():
     command = "prettier --write *.md ./runtime/*.ts"
     logging.info(command)
     os.system(command)
 
+
+def tsc_formatter():
     command = "tsc"
     logging.info(command)
     os.system(command)
+    for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
+        src_file = f"types/{filename}"
+        dest_file = f".{filename}"
+        with open(src_file, "r") as src:
+            with open(dest_file, "w") as dest:
+                start_declare_global = False
+                for line in src.readlines():
+                    trimmed_line = line.strip()
+                    if trimmed_line.startswith("declare global"):
+                        start_declare_global = True
+                        dest.write(line)
+                        continue
+                    if start_declare_global:
+                        if "typeof" in trimmed_line:
+                            prefix_spaces = line.find(trimmed_line)
+                            dest.write(f"{' ' * prefix_spaces}// @ts-ignore\n")
+                    dest.write(line)
+        command = f"mv {dest_file} {src_file}"
+        logging.info(command)
+        os.system(command)
+
+
+def fmt(only):
+    formatters = {
+        "typos": typos_formatter,
+        "rust": rust_formatter,
+        "prettier": prettier_formatter,
+        "taplo": taplo_formatter,
+        "tsc": tsc_formatter,
+    }
+
+    if isinstance(only, str) and only in formatters:
+        formatters[only]()
+    else:
+        for _name, formatter in formatters.items():
+            formatter()
 
 
 def doc(watch):
@@ -321,7 +339,17 @@ if __name__ == "__main__":
     fmt_subparser = subparsers.add_parser(
         "fmt",
         aliases=["f"],
-        help="Run multiple formatters and code-generator: `cargo +nightly fmt`, `taplo fmt`, `prettier`, `tsc`",
+        help="Run multiple formatters, checkers and code generators, by default run all tools",
+    )
+    fmt_subparser.add_argument(
+        "--rust",
+        action="store_true",
+        help="Only run `cargo +nightly fmt`, by default is false",
+    )
+    fmt_subparser.add_argument(
+        "--tsc",
+        action="store_true",
+        help="Only run `tsc`, by default is false",
     )
 
     release_subparser = subparsers.add_parser(
@@ -356,8 +384,6 @@ if __name__ == "__main__":
             list_test()
         else:
             test(parser.name, parser.miri, parser.job)
-    elif parser.subcommand == "tsc":
-        tsc()
     elif parser.subcommand == "build" or parser.subcommand == "b":
         profile = "debug"
         if parser.release:
@@ -368,7 +394,12 @@ if __name__ == "__main__":
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "fmt" or parser.subcommand == "f":
-        fmt()
+        if parser.tsc:
+            fmt("tsc")
+        elif parser.rust:
+            fmt("rust")
+        else:
+            fmt(None)
     elif parser.subcommand == "release" or parser.subcommand == "r":
         release(parser.level, parser.execute)
     else:
