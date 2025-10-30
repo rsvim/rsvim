@@ -376,8 +376,15 @@ impl BuffersManager {
     let data = payload.as_bytes();
     match std::fs::write(abs_filename, data) {
       Ok(_) => {
-        let metadata = std::fs::metadata(abs_filename).unwrap();
-        buf.set_metadata(Some(metadata));
+        match std::fs::metadata(abs_filename) {
+          Ok(metadata) => buf.set_metadata(Some(metadata)),
+          Err(e) => {
+            error!(
+              "Failed to fetch metadata from file {:?}: {:?}",
+              abs_filename, e
+            );
+          }
+        }
         buf.set_last_sync_time(Some(Instant::now()));
         Ok(data.len())
       }
