@@ -808,6 +808,20 @@ export namespace RsvimFs {
   }
 }
 
+export namespace RsvimOpt {
+  /**
+   * @see {@link RsvimOpt.fileEncoding}
+   * @inline
+   * */
+  export type FileEncodingOption = "utf-8";
+
+  /**
+   * @see {@link RsvimOpt.fileFormat}
+   * @inline
+   */
+  export type FileFormatOption = "dos" | "unix" | "mac";
+}
+
 /**
  * The `Rsvim.opt` global object for global editor options.
  *
@@ -1141,18 +1155,6 @@ export class RsvimOpt {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
-}
-
-export namespace RsvimOpt {
-  /**
-   * @inline
-   */
-  export type FileEncodingOption = "utf-8";
-
-  /**
-   * @inline
-   */
-  export type FileFormatOption = "dos" | "unix" | "mac";
 }
 
 /**

@@ -24,7 +24,6 @@ pub type IoResult<T> = std::io::Result<T>;
 /// All error codes.
 #[derive(Debug, thiserror::Error)]
 pub enum TheErr {
-  // buf {
   #[error("Buffer `{0}` doesn't have a filename.")]
   BufferNoName(BufferId),
 
@@ -33,10 +32,10 @@ pub enum TheErr {
 
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, String, IoErr),
-  // buf }
 
-  // js {
-  //
+  #[error("Failed to normalize path `{0}`: {1}.")]
+  NormalizePathFailed(String, IoErr),
+
   #[error("Command `{0}` not found.")]
   CommandNotFound(CompactString),
 
@@ -58,6 +57,9 @@ pub enum TheErr {
   #[error("Not enough arguments specified.")]
   ArgumentsNotEnough,
 
+  #[error("File `{0}` not found: {1}.")]
+  FileNotFound(String, IoErr),
+
   #[error("Failed to open file `{0}`: {1}.")]
   OpenFileFailed(String, IoErr),
 
@@ -75,7 +77,6 @@ pub enum TheErr {
 
   #[error("Buffer too small: `{0}`.")]
   BufferTooSmall(usize),
-  // js }
 }
 
 /// [`Result`] with `T` if ok, [`TheErr`] if error.

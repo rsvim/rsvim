@@ -17,8 +17,6 @@ use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::fs::Metadata;
-use std::io::Read;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
@@ -196,12 +194,15 @@ impl BuffersManager {
     &mut self,
     canvas_size: U16Size,
     filename: &Path,
-  ) -> IoResult<BufferId> {
+  ) -> TheResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
         trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
-        return Err(e);
+        bail!(TheErr::NormalizePathFailed(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     };
 
@@ -215,12 +216,15 @@ impl BuffersManager {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
-        return Err(e);
+        bail!(TheErr::FileNotFound(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     };
 
     let buf = if existed {
-      match self.edit_file(canvas_size, filename, &abs_filename) {
+      match self.read_file(canvas_size, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
           return Err(e);
@@ -311,66 +315,47 @@ impl BuffersManager {
 
 // Primitive APIs {
 
-const BUF_PAGE_SIZE: usize = 8192_usize;
-
 impl BuffersManager {
-  fn edit_file(
+  fn read_file(
     &self,
     canvas_size: U16Size,
     filename: &Path,
-    absolute_filename: &Path,
-  ) -> IoResult<Buffer> {
-    match std::fs::File::open(filename) {
-      Ok(fp) => {
-        let metadata = fp.metadata().unwrap();
-        let mut data: [u8; BUF_PAGE_SIZE] = [0_u8; BUF_PAGE_SIZE];
-        let mut rope_builder = RopeBuilder::new();
-        let fencoding = self.global_local_options().file_encoding();
-        let mut bytes = 0_usize;
-        let mut reader = std::io::BufReader::new(fp);
-        loop {
-          match reader.read(&mut data) {
-            Ok(readded) => {
-              debug_assert!(readded <= BUF_PAGE_SIZE);
-              if readded == 0 {
-                break;
-              }
-              bytes += readded;
-              let payload = match fencoding {
-                FileEncodingOption::Utf8 => {
-                  String::from_utf8_lossy(&data[0..readded])
-                }
-              };
-              rope_builder.append(&payload);
-            }
-            Err(e) => {
-              error!("Failed to read file {:?}:{:?}", filename, e);
-              return Err(e);
-            }
-          }
+    abs_filename: &Path,
+  ) -> TheResult<Buffer> {
+    match std::fs::metadata(filename) {
+      Ok(metadata) => match std::fs::read(filename) {
+        Ok(data) => {
+          let mut rope_builder = RopeBuilder::new();
+          let fencoding = self.global_local_options().file_encoding();
+          let payload = match fencoding {
+            FileEncodingOption::Utf8 => String::from_utf8_lossy(&data),
+          };
+          rope_builder.append(&payload);
+          let rope = rope_builder.finish();
+          trace!("Read {} bytes from file {:?}", data.len(), filename);
+
+          Ok(Buffer::_new(
+            *self.global_local_options(),
+            canvas_size,
+            rope,
+            Some(filename.to_path_buf()),
+            Some(abs_filename.to_path_buf()),
+            Some(metadata),
+            Some(Instant::now()),
+          ))
         }
-        let rope = rope_builder.finish();
-
-        trace!(
-          "Read {} bytes (data: {}) from file {:?}",
-          bytes,
-          data.len(),
-          filename
-        );
-
-        Ok(Buffer::_new(
-          *self.global_local_options(),
-          canvas_size,
-          rope,
-          Some(filename.to_path_buf()),
-          Some(absolute_filename.to_path_buf()),
-          Some(metadata),
-          Some(Instant::now()),
-        ))
-      }
+        Err(e) => {
+          bail!(TheErr::OpenFileFailed(
+            filename.to_string_lossy().to_string(),
+            e
+          ));
+        }
+      },
       Err(e) => {
-        error!("Failed to open file {:?}:{:?}", filename, e);
-        Err(e)
+        bail!(TheErr::OpenFileFailed(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     }
   }
@@ -385,48 +370,26 @@ impl BuffersManager {
       .to_string();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
-    let written_bytes = match std::fs::OpenOptions::new()
-      .create(true)
-      .truncate(true)
-      .write(true)
-      .open(abs_filename)
-    {
-      Ok(fp) => {
-        let mut writer = std::io::BufWriter::new(fp);
-        let payload = buf.text().rope().to_string();
-        let mut data: Vec<u8> = Vec::with_capacity(payload.len());
-
-        let n = match data.write(payload.as_bytes()) {
-          Ok(n) => match writer.write_all(&data) {
-            Ok(_) => match writer.flush() {
-              Ok(_) => n,
-              Err(e) => {
-                bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-              }
-            },
-            Err(e) => {
-              bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-            }
-          },
+    let payload = buf.text().rope().to_string();
+    let data = payload.as_bytes();
+    match std::fs::write(abs_filename, data) {
+      Ok(_) => {
+        match std::fs::metadata(abs_filename) {
+          Ok(metadata) => buf.set_metadata(Some(metadata)),
           Err(e) => {
-            bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
+            error!(
+              "Failed to fetch metadata from file {:?}: {:?}",
+              abs_filename, e
+            );
           }
-        };
-        trace!("Write file {:?}, bytes: {:?}", filename, n);
-
-        let fp1 = writer.get_ref();
-        let metadata = fp1.metadata().unwrap();
-        buf.set_metadata(Some(metadata));
+        }
         buf.set_last_sync_time(Some(Instant::now()));
-
-        n
+        Ok(data.len())
       }
       Err(e) => {
         bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
       }
-    };
-
-    Ok(written_bytes)
+    }
   }
 }
 
