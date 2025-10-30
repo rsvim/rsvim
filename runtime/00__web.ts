@@ -337,13 +337,13 @@ export class TextDecoder {
    *
    * @see {@link !TextDecoder}
    *
-   * @param {(ArrayBuffer | GlobalThis.TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
+   * @param {(ArrayBuffer | TypedArray | DataView)} input - (Optional) Bytes array, by default is `new Uint8Array()`.
    * @param {TextDecoder.DecodeOptions} options - (Optional) Decode options, by default is `{stream: false}`. When decode a stream data (e.g. read from tcp network) while reading it and cannot determine the end of bytes, should set `stream` option to `true`.
    * @returns {string} Decoded string text.
    * @throws Throws {@link !TypeError} if input is not a Uint8Array, or options is invalid, or the data is malformed and `fatal` option is set.
    */
   decode(
-    input?: ArrayBuffer | GlobalThis.TypedArray | DataView,
+    input?: ArrayBuffer | TypedArray | DataView,
     options?: TextDecoder.DecodeOptions,
   ): string {
     input = input ?? new Uint8Array();
@@ -436,23 +436,21 @@ export namespace TextDecoder {
   export type DecodeOptions = { stream?: boolean };
 }
 
-export namespace GlobalThis {
-  /**
-   * {@link !TypedArray}
-   */
-  export type TypedArray =
-    | Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array
-    | BigInt64Array
-    | BigUint64Array;
-}
+/**
+ * {@link !TypedArray}
+ */
+export type TypedArray =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float32Array
+  | Float64Array
+  | BigInt64Array
+  | BigUint64Array;
 
 /**
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object.
