@@ -320,54 +320,33 @@ impl BuffersManager {
     filename: &Path,
     absolute_filename: &Path,
   ) -> IoResult<Buffer> {
-    match std::fs::File::open(filename) {
-      Ok(fp) => {
-        let metadata = fp.metadata().unwrap();
-        let mut data: [u8; BUF_PAGE_SIZE] = [0_u8; BUF_PAGE_SIZE];
-        let mut rope_builder = RopeBuilder::new();
-        let fencoding = self.global_local_options().file_encoding();
-        let mut bytes = 0_usize;
-        let mut reader = std::io::BufReader::new(fp);
-        loop {
-          match reader.read(&mut data) {
-            Ok(readded) => {
-              debug_assert!(readded <= BUF_PAGE_SIZE);
-              if readded == 0 {
-                break;
-              }
-              bytes += readded;
-              let payload = match fencoding {
-                FileEncodingOption::Utf8 => {
-                  String::from_utf8_lossy(&data[0..readded])
-                }
-              };
-              rope_builder.append(&payload);
-            }
-            Err(e) => {
-              error!("Failed to read file {:?}:{:?}", filename, e);
-              return Err(e);
-            }
-          }
+    match std::fs::metadata(filename) {
+      Ok(metadata) => match std::fs::read(filename) {
+        Ok(data) => {
+          let mut rope_builder = RopeBuilder::new();
+          let fencoding = self.global_local_options().file_encoding();
+          let payload = match fencoding {
+            FileEncodingOption::Utf8 => String::from_utf8_lossy(&data),
+          };
+          rope_builder.append(&payload);
+          let rope = rope_builder.finish();
+          trace!("Read {} bytes from file {:?}", data.len(), filename);
+
+          Ok(Buffer::_new(
+            *self.global_local_options(),
+            canvas_size,
+            rope,
+            Some(filename.to_path_buf()),
+            Some(absolute_filename.to_path_buf()),
+            Some(metadata),
+            Some(Instant::now()),
+          ))
         }
-        let rope = rope_builder.finish();
-
-        trace!(
-          "Read {} bytes (data: {}) from file {:?}",
-          bytes,
-          data.len(),
-          filename
-        );
-
-        Ok(Buffer::_new(
-          *self.global_local_options(),
-          canvas_size,
-          rope,
-          Some(filename.to_path_buf()),
-          Some(absolute_filename.to_path_buf()),
-          Some(metadata),
-          Some(Instant::now()),
-        ))
-      }
+        Err(e) => {
+          error!("Failed to open file {:?}:{:?}", filename, e);
+          Err(e)
+        }
+      },
       Err(e) => {
         error!("Failed to open file {:?}:{:?}", filename, e);
         Err(e)
