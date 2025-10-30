@@ -17,8 +17,6 @@ use path_absolutize::Absolutize;
 use ropey::Rope;
 use ropey::RopeBuilder;
 use std::fs::Metadata;
-use std::io::Read;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicI32;
