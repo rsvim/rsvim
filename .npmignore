@@ -3,7 +3,6 @@
 .cargo
 rsvim_cli
 rsvim_core
-runtime
 target
 .editorconfig
 .gitignore
