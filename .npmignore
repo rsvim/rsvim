@@ -1,6 +1,10 @@
+.idea
+.github
+.cargo
 rsvim_cli
 rsvim_core
 runtime
+target
 CHANGELOG.md
 Cargo.*
 DEVELOPMENT.md
