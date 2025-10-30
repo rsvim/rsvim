@@ -13,7 +13,8 @@ target
 CHANGELOG.md
 Cargo.*
 DEVELOPMENT.md
-*.yml
+codecov.yml
+tsconfig.json
 *.cmd
 *.py
 *.toml
