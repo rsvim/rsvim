@@ -206,7 +206,7 @@ def fmt(only):
     if isinstance(only, str) and only in formatters:
         formatters[only]()
     else:
-        for _name, formatter in formatters.items():
+        for formatter in formatters.values():
             formatter()
 
 
