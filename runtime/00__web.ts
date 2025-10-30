@@ -641,3 +641,11 @@ export function reportError(error: any): void {
   globalThis.TextEncoder = TextEncoder;
   globalThis.TextDecoder = TextDecoder;
 })(globalThis as unknown as any);
+
+/// Declarations for .d.ts
+declare global {
+  // @ts-ignore Ignore warning
+  var TextEncoder: typeof TextEncoder;
+  // @ts-ignore Ignore warning
+  var TextDecoder: typeof TextDecoder;
+}
