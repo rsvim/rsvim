@@ -5,6 +5,11 @@ rsvim_cli
 rsvim_core
 runtime
 target
+.editorconfig
+.gitignore
+.markdownlint.jsonc
+.nvimrc
+.prettierignore
 CHANGELOG.md
 Cargo.*
 DEVELOPMENT.md
