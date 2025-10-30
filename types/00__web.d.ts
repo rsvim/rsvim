@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-nocheck
 export declare class TextEncoder {
     constructor();
     encode(input: string): Uint8Array;
