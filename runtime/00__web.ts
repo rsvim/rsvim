@@ -6,7 +6,7 @@
  *
  * The [globalThis](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/globalThis) global object, compatible with [WinterTC](https://min-common-api.proposal.wintertc.org/) web platform APIs.
  *
- * @see [MDN | Web APIs](https://developer.mozilla.org/docs/Web/API).
+ * @see [MDN - Web APIs](https://developer.mozilla.org/docs/Web/API).
  *
  * @packageDocumentation
  */
