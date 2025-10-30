@@ -34,6 +34,7 @@ export declare function clearTimeout(id: number): void;
 export declare function setTimeout(callback: (...args: any[]) => void, delay: number, ...args: any[]): number;
 export declare function queueMicrotask(callback: () => void): void;
 export declare function reportError(error: any): void;
+declare global {
     // @ts-ignore
     var TextEncoder: typeof TextEncoder;
     // @ts-ignore
