@@ -139,14 +139,6 @@ function setDefaultFields(arg: object, defaults: object) {
   }
 }
 
-export namespace TextEncoder {
-  /**
-   * @see {@link TextEncoder}
-   * @inline
-   */
-  export type EncodeIntoResult = { read: number; written: number };
-}
-
 /**
  * Encode string text into bytes, it only supports "utf-8" encoding.
  *
@@ -207,18 +199,12 @@ export class TextEncoder {
   }
 }
 
-export namespace TextDecoder {
+export namespace TextEncoder {
   /**
-   * @see {@link TextDecoder}
+   * @see {@link TextEncoder}
    * @inline
    */
-  export type Options = { fatal?: boolean; ignoreBOM?: boolean };
-
-  /**
-   * @see {@link TextDecoder}
-   * @inline
-   */
-  export type DecodeOptions = { stream?: boolean };
+  export type EncodeIntoResult = { read: number; written: number };
 }
 
 /**
@@ -434,6 +420,20 @@ export class TextDecoder {
   get ignoreBOM(): boolean {
     return this.#ignoreBOM;
   }
+}
+
+export namespace TextDecoder {
+  /**
+   * @see {@link TextDecoder}
+   * @inline
+   */
+  export type Options = { fatal?: boolean; ignoreBOM?: boolean };
+
+  /**
+   * @see {@link TextDecoder}
+   * @inline
+   */
+  export type DecodeOptions = { stream?: boolean };
 }
 
 export namespace GlobalThis {
