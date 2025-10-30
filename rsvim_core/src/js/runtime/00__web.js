@@ -168,65 +168,65 @@ export class TextDecoder {
         return this.#ignoreBOM;
     }
 }
+const TIMEOUT_MAX = Math.pow(2, 31) - 1;
+let nextTimerId = 1;
+const activeTimers = new Map();
+export function clearInterval(id) {
+    checkIsInteger(id, `"clearInterval" ID`);
+    if (activeTimers.has(id)) {
+        __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
+        activeTimers.delete(id);
+    }
+}
+export function setInterval(callback, delay, ...args) {
+    delay = delay ?? 1;
+    checkIsNumber(delay, `"setInterval" delay`);
+    delay *= 1;
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+    checkIsFunction(callback, `"setInterval" callback`);
+    const id = nextTimerId++;
+    const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
+        callback(...args);
+    }, delay, true);
+    activeTimers.set(id, timer);
+    return id;
+}
+export function clearTimeout(id) {
+    checkIsInteger(id, `"clearTimeout" ID`);
+    if (activeTimers.has(id)) {
+        __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
+        activeTimers.delete(id);
+    }
+}
+export function setTimeout(callback, delay, ...args) {
+    delay = delay ?? 1;
+    checkIsNumber(delay, `"setTimeout" delay`);
+    delay *= 1;
+    delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
+    checkIsFunction(callback, `"setTimeout" callback`);
+    const id = nextTimerId++;
+    const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
+        callback(...args);
+        activeTimers.delete(id);
+    }, delay, false);
+    activeTimers.set(id, timer);
+    return id;
+}
+export function queueMicrotask(callback) {
+    checkIsFunction(callback, `"queueMicrotask" callback`);
+    __InternalRsvimGlobalObject.global_queue_microtask(() => {
+        try {
+            callback();
+        }
+        catch (err) {
+            reportError(err);
+        }
+    });
+}
+export function reportError(error) {
+    __InternalRsvimGlobalObject.global_report_error(error);
+}
 ((globalThis) => {
-    const TIMEOUT_MAX = Math.pow(2, 31) - 1;
-    let nextTimerId = 1;
-    const activeTimers = new Map();
-    function clearInterval(id) {
-        checkIsInteger(id, `"clearInterval" ID`);
-        if (activeTimers.has(id)) {
-            __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
-            activeTimers.delete(id);
-        }
-    }
-    function setInterval(callback, delay, ...args) {
-        delay = delay ?? 1;
-        checkIsNumber(delay, `"setInterval" delay`);
-        delay *= 1;
-        delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
-        checkIsFunction(callback, `"setInterval" callback`);
-        const id = nextTimerId++;
-        const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
-            callback(...args);
-        }, delay, true);
-        activeTimers.set(id, timer);
-        return id;
-    }
-    function clearTimeout(id) {
-        checkIsInteger(id, `"clearTimeout" ID`);
-        if (activeTimers.has(id)) {
-            __InternalRsvimGlobalObject.global_clear_timer(activeTimers.get(id));
-            activeTimers.delete(id);
-        }
-    }
-    function setTimeout(callback, delay, ...args) {
-        delay = delay ?? 1;
-        checkIsNumber(delay, `"setTimeout" delay`);
-        delay *= 1;
-        delay = boundByIntegers(delay, [1, TIMEOUT_MAX]);
-        checkIsFunction(callback, `"setTimeout" callback`);
-        const id = nextTimerId++;
-        const timer = __InternalRsvimGlobalObject.global_create_timer(() => {
-            callback(...args);
-            activeTimers.delete(id);
-        }, delay, false);
-        activeTimers.set(id, timer);
-        return id;
-    }
-    function queueMicrotask(callback) {
-        checkIsFunction(callback, `"queueMicrotask" callback`);
-        __InternalRsvimGlobalObject.global_queue_microtask(() => {
-            try {
-                callback();
-            }
-            catch (err) {
-                reportError(err);
-            }
-        });
-    }
-    function reportError(error) {
-        __InternalRsvimGlobalObject.global_report_error(error);
-    }
     globalThis.clearTimeout = clearTimeout;
     globalThis.setTimeout = setTimeout;
     globalThis.clearInterval = clearInterval;
