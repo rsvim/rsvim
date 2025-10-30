@@ -1,11 +1,11 @@
 {
-  "name": "@rsvim/rsvim",
+  "name": "@rsvim/types",
   "version": "0.1.0",
-  "description": "JavaScript/TypeScript APIs and types for Rsvim text editor.",
+  "description": "TypeScript types for Rsvim text editor.",
   "keywords": [
     "rsvim"
   ],
-  "homepage": "https://github.com/rsvim/rsvim#readme",
+  "homepage": "https://github.com/rsvim/rsvim",
   "bugs": {
     "url": "https://github.com/rsvim/rsvim/issues"
   },
