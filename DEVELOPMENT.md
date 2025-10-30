@@ -8,7 +8,7 @@ Please setup your development environment with:
   - For Linux, install [GNU GCC](https://gcc.gnu.org/).
   - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, install [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
-- Version management tool [mise](https://github.com/jdx/mise), then run `mise i`.
+- Install [mise](https://github.com/jdx/mise), then run `mise i` and `npm i`.
 
 ## Rust
 
