@@ -177,7 +177,7 @@ def tsc_formatter():
         dest_file = f".{filename}"
         with open(src_file, "r") as src:
             with open(dest_file, "w") as dest:
-                dest.write("// @ts-ignore\n")
+                dest.write("// @ts-nocheck\n")
                 for line in src.readlines():
                     dest.write(line)
         command = f"mv {dest_file} {src_file}"
