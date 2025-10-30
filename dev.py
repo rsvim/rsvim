@@ -196,6 +196,12 @@ def release(level, execute):
     os.system(command)
 
 
+def tsc():
+    command = "tsc"
+    logging.info(command)
+    os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
