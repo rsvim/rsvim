@@ -1,3 +1,4 @@
+// @ts-ignore
 export declare class TextEncoder {
     constructor();
     encode(input: string): Uint8Array;
@@ -35,9 +36,7 @@ export declare function setTimeout(callback: (...args: any[]) => void, delay: nu
 export declare function queueMicrotask(callback: () => void): void;
 export declare function reportError(error: any): void;
 declare global {
-    // @ts-ignore
     var TextEncoder: typeof TextEncoder;
-    // @ts-ignore
     var TextDecoder: typeof TextDecoder;
     function clearInterval(id: number): void;
     function setInterval(callback: (...args: any[]) => void, delay?: number, ...args: any[]): number;

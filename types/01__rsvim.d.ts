@@ -1,3 +1,4 @@
+// @ts-ignore
 export declare class Rsvim {
     readonly buf: RsvimBuf;
     readonly cmd: RsvimCmd;

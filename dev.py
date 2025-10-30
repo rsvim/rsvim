@@ -177,17 +177,8 @@ def tsc_formatter():
         dest_file = f".{filename}"
         with open(src_file, "r") as src:
             with open(dest_file, "w") as dest:
-                start_declare_global = False
+                dest.write("// @ts-ignore\n")
                 for line in src.readlines():
-                    trimmed_line = line.strip()
-                    if trimmed_line.startswith("declare global"):
-                        start_declare_global = True
-                        dest.write(line)
-                        continue
-                    if start_declare_global:
-                        if "typeof" in trimmed_line:
-                            prefix_spaces = line.find(trimmed_line)
-                            dest.write(f"{' ' * prefix_spaces}// @ts-ignore\n")
                     dest.write(line)
         command = f"mv {dest_file} {src_file}"
         logging.info(command)
