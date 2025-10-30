@@ -1,0 +1,27 @@
+{
+  "name": "@rsvim/rsvim",
+  "version": "0.1.0",
+  "description": "JavaScript/TypeScript APIs and types for Rsvim text editor.",
+  "keywords": [
+    "rsvim"
+  ],
+  "homepage": "https://github.com/rsvim/rsvim#readme",
+  "bugs": {
+    "url": "https://github.com/rsvim/rsvim/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsvim/rsvim.git"
+  },
+  "license": "Vim",
+  "author": "rsvim",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "python3 ./dev.py fmt --tsc"
+  },
+  "dependencies": {
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {}
+}
