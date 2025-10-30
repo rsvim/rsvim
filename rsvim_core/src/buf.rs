@@ -220,7 +220,7 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.edit_file(canvas_size, filename, &abs_filename) {
+      match self.read_file(canvas_size, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
           return Err(e);
@@ -314,12 +314,12 @@ impl BuffersManager {
 const BUF_PAGE_SIZE: usize = 8192_usize;
 
 impl BuffersManager {
-  fn edit_file(
+  fn read_file(
     &self,
     canvas_size: U16Size,
     filename: &Path,
-    absolute_filename: &Path,
-  ) -> IoResult<Buffer> {
+    abs_filename: &Path,
+  ) -> TheResult<Buffer> {
     match std::fs::metadata(filename) {
       Ok(metadata) => match std::fs::read(filename) {
         Ok(data) => {
@@ -337,19 +337,25 @@ impl BuffersManager {
             canvas_size,
             rope,
             Some(filename.to_path_buf()),
-            Some(absolute_filename.to_path_buf()),
+            Some(abs_filename.to_path_buf()),
             Some(metadata),
             Some(Instant::now()),
           ))
         }
         Err(e) => {
           error!("Failed to open file {:?}:{:?}", filename, e);
-          Err(e)
+          bail!(TheErr::OpenFileFailed(
+            filename.to_string_lossy().to_string(),
+            e
+          ));
         }
       },
       Err(e) => {
         error!("Failed to open file {:?}:{:?}", filename, e);
-        Err(e)
+        bail!(TheErr::OpenFileFailed(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     }
   }
