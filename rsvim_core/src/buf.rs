@@ -201,7 +201,10 @@ impl BuffersManager {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
         trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
-        return Err(e);
+        bail!(TheErr::NormalizePathFailed(
+          filename.to_string_lossy().to_string(),
+          e
+        ));
       }
     };
 
@@ -310,8 +313,6 @@ impl BuffersManager {
 }
 
 // Primitive APIs {
-
-const BUF_PAGE_SIZE: usize = 8192_usize;
 
 impl BuffersManager {
   fn read_file(

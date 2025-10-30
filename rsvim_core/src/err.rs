@@ -33,6 +33,9 @@ pub enum TheErr {
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
   SaveBufferFailed(BufferId, String, IoErr),
 
+  #[error("Failed to normalize path `{0}`: {1}.")]
+  NormalizePathFailed(String, IoErr),
+
   #[error("Command `{0}` not found.")]
   CommandNotFound(CompactString),
 
