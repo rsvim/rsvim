@@ -321,7 +321,7 @@ class TestCommand(SubCommand):
             "--job",
             nargs=1,
             metavar="N",
-            help="Run `cargo nextest run` with N threads",
+            help="Run with N threads",
         )
 
     def name(self) -> str:
