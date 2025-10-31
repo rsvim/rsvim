@@ -470,6 +470,8 @@ export namespace RsvimCmd {
   /**
    * Command callback function, this is the backend logic that implements a user ex command.
    *
+   * It accepts a `ctx` parameter that indicates runtime information when the command is executed.
+   *
    * @see {@link RsvimCmd.create}
 ,  */
   export type CommandCallback = (ctx: CommandContext) => Promise<void>;
