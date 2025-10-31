@@ -473,6 +473,7 @@ export namespace RsvimCmd {
    * It accepts a `ctx` parameter that indicates runtime information when the command is executed.
    *
    * @see {@link RsvimCmd.create}
+   * @see {@link CommandContext}
 ,  */
   export type CommandCallback = (ctx: CommandContext) => Promise<void>;
 
