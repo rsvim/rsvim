@@ -20,8 +20,5 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "tsc": "tsc"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3"
   }
 }
