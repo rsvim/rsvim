@@ -464,19 +464,19 @@ class NpmCommand(ICommand):
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    args = argparse.ArgumentParser(description="Rsvim development toolkit")
-    args.add_argument(
+    parser = argparse.ArgumentParser(description="Rsvim development toolkit")
+    parser.add_argument(
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
     )
-    args.add_argument(
+    parser.add_argument(
         "--skip-cache",
         action="store_true",
         help="Build without `sccache`",
     )
 
-    subparsers = args.add_subparsers(dest="subcommand")
+    subparsers = parser.add_subparsers(dest="subcommand")
 
     commands = [
         BuildCommand(subparsers),
@@ -488,19 +488,19 @@ if __name__ == "__main__":
         TestCommand(subparsers),
     ]
 
-    args = args.parse_args()
-    print(args)
+    parsed_args = parser.parse_args()
+    logging.info(f"args: {parsed_args}")
 
-    if args.recache:
+    if parsed_args.recache:
         RECACHE_SCCACHE = True
-    if args.skip_cache:
+    if parsed_args.skip_cache:
         SKIP_SCCACHE = True
 
     for command in commands:
-        if command.name() == args.subcommand or (
-            command.alias() is not None and command.alias() == args.subcommand
+        if command.name() == parsed_args.subcommand or (
+            command.alias() is not None and command.alias() == parsed_args.subcommand
         ):
-            command.run(args)
+            command.run(parser)
             exit(0)
 
     logging.error("Missing arguments, use -h/--help for more details.")
