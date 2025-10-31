@@ -169,7 +169,7 @@ def prettier_formatter():
 
 
 def tsc_formatter():
-    command = "npm run tsc"
+    command = "tsc"
     logging.info(command)
     os.system(command)
     for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:

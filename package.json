@@ -18,7 +18,5 @@
   "type": "module",
   "main": "./runtime/index.js",
   "types": "./types/index.d.ts",
-  "scripts": {
-    "tsc": "tsc"
-  }
+  "scripts": {}
 }
