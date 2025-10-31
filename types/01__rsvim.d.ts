@@ -27,12 +27,18 @@ export declare namespace RsvimCmd {
         force?: boolean;
         alias?: string;
     };
-    type CommandCallback = (ctx: any) => Promise<void>;
+    type CommandCallback = (ctx: CommandContext) => Promise<void>;
     type CommandDefinition = {
         name: string;
         callback: CommandCallback;
         attributes: CommandAttributes;
         options: CommandOptions;
+    };
+    type CommandContext = {
+        bang: boolean;
+        args: string[];
+        currentBufferId: number;
+        currentWindowId: number;
     };
 }
 export declare class RsvimFs {
