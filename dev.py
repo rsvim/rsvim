@@ -303,7 +303,7 @@ class TestCommand(SubCommand):
             "--list",
             action="store_true",
             dest="list_test",
-            help="List all test cases instead of running them",
+            help="Only list all test cases, instead of run them",
         )
         self.test_parser.add_argument(
             "name",
