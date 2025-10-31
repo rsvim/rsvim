@@ -483,6 +483,33 @@ export namespace RsvimCmd {
     attributes: CommandAttributes;
     options: CommandOptions;
   };
+
+  /**
+   * Command runtime context.
+   *
+   * When a command is been execute, runtime information will be passed to the command callback function.
+   */
+  export type CommandContext = {
+    /**
+     * Whether the command is executed with a bang "!".
+     */
+    bang: boolean;
+
+    /**
+     * Arguments that are passed to the command when executed.
+     */
+    args: string[];
+
+    /**
+     * Current buffer ID when the command is executed.
+     */
+    currentBufferId: number;
+
+    /**
+     * Current window ID when the command is executed.
+     */
+    currentWindowId: number;
+  };
 }
 
 /**
