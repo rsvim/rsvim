@@ -309,7 +309,7 @@ class TestCommand(SubCommand):
             "name",
             nargs="*",
             default=[],
-            help="Multiple test names that need to run, by default is empty (runs all test cases)",
+            help="Only run these tests, by default is empty (e.g. run all test cases)",
         )
         self.test_parser.add_argument(
             "--miri",
