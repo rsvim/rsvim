@@ -596,12 +596,16 @@ class ReleaseCommand(ICommand):
         return self._alias
 
     def run(self, args) -> None:
-        command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
-        if args.watch:
-            logging.info("Run 'cargo doc' and refresh it on file changes")
-            command = f"cargo watch -s '{command}'"
+        cwd_path = pathlib.Path.cwd()
+        git_root_path = cwd_path / ".git"
+        assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
+
+        command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {args.level}"
+        if args.execute:
+            logging.info(f"Execute 'cargo release' with level: {args.level}")
+            command = f"{command} --execute --no-verify"
         else:
-            logging.info("Run 'cargo doc' only once")
+            logging.info(f"Dry run 'cargo release' with level: {args.level}")
 
         command = command.strip()
         logging.info(command)
