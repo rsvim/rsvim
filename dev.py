@@ -402,8 +402,8 @@ class BuildCommand(ICommand):
         self._alias = "b"
 
         self.build_parser = subparsers.add_parser(
-            "build",
-            aliases=["b"],
+            self._name,
+            aliases=[self._alias],
             help="Build with `sccache`, by default build `debug` profile",
         )
         self.build_parser.add_argument(
@@ -458,7 +458,8 @@ class FormatCommand(ICommand):
         self._alias = "f"
 
         self.fmt_parser = subparsers.add_parser(
-            "fmt",
+            self._name,
+            aliases=[self._alias],
             help="Run multiple code formattors/checkers/generators, by default run them all",
         )
         self.fmt_parser.add_argument(
@@ -530,6 +531,41 @@ class FormatCommand(ICommand):
             os.system(command)
 
 
+# doc
+class DocumentCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "doc"
+
+        self.doc_parser = subparsers.add_parser(
+            self._name,
+            help="Start `cargo doc` on `http://localhost:3000/rsvim`",
+        )
+        self.doc_parser.add_argument(
+            "-w",
+            "--watch",
+            action="store_true",
+            help="Running cargo doc and watching file changes, by default is false",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
+        if args.watch:
+            logging.info("Run 'cargo doc' and refresh it on file changes")
+            command = f"cargo watch -s '{command}'"
+        else:
+            logging.info("Run 'cargo doc' only once")
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
@@ -551,18 +587,8 @@ if __name__ == "__main__":
         ClippyCommand(subparsers),
         TestCommand(subparsers),
         BuildCommand(subparsers),
+        FormatCommand(subparsers),
     ]
-
-    doc_subparser = subparsers.add_parser(
-        "doc",
-        help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
-    )
-    doc_subparser.add_argument(
-        "-w",
-        "--watch",
-        action="store_true",
-        help="Running cargo doc as a service and watching file changes, by default is false",
-    )
 
     release_subparser = subparsers.add_parser(
         "release",
