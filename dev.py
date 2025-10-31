@@ -285,11 +285,6 @@ if __name__ == "__main__":
         help="Run `cargo nextest run` with N threads",
     )
 
-    tsc_subparser = subparsers.add_parser(
-        "tsc",
-        help="Run `tsc` with `declare global` patches for plugin development",
-    )
-
     build_subparser = subparsers.add_parser(
         "build",
         aliases=["b"],
