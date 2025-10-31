@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Rsvim development toolkit")
     parser.add_argument(
-        "--rebuild-cache",
+        "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
     )
