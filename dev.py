@@ -231,6 +231,12 @@ def subcommand_release(level, execute):
     os.system(command)
 
 
+def subcommand_npm_version(level):
+    command = f"npm version {level} --no-git-tag-version"
+    logging.info(command)
+    os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
@@ -393,5 +399,7 @@ if __name__ == "__main__":
             subcommand_fmt(None)
     elif parser.subcommand == "release" or parser.subcommand == "r":
         subcommand_release(parser.level, parser.execute)
+    elif parser.subcommand == "npm":
+        subcommand_npm_version(parser.version)
     else:
         logging.error("Missing arguments, use -h/--help for more details.")
