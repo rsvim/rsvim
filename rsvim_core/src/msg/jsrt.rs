@@ -1,8 +1,10 @@
 //! Messages that are sent to [`JsRuntime`](crate::js::JsRuntime).
 
+use crate::buf::BufferId;
 use crate::js::JsTaskId;
 use crate::js::JsTimerId;
 use crate::prelude::*;
+use crate::ui::tree::TreeNodeId;
 use compact_str::CompactString;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::Instant;
@@ -43,6 +45,8 @@ pub struct TimeoutResp {
 #[derive(Debug)]
 pub struct ExCommandReq {
   pub payload: CompactString,
+  pub current_buf_id: BufferId,
+  pub current_win_id: TreeNodeId,
 }
 
 #[derive(Debug)]
