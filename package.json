@@ -1,0 +1,22 @@
+{
+  "name": "@rsvim/types",
+  "version": "0.1.2",
+  "description": "TypeScript types for Rsvim text editor.",
+  "keywords": [
+    "rsvim"
+  ],
+  "homepage": "https://github.com/rsvim/rsvim",
+  "bugs": {
+    "url": "https://github.com/rsvim/rsvim/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsvim/rsvim.git"
+  },
+  "license": "Vim",
+  "author": "rsvim",
+  "type": "module",
+  "main": "./runtime/index.js",
+  "types": "./types/index.d.ts",
+  "scripts": {}
+}

@@ -34,5 +34,7 @@
     "useUnknownInCatchVariables": false,
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
-  }
+  },
+  "include": ["./runtime/*.ts"],
+  "exclude": ["./target/**/*.js"]
 }

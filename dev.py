@@ -2,6 +2,9 @@
 
 # Formatted with ruff.
 
+from abc import abstractmethod
+from typing import Protocol
+from typing import Optional
 import argparse
 import logging
 import os
@@ -54,46 +57,122 @@ def set_sccache():
     set_env("RUSTC_WRAPPER", SCCACHE_FULLPATH)
 
 
-def clippy():
-    append_rustflags("-Dwarnings")
-    if WINDOWS:
-        append_rustflags("-Csymbol-mangling-version=v0")
+class ICommand(Protocol):
+    @abstractmethod
+    def run(self, args) -> None:
+        raise Exception("Not implemented!")
 
-    set_rustflags()
-    set_sccache()
+    @abstractmethod
+    def name(self) -> str:
+        raise Exception("Not implemented!")
 
-    command = "cargo clippy --workspace --all-targets"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
+    @abstractmethod
+    def alias(self) -> Optional[str]:
+        raise Exception("Not implemented!")
 
 
-def test(name, miri, jobs):
-    if len(name) == 0:
-        name = None
-        logging.info("Run 'cargo test' for all tests")
-    else:
-        name = " ".join(list(dict.fromkeys(name)))
-        logging.info(f"Run 'cargo test' for tests: {name}")
+# clippy/c
+class ClippyCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "clippy"
+        self._alias = "c"
 
-    if jobs is None:
-        jobs = ""
-    else:
-        jobs = f" -j {jobs[0]}"
-
-    if WINDOWS:
-        append_rustflags("-Csymbol-mangling-version=v0")
-    set_env("RUST_BACKTRACE", "full")
-    if miri:
-        set_env(
-            "MIRIFLAGS",
-            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
+        self.clippy_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
         )
-        if name is None:
-            name = ""
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
-    else:
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        append_rustflags("-Dwarnings")
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
+
+        set_rustflags()
+        set_sccache()
+
+        command = "cargo clippy --workspace --all-targets"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
+# test/t
+class TestCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "test"
+        self._alias = "t"
+
+        self.test_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run `cargo test`, by default on all test cases",
+        )
+        self.test_parser.add_argument(
+            "-l",
+            "--list",
+            action="store_true",
+            dest="list_test",
+            help="Only list all test cases, instead of run them",
+        )
+        self.test_parser.add_argument(
+            "name",
+            nargs="*",
+            default=[],
+            help="Only run these tests, by default is empty (e.g. run all test cases)",
+        )
+        self.test_parser.add_argument(
+            "--miri",
+            action="store_true",
+            help="Run `cargo +nightly miri test`",
+        )
+        self.test_parser.add_argument(
+            "-j",
+            "--job",
+            nargs=1,
+            metavar="N",
+            help="Run with N threads, by default 1",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        if args.list_test:
+            self.list()
+
+        if args.job is None:
+            jobs = ""
+        else:
+            jobs = f" -j {args.job[0]}"
+
+        if args.miri:
+            self.miri(jobs)
+        else:
+            self.test(args.name, jobs)
+
+    def test(self, name, jobs) -> None:
+        if len(name) == 0:
+            name = "--all"
+            logging.info("Run 'cargo test' for all tests")
+        else:
+            name = " ".join(list(dict.fromkeys(name)))
+            logging.info(f"Run 'cargo test' for tests: {name}")
+
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
+        set_env("RUST_BACKTRACE", "full")
+
         rsvim_log = os.getenv("RSVIM_LOG")
         if isinstance(rsvim_log, str):
             set_env("RSVIM_LOG", rsvim_log)
@@ -101,150 +180,297 @@ def test(name, miri, jobs):
             set_env("RSVIM_LOG", "trace")
         set_sccache()
         set_rustflags()
-        if name is None:
-            name = "--all"
         command = f"cargo nextest run{jobs} --no-capture {name}"
 
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
 
+    def miri(self, jobs) -> None:
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
 
-def list_test():
-    set_sccache()
-    set_rustflags()
+        set_env("RUST_BACKTRACE", "full")
+        set_env(
+            "MIRIFLAGS",
+            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
+        )
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core"
 
-    command = "cargo nextest list"
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
 
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
+    def list(self) -> None:
+        set_sccache()
+        set_rustflags()
 
+        command = "cargo nextest list"
 
-def build(profile, verbose, features):
-    set_sccache()
-    set_rustflags()
-
-    if profile == "release":
-        command = "cargo build --release"
-    elif profile == "nightly":
-        command = "cargo build --profile nightly"
-    else:
-        command = "cargo build"
-
-    if verbose:
-        command = f"{command} -vv"
-
-    if isinstance(features, list) and len(features) > 0:
-        features = ",".join(features)
-        command = f"{command} --features {features}"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def typos_formatter():
-    command = "typos"
-    logging.info(command)
-    os.system(command)
-
-
-def rust_formatter():
-    command = "cargo +nightly fmt"
-    logging.info(command)
-    os.system(command)
-
-
-def taplo_formatter():
-    command = "taplo fmt"
-    logging.info(command)
-    os.system(command)
-
-
-def prettier_formatter():
-    command = "prettier --write *.md ./runtime/*.ts"
-    logging.info(command)
-    os.system(command)
-
-
-def tsc_formatter():
-    command = "tsc"
-    logging.info(command)
-    os.system(command)
-    for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
-        src_file = f"types/{filename}"
-        dest_file = f".{filename}"
-        with open(src_file, "r") as src:
-            with open(dest_file, "w") as dest:
-                dest.write("// @ts-ignore\n")
-                for line in src.readlines():
-                    dest.write(line)
-        command = f"mv {dest_file} {src_file}"
+        command = command.strip()
         logging.info(command)
         os.system(command)
 
 
-def fmt(only):
-    formatters = {
-        "typos": typos_formatter,
-        "rust": rust_formatter,
-        "prettier": prettier_formatter,
-        "taplo": taplo_formatter,
-        "tsc": tsc_formatter,
-    }
+# build/b
+class BuildCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "build"
+        self._alias = "b"
 
-    if isinstance(only, str) and only in formatters:
-        formatters[only]()
-    else:
-        for formatter in formatters.values():
-            formatter()
+        self.build_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Build with `sccache`, by default build `debug` profile",
+        )
+        self.build_parser.add_argument(
+            "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
+        )
+        self.build_parser.add_argument(
+            "-F", "--features", action="append", help="Build with '--features' option"
+        )
+        self.build_parser.add_argument(
+            "-r", "--release", action="store_true", help="Build `release` profile"
+        )
+        self.build_parser.add_argument(
+            "-n",
+            "--nightly",
+            action="store_true",
+            help="Build `nightly` target",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        set_sccache()
+        set_rustflags()
+
+        if args.release:
+            command = "cargo build --release"
+        elif args.nightly:
+            command = "cargo build --profile nightly"
+        else:
+            command = "cargo build"
+
+        if args.verbose:
+            command = f"{command} -vv"
+
+        if isinstance(args.features, list) and len(args.features) > 0:
+            features = ",".join(args.features)
+            command = f"{command} --features {features}"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
 
 
-def doc(watch):
-    command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
-    if watch:
-        logging.info("Run 'cargo doc' and refresh it on file changes")
-        command = f"cargo watch -s '{command}'"
-    else:
-        logging.info("Run 'cargo doc' only once")
+# fmt/f
+class FormatCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "fmt"
+        self._alias = "f"
 
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
+        self.fmt_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run multiple code formattors/checkers/generators, by default run them all",
+        )
+        self.fmt_parser.add_argument(
+            "--rust",
+            action="store_true",
+            help="Only run `cargo +nightly fmt`, by default is false",
+        )
+        self.fmt_parser.add_argument(
+            "--tsc",
+            action="store_true",
+            help="Only run `tsc`, by default is false",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        if args.tsc:
+            self.tsc()
+        elif args.rust:
+            self.rustfmt()
+        else:
+            for f in [
+                self.typos,
+                self.rustfmt,
+                self.taplo,
+                self.prettier,
+                self.tsc,
+            ]:
+                f()
+
+    def typos(self):
+        command = "typos"
+        logging.info(command)
+        os.system(command)
+
+    def rustfmt(self):
+        command = "cargo +nightly fmt"
+        logging.info(command)
+        os.system(command)
+
+    def taplo(self):
+        command = "taplo fmt"
+        logging.info(command)
+        os.system(command)
+
+    def prettier(self):
+        command = "prettier --write *.md ./runtime/*.ts"
+        logging.info(command)
+        os.system(command)
+
+    def tsc(self):
+        command = "tsc"
+        logging.info(command)
+        os.system(command)
+        for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
+            src_file = f"types/{filename}"
+            dest_file = f".{filename}"
+            with open(src_file, "r") as src:
+                with open(dest_file, "w") as dest:
+                    dest.write("// @ts-nocheck\n")
+                    for line in src.readlines():
+                        dest.write(line)
+            command = f"mv {dest_file} {src_file}"
+            logging.info(command)
+            os.system(command)
 
 
-def release(level, execute):
-    cwd_path = pathlib.Path.cwd()
-    git_root_path = cwd_path / ".git"
-    assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
+# doc
+class DocumentCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "doc"
 
-    command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
-    if execute:
-        logging.info(f"Execute 'cargo release' with level: {level}")
-        command = f"{command} --execute --no-verify"
-    else:
-        logging.info(f"Dry run 'cargo release' with level: {level}")
+        self.doc_parser = subparsers.add_parser(
+            self._name,
+            help="Start `cargo doc` on `http://localhost:3000/rsvim`",
+        )
+        self.doc_parser.add_argument(
+            "-w",
+            "--watch",
+            action="store_true",
+            help="Running cargo doc and watching file changes, by default is false",
+        )
 
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
+        if args.watch:
+            logging.info("Run 'cargo doc' and refresh it on file changes")
+            command = f"cargo watch -s '{command}'"
+        else:
+            logging.info("Run 'cargo doc' only once")
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
+# release/r
+class ReleaseCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "release"
+        self._alias = "r"
+
+        self.release_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run `cargo release` to publish crates",
+        )
+        self.release_parser.add_argument(
+            "level",
+            choices=["alpha", "beta", "rc", "major", "minor", "patch"],
+            help="Release [LEVEL]",
+        )
+        self.release_parser.add_argument(
+            "-e",
+            "--execute",
+            action="store_true",
+            help="Execute `cargo release` with `--no-verify`",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        cwd = pathlib.Path.cwd()
+        git_root = cwd / ".git"
+        assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
+
+        command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {args.level}"
+        if args.execute:
+            logging.info(f"Execute 'cargo release' with level: {args.level}")
+            command = f"{command} --execute --no-verify"
+        else:
+            logging.info(f"Dry run 'cargo release' with level: {args.level}")
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
+# npm
+class NpmCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "npm"
+
+        self.npm_parser = subparsers.add_parser(
+            self._name,
+            help="Run `npm` with multiple sub commands.",
+        )
+        self.npm_parser.add_argument(
+            "-v",
+            "--version",
+            choices=["major", "minor", "patch"],
+            help="Run `npm version` with [LEVEL]",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        if args.version is not None:
+            self.version(args.version)
+
+    def version(self, level) -> None:
+        command = f"npm version {level} --no-git-tag-version"
+        logging.info(command)
+        os.system(command)
 
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(
-        description="help running linter/tests when developing rsvim"
-    )
+    parser = argparse.ArgumentParser(description="Rsvim development toolkit")
     parser.add_argument(
-        "-r",
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
     )
     parser.add_argument(
-        "-s",
         "--skip-cache",
         action="store_true",
         help="Build without `sccache`",
@@ -252,146 +478,28 @@ if __name__ == "__main__":
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
-    clippy_subparser = subparsers.add_parser(
-        "clippy",
-        aliases=["c"],
-        help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
-    )
+    commands = [
+        BuildCommand(subparsers),
+        ClippyCommand(subparsers),
+        DocumentCommand(subparsers),
+        FormatCommand(subparsers),
+        NpmCommand(subparsers),
+        ReleaseCommand(subparsers),
+        TestCommand(subparsers),
+    ]
 
-    test_subparser = subparsers.add_parser(
-        "test",
-        aliases=["t"],
-        help="Run `cargo test` with by default `RSVIM_LOG=trace` on all test cases",
-    )
-    test_subparser.add_argument(
-        "-l",
-        "--list",
-        action="store_true",
-        dest="list_test",
-        help="List all test cases instead of running them",
-    )
-    test_subparser.add_argument(
-        "name",
-        nargs="*",
-        default=[],
-        help="Multiple test names that need to run, by default is empty (runs all test cases)",
-    )
-    test_subparser.add_argument(
-        "--miri",
-        action="store_true",
-        help="Run `cargo +nightly miri test` on specified [PACKAGE]",
-    )
-    test_subparser.add_argument(
-        "-j",
-        "--job",
-        nargs=1,
-        metavar="N",
-        help="Run `cargo nextest run` with N threads",
-    )
+    parsed_args = parser.parse_args()
+    logging.info(f"args: {parsed_args}")
 
-    tsc_subparser = subparsers.add_parser(
-        "tsc",
-        help="Run `tsc` with `declare global` patches for plugin development",
-    )
-
-    build_subparser = subparsers.add_parser(
-        "build",
-        aliases=["b"],
-        help="Build debug/release target with `sccache`, by default is debug",
-    )
-    build_subparser.add_argument(
-        "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
-    )
-    build_subparser.add_argument(
-        "-F", "--features", action="append", help="Build with '--features' option"
-    )
-    build_subparser.add_argument(
-        "-r", "--release", action="store_true", help="Build release target"
-    )
-    build_subparser.add_argument(
-        "-n",
-        "--nightly",
-        action="store_true",
-        help="Build nightly target",
-    )
-
-    doc_subparser = subparsers.add_parser(
-        "doc",
-        aliases=["d"],
-        help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
-    )
-    doc_subparser.add_argument(
-        "-w",
-        "--watch",
-        action="store_true",
-        help="Running cargo doc as a service and watching file changes, by default is false",
-    )
-
-    fmt_subparser = subparsers.add_parser(
-        "fmt",
-        aliases=["f"],
-        help="Run multiple formatters, checkers and code generators, by default run all tools",
-    )
-    fmt_subparser.add_argument(
-        "--rust",
-        action="store_true",
-        help="Only run `cargo +nightly fmt`, by default is false",
-    )
-    fmt_subparser.add_argument(
-        "--tsc",
-        action="store_true",
-        help="Only run `tsc`, by default is false",
-    )
-
-    release_subparser = subparsers.add_parser(
-        "release",
-        aliases=["r"],
-        help="Run `cargo release` to publish crates",
-    )
-    release_subparser.add_argument(
-        "level",
-        choices=["alpha", "beta", "rc", "major", "minor", "patch"],
-        help="Release [LEVEL]",
-    )
-    release_subparser.add_argument(
-        "-e",
-        "--execute",
-        action="store_true",
-        help="Execute `cargo release` with `--no-verify`",
-    )
-
-    parser = parser.parse_args()
-    # print(parser)
-
-    if parser.recache:
+    if parsed_args.recache:
         RECACHE_SCCACHE = True
-    if parser.skip_cache:
+    if parsed_args.skip_cache:
         SKIP_SCCACHE = True
 
-    if parser.subcommand == "clippy" or parser.subcommand == "c":
-        clippy()
-    elif parser.subcommand == "test" or parser.subcommand == "t":
-        if parser.list_test:
-            list_test()
-        else:
-            test(parser.name, parser.miri, parser.job)
-    elif parser.subcommand == "build" or parser.subcommand == "b":
-        profile = "debug"
-        if parser.release:
-            profile = "release"
-        elif parser.nightly:
-            profile = "nightly"
-        build(profile, parser.verbose, parser.features)
-    elif parser.subcommand == "doc" or parser.subcommand == "d":
-        doc(parser.watch)
-    elif parser.subcommand == "fmt" or parser.subcommand == "f":
-        if parser.tsc:
-            fmt("tsc")
-        elif parser.rust:
-            fmt("rust")
-        else:
-            fmt(None)
-    elif parser.subcommand == "release" or parser.subcommand == "r":
-        release(parser.level, parser.execute)
-    else:
-        logging.error("Missing arguments, use -h/--help for more details.")
+    for command in commands:
+        sub = parsed_args.subcommand
+        if command.name() == sub or command.alias() == sub:
+            command.run(parsed_args)
+            exit(0)
+
+    logging.error("Missing arguments, use -h/--help for more details.")
