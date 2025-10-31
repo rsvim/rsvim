@@ -4,6 +4,7 @@
 
 from abc import abstractmethod
 from typing import Protocol
+from typing import Optional
 import argparse
 import logging
 import os
@@ -244,15 +245,32 @@ class SubCommand(Protocol):
     def run(self, args) -> None:
         raise Exception("Not implemented!")
 
+    @abstractmethod
+    def name(self) -> str:
+        raise Exception("Not implemented!")
+
+    @abstractmethod
+    def alias(self) -> Optional[str]:
+        raise Exception("Not implemented!")
+
 
 # clippy/c
 class ClippyCommand(SubCommand):
     def __init__(self, subparsers) -> None:
+        self._name = "clippy"
+        self._alias = "c"
+
         self.clippy_parser = subparsers.add_parser(
-            "clippy",
-            aliases=["c"],
+            self._name,
+            aliases=[self._alias],
             help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
         )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
 
     def run(self, args) -> None:
         append_rustflags("-Dwarnings")
@@ -285,6 +303,8 @@ if __name__ == "__main__":
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
+
+    commands = {"clippy"}
 
     clippy_subparser = subparsers.add_parser(
         "clippy",
