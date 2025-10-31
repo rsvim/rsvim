@@ -497,8 +497,9 @@ if __name__ == "__main__":
         SKIP_SCCACHE = True
 
     for command in commands:
-        if command.name() == parsed_args.subcommand or (
-            command.alias() is not None and command.alias() == parsed_args.subcommand
+        sub = parsed_args.subcommand
+        if command.name() == sub or (
+            command.alias() is not None and command.alias() == sub
         ):
             command.run(parser)
             exit(0)
