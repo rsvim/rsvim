@@ -182,8 +182,8 @@ impl CommandsManager {
     debug_assert_eq!(req.payload.trim(), req.payload);
 
     let mut context = CommandContextBuilder::default();
-    context.current_buffer_id(Some(req.current_buf_id));
-    context.current_window_id(Some(req.current_win_id));
+    context.current_buffer_id(req.current_buf_id);
+    context.current_window_id(req.current_win_id);
 
     let (mut name, body) = match req.payload.find(char::is_whitespace) {
       Some(pos) => {
