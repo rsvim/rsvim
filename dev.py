@@ -240,7 +240,7 @@ def subcommand_npm_version(level):
     os.system(command)
 
 
-class SubCommand(Protocol):
+class ICommand(Protocol):
     @abstractmethod
     def run(self, args) -> None:
         raise Exception("Not implemented!")
@@ -255,7 +255,7 @@ class SubCommand(Protocol):
 
 
 # clippy/c
-class ClippyCommand(SubCommand):
+class ClippyCommand(ICommand):
     def __init__(self, subparsers) -> None:
         self._name = "clippy"
         self._alias = "c"
@@ -288,7 +288,7 @@ class ClippyCommand(SubCommand):
 
 
 # test/t
-class TestCommand(SubCommand):
+class TestCommand(ICommand):
     def __init__(self, subparsers) -> None:
         self._name = "test"
         self._alias = "t"
@@ -396,7 +396,7 @@ class TestCommand(SubCommand):
 
 
 # build/b
-class BuildCommand(SubCommand):
+class BuildCommand(ICommand):
     def __init__(self, subparsers) -> None:
         self._name = "build"
         self._alias = "b"
@@ -451,6 +451,85 @@ class BuildCommand(SubCommand):
         os.system(command)
 
 
+# fmt/f
+class FormatCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "fmt"
+        self._alias = "f"
+
+        self.fmt_parser = subparsers.add_parser(
+            "fmt",
+            help="Run multiple code formattors/checkers/generators, by default run them all",
+        )
+        self.fmt_parser.add_argument(
+            "--rust",
+            action="store_true",
+            help="Only run `cargo +nightly fmt`, by default is false",
+        )
+        self.fmt_parser.add_argument(
+            "--tsc",
+            action="store_true",
+            help="Only run `tsc`, by default is false",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        if args.tsc:
+            self.tsc()
+        elif args.rust:
+            self.rustfmt()
+        else:
+            for f in [
+                self.typos,
+                self.rustfmt,
+                self.taplo,
+                self.prettier,
+                self.tsc,
+            ]:
+                f()
+
+    def typos(self):
+        command = "typos"
+        logging.info(command)
+        os.system(command)
+
+    def rustfmt(self):
+        command = "cargo +nightly fmt"
+        logging.info(command)
+        os.system(command)
+
+    def taplo(self):
+        command = "taplo fmt"
+        logging.info(command)
+        os.system(command)
+
+    def prettier(self):
+        command = "prettier --write *.md ./runtime/*.ts"
+        logging.info(command)
+        os.system(command)
+
+    def tsc(self):
+        command = "tsc"
+        logging.info(command)
+        os.system(command)
+        for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
+            src_file = f"types/{filename}"
+            dest_file = f".{filename}"
+            with open(src_file, "r") as src:
+                with open(dest_file, "w") as dest:
+                    dest.write("// @ts-nocheck\n")
+                    for line in src.readlines():
+                        dest.write(line)
+            command = f"mv {dest_file} {src_file}"
+            logging.info(command)
+            os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
@@ -471,6 +550,7 @@ if __name__ == "__main__":
     commands = [
         ClippyCommand(subparsers),
         TestCommand(subparsers),
+        BuildCommand(subparsers),
     ]
 
     doc_subparser = subparsers.add_parser(
@@ -482,21 +562,6 @@ if __name__ == "__main__":
         "--watch",
         action="store_true",
         help="Running cargo doc as a service and watching file changes, by default is false",
-    )
-
-    fmt_subparser = subparsers.add_parser(
-        "fmt",
-        help="Run multiple formatters, checkers and code generators, by default run all tools",
-    )
-    fmt_subparser.add_argument(
-        "--rust",
-        action="store_true",
-        help="Only run `cargo +nightly fmt`, by default is false",
-    )
-    fmt_subparser.add_argument(
-        "--tsc",
-        action="store_true",
-        help="Only run `tsc`, by default is false",
     )
 
     release_subparser = subparsers.add_parser(
