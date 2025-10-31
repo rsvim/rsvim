@@ -314,7 +314,7 @@ class TestCommand(SubCommand):
         self.test_parser.add_argument(
             "--miri",
             action="store_true",
-            help="Run `cargo +nightly miri test` on specified [PACKAGE]",
+            help="Run `cargo +nightly miri test`",
         )
         self.test_parser.add_argument(
             "-j",
