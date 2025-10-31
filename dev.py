@@ -247,7 +247,7 @@ if __name__ == "__main__":
         help="Rebuild all `sccache` caches",
     )
     parser.add_argument(
-        "--no-cache",
+        "--skip-cache",
         action="store_true",
         help="Build without `sccache`",
     )
