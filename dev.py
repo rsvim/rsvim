@@ -2,6 +2,8 @@
 
 # Formatted with ruff.
 
+from abc import abstractmethod
+from typing import Protocol
 import argparse
 import logging
 import os
@@ -235,6 +237,36 @@ def subcommand_npm_version(level):
     command = f"npm version {level} --no-git-tag-version"
     logging.info(command)
     os.system(command)
+
+
+class SubCommand(Protocol):
+    @abstractmethod
+    def run(self, args) -> None:
+        raise Exception("Not implemented!")
+
+
+# clippy/c
+class ClippyCommand(SubCommand):
+    def __init__(self, subparsers) -> None:
+        self.clippy_parser = subparsers.add_parser(
+            "clippy",
+            aliases=["c"],
+            help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
+        )
+
+    def run(self, args) -> None:
+        append_rustflags("-Dwarnings")
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
+
+        set_rustflags()
+        set_sccache()
+
+        command = "cargo clippy --workspace --all-targets"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
 
 
 if __name__ == "__main__":
