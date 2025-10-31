@@ -321,7 +321,7 @@ class TestCommand(SubCommand):
             "--job",
             nargs=1,
             metavar="N",
-            help="Run with N threads",
+            help="Run with N threads, by default 1",
         )
 
     def name(self) -> str:
@@ -331,7 +331,124 @@ class TestCommand(SubCommand):
         return self._alias
 
     def run(self, args) -> None:
-        pass
+        if args.list_test:
+            self.list()
+
+        if args.job is None:
+            jobs = ""
+        else:
+            jobs = f" -j {args.job[0]}"
+
+        if args.miri:
+            self.miri(jobs)
+        else:
+            self.test(args.name, jobs)
+
+    def test(self, name, jobs) -> None:
+        if len(name) == 0:
+            name = "--all"
+            logging.info("Run 'cargo test' for all tests")
+        else:
+            name = " ".join(list(dict.fromkeys(name)))
+            logging.info(f"Run 'cargo test' for tests: {name}")
+
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
+        set_env("RUST_BACKTRACE", "full")
+
+        rsvim_log = os.getenv("RSVIM_LOG")
+        if isinstance(rsvim_log, str):
+            set_env("RSVIM_LOG", rsvim_log)
+        else:
+            set_env("RSVIM_LOG", "trace")
+        set_sccache()
+        set_rustflags()
+        command = f"cargo nextest run{jobs} --no-capture {name}"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+    def miri(self, jobs) -> None:
+        if WINDOWS:
+            append_rustflags("-Csymbol-mangling-version=v0")
+
+        set_env("RUST_BACKTRACE", "full")
+        set_env(
+            "MIRIFLAGS",
+            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
+        )
+        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+    def list(self) -> None:
+        set_sccache()
+        set_rustflags()
+
+        command = "cargo nextest list"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
+# build/b
+class BuildCommand(SubCommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "build"
+        self._alias = "b"
+
+        self.build_parser = subparsers.add_parser(
+            "build",
+            aliases=["b"],
+            help="Build with `sccache`, by default build `debug` profile",
+        )
+        self.build_parser.add_argument(
+            "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
+        )
+        self.build_parser.add_argument(
+            "-F", "--features", action="append", help="Build with '--features' option"
+        )
+        self.build_parser.add_argument(
+            "-r", "--release", action="store_true", help="Build `release` profile"
+        )
+        self.build_parser.add_argument(
+            "-n",
+            "--nightly",
+            action="store_true",
+            help="Build `nightly` target",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        set_sccache()
+        set_rustflags()
+
+        if args.release:
+            command = "cargo build --release"
+        elif args.nightly:
+            command = "cargo build --profile nightly"
+        else:
+            command = "cargo build"
+
+        if args.verbose:
+            command = f"{command} -vv"
+
+        if isinstance(args.features, list) and len(args.features) > 0:
+            features = ",".join(args.features)
+            command = f"{command} --features {features}"
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
 
 
 if __name__ == "__main__":
@@ -353,65 +470,8 @@ if __name__ == "__main__":
 
     commands = [
         ClippyCommand(subparsers),
+        TestCommand(subparsers),
     ]
-
-    clippy_subparser = subparsers.add_parser(
-        "clippy",
-        aliases=["c"],
-        help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
-    )
-
-    test_subparser = subparsers.add_parser(
-        "test",
-        aliases=["t"],
-        help="Run `cargo test` with by default `RSVIM_LOG=trace` on all test cases",
-    )
-    test_subparser.add_argument(
-        "-l",
-        "--list",
-        action="store_true",
-        dest="list_test",
-        help="List all test cases instead of running them",
-    )
-    test_subparser.add_argument(
-        "name",
-        nargs="*",
-        default=[],
-        help="Multiple test names that need to run, by default is empty (runs all test cases)",
-    )
-    test_subparser.add_argument(
-        "--miri",
-        action="store_true",
-        help="Run `cargo +nightly miri test` on specified [PACKAGE]",
-    )
-    test_subparser.add_argument(
-        "-j",
-        "--job",
-        nargs=1,
-        metavar="N",
-        help="Run `cargo nextest run` with N threads",
-    )
-
-    build_subparser = subparsers.add_parser(
-        "build",
-        aliases=["b"],
-        help="Build debug/release target with `sccache`, by default is debug",
-    )
-    build_subparser.add_argument(
-        "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
-    )
-    build_subparser.add_argument(
-        "-F", "--features", action="append", help="Build with '--features' option"
-    )
-    build_subparser.add_argument(
-        "-r", "--release", action="store_true", help="Build release target"
-    )
-    build_subparser.add_argument(
-        "-n",
-        "--nightly",
-        action="store_true",
-        help="Build nightly target",
-    )
 
     doc_subparser = subparsers.add_parser(
         "doc",
