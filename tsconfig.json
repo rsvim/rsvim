@@ -5,7 +5,7 @@
     "allowUnusedLabels": false,
     "checkJs": true,
     "declaration": true,
-    "declarationDir": "./types/",
+    "declarationDir": "./types",
     "isolatedModules": true,
     "keyofStringsOnly": false,
     "lib": ["esnext"],
@@ -20,9 +20,9 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noUncheckedIndexedAccess": false,
-    "outDir": "./rsvim_core/src/js/runtime/",
+    "outDir": "./rsvim_core/src/js/runtime",
     "removeComments": true,
-    "rootDir": "./runtime/",
+    "rootDir": "./runtime",
     "strict": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
@@ -34,5 +34,6 @@
     "useUnknownInCatchVariables": false,
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
-  }
+  },
+  "exclude": ["./target"]
 }
