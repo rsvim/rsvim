@@ -10,10 +10,9 @@ target
 .nvimrc
 .prettierignore
 CHANGELOG.md
-Cargo.*
+Cargo.lock
 DEVELOPMENT.md
 codecov.yml
-tsconfig.json
 dev.cmd
 *.py
 *.toml
