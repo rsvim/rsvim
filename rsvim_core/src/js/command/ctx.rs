@@ -43,6 +43,8 @@ impl StructToV8 for CommandContext {
 
     to_v8_prop!(self, obj, scope, bang);
     to_v8_prop!(self, obj, scope, args, Vec);
+    to_v8_prop!(self, obj, scope, current_buffer_id, optional);
+    to_v8_prop!(self, obj, scope, current_window_id, optional);
 
     obj
   }
