@@ -596,9 +596,9 @@ class ReleaseCommand(ICommand):
         return self._alias
 
     def run(self, args) -> None:
-        cwd_path = pathlib.Path.cwd()
-        git_root_path = cwd_path / ".git"
-        assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
+        cwd = pathlib.Path.cwd()
+        git_root = cwd / ".git"
+        assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
         command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {args.level}"
         if args.execute:
