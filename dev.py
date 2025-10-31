@@ -150,6 +150,7 @@ class TestCommand(ICommand):
     def run(self, args) -> None:
         if args.list_test:
             self.list()
+            return
 
         if args.job is None:
             jobs = ""
