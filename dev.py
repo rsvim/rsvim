@@ -57,189 +57,6 @@ def set_sccache():
     set_env("RUSTC_WRAPPER", SCCACHE_FULLPATH)
 
 
-def subcommand_clippy():
-    append_rustflags("-Dwarnings")
-    if WINDOWS:
-        append_rustflags("-Csymbol-mangling-version=v0")
-
-    set_rustflags()
-    set_sccache()
-
-    command = "cargo clippy --workspace --all-targets"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def subcommand_test(name, miri, jobs):
-    if len(name) == 0:
-        name = None
-        logging.info("Run 'cargo test' for all tests")
-    else:
-        name = " ".join(list(dict.fromkeys(name)))
-        logging.info(f"Run 'cargo test' for tests: {name}")
-
-    if jobs is None:
-        jobs = ""
-    else:
-        jobs = f" -j {jobs[0]}"
-
-    if WINDOWS:
-        append_rustflags("-Csymbol-mangling-version=v0")
-    set_env("RUST_BACKTRACE", "full")
-    if miri:
-        set_env(
-            "MIRIFLAGS",
-            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
-        )
-        if name is None:
-            name = ""
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core {name}"
-    else:
-        rsvim_log = os.getenv("RSVIM_LOG")
-        if isinstance(rsvim_log, str):
-            set_env("RSVIM_LOG", rsvim_log)
-        else:
-            set_env("RSVIM_LOG", "trace")
-        set_sccache()
-        set_rustflags()
-        if name is None:
-            name = "--all"
-        command = f"cargo nextest run{jobs} --no-capture {name}"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def subcommand_list_test():
-    set_sccache()
-    set_rustflags()
-
-    command = "cargo nextest list"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def subcommand_build(profile, verbose, features):
-    set_sccache()
-    set_rustflags()
-
-    if profile == "release":
-        command = "cargo build --release"
-    elif profile == "nightly":
-        command = "cargo build --profile nightly"
-    else:
-        command = "cargo build"
-
-    if verbose:
-        command = f"{command} -vv"
-
-    if isinstance(features, list) and len(features) > 0:
-        features = ",".join(features)
-        command = f"{command} --features {features}"
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def typos_formatter():
-    command = "typos"
-    logging.info(command)
-    os.system(command)
-
-
-def rust_formatter():
-    command = "cargo +nightly fmt"
-    logging.info(command)
-    os.system(command)
-
-
-def taplo_formatter():
-    command = "taplo fmt"
-    logging.info(command)
-    os.system(command)
-
-
-def prettier_formatter():
-    command = "prettier --write *.md ./runtime/*.ts"
-    logging.info(command)
-    os.system(command)
-
-
-def tsc_formatter():
-    command = "tsc"
-    logging.info(command)
-    os.system(command)
-    for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
-        src_file = f"types/{filename}"
-        dest_file = f".{filename}"
-        with open(src_file, "r") as src:
-            with open(dest_file, "w") as dest:
-                dest.write("// @ts-nocheck\n")
-                for line in src.readlines():
-                    dest.write(line)
-        command = f"mv {dest_file} {src_file}"
-        logging.info(command)
-        os.system(command)
-
-
-def subcommand_fmt(only):
-    formatters = {
-        "typos": typos_formatter,
-        "rust": rust_formatter,
-        "prettier": prettier_formatter,
-        "taplo": taplo_formatter,
-        "tsc": tsc_formatter,
-    }
-
-    if isinstance(only, str) and only in formatters:
-        formatters[only]()
-    else:
-        for formatter in formatters.values():
-            formatter()
-
-
-def subcommand_doc(watch):
-    command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
-    if watch:
-        logging.info("Run 'cargo doc' and refresh it on file changes")
-        command = f"cargo watch -s '{command}'"
-    else:
-        logging.info("Run 'cargo doc' only once")
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def subcommand_release(level, execute):
-    cwd_path = pathlib.Path.cwd()
-    git_root_path = cwd_path / ".git"
-    assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
-
-    command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
-    if execute:
-        logging.info(f"Execute 'cargo release' with level: {level}")
-        command = f"{command} --execute --no-verify"
-    else:
-        logging.info(f"Dry run 'cargo release' with level: {level}")
-
-    command = command.strip()
-    logging.info(command)
-    os.system(command)
-
-
-def subcommand_npm_version(level):
-    command = f"npm version {level} --no-git-tag-version"
-    logging.info(command)
-    os.system(command)
-
-
 class ICommand(Protocol):
     @abstractmethod
     def run(self, args) -> None:
@@ -612,93 +429,78 @@ class ReleaseCommand(ICommand):
         os.system(command)
 
 
+# npm
+class NpmCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "npm"
+
+        self.npm_parser = subparsers.add_parser(
+            self._name,
+            help="Run `npm` with multiple sub commands.",
+        )
+        self.npm_parser.add_argument(
+            "-v",
+            "--version",
+            choices=["major", "minor", "patch"],
+            help="Run `npm version` with [LEVEL]",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        if args.version is not None:
+            self.version(args.version)
+
+    def version(self, level) -> None:
+        command = f"npm version {level} --no-git-tag-version"
+        logging.info(command)
+        os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Rsvim development toolkit")
-    parser.add_argument(
+    args = argparse.ArgumentParser(description="Rsvim development toolkit")
+    args.add_argument(
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
     )
-    parser.add_argument(
+    args.add_argument(
         "--skip-cache",
         action="store_true",
         help="Build without `sccache`",
     )
 
-    subparsers = parser.add_subparsers(dest="subcommand")
+    subparsers = args.add_subparsers(dest="subcommand")
 
     commands = [
         BuildCommand(subparsers),
         ClippyCommand(subparsers),
         DocumentCommand(subparsers),
         FormatCommand(subparsers),
+        NpmCommand(subparsers),
+        ReleaseCommand(subparsers),
         TestCommand(subparsers),
     ]
 
-    release_subparser = subparsers.add_parser(
-        "release",
-        aliases=["r"],
-        help="Run `cargo release` to publish crates",
-    )
-    release_subparser.add_argument(
-        "level",
-        choices=["alpha", "beta", "rc", "major", "minor", "patch"],
-        help="Release [LEVEL]",
-    )
-    release_subparser.add_argument(
-        "-e",
-        "--execute",
-        action="store_true",
-        help="Execute `cargo release` with `--no-verify`",
-    )
+    args = args.parse_args()
+    print(args)
 
-    npm_subparser = subparsers.add_parser(
-        "npm",
-        help="Run `npm` commands for bump version.",
-    )
-    npm_subparser.add_argument(
-        "-v",
-        "--version",
-        choices=["major", "minor", "patch"],
-        help="Npm --version [LEVEL]",
-    )
-
-    parser = parser.parse_args()
-    # print(parser)
-
-    if parser.recache:
+    if args.recache:
         RECACHE_SCCACHE = True
-    if parser.skip_cache:
+    if args.skip_cache:
         SKIP_SCCACHE = True
 
-    if parser.subcommand == "clippy" or parser.subcommand == "c":
-        subcommand_clippy()
-    elif parser.subcommand == "test" or parser.subcommand == "t":
-        if parser.list_test:
-            subcommand_list_test()
-        else:
-            subcommand_test(parser.name, parser.miri, parser.job)
-    elif parser.subcommand == "build" or parser.subcommand == "b":
-        profile = "debug"
-        if parser.release:
-            profile = "release"
-        elif parser.nightly:
-            profile = "nightly"
-        subcommand_build(profile, parser.verbose, parser.features)
-    elif parser.subcommand == "doc":
-        subcommand_doc(parser.watch)
-    elif parser.subcommand == "fmt":
-        if parser.tsc:
-            subcommand_fmt("tsc")
-        elif parser.rust:
-            subcommand_fmt("rust")
-        else:
-            subcommand_fmt(None)
-    elif parser.subcommand == "release" or parser.subcommand == "r":
-        subcommand_release(parser.level, parser.execute)
-    elif parser.subcommand == "npm":
-        subcommand_npm_version(parser.version)
-    else:
-        logging.error("Missing arguments, use -h/--help for more details.")
+    for command in commands:
+        if command.name() == args.subcommand or (
+            command.alias() is not None and command.alias() == args.subcommand
+        ):
+            command.run(args)
+            exit(0)
+
+    logging.error("Missing arguments, use -h/--help for more details.")
