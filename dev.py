@@ -287,6 +287,53 @@ class ClippyCommand(SubCommand):
         os.system(command)
 
 
+# test/t
+class TestCommand(SubCommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "test"
+        self._alias = "t"
+
+        self.test_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run `cargo test`, by default on all test cases",
+        )
+        self.test_parser.add_argument(
+            "-l",
+            "--list",
+            action="store_true",
+            dest="list_test",
+            help="List all test cases instead of running them",
+        )
+        self.test_parser.add_argument(
+            "name",
+            nargs="*",
+            default=[],
+            help="Multiple test names that need to run, by default is empty (runs all test cases)",
+        )
+        self.test_parser.add_argument(
+            "--miri",
+            action="store_true",
+            help="Run `cargo +nightly miri test` on specified [PACKAGE]",
+        )
+        self.test_parser.add_argument(
+            "-j",
+            "--job",
+            nargs=1,
+            metavar="N",
+            help="Run `cargo nextest run` with N threads",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        pass
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
@@ -304,7 +351,9 @@ if __name__ == "__main__":
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
-    commands = {"clippy"}
+    commands = [
+        ClippyCommand(subparsers),
+    ]
 
     clippy_subparser = subparsers.add_parser(
         "clippy",
