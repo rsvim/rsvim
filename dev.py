@@ -566,6 +566,48 @@ class DocumentCommand(ICommand):
         os.system(command)
 
 
+# release/r
+class ReleaseCommand(ICommand):
+    def __init__(self, subparsers) -> None:
+        self._name = "release"
+        self._alias = "r"
+
+        self.release_parser = subparsers.add_parser(
+            self._name,
+            aliases=[self._alias],
+            help="Run `cargo release` to publish crates",
+        )
+        self.release_parser.add_argument(
+            "level",
+            choices=["alpha", "beta", "rc", "major", "minor", "patch"],
+            help="Release [LEVEL]",
+        )
+        self.release_parser.add_argument(
+            "-e",
+            "--execute",
+            action="store_true",
+            help="Execute `cargo release` with `--no-verify`",
+        )
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return self._alias
+
+    def run(self, args) -> None:
+        command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
+        if args.watch:
+            logging.info("Run 'cargo doc' and refresh it on file changes")
+            command = f"cargo watch -s '{command}'"
+        else:
+            logging.info("Run 'cargo doc' only once")
+
+        command = command.strip()
+        logging.info(command)
+        os.system(command)
+
+
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
@@ -584,10 +626,11 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest="subcommand")
 
     commands = [
-        ClippyCommand(subparsers),
-        TestCommand(subparsers),
         BuildCommand(subparsers),
+        ClippyCommand(subparsers),
+        DocumentCommand(subparsers),
         FormatCommand(subparsers),
+        TestCommand(subparsers),
     ]
 
     release_subparser = subparsers.add_parser(
