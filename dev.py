@@ -54,7 +54,7 @@ def set_sccache():
     set_env("RUSTC_WRAPPER", SCCACHE_FULLPATH)
 
 
-def clippy():
+def subcommand_clippy():
     append_rustflags("-Dwarnings")
     if WINDOWS:
         append_rustflags("-Csymbol-mangling-version=v0")
@@ -69,7 +69,7 @@ def clippy():
     os.system(command)
 
 
-def test(name, miri, jobs):
+def subcommand_test(name, miri, jobs):
     if len(name) == 0:
         name = None
         logging.info("Run 'cargo test' for all tests")
@@ -110,7 +110,7 @@ def test(name, miri, jobs):
     os.system(command)
 
 
-def list_test():
+def subcommand_list_test():
     set_sccache()
     set_rustflags()
 
@@ -121,7 +121,7 @@ def list_test():
     os.system(command)
 
 
-def build(profile, verbose, features):
+def subcommand_build(profile, verbose, features):
     set_sccache()
     set_rustflags()
 
@@ -185,7 +185,7 @@ def tsc_formatter():
         os.system(command)
 
 
-def fmt(only):
+def subcommand_fmt(only):
     formatters = {
         "typos": typos_formatter,
         "rust": rust_formatter,
@@ -201,7 +201,7 @@ def fmt(only):
             formatter()
 
 
-def doc(watch):
+def subcommand_doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
     if watch:
         logging.info("Run 'cargo doc' and refresh it on file changes")
@@ -214,7 +214,7 @@ def doc(watch):
     os.system(command)
 
 
-def release(level, execute):
+def subcommand_release(level, execute):
     cwd_path = pathlib.Path.cwd()
     git_root_path = cwd_path / ".git"
     assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
@@ -369,29 +369,29 @@ if __name__ == "__main__":
         SKIP_SCCACHE = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
-        clippy()
+        subcommand_clippy()
     elif parser.subcommand == "test" or parser.subcommand == "t":
         if parser.list_test:
-            list_test()
+            subcommand_list_test()
         else:
-            test(parser.name, parser.miri, parser.job)
+            subcommand_test(parser.name, parser.miri, parser.job)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         profile = "debug"
         if parser.release:
             profile = "release"
         elif parser.nightly:
             profile = "nightly"
-        build(profile, parser.verbose, parser.features)
+        subcommand_build(profile, parser.verbose, parser.features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
-        doc(parser.watch)
+        subcommand_doc(parser.watch)
     elif parser.subcommand == "fmt" or parser.subcommand == "f":
         if parser.tsc:
-            fmt("tsc")
+            subcommand_fmt("tsc")
         elif parser.rust:
-            fmt("rust")
+            subcommand_fmt("rust")
         else:
-            fmt(None)
+            subcommand_fmt(None)
     elif parser.subcommand == "release" or parser.subcommand == "r":
-        release(parser.level, parser.execute)
+        subcommand_release(parser.level, parser.execute)
     else:
         logging.error("Missing arguments, use -h/--help for more details.")
