@@ -349,6 +349,17 @@ if __name__ == "__main__":
         help="Execute `cargo release` with `--no-verify`",
     )
 
+    npm_subparser = subparsers.add_parser(
+        "npm",
+        help="Run `npm` commands for bump version.",
+    )
+    npm_subparser.add_argument(
+        "-v",
+        "--version",
+        choices=["major", "minor", "patch"],
+        help="Npm --version [LEVEL]",
+    )
+
     parser = parser.parse_args()
     # print(parser)
 
@@ -371,9 +382,9 @@ if __name__ == "__main__":
         elif parser.nightly:
             profile = "nightly"
         subcommand_build(profile, parser.verbose, parser.features)
-    elif parser.subcommand == "doc" or parser.subcommand == "d":
+    elif parser.subcommand == "doc":
         subcommand_doc(parser.watch)
-    elif parser.subcommand == "fmt" or parser.subcommand == "f":
+    elif parser.subcommand == "fmt":
         if parser.tsc:
             subcommand_fmt("tsc")
         elif parser.rust:
