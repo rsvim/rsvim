@@ -234,9 +234,7 @@ def subcommand_release(level, execute):
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(
-        description="help running linter/tests when developing rsvim"
-    )
+    parser = argparse.ArgumentParser(description="Rsvim development toolkit")
     parser.add_argument(
         "-r",
         "--recache",
