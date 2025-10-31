@@ -308,7 +308,6 @@ if __name__ == "__main__":
 
     doc_subparser = subparsers.add_parser(
         "doc",
-        aliases=["d"],
         help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
     )
     doc_subparser.add_argument(
