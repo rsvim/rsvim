@@ -41,6 +41,9 @@ impl StructToV8 for CommandContext {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
+    debug_assert!(self.current_buffer_id.is_some());
+    debug_assert!(self.current_window_id.is_some());
+
     to_v8_prop!(self, obj, scope, bang);
     to_v8_prop!(self, obj, scope, args, Vec);
     to_v8_prop!(self, obj, scope, current_buffer_id, optional);
