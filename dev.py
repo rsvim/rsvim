@@ -319,7 +319,6 @@ if __name__ == "__main__":
 
     fmt_subparser = subparsers.add_parser(
         "fmt",
-        aliases=["f"],
         help="Run multiple formatters, checkers and code generators, by default run all tools",
     )
     fmt_subparser.add_argument(
