@@ -18,6 +18,7 @@ use crate::js::command::ctx::CommandContextBuilder;
 use crate::js::converter::*;
 use crate::js::execute_module;
 use crate::js::next_task_id;
+use crate::msg::ExCommandReq;
 use crate::prelude::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -177,19 +178,21 @@ impl CommandsManager {
 }
 
 impl CommandsManager {
-  pub fn parse(&self, payload: &str) -> Option<CommandFuture> {
-    debug_assert_eq!(payload.trim(), payload);
+  pub fn parse(&self, req: &ExCommandReq) -> Option<CommandFuture> {
+    debug_assert_eq!(req.payload.trim(), req.payload);
 
     let mut context = CommandContextBuilder::default();
+    context.current_buffer_id(req.current_buf_id);
+    context.current_window_id(req.current_win_id);
 
-    let (mut name, body) = match payload.find(char::is_whitespace) {
+    let (mut name, body) = match req.payload.find(char::is_whitespace) {
       Some(pos) => {
-        let name = payload.get(0..pos).unwrap().trim().to_compact_string();
-        let body = payload.get(pos..).unwrap().to_compact_string();
+        let name = req.payload.get(0..pos).unwrap().trim().to_compact_string();
+        let body = req.payload.get(pos..).unwrap().to_compact_string();
         (name, body)
       }
       None => {
-        let name = payload.trim().to_compact_string();
+        let name = req.payload.trim().to_compact_string();
         let body = "".to_compact_string();
         (name, body)
       }

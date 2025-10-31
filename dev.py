@@ -26,7 +26,7 @@ RUSTFLAGS = []
 
 
 def set_env(name, value):
-    logging.info(f"Set env {name}={value}")
+    logging.info(f"Set env: {name}={value}")
     os.environ[name] = value
 
 
@@ -150,6 +150,7 @@ class TestCommand(ICommand):
     def run(self, args) -> None:
         if args.list_test:
             self.list()
+            return
 
         if args.job is None:
             jobs = ""
@@ -489,7 +490,7 @@ if __name__ == "__main__":
     ]
 
     parsed_args = parser.parse_args()
-    logging.info(f"args: {parsed_args}")
+    logging.info(f"Arguments: {parsed_args}")
 
     if parsed_args.recache:
         RECACHE_SCCACHE = True

@@ -270,9 +270,9 @@ export class RsvimCmd {
    *
    * @example
    * ```javascript
-   * async function write(ctx: any): void {
+   * async function write(ctx: RsvimCmd.CommandContext): void {
    *   try {
-   *     const bytes = Rsvim.buf.writeSync(bufId);
+   *     const bytes = Rsvim.buf.writeSync(ctx.currentBufferId);
    *
    *     // Call other async APIs
    *     const file = await Rsvim.fs.open("message.txt");
@@ -470,9 +470,12 @@ export namespace RsvimCmd {
   /**
    * Command callback function, this is the backend logic that implements a user ex command.
    *
+   * It accepts a `ctx` parameter that indicates runtime information when the command is executed.
+   *
    * @see {@link RsvimCmd.create}
+   * @see {@link CommandContext}
 ,  */
-  export type CommandCallback = (ctx: any) => Promise<void>;
+  export type CommandCallback = (ctx: CommandContext) => Promise<void>;
 
   /**
    * Command definition.
@@ -482,6 +485,33 @@ export namespace RsvimCmd {
     callback: CommandCallback;
     attributes: CommandAttributes;
     options: CommandOptions;
+  };
+
+  /**
+   * Command runtime context.
+   *
+   * When a command is been execute, runtime information will be passed to the command callback function.
+   */
+  export type CommandContext = {
+    /**
+     * Whether the command is executed with a bang "!".
+     */
+    bang: boolean;
+
+    /**
+     * Arguments that are passed to the command when executed.
+     */
+    args: string[];
+
+    /**
+     * Current buffer ID when the command is executed.
+     */
+    currentBufferId: number;
+
+    /**
+     * Current window ID when the command is executed.
+     */
+    currentWindowId: number;
   };
 }
 

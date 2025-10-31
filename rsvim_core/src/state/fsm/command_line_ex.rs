@@ -104,10 +104,20 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
+    let tree = data_access.tree.clone();
+    let tree = lock!(tree);
+    let current_window = tree.current_window().unwrap();
+    let current_win_id = current_window.id();
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
+    let current_buf_id = buffer.id();
+
     msg::send_to_jsrt(
       data_access.jsrt_forwarder_tx.clone(),
       JsMessage::ExCommandReq(ExCommandReq {
         payload: cmdline_input_content,
+        current_buf_id,
+        current_win_id,
       }),
     );
 

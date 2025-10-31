@@ -1,16 +1,22 @@
 //! Ex command runtime context.
 
+use crate::buf::BufferId;
 use crate::js::converter::*;
 use crate::to_v8_prop;
+use crate::ui::tree::TreeNodeId;
 use compact_str::CompactString;
 
 /// Command attribute name.
 pub const BANG: &str = "bang";
 pub const ARGS: &str = "args";
+pub const CURRENT_BUFFER_ID: &str = "currentBufferId";
+pub const CURRENT_WINDOW_ID: &str = "currentWindowId";
 
 /// Default command attributes.
 pub const BANG_DEFAULT: bool = false;
 pub const ARGS_DEFAULT: Vec<CompactString> = vec![];
+pub const CURRENT_BUFFER_ID_DEFAULT: BufferId = -1;
+pub const CURRENT_WINDOW_ID_DEFAULT: TreeNodeId = -1;
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_builder::Builder)]
 pub struct CommandContext {
@@ -20,6 +26,12 @@ pub struct CommandContext {
 
   #[builder(default = ARGS_DEFAULT)]
   pub args: Vec<CompactString>,
+
+  #[builder(default = CURRENT_BUFFER_ID_DEFAULT)]
+  pub current_buffer_id: BufferId,
+
+  #[builder(default = CURRENT_WINDOW_ID_DEFAULT)]
+  pub current_window_id: TreeNodeId,
 }
 
 impl StructToV8 for CommandContext {
@@ -29,8 +41,13 @@ impl StructToV8 for CommandContext {
   ) -> v8::Local<'s, v8::Object> {
     let obj = v8::Object::new(scope);
 
+    debug_assert!(self.current_buffer_id > 0);
+    debug_assert!(self.current_window_id > 0);
+
     to_v8_prop!(self, obj, scope, bang);
     to_v8_prop!(self, obj, scope, args, Vec);
+    to_v8_prop!(self, obj, scope, current_buffer_id);
+    to_v8_prop!(self, obj, scope, current_window_id);
 
     obj
   }

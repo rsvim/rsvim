@@ -675,7 +675,7 @@ pub mod boost {
             let mut state = state_rc.borrow_mut();
             let commands = state.commands.clone();
             let commands = lock!(commands);
-            if let Some(command_cb) = commands.parse(&req.payload) {
+            if let Some(command_cb) = commands.parse(&req) {
               state.pending_futures.push(Box::new(command_cb));
             } else {
               // Print error message
