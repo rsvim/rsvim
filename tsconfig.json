@@ -21,7 +21,7 @@
     "noUnusedParameters": false,
     "noUncheckedIndexedAccess": false,
     "outDir": "./rsvim_core/src/js/runtime/",
-    "removeComments": true,
+    "removeComments": false,
     "rootDir": "./runtime/",
     "strict": true,
     "strictBindCallApply": true,
