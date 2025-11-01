@@ -129,7 +129,7 @@ export class RsvimCmd {
     }
 }
 export class RsvimFs {
-    open(path, options) {
+    async open(path, options) {
         checkIsString(path, `"Rsvim.fs.open" path`);
         options = options ?? { read: true };
         checkIsObject(options, `"Rsvim.fs.open" options`);
@@ -147,9 +147,8 @@ export class RsvimFs {
         checkIsBoolean(options.read, `"Rsvim.fs.open" read option`);
         checkIsBoolean(options.truncate, `"Rsvim.fs.open" truncate option`);
         checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
-        return __InternalRsvimGlobalObject
-            .fs_open(path, options)
-            .then((handle) => new RsvimFs.File(handle));
+        const handle = await __InternalRsvimGlobalObject.fs_open(path, options);
+        return new RsvimFs.File(handle);
     }
     openSync(path, options) {
         checkIsString(path, `"Rsvim.fs.openSync" path`);
@@ -191,17 +190,19 @@ export class RsvimFs {
         get isDisposed() {
             return isNull(this.#handle);
         }
-        read(buf) {
+        async read(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
-            return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+            const n = await __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+            return n;
         }
         readSync(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.readSync" buf`);
             return __InternalRsvimGlobalObject.fs_read_sync(this.#handle, buf.buffer);
         }
-        write(buf) {
+        async write(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
-            return __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
+            const n = await __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
+            return n;
         }
         writeSync(buf) {
             checkIsUint8Array(buf, `"RsvimFs.File.writeSync" buf`);
