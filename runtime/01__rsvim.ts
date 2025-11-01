@@ -543,7 +543,10 @@ export class RsvimFs {
    * const file = await Rsvim.fs.open("README.md");
    * ```
    */
-  open(path: string, options?: RsvimFs.OpenOptions): Promise<RsvimFs.File> {
+  async open(
+    path: string,
+    options?: RsvimFs.OpenOptions,
+  ): Promise<RsvimFs.File> {
     checkIsString(path, `"Rsvim.fs.open" path`);
 
     options = options ?? { read: true };
@@ -564,9 +567,8 @@ export class RsvimFs {
     checkIsBoolean(options.write, `"Rsvim.fs.open" write option`);
 
     // @ts-ignore Ignore warning
-    return __InternalRsvimGlobalObject
-      .fs_open(path, options)
-      .then((handle: any) => new RsvimFs.File(handle));
+    const handle = await __InternalRsvimGlobalObject.fs_open(path, options);
+    return new RsvimFs.File(handle);
   }
 
   /**
@@ -755,11 +757,15 @@ export namespace RsvimFs {
      * const text = new TextDecoder().decode(buf); // decode into UTF-8 string "hello world"
      * ```
      */
-    read(buf: Uint8Array): Promise<number> {
+    async read(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.read" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_read(this.#handle, buf.buffer);
+      const n = await __InternalRsvimGlobalObject.fs_read(
+        this.#handle,
+        buf.buffer,
+      );
+      return n;
     }
 
     /**
@@ -804,11 +810,15 @@ export namespace RsvimFs {
      * const n = await file.write(buf); // write 11 bytes
      * ```
      */
-    write(buf: Uint8Array): Promise<number> {
+    async write(buf: Uint8Array): Promise<number> {
       checkIsUint8Array(buf, `"RsvimFs.File.write" buf`);
 
       // @ts-ignore Ignore warning
-      return __InternalRsvimGlobalObject.fs_write(this.#handle, buf.buffer);
+      const n = await __InternalRsvimGlobalObject.fs_write(
+        this.#handle,
+        buf.buffer,
+      );
+      return n;
     }
 
     /**
