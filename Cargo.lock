@@ -2153,9 +2153,9 @@ checksum = "1a80800c0488c3a21695ea981a54918fbb37abf04f4d0720c453632255e2ff0e"
 
 [[package]]
 name = "oxc_resolver"
-version = "11.11.1"
+version = "11.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7e079da76d5593ab6d7585cc18404e38a6dbbc77c6b0460a74ef954e55127f9"
+checksum = "f811e55cc95a77ee2b44868b98c06affe406f67398401d3b7bf6fcbd0fbdb446"
 dependencies = [
  "cfg-if",
  "indexmap",
