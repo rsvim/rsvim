@@ -25,9 +25,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: latest
       - name: Tsc
         run: |
           npm install -g typescript
@@ -39,9 +36,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install Rust
         run: |
-          rustup update --no-self-update 1.89
-          rustup default 1.89
-          rustup component add --toolchain 1.89 rust-src clippy rustfmt
+          rustup component add rust-src clippy rustfmt
           rustup toolchain install nightly
           rustup component add --toolchain nightly rustfmt
       - name: Rustfmt
@@ -114,9 +109,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
-          rustup update --no-self-update stable
-          rustup default stable
-          rustup component add --toolchain stable rust-src clippy llvm-tools
+          rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v5
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
