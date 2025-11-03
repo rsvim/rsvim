@@ -72,12 +72,14 @@ jobs:
       - name: Create Artifact
         if: ${{ matrix.os != 'windows-2022' }}
         run: |
-          tar -czvf rsvim-${{ matrix.target }}.tar.gz target/release/rsvim
+          mv target/release/rsvim .
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim
       - name: Create Artifact (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
-          tar -czvf rsvim-${{ matrix.target }}.tar.gz target/release/rsvim.exe
-          7z a rsvim-${{ matrix.target }}.zip target/release/rsvim.exe
+          mv target/release/rsvim.exe .
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim.exe
+          7z a rsvim-${{ matrix.target }}.zip rsvim.exe
       - name: Create New Release
         uses: ncipollo/release-action@v1
         if: ${{ matrix.os != 'windows-2022' }}
