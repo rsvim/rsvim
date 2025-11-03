@@ -65,9 +65,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Install Rust
         run: |
-          rustup update --no-self-update stable
-          rustup default stable
-          rustup component add --toolchain stable rust-src clippy
+          rustup component add rust-src clippy
       - name: Cargo Build
         run: |
           cargo build --release

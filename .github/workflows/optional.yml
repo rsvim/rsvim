@@ -47,9 +47,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
-          rustup update --no-self-update stable
-          rustup default stable
-          rustup component add --toolchain stable rust-src clippy
+          rustup component add rust-src clippy
       - name: Check out 'current' branch
         uses: actions/checkout@v5
         with:
