@@ -77,7 +77,7 @@ jobs:
       - name: Create Artifact (Windows)
         if: ${{ matrix.os == 'windows-2022' }}
         run: |
-          mv target/release/rsvim.exe
+          mv target/release/rsvim.exe .
           tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim.exe
           7z a rsvim-${{ matrix.target }}.zip rsvim.exe
       - name: Create New Release
