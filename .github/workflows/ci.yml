@@ -33,7 +33,6 @@ jobs:
           echo "./dev.py fmt --tsc"
           python3 ./dev.py fmt --tsc
           git diff --exit-code HEAD
-      # - uses: Swatinem/rust-cache@v2
       - name: Install Rust
         run: |
           rustup component add rust-src clippy rustfmt
