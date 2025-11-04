@@ -12,6 +12,7 @@ mod text_tests;
 mod unicode_tests;
 
 use crate::prelude::*;
+use compact_str::ToCompactString;
 use opt::*;
 use path_absolutize::Absolutize;
 use ropey::Rope;
@@ -200,7 +201,7 @@ impl BuffersManager {
       Err(e) => {
         trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
         bail!(TheErr::NormalizePathFailed(
-          filename.to_string_lossy().to_string(),
+          filename.to_string_lossy().to_compact_string(),
           e
         ));
       }
@@ -217,7 +218,7 @@ impl BuffersManager {
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
         bail!(TheErr::FileNotFound(
-          filename.to_string_lossy().to_string(),
+          filename.to_string_lossy().to_compact_string(),
           e
         ));
       }
@@ -346,14 +347,14 @@ impl BuffersManager {
         }
         Err(e) => {
           bail!(TheErr::OpenFileFailed(
-            filename.to_string_lossy().to_string(),
+            filename.to_string_lossy().to_compact_string(),
             e
           ));
         }
       },
       Err(e) => {
         bail!(TheErr::OpenFileFailed(
-          filename.to_string_lossy().to_string(),
+          filename.to_string_lossy().to_compact_string(),
           e
         ));
       }
@@ -367,7 +368,7 @@ impl BuffersManager {
       .as_ref()
       .unwrap()
       .to_string_lossy()
-      .to_string();
+      .to_compact_string();
     let abs_filename = buf.absolute_filename().as_ref().unwrap();
 
     let payload = buf.text().rope().to_string();
