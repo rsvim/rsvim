@@ -31,10 +31,10 @@ pub enum TheErr {
   BufferNotExist(BufferId),
 
   #[error("Failed to save buffer `{0}`({1}): {2}.")]
-  SaveBufferFailed(BufferId, String, IoErr),
+  SaveBufferFailed(BufferId, CompactString, IoErr),
 
   #[error("Failed to normalize path `{0}`: {1}.")]
-  NormalizePathFailed(String, IoErr),
+  NormalizePathFailed(CompactString, IoErr),
 
   #[error("Command `{0}` not found.")]
   CommandNotFound(CompactString),
@@ -58,10 +58,10 @@ pub enum TheErr {
   ArgumentsNotEnough,
 
   #[error("File `{0}` not found: {1}.")]
-  FileNotFound(String, IoErr),
+  FileNotFound(CompactString, IoErr),
 
   #[error("Failed to open file `{0}`: {1}.")]
-  OpenFileFailed(String, IoErr),
+  OpenFileFailed(CompactString, IoErr),
 
   #[error("Failed to read file `{0}`: {1}.")]
   ReadFileFailed(usize, IoErr),

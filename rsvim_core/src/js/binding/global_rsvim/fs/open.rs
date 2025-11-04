@@ -1,5 +1,7 @@
 //! Open file APIs.
 
+use compact_str::ToCompactString;
+
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
@@ -145,7 +147,7 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
   {
     Ok(file) => Ok(handle::std_to_fd(file)),
     Err(e) => bail!(TheErr::OpenFileFailed(
-      path.to_string_lossy().to_string(),
+      path.to_string_lossy().to_compact_string(),
       e
     )),
   }
@@ -170,7 +172,7 @@ pub async fn async_fs_open(
       Ok(fd)
     }
     Err(e) => bail!(TheErr::OpenFileFailed(
-      path.to_string_lossy().to_string(),
+      path.to_string_lossy().to_compact_string(),
       e
     )),
   }
