@@ -1,7 +1,5 @@
 //! Open file APIs.
 
-use compact_str::ToCompactString;
-
 use crate::flags_builder_impl;
 use crate::flags_impl;
 use crate::from_v8_prop;
@@ -13,6 +11,7 @@ use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
+use compact_str::ToCompactString;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
