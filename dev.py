@@ -499,7 +499,7 @@ if __name__ == "__main__":
 
     for command in commands:
         sub = parsed_args.subcommand
-        if command.name() == sub or command.alias() == sub:
+        if sub is not None and (command.name() == sub or command.alias() == sub):
             command.run(parsed_args)
             exit(0)
 
