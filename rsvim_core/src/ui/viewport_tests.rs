@@ -5,6 +5,7 @@ use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
+use crate::geo_size_into_rect;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
@@ -50,13 +51,7 @@ pub fn make_window(
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
-  let window_shape = IRect::new(
-    (0, 0),
-    (
-      terminal_size.width() as isize,
-      terminal_size.height() as isize,
-    ),
-  );
+  let window_shape = geo_size_into_rect!(terminal_size, isize);
   Window::new(
     tree.global_local_options(),
     window_shape,
