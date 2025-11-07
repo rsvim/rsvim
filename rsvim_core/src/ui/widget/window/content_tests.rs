@@ -1233,7 +1233,10 @@ mod tests_wrap_nolinebreak_eol {
   fn new1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
