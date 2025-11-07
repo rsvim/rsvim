@@ -83,6 +83,7 @@ mimalloc-safe = "0.1.55"
 tikv-jemallocator = "0.6"
 oxc_resolver = "11.13.0"
 encoding_rs = "0.8.35"
+taffy = "0.9.1"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
