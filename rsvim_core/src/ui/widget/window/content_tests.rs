@@ -622,7 +622,10 @@ mod tests_nowrap_startcol {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(35, 6);
+    let terminal_size = U16Size {
+      width: 35,
+      height: 6,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 

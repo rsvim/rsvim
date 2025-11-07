@@ -82,25 +82,25 @@ where
   T: Copy,
 {
   fn min(&self) -> Point<T> {
+    self.top_left()
+  }
+
+  fn top_left(&self) -> Point<T> {
     Point::<T> {
       x: self.left,
       y: self.top,
     }
   }
 
-  fn top_left(&self) -> Point<T> {
-    self.min()
+  fn max(&self) -> Point<T> {
+    self.bottom_right()
   }
 
-  fn max(&self) -> Point<T> {
+  fn bottom_right(&self) -> Point<T> {
     Point::<T> {
       x: self.right,
       y: self.bottom,
     }
-  }
-
-  fn bottom_right(&self) -> Point<T> {
-    self.max()
   }
 }
 
