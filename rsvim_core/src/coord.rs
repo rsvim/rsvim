@@ -72,9 +72,9 @@ pub type U16Rect = Rect<u16>;
 
 pub trait GeoRectExt<T> {
   fn min(&self) -> Point<T>;
-  fn topleft(&self) -> Point<T>;
+  fn top_left(&self) -> Point<T>;
   fn max(&self) -> Point<T>;
-  fn bottomright(&self) -> Point<T>;
+  fn bottom_right(&self) -> Point<T>;
 }
 
 impl<T> GeoRectExt<T> for Rect<T>
@@ -88,7 +88,7 @@ where
     }
   }
 
-  fn topleft(&self) -> Point<T> {
+  fn top_left(&self) -> Point<T> {
     self.min()
   }
 
@@ -99,7 +99,7 @@ where
     }
   }
 
-  fn bottomright(&self) -> Point<T> {
+  fn bottom_right(&self) -> Point<T> {
     self.max()
   }
 }
