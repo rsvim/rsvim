@@ -994,7 +994,10 @@ mod tests_wrap_nolinebreak {
   fn new5() {
     test_log_init();
 
-    let terminal_size = U16Size::new(19, 27);
+    let terminal_size = U16Size {
+      width: 19,
+      height: 27,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
@@ -1050,7 +1053,10 @@ mod tests_wrap_nolinebreak {
   fn update1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(19, 15);
+    let terminal_size = U16Size {
+      width: 19,
+      height: 15,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
