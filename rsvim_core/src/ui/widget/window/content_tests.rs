@@ -1437,7 +1437,10 @@ mod tests_wrap_nolinebreak_startcol {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size::new(19, 30);
+    let terminal_size = U16Size {
+      width: 19,
+      height: 30,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
