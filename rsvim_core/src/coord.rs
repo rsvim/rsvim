@@ -75,6 +75,8 @@ pub trait GeoRectExt<T> {
   fn top_left(&self) -> Point<T>;
   fn max(&self) -> Point<T>;
   fn bottom_right(&self) -> Point<T>;
+  fn height(&self) -> T;
+  fn width(&self) -> T;
 }
 
 impl<T> GeoRectExt<T> for Rect<T>
@@ -101,6 +103,14 @@ where
       x: self.right,
       y: self.bottom,
     }
+  }
+
+  fn height(&self) -> T {
+    self.bottom - self.top
+  }
+
+  fn width(&self) -> T {
+    self.right - self.left
   }
 }
 

@@ -118,25 +118,25 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let bottom_right_pos: IPos = shape.max();
 
   // X-axis
-  let top_left_x = if top_left_pos.x() < 0 {
+  let top_left_x = if top_left_pos.x < 0 {
     // trace!("x-1, top_left_pos:{:?}", top_left_pos);
     0
-  } else if bottom_right_pos.x() > parent_actual_shape.width() as isize {
+  } else if bottom_right_pos.x > parent_actual_shape.width as isize {
     // trace!(
     //   "x-2, bottom_right_pos:{:?}, parent_actual_shape.width:{:?}",
     //   bottom_right_pos,
     //   parent_actual_shape.width()
     // );
     let x_diff = num_traits::sign::abs_sub(
-      bottom_right_pos.x(),
-      parent_actual_shape.width() as isize,
+      bottom_right_pos.x,
+      parent_actual_shape.width as isize,
     );
-    let result = top_left_pos.x() - x_diff;
+    let result = top_left_pos.x - x_diff;
     // trace!("x-2, x_diff:{:?}, result:{:?}", x_diff, result);
     result
   } else {
     // trace!("x-3, top_left_pos:{:?}", top_left_pos);
-    top_left_pos.x()
+    top_left_pos.x
   };
 
   // Y-axis
