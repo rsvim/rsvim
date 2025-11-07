@@ -2,6 +2,7 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
+use crate::geo_size_into_rect;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
@@ -25,10 +26,7 @@ pub fn make_tree_with_buffers(
   let tree_root_id = tree.root_id();
 
   // Window
-  let window_shape = IRect::new(
-    (0, 0),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
-  );
+  let window_shape = geo_size_into_rect!(canvas_size, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
