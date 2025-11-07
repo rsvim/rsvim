@@ -82,7 +82,12 @@ pub fn make_tree_with_buffers_cmdline(
   let window_id = window.id();
 
   // cursor
-  let cursor_shape = IRect::new((0, 0), (1, 1));
+  let cursor_shape = IRect {
+    left: 0,
+    top: 0,
+    right: 1,
+    bottom: 1,
+  };
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
