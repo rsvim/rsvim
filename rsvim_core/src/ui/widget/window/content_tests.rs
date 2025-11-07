@@ -455,7 +455,10 @@ mod tests_nowrap_eol {
   fn new1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(31, 5);
+    let terminal_size = U16Size {
+      width: 31,
+      height: 5,
+    };
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
