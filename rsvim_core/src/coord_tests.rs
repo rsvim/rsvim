@@ -52,7 +52,12 @@ fn cast_geo_rects() {
   assert_eq!(mem::size_of_val(&actual1_max.x), mem::size_of_val(&3_u8));
   assert_eq!(mem::size_of_val(&actual1_max.y), mem::size_of_val(&4_u8));
 
-  let r2: Rect<u16> = Rect::new((15_u16, 25_u16), (35_u16, 45_u16));
+  let r2: Rect<u16> = Rect::<u16> {
+    left: 15_u16,
+    top: 25_u16,
+    right: 35_u16,
+    bottom: 45_u16,
+  };
   let actual2 = geo_rect_as!(r2, i32);
   let actual2_min = actual2.min();
   let actual2_max = actual2.max();
