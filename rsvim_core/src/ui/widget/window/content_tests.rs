@@ -1278,7 +1278,10 @@ mod tests_wrap_nolinebreak_eol {
   fn new1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -1325,7 +1328,10 @@ mod tests_wrap_nolinebreak_startcol {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
@@ -1365,7 +1371,10 @@ mod tests_wrap_nolinebreak_startcol {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(27, 10);
+    let terminal_size = U16Size {
+      width: 27,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
@@ -1399,7 +1408,10 @@ mod tests_wrap_nolinebreak_startcol {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size::new(20, 9);
+    let terminal_size = U16Size {
+      width: 20,
+      height: 9,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
