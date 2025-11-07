@@ -75,10 +75,12 @@ pub fn make_actual_shape(
   //   actual_isize, actual_top_left_pos
   // );
 
-  let actual_shape = U16Rect::new(
-    actual_top_left_pos,
-    point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
-  );
+  let actual_shape = U16Rect {
+    left: actual_top_left_pos.x,
+    top: actual_top_left_pos.y,
+    right: actual_top_left_pos.x + actual_isize.width as u16,
+    bottom: actual_top_left_pos.y + actual_isize.height as u16,
+  };
   // trace!(
   //   "actual_isize:{:?}, actual_shape:{:?}",
   //   actual_isize, actual_shape
