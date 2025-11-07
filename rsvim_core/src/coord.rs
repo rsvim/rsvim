@@ -194,8 +194,8 @@ macro_rules! geo_size_into_rect {
     taffy::geometry::Rect {
       top: 0 as $ty,
       left: 0 as $ty,
-      right: $s.width() as $ty,
-      bottom: $s.height() as $ty,
+      right: $s.width as $ty,
+      bottom: $s.height as $ty,
     } as taffy::geometry::Rect<$ty>
   };
 }
