@@ -491,7 +491,10 @@ mod tests_nowrap_eol {
   fn new2_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(35, 6);
+    let terminal_size = U16Size {
+      width: 35,
+      height: 6,
+    };
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -530,7 +533,10 @@ mod tests_nowrap_eol {
   fn new2_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(35, 6);
+    let terminal_size = U16Size {
+      width: 35,
+      height: 6,
+    };
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -574,7 +580,10 @@ mod tests_nowrap_startcol {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
