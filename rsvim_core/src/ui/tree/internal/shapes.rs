@@ -91,16 +91,10 @@ pub fn make_actual_shape(
 
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  use std::cmp::max;
-  use std::cmp::min;
-
   let top_left_pos: IPos = shape.min().into();
 
   // Truncate shape if size is larger than parent.
-  let height = max(
-    min(shape.height(), parent_actual_shape.height() as isize),
-    0,
-  );
+  let height = max(min(shape.height, parent_actual_shape.height as isize), 0);
   let width = max(min(shape.width(), parent_actual_shape.width() as isize), 0);
   IRect::new(
     top_left_pos,
