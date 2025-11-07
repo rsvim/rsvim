@@ -114,8 +114,8 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
 pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let top_left_pos: IPos = shape.min().into();
-  let bottom_right_pos: IPos = shape.max().into();
+  let top_left_pos: IPos = shape.min();
+  let bottom_right_pos: IPos = shape.max();
 
   // X-axis
   let top_left_x = if top_left_pos.x() < 0 {
