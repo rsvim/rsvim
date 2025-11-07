@@ -5,8 +5,6 @@
 use crate::geo_point_as;
 use crate::prelude::*;
 use num_traits::clamp;
-use std::cmp::max;
-use std::cmp::min;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
@@ -101,8 +99,8 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let top_left_pos: IPos = shape.min();
 
   // Truncate shape if size is larger than parent.
-  let height = clamp(shape.height, 0, parent_actual_shape.height as isize);
-  let width = clamp(shape.width, 0, parent_actual_shape.width as isize);
+  let height = clamp(shape.height(), 0, parent_actual_shape.height() as isize);
+  let width = clamp(shape.width(), 0, parent_actual_shape.width() as isize);
   IRect {
     left: top_left_pos.x,
     top: top_left_pos.y,
