@@ -40,9 +40,9 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-use taffy::geometry::Point;
-use taffy::geometry::Rect;
-use taffy::geometry::Size;
+pub use taffy::geometry::Point;
+pub use taffy::geometry::Rect;
+pub use taffy::geometry::Size;
 
 // Positions {
 
