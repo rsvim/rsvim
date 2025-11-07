@@ -40,7 +40,7 @@ pub fn make_actual_shape(
     max(actual_top_left_ipos.y, parent_actual_top_left_ipos.y),
     parent_actual_bottom_right_ipos.y,
   );
-  let actual_top_left_pos: U16Pos = Point {
+  let actual_top_left_pos: U16Pos = U16Pos {
     x: actual_top_left_x as u16,
     y: actual_top_left_y as u16,
   };
@@ -52,21 +52,17 @@ pub fn make_actual_shape(
   let actual_bottom_right_ipos: IPos =
     bottom_right_pos + parent_actual_top_left_ipos;
   let actual_bottom_right_x = min(
-    max(
-      actual_bottom_right_ipos.x(),
-      parent_actual_top_left_ipos.x(),
-    ),
-    parent_actual_bottom_right_ipos.x(),
+    max(actual_bottom_right_ipos.x, parent_actual_top_left_ipos.x),
+    parent_actual_bottom_right_ipos.x,
   );
   let actual_bottom_right_y = min(
-    max(
-      actual_bottom_right_ipos.y(),
-      parent_actual_top_left_ipos.y(),
-    ),
-    parent_actual_bottom_right_ipos.y(),
+    max(actual_bottom_right_ipos.y, parent_actual_top_left_ipos.y),
+    parent_actual_bottom_right_ipos.y,
   );
-  let actual_bottom_right_pos: U16Pos =
-    point!(x: actual_bottom_right_x as u16, y: actual_bottom_right_y as u16);
+  let actual_bottom_right_pos: U16Pos = U16Pos {
+    x: actual_bottom_right_x as u16,
+    y: actual_bottom_right_y as u16,
+  };
 
   let actual_isize = ISize::new(
     (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
