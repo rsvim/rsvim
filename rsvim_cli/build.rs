@@ -11,6 +11,33 @@ fn version() {
     "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
   );
 
+  let mut version = env!("CARGO_PKG_VERSION").to_string();
+
+  let is_release_profile = profile == "release"
+    && (opt_level == "s" || opt_level == "z")
+    && debug != "true";
+  if !is_release_profile {
+    let profile_name = if profile == "release" {
+      "nightly".to_string()
+    } else {
+      profile.clone()
+    };
+    let repo_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+    let maybe_git_commit = match Repository::open(repo_path) {
+      Ok(repo) => {
+        let head = repo.head().unwrap();
+        let oid = head.target().unwrap();
+        let commit = repo.find_commit(oid).unwrap();
+        let id = commit.id();
+        let id = id.to_string();
+        format!("+{}", &id[0..8])
+      }
+      Err(_) => "".to_string(),
+    };
+
+    version = format!("{}+{}{}", version, profile_name, maybe_git_commit);
+  }
+
   let version = if profile == "release"
     && (opt_level == "s" || opt_level == "z")
     && debug != "true"
