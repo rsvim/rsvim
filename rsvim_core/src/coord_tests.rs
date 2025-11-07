@@ -103,7 +103,10 @@ fn cast_geo_sizes() {
   assert_eq!(mem::size_of_val(&actual2_w), mem::size_of_val(&15_i32));
   assert_eq!(mem::size_of_val(&actual2_h), mem::size_of_val(&25_i32));
 
-  let s3: Size<u32> = Size::new(78_u32, 88_u32);
+  let s3: Size<u32> = Size::<u32> {
+    width: 78_u32,
+    height: 88_u32,
+  };
   let actual3 = geo_size_as!(s3, i16);
   let actual3_h = actual3.height();
   let actual3_w = actual3.width();
