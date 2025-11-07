@@ -21,7 +21,7 @@ pub fn make_actual_shape(
   //   "shape:{:?}, parent_actual_shape:{:?}",
   //   shape, parent_actual_shape
   // );
-  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
+  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min();
   let parent_actual_top_left_ipos: IPos =
     geo_point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
