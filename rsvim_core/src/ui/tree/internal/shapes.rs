@@ -64,10 +64,12 @@ pub fn make_actual_shape(
     y: actual_bottom_right_y as u16,
   };
 
-  let actual_isize = ISize::new(
-    (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
-    (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize),
-  );
+  let actual_isize = ISize {
+    width: (actual_bottom_right_pos.x as isize)
+      - (actual_top_left_pos.x as isize),
+    height: (actual_bottom_right_pos.y as isize)
+      - (actual_top_left_pos.y as isize),
+  };
   // trace!(
   //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
   //   actual_isize, actual_top_left_pos
