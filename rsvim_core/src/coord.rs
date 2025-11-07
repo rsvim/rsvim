@@ -180,8 +180,8 @@ macro_rules! geo_rect_as {
 macro_rules! geo_size_as {
   ($s:ident,$ty:ty) => {
     taffy::geometry::Size {
-      height: $s.height() as $ty,
-      width: $s.width() as $ty,
+      height: $s.height as $ty,
+      width: $s.width as $ty,
     } as taffy::geometry::Size<$ty>
   };
 }
