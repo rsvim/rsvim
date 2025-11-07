@@ -81,7 +81,14 @@ pub trait GeoRectExt<T> {
 
 impl<T> GeoRectExt<T> for Rect<T>
 where
-  T: Copy,
+  T: Copy
+    + PartialOrd
+    + Ord
+    + PartialEq
+    + Eq
+    + std::fmt::Debug
+    + num_traits::Num
+    + num_traits::NumCast,
 {
   fn min(&self) -> Point<T> {
     self.top_left()
