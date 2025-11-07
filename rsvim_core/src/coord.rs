@@ -70,6 +70,30 @@ pub type URect = Rect<usize>;
 /// Rectangle that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Rect = Rect<u16>;
 
+pub trait GeoRectExt<T> {
+  fn min(&self) -> Point<T>;
+  fn max(&self) -> Point<T>;
+}
+
+impl<T> GeoRectExt<T> for Rect<T>
+where
+  T: Clone,
+{
+  fn min(&self) -> Point<T> {
+    Point::<T> {
+      x: self.left,
+      y: self.top,
+    }
+  }
+
+  fn max(&self) -> Point<T> {
+    Point::<T> {
+      x: self.right,
+      y: self.bottom,
+    }
+  }
+}
+
 // Rectangles }
 
 // Size {
