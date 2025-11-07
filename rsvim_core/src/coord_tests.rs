@@ -25,7 +25,10 @@ fn cast_geo_points() {
   assert_eq!(mem::size_of_val(&actual2_x), mem::size_of_val(&15_i32));
   assert_eq!(mem::size_of_val(&actual2_y), mem::size_of_val(&25_i32));
 
-  let p3: Point<u32> = point!(x: 78_u32, y: 88_u32);
+  let p3: Point<u32> = Point::<u32> {
+    x: 78_u32,
+    y: 88_u32,
+  };
   let actual3 = geo_point_as!(p3, i16);
   let actual3_x = actual3.x();
   let actual3_y = actual3.y();
@@ -35,7 +38,12 @@ fn cast_geo_points() {
 
 #[test]
 fn cast_geo_rects() {
-  let r1: IRect = IRect::new((1, 2), (3, 4));
+  let r1: IRect = IRect {
+    left: 1,
+    top: 2,
+    right: 3,
+    bottom: 4,
+  };
   let actual1 = geo_rect_as!(r1, u8);
   let actual1_min = actual1.min();
   let actual1_max = actual1.max();
