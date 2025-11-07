@@ -544,7 +544,10 @@ mod tests_view_nowrap {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size::new(20, 20);
+    let terminal_size = U16Size {
+      width: 20,
+      height: 20,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
@@ -570,7 +573,10 @@ mod tests_view_nowrap {
   fn new5() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
@@ -647,7 +653,10 @@ mod tests_view_nowrap {
   fn new6() {
     test_log_init();
 
-    let terminal_size = U16Size::new(27, 6);
+    let terminal_size = U16Size {
+      width: 27,
+      height: 6,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
@@ -698,7 +707,10 @@ mod tests_view_nowrap {
   fn new7() {
     test_log_init();
 
-    let terminal_size = U16Size::new(20, 20);
+    let terminal_size = U16Size {
+      width: 20,
+      height: 20,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
