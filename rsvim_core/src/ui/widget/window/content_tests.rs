@@ -1809,7 +1809,10 @@ mod tests_wrap_linebreak {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size::new(13, 31);
+    let terminal_size = U16Size {
+      width: 13,
+      height: 31,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
@@ -1873,7 +1876,10 @@ mod tests_wrap_linebreak {
   fn new5() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
@@ -1916,7 +1922,10 @@ mod tests_wrap_linebreak {
   fn update1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size {
+      width: 10,
+      height: 10,
+    };
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
