@@ -6,6 +6,7 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
+use crate::size;
 use crate::size_into_rect;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
@@ -94,10 +95,7 @@ mod tests_nowrap {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 10,
-      height: 10,
-    };
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -136,10 +134,7 @@ mod tests_nowrap {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 35,
-      height: 6,
-    };
+    let terminal_size = size!(35, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -175,10 +170,7 @@ mod tests_nowrap {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 33,
-      height: 10,
-    };
+    let terminal_size = size!(33, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -218,10 +210,7 @@ mod tests_nowrap {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 31,
-      height: 20,
-    };
+    let terminal_size = size!(31, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -271,10 +260,7 @@ mod tests_nowrap {
   fn new5() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 31,
-      height: 20,
-    };
+    let terminal_size = size!(31, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -311,10 +297,7 @@ mod tests_nowrap {
   fn new6() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 13,
-      height: 10,
-    };
+    let terminal_size = size!(13, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
