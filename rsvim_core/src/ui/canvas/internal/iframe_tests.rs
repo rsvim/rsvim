@@ -95,13 +95,13 @@ fn set_cell1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
-    (point!(x: 0, y: 0), 'A'),
-    (point!(x: 7, y: 8), 'B'),
-    (point!(x: 1, y: 3), 'C'),
-    (point!(x: 9, y: 2), 'D'),
-    (point!(x: 9, y: 9), 'E'),
-    (point!(x: 2, y: 9), 'F'),
-    (point!(x: 9, y: 7), 'G'),
+    (point!(0, 0), 'A'),
+    (point!(7, 8), 'B'),
+    (point!(1, 3), 'C'),
+    (point!(9, 2), 'D'),
+    (point!(9, 9), 'E'),
+    (point!(2, 9), 'F'),
+    (point!(9, 7), 'G'),
   ];
 
   for (i, input) in inputs.iter().enumerate() {
@@ -131,13 +131,13 @@ fn set_empty_cell1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
-    (point!(x: 0, y: 0), 'A'),
-    (point!(x: 7, y: 8), 'B'),
-    (point!(x: 1, y: 3), 'C'),
-    (point!(x: 9, y: 2), 'D'),
-    (point!(x: 9, y: 9), 'E'),
-    (point!(x: 2, y: 9), 'F'),
-    (point!(x: 9, y: 7), 'G'),
+    (point!(0, 0), 'A'),
+    (point!(7, 8), 'B'),
+    (point!(1, 3), 'C'),
+    (point!(9, 2), 'D'),
+    (point!(9, 9), 'E'),
+    (point!(2, 9), 'F'),
+    (point!(9, 7), 'G'),
   ];
 
   for (i, input) in inputs.iter().enumerate() {
@@ -179,16 +179,16 @@ fn cells_at1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
-    (point!(x: 0, y: 0), 'A'),
-    (point!(x: 7, y: 1), 'B'),
-    (point!(x: 1, y: 2), 'C'),
-    (point!(x: 6, y: 3), 'D'),
-    (point!(x: 5, y: 4), 'E'),
-    (point!(x: 4, y: 5), 'F'),
-    (point!(x: 2, y: 6), 'G'),
-    (point!(x: 0, y: 7), 'H'),
-    (point!(x: 9, y: 8), 'I'),
-    (point!(x: 3, y: 9), 'J'),
+    (point!(0, 0), 'A'),
+    (point!(7, 1), 'B'),
+    (point!(1, 2), 'C'),
+    (point!(6, 3), 'D'),
+    (point!(5, 4), 'E'),
+    (point!(4, 5), 'F'),
+    (point!(2, 6), 'G'),
+    (point!(0, 7), 'H'),
+    (point!(9, 8), 'I'),
+    (point!(3, 9), 'J'),
   ];
   let expects = [
     "A         ",
@@ -213,7 +213,7 @@ fn cells_at1() {
   info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
   let all_cells = frame.get_cells();
   for i in 0..10 {
-    let pos: U16Pos = point!(x:0, y:i);
+    let pos: U16Pos = point!(0, i);
     let cells = frame.get_cells_at(pos, 10);
     let actual = cells
       .iter()
@@ -283,16 +283,16 @@ fn set_cells_at1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, &str)> = vec![
-    (point!(x: 0, y: 0), "ABCD"),
-    (point!(x: 7, y: 1), "EFGHIJK"),
-    (point!(x: 1, y: 2), "LMN"),
-    (point!(x: 6, y: 3), "OP"),
-    (point!(x: 5, y: 4), "Q"),
-    (point!(x: 4, y: 5), ""),
-    (point!(x: 2, y: 6), "RSTUV"),
-    (point!(x: 0, y: 7), "'WXYZ"),
-    (point!(x: 9, y: 8), "abcdefghijk"),
-    (point!(x: 3, y: 9), "opqrstu"),
+    (point!(0, 0), "ABCD"),
+    (point!(7, 1), "EFGHIJK"),
+    (point!(1, 2), "LMN"),
+    (point!(6, 3), "OP"),
+    (point!(5, 4), "Q"),
+    (point!(4, 5), ""),
+    (point!(2, 6), "RSTUV"),
+    (point!(0, 7), "'WXYZ"),
+    (point!(9, 8), "abcdefghijk"),
+    (point!(3, 9), "opqrstu"),
   ];
 
   let expects = [
