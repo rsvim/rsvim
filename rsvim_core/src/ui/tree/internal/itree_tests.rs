@@ -352,18 +352,18 @@ fn shape1() {
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
-  let s7 = IRect::new((3, 6), (15, 25));
-  let us7 = U16Rect::new((3, 6), (10, 15));
+  let s7 = rect!(3, 6, 15, 25);
+  let us7 = rect!(3, 6, 10, 15);
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
 
-  let s8 = IRect::new((-1, -2), (2, 1));
-  let us8 = U16Rect::new((3, 6), (5, 7));
+  let s8 = rect!(-1, -2, 2, 1);
+  let us8 = rect!(3, 6, 5, 7);
   let n8 = TestValue::new(8, s8);
   let nid8 = n8.id();
 
-  let s9 = IRect::new((5, 6), (9, 8));
-  let us9 = U16Rect::new((8, 12), (10, 14));
+  let s9 = rect!(5, 6, 9, 8);
+  let us9 = rect!(8, 12, 10, 14);
   let n9 = TestValue::new(9, s9);
   let nid9 = n9.id();
 
