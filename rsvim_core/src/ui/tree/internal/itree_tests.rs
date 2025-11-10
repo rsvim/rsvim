@@ -1,6 +1,7 @@
 use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
+use crate::rect;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
@@ -51,7 +52,7 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
-  let s1 = IRect::new((0, 0), (1, 1));
+  let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
   let tree = Itree::new(n1);
@@ -66,7 +67,7 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let s1 = IRect::new((0, 0), (1, 1));
+  let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
