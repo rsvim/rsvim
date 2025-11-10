@@ -180,7 +180,7 @@ macro_rules! size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! geo_size_into_rect {
+macro_rules! size_into_rect {
   ($size_var:ident,$type_name:ty) => {
     geo::Rect::new(
       (0 as $type_name, 0 as $type_name),
