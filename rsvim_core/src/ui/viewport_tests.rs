@@ -6953,10 +6953,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   fn new4_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -7211,10 +7208,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   fn new5_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 10,
-      height: 5,
-    };
+    let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
