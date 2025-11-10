@@ -66,7 +66,12 @@ pub fn make_tree_with_buffers_cmdline(
   let tree_root_id = tree.root_id();
 
   // window
-  let window_shape = size_into_rect!(canvas_size, isize);
+  let window_shape = rect!(
+    0,
+    0,
+    canvas_size.width as isize,
+    canvas_size.height.saturating_sub(1) as isize
+  );
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
