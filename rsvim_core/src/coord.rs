@@ -160,7 +160,7 @@ macro_rules! point_as {
   };
 }
 
-/// Construct a Point
+/// Construct a Rect
 #[macro_export]
 macro_rules! rect {
   ($min:expr,$max:expr) => {
@@ -187,11 +187,19 @@ macro_rules! rect_as {
   };
 }
 
+/// Construct a Size
+#[macro_export]
+macro_rules! size {
+  ($width:expr,$height:expr) => {
+    $crate::coord::Size::new($width, $height)
+  };
+}
+
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
 macro_rules! size_as {
   ($s:ident,$ty:ty) => {
-    Size::new($s.width() as $ty, $s.height() as $ty) as Size<$ty>
+    $crate::coord::Size::new($s.width() as $ty, $s.height() as $ty) as Size<$ty>
   };
 }
 
