@@ -556,7 +556,7 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
   let mut value = 1;
   let mut node_ids: Vec<TreeNodeId> = vec![];
 
-  let s = IRect::new((0, 0), (10, 10));
+  let s = rect!(0, 0, 10, 10);
   let root = TestValue::new(value, s);
   let root_id = root.id();
   node_ids.push(root_id);
