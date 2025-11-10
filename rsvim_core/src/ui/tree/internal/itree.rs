@@ -1,10 +1,10 @@
 //! Internal tree structure that implements the widget tree.
 
+use crate::point;
 use crate::prelude::*;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use geo::point;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -668,10 +668,16 @@ where
               Some(node) => {
                 let current_shape = *node.shape();
                 let current_top_left_pos: IPos = current_shape.min().into();
-                let expected_top_left_pos: IPos = point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                let expected_top_left_pos: IPos = point!(
+                  current_top_left_pos.x + x,
+                  current_top_left_pos.y + y
+                );
                 let expected_shape = IRect::new(
                   expected_top_left_pos,
-                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                  point!(
+                    expected_top_left_pos.x + current_shape.width(),
+                    expected_top_left_pos.y + current_shape.height()
+                  ),
                 );
 
                 let final_shape =
@@ -714,7 +720,7 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let next_top_left_pos: IPos = point!(x: x, y: y);
+        let next_top_left_pos: IPos = point!(x, y);
         let next_shape = IRect::new(
           next_top_left_pos,
           point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
