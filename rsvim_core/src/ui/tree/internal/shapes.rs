@@ -77,7 +77,7 @@ pub fn make_actual_shape(
   //   actual_isize, actual_top_left_pos
   // );
 
-  let actual_shape = rect!(
+  let actual_shape: U16Rect = rect!(
     actual_top_left_pos.x,
     actual_top_left_pos.y,
     actual_top_left_pos.x + actual_isize.width as u16,
