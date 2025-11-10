@@ -502,7 +502,7 @@ fn shape2() {
 fn push1() {
   // test_log_init();
 
-  let shape = IRect::new((0, 0), (10, 10));
+  let shape = rect!(0, 0, 10, 10);
   let node_values: Vec<i32> = [1, 2, 3, 4, 5].to_vec();
   let nodes: Vec<TestValue> = node_values
     .iter()
