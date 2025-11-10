@@ -68,7 +68,7 @@ pub fn make_actual_shape(
   let actual_bottom_right_pos: U16Pos =
     point!(actual_bottom_right_x as u16, actual_bottom_right_y as u16);
 
-  let actual_isize = size!(
+  let actual_isize: ISize = size!(
     (actual_bottom_right_pos.x as isize) - (actual_top_left_pos.x as isize),
     (actual_bottom_right_pos.y as isize) - (actual_top_left_pos.y as isize)
   );
