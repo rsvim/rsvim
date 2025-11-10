@@ -106,8 +106,12 @@ impl CommandLine {
     indicator_node.set_visible(false);
     base.bounded_insert(root_id, indicator_node);
 
-    let input_shape =
-      IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
+    let input_shape = rect!(
+      shape.min().x + 1,
+      shape.min().y,
+      shape.max().x,
+      shape.max().y
+    );
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
