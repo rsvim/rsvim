@@ -5,8 +5,6 @@
 use crate::geo_point_as;
 use crate::prelude::*;
 use geo::point;
-use std::cmp::max;
-use std::cmp::min;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
