@@ -12,6 +12,7 @@ use crate::content::TextContentsWk;
 use crate::inode_enum_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
+use crate::rect;
 use crate::rect_as;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -92,8 +93,12 @@ impl CommandLine {
 
     let mut base = Itree::new(root_node);
 
-    let indicator_shape =
-      IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
+    let indicator_shape = rect!(
+      shape.min().x,
+      shape.min().y,
+      shape.min().x + 1,
+      shape.max().y
+    );
     let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
     let indicator_id = indicator.id();
     let mut indicator_node = CommandLineNode::Indicator(indicator);
