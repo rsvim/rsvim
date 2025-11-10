@@ -15078,10 +15078,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new2_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -15470,10 +15467,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new2_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -15862,10 +15856,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new2_1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -16147,10 +16138,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new2_1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -16432,10 +16420,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new3_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -16793,10 +16778,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
   fn new3_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -17154,10 +17136,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
@@ -17352,10 +17331,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
@@ -17690,10 +17666,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   fn new2_1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
@@ -18168,10 +18141,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
@@ -18597,10 +18567,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   fn new3_1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
