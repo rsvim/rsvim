@@ -9976,10 +9976,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
@@ -10232,10 +10229,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 21,
-      height: 6,
-    };
+    let terminal_size = size!(21, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
