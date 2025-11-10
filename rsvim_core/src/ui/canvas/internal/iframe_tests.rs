@@ -28,10 +28,10 @@ fn new1() {
 fn pos2range1() {
   let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
-  assert_eq!(frame.pos2range(point!(x: 0, y:0), 7), 0..7);
-  assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
-  assert_eq!(frame.pos2range(point!(x: 8, y:9), 1), 98..99);
-  assert_eq!(frame.pos2range(point!(x: 9, y:9), 1), 99..100);
+  assert_eq!(frame.pos2range(point!(0, 0), 7), 0..7);
+  assert_eq!(frame.pos2range(point!(7, 2), 23), 27..50);
+  assert_eq!(frame.pos2range(point!(8, 9), 1), 98..99);
+  assert_eq!(frame.pos2range(point!(9, 9), 1), 99..100);
 }
 
 #[test]
@@ -59,11 +59,11 @@ fn xy2idx1() {
 fn pos2idx1() {
   let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
-  assert_eq!(frame.pos2idx(point!(x:0, y:7)), 70);
-  assert_eq!(frame.pos2idx(point!(x:7, y:3)), 37);
-  assert_eq!(frame.pos2idx(point!(x:1, y:0)), 1);
-  assert_eq!(frame.pos2idx(point!(x:0, y:9)), 90);
-  assert_eq!(frame.pos2idx(point!(x:9, y:9)), 99);
+  assert_eq!(frame.pos2idx(point!(0, 7)), 70);
+  assert_eq!(frame.pos2idx(point!(7, 3)), 37);
+  assert_eq!(frame.pos2idx(point!(1, 0)), 1);
+  assert_eq!(frame.pos2idx(point!(0, 9)), 90);
+  assert_eq!(frame.pos2idx(point!(9, 9)), 99);
 }
 
 #[test]
@@ -81,11 +81,11 @@ fn idx2xy1() {
 fn idx2pos1() {
   let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
-  assert_eq!(frame.idx2pos(70), point!(x:0, y:7));
-  assert_eq!(frame.idx2pos(37), point!(x:7, y:3));
-  assert_eq!(frame.idx2pos(1), point!(x:1, y:0));
-  assert_eq!(frame.idx2pos(90), point!(x:0, y:9));
-  assert_eq!(frame.idx2pos(99), point!(x:9, y:9));
+  assert_eq!(frame.idx2pos(70), point!(0, 7));
+  assert_eq!(frame.idx2pos(37), point!(7, 3));
+  assert_eq!(frame.idx2pos(1), point!(1, 0));
+  assert_eq!(frame.idx2pos(90), point!(0, 9));
+  assert_eq!(frame.idx2pos(99), point!(9, 9));
 }
 
 #[test]
