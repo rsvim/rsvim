@@ -161,19 +161,16 @@ macro_rules! point_as {
 /// ```
 #[macro_export]
 macro_rules! rect_as {
-  ($rect_var:ident,$type_name:ty) => {
-    geo::Rect::new(geo::point!(x: $rect_var.min().x as $type_name, y: $rect_var.min().y as $type_name), geo::point!(x: $rect_var.max().x as $type_name, y: $rect_var.max().y as $type_name)) as geo::Rect<$type_name>
+  ($r:ident,$ty:ty) => {
+    geo::Rect::new(geo::point!(x: $r.min().y as $ty), geo::point!(x: $r.max().x as $ty, y: $r.max().y as $ty)) as geo::Rect<$ty>
   };
 }
 
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
 macro_rules! size_as {
-  ($size_var:ident,$type_name:ty) => {
-    Size::new(
-      $size_var.height() as $type_name,
-      $size_var.width() as $type_name,
-    ) as Size<$type_name>
+  ($s:ident,$ty:ty) => {
+    Size::new($s.width() as $ty) as Size<$ty>
   };
 }
 
@@ -181,13 +178,8 @@ macro_rules! size_as {
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
 macro_rules! size_into_rect {
-  ($size_var:ident,$type_name:ty) => {
-    geo::Rect::new(
-      (0 as $type_name, 0 as $type_name),
-      (
-        $size_var.width() as $type_name,
-        $size_var.height() as $type_name,
-      ),
-    ) as geo::Rect<$type_name>
+  ($s:ident,$ty:ty) => {
+    geo::Rect::new((0 as $ty), ($s.width() as $ty, $s.height() as $ty))
+      as geo::Rect<$ty>
   };
 }
