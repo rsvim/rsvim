@@ -323,7 +323,7 @@ fn shape1() {
   // test_log_init();
 
   let s1 = rect!(0, 0, 20, 20);
-  let us1 = U16Rect::new((0, 0), (20, 20));
+  let us1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
@@ -718,18 +718,18 @@ fn get2() {
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  let s4 = IRect::new((3, 5), (20, 20));
-  let us4 = U16Rect::new((3, 5), (20, 20));
+  let s4 = rect!(3, 5, 20, 20);
+  let us4 = rect!(3, 5, 20, 20);
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
   let s5 = IRect::new((-3, -5), (15, 20));
-  let us5 = U16Rect::new((3, 5), (18, 20));
+  let us5 = rect!(3, 5, 18, 20);
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
 
-  let s6 = IRect::new((8, 13), (18, 25));
-  let us6 = U16Rect::new((11, 18), (18, 20));
+  let s6 = rect!(8, 13, 18, 25);
+  let us6 = rect!(11, 18, 18, 20);
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
@@ -780,15 +780,15 @@ fn get2() {
 fn move_by1() {
   // test_log_init();
 
-  let s1 = IRect::new((0, 0), (20, 20));
+  let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (20, 20));
+  let s2 = rect!(0, 0, 20, 20);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((0, 0), (1, 1));
+  let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
@@ -852,15 +852,15 @@ fn move_by1() {
 fn bounded_move_by1() {
   test_log_init();
 
-  let s1 = IRect::new((0, 0), (20, 20));
+  let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (20, 20));
+  let s2 = rect!(0, 0, 20, 20);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((0, 0), (1, 1));
+  let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
@@ -898,15 +898,15 @@ fn bounded_move_by1() {
     (6, 8),
   ];
   let expects: Vec<IRect> = vec![
-    IRect::new((0, 0), (1, 1)),
-    IRect::new((2, 0), (3, 1)),
-    IRect::new((3, 19), (4, 20)),
-    IRect::new((0, 19), (1, 20)),
-    IRect::new((19, 15), (20, 16)),
-    IRect::new((19, 0), (20, 1)),
-    IRect::new((19, 3), (20, 4)),
-    IRect::new((9, 0), (10, 1)),
-    IRect::new((15, 8), (16, 9)),
+    rect!(0, 0, 1, 1),
+    rect!(2, 0, 3, 1),
+    rect!(3, 19, 4, 20),
+    rect!(0, 19, 1, 20),
+    rect!(19, 15, 20, 16),
+    rect!(19, 0, 20, 1),
+    rect!(19, 3, 20, 4),
+    rect!(9, 0, 10, 1),
+    rect!(15, 8, 16, 9),
   ];
 
   for (i, m) in moves.iter().enumerate() {
@@ -924,15 +924,15 @@ fn bounded_move_by1() {
 fn move_to1() {
   test_log_init();
 
-  let s1 = IRect::new((0, 0), (20, 20));
+  let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (20, 20));
+  let s2 = rect!(0, 0, 20, 20);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((0, 0), (1, 1));
+  let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
@@ -972,13 +972,13 @@ fn move_to1() {
   let expects: Vec<IRect> = vec![
     IRect::new((-10, -4), (-9, -3)),
     IRect::new((2, -7), (3, -6)),
-    IRect::new((1, 90), (2, 91)),
+    rect!(1, 90, 2, 91),
     IRect::new((-70, 41), (-69, 42)),
     IRect::new((23, -4), (24, -3)),
     IRect::new((49, -121), (50, -120)),
-    IRect::new((8, 3), (9, 4)),
+    rect!(8, 3, 9, 4),
     IRect::new((-10, -7), (-9, -6)),
-    IRect::new((6, 8), (7, 9)),
+    rect!(6, 8, 7, 9),
   ];
 
   for (i, m) in moves.iter().enumerate() {
@@ -996,15 +996,15 @@ fn move_to1() {
 fn bounded_move_to1() {
   test_log_init();
 
-  let s1 = IRect::new((0, 0), (20, 20));
+  let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (20, 20));
+  let s2 = rect!(0, 0, 20, 20);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((0, 0), (1, 1));
+  let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
@@ -1042,15 +1042,15 @@ fn bounded_move_to1() {
     (6, 8),
   ];
   let expects: Vec<IRect> = vec![
-    IRect::new((0, 0), (1, 1)),
-    IRect::new((2, 0), (3, 1)),
-    IRect::new((1, 19), (2, 20)),
-    IRect::new((0, 19), (1, 20)),
-    IRect::new((19, 0), (20, 1)),
-    IRect::new((19, 0), (20, 1)),
-    IRect::new((8, 3), (9, 4)),
-    IRect::new((5, 6), (6, 7)),
-    IRect::new((6, 8), (7, 9)),
+    rect!(0, 0, 1, 1),
+    rect!(2, 0, 3, 1),
+    rect!(1, 19, 2, 20),
+    rect!(0, 19, 1, 20),
+    rect!(19, 0, 20, 1),
+    rect!(19, 0, 20, 1),
+    rect!(8, 3, 9, 4),
+    rect!(5, 6, 6, 7),
+    rect!(6, 8, 7, 9),
   ];
 
   for (i, m) in moves.iter().enumerate() {
