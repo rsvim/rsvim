@@ -1967,10 +1967,7 @@ mod tests_wrap_linebreak_startcol {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 20,
-      height: 8,
-    };
+    let terminal_size = size!(20, 8);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
@@ -1999,10 +1996,7 @@ mod tests_wrap_linebreak_startcol {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 13,
-      height: 31,
-    };
+    let terminal_size = size!(13, 31);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default()
       .wrap(true)
