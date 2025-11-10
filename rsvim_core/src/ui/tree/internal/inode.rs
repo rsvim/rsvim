@@ -1,8 +1,8 @@
 //! The node structure of the internal tree.
 
 use crate::flags_impl;
+use crate::geo_rect_as;
 use crate::prelude::*;
-use crate::rect_as;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
@@ -346,7 +346,7 @@ pub struct InodeBase {
 
 impl InodeBase {
   pub fn new(shape: IRect) -> Self {
-    let actual_shape = rect_as!(shape, u16);
+    let actual_shape = geo_rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
       depth: 0,

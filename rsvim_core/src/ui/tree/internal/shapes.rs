@@ -2,7 +2,7 @@
 
 #![allow(clippy::let_and_return)]
 
-use crate::point_as;
+use crate::geo_point_as;
 use crate::prelude::*;
 use geo::point;
 use std::cmp::max;
@@ -24,21 +24,23 @@ pub fn make_actual_shape(
   // );
   let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
   let parent_actual_top_left_ipos: IPos =
-    point_as!(parent_actual_top_left_pos, isize);
+    geo_point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
   let parent_actual_bottom_right_ipos: IPos =
-    point_as!(parent_actual_bottom_right_pos, isize);
+    geo_point_as!(parent_actual_bottom_right_pos, isize);
 
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
 
   let actual_top_left_ipos: IPos = top_left_pos + parent_actual_top_left_ipos;
-  let actual_top_left_x = min(
-    max(actual_top_left_ipos.x(), parent_actual_top_left_ipos.x()),
+  let actual_top_left_x = num_traits::clamp(
+    actual_top_left_ipos.x(),
+    parent_actual_top_left_ipos.x(),
     parent_actual_bottom_right_ipos.x(),
   );
-  let actual_top_left_y = min(
-    max(actual_top_left_ipos.y(), parent_actual_top_left_ipos.y()),
+  let actual_top_left_y = num_traits::clamp(
+    actual_top_left_ipos.y(),
+    parent_actual_top_left_ipos.y(),
     parent_actual_bottom_right_ipos.y(),
   );
   let actual_top_left_pos: U16Pos =
@@ -50,11 +52,9 @@ pub fn make_actual_shape(
 
   let actual_bottom_right_ipos: IPos =
     bottom_right_pos + parent_actual_top_left_ipos;
-  let actual_bottom_right_x = min(
-    max(
-      actual_bottom_right_ipos.x(),
-      parent_actual_top_left_ipos.x(),
-    ),
+  let actual_bottom_right_x = num_traits::clamp(
+    actual_bottom_right_ipos.x(),
+    parent_actual_top_left_ipos.x(),
     parent_actual_bottom_right_ipos.x(),
   );
   let actual_bottom_right_y = min(

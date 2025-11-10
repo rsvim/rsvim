@@ -146,7 +146,7 @@ pub type U16Size = Size<u16>;
 
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
-macro_rules! point_as {
+macro_rules! geo_point_as {
   ($p:ident,$ty:ty) => {
     geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
   };
@@ -160,7 +160,7 @@ macro_rules! point_as {
 /// use geo::{self, point};
 /// ```
 #[macro_export]
-macro_rules! rect_as {
+macro_rules! geo_rect_as {
   ($r:ident,$ty:ty) => {
     geo::Rect::new(geo::point!(x: $r.min().x as $ty, y: $r.min().y as $ty), geo::point!(x: $r.max().x as $ty, y: $r.max().y as $ty)) as geo::Rect<$ty>
 
@@ -169,7 +169,7 @@ macro_rules! rect_as {
 
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
-macro_rules! size_as {
+macro_rules! geo_size_as {
   ($s:ident,$ty:ty) => {
     $crate::coord::Size::new($s.width() as $ty, $s.height() as $ty) as Size<$ty>
   };
@@ -178,7 +178,7 @@ macro_rules! size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! size_into_rect {
+macro_rules! geo_size_into_rect {
   ($s:ident,$ty:ty) => {
     geo::Rect::new(
       (0 as $ty, 0 as $ty),
