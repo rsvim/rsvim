@@ -71,23 +71,23 @@ fn insert1() {
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (1, 1));
+  let s2 = rect!(0, 0, 1, 1);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((0, 0), (1, 1));
+  let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  let s4 = IRect::new((0, 0), (1, 1));
+  let s4 = rect!(0, 0, 1, 1);
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((0, 0), (1, 1));
+  let s5 = rect!(0, 0, 1, 1);
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
 
-  let s6 = IRect::new((0, 0), (1, 1));
+  let s6 = rect!(0, 0, 1, 1);
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
