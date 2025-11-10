@@ -6623,10 +6623,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
   fn new6() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 10,
-      height: 5,
-    };
+    let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
