@@ -6,11 +6,11 @@ pub mod cursor;
 #[cfg(test)]
 mod cursor_tests;
 
+use crate::point;
 use crate::prelude::*;
 use crate::ui::canvas::internal::iframe::Iframe;
 use cell::Cell;
 use cursor::Cursor;
-use geo::point;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -79,7 +79,7 @@ impl Frame {
   /// If index is outside of frame shape.
   pub fn idx2pos(&self, index: usize) -> U16Pos {
     let (x, y) = self.idx2xy(index);
-    point!(x: x as u16, y: y as u16)
+    point!(x as u16, y as u16)
   }
 
   // Utils }
