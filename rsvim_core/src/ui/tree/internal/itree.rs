@@ -767,7 +767,7 @@ where
             Some(node) => {
               let current_shape = *node.shape();
               let expected_top_left_pos: IPos = point!(x, y);
-              let expected_shape = rect!(
+              let expected_shape: IRect = rect!(
                 expected_top_left_pos.x,
                 expected_top_left_pos.y,
                 expected_top_left_pos.x + current_shape.width(),

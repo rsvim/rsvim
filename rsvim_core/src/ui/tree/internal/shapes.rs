@@ -46,7 +46,7 @@ pub fn make_actual_shape(
     parent_actual_bottom_right_ipos.y,
   );
 
-  let actual_top_left_pos =
+  let actual_top_left_pos: U16Pos =
     point!(actual_top_left_x as u16, actual_top_left_y as u16);
   // trace!(
   //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
