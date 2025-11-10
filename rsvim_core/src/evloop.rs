@@ -539,7 +539,12 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
-    let window_shape = size_into_rect!(canvas_size, isize);
+    let window_shape = rect!(
+      0,
+      0,
+      canvas_size.width as isize,
+      canvas_size.height.saturating_sub(1) as isize
+    );
     let mut window = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
