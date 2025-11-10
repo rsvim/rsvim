@@ -552,7 +552,7 @@ impl EventLoop {
     let window_id = window.id();
 
     // Initialize cursor inside the default window.
-    let cursor_shape = IRect::new((0, 0), (1, 1));
+    let cursor_shape = rect!(0, 0, 1, 1);
     let cursor = Cursor::new(
       cursor_shape,
       canvas_cursor.blinking(),
