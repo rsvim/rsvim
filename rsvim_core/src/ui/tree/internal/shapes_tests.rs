@@ -8,11 +8,36 @@ fn make_actual_shapes1() {
   // test_log_init();
 
   let inputs: Vec<IRect> = vec![
-    IRect::new((0, 0), (3, 5)),
-    IRect::new((0, 0), (1, 5)),
-    IRect::new((0, 0), (3, 7)),
-    IRect::new((0, 0), (0, 0)),
-    IRect::new((0, 0), (5, 4)),
+    IRect {
+      left: 0,
+      top: 0,
+      right: 3,
+      bottom: 5,
+    },
+    IRect {
+      left: 0,
+      top: 0,
+      right: 1,
+      bottom: 5,
+    },
+    IRect {
+      left: 0,
+      top: 0,
+      right: 3,
+      bottom: 7,
+    },
+    IRect {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+    },
+    IRect {
+      left: 0,
+      top: 0,
+      right: 5,
+      bottom: 4,
+    },
   ];
   for t in inputs.iter() {
     for p in 0..10 {
