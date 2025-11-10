@@ -158,12 +158,12 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
     top_left_pos.y
   };
 
-  IRect {
-    left: top_left_x,
-    top: top_left_y,
-    right: top_left_x + shape.width(),
-    bottom: top_left_y + shape.height(),
-  }
+  rect!(
+    top_left_x,
+    top_left_y,
+    top_left_x + shape.width(),
+    top_left_y + shape.height()
+  )
 }
 
 /// Bound (truncate) child shape (both position and size) by its parent actual shape.
