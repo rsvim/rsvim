@@ -1,6 +1,7 @@
 use super::frame::*;
 use crate::point;
 use crate::prelude::*;
+use crate::size;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
@@ -11,7 +12,7 @@ use crossterm::style::Color;
 
 #[test]
 fn pos2range1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.pos2range(point!(0, 0), 7), 0..7);
   assert_eq!(frame.pos2range(point!(7, 2), 23), 27..50);
@@ -21,7 +22,7 @@ fn pos2range1() {
 
 #[test]
 fn idx2range1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.idx2range(0, 7), 0..7);
   assert_eq!(frame.idx2range(27, 23), 27..50);
@@ -31,7 +32,7 @@ fn idx2range1() {
 
 #[test]
 fn xy2idx1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.xy2idx(0, 7), 70);
   assert_eq!(frame.xy2idx(7, 3), 37);
@@ -42,7 +43,7 @@ fn xy2idx1() {
 
 #[test]
 fn pos2idx1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.pos2idx(point!(0, 7)), 70);
   assert_eq!(frame.pos2idx(point!(7, 3)), 37);
@@ -53,7 +54,7 @@ fn pos2idx1() {
 
 #[test]
 fn idx2xy1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.idx2xy(70), (0, 7));
   assert_eq!(frame.idx2xy(37), (7, 3));
@@ -64,7 +65,7 @@ fn idx2xy1() {
 
 #[test]
 fn idx2pos1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
   assert_eq!(frame.idx2pos(70), point!(0, 7));
   assert_eq!(frame.idx2pos(37), point!(7, 3));
@@ -76,7 +77,7 @@ fn idx2pos1() {
 #[test]
 fn set_cell1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Frame::new(frame_size, Cursor::default());
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -112,7 +113,7 @@ fn set_cell1() {
 #[test]
 fn set_empty_cell1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Frame::new(frame_size, Cursor::default());
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -160,7 +161,7 @@ fn set_empty_cell1() {
 #[test]
 fn cells_at1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Frame::new(frame_size, Cursor::default());
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -198,7 +199,7 @@ fn cells_at1() {
   info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
   let all_cells = frame.get_cells();
   for i in 0..10 {
-    let pos: U16Pos = point!(x:0, y:i);
+    let pos: U16Pos = point!(0, i);
     let cells = frame.get_cells_at(pos, 10);
     let actual = cells
       .iter()
@@ -264,7 +265,7 @@ fn cells_at1() {
 #[test]
 fn set_cells_at1() {
   test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Frame::new(frame_size, Cursor::default());
 
   let inputs: Vec<(U16Pos, &str)> = vec![
