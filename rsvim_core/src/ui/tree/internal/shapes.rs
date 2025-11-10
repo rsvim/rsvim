@@ -2,7 +2,7 @@
 
 #![allow(clippy::let_and_return)]
 
-use crate::geo_point_as;
+use crate::point_as;
 use crate::prelude::*;
 use geo::point;
 use std::cmp::max;
@@ -24,10 +24,10 @@ pub fn make_actual_shape(
   // );
   let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
   let parent_actual_top_left_ipos: IPos =
-    geo_point_as!(parent_actual_top_left_pos, isize);
+    point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
   let parent_actual_bottom_right_ipos: IPos =
-    geo_point_as!(parent_actual_bottom_right_pos, isize);
+    point_as!(parent_actual_bottom_right_pos, isize);
 
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();

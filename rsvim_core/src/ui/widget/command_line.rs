@@ -9,10 +9,10 @@ pub mod root;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::geo_rect_as;
 use crate::inode_enum_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
+use crate::rect_as;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -105,7 +105,7 @@ impl CommandLine {
       IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let input_actual_shape = geo_rect_as!(input_shape, u16);
+      let input_actual_shape = rect_as!(input_shape, u16);
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
@@ -120,7 +120,7 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = geo_rect_as!(shape, u16);
+      let message_actual_shape = rect_as!(shape, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),

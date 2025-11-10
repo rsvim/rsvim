@@ -40,8 +40,8 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-use geo::Point;
-use geo::Rect;
+pub use geo::Point;
+pub use geo::Rect;
 
 // Positions {
 
@@ -146,7 +146,7 @@ pub type U16Size = Size<u16>;
 
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
-macro_rules! geo_point_as {
+macro_rules! point_as {
   ($point_var:ident,$type_name:ty) => {
     geo::point!(x: $point_var.x() as $type_name, y: $point_var.y() as $type_name)
   };
@@ -160,7 +160,7 @@ macro_rules! geo_point_as {
 /// use geo::{self, point};
 /// ```
 #[macro_export]
-macro_rules! geo_rect_as {
+macro_rules! rect_as {
   ($rect_var:ident,$type_name:ty) => {
     geo::Rect::new(geo::point!(x: $rect_var.min().x as $type_name, y: $rect_var.min().y as $type_name), geo::point!(x: $rect_var.max().x as $type_name, y: $rect_var.max().y as $type_name)) as geo::Rect<$type_name>
   };
@@ -168,7 +168,7 @@ macro_rules! geo_rect_as {
 
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
-macro_rules! geo_size_as {
+macro_rules! size_as {
   ($size_var:ident,$type_name:ty) => {
     Size::new(
       $size_var.height() as $type_name,
