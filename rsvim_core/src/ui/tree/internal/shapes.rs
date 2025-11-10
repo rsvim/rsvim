@@ -94,11 +94,10 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let top_left_pos: IPos = shape.min().into();
 
   // Truncate shape if size is larger than parent.
-  let height = max(
-    min(shape.height(), parent_actual_shape.height() as isize),
-    0,
-  );
-  let width = max(min(shape.width(), parent_actual_shape.width() as isize), 0);
+  let height =
+    num_traits::clamp(shape.height(), 0, parent_actual_shape.height() as isize);
+  let width =
+    num_traits::clamp(shape.width(), 0, parent_actual_shape.width() as isize);
   IRect::new(
     top_left_pos,
     point!(x: top_left_pos.x() + width, y: top_left_pos.y() + height),
