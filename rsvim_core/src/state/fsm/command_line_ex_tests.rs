@@ -10,6 +10,7 @@ use crate::buf::text::Text;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::size;
 use crate::state::StateDataAccess;
 use crate::state::StateMachine;
 use crate::state::Stateful;
@@ -314,7 +315,7 @@ mod tests_goto_normal_mode {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(11, 5);
+    let terminal_size = size!(11, 5);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
@@ -466,7 +467,7 @@ mod tests_goto_normal_mode {
   fn nowrap1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(11, 5);
+    let terminal_size = size!(11, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -632,7 +633,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(11, 5);
+    let terminal_size = size!(11, 5);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
