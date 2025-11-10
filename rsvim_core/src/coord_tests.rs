@@ -1,5 +1,7 @@
 use super::coord::*;
+use crate::point;
 use crate::point_as;
+use crate::rect;
 use crate::rect_as;
 use crate::size_as;
 use crate::size_into_rect;
@@ -15,20 +17,14 @@ fn cast_geo_points() {
   assert_eq!(mem::size_of_val(&actual1_x), mem::size_of_val(&1_usize));
   assert_eq!(mem::size_of_val(&actual1_y), mem::size_of_val(&2_usize));
 
-  let p2: U16Pos = U16Pos {
-    x: 15_u16,
-    y: 25_u16,
-  };
+  let p2: U16Pos = point!(15_u16, 25_u16);
   let actual2 = point_as!(p2, i32);
   let actual2_x = actual2.x;
   let actual2_y = actual2.y;
   assert_eq!(mem::size_of_val(&actual2_x), mem::size_of_val(&15_i32));
   assert_eq!(mem::size_of_val(&actual2_y), mem::size_of_val(&25_i32));
 
-  let p3: Point<u32> = Point::<u32> {
-    x: 78_u32,
-    y: 88_u32,
-  };
+  let p3: Point<u32> = point!(78_u32, 88_u32);
   let actual3 = point_as!(p3, i16);
   let actual3_x = actual3.x;
   let actual3_y = actual3.y;
@@ -38,12 +34,7 @@ fn cast_geo_points() {
 
 #[test]
 fn cast_geo_rects() {
-  let r1: IRect = IRect {
-    left: 1,
-    top: 2,
-    right: 3,
-    bottom: 4,
-  };
+  let r1: IRect = rect!(1, 2, 3, 4);
   let actual1 = rect_as!(r1, u8);
   let actual1_min = actual1.min();
   let actual1_max = actual1.max();
@@ -52,12 +43,7 @@ fn cast_geo_rects() {
   assert_eq!(mem::size_of_val(&actual1_max.x), mem::size_of_val(&3_u8));
   assert_eq!(mem::size_of_val(&actual1_max.y), mem::size_of_val(&4_u8));
 
-  let r2: Rect<u16> = Rect::<u16> {
-    left: 15_u16,
-    top: 25_u16,
-    right: 35_u16,
-    bottom: 45_u16,
-  };
+  let r2: Rect<u16> = rect!(15_u16, 25_u16, 35_u16, 45_u16);
   let actual2 = rect_as!(r2, i32);
   let actual2_min = actual2.min();
   let actual2_max = actual2.max();
