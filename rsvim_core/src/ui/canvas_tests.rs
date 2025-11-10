@@ -1,9 +1,10 @@
 use super::canvas::*;
+use crate::point;
 use crate::prelude::*;
+use crate::size;
 use crate::tests::log::init as test_log_init;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use geo::point;
 
 fn int2letter(i: u8) -> char {
   (i + 65) as char
@@ -11,7 +12,7 @@ fn int2letter(i: u8) -> char {
 
 #[test]
 fn new1() {
-  let can = Canvas::new(U16Size::new(3, 4));
+  let can = Canvas::new(size!(3, 4));
   assert_eq!(can.frame().size(), can.prev_frame().size());
   assert_eq!(*can.frame().cursor(), *can.prev_frame().cursor());
 }
@@ -19,7 +20,7 @@ fn new1() {
 #[test]
 fn _shade_cursor1() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   let cursor1 = Cursor::default();
   can.frame_mut().set_cursor(cursor1);
@@ -28,7 +29,7 @@ fn _shade_cursor1() {
   assert!(actual1.is_empty());
 
   let cursor2 =
-    Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+    Cursor::new(point!(3, 7), false, true, CursorStyle::BlinkingBar);
   can.frame_mut().set_cursor(cursor2);
   let actual2 = can._shade_cursor();
   can._shade_done();
@@ -92,7 +93,7 @@ fn _shade_cursor1() {
   );
 
   let cursor3 =
-    Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
+    Cursor::new(point!(4, 5), true, true, CursorStyle::SteadyUnderScore);
   can.frame_mut().set_cursor(cursor3);
   let actual3 = can._shade_cursor();
   can._shade_done();
@@ -148,11 +149,11 @@ fn _shade_cursor1() {
 #[test]
 fn _next_same_cell_in_row1() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   can
     .frame_mut()
-    .set_cells_at(point!(x:0,y:0), vec![Cell::with_char('A'); 20]);
+    .set_cells_at(point!(0, 0), vec![Cell::with_char('A'); 20]);
   for i in 0..10 {
     let actual = can._next_same_cell_in_row(0, i);
     info!("1-{:?} actual:{:?}", i, actual);
@@ -168,10 +169,10 @@ fn _next_same_cell_in_row1() {
 #[test]
 fn _next_same_cell_in_row2() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   can.frame_mut().set_cells_at(
-    point!(x:3,y:5),
+    point!(3, 5),
     (0..9)
       .map(|i| Cell::with_char(int2letter(i)))
       .collect::<Vec<_>>(),
@@ -203,20 +204,20 @@ fn _next_same_cell_in_row2() {
         info!(
           "chars:{:?}, symbol:{:?}",
           chars,
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         assert!(
-          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
         );
       } else if row == 6 && (0..2).contains(&col) {
         assert_eq!(actual, 2);
         info!(
           "chars:{:?}, symbol:{:?}",
           chars,
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         assert!(
-          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
         );
       } else {
         assert_eq!(actual, col);
@@ -228,10 +229,10 @@ fn _next_same_cell_in_row2() {
 #[test]
 fn _next_same_cell_in_row3() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   can.frame_mut().set_cells_at(
-    point!(x:2,y:3),
+    point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
       .collect::<Vec<_>>(),
@@ -260,7 +261,7 @@ fn _next_same_cell_in_row3() {
         assert_eq!(actual, 6);
         assert_eq!(
           int2letter(char_index).to_compact_string(),
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         char_index += 1;
       } else {
@@ -273,10 +274,10 @@ fn _next_same_cell_in_row3() {
 #[test]
 fn _make_printable_shader1() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   can.frame_mut().set_cells_at(
-    point!(x:2,y:3),
+    point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
       .collect::<Vec<_>>(),
@@ -305,10 +306,10 @@ fn _make_printable_shader1() {
 #[test]
 fn diff1() {
   test_log_init();
-  let mut can = Canvas::new(U16Size::new(10, 10));
+  let mut can = Canvas::new(size!(10, 10));
 
   can.frame_mut().set_cells_at(
-    point!(x:2,y:3),
+    point!(2, 3),
     (0..4)
       .map(|i| Cell::with_char(int2letter(i)))
       .collect::<Vec<_>>(),
