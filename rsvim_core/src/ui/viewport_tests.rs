@@ -4840,10 +4840,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   fn new3_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -5073,10 +5070,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   fn new3_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 5,
-    };
+    let terminal_size = size!(17, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -5306,10 +5300,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   fn new4_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -5547,10 +5538,7 @@ mod tests_search_anchor_downward_nowrap_eol {
   fn new4_cf_mac() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
