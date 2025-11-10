@@ -1,8 +1,8 @@
 //! Internal implementations for `Iframe`.
 
+use crate::point;
 use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
-use geo::point;
 use std::ops::Range;
 
 #[cfg(test)]
@@ -26,11 +26,11 @@ pub struct Iframe {
 impl Iframe {
   /// Make new frame.
   pub fn new(size: U16Size) -> Self {
-    let n = size.height() as usize * size.width() as usize;
+    let n = size.height as usize * size.width as usize;
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      dirty_rows: vec![false; size.height as usize], // When a frame first create, it's not dirty.
     }
   }
 
@@ -53,7 +53,7 @@ impl Iframe {
 
   /// Convert (position) X and Y into Vec index.
   pub fn xy2idx(&self, x: usize, y: usize) -> usize {
-    y * self.size.width() as usize + x
+    y * self.size.width as usize + x
   }
 
   /// Convert position into Vec index.
@@ -70,8 +70,8 @@ impl Iframe {
   /// If index is outside of frame shape.
   pub fn idx2xy(&self, index: usize) -> (usize, usize) {
     debug_assert!(index <= self.cells.len());
-    let x = index % self.size.width() as usize;
-    let y = index / self.size.width() as usize;
+    let x = index % self.size.width as usize;
+    let y = index / self.size.width as usize;
     (x, y)
   }
 
@@ -82,7 +82,7 @@ impl Iframe {
   /// If index is outside of frame shape.
   pub fn idx2pos(&self, index: usize) -> U16Pos {
     let (x, y) = self.idx2xy(index);
-    point!(x: x as u16, y: y as u16)
+    point!(x as u16, y as u16)
   }
 
   // Utils }
@@ -94,18 +94,17 @@ impl Iframe {
 
   /// Whether the frame is zero sized.
   pub fn zero_sized(&self) -> bool {
-    self.size.height() == 0 || self.size.width() == 0
+    self.size.height == 0 || self.size.width == 0
   }
 
   /// Set current frame size.
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
-    self.cells.resize(
-      size.height() as usize * size.width() as usize,
-      Cell::default(),
-    );
-    self.dirty_rows = vec![true; size.height() as usize];
+    self
+      .cells
+      .resize(size.height as usize * size.width as usize, Cell::default());
+    self.dirty_rows = vec![true; size.height as usize];
     old_size
   }
 
@@ -291,7 +290,7 @@ impl Iframe {
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty_rows(&mut self) {
-    self.dirty_rows = vec![false; self.size.height() as usize];
+    self.dirty_rows = vec![false; self.size.height as usize];
   }
 }
 
@@ -302,9 +301,9 @@ impl Iframe {
   /// NOTE: This method is mostly for debugging and testing.
   pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
     let mut results: Vec<Vec<CompactString>> = vec![];
-    for row in 0..self.size.height() {
+    for row in 0..self.size.height {
       let mut row_symbols: Vec<CompactString> = vec![];
-      for col in 0..self.size.width() {
+      for col in 0..self.size.width {
         let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
       }
@@ -319,9 +318,9 @@ impl Iframe {
   /// NOTE: This method is mostly for debugging and testing.
   pub fn raw_symbols_with_placeholder(&self) -> Vec<Vec<CompactString>> {
     let mut results: Vec<Vec<CompactString>> = vec![];
-    for row in 0..self.size.height() {
+    for row in 0..self.size.height {
       let mut row_symbols: Vec<CompactString> = vec![];
-      for col in 0..self.size.width() {
+      for col in 0..self.size.width {
         let idx = self.xy2idx(col as usize, row as usize);
         let s = self.cells[idx].symbol();
         row_symbols.push(if s.is_empty() {
