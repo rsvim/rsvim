@@ -618,39 +618,39 @@ fn remove2() {
 fn get1() {
   // test_log_init();
 
-  let s1 = IRect::new((0, 0), (20, 20));
+  let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
 
-  let s2 = IRect::new((0, 0), (15, 15));
+  let s2 = rect!(0, 0, 15, 15);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((10, 10), (18, 19));
+  let s3 = rect!(10, 10, 18, 19);
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  let s4 = IRect::new((3, 5), (20, 14));
+  let s4 = rect!(3, 5, 20, 14);
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (10, 20));
+  let s5 = rect!(-3, -5, 10, 20);
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
 
-  let s6 = IRect::new((3, 6), (6, 10));
+  let s6 = rect!(3, 6, 6, 10);
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
-  let s7 = IRect::new((3, 6), (15, 25));
+  let s7 = rect!(3, 6, 15, 25);
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
 
-  let s8 = IRect::new((-1, -2), (2, 1));
+  let s8 = rect!(-1, -2, 2, 1);
   let n8 = TestValue::new(8, s8);
   let nid8 = n8.id();
 
-  let s9 = IRect::new((5, 6), (9, 8));
+  let s9 = rect!(5, 6, 9, 8);
   let n9 = TestValue::new(9, s9);
   let nid9 = n9.id();
 
