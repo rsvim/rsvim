@@ -3,6 +3,7 @@
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::rect;
 use crate::size_into_rect;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
@@ -38,12 +39,7 @@ pub fn make_tree_with_buffers(
   let window_id = window.id();
 
   // Cursor.
-  let cursor_shape = IRect {
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-  };
+  let cursor_shape = rect!(0, 0, 0, 0);
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
