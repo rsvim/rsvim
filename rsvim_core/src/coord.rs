@@ -144,11 +144,31 @@ pub type U16Size = Size<u16>;
 
 // Size }
 
+/// Construct a Point
+#[macro_export]
+macro_rules! point {
+  (x:$x:ident, y:$y:ident) => {
+    geo::point!(x: $x, y: $y)
+  }
+}
+
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
 macro_rules! point_as {
   ($p:ident,$ty:ty) => {
     geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
+  };
+}
+
+/// Construct a Point
+#[macro_export]
+macro_rules! rect {
+  ($min:expr,$max:expr) => {
+    geo::Rect::new($min, $max)
+  };
+
+  (left:$left:expr,top:$top:expr,right:$right:expr,bottom:$bottom:expr) => {
+    geo::Rect::new(geo::point!(x:$left,y:$top), geo::point!(x:$right,y:$bottom))
   };
 }
 
