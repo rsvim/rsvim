@@ -36,7 +36,6 @@ fn version() {
 
     version = format!("{}+{}{}", version, profile, maybe_git_commit,)
   }
-
   version = format!("{} (v8 {})", version, v8_version());
 
   let output_path =
