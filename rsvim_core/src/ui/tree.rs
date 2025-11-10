@@ -2,9 +2,9 @@
 
 pub mod internal;
 
-use crate::geo_size_into_rect;
 use crate::inode_enum_dispatcher;
 use crate::prelude::*;
+use crate::size_into_rect;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
@@ -161,7 +161,7 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
-    let shape = geo_size_into_rect!(canvas_size, isize);
+    let shape = size_into_rect!(canvas_size, isize);
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
     Tree {

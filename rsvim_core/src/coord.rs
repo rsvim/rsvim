@@ -208,7 +208,7 @@ macro_rules! point {
 
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
-macro_rules! geo_point_as {
+macro_rules! point_as {
   ($p:ident,$ty:ty) => {
     taffy::geometry::Point {
       x: $p.x as $ty,
@@ -238,7 +238,7 @@ macro_rules! rect {
 /// use geo::{self, point};
 /// ```
 #[macro_export]
-macro_rules! geo_rect_as {
+macro_rules! rect_as {
   ($r:ident,$ty:ty) => {
     taffy::geometry::Rect {
       left: $r.left as $ty,
@@ -262,7 +262,7 @@ macro_rules! size {
 
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
-macro_rules! geo_size_as {
+macro_rules! size_as {
   ($s:ident,$ty:ty) => {
     taffy::geometry::Size {
       height: $s.height as $ty,
@@ -274,7 +274,7 @@ macro_rules! geo_size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! geo_size_into_rect {
+macro_rules! size_into_rect {
   ($s:ident,$ty:ty) => {
     taffy::geometry::Rect {
       top: 0 as $ty,

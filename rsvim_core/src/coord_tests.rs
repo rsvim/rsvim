@@ -1,15 +1,15 @@
 use super::coord::*;
-use crate::geo_point_as;
-use crate::geo_rect_as;
-use crate::geo_size_as;
-use crate::geo_size_into_rect;
+use crate::point_as;
+use crate::rect_as;
+use crate::size_as;
+use crate::size_into_rect;
 // use crate::prelude::*;
 use std::mem;
 
 #[test]
 fn cast_geo_points() {
   let p1: IPos = IPos { x: 1, y: 2 };
-  let actual1 = geo_point_as!(p1, usize);
+  let actual1 = point_as!(p1, usize);
   let actual1_x = actual1.x;
   let actual1_y = actual1.y;
   assert_eq!(mem::size_of_val(&actual1_x), mem::size_of_val(&1_usize));
@@ -19,7 +19,7 @@ fn cast_geo_points() {
     x: 15_u16,
     y: 25_u16,
   };
-  let actual2 = geo_point_as!(p2, i32);
+  let actual2 = point_as!(p2, i32);
   let actual2_x = actual2.x;
   let actual2_y = actual2.y;
   assert_eq!(mem::size_of_val(&actual2_x), mem::size_of_val(&15_i32));
@@ -29,7 +29,7 @@ fn cast_geo_points() {
     x: 78_u32,
     y: 88_u32,
   };
-  let actual3 = geo_point_as!(p3, i16);
+  let actual3 = point_as!(p3, i16);
   let actual3_x = actual3.x;
   let actual3_y = actual3.y;
   assert_eq!(mem::size_of_val(&actual3_x), mem::size_of_val(&78_i16));
@@ -44,7 +44,7 @@ fn cast_geo_rects() {
     right: 3,
     bottom: 4,
   };
-  let actual1 = geo_rect_as!(r1, u8);
+  let actual1 = rect_as!(r1, u8);
   let actual1_min = actual1.min();
   let actual1_max = actual1.max();
   assert_eq!(mem::size_of_val(&actual1_min.x), mem::size_of_val(&1_u8));
@@ -58,7 +58,7 @@ fn cast_geo_rects() {
     right: 35_u16,
     bottom: 45_u16,
   };
-  let actual2 = geo_rect_as!(r2, i32);
+  let actual2 = rect_as!(r2, i32);
   let actual2_min = actual2.min();
   let actual2_max = actual2.max();
   assert_eq!(mem::size_of_val(&actual2_min.x), mem::size_of_val(&15_i32));
@@ -72,7 +72,7 @@ fn cast_geo_rects() {
     right: 99_u32,
     bottom: 100_u32,
   };
-  let actual3 = geo_rect_as!(r3, i16);
+  let actual3 = rect_as!(r3, i16);
   let actual3_min = actual3.min();
   let actual3_max = actual3.max();
   assert_eq!(mem::size_of_val(&actual3_min.x), mem::size_of_val(&78_i16));
@@ -87,7 +87,7 @@ fn cast_geo_sizes() {
     width: 1,
     height: 2,
   };
-  let actual1 = geo_size_as!(s1, u8);
+  let actual1 = size_as!(s1, u8);
   let actual1_w = actual1.width;
   let actual1_h = actual1.height;
   assert_eq!(mem::size_of_val(&actual1_w), mem::size_of_val(&1_u8));
@@ -97,7 +97,7 @@ fn cast_geo_sizes() {
     width: 15_u16,
     height: 25_u16,
   };
-  let actual2 = geo_size_as!(s2, i32);
+  let actual2 = size_as!(s2, i32);
   let actual2_w = actual2.width;
   let actual2_h = actual2.height;
   assert_eq!(mem::size_of_val(&actual2_w), mem::size_of_val(&15_i32));
@@ -107,7 +107,7 @@ fn cast_geo_sizes() {
     width: 78_u32,
     height: 88_u32,
   };
-  let actual3 = geo_size_as!(s3, i16);
+  let actual3 = size_as!(s3, i16);
   let actual3_h = actual3.height;
   let actual3_w = actual3.width;
   assert_eq!(mem::size_of_val(&actual3_w), mem::size_of_val(&78_i16));
@@ -120,7 +120,7 @@ fn cast_geo_size_into_rect() {
     width: 1,
     height: 2,
   };
-  let actual = geo_size_into_rect!(s1, u8);
+  let actual = size_into_rect!(s1, u8);
   assert_eq!(mem::size_of_val(&actual.min().x), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.min().y), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.max().x), mem::size_of_val(&1_u8));
