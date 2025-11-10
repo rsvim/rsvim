@@ -6698,10 +6698,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
   fn new4_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 17,
-      height: 4,
-    };
+    let terminal_size = size!(17, 4);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
