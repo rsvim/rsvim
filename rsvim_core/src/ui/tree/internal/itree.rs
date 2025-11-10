@@ -2,6 +2,7 @@
 
 use crate::point;
 use crate::prelude::*;
+use crate::rect;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
@@ -668,12 +669,11 @@ where
                   current_top_left_pos.x + x,
                   current_top_left_pos.y + y
                 );
-                let expected_shape = IRect::new(
-                  expected_top_left_pos,
-                  point!(
-                    expected_top_left_pos.x + current_shape.width(),
-                    expected_top_left_pos.y + current_shape.height()
-                  ),
+                let expected_shape = rect!(
+                  expected_top_left_pos.x,
+                  expected_top_left_pos.y,
+                  expected_top_left_pos.x + current_shape.width(),
+                  expected_top_left_pos.y + current_shape.height()
                 );
 
                 let final_shape =
