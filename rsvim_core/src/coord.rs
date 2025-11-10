@@ -198,6 +198,14 @@ pub type U16Size = Size<u16>;
 
 // Size }
 
+/// Construct a Point.
+#[macro_export]
+macro_rules! point {
+  ($x:expr,$y:expr) => {
+    taffy::geometry::Point { x: $x, y: $y }
+  };
+}
+
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
 macro_rules! geo_point_as {
@@ -206,6 +214,19 @@ macro_rules! geo_point_as {
       x: $p.x as $ty,
       y: $p.y as $ty,
     } as taffy::geometry::Point<$ty>
+  };
+}
+
+/// Construct a Rect
+#[macro_export]
+macro_rules! rect {
+  ($left:expr,$top:expr,$right:expr,$bottom:expr) => {
+    taffy::geometry::Rect {
+      left: $left,
+      right: $right,
+      top: $top,
+      bottom: $bottom,
+    }
   };
 }
 
@@ -225,6 +246,17 @@ macro_rules! geo_rect_as {
       top: $r.top as $ty,
       bottom: $r.bottom as $ty,
     } as taffy::geometry::Rect<$ty>
+  };
+}
+
+/// Construct a Size
+#[macro_export]
+macro_rules! size {
+  ($width:expr,$height:expr) => {
+    taffy::geometry::Size {
+      height: $height,
+      width: $width,
+    }
   };
 }
 
