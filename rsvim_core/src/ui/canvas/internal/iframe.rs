@@ -58,7 +58,7 @@ impl Iframe {
 
   /// Convert position into Vec index.
   pub fn pos2idx(&self, pos: U16Pos) -> usize {
-    self.xy2idx(pos.x() as usize, pos.y() as usize)
+    self.xy2idx(pos.x as usize, pos.y as usize)
   }
 
   /// Convert index into (position) X and Y.
@@ -168,7 +168,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_rows[pos.y() as usize] = true;
+      self.dirty_rows[pos.y as usize] = true;
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
@@ -245,7 +245,7 @@ impl Iframe {
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      for row in pos.y()..(end_at.y() + 1) {
+      for row in pos.y..(end_at.y + 1) {
         // trace!("try set dirty rows at row:{:?}", row);
         if (row as usize) < self.dirty_rows.len() {
           self.dirty_rows[row as usize] = true;
@@ -253,8 +253,8 @@ impl Iframe {
       }
       // trace!(
       //   "try set cells dirty at row range:{:?}-{:?}",
-      //   pos.y(),
-      //   end_at.y() + 1
+      //   pos.y,
+      //   end_at.y + 1
       // );
       Some(self.cells.splice(range, cells).collect())
     } else {
