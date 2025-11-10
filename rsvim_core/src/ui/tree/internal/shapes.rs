@@ -88,9 +88,6 @@ pub fn make_actual_shape(
 
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  use std::cmp::max;
-  use std::cmp::min;
-
   let top_left_pos: IPos = shape.min().into();
 
   // Truncate shape if size is larger than parent.
