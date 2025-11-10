@@ -4,7 +4,6 @@ use crate::content::TextContents;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeOptions;
 use crate::js::command::CommandsManager;
-use crate::prelude::*;
 use crate::size;
 use crate::ui::tree::Tree;
 use std::time::Instant;
