@@ -11,12 +11,11 @@ fn version() {
     "[RSVIM] Env profile:{profile:?}, opt_level:{opt_level:?}, debug:{debug:?}..."
   );
 
-  let version = if profile == "release"
+  let mut version = env!("CARGO_PKG_VERSION").to_string();
+  let is_release_profile = profile == "release"
     && (opt_level == "s" || opt_level == "z")
-    && debug != "true"
-  {
-    format!("{} (v8 {})", env!("CARGO_PKG_VERSION"), v8_version())
-  } else {
+    && debug != "true";
+  if !is_release_profile {
     let profile = if profile == "release" {
       "nightly".to_string()
     } else {
@@ -35,14 +34,10 @@ fn version() {
       Err(_) => "".to_string(),
     };
 
-    format!(
-      "{}+{}{} (v8 {})",
-      env!("CARGO_PKG_VERSION"),
-      profile,
-      maybe_git_commit,
-      v8_version()
-    )
-  };
+    version = format!("{}+{}{}", version, profile, maybe_git_commit,)
+  }
+
+  version = format!("{} (v8 {})", version, v8_version());
 
   let output_path =
     Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
