@@ -147,8 +147,8 @@ pub type U16Size = Size<u16>;
 /// Convert the generic type `T` inside `geo::Point<T>` to another type `U`.
 #[macro_export]
 macro_rules! point_as {
-  ($point_var:ident,$type_name:ty) => {
-    geo::point!(x: $point_var.x() as $type_name, y: $point_var.y() as $type_name)
+  ($p:ident,$ty:ty) => {
+    geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
   };
 }
 
