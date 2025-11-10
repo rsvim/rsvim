@@ -63,108 +63,18 @@ fn bound_size1() {
   // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
-    (
-      IRect {
-        left: 0,
-        top: 0,
-        right: 7,
-        bottom: 8,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
-    (
-      IRect {
-        left: 3,
-        top: 2,
-        right: 10,
-        bottom: 10,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
-    (
-      IRect {
-        left: 3,
-        top: -2,
-        right: 12,
-        bottom: 9,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
-    (
-      IRect {
-        left: 3,
-        top: 1,
-        right: 12,
-        bottom: 9,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-      },
-    ),
-    (
-      IRect {
-        left: -1,
-        top: -1,
-        right: 1,
-        bottom: 1,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-      },
-    ),
+    (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
+    (rect!(3, 2, 10, 10), rect!(0, 0, 10, 10)),
+    (rect!(3, -2, 12, 9), rect!(0, 0, 10, 10)),
+    (rect!(3, 1, 12, 9), rect!(0, 0, 0, 0)),
+    (rect!(-1, -1, 1, 1), rect!(0, 0, 0, 0)),
   ];
   let expects: Vec<IRect> = vec![
-    IRect {
-      left: 0,
-      top: 0,
-      right: 7,
-      bottom: 8,
-    },
-    IRect {
-      left: 3,
-      top: 2,
-      right: 10,
-      bottom: 10,
-    },
-    IRect {
-      left: 3,
-      top: -2,
-      right: 12,
-      bottom: 8,
-    },
-    IRect {
-      left: 3,
-      top: 1,
-      right: 3,
-      bottom: 1,
-    },
-    IRect {
-      left: -1,
-      top: -1,
-      right: -1,
-      bottom: -1,
-    },
+    rect!(0, 0, 7, 8),
+    rect!(3, 2, 10, 10),
+    rect!(3, -2, 12, 8),
+    rect!(3, 1, 3, 1),
+    rect!(-1, -1, -1, -1),
   ];
   for (i, p) in inputs.iter().enumerate() {
     let actual = bound_size(&p.0, &p.1);
@@ -182,48 +92,9 @@ fn bound_position1() {
   // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
-    (
-      IRect {
-        left: 0,
-        top: 0,
-        right: 7,
-        bottom: 8,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
-    (
-      IRect {
-        left: 3,
-        top: 2,
-        right: 12,
-        bottom: 11,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
-    (
-      IRect {
-        left: 7,
-        top: -2,
-        right: 13,
-        bottom: 8,
-      },
-      U16Rect {
-        left: 0,
-        top: 0,
-        right: 10,
-        bottom: 10,
-      },
-    ),
+    (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
+    (rect!(3, 2, 12, 11), rect!(0, 0, 10, 10)),
+    (rect!(7, -2, 13, 8), rect!(0, 0, 10, 10)),
     (
       IRect {
         left: -8,
