@@ -1,11 +1,11 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
 use crate::buf::text::Text;
+use crate::point;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::viewport::Viewport;
-use geo::point;
 use std::convert::From;
 
 /// Draw a text (with its viewport) on a canvas (with its actual shape).
@@ -82,7 +82,7 @@ pub fn draw(
           let cells = std::iter::repeat_n('>', start_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += start_fills;
         }
