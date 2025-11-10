@@ -625,11 +625,7 @@ where
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
-        self.move_to(
-          id,
-          current_top_left_pos.x() + x,
-          current_top_left_pos.y() + y,
-        )
+        self.move_to(id, current_top_left_pos.x + x, current_top_left_pos.y + y)
       }
       None => None,
     }
@@ -685,8 +681,8 @@ where
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
-                let final_x = final_top_left_pos.x() - current_top_left_pos.x();
-                let final_y = final_top_left_pos.y() - current_top_left_pos.y();
+                let final_x = final_top_left_pos.x - current_top_left_pos.x;
+                let final_y = final_top_left_pos.y - current_top_left_pos.y;
                 self.move_by(id, final_x, final_y)
               }
               None => None,
@@ -784,7 +780,7 @@ where
                 shapes::bound_shape(&expected_shape, &parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
-              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
+              self.move_to(id, final_top_left_pos.x, final_top_left_pos.y)
             }
             None => None,
           },
