@@ -771,10 +771,13 @@ where
           Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
             Some(node) => {
               let current_shape = *node.shape();
-              let expected_top_left_pos: IPos = point!(x: x, y: y);
+              let expected_top_left_pos: IPos = point!(x, y);
               let expected_shape = IRect::new(
                 expected_top_left_pos,
-                point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                point!(
+                  expected_top_left_pos.x + current_shape.width(),
+                  expected_top_left_pos.y + current_shape.height()
+                ),
               );
 
               let final_shape =
