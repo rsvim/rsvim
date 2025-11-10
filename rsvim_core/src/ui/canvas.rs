@@ -6,12 +6,12 @@ pub mod internal;
 #[cfg(test)]
 mod frame_tests;
 
+use crate::point;
 use crate::prelude::*;
 use crossterm;
 pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
-use geo::point;
 use std::fmt::Debug;
 use std::slice::Iter;
 
@@ -206,8 +206,8 @@ impl Canvas {
     let prev_frame = self.prev_frame();
 
     let mut col_end_at = col;
-    while col_end_at < frame.size().width() {
-      let pos: U16Pos = point!(x: col_end_at, y: row);
+    while col_end_at < frame.size().width {
+      let pos: U16Pos = point!(col_end_at, row);
       let cell2 = frame.get_cell(pos);
       let prev_cell2 = prev_frame.get_cell(pos);
       if cell2 == prev_cell2 {
@@ -229,7 +229,7 @@ impl Canvas {
 
     debug_assert!(end_col > start_col);
     let new_cells = frame.get_cells_at(
-      point!(x: start_col, y: row),
+      point!(start_col, row),
       end_col as usize - start_col as usize,
     );
     let new_contents = new_cells
@@ -261,11 +261,11 @@ impl Canvas {
     let mut shaders = vec![];
 
     if !frame.zero_sized() {
-      for row in 0..size.height() {
+      for row in 0..size.height {
         let mut col = 0_u16;
-        while col < size.width() {
+        while col < size.width {
           // Skip unchanged columns
-          let pos: U16Pos = point!(x: col, y: row);
+          let pos: U16Pos = point!(col, row);
           let cell = frame.get_cell(pos);
           let prev_cell = prev_frame.get_cell(pos);
           if cell == prev_cell {
@@ -304,11 +304,11 @@ impl Canvas {
 
     if !frame.zero_sized() {
       for (row, dirty) in frame.dirty_rows().iter().enumerate() {
-        if row < size.height() as usize && *dirty {
+        if row < size.height as usize && *dirty {
           let mut col = 0_u16;
-          while col < size.width() {
+          while col < size.width {
             // Skip unchanged columns
-            let pos: U16Pos = point!(x: col, y: row as u16);
+            let pos: U16Pos = point!(col, row as u16);
             let cell = frame.get_cell(pos);
             let prev_cell = prev_frame.get_cell(pos);
             if cell == prev_cell {
