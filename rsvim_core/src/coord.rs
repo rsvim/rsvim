@@ -162,7 +162,8 @@ macro_rules! point_as {
 #[macro_export]
 macro_rules! rect_as {
   ($r:ident,$ty:ty) => {
-    geo::Rect::new(geo::point!(x: $r.min().y as $ty), geo::point!(x: $r.max().x as $ty, y: $r.max().y as $ty)) as geo::Rect<$ty>
+    geo::Rect::new(geo::point!(x: $r.min().x as $ty, y: $r.min().y as $ty), geo::point!(x: $r.max().x as $ty, y: $r.max().y as $ty)) as geo::Rect<$ty>
+
   };
 }
 
