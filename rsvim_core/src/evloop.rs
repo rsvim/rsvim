@@ -21,6 +21,8 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
+use crate::size;
+use crate::size_into_rect;
 use crate::state::StateDataAccess;
 use crate::state::StateMachine;
 use crate::state::Stateful;
@@ -173,7 +175,7 @@ impl EventLoop {
     ),
   )> {
     // Canvas
-    let canvas_size = U16Size::new(terminal_cols, terminal_rows);
+    let canvas_size = size!(terminal_cols, terminal_rows);
     let canvas = Canvas::new(canvas_size);
     let canvas = Canvas::to_arc(canvas);
 
@@ -536,13 +538,7 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
-    let window_shape = IRect::new(
-      (0, 0),
-      (
-        canvas_size.width() as isize,
-        canvas_size.height().saturating_sub(1) as isize,
-      ),
-    );
+    let window_shape = size_into_rect!(canvas_size, isize);
     let mut window = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
