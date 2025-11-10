@@ -1,16 +1,17 @@
 use super::iframe::*;
+use crate::point;
 use crate::prelude::*;
+use crate::size;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use geo::point;
 
 #[test]
 fn new1() {
-  let sz = U16Size::new(2, 1);
+  let sz = size!(2, 1);
   let f = Iframe::new(sz);
   assert_eq!(f.size().width(), 2);
   assert_eq!(f.size().height(), 1);
@@ -25,7 +26,7 @@ fn new1() {
 
 #[test]
 fn pos2range1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.pos2range(point!(x: 0, y:0), 7), 0..7);
   assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
@@ -35,7 +36,7 @@ fn pos2range1() {
 
 #[test]
 fn idx2range1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.idx2range(0, 7), 0..7);
   assert_eq!(frame.idx2range(27, 23), 27..50);
@@ -45,7 +46,7 @@ fn idx2range1() {
 
 #[test]
 fn xy2idx1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.xy2idx(0, 7), 70);
   assert_eq!(frame.xy2idx(7, 3), 37);
@@ -56,7 +57,7 @@ fn xy2idx1() {
 
 #[test]
 fn pos2idx1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.pos2idx(point!(x:0, y:7)), 70);
   assert_eq!(frame.pos2idx(point!(x:7, y:3)), 37);
@@ -67,7 +68,7 @@ fn pos2idx1() {
 
 #[test]
 fn idx2xy1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.idx2xy(70), (0, 7));
   assert_eq!(frame.idx2xy(37), (7, 3));
@@ -78,7 +79,7 @@ fn idx2xy1() {
 
 #[test]
 fn idx2pos1() {
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let frame = Iframe::new(frame_size);
   assert_eq!(frame.idx2pos(70), point!(x:0, y:7));
   assert_eq!(frame.idx2pos(37), point!(x:7, y:3));
@@ -90,7 +91,7 @@ fn idx2pos1() {
 #[test]
 fn set_cell1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -126,7 +127,7 @@ fn set_cell1() {
 #[test]
 fn set_empty_cell1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -174,7 +175,7 @@ fn set_empty_cell1() {
 #[test]
 fn cells_at1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
@@ -278,7 +279,7 @@ fn cells_at1() {
 #[test]
 fn set_cells_at1() {
   // test_log_init();
-  let frame_size = U16Size::new(10, 10);
+  let frame_size = size!(10, 10);
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, &str)> = vec![
@@ -327,7 +328,7 @@ fn set_cells_at1() {
 fn clone1() {
   test_log_init();
 
-  let size1 = U16Size::new(5, 5);
+  let size1 = size!(5, 5);
   let mut frame1 = Iframe::new(size1);
   for i in 0..25 {
     let pos = frame1.idx2pos(i);
@@ -339,7 +340,7 @@ fn clone1() {
   }
   info!("frame1:{frame1:?}");
 
-  let size2 = U16Size::new(3, 3);
+  let size2 = size!(3, 3);
   let mut frame2 = Iframe::new(size2);
   for i in 0..9 {
     let pos = frame2.idx2pos(i);
@@ -352,7 +353,7 @@ fn clone1() {
   }
   info!("frame2:{frame2:?}");
 
-  let size3 = U16Size::new(7, 7);
+  let size3 = size!(7, 7);
   let mut frame3 = Iframe::new(size3);
   for i in 0..49 {
     let pos = frame3.idx2pos(i);
