@@ -723,7 +723,10 @@ where
         let next_top_left_pos: IPos = point!(x, y);
         let next_shape = IRect::new(
           next_top_left_pos,
-          point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+          point!(
+            next_top_left_pos.x + current_shape.width(),
+            next_top_left_pos.y + current_shape.height()
+          ),
         );
         node.set_shape(&next_shape);
 
