@@ -669,7 +669,7 @@ where
                   current_top_left_pos.x + x,
                   current_top_left_pos.y + y
                 );
-                let expected_shape = rect!(
+                let expected_shape: IRect = rect!(
                   expected_top_left_pos.x,
                   expected_top_left_pos.y,
                   expected_top_left_pos.x + current_shape.width(),
