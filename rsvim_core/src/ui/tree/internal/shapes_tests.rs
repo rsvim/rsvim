@@ -95,66 +95,15 @@ fn bound_position1() {
     (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
     (rect!(3, 2, 12, 11), rect!(0, 0, 10, 10)),
     (rect!(7, -2, 13, 8), rect!(0, 0, 10, 10)),
-    (
-      IRect {
-        left: -8,
-        top: 8,
-        right: -3,
-        bottom: 16,
-      },
-      U16Rect {
-        left: 3,
-        top: 7,
-        right: 8,
-        bottom: 15,
-      },
-    ),
-    (
-      IRect {
-        left: -5,
-        top: 19,
-        right: -3,
-        bottom: 21,
-      },
-      U16Rect {
-        left: 10,
-        top: 15,
-        right: 15,
-        bottom: 20,
-      },
-    ),
+    (rect!(-8, 8, -3, 16), rect!(3, 7, 8, 15)),
+    (rect!(-5, 19, -3, 21), rect!(10, 15, 15, 20)),
   ];
   let expects: Vec<IRect> = vec![
-    IRect {
-      left: 0,
-      top: 0,
-      right: 7,
-      bottom: 8,
-    },
-    IRect {
-      left: 1,
-      top: 1,
-      right: 10,
-      bottom: 10,
-    },
-    IRect {
-      left: 4,
-      top: 0,
-      right: 10,
-      bottom: 10,
-    },
-    IRect {
-      left: 0,
-      top: 0,
-      right: 5,
-      bottom: 8,
-    },
-    IRect {
-      left: 0,
-      top: 3,
-      right: 2,
-      bottom: 5,
-    },
+    rect!(0, 0, 7, 8),
+    rect!(1, 1, 10, 10),
+    rect!(4, 0, 10, 10),
+    rect!(0, 0, 5, 8),
+    rect!(0, 3, 2, 5),
   ];
   for (i, p) in inputs.iter().enumerate() {
     let actual = bound_position(&p.0, &p.1);
