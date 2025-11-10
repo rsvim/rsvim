@@ -180,7 +180,9 @@ macro_rules! size_as {
 #[macro_export]
 macro_rules! size_into_rect {
   ($s:ident,$ty:ty) => {
-    geo::Rect::new((0 as $ty), ($s.width() as $ty, $s.height() as $ty))
-      as geo::Rect<$ty>
+    geo::Rect::new(
+      (0 as $ty, 0 as $ty),
+      ($s.width() as $ty, $s.height() as $ty),
+    ) as geo::Rect<$ty>
   };
 }
