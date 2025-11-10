@@ -77,7 +77,7 @@ impl Default for Cursor {
   /// Make default cursor.
   fn default() -> Self {
     Cursor {
-      pos: point! {x:0_u16, y:0_u16},
+      pos: point!(x:0_u16, y:0_u16),
       // blinking=false
       // hidden=false
       flags: Flags::empty(),
