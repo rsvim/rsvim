@@ -21,7 +21,6 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
-use crate::rect;
 use crate::state::StateDataAccess;
 use crate::state::StateMachine;
 use crate::state::Stateful;
@@ -537,12 +536,12 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
-    let window_shape = rect!(
+    let window_shape = IRect::new(
       (0, 0),
       (
         canvas_size.width() as isize,
         canvas_size.height().saturating_sub(1) as isize,
-      )
+      ),
     );
     let mut window = {
       let buffers = lock!(self.buffers);
@@ -557,7 +556,7 @@ impl EventLoop {
     let window_id = window.id();
 
     // Initialize cursor inside the default window.
-    let cursor_shape = rect!(left:0, top:0, right:1, bottom:1);
+    let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor = Cursor::new(
       cursor_shape,
       canvas_cursor.blinking(),
