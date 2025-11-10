@@ -21,6 +21,7 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
+use crate::rect;
 use crate::size;
 use crate::size_into_rect;
 use crate::state::StateDataAccess;
