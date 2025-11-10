@@ -57,11 +57,9 @@ pub fn make_actual_shape(
     parent_actual_top_left_ipos.x(),
     parent_actual_bottom_right_ipos.x(),
   );
-  let actual_bottom_right_y = min(
-    max(
-      actual_bottom_right_ipos.y(),
-      parent_actual_top_left_ipos.y(),
-    ),
+  let actual_bottom_right_y = num_traits::clamp(
+    actual_bottom_right_ipos.y(),
+    parent_actual_top_left_ipos.y(),
     parent_actual_bottom_right_ipos.y(),
   );
   let actual_bottom_right_pos: U16Pos =
