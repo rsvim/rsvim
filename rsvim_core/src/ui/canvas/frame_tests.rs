@@ -1,4 +1,5 @@
 use super::frame::*;
+use crate::point;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::frame::cell::Cell;
@@ -7,16 +8,15 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::style::Attributes;
 use crossterm::style::Color;
-use geo::point;
 
 #[test]
 fn pos2range1() {
   let frame_size = U16Size::new(10, 10);
   let frame = Frame::new(frame_size, Cursor::default());
-  assert_eq!(frame.pos2range(point!(x: 0, y:0), 7), 0..7);
-  assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
-  assert_eq!(frame.pos2range(point!(x: 8, y:9), 1), 98..99);
-  assert_eq!(frame.pos2range(point!(x: 9, y:9), 1), 99..100);
+  assert_eq!(frame.pos2range(point!(0, 0), 7), 0..7);
+  assert_eq!(frame.pos2range(point!(7, 2), 23), 27..50);
+  assert_eq!(frame.pos2range(point!(8, 9), 1), 98..99);
+  assert_eq!(frame.pos2range(point!(9, 9), 1), 99..100);
 }
 
 #[test]
