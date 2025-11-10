@@ -1,8 +1,8 @@
 use super::coord::*;
-use crate::geo_size_into_rect;
 use crate::point_as;
 use crate::rect_as;
 use crate::size_as;
+use crate::size_into_rect;
 use geo::Point;
 use geo::Rect;
 use geo::point;
@@ -89,7 +89,7 @@ fn cast_geo_sizes() {
 #[test]
 fn cast_geo_size_into_rect() {
   let s1: ISize = ISize::new(1, 2);
-  let actual = geo_size_into_rect!(s1, u8);
+  let actual = size_into_rect!(s1, u8);
   assert_eq!(mem::size_of_val(&actual.min().x), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.min().y), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.max().x), mem::size_of_val(&1_u8));
