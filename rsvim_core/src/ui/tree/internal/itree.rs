@@ -717,12 +717,11 @@ where
       Some(node) => {
         let current_shape = *node.shape();
         let next_top_left_pos: IPos = point!(x, y);
-        let next_shape = IRect::new(
-          next_top_left_pos,
-          point!(
-            next_top_left_pos.x + current_shape.width(),
-            next_top_left_pos.y + current_shape.height()
-          ),
+        let next_shape = rect!(
+          next_top_left_pos.x,
+          next_top_left_pos.y,
+          next_top_left_pos.x + current_shape.width(),
+          next_top_left_pos.y + current_shape.height()
         );
         node.set_shape(&next_shape);
 
@@ -768,12 +767,11 @@ where
             Some(node) => {
               let current_shape = *node.shape();
               let expected_top_left_pos: IPos = point!(x, y);
-              let expected_shape = IRect::new(
-                expected_top_left_pos,
-                point!(
-                  expected_top_left_pos.x + current_shape.width(),
-                  expected_top_left_pos.y + current_shape.height()
-                ),
+              let expected_shape = rect!(
+                expected_top_left_pos.x,
+                expected_top_left_pos.y,
+                expected_top_left_pos.x + current_shape.width(),
+                expected_top_left_pos.y + current_shape.height()
               );
 
               let final_shape =
