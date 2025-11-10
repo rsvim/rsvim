@@ -171,7 +171,7 @@ macro_rules! rect_as {
 #[macro_export]
 macro_rules! size_as {
   ($s:ident,$ty:ty) => {
-    Size::new($s.width() as $ty) as Size<$ty>
+    Size::new($s.width() as $ty, $s.height() as $ty) as Size<$ty>
   };
 }
 
