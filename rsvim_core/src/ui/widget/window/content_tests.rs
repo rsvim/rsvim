@@ -587,10 +587,7 @@ mod tests_nowrap_startcol {
   fn new2() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 35,
-      height: 6,
-    };
+    let terminal_size = size!(35, 6);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -627,10 +624,7 @@ mod tests_nowrap_startcol {
   fn new3() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 33,
-      height: 10,
-    };
+    let terminal_size = size!(33, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -671,10 +665,7 @@ mod tests_nowrap_startcol {
   fn new4() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 31,
-      height: 20,
-    };
+    let terminal_size = size!(31, 20);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -724,10 +715,7 @@ mod tests_nowrap_startcol {
   fn update1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 21,
-      height: 10,
-    };
+    let terminal_size = size!(21, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
 
@@ -790,10 +778,7 @@ mod tests_wrap_nolinebreak {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size {
-      width: 10,
-      height: 10,
-    };
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default().build().unwrap();
     let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
 
