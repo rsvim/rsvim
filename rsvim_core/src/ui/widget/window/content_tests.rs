@@ -5,7 +5,7 @@ use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
-use crate::geo_size_into_rect;
+use crate::geo_size_into;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
@@ -33,7 +33,7 @@ pub fn make_viewport(
   start_column_idx: usize,
 ) -> ViewportArc {
   let buffer = lock!(buffer);
-  let actual_shape = geo_size_into_rect!(terminal_size, u16);
+  let actual_shape = geo_size_into!(terminal_size, u16);
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),

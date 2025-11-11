@@ -138,7 +138,7 @@ macro_rules! geo_point_as {
 
 #[macro_export]
 macro_rules! geo_rect {
-  (lt:$min:expr,rb:$max:expr) => {
+  (min:$min:expr,max:$max:expr) => {
     geo::Rect::new($min, $max)
   };
 
@@ -180,7 +180,7 @@ macro_rules! geo_size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! geo_size_into_rect {
+macro_rules! geo_size_into {
   ($s:ident,$ty:ty) => {
     geo::Rect::new(
       (0 as $ty, 0 as $ty),
