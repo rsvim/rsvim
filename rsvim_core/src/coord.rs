@@ -110,16 +110,6 @@ where
   }
 }
 
-impl<T> Into<Rect<T>> for Size<T>
-where
-  T: geo::CoordNum,
-{
-  /// Make rect from [`Size`].
-  fn into(self) -> Rect<T> {
-    Rect::new((0 as T, 0 as T), (self.width() as T, self.height() as T))
-  }
-}
-
 /// Size that uses [`isize`] as internal type.
 pub type ISize = Size<isize>;
 
