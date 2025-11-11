@@ -110,20 +110,13 @@ where
   }
 }
 
-pub trait GeoRectExt<T>
+impl<T> Into<Rect<T>> for Size<T>
 where
   T: geo::CoordNum,
 {
-  fn from(size: Size<T>) -> geo::Rect<T>;
-}
-
-impl<T> GeoRectExt<T> for Rect<T>
-where
-  T: geo::CoordNum,
-{
-  fn from(size: Size<T>) -> geo::Rect<T> {
-    geo::Rect::new((0 as T, 0 as T), (size.width() as T, size.height() as T))
-      as geo::Rect<T>
+  /// Make rect from [`Size`].
+  fn into(self) -> Rect<T> {
+    Rect::new((0 as T, 0 as T), (self.width() as T, self.height() as T))
   }
 }
 
