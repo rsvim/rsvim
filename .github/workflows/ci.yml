@@ -22,7 +22,7 @@ env:
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Tsc
@@ -130,7 +130,7 @@ jobs:
           verbose: true
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         rust_version: [1.89.0, stable, beta]
