@@ -8,8 +8,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    ignore:
-      - dependency-name: "v8" # Ignore v8
     groups:
       swc: # For SWC monorepo
         patterns:
