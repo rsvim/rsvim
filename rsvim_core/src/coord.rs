@@ -138,7 +138,7 @@ macro_rules! geo_point_as {
 
 #[macro_export]
 macro_rules! geo_rect {
-  ($min:expr,$max:expr) => {
+  (lt:$min:expr,rb:$max:expr) => {
     geo::Rect::new($min, $max)
   };
 
