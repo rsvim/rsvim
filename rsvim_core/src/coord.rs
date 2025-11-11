@@ -102,14 +102,7 @@ where
 
 impl<T> From<Rect<T>> for Size<T>
 where
-  T: Copy
-    + PartialOrd
-    + Ord
-    + PartialEq
-    + Eq
-    + std::fmt::Debug
-    + num_traits::Num
-    + num_traits::NumCast,
+  T: geo::CoordNum,
 {
   /// Make size from [`Rect`].
   fn from(rect: Rect<T>) -> Size<T> {
