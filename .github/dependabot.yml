@@ -9,8 +9,11 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "swc*" # Ignore swc
       - dependency-name: "v8" # Ignore v8
+    groups:
+      swc: # For SWC monorepo
+        patterns:
+          - "swc*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
