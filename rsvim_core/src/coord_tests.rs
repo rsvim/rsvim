@@ -1,8 +1,5 @@
 use super::coord::*;
-use crate::geo_point_as;
-use crate::geo_rect_as;
-use crate::geo_size_as;
-use crate::geo_size_into;
+use crate::prelude::*;
 use geo::Point;
 use geo::Rect;
 use geo::point;
