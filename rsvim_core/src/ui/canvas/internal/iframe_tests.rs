@@ -93,7 +93,7 @@ fn set_cell1() {
   let frame_size = U16Size::new(10, 10);
   let mut frame = Iframe::new(frame_size);
 
-  let inputs: Vec<(U16Pos, char)> = vec![
+  let inputs: Vec<(U16Point, char)> = vec![
     (point!(x: 0, y: 0), 'A'),
     (point!(x: 7, y: 8), 'B'),
     (point!(x: 1, y: 3), 'C'),
@@ -129,7 +129,7 @@ fn set_empty_cell1() {
   let frame_size = U16Size::new(10, 10);
   let mut frame = Iframe::new(frame_size);
 
-  let inputs: Vec<(U16Pos, char)> = vec![
+  let inputs: Vec<(U16Point, char)> = vec![
     (point!(x: 0, y: 0), 'A'),
     (point!(x: 7, y: 8), 'B'),
     (point!(x: 1, y: 3), 'C'),
@@ -177,7 +177,7 @@ fn cells_at1() {
   let frame_size = U16Size::new(10, 10);
   let mut frame = Iframe::new(frame_size);
 
-  let inputs: Vec<(U16Pos, char)> = vec![
+  let inputs: Vec<(U16Point, char)> = vec![
     (point!(x: 0, y: 0), 'A'),
     (point!(x: 7, y: 1), 'B'),
     (point!(x: 1, y: 2), 'C'),
@@ -212,7 +212,7 @@ fn cells_at1() {
   info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
   let all_cells = frame.get_cells();
   for i in 0..10 {
-    let pos: U16Pos = point!(x:0, y:i);
+    let pos: U16Point = point!(x:0, y:i);
     let cells = frame.get_cells_at(pos, 10);
     let actual = cells
       .iter()
@@ -281,7 +281,7 @@ fn set_cells_at1() {
   let frame_size = U16Size::new(10, 10);
   let mut frame = Iframe::new(frame_size);
 
-  let inputs: Vec<(U16Pos, &str)> = vec![
+  let inputs: Vec<(U16Point, &str)> = vec![
     (point!(x: 0, y: 0), "ABCD"),
     (point!(x: 7, y: 1), "EFGHIJK"),
     (point!(x: 1, y: 2), "LMN"),

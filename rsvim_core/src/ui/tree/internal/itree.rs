@@ -624,7 +624,7 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let current_top_left_pos: IPos = current_shape.min().into();
+        let current_top_left_pos: IPoint = current_shape.min().into();
         self.move_to(
           id,
           current_top_left_pos.x() + x,
@@ -667,8 +667,8 @@ where
             match self.nodes.get_mut(&id) {
               Some(node) => {
                 let current_shape = *node.shape();
-                let current_top_left_pos: IPos = current_shape.min().into();
-                let expected_top_left_pos: IPos = point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                let current_top_left_pos: IPoint = current_shape.min().into();
+                let expected_top_left_pos: IPoint = point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
                 let expected_shape = IRect::new(
                   expected_top_left_pos,
                   point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
@@ -676,7 +676,7 @@ where
 
                 let final_shape =
                   shapes::bound_shape(&expected_shape, &parent_actual_shape);
-                let final_top_left_pos: IPos = final_shape.min().into();
+                let final_top_left_pos: IPoint = final_shape.min().into();
 
                 // Real movement
                 let final_x = final_top_left_pos.x() - current_top_left_pos.x();
@@ -714,7 +714,7 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let next_top_left_pos: IPos = point!(x: x, y: y);
+        let next_top_left_pos: IPoint = point!(x: x, y: y);
         let next_shape = IRect::new(
           next_top_left_pos,
           point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
@@ -762,7 +762,7 @@ where
           Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
             Some(node) => {
               let current_shape = *node.shape();
-              let expected_top_left_pos: IPos = point!(x: x, y: y);
+              let expected_top_left_pos: IPoint = point!(x: x, y: y);
               let expected_shape = IRect::new(
                 expected_top_left_pos,
                 point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
@@ -770,7 +770,7 @@ where
 
               let final_shape =
                 shapes::bound_shape(&expected_shape, &parent_actual_shape);
-              let final_top_left_pos: IPos = final_shape.min().into();
+              let final_top_left_pos: IPoint = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
             }

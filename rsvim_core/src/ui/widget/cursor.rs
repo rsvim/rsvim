@@ -79,7 +79,7 @@ inode_impl!(Cursor, base);
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
-    let pos: U16Pos = actual_shape.min().into();
+    let pos: U16Point = actual_shape.min().into();
     // trace!(
     //   "draw, actual shape:{:?}, top-left pos:{:?}",
     //   actual_shape, pos

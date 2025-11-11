@@ -20,17 +20,18 @@ pub fn make_actual_shape(
   //   "shape:{:?}, parent_actual_shape:{:?}",
   //   shape, parent_actual_shape
   // );
-  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_top_left_ipos: IPos =
+  let parent_actual_top_left_pos: U16Point = parent_actual_shape.min().into();
+  let parent_actual_top_left_ipos: IPoint =
     geo_point_as!(parent_actual_top_left_pos, isize);
-  let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
-  let parent_actual_bottom_right_ipos: IPos =
+  let parent_actual_bottom_right_pos: U16Point =
+    parent_actual_shape.max().into();
+  let parent_actual_bottom_right_ipos: IPoint =
     geo_point_as!(parent_actual_bottom_right_pos, isize);
 
-  let top_left_pos: IPos = shape.min().into();
-  let bottom_right_pos: IPos = shape.max().into();
+  let top_left_pos: IPoint = shape.min().into();
+  let bottom_right_pos: IPoint = shape.max().into();
 
-  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_top_left_ipos;
+  let actual_top_left_ipos: IPoint = top_left_pos + parent_actual_top_left_ipos;
   let actual_top_left_x = num_traits::clamp(
     actual_top_left_ipos.x(),
     parent_actual_top_left_ipos.x(),
@@ -41,14 +42,14 @@ pub fn make_actual_shape(
     parent_actual_top_left_ipos.y(),
     parent_actual_bottom_right_ipos.y(),
   );
-  let actual_top_left_pos: U16Pos =
+  let actual_top_left_pos: U16Point =
     point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
   // trace!(
   //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
   //   actual_top_left_ipos, actual_top_left_pos
   // );
 
-  let actual_bottom_right_ipos: IPos =
+  let actual_bottom_right_ipos: IPoint =
     bottom_right_pos + parent_actual_top_left_ipos;
   let actual_bottom_right_x = num_traits::clamp(
     actual_bottom_right_ipos.x(),
@@ -60,7 +61,7 @@ pub fn make_actual_shape(
     parent_actual_top_left_ipos.y(),
     parent_actual_bottom_right_ipos.y(),
   );
-  let actual_bottom_right_pos: U16Pos =
+  let actual_bottom_right_pos: U16Point =
     point!(x: actual_bottom_right_x as u16, y: actual_bottom_right_y as u16);
 
   let actual_isize = ISize::new(
@@ -86,7 +87,7 @@ pub fn make_actual_shape(
 
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let top_left_pos: IPos = shape.min().into();
+  let top_left_pos: IPoint = shape.min().into();
 
   // Truncate shape if size is larger than parent.
   let height =
@@ -102,8 +103,8 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
 pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let top_left_pos: IPos = shape.min().into();
-  let bottom_right_pos: IPos = shape.max().into();
+  let top_left_pos: IPoint = shape.min().into();
+  let bottom_right_pos: IPoint = shape.max().into();
 
   // X-axis
   let top_left_x = if top_left_pos.x() < 0 {

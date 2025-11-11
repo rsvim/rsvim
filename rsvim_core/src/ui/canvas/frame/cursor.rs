@@ -11,7 +11,7 @@ flags_impl!(Flags, u8, BLINKING, HIDDEN);
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Terminal cursor.
 pub struct Cursor {
-  pos: U16Pos,
+  pos: U16Point,
   // blinking=false
   // hidden=false
   flags: Flags,
@@ -21,7 +21,7 @@ pub struct Cursor {
 impl Cursor {
   /// Make new terminal cursor.
   pub fn new(
-    pos: U16Pos,
+    pos: U16Point,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
@@ -33,12 +33,12 @@ impl Cursor {
   }
 
   /// Get position.
-  pub fn pos(&self) -> &U16Pos {
+  pub fn pos(&self) -> &U16Point {
     &self.pos
   }
 
   /// Set position.
-  pub fn set_pos(&mut self, pos: U16Pos) {
+  pub fn set_pos(&mut self, pos: U16Point) {
     self.pos = pos;
   }
 

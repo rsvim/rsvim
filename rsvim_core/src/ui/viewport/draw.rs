@@ -15,7 +15,7 @@ pub fn draw(
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
-  let upos: U16Pos = actual_shape.min().into();
+  let upos: U16Point = actual_shape.min().into();
   let height = actual_shape.height();
   let width = actual_shape.width();
 

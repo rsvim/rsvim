@@ -42,7 +42,7 @@ impl Frame {
   /// Convert start position and length of following N elements into Vec range.
   ///
   /// Returns the left-inclusive right-exclusive index range.
-  pub fn pos2range(&self, pos: U16Pos, n: usize) -> Range<usize> {
+  pub fn pos2range(&self, pos: U16Point, n: usize) -> Range<usize> {
     self.iframe.pos2range(pos, n)
   }
 
@@ -57,7 +57,7 @@ impl Frame {
   }
 
   /// Convert position into Vec index.
-  pub fn pos2idx(&self, pos: U16Pos) -> usize {
+  pub fn pos2idx(&self, pos: U16Point) -> usize {
     self.iframe.pos2idx(pos)
   }
 
@@ -77,7 +77,7 @@ impl Frame {
   /// # Panics
   ///
   /// If index is outside of frame shape.
-  pub fn idx2pos(&self, index: usize) -> U16Pos {
+  pub fn idx2pos(&self, index: usize) -> U16Point {
     let (x, y) = self.idx2xy(index);
     point!(x: x as u16, y: y as u16)
   }
@@ -114,12 +114,12 @@ impl Frame {
   /// # Panics
   ///
   /// If the position is outside of frame shape.
-  pub fn get_cell(&self, pos: U16Pos) -> &Cell {
+  pub fn get_cell(&self, pos: U16Point) -> &Cell {
     self.iframe.get_cell(pos)
   }
 
   /// Try get a cell, non-panic version of [`get_cell`](Frame::get_cell).
-  pub fn try_get_cell(&self, pos: U16Pos) -> Option<&Cell> {
+  pub fn try_get_cell(&self, pos: U16Point) -> Option<&Cell> {
     self.iframe.try_get_cell(pos)
   }
 
@@ -130,12 +130,12 @@ impl Frame {
   /// # Panics
   ///
   /// If the position is outside of frame shape.
-  pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
+  pub fn set_cell(&mut self, pos: U16Point, cell: Cell) -> Cell {
     self.iframe.set_cell(pos, cell)
   }
 
   /// Try set a cell, non-panic version of [`set_cell`](Frame::set_cell).
-  pub fn try_set_cell(&mut self, pos: U16Pos, cell: Cell) -> Option<Cell> {
+  pub fn try_set_cell(&mut self, pos: U16Point, cell: Cell) -> Option<Cell> {
     self.iframe.try_set_cell(pos, cell)
   }
 
@@ -146,12 +146,12 @@ impl Frame {
   /// # Panics
   ///
   /// If the position is outside of frame shape.
-  pub fn set_empty_cell(&mut self, pos: U16Pos) -> Cell {
+  pub fn set_empty_cell(&mut self, pos: U16Point) -> Cell {
     self.iframe.set_empty_cell(pos)
   }
 
   /// Try set an empty cell, non-panic version of [`set_empty_cell`](Frame::set_empty_cell).
-  pub fn try_set_empty_cell(&mut self, pos: U16Pos) -> Option<Cell> {
+  pub fn try_set_empty_cell(&mut self, pos: U16Point) -> Option<Cell> {
     self.iframe.try_set_empty_cell(pos)
   }
 
@@ -165,13 +165,13 @@ impl Frame {
   /// # Panics
   ///
   /// If the range is outside of frame shape.
-  pub fn get_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+  pub fn get_cells_at(&self, pos: U16Point, n: usize) -> &[Cell] {
     self.iframe.get_cells_at(pos, n)
   }
 
   /// Try get a range of continuously cells, non-panic version of
   /// [`get_cells_at`](Frame::get_cells_at).
-  pub fn try_get_cells_at(&self, pos: U16Pos, n: usize) -> Option<&[Cell]> {
+  pub fn try_get_cells_at(&self, pos: U16Point, n: usize) -> Option<&[Cell]> {
     self.iframe.try_get_cells_at(pos, n)
   }
 
@@ -182,7 +182,7 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
+  pub fn set_cells_at(&mut self, pos: U16Point, cells: Vec<Cell>) -> Vec<Cell> {
     self.iframe.set_cells_at(pos, cells)
   }
 
@@ -190,7 +190,7 @@ impl Frame {
   /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(
     &mut self,
-    pos: U16Pos,
+    pos: U16Point,
     cells: Vec<Cell>,
   ) -> Option<Vec<Cell>> {
     self.iframe.try_set_cells_at(pos, cells)
@@ -201,7 +201,7 @@ impl Frame {
   /// # Panics
   ///
   /// If any positions of `cells` is outside of frame shape.
-  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
+  pub fn set_empty_cells_at(&mut self, pos: U16Point, n: usize) -> Vec<Cell> {
     self.iframe.set_empty_cells_at(pos, n)
   }
 
@@ -209,7 +209,7 @@ impl Frame {
   /// [`set_empty_cells_at`](Frame::set_empty_cells_at).
   pub fn try_set_empty_cells_at(
     &mut self,
-    pos: U16Pos,
+    pos: U16Point,
     n: usize,
   ) -> Option<Vec<Cell>> {
     self.iframe.try_set_empty_cells_at(pos, n)

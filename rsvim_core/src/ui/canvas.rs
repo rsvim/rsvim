@@ -84,7 +84,7 @@ impl Canvas {
   }
 
   /// Get previous frame cells at specified range.
-  pub fn prev_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+  pub fn prev_cells_at(&self, pos: U16Point, n: usize) -> &[Cell] {
     self.prev_frame.get_cells_at(pos, n)
   }
 
@@ -207,7 +207,7 @@ impl Canvas {
 
     let mut col_end_at = col;
     while col_end_at < frame.size().width() {
-      let pos: U16Pos = point!(x: col_end_at, y: row);
+      let pos: U16Point = point!(x: col_end_at, y: row);
       let cell2 = frame.get_cell(pos);
       let prev_cell2 = prev_frame.get_cell(pos);
       if cell2 == prev_cell2 {
@@ -265,7 +265,7 @@ impl Canvas {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
-          let pos: U16Pos = point!(x: col, y: row);
+          let pos: U16Point = point!(x: col, y: row);
           let cell = frame.get_cell(pos);
           let prev_cell = prev_frame.get_cell(pos);
           if cell == prev_cell {
@@ -308,7 +308,7 @@ impl Canvas {
           let mut col = 0_u16;
           while col < size.width() {
             // Skip unchanged columns
-            let pos: U16Pos = point!(x: col, y: row as u16);
+            let pos: U16Point = point!(x: col, y: row as u16);
             let cell = frame.get_cell(pos);
             let prev_cell = prev_frame.get_cell(pos);
             if cell == prev_cell {

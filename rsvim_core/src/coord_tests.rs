@@ -7,14 +7,14 @@ use std::mem;
 
 #[test]
 fn cast_geo_points() {
-  let p1: IPos = point!(x: 1, y: 2);
+  let p1: IPoint = point!(x: 1, y: 2);
   let actual1 = geo_point_as!(p1, usize);
   let actual1_x = actual1.x();
   let actual1_y = actual1.y();
   assert_eq!(mem::size_of_val(&actual1_x), mem::size_of_val(&1_usize));
   assert_eq!(mem::size_of_val(&actual1_y), mem::size_of_val(&2_usize));
 
-  let p2: U16Pos = point!(x: 15_u16, y: 25_u16);
+  let p2: U16Point = point!(x: 15_u16, y: 25_u16);
   let actual2 = geo_point_as!(p2, i32);
   let actual2_x = actual2.x();
   let actual2_y = actual2.y();

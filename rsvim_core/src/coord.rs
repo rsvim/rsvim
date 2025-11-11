@@ -43,20 +43,20 @@
 use geo::Point;
 use geo::Rect;
 
-// Positions {
+// Point {
 
 /// Position that uses [`isize`] as internal type.
-pub type IPos = Point<isize>;
+pub type IPoint = Point<isize>;
 
 /// Position that uses [`usize`] as internal type.
-pub type UPos = Point<usize>;
+pub type UPoint = Point<usize>;
 
 /// Position that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
-pub type U16Pos = Point<u16>;
+pub type U16Point = Point<u16>;
 
-// Positions }
+// Point }
 
-// Rectangles {
+// Rectangle {
 
 /// Rectangle that uses [`isize`] as internal type.
 pub type IRect = Rect<isize>;
@@ -67,7 +67,7 @@ pub type URect = Rect<usize>;
 /// Rectangle that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Rect = Rect<u16>;
 
-// Rectangles }
+// Rectangle }
 
 // Size {
 
