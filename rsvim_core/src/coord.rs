@@ -40,8 +40,8 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-pub use geo::Point;
-pub use geo::Rect;
+use geo::Point;
+use geo::Rect;
 
 // Positions {
 
@@ -73,30 +73,14 @@ pub type U16Rect = Rect<u16>;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 /// Generic rectangle size.
-pub struct Size<
-  T: Copy
-    + PartialOrd
-    + Ord
-    + PartialEq
-    + Eq
-    + std::fmt::Debug
-    + num_traits::Num
-    + num_traits::NumCast,
-> {
+pub struct Size<T: geo::CoordNum> {
   width: T,
   height: T,
 }
 
 impl<T> Size<T>
 where
-  T: Copy
-    + PartialOrd
-    + Ord
-    + PartialEq
-    + Eq
-    + std::fmt::Debug
-    + num_traits::Num
-    + num_traits::NumCast,
+  T: geo::CoordNum,
 {
   /// Make size from width(columns) and height(rows).
   ///
