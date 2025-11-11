@@ -10,6 +10,7 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "swc*" # Ignore swc
+      - dependency-name: "v8" # Ignore v8
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
