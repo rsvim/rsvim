@@ -45,13 +45,13 @@ use geo::Rect;
 
 // Point {
 
-/// Position that uses [`isize`] as internal type.
+/// Point that uses [`isize`] as internal type.
 pub type IPoint = Point<isize>;
 
-/// Position that uses [`usize`] as internal type.
+/// Point that uses [`usize`] as internal type.
 pub type UPoint = Point<usize>;
 
-/// Position that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
+/// Point that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Point = Point<u16>;
 
 // Point }
