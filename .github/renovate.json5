@@ -1,0 +1,8 @@
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["swc*"],
+      "groupName": "swc-crates",
+    }
+  ]
+}
