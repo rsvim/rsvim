@@ -2,7 +2,6 @@
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
   - package-ecosystem: "cargo" # For rust development
@@ -10,9 +9,11 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "swc*" # Ignore swc
-      - dependency-name: "v8*" # Ignore v8
-      - dependency-name: "sourcemap*" # Ignore sourcemap
+      - dependency-name: "v8" # Ignore v8
+    groups:
+      swc: # For SWC monorepo
+        patterns:
+          - "swc*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
