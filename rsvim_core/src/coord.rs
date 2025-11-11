@@ -162,6 +162,13 @@ macro_rules! geo_rect_as {
   };
 }
 
+#[macro_export]
+macro_rules! geo_size {
+  ($width:expr,$height:expr) => {
+    $crate::coord::Size::new($width, $height)
+  };
+}
+
 /// Convert the generic type `T` inside `Size<T>` to another type `U`.
 #[macro_export]
 macro_rules! geo_size_as {
