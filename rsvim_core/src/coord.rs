@@ -138,7 +138,7 @@ macro_rules! geo_point_as {
 
 #[macro_export]
 macro_rules! geo_rect {
-  (min:$min:expr,max:$max:expr) => {
+  (tl:$min:expr,br:$max:expr) => {
     geo::Rect::new($min, $max)
   };
 
@@ -164,7 +164,7 @@ macro_rules! geo_rect_as {
 
 #[macro_export]
 macro_rules! geo_size {
-  ($width:expr,$height:expr) => {
+  (w:$width:expr,h:$height:expr) => {
     $crate::coord::Size::new($width, $height)
   };
 }
