@@ -110,6 +110,23 @@ where
   }
 }
 
+pub trait GeoRectExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn from(size: Size<T>) -> geo::Rect<T>;
+}
+
+impl<T> GeoRectExt<T> for Rect<T>
+where
+  T: geo::CoordNum,
+{
+  fn from(size: Size<T>) -> geo::Rect<T> {
+    geo::Rect::new((0 as T, 0 as T), (size.width() as T, size.height() as T))
+      as geo::Rect<T>
+  }
+}
+
 /// Size that uses [`isize`] as internal type.
 pub type ISize = Size<isize>;
 
@@ -143,7 +160,7 @@ macro_rules! geo_rect {
   };
 
   (l:$left:expr,t:$top:expr,r:$right:expr,b:$bottom:expr) => {
-    geo::Rect::new(geo::point!(x:$left,y:$top), geo::point!(x:$right,y:$bottom))
+    geo::Rect::new(($left, $top), ($right, $bottom))
   };
 }
 
