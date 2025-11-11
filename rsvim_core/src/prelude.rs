@@ -9,7 +9,7 @@ pub use crate::err::*;
 pub use crate::geo_point_as;
 pub use crate::geo_rect_as;
 pub use crate::geo_size_as;
-pub use crate::geo_size_into;
+pub use crate::geo_size_into_rect;
 pub use crate::lock;
 pub use crate::rc_ptr;
 pub use crate::rc_refcell_ptr;
