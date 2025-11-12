@@ -123,8 +123,6 @@ swc_visit = "=2.0.1"
 v8 = { version = "=142.1.0", default-features = false, features = [
   "use_custom_libcxx",
 ] }
-# Pin this version, see: https://github.com/denoland/rusty_v8/issues/1849
-timezone_provider = "=0.0.14"
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
 

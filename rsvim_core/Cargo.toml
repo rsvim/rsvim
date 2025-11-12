@@ -101,7 +101,6 @@ swc_visit = { workspace = true }
 v8 = { workspace = true, default-features = false, features = [
   "use_custom_libcxx",
 ] }
-timezone_provider = { workspace = true }
 
 # NOTE: Javascript dependencies }
 
