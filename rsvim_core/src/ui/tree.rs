@@ -136,6 +136,9 @@ pub struct Tree {
   // Layout engine.
   layout: TaffyTreeRc,
 
+  // Root node ID.
+  root_id: Option<TreeNodeId>,
+
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
 
