@@ -20,10 +20,6 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn enabled(&self) -> bool;
 
   fn set_enabled(&mut self, enabled: bool);
-
-  fn visible(&self) -> bool;
-
-  fn set_visible(&mut self, visible: bool);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -45,14 +41,6 @@ macro_rules! inode_impl {
 
       fn set_enabled(&mut self, enabled: bool) {
         self.$base.set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base.visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self.$base.set_visible(visible);
       }
     }
   };
@@ -95,21 +83,6 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
-          )*
-        }
-      }
     }
   }
 }
