@@ -1,7 +1,6 @@
 //! The node structure of the internal tree.
 
 use crate::flags_impl;
-use crate::geo_rect_as;
 use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
@@ -155,7 +154,7 @@ impl InodeBase {
     self.id
   }
 
-  pub fn layout_node_id(&self) -> TreeNodeId {
+  pub fn layout_node_id(&self) -> LayoutNodeId {
     self.layout_node_id
   }
 
