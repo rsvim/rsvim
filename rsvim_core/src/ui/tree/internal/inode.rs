@@ -110,13 +110,22 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(layout_tree: &mut TaffyTree, style: Style) -> TaffyResult<Self> {
+  pub fn new(
+    layout_tree: &mut TaffyTree,
+    style: Style,
+    parent_layout_node_id: LayoutNodeId,
+  ) -> TaffyResult<Self> {
     match layout_tree.new_leaf(style) {
-      Ok(layout_node_id) => Ok(InodeBase {
-        id: next_node_id(),
-        layout_node_id,
-        flags: FLAGS,
-      }),
+      Ok(layout_node_id) => {
+        layout_tree
+          .add_child(parent_layout_node_id, layout_node_id)
+          .unwrap();
+        Ok(InodeBase {
+          id: next_node_id(),
+          layout_node_id,
+          flags: FLAGS,
+        })
+      }
       Err(e) => Err(e),
     }
   }
