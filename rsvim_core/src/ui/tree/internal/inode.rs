@@ -15,7 +15,7 @@ pub type TreeNodeId = i32;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn layout_node_id(&self) -> LayoutNodeId;
+  fn layout_id(&self) -> LayoutNodeId;
 
   fn enabled(&self) -> bool;
 
@@ -31,8 +31,8 @@ macro_rules! inode_impl {
         self.$base.id()
       }
 
-      fn layout_node_id(&self) -> LayoutNodeId {
-        self.$base.layout_node_id()
+      fn layout_id(&self) -> LayoutNodeId {
+        self.$base.layout_id()
       }
 
       fn enabled(&self) -> bool {
@@ -59,10 +59,10 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn layout_node_id(&self) -> LayoutNodeId {
+      fn layout_id(&self) -> LayoutNodeId {
         match self {
           $(
-            $enum::$variant(e) => e.layout_node_id(),
+            $enum::$variant(e) => e.layout_id(),
           )*
         }
       }
@@ -104,7 +104,7 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  layout_node_id: LayoutNodeId,
+  layout_id: LayoutNodeId,
   // enabled
   flags: Flags,
 }
@@ -116,11 +116,11 @@ impl InodeBase {
     style: Style,
   ) -> TaffyResult<Self> {
     match layout.new_leaf(style) {
-      Ok(layout_node_id) => {
-        layout.add_child(parent_layout_id, layout_node_id).unwrap();
+      Ok(layout_id) => {
+        layout.add_child(parent_layout_id, layout_id).unwrap();
         Ok(InodeBase {
           id: next_node_id(),
-          layout_node_id,
+          layout_id,
           flags: FLAGS,
         })
       }
@@ -133,7 +133,7 @@ impl InodeBase {
   }
 
   pub fn layout_node_id(&self) -> LayoutNodeId {
-    self.layout_node_id
+    self.layout_id
   }
 
   pub fn enabled(&self) -> bool {
