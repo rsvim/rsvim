@@ -40,58 +40,58 @@ pub trait Inodeable: Sized + Clone + Debug {
 /// Generate getter/setter for `Inode`.
 #[macro_export]
 macro_rules! inode_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
+  ($name:ty,$base:ident) => {
+    impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.$base_name.id()
+        self.$base.id()
       }
 
       fn depth(&self) -> usize {
-        self.$base_name.depth()
+        self.$base.depth()
       }
 
       fn set_depth(&mut self, depth: usize) {
-        self.$base_name.set_depth(depth);
+        self.$base.set_depth(depth);
       }
 
       fn zindex(&self) -> usize {
-        self.$base_name.zindex()
+        self.$base.zindex()
       }
 
       fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
+        self.$base.set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
-        self.$base_name.shape()
+        self.$base.shape()
       }
 
       fn set_shape(&mut self, shape: &IRect) {
-        self.$base_name.set_shape(shape);
+        self.$base.set_shape(shape);
       }
 
       fn actual_shape(&self) -> &U16Rect {
-        self.$base_name.actual_shape()
+        self.$base.actual_shape()
       }
 
       fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self.$base_name.set_actual_shape(actual_shape)
+        self.$base.set_actual_shape(actual_shape)
       }
 
       fn enabled(&self) -> bool {
-        self.$base_name.enabled()
+        self.$base.enabled()
       }
 
       fn set_enabled(&mut self, enabled: bool) {
-        self.$base_name.set_enabled(enabled);
+        self.$base.set_enabled(enabled);
       }
 
       fn visible(&self) -> bool {
-        self.$base_name.visible()
+        self.$base.visible()
       }
 
       fn set_visible(&mut self, visible: bool) {
-        self.$base_name.set_visible(visible);
+        self.$base.set_visible(visible);
       }
     }
   };
@@ -100,104 +100,84 @@ macro_rules! inode_impl {
 /// Generate getter/setter for `Inode` with `Itree` base.
 #[macro_export]
 macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
+  ($name:ty,$base:ident) => {
+    impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
+        self.$base.root_id()
       }
 
       fn depth(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .depth()
+        self.$base.node(self.$base.root_id()).unwrap().depth()
       }
 
       fn set_depth(&mut self, depth: usize) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_depth(depth);
       }
 
       fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
+        self.$base.node(self.$base.root_id()).unwrap().zindex()
       }
 
       fn set_zindex(&mut self, zindex: usize) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
+        self.$base.node(self.$base.root_id()).unwrap().shape()
       }
 
       fn set_shape(&mut self, shape: &IRect) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_shape(shape);
       }
 
       fn actual_shape(&self) -> &U16Rect {
         self
-          .$base_name
-          .node(self.$base_name.root_id())
+          .$base
+          .node(self.$base.root_id())
           .unwrap()
           .actual_shape()
       }
 
       fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_actual_shape(actual_shape);
       }
 
       fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
+        self.$base.node(self.$base.root_id()).unwrap().enabled()
       }
 
       fn set_enabled(&mut self, enabled: bool) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_enabled(enabled);
       }
 
       fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
+        self.$base.node(self.$base.root_id()).unwrap().visible()
       }
 
       fn set_visible(&mut self, visible: bool) {
         self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
+          .$base
+          .node_mut(self.$base.root_id())
           .unwrap()
           .set_visible(visible);
       }
