@@ -136,6 +136,9 @@ pub struct Tree {
   // Root node ID.
   root_id: TreeNodeId,
 
+  // Root layout node ID.
+  root_layout_node_id: LayoutNodeId,
+
   // Canvas size.
   size: U16Size,
 
@@ -198,12 +201,12 @@ impl Tree {
 
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
-    self.base.is_empty()
+    self.nodes.is_empty()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self.base.root_id()
+    self.root_id
   }
 
   /// All node IDs collection.
