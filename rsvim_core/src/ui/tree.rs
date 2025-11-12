@@ -180,7 +180,9 @@ impl Tree {
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
-      base: Itree::new(root_node),
+      nodes: FoldMap::new(),
+      root_id: 
+      layout
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
@@ -191,7 +193,7 @@ impl Tree {
 
   /// Nodes count, include the root node.
   pub fn len(&self) -> usize {
-    self.base.len()
+    self.nodes.len()
   }
 
   /// Whether the tree is empty.
