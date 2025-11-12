@@ -134,7 +134,7 @@ pub struct Tree {
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // Root node ID.
-  root_id: Option<TreeNodeId>,
+  root_id: TreeNodeId,
 
   // Canvas size.
   size: U16Size,
@@ -176,16 +176,11 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
-    let shape = IRect::new(
-      (0, 0),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
-    );
-    let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
+    let mut layout = Rc::new(RefCell::new(TaffyTree::new()));
     Tree {
       nodes: FoldMap::new(),
-      root_id: 
-      layout
+      root_id: next_node_id(),
+      layout,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
