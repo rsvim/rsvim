@@ -133,11 +133,11 @@ pub struct Tree {
   // Widget nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
-  // Layout engine.
-  layout: TaffyTreeRc,
-
   // Root node ID.
   root_id: Option<TreeNodeId>,
+
+  // Layout engine.
+  layout: TaffyTreeRc,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
