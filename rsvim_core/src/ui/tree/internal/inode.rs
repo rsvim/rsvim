@@ -155,36 +155,8 @@ impl InodeBase {
     self.id
   }
 
-  pub fn depth(&self) -> usize {
-    self.depth
-  }
-
-  pub fn set_depth(&mut self, depth: usize) {
-    self.depth = depth;
-  }
-
-  pub fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  pub fn set_zindex(&mut self, zindex: usize) {
-    self.zindex = zindex;
-  }
-
-  pub fn shape(&self) -> &IRect {
-    &self.shape
-  }
-
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
-  }
-
-  pub fn actual_shape(&self) -> &U16Rect {
-    &self.actual_shape
-  }
-
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
+  pub fn layout_node_id(&self) -> TreeNodeId {
+    self.layout_node_id
   }
 
   pub fn enabled(&self) -> bool {
