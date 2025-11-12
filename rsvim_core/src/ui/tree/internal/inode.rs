@@ -6,27 +6,17 @@ use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::TaffyTree;
 
+pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn depth(&self) -> usize;
-
-  fn set_depth(&mut self, depth: usize);
-
-  fn zindex(&self) -> usize;
-
-  fn set_zindex(&mut self, zindex: usize);
-
-  fn shape(&self) -> &IRect;
-
-  fn set_shape(&mut self, shape: &IRect);
-
-  fn actual_shape(&self) -> &U16Rect;
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect);
+  fn layout_node_id(&self) -> LayoutNodeId;
 
   fn enabled(&self) -> bool;
 
@@ -46,36 +36,8 @@ macro_rules! inode_impl {
         self.$base.id()
       }
 
-      fn depth(&self) -> usize {
-        self.$base.depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self.$base.set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base.zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base.set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base.shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self.$base.set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self.$base.actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self.$base.set_actual_shape(actual_shape)
+      fn layout_node_id(&self) -> LayoutNodeId {
+        self.$base.layout_node_id()
       }
 
       fn enabled(&self) -> bool {
@@ -97,94 +59,6 @@ macro_rules! inode_impl {
   };
 }
 
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($name:ty,$base:ident) => {
-    impl Inodeable for $name {
-      fn id(&self) -> TreeNodeId {
-        self.$base.root_id()
-      }
-
-      fn depth(&self) -> usize {
-        self.$base.node(self.$base.root_id()).unwrap().depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base.node(self.$base.root_id()).unwrap().zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base.node(self.$base.root_id()).unwrap().shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self
-          .$base
-          .node(self.$base.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
-      }
-
-      fn enabled(&self) -> bool {
-        self.$base.node(self.$base.root_id()).unwrap().enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base.node(self.$base.root_id()).unwrap().visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base
-          .node_mut(self.$base.root_id())
-          .unwrap()
-          .set_visible(visible);
-      }
-    }
-  };
-}
-
 /// Generate enum dispatcher for `Inode`.
 #[macro_export]
 macro_rules! inode_enum_dispatcher {
@@ -198,66 +72,10 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn depth(&self) -> usize {
+      fn layout_node_id(&self) -> LayoutNodeId {
         match self {
           $(
-            $enum::$variant(e) => e.depth(),
-          )*
-        }
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_depth(depth),
-          )*
-        }
-      }
-
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_zindex(zindex),
-          )*
-        }
-      }
-
-      fn shape(&self) -> &IRect {
-        match self {
-          $(
-            $enum::$variant(e) => e.shape(),
-          )*
-        }
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_shape(shape),
-          )*
-        }
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        match self {
-          $(
-            $enum::$variant(e) => e.actual_shape(),
-          )*
-        }
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_actual_shape(actual_shape),
+            $enum::$variant(e) => e.layout_node_id(),
           )*
         }
       }
@@ -315,25 +133,21 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  depth: usize,
-  shape: IRect,
-  actual_shape: U16Rect,
-  zindex: usize,
+  layout_node_id: LayoutNodeId,
   // enabled
   // visible
   flags: Flags,
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
-    let actual_shape = geo_rect_as!(shape, u16);
-    InodeBase {
-      id: next_node_id(),
-      depth: 0,
-      shape,
-      actual_shape,
-      zindex: 0,
-      flags: FLAGS,
+  pub fn new(layout_tree: &mut TaffyTree, style: Style) -> TaffyResult<Self> {
+    match layout_tree.new_leaf(style) {
+      Ok(layout_node_id) => Ok(InodeBase {
+        id: next_node_id(),
+        layout_node_id,
+        flags: FLAGS,
+      }),
+      Err(e) => Err(e),
     }
   }
 
