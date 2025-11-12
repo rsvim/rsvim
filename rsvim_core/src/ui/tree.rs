@@ -176,13 +176,13 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
-    let mut layout = Rc::new(RefCell::new(TaffyTree::new()));
-    layout.borrow_mut().disable_rounding();
+    let mut layout = TaffyTree::new();
+    layout.disable_rounding();
     Tree {
       nodes: FoldMap::new(),
       root_id: next_node_id(),
       size: canvas_size,
-      layout,
+      layout: Rc::new(RefCell::new(layout)),
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
