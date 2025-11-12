@@ -112,8 +112,8 @@ pub struct InodeBase {
 impl InodeBase {
   pub fn new(
     layout: &mut TaffyTree,
-    style: Style,
     parent_layout_id: LayoutNodeId,
+    style: Style,
   ) -> TaffyResult<Self> {
     match layout.new_leaf(style) {
       Ok(layout_node_id) => {
