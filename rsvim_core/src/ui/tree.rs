@@ -130,7 +130,7 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
-  // All tree nodes.
+  // Widget nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // Layout engine.
