@@ -95,10 +95,9 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED, VISIBLE);
+flags_impl!(Flags, u8, ENABLED);
 
 // enabled=true
-// visible=true
 const FLAGS: Flags = Flags::all();
 
 #[derive(Debug, Clone, Copy)]
@@ -107,7 +106,6 @@ pub struct InodeBase {
   id: TreeNodeId,
   layout_node_id: LayoutNodeId,
   // enabled
-  // visible
   flags: Flags,
 }
 
