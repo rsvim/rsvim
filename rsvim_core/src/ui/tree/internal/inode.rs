@@ -138,12 +138,4 @@ impl InodeBase {
   pub fn set_enabled(&mut self, value: bool) {
     self.flags.set(Flags::ENABLED, value);
   }
-
-  pub fn visible(&self) -> bool {
-    self.flags.contains(Flags::VISIBLE)
-  }
-
-  pub fn set_visible(&mut self, value: bool) {
-    self.flags.set(Flags::VISIBLE, value);
-  }
 }
