@@ -136,6 +136,9 @@ pub struct Tree {
   // Root node ID.
   root_id: Option<TreeNodeId>,
 
+  // Canvas size.
+  size: U16Size,
+
   // Layout engine.
   layout: TaffyTreeRc,
 
