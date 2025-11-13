@@ -32,14 +32,14 @@ fn new() {
 
   let layout_tree = new_layout_tree();
   let n1 = TestNode::new(
-    Rc::downgrade(layout_tree),
+    Rc::downgrade(&layout_tree),
     Style {
       ..Default::default()
     },
     1,
   );
   let n2 = TestNode::new(
-    Rc::downgrade(layout_tree),
+    Rc::downgrade(&layout_tree),
     Style {
       ..Default::default()
     },
