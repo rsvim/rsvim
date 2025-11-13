@@ -189,12 +189,12 @@ impl Tree {
     self.root_id
   }
 
-  /// Get the node struct by its `id`.
+  /// Get node by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
     self.nodes.get(&id)
   }
 
-  /// Get mutable node struct by its `id`.
+  /// Get mutable node by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.nodes.get_mut(&id)
   }
