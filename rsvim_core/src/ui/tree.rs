@@ -94,12 +94,16 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// ## Visible/Enabled
 ///
 /// A widget can be hidden/disabled, this is useful for some special use cases.
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
+/// For example, when implementing the "command-line" UI widget, we actually
+/// have multiple command-line widgets:
+/// - The "input" widget for receiving user's input command contents.
+/// - The "message" widget for printing Rsvim echoing messages.
+/// - The "search" widget for searching forward/backward.
 ///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
+/// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
+/// 2 are hidden/disabled.
+/// Thus we have to remove the other 2 nodes from the layout tree, the make
+/// sure they won't break our TUI layout.
 ///
 pub struct Tree {
   // Widget nodes.
