@@ -137,4 +137,8 @@ impl InodeBase {
   pub fn style(&self) -> &Style {
     &self.style
   }
+
+  pub fn set_style(&mut self, style: Style) {
+    self.style = style;
+  }
 }
