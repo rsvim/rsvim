@@ -16,7 +16,6 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
-use itertools::Itertools;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -192,12 +191,12 @@ impl Tree {
 
   /// Get the node struct by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self.nodes.get(id)
+    self.nodes.get(&id)
   }
 
   /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self.nodes.get_mut(id)
+    self.nodes.get_mut(&id)
   }
 
   // /// See [`Itree::iter`].
