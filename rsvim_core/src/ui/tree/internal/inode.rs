@@ -58,7 +58,7 @@ macro_rules! inode_impl {
       }
 
       fn set_style(&mut self, style: Style) {
-        self.$base.set_style(style)
+        self.$base.set_style(style);
       }
     }
   };
