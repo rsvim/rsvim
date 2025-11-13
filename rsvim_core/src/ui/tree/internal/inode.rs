@@ -89,6 +89,22 @@ macro_rules! inode_enum_dispatcher {
           )*
         }
       }
+
+      fn style(&self) -> &Style {
+        match self {
+          $(
+            $enum::$variant(e) => e.style(),
+          )*
+        }
+      }
+
+      fn set_style(&mut self, style: Style) {
+        match self {
+          $(
+            $enum::$variant(e) => e.set_style(style),
+          )*
+        }
+      }
     }
   }
 }
