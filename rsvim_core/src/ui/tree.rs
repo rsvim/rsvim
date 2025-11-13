@@ -71,25 +71,26 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 ///
 /// # Ownership
 ///
-/// Parent owns all its children.
+/// Parent owns its children:
 ///
 /// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// * Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries. While the size of each node can be logically infinite on the
+///   imaginary canvas.
+/// * The `visible` and `enabled` attributes of a child are implicitly
+///   inherited from it's parent, unless they're explicitly been set.
 ///
-/// ## Priority
+/// # Priority
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// Children have higher priority than their parent to both display and process
+/// input events:
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
+/// * Children are always displayed on top of their parent, and has higher
+///   priority to process a user's input event when the event occurs within the
+///   shape of the child. The event will fallback to their parent if the child
+///   doesn't process it.
+/// * For children that shade each other, the one with higher z-index has
+///   higher priority to display and process the input events.
 ///
 /// ## Visible/Enabled
 ///
