@@ -1,14 +1,11 @@
 //! The node structure of the internal tree.
 
-use crate::flags_impl;
-use crate::prelude::*;
 use crate::ui::tree::TaffyTreeWk;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
 use taffy::TaffyResult;
-use taffy::TaffyTree;
 
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
@@ -110,6 +107,7 @@ pub struct InodeBase {
   id: TreeNodeId,
   layout_id: LayoutNodeId,
   layout_tree: TaffyTreeWk,
+  style: Style,
 }
 
 impl InodeBase {
@@ -117,11 +115,12 @@ impl InodeBase {
     let layout_tree1 = layout_tree.clone();
     let layout_tree = layout_tree.upgrade().unwrap();
     let mut layout_tree = layout_tree.borrow_mut();
-    match layout_tree.new_leaf(style) {
+    match layout_tree.new_leaf(style.clone()) {
       Ok(layout_id) => Ok(InodeBase {
         id: next_node_id(),
         layout_id,
         layout_tree: layout_tree1,
+        style,
       }),
       Err(e) => Err(e),
     }
@@ -133,5 +132,9 @@ impl InodeBase {
 
   pub fn layout_id(&self) -> LayoutNodeId {
     self.layout_id
+  }
+
+  pub fn style(&self) -> &Style {
+    &self.style
   }
 }
