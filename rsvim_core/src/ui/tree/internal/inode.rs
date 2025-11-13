@@ -17,9 +17,21 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn layout_id(&self) -> LayoutNodeId;
 
-  fn enabled(&self) -> bool;
+  /// Whether this node is attached to a parent node.
+  ///
+  /// By default a node is attached to a parent node when it is created, and
+  /// all nodes are in the UI tree with the same root node. But you can detach
+  /// it from its parent node to:
+  /// 1. Hide/disable this node temporarily. This is useful to switch the UI
+  ///    widgets.
+  /// 2. Move this node from a parent node to another, e.g. first detach it
+  ///    from a parent, then attach it to another parent.
+  /// 3. Remove this node permanently.
+  fn is_attached(&self) -> bool;
 
-  fn set_enabled(&mut self, enabled: bool);
+  fn attach(&mut self, enabled: bool);
+
+  fn detach(&mut self, enabled: bool);
 }
 
 /// Generate getter/setter for `Inode`.

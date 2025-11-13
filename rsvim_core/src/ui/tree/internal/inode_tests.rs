@@ -42,7 +42,7 @@ fn new() {
 
   assert_eq!(n1.borrow().depth(), 0);
   assert_eq!(n1.borrow().zindex(), 0);
-  assert!(n1.borrow().enabled());
+  assert!(n1.borrow().is_attached());
   assert!(n1.borrow().visible());
 
   assert_eq!(*n1.borrow().shape(), IRect::new((0, 0), (0, 0)));
