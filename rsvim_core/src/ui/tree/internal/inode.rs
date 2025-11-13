@@ -16,13 +16,11 @@ pub type TreeNodeId = i32;
 /// Whole TUI is a tree structure, each node on the tree is a UI widget (e.g.
 /// rectangle), and renders itself onto the terminal.
 ///
-/// We use [taffy] library to maintain the node relationship
-/// (e.g. parent and children) and layout calculation, each node will hold a
-/// weak pointer of [TaffyTree](taffy::TaffyTree), when a pair of parent-child
-/// relationship is changed, a node position/size is changed, a node is
-/// created/removed, we are actually just calling taffy's API to help us
-/// complete the work, and calculate the newest layout, and render all the
-/// nodes to terminal with newest layout.
+/// We use [taffy] library to maintain the relationships between each parent
+/// and children nodes, and also the layout algorithms. Each node holds a weak
+/// pointer to [TaffyTree], when the layout is changed, we just call taffy's
+/// API to help us update node relationships and update layout, then render all
+/// the nodes with newest layout. Here are some examples about layout changes:
 ///
 /// All APIs of this trait, with `layout_` prefix, are actually just wrappers
 /// on TaffyTree APIs, except the `layout_id` API.
