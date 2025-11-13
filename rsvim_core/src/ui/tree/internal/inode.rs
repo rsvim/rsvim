@@ -4,6 +4,7 @@ use crate::ui::tree::TaffyTreeWk;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
+use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 
@@ -31,6 +32,10 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn style(&self) -> &Style;
 
   fn set_style(&mut self, style: Style);
+
+  fn layout(&self) -> &Layout;
+
+  fn set_layout(&mut self, layout: Layout);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -124,6 +129,7 @@ pub struct InodeBase {
   layout_id: LayoutNodeId,
   layout_tree: TaffyTreeWk,
   style: Style,
+  layout: Layout,
 }
 
 impl InodeBase {
