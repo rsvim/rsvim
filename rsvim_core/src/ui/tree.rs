@@ -36,11 +36,12 @@ pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
 pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The widget tree (UI tree).
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// The widget tree manages all UI widgets and rendering on the canvas, each
+/// widgiet is a node on the tree, the tree has a root node, and all other
+/// nodes inside is the root node's descendants. The root node is the terminal
+/// itself, while each node inside renders a part of the terminal.
 ///
 /// # Terms
 ///
