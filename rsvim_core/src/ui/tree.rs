@@ -65,7 +65,9 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// - grid
 /// - block
 ///
-/// They are just right to laying out Rsvim UI widgets as well.
+/// They are just right to laying out Rsvim UI widgets as well. But layout just
+/// tells a node where it should be rendering, it is still need to implement
+/// the rendering method by itself.
 ///
 /// # Ownership
 ///
