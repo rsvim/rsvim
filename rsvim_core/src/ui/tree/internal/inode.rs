@@ -131,15 +131,7 @@ impl InodeBase {
     self.id
   }
 
-  pub fn layout_node_id(&self) -> LayoutNodeId {
+  pub fn layout_id(&self) -> LayoutNodeId {
     self.layout_id
-  }
-
-  pub fn enabled(&self) -> bool {
-    self.flags.contains(Flags::ENABLED)
-  }
-
-  pub fn set_enabled(&mut self, value: bool) {
-    self.flags.set(Flags::ENABLED, value);
   }
 }
