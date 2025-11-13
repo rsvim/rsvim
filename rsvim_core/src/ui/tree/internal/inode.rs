@@ -33,7 +33,7 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn style(&self) -> &Style;
 
-  fn style_mut(&mut self) -> &mut Style;
+  fn set_style(&mut self, style: Style);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -57,8 +57,8 @@ macro_rules! inode_impl {
         self.$base.style()
       }
 
-      fn style_mut(&self) -> &mut Style {
-        self.$base.style_mut()
+      fn set_style(&mut self, style: Style) {
+        self.$base.set_style(style)
       }
     }
   };
