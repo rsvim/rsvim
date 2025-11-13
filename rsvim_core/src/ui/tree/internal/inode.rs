@@ -118,6 +118,22 @@ macro_rules! inode_enum_dispatcher {
           )*
         }
       }
+
+      fn layout(&self) -> &Option<Layout> {
+        match self {
+          $(
+            $enum::$variant(e) => e.layout(),
+          )*
+        }
+      }
+
+      fn set_layout(&mut self, layout: Option<Layout>) {
+        match self {
+          $(
+            $enum::$variant(e) => e.set_layout(layout),
+          )*
+        }
+      }
     }
   }
 }
@@ -137,7 +153,7 @@ pub struct InodeBase {
   layout_id: LayoutNodeId,
   layout_tree: TaffyTreeWk,
   style: Style,
-  layout: Layout,
+  layout: Option<Layout>,
 }
 
 impl InodeBase {
