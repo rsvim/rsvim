@@ -3,9 +3,7 @@
 use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::TaffyTreeWk;
-use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
@@ -15,11 +13,10 @@ use taffy::TaffyTree;
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
-/// This trait maintains the UI tree relationship and layout information
-/// among all the nodes. The whole TUI is a tree structure, and each node on
-/// the tree is a rectangle, and finally renders itself onto the terminal.
+/// Whole TUI is a tree structure, each node on the tree is a UI widget (e.g.
+/// rectangle), and renders itself onto the terminal.
 ///
-/// Since we're using [taffy](taffy) crate to maintain the node relationship
+/// We use [taffy] library to maintain the node relationship
 /// (e.g. parent and children) and layout calculation, each node will hold a
 /// weak pointer of [TaffyTree](taffy::TaffyTree), when a pair of parent-child
 /// relationship is changed, a node position/size is changed, a node is
