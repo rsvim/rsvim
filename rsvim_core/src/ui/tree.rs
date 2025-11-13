@@ -215,9 +215,11 @@ impl Tree {
   }
 
   /// Get current window node ID.
-  /// NOTE: A window is called the current window because it has cursor inside it. But when user is
-  /// in command-line mode, the cursor widget is actually inside the command-line widget, not in
-  /// window. Mean while the **current** window is actually the **previous current** window.
+  ///
+  /// NOTE: A window is called the current window because it has cursor inside
+  /// it. But when user is in command-line mode, the cursor widget is actually
+  /// inside the command-line widget, not in window. Mean while the **current**
+  /// window is actually the **last current** window.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
     self.current_window_id
   }
