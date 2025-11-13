@@ -16,10 +16,13 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
+use taffy::prelude::FromPercent;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use taffy::TaffyResult;
 use taffy::TaffyTree;
+use taffy::Style;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
@@ -155,12 +158,22 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let mut layout = TaffyTree::new();
     layout.disable_rounding();
+    let root_style = Style {
+      size: taffy::Size { 
+        width: taffy::Dimension::length(canvas_size.width() as f32), 
+        height: taffy::Dimension::length(canvas_size.height() as f32)
+      },
+      ..Default::default()
+    };
+    match layout.new_leaf(root_style) {
+      Ok(root_layout_id) => Ok(
     Tree {
       nodes: FoldMap::new(),
       root_id: next_node_id(),
+      root_layout_id,
       size: canvas_size,
       layout: Rc::new(RefCell::new(layout)),
       command_line_id: None,
@@ -168,6 +181,10 @@ impl Tree {
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
+    }
+      )
+        Err(e) => Err(e),
+
     }
   }
 
