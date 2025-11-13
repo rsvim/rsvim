@@ -30,38 +30,7 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn layout_id(&self) -> LayoutNodeId;
 
   /// Get [TaffyTree] weak pointer.
-  fn layout(&self) -> TaffyTreeWk;
-
-  /// [TaffyTree::add_child]
-  ///
-  /// Add this node as a child to parent node.
-  fn layout_add(&mut self, parent_layout_id: LayoutNodeId);
-
-  /// [TaffyTree::insert_child_at_index]
-  ///
-  /// Add this node as a child to parent node, but insert at provide
-  /// `child_index`.
-  fn layout_insert_at_index(
-    &mut self,
-    parent_layout_id: LayoutNodeId,
-    child_index: usize,
-  );
-
-  /// [TaffyTree::remove_child]
-  fn layout_remove(&mut self, parent_layout_id: LayoutNodeId);
-
-  /// Get parent layout ID.
-  ///
-  /// It returns parent layout ID if this node is attached to a parent node,
-  /// unless this node is the root node. Otherwise it returns `None` to
-  /// indicates this node is detached or it is the root node itself.
-  fn layout_parent(&self) -> Option<LayoutNodeId>;
-
-  /// Insert this node to its parent layout ID.
-  fn attach(&mut self, parent_layout_id: LayoutNodeId);
-
-  /// Remove this node from its parent layout ID.
-  fn detach(&mut self, parent_layout_id: LayoutNodeId);
+  fn layout_tree(&self) -> TaffyTreeWk;
 }
 
 /// Generate getter/setter for `Inode`.
@@ -77,12 +46,8 @@ macro_rules! inode_impl {
         self.$base.layout_id()
       }
 
-      fn enabled(&self) -> bool {
-        self.$base.enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self.$base.set_enabled(enabled);
+      fn layout_tree(&self) -> TaffyTreeWk {
+        self.$base.layout_tree()
       }
     }
   };
@@ -109,22 +74,13 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn enabled(&self) -> bool {
+      fn layout_tree(&self) -> TaffyTreeWk {
         match self {
           $(
-            $enum::$variant(e) => e.enabled(),
+            $enum::$variant(e) => e.layout_tree(),
           )*
         }
       }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_enabled(enabled),
-          )*
-        }
-      }
-
     }
   }
 }
