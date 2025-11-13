@@ -188,4 +188,12 @@ impl InodeBase {
   pub fn set_style(&mut self, style: Style) {
     self.style = style;
   }
+
+  pub fn layout(&self) -> &Option<Layout> {
+    &self.layout
+  }
+
+  pub fn set_layout(&mut self, layout: Option<Layout>) {
+    self.layout = layout;
+  }
 }
