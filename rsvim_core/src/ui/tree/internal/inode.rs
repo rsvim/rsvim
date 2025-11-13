@@ -12,6 +12,9 @@ use taffy::TaffyTree;
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
+/// This trait maintains the UI tree relationship and layout information
+/// among all the nodes. The whole TUI is a tree structure, and each node on
+/// the tree is a rectangle, and finally renders itself onto the terminal.
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
@@ -30,7 +33,9 @@ pub trait Inodeable: Sized + Clone + Debug {
   ///
   /// NOTE: This method is equivalent to `parent_layout_id().is_some()`,
   /// because has a parent layout ID means it is attached to a parent node.
-  fn is_attached(&self) -> bool;
+  fn is_attached(&self) -> bool {
+    self.parent_layout_id().is_some()
+  }
 
   /// Get parent layout ID.
   ///
