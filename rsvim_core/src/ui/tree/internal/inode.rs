@@ -29,8 +29,11 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn layout_id(&self) -> LayoutNodeId;
 
-  /// Get [TaffyTree] weak pointer.
   fn layout_tree(&self) -> TaffyTreeWk;
+
+  fn style(&self) -> &Style;
+
+  fn style_mut(&mut self) -> &mut Style;
 }
 
 /// Generate getter/setter for `Inode`.
@@ -48,6 +51,14 @@ macro_rules! inode_impl {
 
       fn layout_tree(&self) -> TaffyTreeWk {
         self.$base.layout_tree()
+      }
+
+      fn style(&self) -> &Style {
+        self.$base.style()
+      }
+
+      fn style_mut(&self) -> &mut Style {
+        self.$base.style_mut()
       }
     }
   };
