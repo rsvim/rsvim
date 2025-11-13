@@ -93,23 +93,17 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED);
-
-// enabled=true
-const FLAGS: Flags = Flags::all();
-
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
   layout_id: LayoutNodeId,
-  // enabled
-  flags: Flags,
+  layout_tree: TaffyTreeWk,
 }
 
 impl InodeBase {
   pub fn new(
-    layout: &mut TaffyTree,
+    layout_tree: TaffyTreeWk,
     parent_layout_id: LayoutNodeId,
     style: Style,
   ) -> TaffyResult<Self> {
