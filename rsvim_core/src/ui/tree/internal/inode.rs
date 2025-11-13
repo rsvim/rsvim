@@ -22,13 +22,14 @@ pub type TreeNodeId = i32;
 /// API to help us update node relationships and update layout, then render all
 /// the nodes with newest layout. Here are some examples about layout changes:
 ///
-/// All APIs of this trait, with `layout_` prefix, are actually just wrappers
-/// on TaffyTree APIs, except the `layout_id` API.
+/// All APIs with `layout_` prefix in this trait, are just wrappers on
+/// [TaffyTree], except the `layout_id` API.
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
   fn layout_id(&self) -> LayoutNodeId;
 
+  /// Get [TaffyTree] weak pointer.
   fn layout(&self) -> TaffyTreeWk;
 
   /// [TaffyTree::add_child]
@@ -45,9 +46,6 @@ pub trait Inodeable: Sized + Clone + Debug {
     parent_layout_id: LayoutNodeId,
     child_index: usize,
   );
-
-  /// [TaffyTree::remove_child]
-  fn layout_remove(&mut self, parent_layout_id: LayoutNodeId);
 
   /// [TaffyTree::remove_child]
   fn layout_remove(&mut self, parent_layout_id: LayoutNodeId);
