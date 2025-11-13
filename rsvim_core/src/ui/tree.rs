@@ -43,6 +43,13 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// nodes inside is the root node's descendants. The root node is the terminal
 /// itself, while each node inside renders a part of the terminal.
 ///
+/// We use [taffy] to manage the parent-child relationships among all the
+/// nodes, and calculate layout for the whole TUI. The tree structure contains
+/// a [TaffyTree] pointer. Each node holds a weak reference point to that
+/// [TaffyTree], and also a [taffy::Style] to indicate what style this node
+/// wants to be, a [taffy::Layout] to cache the layout result that how this
+/// node is going to render itself.
+///
 /// # Terms
 ///
 /// * Parent: The parent node.
@@ -51,9 +58,7 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// # Guarantees
-///
-/// ## Ownership
+/// # Ownership
 ///
 /// Parent owns all its children.
 ///
