@@ -119,7 +119,7 @@ pub struct Tree {
   // Canvas size.
   size: U16Size,
 
-  // Layout engine.
+  // Layout tree.
   layout: TaffyTreeRc,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
