@@ -27,7 +27,7 @@ pub type TreeNodeId = i32;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn layout_node_id(&self) -> LayoutNodeId;
+  fn layout_id(&self) -> LayoutNodeId;
 
   fn layout_tree(&self) -> TaffyTreeWk;
 
@@ -104,7 +104,7 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
@@ -113,20 +113,16 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(
-    layout_tree: TaffyTreeWk,
-    parent_layout_id: LayoutNodeId,
-    style: Style,
-  ) -> TaffyResult<Self> {
-    match layout.new_leaf(style) {
-      Ok(layout_id) => {
-        layout.add_child(parent_layout_id, layout_id).unwrap();
-        Ok(InodeBase {
-          id: next_node_id(),
-          layout_id,
-          flags: FLAGS,
-        })
-      }
+  pub fn new(layout_tree: TaffyTreeWk, style: Style) -> TaffyResult<Self> {
+    let layout_tree1 = layout_tree.clone();
+    let layout_tree = layout_tree.upgrade().unwrap();
+    let mut layout_tree = layout_tree.borrow_mut();
+    match layout_tree.new_leaf(style) {
+      Ok(layout_id) => Ok(InodeBase {
+        id: next_node_id(),
+        layout_id,
+        layout_tree: layout_tree1,
+      }),
       Err(e) => Err(e),
     }
   }
