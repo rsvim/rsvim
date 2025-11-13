@@ -58,6 +58,15 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
+/// Taffy implements several layout algorithms in
+/// [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) specification:
+///
+/// - flexbox
+/// - grid
+/// - block
+///
+/// They are just right to laying out Rsvim UI widgets as well.
+///
 /// # Ownership
 ///
 /// Parent owns all its children.
