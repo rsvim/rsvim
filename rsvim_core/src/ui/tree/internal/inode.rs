@@ -33,9 +33,9 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn set_style(&mut self, style: Style);
 
-  fn layout(&self) -> &Layout;
+  fn layout(&self) -> &Option<Layout>;
 
-  fn set_layout(&mut self, layout: Layout);
+  fn set_layout(&mut self, layout: Option<Layout>);
 }
 
 /// Generate getter/setter for `Inode`.
