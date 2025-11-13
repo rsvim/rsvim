@@ -15,10 +15,23 @@ pub type TreeNodeId = i32;
 /// This trait maintains the UI tree relationship and layout information
 /// among all the nodes. The whole TUI is a tree structure, and each node on
 /// the tree is a rectangle, and finally renders itself onto the terminal.
+///
+/// Since we're using [taffy](taffy) crate to maintain the node relationship
+/// (e.g. parent and children) and layout calculation, each node will hold a
+/// weak pointer of [TaffyTree](taffy::TaffyTree), when a pair of parent-child 
+/// relationship is changed, a node position/size is changed, a node is
+/// created/removed, we are actually just calling taffy's API to help us
+/// complete the work, and calculate the newest layout, and render all the
+/// nodes to terminal with newest layout.
+///
+/// All APIs of this trait, with `layout_` prefix are actually the TaffyTree
+/// APIs, except `layout_id` API.
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
   fn layout_id(&self) -> LayoutNodeId;
+
+  fn layout_add_child()
 
   /// Whether this node is attached to a parent node.
   ///
