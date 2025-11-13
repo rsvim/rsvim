@@ -167,6 +167,7 @@ impl InodeBase {
         layout_id,
         layout_tree: layout_tree1,
         style,
+        layout: None,
       }),
       Err(e) => Err(e),
     }
