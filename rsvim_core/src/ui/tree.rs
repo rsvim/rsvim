@@ -162,7 +162,7 @@ impl Tree {
     let mut layout = TaffyTree::new();
     layout.disable_rounding();
     let root_style = Style {
-      size: taffy::Size { 
+      size: taffy::Size {
         width: taffy::Dimension::length(canvas_size.width() as f32), 
         height: taffy::Dimension::length(canvas_size.height() as f32)
       },
