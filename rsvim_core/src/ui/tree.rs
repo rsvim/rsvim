@@ -184,16 +184,6 @@ impl Tree {
     }
   }
 
-  /// Nodes count, include the root node.
-  pub fn len(&self) -> usize {
-    self.nodes.len()
-  }
-
-  /// Whether the tree is empty.
-  pub fn is_empty(&self) -> bool {
-    self.nodes.is_empty()
-  }
-
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self.root_id
