@@ -62,6 +62,14 @@ macro_rules! inode_impl {
       fn set_style(&mut self, style: Style) {
         self.$base.set_style(style);
       }
+
+      fn layout(&self) -> &Option<Layout> {
+        self.$base.layout()
+      }
+
+      fn set_layout(&mut self, layout: Option<Layout>) {
+        self.$base.set_layout(layout);
+      }
     }
   };
 }
