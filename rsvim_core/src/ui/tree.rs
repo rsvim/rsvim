@@ -37,6 +37,12 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
 pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
+pub fn new_layout_tree() -> TaffyTreeRc {
+  let mut layout_tree = TaffyTree::new();
+  layout_tree.disable_rounding();
+  Rc::new(RefCell::new(layout_tree))
+}
+
 #[derive(Debug, Clone)]
 /// The widget tree (UI tree).
 ///
