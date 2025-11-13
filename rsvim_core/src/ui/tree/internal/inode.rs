@@ -27,7 +27,17 @@ pub trait Inodeable: Sized + Clone + Debug {
   /// 2. Move this node from a parent node to another, e.g. first detach it
   ///    from a parent, then attach it to another parent.
   /// 3. Remove this node permanently.
+  ///
+  /// NOTE: This method is equivalent to `parent_layout_id().is_some()`,
+  /// because has a parent layout ID means it is attached to a parent node.
   fn is_attached(&self) -> bool;
+
+  /// Get parent layout ID.
+  ///
+  /// It returns parent layout ID if this node is attached to a parent node,
+  /// unless this node is the root node. Otherwise it returns `None` to
+  /// indicates this node is detached or it is the root node itself.
+  fn parent_layout_id(&self) -> Option<LayoutNodeId>;
 
   fn attach(&mut self, enabled: bool);
 
