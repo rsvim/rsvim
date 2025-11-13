@@ -39,9 +39,11 @@ pub trait Inodeable: Sized + Clone + Debug {
   /// indicates this node is detached or it is the root node itself.
   fn parent_layout_id(&self) -> Option<LayoutNodeId>;
 
-  fn attach(&mut self, enabled: bool);
+  /// Insert this node to its parent layout ID.
+  fn attach(&mut self, parent_layout_id: LayoutNodeId);
 
-  fn detach(&mut self, enabled: bool);
+  /// Remove this node from its parent layout ID.
+  fn detach(&mut self, parent_layout_id: LayoutNodeId);
 }
 
 /// Generate getter/setter for `Inode`.
