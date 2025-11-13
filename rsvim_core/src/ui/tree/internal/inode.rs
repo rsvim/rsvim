@@ -2,7 +2,10 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::TaffyTreeWk;
+use std::cell::RefCell;
 use std::fmt::Debug;
+use std::rc::Rc;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
@@ -31,31 +34,35 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn layout_id(&self) -> LayoutNodeId;
 
-  fn layout_add_child(&mut self, parent_layout_id: LayoutNodeId);
+  fn layout(&self) -> TaffyTreeWk;
 
-  /// Whether this node is attached to a parent node.
+  /// [TaffyTree::add_child]
   ///
-  /// By default a node is attached to a parent node when it is created, and
-  /// all nodes are in the UI tree with the same root node. But you can detach
-  /// it from its parent node to:
-  /// 1. Hide/disable this node temporarily. This is useful to switch the UI
-  ///    widgets.
-  /// 2. Move this node from a parent node to another, e.g. first detach it
-  ///    from a parent, then attach it to another parent.
-  /// 3. Remove this node permanently.
+  /// Add this node as a child to parent node.
+  fn layout_add(&mut self, parent_layout_id: LayoutNodeId);
+
+  /// [TaffyTree::insert_child_at_index]
   ///
-  /// NOTE: This method is equivalent to `parent_layout_id().is_some()`,
-  /// because has a parent layout ID means it is attached to a parent node.
-  fn is_attached(&self) -> bool {
-    self.parent_layout_id().is_some()
-  }
+  /// Add this node as a child to parent node, but insert at provide
+  /// `child_index`.
+  fn layout_insert_at_index(
+    &mut self,
+    parent_layout_id: LayoutNodeId,
+    child_index: usize,
+  );
+
+  /// [TaffyTree::remove_child]
+  fn layout_remove(&mut self, parent_layout_id: LayoutNodeId);
+
+  /// [TaffyTree::remove_child]
+  fn layout_remove(&mut self, parent_layout_id: LayoutNodeId);
 
   /// Get parent layout ID.
   ///
   /// It returns parent layout ID if this node is attached to a parent node,
   /// unless this node is the root node. Otherwise it returns `None` to
   /// indicates this node is detached or it is the root node itself.
-  fn parent_layout_id(&self) -> Option<LayoutNodeId>;
+  fn layout_parent(&self) -> Option<LayoutNodeId>;
 
   /// Insert this node to its parent layout ID.
   fn attach(&mut self, parent_layout_id: LayoutNodeId);
