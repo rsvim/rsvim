@@ -27,7 +27,7 @@ pub type TreeNodeId = i32;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn layout_id(&self) -> LayoutNodeId;
+  fn layout_node_id(&self) -> LayoutNodeId;
 
   fn layout_tree(&self) -> TaffyTreeWk;
 
