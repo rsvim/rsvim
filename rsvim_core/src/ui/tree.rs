@@ -22,7 +22,6 @@ use std::rc::Weak;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
-use taffy::prelude::FromPercent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
