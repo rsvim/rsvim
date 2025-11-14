@@ -120,19 +120,7 @@ impl InodeBase {
     self.layout_id
   }
 
-  pub fn style(&self) -> &Style {
-    &self.style
-  }
-
-  pub fn set_style(&mut self, style: Style) {
-    self.style = style;
-  }
-
-  pub fn layout(&self) -> &Option<Layout> {
-    &self.layout
-  }
-
-  pub fn set_layout(&mut self, layout: Option<Layout>) {
-    self.layout = layout;
+  pub fn layout_tree(&self) -> TaffyTreeWk {
+    self.layout_tree
   }
 }
