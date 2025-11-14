@@ -100,14 +100,13 @@ pub struct InodeBase {
 
 impl InodeBase {
   pub fn new(layout_tree: TaffyTreeWk, style: Style) -> TaffyResult<Self> {
-    let layout_tree1 = layout_tree.clone();
-    let layout_tree = layout_tree.upgrade().unwrap();
-    let mut layout_tree = layout_tree.borrow_mut();
-    match layout_tree.new_leaf(style) {
+    let lo = layout_tree.upgrade().unwrap();
+    let mut lo = lo.borrow_mut();
+    match lo.new_leaf(style) {
       Ok(layout_id) => Ok(InodeBase {
         id: next_node_id(),
         layout_id,
-        layout_tree: layout_tree1,
+        layout_tree,
       }),
       Err(e) => Err(e),
     }
