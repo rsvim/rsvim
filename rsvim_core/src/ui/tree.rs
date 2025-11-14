@@ -128,7 +128,7 @@ pub struct Tree {
   size: U16Size,
 
   // Layout tree.
-  layout: TaffyTreeRc,
+  layout_tree: TaffyTreeRc,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
@@ -179,7 +179,7 @@ impl Tree {
         root_id: next_node_id(),
         root_layout_id,
         size: canvas_size,
-        layout: Rc::new(RefCell::new(layout)),
+        layout_tree: Rc::new(RefCell::new(layout)),
         command_line_id: None,
         window_ids: BTreeSet::new(),
         current_window_id: None,
