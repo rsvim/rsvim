@@ -204,7 +204,15 @@ impl Tree {
 
   /// Root layout node ID.
   pub fn root_layout_id(&self) -> LayoutNodeId {
-    self.tree_node_ids.get(&self.root_id).unwrap()
+    *self.tree_node_ids.get(&self.root_id).unwrap()
+  }
+
+  pub fn layout_id(&self, id: TreeNodeId) -> Option<LayoutNodeId> {
+    self.tree_node_ids.get(&id).map(|id1| *id1)
+  }
+
+  pub fn node_id(&self, layout_id: LayoutNodeId) -> Option<TreeNodeId> {
+    self.layout_node_ids.get(&layout_id).map(|id1| *id1)
   }
 
   /// Get node by its `id`.
@@ -215,14 +223,6 @@ impl Tree {
   /// Get mutable node by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.nodes.get_mut(&id)
-  }
-
-  pub fn layout_id(&self, id: TreeNodeId) -> Option<&LayoutNodeId> {
-    self.tree_node_ids.get(&id)
-  }
-
-  pub fn node_id(&self, layout_id: LayoutNodeId) -> Option<&TreeNodeId> {
-    self.layout_node_ids.get(&layout_id)
   }
 
   // /// See [`Itree::iter`].
