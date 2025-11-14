@@ -202,6 +202,11 @@ impl Tree {
     self.root_id
   }
 
+  /// Root layout node ID.
+  pub fn root_layout_id(&self) -> LayoutNodeId {
+    self.tree_node_ids.get(&self.root_id).unwrap()
+  }
+
   /// Get node by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
     self.nodes.get(&id)
