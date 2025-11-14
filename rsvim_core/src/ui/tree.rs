@@ -202,19 +202,6 @@ impl Tree {
     self.root_id
   }
 
-  /// Root layout node ID.
-  pub fn root_layout_id(&self) -> LayoutNodeId {
-    *self.tree_node_ids.get(&self.root_id).unwrap()
-  }
-
-  pub fn layout_id(&self, id: TreeNodeId) -> Option<LayoutNodeId> {
-    self.tree_node_ids.get(&id).map(|id1| *id1)
-  }
-
-  pub fn node_id(&self, layout_id: LayoutNodeId) -> Option<TreeNodeId> {
-    self.layout_node_ids.get(&layout_id).map(|id1| *id1)
-  }
-
   /// Get node by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
     self.nodes.get(&id)
@@ -531,14 +518,11 @@ impl<'a> Iterator for TreeIter<'a> {
   }
 }
 
-impl<'a, T> TreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+impl<'a> TreeIter<'a> {
+  pub fn new(tree: &'a Tree, start_layout_id: Option<LayoutNodeId>) -> Self {
     let mut que = VecDeque::new();
-    if let Some(id) = start_node_id {
-      que.push_back(id);
+    if let Some(start_layout_id) = start_layout_id {
+      que.push_back(start_layout_id);
     }
     Self { tree, que }
   }
