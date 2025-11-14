@@ -17,6 +17,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::rc::Weak;
 use taffy::Style;
@@ -118,6 +119,12 @@ pub struct Tree {
   // Widget nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
+  // Maps widget node ID => layout node ID.
+  tree_node_ids: FoldMap<TreeNodeId, LayoutNodeId>,
+
+  // Maps layout node ID => widget node ID.
+  layout_node_ids: FoldMap<LayoutNodeId, TreeNodeId>,
+
   // Root node ID.
   root_id: TreeNodeId,
 
@@ -203,6 +210,14 @@ impl Tree {
   /// Get mutable node by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.nodes.get_mut(&id)
+  }
+
+  pub fn layout_id(&self, id: TreeNodeId) -> Option<&LayoutNodeId> {
+    self.tree_node_ids.get(&id)
+  }
+
+  pub fn node_id(&self, layout_id: LayoutNodeId) -> Option<&TreeNodeId> {
+    self.layout_node_ids.get(&layout_id)
   }
 
   // /// See [`Itree::iter`].
@@ -479,3 +494,47 @@ impl Tree {
   }
 }
 // Draw }
+
+#[derive(Debug)]
+/// The iterator of the tree, it traverse the tree from the root node in
+/// level-order. This helps us render the whole UI tree, because the root node
+/// is at the bottom of canvas, leaf nodes are at the top of canvas.
+pub struct TreeIter<'a> {
+  tree: &'a Tree,
+  que: VecDeque<LayoutNodeId>,
+}
+
+impl<'a> Iterator for TreeIter<'a> {
+  type Item = &'a TreeNode;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(layout_id) = self.que.pop_front() {
+      if let Ok(children_layout_ids) =
+        self.tree.layout_tree.borrow().children(layout_id)
+      {
+        for child_layout_id in children_layout_ids {
+          if self.tree.layout_node_ids.contains_key(&child_layout_id) {
+            self.que.push_back(child_layout_id);
+          }
+        }
+      }
+      let node_id = self.tree.layout_node_ids.get(&layout_id).unwrap();
+      self.tree.node(*node_id)
+    } else {
+      None
+    }
+  }
+}
+
+impl<'a, T> TreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+    let mut que = VecDeque::new();
+    if let Some(id) = start_node_id {
+      que.push_back(id);
+    }
+    Self { tree, que }
+  }
+}

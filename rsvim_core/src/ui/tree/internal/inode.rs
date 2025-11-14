@@ -1,10 +1,9 @@
-//! The node structure of the internal tree.
+//! Internal tree node.
 
 use crate::ui::tree::TaffyTreeWk;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
-use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 
@@ -121,6 +120,6 @@ impl InodeBase {
   }
 
   pub fn layout_tree(&self) -> TaffyTreeWk {
-    self.layout_tree
+    self.layout_tree.clone()
   }
 }
