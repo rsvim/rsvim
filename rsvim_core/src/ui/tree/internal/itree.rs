@@ -10,53 +10,6 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 
-#[derive(Debug)]
-/// The pre-order iterator of the tree.
-///
-/// For each node, it first visits the node itself, then visits all its children.
-/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-/// This also follows the order when rendering the widget tree to terminal device.
-pub struct ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  tree: &'a Itree<T>,
-  que: VecDeque<TreeNodeId>,
-}
-
-impl<'a, T> Iterator for ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a T;
-
-  fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
-        }
-      }
-      self.tree.node(id)
-    } else {
-      None
-    }
-  }
-}
-
-impl<'a, T> ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
-    let mut que = VecDeque::new();
-    if let Some(id) = start_node_id {
-      que.push_back(id);
-    }
-    Self { tree, que }
-  }
-}
-
 // Attributes {
 impl<T> Itree<T>
 where
