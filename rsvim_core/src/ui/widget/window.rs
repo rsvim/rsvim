@@ -10,7 +10,7 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -36,7 +36,7 @@ pub enum WindowNode {
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+inode_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 
 #[derive(Debug, Clone)]
