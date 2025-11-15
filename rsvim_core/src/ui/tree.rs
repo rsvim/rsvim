@@ -119,10 +119,10 @@ pub struct Tree {
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // Maps widget node ID => layout node ID.
-  nodes2layouts: FoldMap<TreeNodeId, LayoutNodeId>,
+  nodeids2layoutids: FoldMap<TreeNodeId, LayoutNodeId>,
 
   // Maps layout node ID => widget node ID.
-  layouts2nodes: FoldMap<LayoutNodeId, TreeNodeId>,
+  layoutids2nodeids: FoldMap<LayoutNodeId, TreeNodeId>,
 
   // Root node ID.
   root_id: TreeNodeId,
@@ -164,7 +164,7 @@ arc_mutex_ptr!(Tree);
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
-// Node {
+// ID {
 impl Tree {
   /// Make a widget tree.
   ///
@@ -184,8 +184,8 @@ impl Tree {
         nodes: FoldMap::new(),
         root_id: next_node_id(),
         root_layout_id,
-        nodes2layouts: FoldMap::new(),
-        layouts2nodes: FoldMap::new(),
+        nodeids2layoutids: FoldMap::new(),
+        layoutids2nodeids: FoldMap::new(),
         size: canvas_size,
         layout_tree: Rc::new(RefCell::new(layout)),
         command_line_id: None,
@@ -214,13 +214,13 @@ impl Tree {
   }
 
   // Maps widget node ID => layout node ID.
-  pub fn nodes2layouts(&self) -> &FoldMap<TreeNodeId, LayoutNodeId> {
-    &self.nodes2layouts
+  pub fn nodeids2layoutids(&self) -> &FoldMap<TreeNodeId, LayoutNodeId> {
+    &self.nodeids2layoutids
   }
 
   // Maps layout node ID => widget node ID.
-  pub fn layouts2nodes(&self) -> &FoldMap<LayoutNodeId, TreeNodeId> {
-    &self.layouts2nodes
+  pub fn layoutids2nodeids(&self) -> &FoldMap<LayoutNodeId, TreeNodeId> {
+    &self.layoutids2nodeids
   }
 
   /// Get iterator of this tree, it traverse the tree in level-order. This
@@ -228,11 +228,6 @@ impl Tree {
   pub fn iter(&self) -> TreeIter {
     TreeIter::new(self, Some(self.root_layout_id))
   }
-
-  // /// See [`Itree::iter_mut`].
-  // pub fn iter_mut(&mut self) -> TreeIterMut {
-  //   self.base.iter_mut()
-  // }
 
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
@@ -279,7 +274,7 @@ impl Tree {
     &self.window_ids
   }
 }
-// Node {
+// ID }
 
 // Widget {
 impl Tree {
