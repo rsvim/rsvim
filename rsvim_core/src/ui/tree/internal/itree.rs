@@ -1,6 +1,5 @@
 //! Internal tree utility.
 
-use crate::prelude::*;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
 use crate::ui::tree::internal::LayoutNodeId;
