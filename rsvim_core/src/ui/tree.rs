@@ -17,7 +17,6 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
 use std::cell::RefCell;
-use std::collections::VecDeque;
 use std::rc::Rc;
 use std::rc::Weak;
 use taffy::Style;
@@ -120,10 +119,10 @@ pub struct Tree {
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // Maps widget node ID => layout node ID.
-  tree_node_ids: FoldMap<TreeNodeId, LayoutNodeId>,
+  nodes2layouts: FoldMap<TreeNodeId, LayoutNodeId>,
 
   // Maps layout node ID => widget node ID.
-  layout_node_ids: FoldMap<LayoutNodeId, TreeNodeId>,
+  layouts2nodes: FoldMap<LayoutNodeId, TreeNodeId>,
 
   // Root node ID.
   root_id: TreeNodeId,
@@ -210,6 +209,14 @@ impl Tree {
   /// Get mutable node by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.nodes.get_mut(&id)
+  }
+
+  pub fn nodes2layouts(&self) -> &FoldMap<TreeNodeId, LayoutNodeId> {
+    &self.nodes2layouts
+  }
+
+  pub fn layouts2nodes(&self) -> &FoldMap<LayoutNodeId, TreeNodeId> {
+    &self.layouts2nodes
   }
 
   // /// See [`Itree::iter`].

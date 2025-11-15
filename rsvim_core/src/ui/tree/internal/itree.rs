@@ -1,4 +1,4 @@
-//! Internal tree utility.
+//! Internal tree.
 
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
@@ -23,12 +23,12 @@ impl<'a> Iterator for TreeIter<'a> {
         self.tree.layout_tree.borrow().children(layout_id)
       {
         for child_layout_id in children_layout_ids {
-          if self.tree.layout_node_ids.contains_key(&child_layout_id) {
+          if self.tree.layout2nodeids.contains_key(&child_layout_id) {
             self.que.push_back(child_layout_id);
           }
         }
       }
-      let node_id = self.tree.layout_node_ids.get(&layout_id).unwrap();
+      let node_id = self.tree.layout2nodeids.get(&layout_id).unwrap();
       self.tree.node(*node_id)
     } else {
       None
