@@ -221,11 +221,12 @@ impl Tree {
     &self.layouts2nodes
   }
 
-  // /// See [`Itree::iter`].
-  // pub fn iter(&self) -> TreeIter {
-  //   self.base.iter()
-  // }
-  //
+  /// Get iterator of this tree, it traverse the tree in level-order. This
+  /// helps us render the whole UI tree.
+  pub fn iter(&self) -> TreeIter {
+    self.base.iter()
+  }
+
   // /// See [`Itree::iter_mut`].
   // pub fn iter_mut(&mut self) -> TreeIterMut {
   //   self.base.iter_mut()
