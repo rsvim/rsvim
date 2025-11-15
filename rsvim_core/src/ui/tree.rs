@@ -224,7 +224,7 @@ impl Tree {
   /// Get iterator of this tree, it traverse the tree in level-order. This
   /// helps us render the whole UI tree.
   pub fn iter(&self) -> TreeIter {
-    self.base.iter()
+    TreeIter::new(self, Some(self.root_layout_id))
   }
 
   // /// See [`Itree::iter_mut`].
