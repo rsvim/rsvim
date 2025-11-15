@@ -211,10 +211,12 @@ impl Tree {
     self.nodes.get_mut(&id)
   }
 
+  // Maps widget node ID => layout node ID.
   pub fn nodes2layouts(&self) -> &FoldMap<TreeNodeId, LayoutNodeId> {
     &self.nodes2layouts
   }
 
+  // Maps layout node ID => widget node ID.
   pub fn layouts2nodes(&self) -> &FoldMap<LayoutNodeId, TreeNodeId> {
     &self.layouts2nodes
   }
