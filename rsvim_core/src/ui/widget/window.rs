@@ -11,7 +11,7 @@ mod opt_tests;
 
 use crate::buf::BufferWk;
 use crate::inode_dispatcher;
-use crate::inode_itree_impl;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -36,14 +36,13 @@ pub enum WindowNode {
   Cursor(Cursor),
 }
 
-inode_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+inode_impl!(Window, base);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
