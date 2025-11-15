@@ -184,6 +184,8 @@ impl Tree {
         nodes: FoldMap::new(),
         root_id: next_node_id(),
         root_layout_id,
+        nodes2layouts: FoldMap::new(),
+        layouts2nodes: FoldMap::new(),
         size: canvas_size,
         layout_tree: Rc::new(RefCell::new(layout)),
         command_line_id: None,
