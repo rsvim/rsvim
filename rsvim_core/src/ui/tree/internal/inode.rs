@@ -2,7 +2,6 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
-use crate::rect_as;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
