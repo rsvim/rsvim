@@ -718,10 +718,12 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let next_top_left_pos: IPos = point!(x: x, y: y);
-        let next_shape = IRect::new(
-          next_top_left_pos,
-          point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+        let next_top_left_pos: IPos = point!(x, y);
+        let next_shape = rect!(
+          next_top_left_pos.x,
+          next_top_left_pos.y,
+          next_top_left_pos.x() + current_shape.width(),
+          next_top_left_pos.y() + current_shape.height()
         );
         node.set_shape(&next_shape);
 
