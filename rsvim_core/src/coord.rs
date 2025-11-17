@@ -64,7 +64,10 @@ pub type U16Size = Size<u16>;
 #[macro_export]
 macro_rules! geo_point_as {
   ($p:ident,$ty:ty) => {
-    geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
+    $crate::coord::Point {
+      x: $p.x() as $ty,
+      y: $p.y() as $ty,
+    }
   };
 }
 
