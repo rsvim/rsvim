@@ -59,6 +59,7 @@ impl Window {
   pub fn new(
     layout_tree: TaffyTreeWk,
     style: Style,
+    parent_layout_id: LayoutNodeId,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
@@ -70,6 +71,10 @@ impl Window {
     // let mut base = Itree::new(root_node);
 
     let base = InodeBase::new(layout_tree, style)?;
+    let layout_tree = layout_tree.upgrade().unwrap();
+    let layout = layout_tree
+      .borrow_mut()
+      .add_child(parent_layout_id, base.layout_id());
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
