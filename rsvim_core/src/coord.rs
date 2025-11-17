@@ -100,9 +100,11 @@ macro_rules! geo_size_as {
 #[macro_export]
 macro_rules! geo_size_into_rect {
   ($s:ident,$ty:ty) => {
-    geo::Rect::new(
-      (0 as $ty, 0 as $ty),
-      ($s.width() as $ty, $s.height() as $ty),
-    ) as geo::Rect<$ty>
+    $crate::coord::Rect {
+      left: 0 as $ty,
+      top: 0 as $ty,
+      right: $s.width as $ty,
+      bottom: $s.height as $ty,
+    } as $crate::coord::Rect<$ty>
   };
 }
