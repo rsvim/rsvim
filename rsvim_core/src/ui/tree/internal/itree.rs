@@ -664,14 +664,14 @@ where
                 let current_shape = *node.shape();
                 let current_top_left_pos: IPos = current_shape.min().into();
                 let expected_top_left_pos: IPos = point!(
-                  current_top_left_pos.x() + x,
-                  current_top_left_pos.y() + y
+                  current_top_left_pos.x + x,
+                  current_top_left_pos.y + y
                 );
                 let expected_shape = rect!(
                   expected_top_left_pos.x,
                   expected_top_left_pos.y,
-                  expected_top_left_pos.x() + current_shape.width(),
-                  expected_top_left_pos.y() + current_shape.height()
+                  expected_top_left_pos.x + current_shape.width(),
+                  expected_top_left_pos.y + current_shape.height()
                 );
 
                 let final_shape =
@@ -679,8 +679,8 @@ where
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
-                let final_x = final_top_left_pos.x() - current_top_left_pos.x();
-                let final_y = final_top_left_pos.y() - current_top_left_pos.y();
+                let final_x = final_top_left_pos.x - current_top_left_pos.x;
+                let final_y = final_top_left_pos.y - current_top_left_pos.y;
                 self.move_by(id, final_x, final_y)
               }
               None => None,
