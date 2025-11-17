@@ -4,7 +4,7 @@ use std::mem;
 
 #[test]
 fn cast_geo_points() {
-  let p1: IPos = point!(x: 1, y: 2);
+  let p1: IPos = point!(1, 2);
   let actual1 = point_as!(p1, usize);
   let actual1_x = actual1.x();
   let actual1_y = actual1.y();
