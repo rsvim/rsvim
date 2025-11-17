@@ -6,22 +6,22 @@ use std::mem;
 fn cast_geo_points() {
   let p1: IPos = point!(1, 2);
   let actual1 = point_as!(p1, usize);
-  let actual1_x = actual1.x();
-  let actual1_y = actual1.y();
+  let actual1_x = actual1.x;
+  let actual1_y = actual1.y;
   assert_eq!(mem::size_of_val(&actual1_x), mem::size_of_val(&1_usize));
   assert_eq!(mem::size_of_val(&actual1_y), mem::size_of_val(&2_usize));
 
   let p2: U16Pos = point!(15_u16, 25_u16);
   let actual2 = point_as!(p2, i32);
-  let actual2_x = actual2.x();
-  let actual2_y = actual2.y();
+  let actual2_x = actual2.x;
+  let actual2_y = actual2.y;
   assert_eq!(mem::size_of_val(&actual2_x), mem::size_of_val(&15_i32));
   assert_eq!(mem::size_of_val(&actual2_y), mem::size_of_val(&25_i32));
 
   let p3: Point<u32> = point!(78_u32, 88_u32);
   let actual3 = point_as!(p3, i16);
-  let actual3_x = actual3.x();
-  let actual3_y = actual3.y();
+  let actual3_x = actual3.x;
+  let actual3_y = actual3.y;
   assert_eq!(mem::size_of_val(&actual3_x), mem::size_of_val(&78_i16));
   assert_eq!(mem::size_of_val(&actual3_y), mem::size_of_val(&88_i16));
 }
