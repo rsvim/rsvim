@@ -93,13 +93,13 @@ fn set_cell1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
-    (point!(x: 0, y: 0), 'A'),
-    (point!(x: 7, y: 8), 'B'),
-    (point!(x: 1, y: 3), 'C'),
-    (point!(x: 9, y: 2), 'D'),
-    (point!(x: 9, y: 9), 'E'),
-    (point!(x: 2, y: 9), 'F'),
-    (point!(x: 9, y: 7), 'G'),
+    (point!(0, 0), 'A'),
+    (point!(7, 8), 'B'),
+    (point!(1, 3), 'C'),
+    (point!(9, 2), 'D'),
+    (point!(9, 9), 'E'),
+    (point!(2, 9), 'F'),
+    (point!(9, 7), 'G'),
   ];
 
   for (i, input) in inputs.iter().enumerate() {
