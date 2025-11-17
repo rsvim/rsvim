@@ -197,7 +197,7 @@ fn cells_at1() {
   info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
   let all_cells = frame.get_cells();
   for i in 0..10 {
-    let pos: U16Pos = point!(x:0, y:i);
+    let pos: U16Pos = point!(0, i);
     let cells = frame.get_cells_at(pos, 10);
     let actual = cells
       .iter()
