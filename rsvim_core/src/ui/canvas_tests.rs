@@ -202,20 +202,20 @@ fn _next_same_cell_in_row2() {
         info!(
           "chars:{:?}, symbol:{:?}",
           chars,
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         assert!(
-          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
         );
       } else if row == 6 && (0..2).contains(&col) {
         assert_eq!(actual, 2);
         info!(
           "chars:{:?}, symbol:{:?}",
           chars,
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         assert!(
-          chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol())
+          chars.contains(can.frame().get_cell(point!(col, row)).symbol())
         );
       } else {
         assert_eq!(actual, col);
@@ -259,7 +259,7 @@ fn _next_same_cell_in_row3() {
         assert_eq!(actual, 6);
         assert_eq!(
           int2letter(char_index).to_compact_string(),
-          can.frame().get_cell(point!(x:col, y:row)).symbol()
+          can.frame().get_cell(point!(col, row)).symbol()
         );
         char_index += 1;
       } else {
