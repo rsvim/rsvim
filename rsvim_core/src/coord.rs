@@ -69,7 +69,7 @@ pub trait RectExt<T> {
 
 impl<T> RectExt<T> for Rect<T>
 where
-  T: Copy + num_traits::Num,
+  T: Copy + PartialOrd + num_traits::Num,
 {
   fn min(&self) -> Point<T> {
     self.top_left()
@@ -94,10 +94,12 @@ where
   }
 
   fn height(&self) -> T {
+    debug_assert!(self.bottom >= self.top);
     self.bottom - self.top
   }
 
   fn width(&self) -> T {
+    debug_assert!(self.right >= self.left);
     self.right - self.left
   }
 }
