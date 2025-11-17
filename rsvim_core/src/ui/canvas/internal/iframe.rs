@@ -52,12 +52,12 @@ impl Iframe {
 
   /// Convert (position) X and Y into Vec index.
   pub fn xy2idx(&self, x: usize, y: usize) -> usize {
-    y * self.size.width() as usize + x
+    y * self.size.width as usize + x
   }
 
   /// Convert position into Vec index.
   pub fn pos2idx(&self, pos: U16Pos) -> usize {
-    self.xy2idx(pos.x() as usize, pos.y() as usize)
+    self.xy2idx(pos.x as usize, pos.y as usize)
   }
 
   /// Convert index into (position) X and Y.
@@ -69,8 +69,8 @@ impl Iframe {
   /// If index is outside of frame shape.
   pub fn idx2xy(&self, index: usize) -> (usize, usize) {
     debug_assert!(index <= self.cells.len());
-    let x = index % self.size.width() as usize;
-    let y = index / self.size.width() as usize;
+    let x = index % self.size.width as usize;
+    let y = index / self.size.width as usize;
     (x, y)
   }
 
