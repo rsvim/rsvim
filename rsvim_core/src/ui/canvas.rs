@@ -11,7 +11,6 @@ use crossterm;
 pub use frame::cell::*;
 pub use frame::cursor::*;
 pub use frame::*;
-use geo::point;
 use std::fmt::Debug;
 use std::slice::Iter;
 
