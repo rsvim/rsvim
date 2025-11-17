@@ -29,7 +29,7 @@ impl Iframe {
     Iframe {
       size,
       cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
+      dirty_rows: vec![false; size.height as usize], // When a frame first create, it's not dirty.
     }
   }
 
