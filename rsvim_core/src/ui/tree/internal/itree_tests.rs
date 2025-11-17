@@ -186,7 +186,7 @@ fn insert2() {
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (10, 20));
+  let s5 = rect!(-3, -5, 10, 20);
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
 
@@ -198,7 +198,7 @@ fn insert2() {
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
 
-  let s8 = IRect::new((-1, -2), (2, 1));
+  let s8 = rect!(-1, -2, 2, 1);
   let n8 = TestValue::new(8, s8);
   let nid8 = n8.id();
 
@@ -341,7 +341,7 @@ fn shape1() {
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (10, 20));
+  let s5 = rect!(-3, -5, 10, 20);
   let us5 = U16Rect::new((0, 0), (10, 15));
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
@@ -356,7 +356,7 @@ fn shape1() {
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
 
-  let s8 = IRect::new((-1, -2), (2, 1));
+  let s8 = rect!(-1, -2, 2, 1);
   let us8 = U16Rect::new((3, 6), (5, 7));
   let n8 = TestValue::new(8, s8);
   let nid8 = n8.id();
@@ -433,7 +433,7 @@ fn shape2() {
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((-2, -2), (-1, 0));
+  let s3 = rect!(-2, -2, -1, 0);
   let us3 = U16Rect::new((0, 0), (0, 0));
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
@@ -443,7 +443,7 @@ fn shape2() {
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (15, 20));
+  let s5 = rect!(-3, -5, 15, 20);
   let us5 = U16Rect::new((3, 5), (18, 20));
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
@@ -633,7 +633,7 @@ fn get1() {
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (10, 20));
+  let s5 = rect!(-3, -5, 10, 20);
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
 
@@ -645,7 +645,7 @@ fn get1() {
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
 
-  let s8 = IRect::new((-1, -2), (2, 1));
+  let s8 = rect!(-1, -2, 2, 1);
   let n8 = TestValue::new(8, s8);
   let nid8 = n8.id();
 
@@ -712,7 +712,7 @@ fn get2() {
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
-  let s3 = IRect::new((-2, -2), (-1, 0));
+  let s3 = rect!(-2, -2, -1, 0);
   let us3 = U16Rect::new((0, 0), (0, 0));
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
@@ -722,7 +722,7 @@ fn get2() {
   let n4 = TestValue::new(4, s4);
   let nid4 = n4.id();
 
-  let s5 = IRect::new((-3, -5), (15, 20));
+  let s5 = rect!(-3, -5, 15, 20);
   let us5 = U16Rect::new((3, 5), (18, 20));
   let n5 = TestValue::new(5, s5);
   let nid5 = n5.id();
@@ -825,15 +825,15 @@ fn move_by1() {
     (6, 8),
   ];
   let expects: Vec<IRect> = vec![
-    IRect::new((-10, -4), (-9, -3)),
-    IRect::new((-8, -11), (-7, -10)),
-    IRect::new((-7, 79), (-6, 80)),
-    IRect::new((-77, 120), (-76, 121)),
-    IRect::new((-54, 116), (-53, 117)),
-    IRect::new((-5, -5), (-4, -4)),
-    IRect::new((3, -2), (4, -1)),
-    IRect::new((-7, -9), (-6, -8)),
-    IRect::new((-1, -1), (0, 0)),
+    rect!(-10, -4, -9, -3),
+    rect!(-8, -11, -7, -10),
+    rect!(-7, 79, -6, 80),
+    rect!(-77, 120, -76, 121),
+    rect!(-54, 116, -53, 117),
+    rect!(-5, -5, -4, -4),
+    rect!(3, -2, 4, -1),
+    rect!(-7, -9, -6, -8),
+    rect!(-1, -1, 0, 0),
   ];
 
   for (i, m) in moves.iter().enumerate() {
@@ -969,14 +969,14 @@ fn move_to1() {
     (6, 8),
   ];
   let expects: Vec<IRect> = vec![
-    IRect::new((-10, -4), (-9, -3)),
-    IRect::new((2, -7), (3, -6)),
+    rect!(-10, -4, -9, -3),
+    rect!(2, -7, 3, -6),
     rect!(1, 90, 2, 91),
-    IRect::new((-70, 41), (-69, 42)),
-    IRect::new((23, -4), (24, -3)),
-    IRect::new((49, -121), (50, -120)),
+    rect!(-70, 41, -69, 42),
+    rect!(23, -4, 24, -3),
+    rect!(49, -121, 50, -120),
     rect!(8, 3, 9, 4),
-    IRect::new((-10, -7), (-9, -6)),
+    rect!(-10, -7, -9, -6),
     rect!(6, 8, 7, 9),
   ];
 
