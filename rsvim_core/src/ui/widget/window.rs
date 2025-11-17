@@ -29,6 +29,7 @@ use root::RootContainer;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -75,6 +76,13 @@ impl Window {
     layout_tree
       .borrow_mut()
       .add_child(parent_layout_id, base.layout_id())?;
+    let layout = {
+      let layout_tree = layout_tree.borrow_mut();
+      layout_tree.add_child(parent_layout_id, base.layout_id());
+      let parent_layout = layout_tree.layout(parent_layout_id)?;
+      layout_tree.compute_layout(base.layout_id(), taffy::Size::MAX_CONTENT)?;
+      layout_tree.layout(base.layout_id())?
+    };
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
