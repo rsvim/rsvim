@@ -101,14 +101,12 @@ impl InodeBase {
   pub fn new(layout_tree: TaffyTreeWk, style: Style) -> TaffyResult<Self> {
     let lo = layout_tree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
-    match lo.new_leaf(style) {
-      Ok(layout_id) => Ok(InodeBase {
-        id: next_node_id(),
-        layout_id,
-        layout_tree,
-      }),
-      Err(e) => Err(e),
-    }
+    let layout_id = lo.new_leaf(style)?;
+    Ok(InodeBase {
+      id: next_node_id(),
+      layout_id,
+      layout_tree,
+    })
   }
 
   pub fn id(&self) -> TreeNodeId {
