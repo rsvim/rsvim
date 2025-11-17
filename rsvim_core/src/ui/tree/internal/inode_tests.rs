@@ -26,8 +26,8 @@ inode_impl!(TestNode, base);
 fn new() {
   // test_log_init();
 
-  let n1 = TestNode::new(1, IRect::new((0, 0), (0, 0)));
-  let n2 = TestNode::new(2, IRect::new((1, 2), (3, 4)));
+  let n1 = TestNode::new(1, rect!(0, 0, 0, 0));
+  let n2 = TestNode::new(2, rect!(1, 2, 3, 4));
   let n1 = RefCell::new(n1);
   let n2 = RefCell::new(n2);
 
@@ -45,8 +45,8 @@ fn new() {
   assert!(n1.borrow().enabled());
   assert!(n1.borrow().visible());
 
-  assert_eq!(*n1.borrow().shape(), IRect::new((0, 0), (0, 0)));
-  assert_eq!(*n2.borrow().shape(), IRect::new((1, 2), (3, 4)));
+  assert_eq!(*n1.borrow().shape(), rect!(0, 0, 0, 0));
+  assert_eq!(*n2.borrow().shape(), rect!(1, 2, 3, 4));
 }
 
 #[test]
