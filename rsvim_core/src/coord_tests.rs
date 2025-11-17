@@ -37,7 +37,7 @@ fn cast_geo_rects() {
   assert_eq!(mem::size_of_val(&actual1_max.x), mem::size_of_val(&3_u8));
   assert_eq!(mem::size_of_val(&actual1_max.y), mem::size_of_val(&4_u8));
 
-  let r2: Rect<u16> = Rect::new((15_u16, 25_u16), (35_u16, 45_u16));
+  let r2: Rect<u16> = rect!(15_u16, 25_u16, 35_u16, 45_u16);
   let actual2 = rect_as!(r2, i32);
   let actual2_min = actual2.min();
   let actual2_max = actual2.max();
@@ -46,7 +46,7 @@ fn cast_geo_rects() {
   assert_eq!(mem::size_of_val(&actual2_max.x), mem::size_of_val(&35_i32));
   assert_eq!(mem::size_of_val(&actual2_max.y), mem::size_of_val(&45_i32));
 
-  let r3: Rect<u32> = Rect::new((78_u32, 88_u32), (99_u32, 100_u32));
+  let r3: Rect<u32> = rect!(78_u32, 88_u32, 99_u32, 100_u32);
   let actual3 = rect_as!(r3, i16);
   let actual3_min = actual3.min();
   let actual3_max = actual3.max();
