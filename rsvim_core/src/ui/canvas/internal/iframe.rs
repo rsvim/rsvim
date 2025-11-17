@@ -100,10 +100,9 @@ impl Iframe {
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
-    self.cells.resize(
-      size.height() as usize * size.width() as usize,
-      Cell::default(),
-    );
+    self
+      .cells
+      .resize(size.height as usize * size.width as usize, Cell::default());
     self.dirty_rows = vec![true; size.height() as usize];
     old_size
   }
