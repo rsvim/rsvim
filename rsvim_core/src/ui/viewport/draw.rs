@@ -175,7 +175,7 @@ pub fn draw(
           let cells = std::iter::repeat_n('<', end_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
           canvas.frame_mut().set_cells_at(cells_upos, cells);
 
           col_idx += end_fills;
