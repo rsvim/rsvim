@@ -93,7 +93,7 @@ impl Iframe {
 
   /// Whether the frame is zero sized.
   pub fn zero_sized(&self) -> bool {
-    self.size.height() == 0 || self.size.width() == 0
+    self.size.height == 0 || self.size.width == 0
   }
 
   /// Set current frame size.
