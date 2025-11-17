@@ -66,7 +66,7 @@ impl std::fmt::Display for Stats {
 }
 
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_size.height() as usize * 3 + 3).unwrap()
+  std::num::NonZeroUsize::new(canvas_size.height as usize * 3 + 3).unwrap()
 }
 
 #[derive(Debug)]
