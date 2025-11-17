@@ -21,13 +21,14 @@
 //! column. Thus we need to flip the coordinate system upside down:
 //!
 //! ```text
-//!
+//!  (left,top)
 //!   (0,0)------------------(width,0)--------Y
 //!     |                         |
 //!     |  Terminal               |
 //!     |                         |
 //!     |                         |
 //!   (0,height)-------------(width,height)
+//!     |                    (right,bottom)
 //!     |
 //!     X
 //! ```
