@@ -72,9 +72,9 @@ impl Window {
 
     let base = InodeBase::new(layout_tree, style)?;
     let layout_tree = layout_tree.upgrade().unwrap();
-    let layout = layout_tree
+    layout_tree
       .borrow_mut()
-      .add_child(parent_layout_id, base.layout_id());
+      .add_child(parent_layout_id, base.layout_id())?;
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
