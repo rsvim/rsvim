@@ -305,7 +305,7 @@ mod tests_cursor_move {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_tree(
-      U16Size::new(10, 10),
+      size!(10, 10),
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
@@ -415,7 +415,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
+        size!(10, 10),
         buf_opts,
         WindowOptionsBuilder::default().wrap(false).build().unwrap(),
         lines,
@@ -526,7 +526,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 10),
+        size!(10, 10),
         buf_opts,
         WindowOptionsBuilder::default().wrap(false).build().unwrap(),
         lines,
@@ -638,7 +638,7 @@ mod tests_cursor_move {
       "12th.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_tree(
-      U16Size::new(10, 6),
+      size!(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(false)
@@ -883,7 +883,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
+        size!(10, 6),
         buf_opts,
         WindowOptionsBuilder::default()
           .wrap(true)
@@ -1129,7 +1129,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
+        size!(10, 6),
         buf_opts,
         WindowOptionsBuilder::default()
           .wrap(true)
@@ -1370,7 +1370,7 @@ mod tests_cursor_move {
       "12th.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) = make_tree(
-      U16Size::new(10, 6),
+      size!(10, 6),
       WindowOptionsBuilder::default()
         .wrap(true)
         .line_break(true)
@@ -1615,7 +1615,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
+        size!(10, 6),
         buf_opts,
         WindowOptionsBuilder::default()
           .wrap(true)
@@ -1861,7 +1861,7 @@ mod tests_cursor_move {
       .unwrap();
     let (event, tree, bufs, buf, contents, data_access) =
       make_tree_with_buffer_opts(
-        U16Size::new(10, 6),
+        size!(10, 6),
         buf_opts,
         WindowOptionsBuilder::default()
           .wrap(true)
@@ -2091,7 +2091,7 @@ mod tests_insert_text {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
@@ -2306,7 +2306,7 @@ mod tests_insert_text {
   fn nowrap1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -2530,7 +2530,7 @@ mod tests_insert_text {
   fn nowrap1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -2754,7 +2754,7 @@ mod tests_insert_text {
   fn nowrap2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
@@ -2886,7 +2886,7 @@ mod tests_insert_text {
   fn nowrap3() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
@@ -3189,7 +3189,7 @@ mod tests_insert_text {
   fn nowrap3_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -3501,7 +3501,7 @@ mod tests_insert_text {
   fn nowrap3_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -3808,7 +3808,7 @@ mod tests_insert_text {
   fn nowrap4() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
@@ -3868,7 +3868,7 @@ mod tests_insert_text {
   fn nowrap5() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let window_option =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
@@ -3929,7 +3929,7 @@ mod tests_insert_text {
   fn nowrap5_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 5);
+    let terminal_size = size!(10, 5);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -3994,7 +3994,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
@@ -4404,7 +4404,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -4823,7 +4823,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -5242,7 +5242,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
@@ -5305,7 +5305,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak3() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
@@ -5368,7 +5368,7 @@ mod tests_insert_text {
   fn wrap_nolinebreak4() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
@@ -5512,7 +5512,7 @@ mod tests_insert_text {
   fn wrap_linebreak1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
@@ -5914,7 +5914,7 @@ mod tests_insert_text {
   fn wrap_linebreak2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
@@ -5977,7 +5977,7 @@ mod tests_insert_text {
   fn wrap_linebreak3() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 6);
+    let terminal_size = size!(10, 6);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
@@ -6040,7 +6040,7 @@ mod tests_insert_text {
   fn nowrap_special_characters1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(200, 10);
+    let terminal_size = size!(200, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
@@ -6122,7 +6122,7 @@ mod tests_insert_text {
   fn nowrap_special_characters2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(200, 10);
+    let terminal_size = size!(200, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines =
@@ -6302,7 +6302,7 @@ mod tests_delete_text {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![
@@ -6940,7 +6940,7 @@ mod tests_delete_text {
   fn nowrap1_crlf_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -7587,7 +7587,7 @@ mod tests_delete_text {
   fn nowrap1_cr_mac() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let buf_opts = BufferOptionsBuilder::default()
       .file_format(FileFormatOption::Mac)
       .build()
@@ -8234,7 +8234,7 @@ mod tests_delete_text {
   fn nowrap2() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
@@ -8294,7 +8294,7 @@ mod tests_delete_text {
   fn nowrap3() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_options =
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
@@ -8354,7 +8354,7 @@ mod tests_delete_text {
   fn wrap_linebreak1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = size!(10, 10);
     let window_options = WindowOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
