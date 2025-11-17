@@ -205,7 +205,7 @@ impl Canvas {
     let prev_frame = self.prev_frame();
 
     let mut col_end_at = col;
-    while col_end_at < frame.size().width() {
+    while col_end_at < frame.size().width {
       let pos: U16Pos = point!(col_end_at, row);
       let cell2 = frame.get_cell(pos);
       let prev_cell2 = prev_frame.get_cell(pos);
@@ -260,9 +260,9 @@ impl Canvas {
     let mut shaders = vec![];
 
     if !frame.zero_sized() {
-      for row in 0..size.height() {
+      for row in 0..size.height {
         let mut col = 0_u16;
-        while col < size.width() {
+        while col < size.width {
           // Skip unchanged columns
           let pos: U16Pos = point!(col, row);
           let cell = frame.get_cell(pos);
@@ -303,9 +303,9 @@ impl Canvas {
 
     if !frame.zero_sized() {
       for (row, dirty) in frame.dirty_rows().iter().enumerate() {
-        if row < size.height() as usize && *dirty {
+        if row < size.height as usize && *dirty {
           let mut col = 0_u16;
-          while col < size.width() {
+          while col < size.width {
             // Skip unchanged columns
             let pos: U16Pos = point!(col, row as u16);
             let cell = frame.get_cell(pos);
