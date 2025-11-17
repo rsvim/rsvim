@@ -1,8 +1,5 @@
 use super::coord::*;
 use crate::prelude::*;
-use geo::Point;
-use geo::Rect;
-use geo::point;
 use std::mem;
 
 #[test]
