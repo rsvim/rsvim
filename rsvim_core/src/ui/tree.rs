@@ -2,7 +2,7 @@
 
 pub mod internal;
 
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -16,6 +16,12 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::rc::Weak;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::TaffyTree;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
@@ -25,15 +31,32 @@ pub enum TreeNode {
   CommandLine(CommandLine),
 }
 
-inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
+pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
+pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
+
+pub fn new_layout_tree() -> TaffyTreeRc {
+  let mut layout_tree = TaffyTree::new();
+  layout_tree.disable_rounding();
+  Rc::new(RefCell::new(layout_tree))
+}
+
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The widget tree (UI tree).
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// The widget tree manages all UI widgets and rendering on the canvas, each
+/// widgiet is a node on the tree, the tree has a root node, and all other
+/// nodes inside is the root node's descendants. The root node is the terminal
+/// itself, while each node inside renders a part of the terminal.
+///
+/// We use [taffy] to manage the parent-child relationships among all the
+/// nodes, and calculate layout for the whole TUI. The tree structure contains
+/// a [TaffyTree] pointer. Each node holds a weak reference point to that
+/// [TaffyTree], and also a [taffy::Style] to indicate what style this node
+/// wants to be, a [taffy::Layout] to cache the layout result that how this
+/// node is going to render itself.
 ///
 /// # Terms
 ///
@@ -43,88 +66,75 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// # Guarantees
+/// Taffy implements several layout algorithms in
+/// [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) specification:
 ///
-/// ## Ownership
+/// - flexbox
+/// - grid
+/// - block
 ///
-/// Parent owns all its children.
+/// They are just right to laying out Rsvim UI widgets as well. But layout just
+/// tells a node where it should be rendering, it is still need to implement
+/// the rendering method by itself.
+///
+/// # Ownership
+///
+/// Parent owns its children:
 ///
 /// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// * Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries. While the size of each node can be logically infinite on the
+///   imaginary canvas.
+/// * The `visible` and `enabled` attributes of a child are implicitly
+///   inherited from it's parent, unless they're explicitly been set.
 ///
-/// ## Priority
+/// # Priority
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// Children have higher priority than their parent to both display and process
+/// input events:
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
+/// * Children are always displayed on top of their parent, and has higher
+///   priority to process a user's input event when the event occurs within the
+///   shape of the child. The event will fallback to their parent if the child
+///   doesn't process it.
+/// * For children that shade each other, the one with higher z-index has
+///   higher priority to display and process the input events.
 ///
-/// # Attributes
+/// ## Visible/Enabled
 ///
-/// ## Shape (position and size)
+/// A widget can be hidden/disabled, this is useful for some special use cases.
+/// For example, when implementing the "command-line" UI widget, we actually
+/// have multiple command-line widgets:
+/// - The "input" widget for receiving user's input command contents.
+/// - The "message" widget for printing Rsvim echoing messages.
+/// - The "search" widget for searching forward/backward.
 ///
-/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-/// default relative to its parent top-left corner, and the size is by default logically
-/// infinite. While rendering to the terminal device, we need to calculate its absolute position
-/// and actual size.
-///
-/// There're two kinds of positions:
-/// * Relative: Based on it's parent's position.
-/// * Absolute: Based on the terminal device.
-///
-/// There're two kinds of sizes:
-/// * Logical: An infinite size on the imaginary canvas.
-/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///   bounded by the terminal device's actual shape.
-///
-/// The shape boundary uses top-left open, bottom-right closed interval. For example the
-/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-/// The width and height of the shape is both `10`.
-///
-/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-/// position and actual size right after it's shape is been changed, and also caches the result.
-/// Thus we simply get the cached results when need.
-///
-/// ## Z-index
-///
-/// The z-index arranges the display priority of the content stack when multiple children
-/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-/// those widgets have the same z-index, the later inserted one will cover the previous inserted
-/// ones.
-///
-/// The z-index only works for the children under the same parent. For a child widget, it always
-/// covers/overrides its parent display.
-/// To change the visibility priority between children and parent, you need to change the
-/// relationship between them.
-///
-/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-/// still covers C, because it's a sibling of B.
-///
-/// ## Visible and enabled
-///
-/// A widget can be visible or invisible. When it's visible, it handles user's input events,
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
-///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
+/// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
+/// 2 are hidden/disabled.
+/// Thus we have to remove the other 2 nodes from the layout tree, the make
+/// sure they won't break our TUI layout.
 ///
 pub struct Tree {
-  // Internal implementation.
-  base: Itree<TreeNode>,
+  // Widget nodes.
+  nodes: FoldMap<TreeNodeId, TreeNode>,
+
+  // Maps widget node ID => layout node ID.
+  nodeids2layoutids: FoldMap<TreeNodeId, LayoutNodeId>,
+
+  // Maps layout node ID => widget node ID.
+  layoutids2nodeids: FoldMap<LayoutNodeId, TreeNodeId>,
+
+  // Root node ID.
+  root_id: TreeNodeId,
+
+  // Root layout node ID.
+  root_layout_id: LayoutNodeId,
+
+  // Canvas size.
+  size: U16Size,
+
+  // Layout tree.
+  layout_tree: TaffyTreeRc,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
@@ -151,80 +161,70 @@ pub struct Tree {
 
 arc_mutex_ptr!(Tree);
 
-// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-// pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
-
-// Node {
+// ID {
 impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
-    let shape = IRect::new(
-      (0, 0),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
-    );
-    let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
-    Tree {
-      base: Itree::new(root_node),
-      command_line_id: None,
-      window_ids: BTreeSet::new(),
-      current_window_id: None,
-      global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
-      global_local_options: WindowOptionsBuilder::default().build().unwrap(),
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+    let mut layout = TaffyTree::new();
+    layout.disable_rounding();
+    let root_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::length(canvas_size.width() as f32),
+        height: taffy::Dimension::length(canvas_size.height() as f32),
+      },
+      ..Default::default()
+    };
+    match layout.new_leaf(root_style) {
+      Ok(root_layout_id) => Ok(Tree {
+        nodes: FoldMap::new(),
+        root_id: next_node_id(),
+        root_layout_id,
+        nodeids2layoutids: FoldMap::new(),
+        layoutids2nodeids: FoldMap::new(),
+        size: canvas_size,
+        layout_tree: Rc::new(RefCell::new(layout)),
+        command_line_id: None,
+        window_ids: BTreeSet::new(),
+        current_window_id: None,
+        global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
+        global_local_options: WindowOptionsBuilder::default().build().unwrap(),
+      }),
+      Err(e) => Err(e),
     }
-  }
-
-  /// Nodes count, include the root node.
-  pub fn len(&self) -> usize {
-    self.base.len()
-  }
-
-  /// Whether the tree is empty.
-  pub fn is_empty(&self) -> bool {
-    self.base.is_empty()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self.base.root_id()
+    self.root_id
   }
 
-  /// All node IDs collection.
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.base.node_ids()
-  }
-
-  /// Get the parent ID by a node `id`.
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.base.parent_id(id)
-  }
-
-  /// Get the children IDs by a node `id`.
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.base.children_ids(id)
-  }
-
-  /// Get the node struct by its `id`.
+  /// Get node by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self.base.node(id)
+    self.nodes.get(&id)
   }
 
-  /// Get mutable node struct by its `id`.
+  /// Get mutable node by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self.base.node_mut(id)
+    self.nodes.get_mut(&id)
   }
 
-  // /// See [`Itree::iter`].
-  // pub fn iter(&self) -> TreeIter {
-  //   self.base.iter()
-  // }
-  //
-  // /// See [`Itree::iter_mut`].
-  // pub fn iter_mut(&mut self) -> TreeIterMut {
-  //   self.base.iter_mut()
-  // }
+  // Maps widget node ID => layout node ID.
+  pub fn nodeids2layoutids(&self) -> &FoldMap<TreeNodeId, LayoutNodeId> {
+    &self.nodeids2layoutids
+  }
+
+  // Maps layout node ID => widget node ID.
+  pub fn layoutids2nodeids(&self) -> &FoldMap<LayoutNodeId, TreeNodeId> {
+    &self.layoutids2nodeids
+  }
+
+  /// Get iterator of this tree, it traverse the tree in level-order. This
+  /// helps us render the whole UI tree.
+  pub fn iter(&self) -> TreeIter {
+    TreeIter::new(self, Some(self.root_layout_id))
+  }
 
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
@@ -232,9 +232,11 @@ impl Tree {
   }
 
   /// Get current window node ID.
-  /// NOTE: A window is called the current window because it has cursor inside it. But when user is
-  /// in command-line mode, the cursor widget is actually inside the command-line widget, not in
-  /// window. Mean while the **current** window is actually the **previous current** window.
+  ///
+  /// NOTE: A window is called the current window because it has cursor inside
+  /// it. But when user is in command-line mode, the cursor widget is actually
+  /// inside the command-line widget, not in window. Mean while the **current**
+  /// window is actually the **last current** window.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
     self.current_window_id
   }
@@ -269,7 +271,7 @@ impl Tree {
     &self.window_ids
   }
 }
-// Node {
+// ID }
 
 // Widget {
 impl Tree {
@@ -478,7 +480,7 @@ impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = lock!(canvas);
-    for node in self.base.iter() {
+    for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
       if !node.visible() {
         continue;

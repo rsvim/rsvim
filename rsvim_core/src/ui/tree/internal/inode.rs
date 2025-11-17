@@ -1,205 +1,49 @@
-//! The node structure of the internal tree.
+//! Internal tree node.
 
-use crate::flags_impl;
-use crate::geo_rect_as;
-use crate::prelude::*;
+use crate::ui::tree::TaffyTreeWk;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
+use taffy::Style;
+use taffy::TaffyResult;
 
+pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
+/// Whole TUI is a tree structure, each node on the tree is a UI widget (e.g.
+/// rectangle), and renders itself onto the terminal.
+///
+/// We use [taffy] library to maintain the relationships between each parent
+/// and children nodes, and also the layout algorithms. Each node holds a weak
+/// pointer to [TaffyTree], when the layout is changed, we just call taffy's
+/// API to help us update node relationships and update layout, then render all
+/// the nodes with newest layout. Here are some examples about layout changes:
+///
+/// All APIs with `layout_` prefix in this trait, are just wrappers on
+/// [TaffyTree], except the `layout_id` API.
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn depth(&self) -> usize;
+  fn layout_id(&self) -> LayoutNodeId;
 
-  fn set_depth(&mut self, depth: usize);
-
-  fn zindex(&self) -> usize;
-
-  fn set_zindex(&mut self, zindex: usize);
-
-  fn shape(&self) -> &IRect;
-
-  fn set_shape(&mut self, shape: &IRect);
-
-  fn actual_shape(&self) -> &U16Rect;
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect);
-
-  fn enabled(&self) -> bool;
-
-  fn set_enabled(&mut self, enabled: bool);
-
-  fn visible(&self) -> bool;
-
-  fn set_visible(&mut self, visible: bool);
+  fn layout_tree(&self) -> TaffyTreeWk;
 }
 
 /// Generate getter/setter for `Inode`.
 #[macro_export]
 macro_rules! inode_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
+  ($name:ty,$base:ident) => {
+    impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.$base_name.id()
+        self.$base.id()
       }
 
-      fn depth(&self) -> usize {
-        self.$base_name.depth()
+      fn layout_id(&self) -> LayoutNodeId {
+        self.$base.layout_id()
       }
 
-      fn set_depth(&mut self, depth: usize) {
-        self.$base_name.set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base_name.zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base_name.shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self.$base_name.set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self.$base_name.actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self.$base_name.set_actual_shape(actual_shape)
-      }
-
-      fn enabled(&self) -> bool {
-        self.$base_name.enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self.$base_name.set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base_name.visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self.$base_name.set_visible(visible);
-      }
-    }
-  };
-}
-
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
-      fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
-      }
-
-      fn depth(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
-      }
-
-      fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_visible(visible);
+      fn layout_tree(&self) -> TaffyTreeWk {
+        self.$base.layout_tree()
       }
     }
   };
@@ -207,7 +51,7 @@ macro_rules! inode_itree_impl {
 
 /// Generate enum dispatcher for `Inode`.
 #[macro_export]
-macro_rules! inode_enum_dispatcher {
+macro_rules! inode_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodeable for $enum {
       fn id(&self) -> TreeNodeId {
@@ -218,98 +62,18 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn depth(&self) -> usize {
+      fn layout_id(&self) -> LayoutNodeId {
         match self {
           $(
-            $enum::$variant(e) => e.depth(),
+            $enum::$variant(e) => e.layout_id(),
           )*
         }
       }
 
-      fn set_depth(&mut self, depth: usize) {
+      fn layout_tree(&self) -> TaffyTreeWk {
         match self {
           $(
-            $enum::$variant(e) => e.set_depth(depth),
-          )*
-        }
-      }
-
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_zindex(zindex),
-          )*
-        }
-      }
-
-      fn shape(&self) -> &IRect {
-        match self {
-          $(
-            $enum::$variant(e) => e.shape(),
-          )*
-        }
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_shape(shape),
-          )*
-        }
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        match self {
-          $(
-            $enum::$variant(e) => e.actual_shape(),
-          )*
-        }
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_actual_shape(actual_shape),
-          )*
-        }
-      }
-
-      fn enabled(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.enabled(),
-          )*
-        }
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_enabled(enabled),
-          )*
-        }
-      }
-
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
+            $enum::$variant(e) => e.layout_tree(),
           )*
         }
       }
@@ -325,87 +89,35 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED, VISIBLE);
-
-// enabled=true
-// visible=true
-const FLAGS: Flags = Flags::all();
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  depth: usize,
-  shape: IRect,
-  actual_shape: U16Rect,
-  zindex: usize,
-  // enabled
-  // visible
-  flags: Flags,
+  layout_id: LayoutNodeId,
+  layout_tree: TaffyTreeWk,
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
-    let actual_shape = geo_rect_as!(shape, u16);
-    InodeBase {
+  pub fn new(layout_tree: TaffyTreeWk, style: Style) -> TaffyResult<Self> {
+    let lo = layout_tree.upgrade().unwrap();
+    let mut lo = lo.borrow_mut();
+    let layout_id = lo.new_leaf(style)?;
+    Ok(InodeBase {
       id: next_node_id(),
-      depth: 0,
-      shape,
-      actual_shape,
-      zindex: 0,
-      flags: FLAGS,
-    }
+      layout_id,
+      layout_tree,
+    })
   }
 
   pub fn id(&self) -> TreeNodeId {
     self.id
   }
 
-  pub fn depth(&self) -> usize {
-    self.depth
+  pub fn layout_id(&self) -> LayoutNodeId {
+    self.layout_id
   }
 
-  pub fn set_depth(&mut self, depth: usize) {
-    self.depth = depth;
-  }
-
-  pub fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  pub fn set_zindex(&mut self, zindex: usize) {
-    self.zindex = zindex;
-  }
-
-  pub fn shape(&self) -> &IRect {
-    &self.shape
-  }
-
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
-  }
-
-  pub fn actual_shape(&self) -> &U16Rect {
-    &self.actual_shape
-  }
-
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
-  }
-
-  pub fn enabled(&self) -> bool {
-    self.flags.contains(Flags::ENABLED)
-  }
-
-  pub fn set_enabled(&mut self, value: bool) {
-    self.flags.set(Flags::ENABLED, value);
-  }
-
-  pub fn visible(&self) -> bool {
-    self.flags.contains(Flags::VISIBLE)
-  }
-
-  pub fn set_visible(&mut self, value: bool) {
-    self.flags.set(Flags::VISIBLE, value);
+  pub fn layout_tree(&self) -> TaffyTreeWk {
+    self.layout_tree.clone()
   }
 }

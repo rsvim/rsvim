@@ -10,8 +10,8 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
+use crate::inode_dispatcher;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -27,6 +27,9 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -36,14 +39,13 @@ pub enum WindowNode {
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+inode_impl!(Window, base);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -55,13 +57,32 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
+  pub fn new(
+    layout_tree: TaffyTreeWk,
+    style: Style,
+    parent_layout_id: LayoutNodeId,
+    opts: &WindowOptions,
+    buffer: BufferWk,
+  ) -> TaffyResult<Self> {
+    // let root = RootContainer::new(shape);
+    // let root_id = root.id();
+    // let root_node = WindowNode::RootContainer(root);
+    // let root_actual_shape = root.actual_shape();
+    //
+    // let mut base = Itree::new(root_node);
 
-    let mut base = Itree::new(root_node);
+    let base = InodeBase::new(layout_tree, style)?;
+    let layout_tree = layout_tree.upgrade().unwrap();
+    layout_tree
+      .borrow_mut()
+      .add_child(parent_layout_id, base.layout_id())?;
+    let layout = {
+      let layout_tree = layout_tree.borrow_mut();
+      layout_tree.add_child(parent_layout_id, base.layout_id());
+      let parent_layout = layout_tree.layout(parent_layout_id)?;
+      layout_tree.compute_layout(base.layout_id(), taffy::Size::MAX_CONTENT)?;
+      layout_tree.layout(base.layout_id())?
+    };
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
@@ -82,7 +103,7 @@ impl Window {
 
     base.bounded_insert(root_id, content_node);
 
-    Window {
+    Ok(Window {
       base,
       options: *opts,
       content_id,
@@ -90,7 +111,7 @@ impl Window {
       buffer,
       viewport,
       cursor_viewport,
-    }
+    })
   }
 }
 

@@ -10,7 +10,7 @@ pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
 use crate::geo_rect_as;
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -42,7 +42,7 @@ pub enum CommandLineNode {
   Message(Message),
 }
 
-inode_enum_dispatcher!(
+inode_dispatcher!(
   CommandLineNode,
   RootContainer,
   Indicator,
