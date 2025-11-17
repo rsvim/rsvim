@@ -142,8 +142,7 @@ pub fn draw(
                 vec![cell]
               };
 
-              let cell_upos =
-                point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              let cell_upos = point!(col_idx + upos.x, row_idx + upos.y);
               canvas.frame_mut().set_cells_at(cell_upos, cells);
 
               col_idx += unicode_width as u16;
@@ -166,7 +165,7 @@ pub fn draw(
           let cells = std::iter::repeat_n(' ', left_length as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += left_length;
         }
