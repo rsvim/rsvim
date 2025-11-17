@@ -120,8 +120,8 @@ macro_rules! point {
 macro_rules! point_as {
   ($p:ident,$ty:ty) => {
     $crate::coord::Point {
-      x: $p.x() as $ty,
-      y: $p.y() as $ty,
+      x: $p.x as $ty,
+      y: $p.y as $ty,
     }
   };
 }
