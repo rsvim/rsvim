@@ -42,7 +42,7 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-// Point
+// Position
 pub type Point<T> = taffy::geometry::Point<T>;
 pub type IPos = Point<isize>;
 pub type UPos = Point<usize>;
