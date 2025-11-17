@@ -72,17 +72,15 @@ macro_rules! geo_point_as {
 }
 
 /// Convert the generic type `T` inside `geo::Rect<T>` to another type `U`.
-///
-/// It requires:
-///
-/// ```rust
-/// use geo::{self, point};
-/// ```
 #[macro_export]
 macro_rules! geo_rect_as {
   ($r:ident,$ty:ty) => {
-    geo::Rect::new(geo::point!(x: $r.min().x as $ty, y: $r.min().y as $ty), geo::point!(x: $r.max().x as $ty, y: $r.max().y as $ty)) as geo::Rect<$ty>
-
+    $crate::coord::Rect {
+      left: $r.left as $ty,
+      top: $r.top as $ty,
+      right: $r.right as $ty,
+      bottom: $r.bottom as $ty,
+    } as $crate::coord::Rect<$ty>
   };
 }
 
