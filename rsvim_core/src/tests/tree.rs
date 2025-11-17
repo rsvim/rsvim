@@ -25,10 +25,7 @@ pub fn make_tree_with_buffers(
   let tree_root_id = tree.root_id();
 
   // Window
-  let window_shape = IRect::new(
-    (0, 0),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
-  );
+  let window_shape = size_into_rect!(canvas_size, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
