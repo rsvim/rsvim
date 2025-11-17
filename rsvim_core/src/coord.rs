@@ -54,6 +54,46 @@ pub type IRect = Rect<isize>;
 pub type URect = Rect<usize>;
 pub type U16Rect = Rect<u16>;
 
+pub trait RectExt<T> {
+  /// `min` and `top_left` are the same.
+  fn min(&self) -> Point<T>;
+  fn top_left(&self) -> Point<T>;
+
+  /// `max` and `bottom_right` are the same.
+  fn max(&self) -> Point<T>;
+  fn bottom_right(&self) -> Point<T>;
+
+  fn height(&self) -> T;
+  fn width(&self) -> T;
+}
+
+impl<T> RectExt<T> for Rect<T>
+where
+  T: num_traits::Num + num_traits::NumCast,
+{
+  fn min(&self) -> Point<T> {
+    self.top_left()
+  }
+
+  fn top_left(&self) -> Point<T> {
+    Point {
+      x: self.left,
+      y: self.top,
+    }
+  }
+
+  fn max(&self) -> Point<T> {
+    self.bottom_right()
+  }
+
+  fn bottom_right(&self) -> Point<T> {
+    Point {
+      x: self.right,
+      y: self.bottom,
+    }
+  }
+}
+
 // Size
 pub type Size<T> = taffy::geometry::Size<T>;
 pub type ISize = Size<isize>;
