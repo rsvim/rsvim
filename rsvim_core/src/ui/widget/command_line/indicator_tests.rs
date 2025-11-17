@@ -67,14 +67,8 @@ mod tests_nowrap {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(1, 1);
-    let terminal_shape = IRect::new(
-      (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
-    );
+    let terminal_size = size!(1, 1);
+    let terminal_shape = size_into_rect!(terminal_size, isize);
 
     let expect = vec![":"];
 
