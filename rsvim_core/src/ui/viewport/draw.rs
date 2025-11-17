@@ -194,7 +194,7 @@ pub fn draw(
     let cells = std::iter::repeat_n(' ', width as usize)
       .map(Cell::from)
       .collect::<Vec<_>>();
-    let cells_upos = point!(x: upos.x(), y: row_idx + upos.y());
+    let cells_upos = point!(upos.x, row_idx + upos.y);
     canvas.frame_mut().set_cells_at(cells_upos, cells);
     row_idx += 1;
   }
