@@ -177,16 +177,16 @@ fn cells_at1() {
   let mut frame = Iframe::new(frame_size);
 
   let inputs: Vec<(U16Pos, char)> = vec![
-    (point!(x: 0, y: 0), 'A'),
-    (point!(x: 7, y: 1), 'B'),
-    (point!(x: 1, y: 2), 'C'),
-    (point!(x: 6, y: 3), 'D'),
-    (point!(x: 5, y: 4), 'E'),
-    (point!(x: 4, y: 5), 'F'),
-    (point!(x: 2, y: 6), 'G'),
-    (point!(x: 0, y: 7), 'H'),
-    (point!(x: 9, y: 8), 'I'),
-    (point!(x: 3, y: 9), 'J'),
+    (point!(0, 0), 'A'),
+    (point!(7, 1), 'B'),
+    (point!(1, 2), 'C'),
+    (point!(6, 3), 'D'),
+    (point!(5, 4), 'E'),
+    (point!(4, 5), 'F'),
+    (point!(2, 6), 'G'),
+    (point!(0, 7), 'H'),
+    (point!(9, 8), 'I'),
+    (point!(3, 9), 'J'),
   ];
   let expects = [
     "A         ",
