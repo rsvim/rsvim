@@ -25,7 +25,7 @@ pub struct Iframe {
 impl Iframe {
   /// Make new frame.
   pub fn new(size: U16Size) -> Self {
-    let n = size.height() as usize * size.width() as usize;
+    let n = size.height as usize * size.width as usize;
     Iframe {
       size,
       cells: vec![Cell::default(); n],
