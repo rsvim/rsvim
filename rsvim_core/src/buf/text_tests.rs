@@ -9,7 +9,7 @@ use ropey::Rope;
 fn last_char1_unix() {
   test_log_init();
 
-  let terminal_size = U16Size::new(10, 10);
+  let terminal_size = size!(10, 10);
   let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Unix)
     .build()
@@ -104,7 +104,7 @@ fn last_char1_unix() {
 fn last_char1_win() {
   test_log_init();
 
-  let terminal_size = U16Size::new(10, 10);
+  let terminal_size = size!(10, 10);
   let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Dos)
     .build()
@@ -200,7 +200,7 @@ fn last_char1_win() {
 fn last_char1_mac() {
   test_log_init();
 
-  let terminal_size = U16Size::new(10, 10);
+  let terminal_size = size!(10, 10);
   let opt = BufferOptionsBuilder::default()
     .file_format(FileFormatOption::Mac)
     .build()
