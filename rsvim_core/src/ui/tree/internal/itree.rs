@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use geo::point;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -668,10 +667,15 @@ where
               Some(node) => {
                 let current_shape = *node.shape();
                 let current_top_left_pos: IPos = current_shape.min().into();
-                let expected_top_left_pos: IPos = point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
-                let expected_shape = IRect::new(
-                  expected_top_left_pos,
-                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                let expected_top_left_pos: IPos = point!(
+                  current_top_left_pos.x() + x,
+                  current_top_left_pos.y() + y
+                );
+                let expected_shape = rect!(
+                  expected_top_left_pos.x,
+                  expected_top_left_pos.y,
+                  expected_top_left_pos.x() + current_shape.width(),
+                  expected_top_left_pos.y() + current_shape.height()
                 );
 
                 let final_shape =
