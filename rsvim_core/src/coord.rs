@@ -69,7 +69,7 @@ pub trait RectExt<T> {
 
 impl<T> RectExt<T> for Rect<T>
 where
-  T: Copy,
+  T: Copy + num_traits::NumOps,
 {
   fn min(&self) -> Point<T> {
     self.top_left()
