@@ -88,7 +88,10 @@ macro_rules! geo_rect_as {
 #[macro_export]
 macro_rules! geo_size_as {
   ($s:ident,$ty:ty) => {
-    $crate::coord::Size::new($s.width() as $ty, $s.height() as $ty) as Size<$ty>
+    $crate::coord::Size {
+      width: $s.width as $ty,
+      height: $s.height as $ty,
+    } as $crate::coord::Size<$ty>
   };
 }
 
