@@ -62,7 +62,7 @@ pub type U16Size = Size<u16>;
 
 #[macro_export]
 macro_rules! point {
-  (x:$x:expr,y:$y:expr) => {
+  ($x:expr,$y:expr) => {
     $crate::coord::Point { x: $x, y: $y }
   };
 }
