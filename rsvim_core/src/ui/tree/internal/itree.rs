@@ -624,11 +624,7 @@ where
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
-        self.move_to(
-          id,
-          current_top_left_pos.x() + x,
-          current_top_left_pos.y() + y,
-        )
+        self.move_to(id, current_top_left_pos.x + x, current_top_left_pos.y + y)
       }
       None => None,
     }
@@ -768,17 +764,19 @@ where
           Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
             Some(node) => {
               let current_shape = *node.shape();
-              let expected_top_left_pos: IPos = point!(x: x, y: y);
-              let expected_shape = IRect::new(
-                expected_top_left_pos,
-                point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+              let expected_top_left_pos: IPos = point!(x, y);
+              let expected_shape = rect!(
+                expected_top_left_pos.x,
+                expected_top_left_pos.y,
+                expected_top_left_pos.x() + current_shape.width(),
+                expected_top_left_pos.y() + current_shape.height()
               );
 
               let final_shape =
                 shapes::bound_shape(&expected_shape, &parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
-              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
+              self.move_to(id, final_top_left_pos.x, final_top_left_pos.y)
             }
             None => None,
           },
