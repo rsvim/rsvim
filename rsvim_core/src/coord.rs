@@ -35,8 +35,9 @@
 //!
 //! NOTE: The X-axis remains the same, the Y-axis is upside down.
 //!
-//! The top-left of the terminal is the `(0,0)` position, the bottom-right of the terminal is the
-//! `(width,height)` position, where the `width` and `height` is the size of the terminal.
+//! The top-left of the terminal is the `(0,0)` point, e.g. `(left,top)`. The
+//! bottom-right of the terminal is the `(width,height)` point, e.g.
+//! `(right,bottom)`. The `width` and `height` is the size of the terminal.
 //!
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
