@@ -78,6 +78,18 @@ macro_rules! point_as {
   };
 }
 
+#[macro_export]
+macro_rules! rect {
+  ($left:expr,$top:expr,$right:expr,$bottom:expr) => {
+    $crate::coord::Rect {
+      left: $left,
+      top: $top,
+      right: $right,
+      bottom: $bottom,
+    }
+  };
+}
+
 /// Convert the generic type `T` inside `geo::Rect<T>` to another type `U`.
 #[macro_export]
 macro_rules! rect_as {
@@ -88,6 +100,16 @@ macro_rules! rect_as {
       right: $r.right as $ty,
       bottom: $r.bottom as $ty,
     } as $crate::coord::Rect<$ty>
+  };
+}
+
+#[macro_export]
+macro_rules! size {
+  ($width:expr,$height:expr) => {
+    $crate::coord::Size {
+      width: $width,
+      height: $height,
+    }
   };
 }
 
