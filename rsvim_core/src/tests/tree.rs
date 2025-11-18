@@ -84,9 +84,11 @@ pub fn make_tree_with_buffers_cmdline(
   tree.set_current_window_id(Some(window_id));
 
   // command-line
-  let cmdline_shape = IRect::new(
-    (0, canvas_size.height().saturating_sub(1) as isize),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
+  let cmdline_shape = rect!(
+    0,
+    canvas_size.height.saturating_sub(1) as isize,
+    canvas_size.width as isize,
+    canvas_size.height as isize
   );
   let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
   let _cmdline_id = cmdline.id();
