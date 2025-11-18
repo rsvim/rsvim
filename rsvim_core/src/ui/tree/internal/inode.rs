@@ -1,6 +1,5 @@
 //! The tree node of internal tree.
 
-use crate::prelude::*;
 use crate::ui::tree::TaffyTreeWk;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
