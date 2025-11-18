@@ -64,9 +64,10 @@ impl Window {
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
     let base = InodeBase::new(lotree, style)?;
+    let lo = lotree.upgrade().unwrap();
 
     let (viewport, cursor_viewport) = {
-      let layout = lotree.upgrade().unwrap().borrow().layout(base.loid())?;
+      let layout = lo.borrow().layout(base.loid())?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
 
@@ -101,11 +102,9 @@ impl Window {
       buffer.clone(),
       Arc::downgrade(&viewport),
     )?;
-    {
-      let lo = lotree.upgrade().unwrap();
-      let mut lo = lo.borrow_mut();
-      lo.add_child(base.loid(), content.loid())?;
-    }
+
+    lo.borrow_mut().add_child(base.loid(), content.loid())?;
+
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
