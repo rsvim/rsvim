@@ -103,7 +103,6 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 /// - The "input" widget for receiving user's input command contents.
 /// - The "message" widget for printing Rsvim echoing messages.
 /// - The "search" widget for searching forward/backward.
-///
 /// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
 /// 2 are hidden/disabled.
 /// Thus we have to remove the other 2 nodes from the layout tree, the make
