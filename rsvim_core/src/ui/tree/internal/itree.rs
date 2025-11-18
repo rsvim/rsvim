@@ -5,6 +5,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::*;
+use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -319,7 +320,16 @@ where
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
+    if let Some(loid) = self.nid2loid.get(&id) {
+      if let Ok(children_loids) = self.lotree.borrow().children(*loid) {
+        return children_loids
+          .iter()
+          .filter(|i| self.loid2nid.contains_key(i))
+          .map(|i| *self.loid2nid.get(i).unwrap())
+          .collect_vec();
+      }
+    }
+    vec![]
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
