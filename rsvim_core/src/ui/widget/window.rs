@@ -67,7 +67,10 @@ impl Window {
     let lo = lotree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
     let loid = lo.new_leaf(style)?;
-    lo.compute_layout(loid, parent_layout.size)?;
+    lo.compute_layout(
+      loid,
+      taffy::Size(taffy::AvailableSize(parent_layout.size)),
+    )?;
 
     let mut base = Itree::new(root_node);
 
