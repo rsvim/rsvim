@@ -118,14 +118,14 @@ pub struct Tree {
   // Root node.
   root_id: TreeNodeId,
   root_layout_id: LayoutNodeId,
+  size: U16Size,
 
   // Maps between Node ID <=> Layout ID
   nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
   loid2nid: FoldMap<TreeNodeId, LayoutNodeId>,
 
-  // Layout.
+  // Layout tree.
   lotree: TaffyTreeRc,
-  size: U16Size,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
