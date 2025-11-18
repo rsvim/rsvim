@@ -623,8 +623,12 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let current_top_left_pos: IPos = current_shape.min();
-        self.move_to(id, current_top_left_pos.x + x, current_top_left_pos.y + y)
+        let current_top_left_pos: IPos = current_shape.min().into();
+        self.move_to(
+          id,
+          current_top_left_pos.x() + x,
+          current_top_left_pos.y() + y,
+        )
       }
       None => None,
     }
