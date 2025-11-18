@@ -182,6 +182,7 @@ impl Tree {
       size: canvas_size,
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
+      lotree,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
