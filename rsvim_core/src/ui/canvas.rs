@@ -121,8 +121,8 @@ impl Canvas {
     }
 
     shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-      saved_cursor_pos.x(),
-      saved_cursor_pos.y(),
+      saved_cursor_pos.x,
+      saved_cursor_pos.y,
     )));
 
     // For cursor
@@ -174,8 +174,8 @@ impl Canvas {
       }
       if cursor.pos() != prev_cursor.pos() {
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-          cursor.pos().x(),
-          cursor.pos().y(),
+          cursor.pos().x,
+          cursor.pos().y,
         )));
       }
     }
