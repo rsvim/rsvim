@@ -112,8 +112,16 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 /// Thus we have to remove the other 2 nodes from the layout tree, the make
 /// sure they won't break our TUI layout.
 pub struct Tree {
-  // Internal implementation.
-  base: Itree<TreeNode>,
+  // Tree nodes.
+  nodes: FoldMap<TreeNodeId, TreeNode>,
+
+  // Root node.
+  root_id: TreeNodeId,
+  root_layout_id: LayoutNodeId,
+
+  // Maps between Node ID <=> Layout ID
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<TreeNodeId, LayoutNodeId>,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
