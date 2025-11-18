@@ -72,10 +72,10 @@ pub fn make_actual_shape(
   // );
 
   let actual_shape = rect!(
-    actual_top_left_pos.x,
-    actual_top_left_pos.y,
-    actual_top_left_pos.x + actual_isize.width() as u16,
-    actual_top_left_pos.y + actual_isize.height() as u16
+    actual_top_left_pos.x(),
+    actual_top_left_pos.y(),
+    actual_top_left_pos.x() + actual_isize.width() as u16,
+    actual_top_left_pos.y() + actual_isize.height() as u16
   );
   // trace!(
   //   "actual_isize:{:?}, actual_shape:{:?}",
