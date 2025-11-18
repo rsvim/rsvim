@@ -119,7 +119,7 @@ macro_rules! point {
 #[macro_export]
 macro_rules! point_as {
   ($p:ident,$ty:ty) => {
-    geo::point!(x: $p.x as $ty, y: $p.y as $ty)
+    geo::point!(x: $p.x() as $ty, y: $p.y() as $ty)
   };
 }
 
@@ -142,22 +142,17 @@ macro_rules! rect {
 #[macro_export]
 macro_rules! rect_as {
   ($r:ident,$ty:ty) => {
-    $crate::coord::Rect {
-      left: $r.left as $ty,
-      top: $r.top as $ty,
-      right: $r.right as $ty,
-      bottom: $r.bottom as $ty,
-    } as $crate::coord::Rect<$ty>
+    $crate::coord::Rect::new(
+      ($r.min().x as $ty, $r.min().y as $ty),
+      ($r.max().x as $ty, $r.max().y as $ty),
+    ) as $crate::coord::Rect<$ty>
   };
 }
 
 #[macro_export]
 macro_rules! size {
   ($width:expr,$height:expr) => {
-    $crate::coord::Size {
-      width: $width,
-      height: $height,
-    }
+    $crate::coord::Size::new($width, $height)
   };
 }
 
@@ -165,10 +160,8 @@ macro_rules! size {
 #[macro_export]
 macro_rules! size_as {
   ($s:ident,$ty:ty) => {
-    $crate::coord::Size {
-      width: $s.width as $ty,
-      height: $s.height as $ty,
-    } as $crate::coord::Size<$ty>
+    $crate::coord::Size::new($s.width() as $ty, $s.height() as $ty)
+      as $crate::coord::Size<$ty>
   };
 }
 
@@ -177,11 +170,9 @@ macro_rules! size_as {
 #[macro_export]
 macro_rules! size_into_rect {
   ($s:ident,$ty:ty) => {
-    $crate::coord::Rect {
-      left: 0 as $ty,
-      top: 0 as $ty,
-      right: $s.width as $ty,
-      bottom: $s.height as $ty,
-    } as $crate::coord::Rect<$ty>
+    $crate::coord::Rect::new(
+      (0 as $ty, 0 as $ty),
+      ($s.width() as $ty, $s.height() as $ty),
+    ) as $crate::coord::Rect<$ty>
   };
 }
