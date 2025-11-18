@@ -178,6 +178,7 @@ macro_rules! size_into_rect {
   };
 }
 
+// point
 pub trait PointExt<T>
 where
   T: geo::CoordNum,
@@ -203,6 +204,7 @@ where
   }
 }
 
+// size
 pub trait SizeExt<T>
 where
   T: geo::CoordNum,
@@ -225,5 +227,31 @@ where
 {
   fn into(&self) -> Size<T> {
     Size::new(self.width, self.height)
+  }
+}
+
+// rect
+pub trait RectExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn from(value: taffy::geometry::Rect<T>) -> Rect<T> {
+    Rect::new((value.left, value.top), (value.right, value.bottom))
+  }
+}
+
+pub trait TaffyRectExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn into(&self) -> Rect<T>;
+}
+
+impl<T> TaffyRectExt<T> for taffy::geometry::Rect<T>
+where
+  T: geo::CoordNum,
+{
+  fn into(&self) -> Rect<T> {
+    Rect::new((self.left, self.top), (self.right, self.bottom))
   }
 }
