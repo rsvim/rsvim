@@ -213,7 +213,7 @@ where
   nodes: FoldMap<TreeNodeId, T>,
 
   root_id: TreeNodeId,
-  root_loid: TreeNodeId,
+  root_loid: LayoutNodeId,
 
   nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
   loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
@@ -296,43 +296,12 @@ where
   #[cfg(test)]
   fn _internal_check(&self) {
     debug_assert!(!self.nodes.is_empty());
-    debug_assert!(!self.relationships.borrow().is_empty());
-    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
-
-    let root_id = self.relationships.borrow().root_id();
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(root_id);
-
-    while let Some(id) = que.pop_front() {
-      let parent = self.relationships.borrow().parent_id(id);
-      if id == root_id {
-        debug_assert!(parent.is_none());
-      } else {
-        debug_assert!(parent.is_some());
-        let parents_children =
-          self.relationships.borrow().children_ids(parent.unwrap());
-        for c in parents_children {
-          let child_parent = self.relationships.borrow().parent_id(c);
-          debug_assert!(child_parent.is_some());
-          debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
-        }
-      }
-
-      let children_ids = self.relationships.borrow().children_ids(id);
-      debug_assert_eq!(
-        children_ids.len(),
-        children_ids
-          .iter()
-          .cloned()
-          .collect::<FoldSet<TreeNodeId>>()
-          .len()
-      );
-      for c in children_ids {
-        let child_parent = self.relationships.borrow().parent_id(c);
-        debug_assert!(child_parent.is_some());
-        debug_assert_eq!(child_parent.unwrap(), id);
-      }
-    }
+    debug_assert!(!self.nid2loid.is_empty());
+    debug_assert!(!self.loid2nid.is_empty());
+    debug_assert!(!self.lotree.borrow().is_empty());
+    debug_assert_eq!(self.lotree.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.nid2loid.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.loid2nid.borrow().len(), self.nodes.len());
   }
 
   pub fn len(&self) -> usize {
