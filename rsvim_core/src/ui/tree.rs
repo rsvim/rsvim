@@ -19,6 +19,8 @@ pub use internal::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use taffy::Style;
+use taffy::TaffyResult;
 use taffy::TaffyTree;
 
 #[derive(Debug, Clone)]
@@ -156,12 +158,30 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+    let lotree = new_layout_tree();
+    let root_loid = {
+      let lotree = lotree.borrow_mut();
+      let root_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::length(canvas_size.width() as f32),
+          height: taffy::Dimension::length(canvas_size.height() as f32),
+        },
+        ..Default::default()
+      };
+      lotree.new_leaf(root_style)?
+    };
     let shape = size_into_rect!(canvas_size, isize);
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
+
     Tree {
-      base: Itree::new(root_node),
+      nodes: FoldMap::new(),
+      root_id: next_node_id(),
+      root_loid,
+      size: canvas_size,
+      nid2loid: FoldMap::new(),
+      loid2nid: FoldMap::new(),
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,

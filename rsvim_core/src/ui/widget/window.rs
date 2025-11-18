@@ -58,8 +58,8 @@ impl Window {
   pub fn new(
     lotree: TaffyTreeWk,
     style: Style,
+    parent_id: TreeNodeId,
     opts: &WindowOptions,
-    shape: IRect,
     buffer: BufferWk,
   ) -> Self {
     let root = RootContainer::new(shape);
