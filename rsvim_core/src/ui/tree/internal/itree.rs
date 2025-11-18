@@ -298,7 +298,7 @@ where
     debug_assert!(!self.nodes.is_empty());
     debug_assert!(!self.nid2loid.is_empty());
     debug_assert!(!self.loid2nid.is_empty());
-    debug_assert!(!self.lotree.borrow().is_empty());
+    debug_assert!(self.lotree.borrow().total_node_count() != 0);
     debug_assert_eq!(self.lotree.borrow().len(), self.nodes.len());
     debug_assert_eq!(self.nid2loid.borrow().len(), self.nodes.len());
     debug_assert_eq!(self.loid2nid.borrow().len(), self.nodes.len());
