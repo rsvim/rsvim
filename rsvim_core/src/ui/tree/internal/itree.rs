@@ -312,10 +312,6 @@ where
     self.root_loid
   }
 
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.nodes.keys().copied().collect()
-  }
-
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.relationships.borrow().parent_id(id)
   }
