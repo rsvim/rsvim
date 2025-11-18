@@ -315,7 +315,7 @@ where
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lotree.borrow().parent(*loid)?;
-    self.loid2nid.get(&parent_loid)
+    self.loid2nid.get(&parent_loid).copied()
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
