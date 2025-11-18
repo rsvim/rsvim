@@ -29,6 +29,7 @@ use std::sync::Arc;
 use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -67,6 +68,7 @@ impl Window {
     let mut lo = lo.borrow_mut();
     let loid = lo.new_leaf(style)?;
     lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
+    let layout = lo.layout(loid)?;
 
     let mut base = Itree::new(root_node);
 

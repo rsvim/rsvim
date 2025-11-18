@@ -177,3 +177,21 @@ macro_rules! size_into_rect {
     ) as $crate::coord::Rect<$ty>
   };
 }
+
+pub trait PointExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn from(value: taffy::geometry::Point<T>) -> Point<T> {
+    geo::point!(x: value.x, y: value.y)
+  }
+}
+
+pub trait TaffyPointExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn into(&self) -> Point<T> {
+    geo::point!(x: value.x, y: value.y)
+  }
+}
