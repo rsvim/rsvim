@@ -202,3 +202,28 @@ where
     geo::point!(x: self.x, y: self.y)
   }
 }
+
+pub trait SizeExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn from(value: taffy::geometry::Size<T>) -> Size<T> {
+    Size::new(value.width, value.height)
+  }
+}
+
+pub trait TaffySizeExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn into(&self) -> Size<T>;
+}
+
+impl<T> TaffySizeExt<T> for taffy::geometry::Size<T>
+where
+  T: geo::CoordNum,
+{
+  fn into(&self) -> Size<T> {
+    Size::new(self.width, self.height)
+  }
+}
