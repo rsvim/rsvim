@@ -27,6 +27,7 @@ use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
 use taffy::Style;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -61,7 +62,10 @@ impl Window {
     parent_id: TreeNodeId,
     opts: &WindowOptions,
     buffer: BufferWk,
-  ) -> Self {
+  ) -> TaffyResult<Self> {
+    let lo = lotree.upgrade().unwrap();
+    let mut lo = lo.borrow_mut();
+
     let root = RootContainer::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);

@@ -169,7 +169,9 @@ impl Tree {
         },
         ..Default::default()
       };
-      lotree.new_leaf(root_style)?
+      let root_loid = lotree.new_leaf(root_style)?;
+      lotree.compute_layout(root_loid, taffy::Size::MAX_CONTENT)?;
+      root_loid
     };
     Ok(Tree {
       nodes: FoldMap::new(),
