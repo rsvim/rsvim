@@ -78,6 +78,7 @@ where
   }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 // Size
 pub struct Size<T>
 where
@@ -96,11 +97,11 @@ where
   }
 
   pub fn width(&self) -> T {
-    &self.width
+    self.width
   }
 
   pub fn height(&self) -> T {
-    &self.height
+    self.height
   }
 }
 
