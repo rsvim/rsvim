@@ -412,6 +412,14 @@ impl InodeBase {
     self.id
   }
 
+  pub fn loid(&self) -> LayoutNodeId {
+    self.loid
+  }
+
+  pub fn lotree(&self) -> TaffyTreeRc {
+    self.lotree.clone()
+  }
+
   pub fn depth(&self) -> usize {
     self.depth
   }
