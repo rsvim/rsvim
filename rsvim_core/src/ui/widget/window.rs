@@ -26,7 +26,6 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
-use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::prelude::TaffyMaxContent;
@@ -64,18 +63,13 @@ impl Window {
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let (loid, layout) = {
-      let lo = lotree.upgrade().unwrap();
-      let mut lo = lo.borrow_mut();
-      let loid = lo.new_leaf(style)?;
-      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
-      let layout = lo.layout(loid)?;
-      (loid, layout)
-    };
+    let base = InodeBase::new(lotree, style)?;
 
     let (viewport, cursor_viewport) = {
+      let layout = lotree.upgrade().unwrap().borrow().layout(base.loid())?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
+
       let viewport_pos = layout.location.into();
       let viewport_pos = point_as!(viewport_pos, u16);
       let viewport_size = layout.size.into();

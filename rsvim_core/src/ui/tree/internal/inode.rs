@@ -5,6 +5,7 @@ use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
@@ -90,6 +91,7 @@ impl InodeBase {
     let lo = lotree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
     let loid = lo.new_leaf(style)?;
+    lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
     Ok(Self {
       id: next_node_id(),
       loid,
