@@ -87,6 +87,23 @@ where
   height: T,
 }
 
+impl<T> Size<T>
+where
+  T: geo::CoordNum,
+{
+  pub fn new(width: T, height: T) -> Self {
+    Self { width, height }
+  }
+
+  pub fn width(&self) -> &T {
+    &self.width
+  }
+
+  pub fn height(&self) -> &T {
+    &self.height
+  }
+}
+
 pub type ISize = Size<isize>;
 pub type USize = Size<usize>;
 pub type U16Size = Size<u16>;
@@ -94,7 +111,7 @@ pub type U16Size = Size<u16>;
 #[macro_export]
 macro_rules! point {
   ($x:expr,$y:expr) => {
-    $crate::coord::Point { x: $x, y: $y }
+    geo::point!(x: $x, y: $y)
   };
 }
 
@@ -102,22 +119,18 @@ macro_rules! point {
 #[macro_export]
 macro_rules! point_as {
   ($p:ident,$ty:ty) => {
-    $crate::coord::Point {
-      x: $p.x as $ty,
-      y: $p.y as $ty,
-    }
+    geo::point!(x: $p.x as $ty, y: $p.y as $ty)
   };
 }
 
 #[macro_export]
 macro_rules! rect {
   ($left:expr,$top:expr,$right:expr,$bottom:expr) => {
-    $crate::coord::Rect {
-      left: $left,
-      top: $top,
-      right: $right,
-      bottom: $bottom,
-    }
+    $crate::coord::Rect::new(($left, $top), ($right, $bottom))
+  };
+
+  (($left:expr,$top:expr),($right:expr,$bottom:expr)) => {
+    $crate::coord::Rect::new(($left, $top), ($right, $bottom))
   };
 }
 
