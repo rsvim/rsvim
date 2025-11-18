@@ -42,11 +42,19 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 }
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The widget tree (UI tree).
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// The widget tree manages all UI widgets and rendering on the canvas, each
+/// widgiet is a node on the tree, the tree has a root node, and all other
+/// nodes inside is the root node's descendants. The root node is the terminal
+/// itself, while each node inside renders a part of the terminal.
+///
+/// We use [taffy] to manage the parent-child relationships among all the
+/// nodes, and calculate layout for the whole TUI. The tree structure contains
+/// a [TaffyTree] pointer. Each node holds a weak reference point to that
+/// [TaffyTree], and also a [taffy::Style] to indicate what style this node
+/// wants to be, a [taffy::Layout] to cache the layout result that how this
+/// node is going to render itself.
 ///
 /// # Terms
 ///
@@ -56,21 +64,11 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// # Guarantees
-///
-/// ## Ownership
-///
-/// Parent owns all its children.
-///
-/// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
-///
-/// ## Priority
+/// Taffy implements several layout algorithms in
+/// [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) specification:
+/// - flexbox
+/// - grid
+/// - block
 ///
 /// Children have higher priority than their parent to both display and process input events.
 ///
