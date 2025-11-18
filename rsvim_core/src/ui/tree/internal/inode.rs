@@ -1,7 +1,6 @@
 //! The tree node of internal tree.
 
 use crate::ui::tree::TaffyTreeWk;
-use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
@@ -10,7 +9,7 @@ use taffy::TaffyResult;
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
-pub trait Inodeable: Sized + Clone + Debug {
+pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
 
   fn loid(&self) -> LayoutNodeId;
