@@ -116,8 +116,8 @@ pub struct Tree {
   nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // Root node.
-  root_id: TreeNodeId,
-  root_layout_id: LayoutNodeId,
+  root_nid: TreeNodeId,
+  root_loid: LayoutNodeId,
   size: U16Size,
 
   // Maps between Node ID <=> Layout ID
