@@ -87,7 +87,7 @@ pub fn make_actual_shape(
 
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let top_left_pos: IPos = shape.min();
+  let top_left_pos: IPos = shape.min().into();
 
   // Truncate shape if size is larger than parent.
   let height =
@@ -95,10 +95,10 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let width =
     num_traits::clamp(shape.width(), 0, parent_actual_shape.width() as isize);
   rect!(
-    top_left_pos.x,
-    top_left_pos.y,
-    top_left_pos.x + width,
-    top_left_pos.y + height
+    top_left_pos.x(),
+    top_left_pos.y(),
+    top_left_pos.x() + width(),
+    top_left_pos.y() + height()
   )
 }
 
