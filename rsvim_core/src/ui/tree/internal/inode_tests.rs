@@ -18,7 +18,7 @@ struct TestNode {
 impl TestNode {
   pub fn new(lotree: TaffyTreeWk, style: Style, value: usize) -> Self {
     TestNode {
-      base: InodeBase::new(lotree, style),
+      base: InodeBase::new(lotree, style).unwrap(),
       value,
     }
   }
