@@ -623,7 +623,7 @@ where
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
-        let current_top_left_pos: IPos = current_shape.min().into();
+        let current_top_left_pos: IPos = current_shape.min();
         self.move_to(id, current_top_left_pos.x + x, current_top_left_pos.y + y)
       }
       None => None,
@@ -662,7 +662,7 @@ where
             match self.nodes.get_mut(&id) {
               Some(node) => {
                 let current_shape = *node.shape();
-                let current_top_left_pos: IPos = current_shape.min().into();
+                let current_top_left_pos: IPos = current_shape.min();
                 let expected_top_left_pos: IPos = point!(
                   current_top_left_pos.x + x,
                   current_top_left_pos.y + y
@@ -676,7 +676,7 @@ where
 
                 let final_shape =
                   shapes::bound_shape(&expected_shape, &parent_actual_shape);
-                let final_top_left_pos: IPos = final_shape.min().into();
+                let final_top_left_pos: IPos = final_shape.min();
 
                 // Real movement
                 let final_x = final_top_left_pos.x - current_top_left_pos.x;
@@ -774,7 +774,7 @@ where
 
               let final_shape =
                 shapes::bound_shape(&expected_shape, &parent_actual_shape);
-              let final_top_left_pos: IPos = final_shape.min().into();
+              let final_top_left_pos: IPos = final_shape.min();
 
               self.move_to(id, final_top_left_pos.x, final_top_left_pos.y)
             }
