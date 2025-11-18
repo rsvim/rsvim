@@ -95,11 +95,11 @@ where
     Self { width, height }
   }
 
-  pub fn width(&self) -> &T {
+  pub fn width(&self) -> T {
     &self.width
   }
 
-  pub fn height(&self) -> &T {
+  pub fn height(&self) -> T {
     &self.height
   }
 }
