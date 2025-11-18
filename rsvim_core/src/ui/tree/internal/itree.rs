@@ -1,7 +1,9 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::LayoutNodeId;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use std::cell::RefCell;
@@ -13,6 +15,9 @@ use std::iter::Iterator;
 pub struct Relationships {
   // Root id.
   root_id: TreeNodeId,
+  root_loid: LayoutNodeId,
+
+  lotree: TaffyTreeRc,
 
   // Maps node id => its parent node id.
   parent_id: FoldMap<TreeNodeId, TreeNodeId>,
