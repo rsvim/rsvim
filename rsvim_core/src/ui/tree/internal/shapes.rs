@@ -97,8 +97,8 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   rect!(
     top_left_pos.x(),
     top_left_pos.y(),
-    top_left_pos.x() + width(),
-    top_left_pos.y() + height()
+    top_left_pos.x() + width,
+    top_left_pos.y() + height
   )
 }
 
