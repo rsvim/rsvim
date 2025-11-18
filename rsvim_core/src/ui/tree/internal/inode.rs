@@ -79,7 +79,7 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
