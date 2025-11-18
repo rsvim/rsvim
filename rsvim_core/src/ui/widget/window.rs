@@ -88,6 +88,10 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
+    let content_style = Style {
+      size: taffy::Size::MAX_CONTENT,
+      ..Default::default()
+    };
     let content =
       Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let content_id = content.id();
