@@ -161,23 +161,18 @@ impl Tree {
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let lotree = new_layout_tree();
-    let root_loid = {
-      let mut lotree = lotree.borrow_mut();
-      let root_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::length(canvas_size.width() as f32),
-          height: taffy::Dimension::length(canvas_size.height() as f32),
-        },
-        ..Default::default()
-      };
-      let root_loid = lotree.new_leaf(root_style)?;
-      lotree.compute_layout(root_loid, taffy::Size::MAX_CONTENT)?;
-      root_loid
+    let root_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::length(canvas_size.width() as f32),
+        height: taffy::Dimension::length(canvas_size.height() as f32),
+      },
+      ..Default::default()
     };
+    let root_base = InodeBase::new(Rc::downgrade(&lotree), root_style)?;
     Ok(Tree {
       nodes: FoldMap::new(),
-      root_id: next_node_id(),
-      root_loid,
+      root_id: root_base.id(),
+      root_loid: root_base.loid(),
       size: canvas_size,
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
