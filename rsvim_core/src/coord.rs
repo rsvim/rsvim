@@ -189,16 +189,14 @@ where
 
 pub trait TaffyPointExt<T>
 where
-  T:
-    Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
+  T: geo::CoordNum,
 {
   fn into(&self) -> Point<T>;
 }
 
 impl<T> TaffyPointExt<T> for taffy::geometry::Point<T>
 where
-  T:
-    Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
+  T: geo::CoordNum,
 {
   fn into(&self) -> Point<T> {
     geo::point!(x: self.x, y: self.y)
