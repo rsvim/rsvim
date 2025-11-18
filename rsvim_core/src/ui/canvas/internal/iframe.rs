@@ -245,7 +245,7 @@ impl Iframe {
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       // trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
-      for row in pos.y..(end_at.y + 1) {
+      for row in pos.y()..(end_at.y() + 1) {
         // trace!("try set dirty rows at row:{:?}", row);
         if (row as usize) < self.dirty_rows.len() {
           self.dirty_rows[row as usize] = true;
@@ -290,7 +290,7 @@ impl Iframe {
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty_rows(&mut self) {
-    self.dirty_rows = vec![false; self.size.height as usize];
+    self.dirty_rows = vec![false; self.size.height() as usize];
   }
 }
 
@@ -301,9 +301,9 @@ impl Iframe {
   /// NOTE: This method is mostly for debugging and testing.
   pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
     let mut results: Vec<Vec<CompactString>> = vec![];
-    for row in 0..self.size.height {
+    for row in 0..self.size.height() {
       let mut row_symbols: Vec<CompactString> = vec![];
-      for col in 0..self.size.width {
+      for col in 0..self.size.width() {
         let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
       }
