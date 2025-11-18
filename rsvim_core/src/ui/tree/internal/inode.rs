@@ -6,6 +6,8 @@ use crate::ui::tree::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
+use taffy::Style;
+use taffy::TaffyResult;
 
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
@@ -384,16 +386,26 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(lotree: TaffyTreeRc, shape: IRect) -> Self {
+  pub fn new(
+    lotree: TaffyTreeRc,
+    style: Style,
+    shape: IRect,
+  ) -> TaffyResult<Self> {
+    let loid = {
+      let mut lo = lotree.borrow_mut();
+      lo.new_leaf(style)?
+    };
     let actual_shape = rect_as!(shape, u16);
-    InodeBase {
+    Ok(InodeBase {
       id: next_node_id(),
+      loid,
+      lotree,
       depth: 0,
       shape,
       actual_shape,
       zindex: 0,
       flags: FLAGS,
-    }
+    })
   }
 
   pub fn id(&self) -> TreeNodeId {
