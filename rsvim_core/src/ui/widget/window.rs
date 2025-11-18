@@ -85,7 +85,7 @@ impl Window {
         viewport_pos.x() + viewport_size.width(),
         viewport_pos.y() + viewport_size.height()
       );
-      let viewport = Viewport::view(opts, buffer.text(), viewport_shape, 0, 0);
+      let viewport = Viewport::view(opts, buffer.text(), &viewport_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
