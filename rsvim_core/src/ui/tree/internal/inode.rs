@@ -1,4 +1,4 @@
-//! The node structure of the internal tree.
+//! The tree node of internal tree.
 
 use crate::flags_impl;
 use crate::prelude::*;
