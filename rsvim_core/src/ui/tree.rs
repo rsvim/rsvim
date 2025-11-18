@@ -127,19 +127,17 @@ pub struct Tree {
   // Layout tree.
   lotree: TaffyTreeRc,
 
-  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  // Command-line node ID.
   command_line_id: Option<TreeNodeId>,
 
-  // All [`Window`](crate::ui::widget::Window) node IDs.
+  // All window node IDs.
   window_ids: BTreeSet<TreeNodeId>,
 
   // The *current* window node ID.
   //
-  // The **current** window means user is focused on the window widget, i.e. it contains the
-  // cursor, since the cursor is like the mouse on the screen.
-  //
-  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
-  // widget. But we still keeps the **current window**, this field is actually the **previous**
+  // The **current** window means user is focused on the window widget, e.g. it
+  // contains the cursor. But when user types some commands in cmdline widget,
+  // cursor will move to cmdline, we still keeps the **current window**, this field is actually the **previous**
   // current window.
   current_window_id: Option<TreeNodeId>,
 
