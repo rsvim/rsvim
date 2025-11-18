@@ -16,6 +16,10 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::rc::Weak;
+use taffy::TaffyTree;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
@@ -27,6 +31,9 @@ pub enum TreeNode {
 
 inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+
+pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
+pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
 #[derive(Debug, Clone)]
 /// The widget tree.
