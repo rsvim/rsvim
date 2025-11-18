@@ -56,7 +56,7 @@ impl StdoutWritable for EditorWriter {
     queue!(self.output, cursor.style())?;
     queue!(
       self.output,
-      crossterm::cursor::MoveTo(cursor.pos().x, cursor.pos().y)
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
     )?;
 
     self.write(canvas)?;
