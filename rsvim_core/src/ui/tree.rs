@@ -77,22 +77,24 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 /// # Ownership
 ///
 /// Parent owns its children:
-/// * Children will be destroyed when their parent is.
-/// * Children are displayed inside their parent's geometric shape, clipped by
+///
+/// - Children will be destroyed when their parent is.
+/// - Children are displayed inside their parent's geometric shape, clipped by
 ///   boundaries. While the size of each node can be logically infinite on the
 ///   imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly
+/// - The `visible` and `enabled` attributes of a child are implicitly
 ///   inherited from it's parent, unless they're explicitly been set.
 ///
 /// # Priority
 ///
 /// Children have higher priority than their parent to both display and process
 /// input events:
-/// * Children are always displayed on top of their parent, and has higher
+///
+/// - Children are always displayed on top of their parent, and has higher
 ///   priority to process a user's input event when the event occurs within the
 ///   shape of the child. The event will fallback to their parent if the child
 ///   doesn't process it.
-/// * For children that shade each other, the one with higher z-index has
+/// - For children that shade each other, the one with higher z-index has
 ///   higher priority to display and process the input events.
 ///
 /// ## Visible/Enabled
@@ -100,9 +102,11 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 /// A widget can be hidden/disabled, this is useful for some special use cases.
 /// For example, when implementing the "command-line" UI widget, we actually
 /// have multiple command-line widgets:
+///
 /// - The "input" widget for receiving user's input command contents.
 /// - The "message" widget for printing Rsvim echoing messages.
 /// - The "search" widget for searching forward/backward.
+///
 /// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
 /// 2 are hidden/disabled.
 /// Thus we have to remove the other 2 nodes from the layout tree, the make
