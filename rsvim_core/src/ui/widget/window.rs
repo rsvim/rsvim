@@ -26,6 +26,7 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
+use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 
@@ -59,17 +60,14 @@ impl Window {
   pub fn new(
     lotree: TaffyTreeWk,
     style: Style,
-    parent_id: TreeNodeId,
+    parent_layout: &Layout,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
     let lo = lotree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
-
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
+    let loid = lo.new_leaf(style)?;
+    lo.compute_layout(loid, parent_layout.size)?;
 
     let mut base = Itree::new(root_node);
 
