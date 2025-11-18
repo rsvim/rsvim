@@ -11,11 +11,11 @@ use crossterm::style::Color;
 fn new1() {
   let sz = size!(2, 1);
   let f = Iframe::new(sz);
-  assert_eq!(f.size().width, 2);
-  assert_eq!(f.size().height, 1);
+  assert_eq!(f.size().width(), 2);
+  assert_eq!(f.size().height(), 1);
   assert_eq!(
     f.get_cells().len(),
-    f.size().height as usize * f.size().width as usize
+    f.size().height() as usize * f.size().width() as usize
   );
   for c in f.get_cells().iter() {
     assert_eq!(c.symbol(), Cell::default().symbol());
