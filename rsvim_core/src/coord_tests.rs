@@ -60,22 +60,22 @@ fn cast_geo_rects() {
 fn cast_geo_sizes() {
   let s1: ISize = size!(1, 2);
   let actual1 = size_as!(s1, u8);
-  let actual1_w = actual1.width();
-  let actual1_h = actual1.height();
+  let actual1_w = actual1.width;
+  let actual1_h = actual1.height;
   assert_eq!(mem::size_of_val(&actual1_w), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual1_h), mem::size_of_val(&2_u8));
 
   let s2: U16Size = size!(15_u16, 25_u16);
   let actual2 = size_as!(s2, i32);
-  let actual2_w = actual2.width();
-  let actual2_h = actual2.height();
+  let actual2_w = actual2.width;
+  let actual2_h = actual2.height;
   assert_eq!(mem::size_of_val(&actual2_w), mem::size_of_val(&15_i32));
   assert_eq!(mem::size_of_val(&actual2_h), mem::size_of_val(&25_i32));
 
   let s3: Size<u32> = size!(78_u32, 88_u32);
   let actual3 = size_as!(s3, i16);
-  let actual3_h = actual3.height();
-  let actual3_w = actual3.width();
+  let actual3_h = actual3.height;
+  let actual3_w = actual3.width;
   assert_eq!(mem::size_of_val(&actual3_w), mem::size_of_val(&78_i16));
   assert_eq!(mem::size_of_val(&actual3_h), mem::size_of_val(&88_i16));
 }
