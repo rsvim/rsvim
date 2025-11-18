@@ -89,7 +89,10 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content_style = Style {
-      size: taffy::Size::MAX_CONTENT,
+      size: {
+        width: taffy::Dimension::percent(100.0),
+        height: taffy::Dimension::percent(100.0),
+      },
       ..Default::default()
     };
     let content =
