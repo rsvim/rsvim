@@ -63,8 +63,8 @@ pub fn make_actual_shape(
     point!(actual_bottom_right_x as u16, actual_bottom_right_y as u16);
 
   let actual_isize = size!(
-    (actual_bottom_right_pos.x as isize) - (actual_top_left_pos.x as isize),
-    (actual_bottom_right_pos.y as isize) - (actual_top_left_pos.y as isize)
+    (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
+    (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize)
   );
   // trace!(
   //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
@@ -105,51 +105,51 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
 pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let top_left_pos: IPos = shape.min();
-  let bottom_right_pos: IPos = shape.max();
+  let top_left_pos: IPos = shape.min().into();
+  let bottom_right_pos: IPos = shape.max().into();
 
   // X-axis
-  let top_left_x = if top_left_pos.x < 0 {
+  let top_left_x = if top_left_pos.x() < 0 {
     // trace!("x-1, top_left_pos:{:?}", top_left_pos);
     0
-  } else if bottom_right_pos.x > parent_actual_shape.width() as isize {
+  } else if bottom_right_pos.x() > parent_actual_shape.width() as isize {
     // trace!(
     //   "x-2, bottom_right_pos:{:?}, parent_actual_shape.width:{:?}",
     //   bottom_right_pos,
     //   parent_actual_shape.width()
     // );
     let x_diff = num_traits::sign::abs_sub(
-      bottom_right_pos.x,
+      bottom_right_pos.x(),
       parent_actual_shape.width() as isize,
     );
-    let result = top_left_pos.x - x_diff;
+    let result = top_left_pos.x() - x_diff;
     // trace!("x-2, x_diff:{:?}, result:{:?}", x_diff, result);
     result
   } else {
     // trace!("x-3, top_left_pos:{:?}", top_left_pos);
-    top_left_pos.x
+    top_left_pos.x()
   };
 
   // Y-axis
-  let top_left_y = if top_left_pos.y < 0 {
+  let top_left_y = if top_left_pos.y() < 0 {
     // trace!("y-1, top_left_pos:{:?}", top_left_pos);
     0
-  } else if bottom_right_pos.y > parent_actual_shape.height() as isize {
+  } else if bottom_right_pos.y() > parent_actual_shape.height() as isize {
     // trace!(
     //   "y-2, bottom_right_pos:{:?}, parent_actual_shape.height:{:?}",
     //   bottom_right_pos,
     //   parent_actual_shape.height()
     // );
     let y_diff = num_traits::sign::abs_sub(
-      bottom_right_pos.y,
+      bottom_right_pos.y(),
       parent_actual_shape.height() as isize,
     );
-    let result = top_left_pos.y - y_diff;
+    let result = top_left_pos.y() - y_diff;
     // trace!("y-2, y_diff:{:?}, result:{:?}", y_diff, result);
     result
   } else {
     // trace!("y-3, top_left_pos:{:?}", top_left_pos);
-    top_left_pos.y
+    top_left_pos.y()
   };
 
   rect!(
