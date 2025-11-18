@@ -125,7 +125,7 @@ pub struct Tree {
   loid2nid: FoldMap<TreeNodeId, LayoutNodeId>,
 
   // Layout tree.
-  lotree: TaffyTreeRc,
+  layout_tree: TaffyTreeRc,
 
   // Command-line node ID.
   command_line_id: Option<TreeNodeId>,
