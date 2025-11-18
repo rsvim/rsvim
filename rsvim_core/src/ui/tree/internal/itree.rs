@@ -6,13 +6,10 @@ use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::*;
 use itertools::Itertools;
-use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
