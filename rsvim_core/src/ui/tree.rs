@@ -137,8 +137,8 @@ pub struct Tree {
   //
   // The **current** window means user is focused on the window widget, e.g. it
   // contains the cursor. But when user types some commands in cmdline widget,
-  // cursor will move to cmdline, we still keeps the **current window**, this field is actually the **previous**
-  // current window.
+  // cursor will move to cmdline, we still keeps the **current** window id,
+  // this field is actually the **latest** current window.
   current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
