@@ -4,8 +4,8 @@ use super::indicator::*;
 use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
-use crate::geo_size_as;
 use crate::prelude::*;
+use crate::size_as;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
@@ -67,14 +67,8 @@ mod tests_nowrap {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(1, 1);
-    let terminal_shape = IRect::new(
-      (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
-    );
+    let terminal_size = size!(1, 1);
+    let terminal_shape = size_into_rect!(terminal_size, isize);
 
     let expect = vec![":"];
 

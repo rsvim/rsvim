@@ -25,10 +25,7 @@ pub fn make_tree_with_buffers(
   let tree_root_id = tree.root_id();
 
   // Window
-  let window_shape = IRect::new(
-    (0, 0),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
-  );
+  let window_shape = size_into_rect!(canvas_size, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
@@ -40,7 +37,7 @@ pub fn make_tree_with_buffers(
   let window_id = window.id();
 
   // Cursor.
-  let cursor_shape = IRect::new((0, 0), (1, 1));
+  let cursor_shape = rect!(0, 0, 1, 1);
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
@@ -67,13 +64,7 @@ pub fn make_tree_with_buffers_cmdline(
   let tree_root_id = tree.root_id();
 
   // window
-  let window_shape = IRect::new(
-    (0, 0),
-    (
-      canvas_size.width() as isize,
-      canvas_size.height().saturating_sub(1) as isize,
-    ),
-  );
+  let window_shape = size_into_rect!(canvas_size, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
@@ -85,7 +76,7 @@ pub fn make_tree_with_buffers_cmdline(
   let window_id = window.id();
 
   // cursor
-  let cursor_shape = IRect::new((0, 0), (1, 1));
+  let cursor_shape = rect!(0, 0, 1, 1);
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
@@ -93,9 +84,11 @@ pub fn make_tree_with_buffers_cmdline(
   tree.set_current_window_id(Some(window_id));
 
   // command-line
-  let cmdline_shape = IRect::new(
-    (0, canvas_size.height().saturating_sub(1) as isize),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
+  let cmdline_shape = rect!(
+    0,
+    canvas_size.height().saturating_sub(1) as isize,
+    canvas_size.width() as isize,
+    canvas_size.height() as isize
   );
   let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
   let _cmdline_id = cmdline.id();

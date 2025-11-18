@@ -7,7 +7,6 @@ use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use compact_str::ToCompactString;
-use geo::point;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
@@ -60,7 +59,6 @@ impl Widgetable for Indicator {
     let symbol = self.symbol;
     let symbol = format!("{symbol}").to_compact_string();
     let cell = Cell::with_symbol(symbol);
-    let cell_upos = point!(x: upos.x(), y: upos.y());
-    canvas.frame_mut().set_cell(cell_upos, cell);
+    canvas.frame_mut().set_cell(upos, cell);
   }
 }

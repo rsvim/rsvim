@@ -29,13 +29,7 @@ fn make_window_from_size(
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
-  let window_shape = IRect::new(
-    (0, 0),
-    (
-      terminal_size.width() as isize,
-      terminal_size.height() as isize,
-    ),
-  );
+  let window_shape = size_into_rect!(terminal_size, isize);
   Window::new(
     tree.global_local_options(),
     window_shape,
@@ -73,7 +67,7 @@ fn do_test_draw(actual: &Canvas, expect: &[&str]) {
 fn draw_after_init1() {
   test_log_init();
 
-  let terminal_size = U16Size::new(10, 10);
+  let terminal_size = size!(10, 10);
   let buf_opts = BufferOptionsBuilder::default().build().unwrap();
   let buf = make_buffer_from_lines(
     terminal_size,

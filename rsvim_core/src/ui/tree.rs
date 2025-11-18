@@ -160,10 +160,7 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
-    let shape = IRect::new(
-      (0, 0),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
-    );
+    let shape = size_into_rect!(canvas_size, isize);
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
