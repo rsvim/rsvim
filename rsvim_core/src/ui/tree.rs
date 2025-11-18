@@ -141,10 +141,8 @@ pub struct Tree {
   // this field is actually the **latest** current window.
   current_window_id: Option<TreeNodeId>,
 
-  // Global options for windows.
+  // Window global and local options.
   global_options: WindowGlobalOptions,
-
-  // Global-local options for windows.
   global_local_options: WindowOptions,
 }
 
