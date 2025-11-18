@@ -117,7 +117,7 @@ pub struct Tree {
 
   // Root node.
   root_id: TreeNodeId,
-  root_layout_id: LayoutNodeId,
+  root_loid: LayoutNodeId,
   size: U16Size,
 
   // Maps between Node ID <=> Layout ID
@@ -125,7 +125,7 @@ pub struct Tree {
   loid2nid: FoldMap<TreeNodeId, LayoutNodeId>,
 
   // Layout tree.
-  layout_tree: TaffyTreeRc,
+  lotree: TaffyTreeRc,
 
   // Command-line node ID.
   command_line_id: Option<TreeNodeId>,

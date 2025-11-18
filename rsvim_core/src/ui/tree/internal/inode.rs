@@ -12,6 +12,8 @@ pub type TreeNodeId = i32;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
+  fn loid(&self) -> LayoutNodeId;
+
   fn depth(&self) -> usize;
 
   fn set_depth(&mut self, depth: usize);
