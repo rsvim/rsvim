@@ -42,6 +42,9 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
+// Coord
+pub type Coord<T> = geo::Coord<T>;
+
 // Position
 pub type Point<T> = taffy::geometry::Point<T>;
 pub type IPos = Point<isize>;

@@ -40,7 +40,7 @@ tokio-util = { workspace = true, features = ["full"] }
 futures = { workspace = true }
 compact_str = { workspace = true }
 ropey = { workspace = true, default-features = false }
-taffy = { workspace = true }
+geo = { workspace = true }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
 dirs = { workspace = true }
