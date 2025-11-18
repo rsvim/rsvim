@@ -302,7 +302,7 @@ impl Iframe {
     let mut results: Vec<Vec<CompactString>> = vec![];
     for row in 0..self.size.height {
       let mut row_symbols: Vec<CompactString> = vec![];
-      for col in 0..self.size.width() {
+      for col in 0..self.size.width {
         let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
       }
@@ -317,9 +317,9 @@ impl Iframe {
   /// NOTE: This method is mostly for debugging and testing.
   pub fn raw_symbols_with_placeholder(&self) -> Vec<Vec<CompactString>> {
     let mut results: Vec<Vec<CompactString>> = vec![];
-    for row in 0..self.size.height() {
+    for row in 0..self.size.height {
       let mut row_symbols: Vec<CompactString> = vec![];
-      for col in 0..self.size.width() {
+      for col in 0..self.size.width {
         let idx = self.xy2idx(col as usize, row as usize);
         let s = self.cells[idx].symbol();
         row_symbols.push(if s.is_empty() {
