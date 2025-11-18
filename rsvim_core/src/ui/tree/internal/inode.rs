@@ -103,51 +103,11 @@ impl InodeBase {
     self.id
   }
 
-  pub fn depth(&self) -> usize {
-    self.depth
+  pub fn loid(&self) -> LayoutNodeId {
+    self.loid
   }
 
-  pub fn set_depth(&mut self, depth: usize) {
-    self.depth = depth;
-  }
-
-  pub fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  pub fn set_zindex(&mut self, zindex: usize) {
-    self.zindex = zindex;
-  }
-
-  pub fn shape(&self) -> &IRect {
-    &self.shape
-  }
-
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
-  }
-
-  pub fn actual_shape(&self) -> &U16Rect {
-    &self.actual_shape
-  }
-
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
-  }
-
-  pub fn enabled(&self) -> bool {
-    self.flags.contains(Flags::ENABLED)
-  }
-
-  pub fn set_enabled(&mut self, value: bool) {
-    self.flags.set(Flags::ENABLED, value);
-  }
-
-  pub fn visible(&self) -> bool {
-    self.flags.contains(Flags::VISIBLE)
-  }
-
-  pub fn set_visible(&mut self, value: bool) {
-    self.flags.set(Flags::VISIBLE, value);
+  pub fn lotree(&self) -> TaffyTreeWk {
+    self.lotree.clone()
   }
 }
