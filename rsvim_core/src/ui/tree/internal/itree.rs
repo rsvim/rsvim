@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
+use crate::ui::tree::*;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -205,17 +206,14 @@ pub struct Itree<T>
 where
   T: Inodeable,
 {
-  // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
+  lotree: TaffyTreeRc,
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
-  relationships: RefCell<Relationships>,
+  root_id: TreeNodeId,
+  root_loid: TreeNodeId,
+
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 #[derive(Debug)]
