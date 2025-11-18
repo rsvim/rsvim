@@ -666,25 +666,25 @@ where
             match self.nodes.get_mut(&id) {
               Some(node) => {
                 let current_shape = *node.shape();
-                let current_top_left_pos: IPos = current_shape.min();
+                let current_top_left_pos: IPos = current_shape.min().into();
                 let expected_top_left_pos: IPos = point!(
-                  current_top_left_pos.x + x,
-                  current_top_left_pos.y + y
+                  current_top_left_pos.x() + x,
+                  current_top_left_pos.y() + y
                 );
                 let expected_shape = rect!(
-                  expected_top_left_pos.x,
-                  expected_top_left_pos.y,
-                  expected_top_left_pos.x + current_shape.width(),
-                  expected_top_left_pos.y + current_shape.height()
+                  expected_top_left_pos.x(),
+                  expected_top_left_pos.y(),
+                  expected_top_left_pos.x() + current_shape.width(),
+                  expected_top_left_pos.y() + current_shape.height()
                 );
 
                 let final_shape =
                   shapes::bound_shape(&expected_shape, &parent_actual_shape);
-                let final_top_left_pos: IPos = final_shape.min();
+                let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
-                let final_x = final_top_left_pos.x - current_top_left_pos.x;
-                let final_y = final_top_left_pos.y - current_top_left_pos.y;
+                let final_x = final_top_left_pos.x() - current_top_left_pos.x();
+                let final_y = final_top_left_pos.y() - current_top_left_pos.y();
                 self.move_by(id, final_x, final_y)
               }
               None => None,
@@ -720,10 +720,10 @@ where
         let current_shape = *node.shape();
         let next_top_left_pos: IPos = point!(x, y);
         let next_shape = rect!(
-          next_top_left_pos.x,
-          next_top_left_pos.y,
-          next_top_left_pos.x + current_shape.width(),
-          next_top_left_pos.y + current_shape.height()
+          next_top_left_pos.x(),
+          next_top_left_pos.y(),
+          next_top_left_pos.x() + current_shape.width(),
+          next_top_left_pos.y() + current_shape.height()
         );
         node.set_shape(&next_shape);
 
@@ -770,17 +770,17 @@ where
               let current_shape = *node.shape();
               let expected_top_left_pos: IPos = point!(x, y);
               let expected_shape = rect!(
-                expected_top_left_pos.x,
-                expected_top_left_pos.y,
-                expected_top_left_pos.x + current_shape.width(),
-                expected_top_left_pos.y + current_shape.height()
+                expected_top_left_pos.x(),
+                expected_top_left_pos.y(),
+                expected_top_left_pos.x() + current_shape.width(),
+                expected_top_left_pos.y() + current_shape.height()
               );
 
               let final_shape =
                 shapes::bound_shape(&expected_shape, &parent_actual_shape);
-              let final_top_left_pos: IPos = final_shape.min();
+              let final_top_left_pos: IPos = final_shape.min().into();
 
-              self.move_to(id, final_top_left_pos.x, final_top_left_pos.y)
+              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
             }
             None => None,
           },
