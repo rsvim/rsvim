@@ -104,6 +104,7 @@ impl Window {
     {
       let lo = lotree.upgrade().unwrap();
       let mut lo = lo.borrow_mut();
+      lo.add_child(base.loid(), content.loid())?;
     }
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
