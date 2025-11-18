@@ -75,8 +75,17 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+      let viewport_pos = layout.location.into();
+      let viewport_pos = point_as!(viewport_pos, u16);
+      let viewport_size = layout.size.into();
+      let viewport_size = size_as!(viewport_size, u16);
+      let viewport_shape = rect!(
+        viewport_pos.x(),
+        viewport_pos.y(),
+        viewport_pos.x() + viewport_size.width(),
+        viewport_pos.y() + viewport_size.height()
+      );
+      let viewport = Viewport::view(opts, buffer.text(), viewport_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
