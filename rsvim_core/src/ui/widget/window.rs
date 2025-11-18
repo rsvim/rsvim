@@ -11,6 +11,7 @@ mod opt_tests;
 
 use crate::buf::BufferWk;
 use crate::inode_enum_dispatcher;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -55,6 +56,8 @@ pub struct Window {
   viewport: ViewportArc,
   cursor_viewport: CursorViewportArc,
 }
+
+inode_impl!(Window, base);
 
 impl Window {
   pub fn new(
@@ -108,8 +111,6 @@ impl Window {
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
-    base.bounded_insert(root_id, content_node);
-
     Window {
       base,
       options: *opts,
@@ -121,8 +122,6 @@ impl Window {
     }
   }
 }
-
-inode_itree_impl!(Window, base);
 
 impl Widgetable for Window {
   fn draw(&self, canvas: &mut Canvas) {
