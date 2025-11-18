@@ -27,160 +27,12 @@ macro_rules! inode_impl {
         self.$base_name.id()
       }
 
-      fn depth(&self) -> usize {
-        self.$base_name.depth()
+      fn loid(&self) -> LayoutNodeId {
+        self.$base_name.loid()
       }
 
-      fn set_depth(&mut self, depth: usize) {
-        self.$base_name.set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base_name.zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base_name.shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self.$base_name.set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self.$base_name.actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self.$base_name.set_actual_shape(actual_shape)
-      }
-
-      fn enabled(&self) -> bool {
-        self.$base_name.enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self.$base_name.set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base_name.visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self.$base_name.set_visible(visible);
-      }
-    }
-  };
-}
-
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
-      fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
-      }
-
-      fn depth(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_zindex(zindex);
-      }
-
-      fn shape(&self) -> &IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
-      }
-
-      fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_visible(visible);
+      fn lotree(&self) -> TaffyTreeWk {
+        self.$base_name.lotree()
       }
     }
   };
@@ -199,98 +51,18 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn depth(&self) -> usize {
+      fn loid(&self) -> LayoutNodeId {
         match self {
           $(
-            $enum::$variant(e) => e.depth(),
+            $enum::$variant(e) => e.loid(),
           )*
         }
       }
 
-      fn set_depth(&mut self, depth: usize) {
+      fn lotree(&self) -> TaffyTreeWk {
         match self {
           $(
-            $enum::$variant(e) => e.set_depth(depth),
-          )*
-        }
-      }
-
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_zindex(zindex),
-          )*
-        }
-      }
-
-      fn shape(&self) -> &IRect {
-        match self {
-          $(
-            $enum::$variant(e) => e.shape(),
-          )*
-        }
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_shape(shape),
-          )*
-        }
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        match self {
-          $(
-            $enum::$variant(e) => e.actual_shape(),
-          )*
-        }
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_actual_shape(actual_shape),
-          )*
-        }
-      }
-
-      fn enabled(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.enabled(),
-          )*
-        }
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_enabled(enabled),
-          )*
-        }
-      }
-
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
+            $enum::$variant(e) => e.lotree(),
           )*
         }
       }
