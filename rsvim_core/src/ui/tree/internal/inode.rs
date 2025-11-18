@@ -2,6 +2,7 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
@@ -13,7 +14,8 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
   fn loid(&self) -> LayoutNodeId;
-  fn lotree(&self) -> LayoutNodeId;
+
+  fn lotree(&self) -> TaffyTreeRc;
 
   fn depth(&self) -> usize;
 
@@ -47,6 +49,14 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.id()
+      }
+
+      fn loid(&self) -> LayoutNodeId {
+        self.$base_name.loid()
+      }
+
+      fn lotree(&self) -> TaffyTreeRc {
+        self.$base_name.lotree()
       }
 
       fn depth(&self) -> usize {
@@ -107,6 +117,14 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
+      }
+
+      fn loid(&self) -> LayoutNodeId {
+        self.$base_name.loid()
+      }
+
+      fn lotree(&self) -> TaffyTreeRc {
+        self.$base_name.lotree()
       }
 
       fn depth(&self) -> usize {
@@ -217,6 +235,22 @@ macro_rules! inode_enum_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.id(),
+          )*
+        }
+      }
+
+      fn loid(&self) -> LayoutNodeId {
+        match self {
+          $(
+            $enum::$variant(e) => e.loid(),
+          )*
+        }
+      }
+
+      fn lotree(&self) -> TaffyTreeRc {
+        match self {
+          $(
+            $enum::$variant(e) => e.lotree(),
           )*
         }
       }
@@ -334,10 +368,12 @@ flags_impl!(Flags, u8, ENABLED, VISIBLE);
 // visible=true
 const FLAGS: Flags = Flags::all();
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
+  loid: LayoutNodeId,
+  lotree: TaffyTreeRc,
   depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
@@ -348,7 +384,7 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(lotree: TaffyTreeRc, shape: IRect) -> Self {
     let actual_shape = rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
