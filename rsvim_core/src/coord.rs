@@ -170,7 +170,10 @@ where
   fn from(value: taffy::geometry::Size<T>) -> Size<T>;
 }
 
-impl<T> SizeExt<T> for Size<T> {
+impl<T> SizeExt<T> for Size<T>
+where
+  T: geo::CoordNum,
+{
   fn from(value: taffy::geometry::Size<T>) -> Size<T> {
     Size::new(value.width, value.height)
   }
