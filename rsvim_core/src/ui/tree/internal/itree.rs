@@ -299,17 +299,9 @@ where
     debug_assert!(!self.nid2loid.is_empty());
     debug_assert!(!self.loid2nid.is_empty());
     debug_assert!(self.lotree.borrow().total_node_count() != 0);
-    debug_assert_eq!(self.lotree.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.lotree.borrow().total_node_count(), self.nodes.len());
     debug_assert_eq!(self.nid2loid.borrow().len(), self.nodes.len());
     debug_assert_eq!(self.loid2nid.borrow().len(), self.nodes.len());
-  }
-
-  pub fn len(&self) -> usize {
-    self.nodes.len()
-  }
-
-  pub fn is_empty(&self) -> bool {
-    self.nodes.len() <= 1
   }
 
   pub fn root_id(&self) -> TreeNodeId {
