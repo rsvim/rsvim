@@ -171,10 +171,6 @@ impl Tree {
       };
       lotree.new_leaf(root_style)?
     };
-    let shape = size_into_rect!(canvas_size, isize);
-    let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
-
     Ok(Tree {
       nodes: FoldMap::new(),
       root_id: next_node_id(),
