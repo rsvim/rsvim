@@ -89,14 +89,22 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content_style = Style {
-      size: {
+      size: taffy::Size {
         width: taffy::Dimension::percent(100.0),
         height: taffy::Dimension::percent(100.0),
       },
       ..Default::default()
     };
-    let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+    let content = Content::new(
+      lotree,
+      content_style,
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    )?;
+    {
+      let lo = lotree.upgrade().unwrap();
+      let mut lo = lo.borrow_mut();
+    }
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
