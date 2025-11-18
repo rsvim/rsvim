@@ -79,7 +79,14 @@ where
 }
 
 // Size
-pub type Size<T> = taffy::geometry::Size<T>;
+pub struct Size<T>
+where
+  T: geo::CoordNum,
+{
+  width: T,
+  height: T,
+}
+
 pub type ISize = Size<isize>;
 pub type USize = Size<usize>;
 pub type U16Size = Size<u16>;
