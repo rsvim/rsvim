@@ -14,7 +14,7 @@ pub fn draw(
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
-  let upos: U16Pos = actual_shape.min();
+  let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -81,7 +81,7 @@ pub fn draw(
           let cells = std::iter::repeat_n('>', start_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
+          let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += start_fills;
         }
@@ -142,7 +142,7 @@ pub fn draw(
                 vec![cell]
               };
 
-              let cell_upos = point!(col_idx + upos.x, row_idx + upos.y);
+              let cell_upos = point!(col_idx + upos.x(), row_idx + upos.y());
               canvas.frame_mut().set_cells_at(cell_upos, cells);
 
               col_idx += unicode_width as u16;
@@ -165,7 +165,7 @@ pub fn draw(
           let cells = std::iter::repeat_n(' ', left_length as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
+          let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
           col_idx += left_length;
         }
@@ -175,7 +175,7 @@ pub fn draw(
           let cells = std::iter::repeat_n('<', end_fills as usize)
             .map(Cell::from)
             .collect::<Vec<_>>();
-          let cells_upos = point!(col_idx + upos.x, row_idx + upos.y);
+          let cells_upos = point!(col_idx + upos.x(), row_idx + upos.y());
           canvas.frame_mut().set_cells_at(cells_upos, cells);
 
           col_idx += end_fills;
