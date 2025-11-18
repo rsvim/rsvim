@@ -1,6 +1,6 @@
 //! The tree node of internal tree.
 
-use crate::ui::tree::TaffyTreeWk;
+use crate::ui::tree::TaffyTreeRc;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::Style;
@@ -15,7 +15,7 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn loid(&self) -> LayoutNodeId;
 
-  fn lotree(&self) -> TaffyTreeWk;
+  fn lotree(&self) -> TaffyTreeRc;
 }
 
 /// Generate getter/setter for `Inode`.
@@ -31,7 +31,7 @@ macro_rules! inode_impl {
         self.$base_name.loid()
       }
 
-      fn lotree(&self) -> TaffyTreeWk {
+      fn lotree(&self) -> TaffyTreeRc {
         self.$base_name.lotree()
       }
     }
@@ -59,7 +59,7 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn lotree(&self) -> TaffyTreeWk {
+      fn lotree(&self) -> TaffyTreeRc {
         match self {
           $(
             $enum::$variant(e) => e.lotree(),
@@ -83,11 +83,11 @@ pub fn next_node_id() -> TreeNodeId {
 pub struct InodeBase {
   id: TreeNodeId,
   loid: LayoutNodeId,
-  lotree: TaffyTreeWk,
+  lotree: TaffyTreeRc,
 }
 
 impl InodeBase {
-  pub fn new(lotree: TaffyTreeWk, style: Style) -> TaffyResult<Self> {
+  pub fn new(lotree: TaffyTreeRc, style: Style) -> TaffyResult<Self> {
     let lo = lotree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
     let loid = lo.new_leaf(style)?;
@@ -107,7 +107,7 @@ impl InodeBase {
     self.loid
   }
 
-  pub fn lotree(&self) -> TaffyTreeWk {
+  pub fn lotree(&self) -> TaffyTreeRc {
     self.lotree.clone()
   }
 }
