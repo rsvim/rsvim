@@ -64,13 +64,14 @@ impl Window {
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let lo = lotree.upgrade().unwrap();
-    let mut lo = lo.borrow_mut();
-    let loid = lo.new_leaf(style)?;
-    lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
-    let layout = lo.layout(loid)?;
-
-    let mut base = Itree::new(root_node);
+    let (loid, layout) = {
+      let lo = lotree.upgrade().unwrap();
+      let mut lo = lo.borrow_mut();
+      let loid = lo.new_leaf(style)?;
+      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
+      let layout = lo.layout(loid)?;
+      (loid, layout)
+    };
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
