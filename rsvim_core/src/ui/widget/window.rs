@@ -60,17 +60,13 @@ impl Window {
   pub fn new(
     lotree: TaffyTreeWk,
     style: Style,
-    parent_layout: &Layout,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
     let lo = lotree.upgrade().unwrap();
     let mut lo = lo.borrow_mut();
     let loid = lo.new_leaf(style)?;
-    lo.compute_layout(
-      loid,
-      taffy::Size(taffy::AvailableSize(parent_layout.size)),
-    )?;
+    lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
 
     let mut base = Itree::new(root_node);
 
