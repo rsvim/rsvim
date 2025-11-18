@@ -1,21 +1,24 @@
+use taffy::Style;
+
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
+use crate::ui::tree::TaffyTreeWk;
 // use crate::tests::log::init as test_log_init;
 use std::cell::RefCell;
 
 // Test node
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct TestNode {
-  pub value: usize,
   pub base: InodeBase,
+  pub value: usize,
 }
 
 impl TestNode {
-  pub fn new(value: usize, shape: IRect) -> Self {
+  pub fn new(lotree: TaffyTreeWk, style: Style, value: usize) -> Self {
     TestNode {
+      base: InodeBase::new(lotree, style),
       value,
-      base: InodeBase::new(shape),
     }
   }
 }
