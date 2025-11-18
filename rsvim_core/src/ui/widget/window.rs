@@ -11,7 +11,6 @@ mod opt_tests;
 
 use crate::buf::BufferWk;
 use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -27,6 +26,7 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
+use taffy::Style;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -55,7 +55,13 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(
+    lotree: TaffyTreeWk,
+    style: Style,
+    opts: &WindowOptions,
+    shape: IRect,
+    buffer: BufferWk,
+  ) -> Self {
     let root = RootContainer::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);
