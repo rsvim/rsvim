@@ -78,27 +78,16 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED, VISIBLE);
-
-// enabled=true
-// visible=true
-const FLAGS: Flags = Flags::all();
-
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  depth: usize,
-  shape: IRect,
-  actual_shape: U16Rect,
-  zindex: usize,
-  // enabled
-  // visible
-  flags: Flags,
+  loid: LayoutNodeId,
+  lotree: TaffyTreeWk,
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(lotree: TaffyTreeWk) -> Self {
     let actual_shape = rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
