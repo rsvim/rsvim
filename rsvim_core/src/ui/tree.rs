@@ -161,7 +161,7 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let lotree = new_layout_tree();
     let root_loid = {
-      let lotree = lotree.borrow_mut();
+      let mut lotree = lotree.borrow_mut();
       let root_style = Style {
         size: taffy::Size {
           width: taffy::Dimension::length(canvas_size.width() as f32),
@@ -175,7 +175,7 @@ impl Tree {
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
 
-    Tree {
+    Ok(Tree {
       nodes: FoldMap::new(),
       root_id: next_node_id(),
       root_loid,
@@ -188,7 +188,7 @@ impl Tree {
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
-    }
+    })
   }
 
   /// Nodes count, include the root node.
