@@ -6,6 +6,7 @@ use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 
+pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
