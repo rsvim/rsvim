@@ -1,11 +1,12 @@
-use taffy::Style;
-
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::tree::TaffyTreeWk;
+use crate::ui::tree::new_layout_tree;
+use taffy::Style;
 // use crate::tests::log::init as test_log_init;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 // Test node
 #[derive(Clone, Debug)]
@@ -29,8 +30,22 @@ inode_impl!(TestNode, base);
 fn new() {
   // test_log_init();
 
-  let n1 = TestNode::new(1, rect!(0, 0, 0, 0));
-  let n2 = TestNode::new(2, rect!(1, 2, 3, 4));
+  let lotree = new_layout_tree();
+
+  let n1 = TestNode::new(
+    Rc::downgrade(&lotree),
+    Style {
+      ..Default::default()
+    },
+    1,
+  );
+  let n2 = TestNode::new(
+    Rc::downgrade(&lotree),
+    Style {
+      ..Default::default()
+    },
+    2,
+  );
   let n1 = RefCell::new(n1);
   let n2 = RefCell::new(n2);
 
