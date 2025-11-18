@@ -52,12 +52,12 @@ impl Iframe {
 
   /// Convert (position) X and Y into Vec index.
   pub fn xy2idx(&self, x: usize, y: usize) -> usize {
-    y * self.size.width as usize + x
+    y * self.size.width() as usize + x
   }
 
   /// Convert position into Vec index.
   pub fn pos2idx(&self, pos: U16Pos) -> usize {
-    self.xy2idx(pos.x as usize, pos.y as usize)
+    self.xy2idx(pos.x() as usize, pos.y() as usize)
   }
 
   /// Convert index into (position) X and Y.
@@ -69,8 +69,8 @@ impl Iframe {
   /// If index is outside of frame shape.
   pub fn idx2xy(&self, index: usize) -> (usize, usize) {
     debug_assert!(index <= self.cells.len());
-    let x = index % self.size.width as usize;
-    let y = index / self.size.width as usize;
+    let x = index % self.size.width() as usize;
+    let y = index / self.size.width() as usize;
     (x, y)
   }
 
@@ -93,17 +93,18 @@ impl Iframe {
 
   /// Whether the frame is zero sized.
   pub fn zero_sized(&self) -> bool {
-    self.size.height == 0 || self.size.width == 0
+    self.size.height() == 0 || self.size.width() == 0
   }
 
   /// Set current frame size.
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
-    self
-      .cells
-      .resize(size.height as usize * size.width as usize, Cell::default());
-    self.dirty_rows = vec![true; size.height as usize];
+    self.cells.resize(
+      size.height() as usize * size.width() as usize,
+      Cell::default(),
+    );
+    self.dirty_rows = vec![true; size.height() as usize];
     old_size
   }
 
@@ -167,7 +168,7 @@ impl Iframe {
       //   old_cell
       // );
       self.cells[index] = cell;
-      self.dirty_rows[pos.y as usize] = true;
+      self.dirty_rows[pos.y() as usize] = true;
       Some(old_cell)
     } else {
       // trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
