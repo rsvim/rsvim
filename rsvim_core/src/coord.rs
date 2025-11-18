@@ -46,64 +46,35 @@
 pub type Coord<T> = geo::Coord<T>;
 
 // Position
-pub type Point<T> = taffy::geometry::Point<T>;
+pub type Point<T> = geo::Point<T>;
 pub type IPos = Point<isize>;
 pub type UPos = Point<usize>;
 pub type U16Pos = Point<u16>;
 
 // Rectangle
-pub type Rect<T> = taffy::geometry::Rect<T>;
+pub type Rect<T> = geo::Rect<T>;
 pub type IRect = Rect<isize>;
 pub type URect = Rect<usize>;
 pub type U16Rect = Rect<u16>;
 
-pub trait RectExt<T> {
-  /// `min` and `top_left` are the same.
-  fn min(&self) -> Point<T>;
-  fn top_left(&self) -> Point<T>;
-
-  /// `max` and `bottom_right` are the same.
-  fn max(&self) -> Point<T>;
-  fn bottom_right(&self) -> Point<T>;
-
-  fn height(&self) -> T;
-  fn width(&self) -> T;
+pub trait RectExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn top_left(&self) -> Coord<T>;
+  fn bottom_right(&self) -> Coord<T>;
 }
 
 impl<T> RectExt<T> for Rect<T>
 where
-  T: Copy + PartialOrd + num_traits::Num,
+  T: geo::CoordNum,
 {
-  fn min(&self) -> Point<T> {
-    self.top_left()
+  fn top_left(&self) -> Coord<T> {
+    self.min()
   }
 
-  fn top_left(&self) -> Point<T> {
-    Point {
-      x: self.left,
-      y: self.top,
-    }
-  }
-
-  fn max(&self) -> Point<T> {
-    self.bottom_right()
-  }
-
-  fn bottom_right(&self) -> Point<T> {
-    Point {
-      x: self.right,
-      y: self.bottom,
-    }
-  }
-
-  fn height(&self) -> T {
-    debug_assert!(self.bottom >= self.top);
-    self.bottom - self.top
-  }
-
-  fn width(&self) -> T {
-    debug_assert!(self.right >= self.left);
-    self.right - self.left
+  fn bottom_right(&self) -> Coord<T> {
+    self.max()
   }
 }
 
