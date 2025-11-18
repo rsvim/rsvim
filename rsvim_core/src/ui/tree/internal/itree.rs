@@ -305,7 +305,11 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relationships.borrow().root_id()
+    self.root_id
+  }
+
+  pub fn root_loid(&self) -> LayoutNodeId {
+    self.root_loid
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
