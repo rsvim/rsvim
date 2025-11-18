@@ -88,8 +88,7 @@ pub struct InodeBase {
 
 impl InodeBase {
   pub fn new(lotree: TaffyTreeRc, style: Style) -> TaffyResult<Self> {
-    let lo = lotree.upgrade().unwrap();
-    let mut lo = lo.borrow_mut();
+    let mut lo = lotree.borrow_mut();
     let loid = lo.new_leaf(style)?;
     lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
     Ok(Self {

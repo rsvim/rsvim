@@ -9,6 +9,9 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
@@ -206,8 +209,8 @@ pub struct Itree<T>
 where
   T: Inodeable,
 {
-  nodes: FoldMap<TreeNodeId, T>,
   lotree: TaffyTreeRc,
+  nodes: FoldMap<TreeNodeId, T>,
 
   root_id: TreeNodeId,
   root_loid: TreeNodeId,
@@ -268,15 +271,23 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(root_node: T) -> Self {
+  pub fn new(lotree: TaffyTreeRc, root_node: T) -> TaffyResult<Self> {
     let root_id = root_node.id();
+    let root_loid = root_node.loid();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
-    Itree {
+    let mut nid2loid = FoldMap::new();
+    let mut loid2nid = FoldMap::new();
+    nid2loid.insert(root_id, root_loid);
+    loid2nid.insert(root_loid, root_id);
+    Ok(Itree {
+      lotree,
       nodes,
-      relationships,
-    }
+      root_id,
+      root_loid,
+      nid2loid,
+      loid2nid,
+    })
   }
 
   #[cfg(not(test))]
