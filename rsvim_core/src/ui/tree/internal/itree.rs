@@ -4,10 +4,12 @@ use crate::prelude::*;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use std::cell::RefCell;
+use crate::ui::tree::*;
+use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
@@ -205,17 +207,14 @@ pub struct Itree<T>
 where
   T: Inodeable,
 {
-  // Nodes collection, maps from node ID to its node struct.
+  lotree: TaffyTreeRc,
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
-  relationships: RefCell<Relationships>,
+  root_id: TreeNodeId,
+  root_loid: LayoutNodeId,
+
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 #[derive(Debug)]
@@ -270,15 +269,23 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(root_node: T) -> Self {
+  pub fn new(lotree: TaffyTreeRc, root_node: T) -> TaffyResult<Self> {
     let root_id = root_node.id();
+    let root_loid = root_node.loid();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
-    Itree {
+    let mut nid2loid = FoldMap::new();
+    let mut loid2nid = FoldMap::new();
+    nid2loid.insert(root_id, root_loid);
+    loid2nid.insert(root_loid, root_id);
+    Ok(Itree {
+      lotree,
       nodes,
-      relationships,
-    }
+      root_id,
+      root_loid,
+      nid2loid,
+      loid2nid,
+    })
   }
 
   #[cfg(not(test))]
@@ -287,67 +294,39 @@ where
   #[cfg(test)]
   fn _internal_check(&self) {
     debug_assert!(!self.nodes.is_empty());
-    debug_assert!(!self.relationships.borrow().is_empty());
-    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
-
-    let root_id = self.relationships.borrow().root_id();
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(root_id);
-
-    while let Some(id) = que.pop_front() {
-      let parent = self.relationships.borrow().parent_id(id);
-      if id == root_id {
-        debug_assert!(parent.is_none());
-      } else {
-        debug_assert!(parent.is_some());
-        let parents_children =
-          self.relationships.borrow().children_ids(parent.unwrap());
-        for c in parents_children {
-          let child_parent = self.relationships.borrow().parent_id(c);
-          debug_assert!(child_parent.is_some());
-          debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
-        }
-      }
-
-      let children_ids = self.relationships.borrow().children_ids(id);
-      debug_assert_eq!(
-        children_ids.len(),
-        children_ids
-          .iter()
-          .cloned()
-          .collect::<FoldSet<TreeNodeId>>()
-          .len()
-      );
-      for c in children_ids {
-        let child_parent = self.relationships.borrow().parent_id(c);
-        debug_assert!(child_parent.is_some());
-        debug_assert_eq!(child_parent.unwrap(), id);
-      }
-    }
-  }
-
-  pub fn len(&self) -> usize {
-    self.nodes.len()
-  }
-
-  pub fn is_empty(&self) -> bool {
-    self.nodes.len() <= 1
+    debug_assert!(!self.nid2loid.is_empty());
+    debug_assert!(!self.loid2nid.is_empty());
+    debug_assert!(self.lotree.borrow().total_node_count() != 0);
+    debug_assert_eq!(self.lotree.borrow().total_node_count(), self.nodes.len());
+    debug_assert_eq!(self.nid2loid.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.loid2nid.borrow().len(), self.nodes.len());
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relationships.borrow().root_id()
+    self.root_id
   }
 
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.nodes.keys().copied().collect()
+  pub fn root_loid(&self) -> LayoutNodeId {
+    self.root_loid
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationships.borrow().parent_id(id)
+    let loid = self.nid2loid.get(&id)?;
+    let parent_loid = self.lotree.borrow().parent(*loid)?;
+    self.loid2nid.get(&parent_loid).copied()
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
+    if let Some(loid) = self.nid2loid.get(&id) {
+      if let Ok(children_loids) = self.lotree.borrow().children(*loid) {
+        return children_loids
+          .iter()
+          .filter(|i| self.loid2nid.contains_key(i))
+          .map(|i| *self.loid2nid.get(i).unwrap())
+          .collect_vec();
+      }
+    }
+    vec![]
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {

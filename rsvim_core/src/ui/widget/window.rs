@@ -11,7 +11,7 @@ mod opt_tests;
 
 use crate::buf::BufferWk;
 use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -27,6 +27,9 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -43,7 +46,7 @@ widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -54,20 +57,34 @@ pub struct Window {
   cursor_viewport: CursorViewportArc,
 }
 
-impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
+inode_impl!(Window, base);
 
-    let mut base = Itree::new(root_node);
+impl Window {
+  pub fn new(
+    lotree: TaffyTreeWk,
+    style: Style,
+    opts: &WindowOptions,
+    buffer: BufferWk,
+  ) -> TaffyResult<Self> {
+    let base = InodeBase::new(lotree, style)?;
+    let lo = lotree.upgrade().unwrap();
 
     let (viewport, cursor_viewport) = {
+      let layout = lo.borrow().layout(base.loid())?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+
+      let viewport_pos = layout.location.into();
+      let viewport_pos = point_as!(viewport_pos, u16);
+      let viewport_size = layout.size.into();
+      let viewport_size = size_as!(viewport_size, u16);
+      let viewport_shape = rect!(
+        viewport_pos.x(),
+        viewport_pos.y(),
+        viewport_pos.x() + viewport_size.width(),
+        viewport_pos.y() + viewport_size.height()
+      );
+      let viewport = Viewport::view(opts, buffer.text(), &viewport_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -75,12 +92,24 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+    let content_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::percent(100.0),
+        height: taffy::Dimension::percent(100.0),
+      },
+      ..Default::default()
+    };
+    let content = Content::new(
+      lotree,
+      content_style,
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    )?;
+
+    lo.borrow_mut().add_child(base.loid(), content.loid())?;
+
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
-
-    base.bounded_insert(root_id, content_node);
 
     Window {
       base,
@@ -93,8 +122,6 @@ impl Window {
     }
   }
 }
-
-inode_itree_impl!(Window, base);
 
 impl Widgetable for Window {
   fn draw(&self, canvas: &mut Canvas) {

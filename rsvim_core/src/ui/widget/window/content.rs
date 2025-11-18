@@ -1,4 +1,4 @@
-//! Vim window's text content widget.
+//! Window content.
 
 use crate::buf::BufferWk;
 use crate::inode_impl;
@@ -7,28 +7,31 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
+use taffy::Style;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
 pub struct Content {
   base: InodeBase,
-
-  // Buffer.
   buffer: BufferWk,
-
-  // Viewport.
   viewport: ViewportWk,
 }
 
 impl Content {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
-    let base = InodeBase::new(shape);
-    Content {
+  pub fn new(
+    lotree: TaffyTreeWk,
+    style: Style,
+    buffer: BufferWk,
+    viewport: ViewportWk,
+  ) -> TaffyResult<Self> {
+    let base = InodeBase::new(lotree, style)?;
+    Ok(Content {
       base,
       buffer,
       viewport,
-    }
+    })
   }
 
   pub fn set_viewport(&mut self, viewport: ViewportWk) {
