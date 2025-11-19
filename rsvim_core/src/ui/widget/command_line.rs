@@ -31,6 +31,7 @@ use message::Message;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::FromLength;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
@@ -83,6 +84,21 @@ impl CommandLine {
     let root_node = CommandLineNode::Root(root);
 
     let mut base = Itree::new(lotree.clone(), root_node);
+
+    let indicator_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let input_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
 
     let indicator_shape = rect!(
       shape.min().x,
