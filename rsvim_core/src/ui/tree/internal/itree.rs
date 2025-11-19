@@ -298,32 +298,26 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(lotree: TaffyTreeRc, root_node: T) -> TaffyResult<Self> {
-    let lotree = new_layout_tree();
-    let root_loid = {
-      let mut lo = lotree.borrow_mut();
-      lo.new_leaf(style)?
-    };
-
-    let root = ItreeRootNode::new(shape);
-    let root_id = root.id();
-    let root_node = ItreeNode::Root(root);
+  pub fn new(lotree: TaffyTreeRc, root_node: T) -> Self {
+    let root_id = root_node.id();
+    let root_loid = root_node.loid();
 
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
+
     let mut nid2loid = FoldMap::new();
     let mut loid2nid = FoldMap::new();
     nid2loid.insert(root_id, root_loid);
     loid2nid.insert(root_loid, root_id);
 
-    Ok(Itree {
+    Itree {
       lotree,
       nodes,
       root_id,
       root_loid,
       nid2loid,
       loid2nid,
-    })
+    }
   }
 
   #[cfg(not(test))]
