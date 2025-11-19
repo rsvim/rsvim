@@ -12,10 +12,6 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
   fn loid(&self) -> LayoutNodeId;
 
-  fn shape(&self) -> &IRect;
-
-  fn set_shape(&mut self, shape: &IRect);
-
   fn actual_shape(&self) -> &U16Rect;
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect);
@@ -40,14 +36,6 @@ macro_rules! inode_impl {
 
       fn loid(&self) -> LayoutNodeId {
         self.$base_name.loid()
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base_name.shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self.$base_name.set_shape(shape);
       }
 
       fn actual_shape(&self) -> &U16Rect {
@@ -88,22 +76,6 @@ macro_rules! inode_itree_impl {
 
       fn loid(&self) -> LayoutNodeId {
         self.$base_name.root_loid()
-      }
-
-      fn shape(&self) -> &IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_shape(shape);
       }
 
       fn actual_shape(&self) -> &U16Rect {
@@ -177,22 +149,6 @@ macro_rules! inode_enum_dispatcher {
       }
     }
 
-    fn shape(&self) -> &IRect {
-      match self {
-        $(
-          $enum::$variant(e) => e.shape(),
-        )*
-      }
-    }
-
-    fn set_shape(&mut self, shape: &IRect) {
-      match self {
-        $(
-          $enum::$variant(e) => e.set_shape(shape),
-        )*
-      }
-    }
-
     fn actual_shape(&self) -> &U16Rect {
       match self {
         $(
@@ -262,7 +218,6 @@ const FLAGS: Flags = Flags::all();
 pub struct InodeBase {
   id: TreeNodeId,
   loid: LayoutNodeId,
-  shape: IRect,
   actual_shape: U16Rect,
   // enabled
   // visible
@@ -270,12 +225,10 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(loid: LayoutNodeId, shape: IRect) -> Self {
-    let actual_shape = rect_as!(shape, u16);
+  pub fn new(loid: LayoutNodeId, actual_shape: U16Rect) -> Self {
     InodeBase {
       id: next_node_id(),
       loid,
-      shape,
       actual_shape,
       flags: FLAGS,
     }
@@ -283,14 +236,6 @@ impl InodeBase {
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn shape(&self) -> &IRect {
-    &self.shape
-  }
-
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
   }
 
   pub fn actual_shape(&self) -> &U16Rect {
