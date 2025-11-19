@@ -55,13 +55,6 @@ pub trait PointExt<T>
 where
   T: geo::CoordNum,
 {
-  fn from(value: taffy::geometry::Point<T>) -> Point<T>;
-}
-
-impl<T> PointExt<T> for Point<T>
-where
-  T: geo::CoordNum,
-{
   fn from(value: taffy::geometry::Point<T>) -> Point<T> {
     geo::point!(x: value.x, y: value.y)
   }
