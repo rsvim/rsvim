@@ -473,24 +473,10 @@ where
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.nid2loid.contains_key(&parent_id));
 
-    // Child node.
     let child_id = child_node.id();
-    let child_zindex = child_node.zindex();
-
-    // Update attributes for both the newly inserted child, and all its descendants (if the child
-    // itself is also a sub-tree in current relationship).
-    //
-    // NOTE: This is useful when we want to move some widgets and all its children nodes to another
-    // place. We don't need to remove all the nodes (which could be slow), but only need to move
-    // the root of the tree.
-    //
-    // The attributes to be updated:
-    // 1. Depth.
-    // 2. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_depth = parent_node.depth();
     let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_depth(parent_depth + 1);
+
     child_node.set_actual_shape(&shapes::make_actual_shape(
       child_node.shape(),
       &parent_actual_shape,
