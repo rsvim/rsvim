@@ -4,11 +4,10 @@ use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
-use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 
-pub trait Inodeable: Sized + Clone + Debug {
+pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
   fn loid(&self) -> LayoutNodeId;
 
