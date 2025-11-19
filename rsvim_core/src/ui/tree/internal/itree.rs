@@ -297,7 +297,12 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(root_node: T) -> Self {
+  pub fn new(shape: IRect) -> Self {
+    let root = RootContainer::new(shape);
+    let root_id = root.id();
+    let root_node = RootContainer(root);
+    let root_actual_shape = root.actual_shape();
+
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
