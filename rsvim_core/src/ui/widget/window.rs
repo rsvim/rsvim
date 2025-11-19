@@ -28,6 +28,7 @@ use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
 use taffy::Style;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -61,7 +62,13 @@ impl Window {
     style: Style,
     opts: &WindowOptions,
     buffer: BufferWk,
-  ) -> Self {
+  ) -> TaffyResult<Self> {
+    let root = {
+      let mut lo = lotree.borrow_mut();
+      let root_loid = lo.new_leaf(style)?;
+      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
+    };
+
     let root = RootContainer::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);
