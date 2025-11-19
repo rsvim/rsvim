@@ -86,24 +86,6 @@ pub trait RectExt<T>
 where
   T: geo::CoordNum,
 {
-  fn top_left(&self) -> Coord<T>;
-  fn bottom_right(&self) -> Coord<T>;
-
-  fn from(value: taffy::geometry::Rect<T>) -> Rect<T>;
-}
-
-impl<T> RectExt<T> for Rect<T>
-where
-  T: geo::CoordNum,
-{
-  fn top_left(&self) -> Coord<T> {
-    self.min()
-  }
-
-  fn bottom_right(&self) -> Coord<T> {
-    self.max()
-  }
-
   fn from(value: taffy::geometry::Rect<T>) -> Rect<T> {
     Rect::new((value.left, value.top), (value.right, value.bottom))
   }
