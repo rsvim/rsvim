@@ -268,7 +268,7 @@ where
 }
 
 #[derive(Debug)]
-/// The level-order iterator of the tree.
+/// The level-order iterator of the tree, start from tree root.
 ///
 /// For each node, it first visits the node itself, then visits all its children.
 /// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
