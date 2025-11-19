@@ -26,7 +26,7 @@ pub trait Widgetable {
 
 /// Generate enum dispatcher for `Widget`.
 #[macro_export]
-macro_rules! widget_enum_dispatcher {
+macro_rules! widget_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Widgetable for $enum {
       fn draw(&self, canvas: &mut Canvas) {
