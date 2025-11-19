@@ -141,26 +141,21 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
 
-  // All [`Window`](crate::ui::widget::Window) node IDs.
+  // All window node IDs.
   window_ids: BTreeSet<TreeNodeId>,
 
   // The *current* window node ID.
   //
-  // The **current** window means user is focused on the window widget, i.e. it contains the
-  // cursor, since the cursor is like the mouse on the screen.
-  //
-  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
-  // widget. But we still keeps the **current window**, this field is actually the **previous**
-  // current window.
+  // The **current** window means it contains cursor, even when user is typing
+  // commands in cmdline widget, the cursor is actually in the cmdline widget,
+  // the **current** window is the latest window that contains the cursor.
   current_window_id: Option<TreeNodeId>,
 
-  // Global options for windows.
+  // Global window options.
   global_options: WindowGlobalOptions,
-
-  // Global-local options for windows.
   global_local_options: WindowOptions,
 }
 
@@ -186,16 +181,6 @@ impl Tree {
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
     }
-  }
-
-  /// Nodes count, include the root node.
-  pub fn len(&self) -> usize {
-    self.base.len()
-  }
-
-  /// Whether the tree is empty.
-  pub fn is_empty(&self) -> bool {
-    self.base.is_empty()
   }
 
   /// Root node ID.
