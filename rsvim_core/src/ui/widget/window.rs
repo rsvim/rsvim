@@ -59,29 +59,21 @@ pub struct Window {
 impl Window {
   pub fn new(
     lotree: TaffyTreeRc,
-    style: Style,
+    root_loid: LayoutNodeId,
+    root_shape: U16Rect,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let root = {
-      let mut lo = lotree.borrow_mut();
-      let root_loid = lo.new_leaf(style)?;
-      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)?;
-      let root_layout = lo.layout(root_loid)?;
-    };
-
-    let root = Root::new(shape);
+    let root = Root::new(root_loid, root_shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
-    let root_actual_shape = root.actual_shape();
 
-    let mut base = Itree::new(root_node);
+    let mut base = Itree::new(lotree, root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+      let viewport = Viewport::view(opts, buffer.text(), &root_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -90,7 +82,7 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+      Content::new(root_shape, buffer.clone(), Arc::downgrade(&viewport));
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
