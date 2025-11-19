@@ -2,6 +2,7 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
@@ -9,6 +10,7 @@ use std::sync::atomic::Ordering;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
+  fn loid(&self) -> LayoutNodeId;
 
   fn depth(&self) -> usize;
 
@@ -42,6 +44,10 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> $crate::ui::tree::TreeNodeId {
         self.$base_name.id()
+      }
+
+      fn loid(&self) -> $crate::ui::tree::LayoutNodeId {
+        self.$base_name.loid()
       }
 
       fn depth(&self) -> usize {
@@ -102,6 +108,10 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
+      }
+
+      fn loid(&self) -> LayoutNodeId {
+        self.$base_name.root_loid()
       }
 
       fn depth(&self) -> usize {
@@ -208,10 +218,18 @@ macro_rules! inode_itree_impl {
 macro_rules! inode_enum_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodeable for $enum {
-      fn id(&self) -> TreeNodeId {
+      fn id(&self) -> $crate::ui::tree::TreeNodeId {
         match self {
           $(
             $enum::$variant(e) => e.id(),
+          )*
+        }
+      }
+
+      fn loid(&self) -> $crate::ui::tree::LayoutNodeId {
+        match self {
+          $(
+            $enum::$variant(e) => e.loid(),
           )*
         }
       }
@@ -333,6 +351,7 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
+  loid: LayoutNodeId,
   depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
@@ -343,7 +362,7 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(loid: LayoutNodeId, shape: IRect) -> Self {
     let actual_shape = rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
