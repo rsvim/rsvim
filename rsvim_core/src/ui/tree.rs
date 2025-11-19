@@ -2,7 +2,7 @@
 
 pub mod internal;
 
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -41,7 +41,7 @@ pub enum TreeNode {
 }
 
 impl Inodeable for TreeNode {
-  inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+  inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 }
 widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 

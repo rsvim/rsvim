@@ -1,6 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::tree::InodeBase;

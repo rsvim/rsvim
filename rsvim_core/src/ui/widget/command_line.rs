@@ -9,7 +9,7 @@ pub mod root;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::rect_as;
@@ -43,7 +43,7 @@ pub enum CommandLineNode {
 }
 
 impl Inodeable for CommandLineNode {
-  inode_enum_dispatcher!(
+  inode_dispatcher!(
     CommandLineNode,
     RootContainer,
     Indicator,
