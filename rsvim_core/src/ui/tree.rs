@@ -6,7 +6,6 @@ use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
-use crate::ui::tree::Root;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::Window;

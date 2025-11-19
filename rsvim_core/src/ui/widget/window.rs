@@ -33,13 +33,13 @@ use taffy::TaffyResult;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  RootContainer(RootContainer),
+  Root(Root),
   Content(Content),
   Cursor(Cursor),
 }
 
-inode_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+inode_dispatcher!(WindowNode, Root, Content, Cursor);
+widget_dispatcher!(WindowNode, Root, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -66,12 +66,13 @@ impl Window {
     let root = {
       let mut lo = lotree.borrow_mut();
       let root_loid = lo.new_leaf(style)?;
-      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
+      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)?;
+      let root_layout = lo.layout(root_loid)?;
     };
 
-    let root = RootContainer::new(shape);
+    let root = Root::new(shape);
     let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
+    let root_node = WindowNode::Root(root);
     let root_actual_shape = root.actual_shape();
 
     let mut base = Itree::new(root_node);
