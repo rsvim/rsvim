@@ -523,7 +523,7 @@ where
   /// If the node `id` is the root node id since root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.relationships.borrow().root_id());
+    debug_assert_ne!(id, self.root_id);
     self._internal_check();
 
     // Remove child node from collection.
