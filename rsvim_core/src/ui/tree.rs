@@ -40,9 +40,7 @@ pub enum TreeNode {
   CommandLine(CommandLine),
 }
 
-impl Inodeable for TreeNode {
-  inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
-}
+inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 widget_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]

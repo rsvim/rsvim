@@ -42,17 +42,14 @@ pub enum CommandLineNode {
   Message(Message),
 }
 
-impl Inodeable for CommandLineNode {
-  inode_dispatcher!(
-    CommandLineNode,
-    RootContainer,
-    Indicator,
-    Input,
-    Cursor,
-    Message
-  );
-}
-
+inode_dispatcher!(
+  CommandLineNode,
+  RootContainer,
+  Indicator,
+  Input,
+  Cursor,
+  Message
+);
 widget_dispatcher!(
   CommandLineNode,
   RootContainer,
