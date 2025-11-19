@@ -116,6 +116,10 @@ where
     self.root_id
   }
 
+  pub fn root_loid(&self) -> LayoutNodeId {
+    *self.nid2loid.get(&self.root_id).unwrap()
+  }
+
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lotree.borrow().parent(*loid)?;

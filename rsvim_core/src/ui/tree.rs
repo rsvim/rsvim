@@ -225,6 +225,11 @@ impl Tree {
     self.base.root_id()
   }
 
+  /// Root node ID.
+  pub fn root_loid(&self) -> LayoutNodeId {
+    self.base.root_loid()
+  }
+
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.base.parent_id(id)
