@@ -536,6 +536,14 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
+
+    let window_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(canvas_size.width()),
+        height: taffy::Dimension::from_length(canvas_size.height()),
+      },
+      ..Default::default()
+    };
     let window_shape = size_into_rect!(canvas_size, isize);
     let mut window = {
       let buffers = lock!(self.buffers);
