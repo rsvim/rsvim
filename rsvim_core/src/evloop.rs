@@ -583,6 +583,7 @@ impl EventLoop {
         tree.global_local_options(),
         Arc::downgrade(buf),
       )
+      .unwrap()
     };
     let window_id = window.id();
 
