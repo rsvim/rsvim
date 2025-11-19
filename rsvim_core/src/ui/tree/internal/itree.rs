@@ -269,13 +269,6 @@ where
 
 #[derive(Debug)]
 /// The level-order iterator of the tree, start from tree root.
-///
-/// It starts from tree root node, pushes the root node into a queue. Then it
-/// always visits the node popped from the queue, and pushes all the children
-/// nodes into the queue. Repeat this operation until the queue is empty.
-///
-/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-/// This also follows the order when rendering the widget tree to terminal device.
 pub struct ItreeIter<'a, T>
 where
   T: Inodeable,
