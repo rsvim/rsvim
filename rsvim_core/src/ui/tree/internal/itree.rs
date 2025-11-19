@@ -1,10 +1,10 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::Inodeable;
+use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::LayoutNodeId;
-use crate::ui::tree::internal::TreeNodeId;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use std::cell::RefCell;
 use std::collections::VecDeque;
