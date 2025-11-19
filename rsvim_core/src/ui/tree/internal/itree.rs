@@ -210,17 +210,18 @@ pub struct Itree<T>
 where
   T: Inodeable,
 {
-  // Nodes collection, maps from node ID to its node struct.
+  // Layout tree
+  lotree: TaffyTreeRc,
+  // Tree nodes
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
-  relationships: RefCell<Relationships>,
+  // Root node
+  root_id: TreeNodeId,
+  root_loid: LayoutNodeId,
+
+  // Maps between node ID and layout node ID
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 #[derive(Debug)]
