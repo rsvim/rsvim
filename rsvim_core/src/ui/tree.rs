@@ -189,19 +189,8 @@ impl Tree {
       let root_loid = lo.new_leaf(root_style)?;
       lo.compute_layout(root_loid, taffy::Size::MAX_CONTENT)?;
       let root_layout = lo.layout(root_loid)?;
-      let root_pos = point!(root_layout.location.x, root_layout.location.y);
-      let root_pos = point_as!(root_pos, u16);
-      let root_size = size!(root_layout.size.width, root_layout.size.height);
-      let root_size = size_as!(root_size, u16);
-      (
-        root_loid,
-        rect!(
-          root_pos.x(),
-          root_pos.y(),
-          root_pos.x() + root_size.width(),
-          root_pos.y() + root_size.height()
-        ),
-      )
+      let root_shape = rect_from_layout!(root_layout, u16);
+      (root_loid, root_shape)
     };
 
     let root = Root::new(root_loid, root_shape);
