@@ -216,14 +216,13 @@ impl Tree {
     })
   }
 
+  pub fn lotree(&self) -> TaffyTreeRc {
+    self.base.lotree()
+  }
+
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self.base.root_id()
-  }
-
-  /// All node IDs collection.
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.base.node_ids()
   }
 
   /// Get the parent ID by a node `id`.
