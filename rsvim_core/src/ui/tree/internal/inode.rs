@@ -5,7 +5,6 @@ use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
-use taffy::TaffyResult;
 
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
