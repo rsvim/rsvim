@@ -316,9 +316,9 @@ where
       lo.new_leaf(style)?
     };
 
-    let root_node = ItreeRootNode::new(shape);
-    let root_id = root_node.id();
-    let root_node = ItreeNode::Root(root_node);
+    let root = ItreeRootNode::new(shape);
+    let root_id = root.id();
+    let root_node = ItreeNode::Root(root);
 
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
