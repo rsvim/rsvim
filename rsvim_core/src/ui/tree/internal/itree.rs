@@ -475,12 +475,12 @@ where
     debug_assert!(self.nid2loid.contains_key(&parent_id));
 
     let child_id = child_node.id();
+    let child_loid = child_node.loid();
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
 
     let child_actual_shape = {
-      let child_loid = child_node.loid();
-      let parent_loid = self.nid2loid.get(&parent_id).unwrap();
       let mut lo = self.lotree.borrow_mut();
       lo.add_child(*parent_loid, child_loid).unwrap();
       lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
@@ -501,19 +501,8 @@ where
 
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
-
-    // Create edge between child and its parent.
-    self.relationships.borrow_mut().add_child(
-      parent_id,
-      child_id,
-      child_zindex,
-      &self.nodes,
-    );
-
-    // Update all the descendants attributes under the `child_id` node.
-    for dnode_id in self.children_ids(child_id).iter() {
-      self.update_descendant_attributes(*dnode_id, child_id);
-    }
+    self.nid2loid.insert(child_id, child_loid);
+    self.loid2nid.insert(child_loid, child_id);
 
     self._internal_check();
     result
