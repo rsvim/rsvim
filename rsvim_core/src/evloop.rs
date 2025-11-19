@@ -569,9 +569,9 @@ impl EventLoop {
       let cmdline_layout = lo.layout(cmdline_loid).unwrap();
       let window_shape = rect_from_layout!(window_layout, u16);
       let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
+      (window_loid, window_shape, cmdline_loid, cmdline_shape)
     };
 
-    let window_shape = size_into_rect!(canvas_size, isize);
     let mut window = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
