@@ -471,13 +471,11 @@ where
   ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.lotree.borrow().contains_id(parent_id));
+    debug_assert!(self.nid2loid.contains_key(&parent_id));
 
     // Child node.
     let child_id = child_node.id();
     let child_zindex = child_node.zindex();
-
-    debug_assert!(!self.relationships.borrow().contains_id(child_id));
 
     // Update attributes for both the newly inserted child, and all its descendants (if the child
     // itself is also a sub-tree in current relationship).

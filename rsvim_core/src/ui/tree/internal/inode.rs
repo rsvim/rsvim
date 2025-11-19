@@ -12,14 +12,6 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
   fn loid(&self) -> LayoutNodeId;
 
-  fn depth(&self) -> usize;
-
-  fn set_depth(&mut self, depth: usize);
-
-  fn zindex(&self) -> usize;
-
-  fn set_zindex(&mut self, zindex: usize);
-
   fn shape(&self) -> &IRect;
 
   fn set_shape(&mut self, shape: &IRect);
@@ -48,22 +40,6 @@ macro_rules! inode_impl {
 
       fn loid(&self) -> LayoutNodeId {
         self.$base_name.loid()
-      }
-
-      fn depth(&self) -> usize {
-        self.$base_name.depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self.$base_name.set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base_name.zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
@@ -112,38 +88,6 @@ macro_rules! inode_itree_impl {
 
       fn loid(&self) -> LayoutNodeId {
         self.$base_name.root_loid()
-      }
-
-      fn depth(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_depth(depth);
-      }
-
-      fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
@@ -233,38 +177,6 @@ macro_rules! inode_enum_dispatcher {
       }
     }
 
-    fn depth(&self) -> usize {
-      match self {
-        $(
-          $enum::$variant(e) => e.depth(),
-        )*
-      }
-    }
-
-    fn set_depth(&mut self, depth: usize) {
-      match self {
-        $(
-          $enum::$variant(e) => e.set_depth(depth),
-        )*
-      }
-    }
-
-    fn zindex(&self) -> usize {
-      match self {
-        $(
-          $enum::$variant(e) => e.zindex(),
-        )*
-      }
-    }
-
-    fn set_zindex(&mut self, zindex: usize) {
-      match self {
-        $(
-          $enum::$variant(e) => e.set_zindex(zindex),
-        )*
-      }
-    }
-
     fn shape(&self) -> &IRect {
       match self {
         $(
@@ -350,10 +262,8 @@ const FLAGS: Flags = Flags::all();
 pub struct InodeBase {
   id: TreeNodeId,
   loid: LayoutNodeId,
-  depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
-  zindex: usize,
   // enabled
   // visible
   flags: Flags,
@@ -365,32 +275,14 @@ impl InodeBase {
     InodeBase {
       id: next_node_id(),
       loid,
-      depth: 0,
       shape,
       actual_shape,
-      zindex: 0,
       flags: FLAGS,
     }
   }
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn depth(&self) -> usize {
-    self.depth
-  }
-
-  pub fn set_depth(&mut self, depth: usize) {
-    self.depth = depth;
-  }
-
-  pub fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  pub fn set_zindex(&mut self, zindex: usize) {
-    self.zindex = zindex;
   }
 
   pub fn shape(&self) -> &IRect {
