@@ -346,16 +346,16 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> TaffyResult<Self> {
+  pub fn new(shape: IRect) -> Self {
     let actual_shape = rect_as!(shape, u16);
-    Ok(InodeBase {
+    InodeBase {
       id: next_node_id(),
       depth: 0,
       shape,
       actual_shape,
       zindex: 0,
       flags: FLAGS,
-    })
+    }
   }
 
   pub fn id(&self) -> TreeNodeId {
