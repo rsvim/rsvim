@@ -99,6 +99,13 @@ impl CommandLine {
       },
       ..Default::default()
     };
+    let message_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
 
     let indicator_shape = rect!(
       shape.min().x,

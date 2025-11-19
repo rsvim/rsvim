@@ -84,8 +84,8 @@ impl Window {
     let (content_loid, content_shape) = {
       let content_style = Style {
         size: taffy::Size {
-          width: taffy::Dimension::percent(100.0),
-          height: taffy::Dimension::percent(100.0),
+          width: taffy::Dimension::auto(),
+          height: taffy::Dimension::auto(),
         },
         ..Default::default()
       };
