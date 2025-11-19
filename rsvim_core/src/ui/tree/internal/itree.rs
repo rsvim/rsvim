@@ -261,7 +261,7 @@ where
     let child_actual_shape = {
       let mut lo = self.lotree.borrow_mut();
       lo.add_child(*parent_loid, child_loid).unwrap();
-      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
+      lo.compute_layout(*parent_loid, taffy::Size::MAX_CONTENT)
         .unwrap();
       let child_layout = lo.layout(child_loid).unwrap();
       let child_pos = point!(child_layout.location.x, child_layout.location.y);
