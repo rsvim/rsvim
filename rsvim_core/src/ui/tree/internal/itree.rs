@@ -529,12 +529,15 @@ where
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
-        // Remove node/edge relationship.
-        debug_assert!(self.relationships.borrow().contains_id(id));
-        // Remove edges between `id` and its parent.
-        let relation_removed = self.relationships.borrow_mut().remove_child(id);
-        debug_assert!(relation_removed);
-        Some(removed)
+        let mut lo = self.lotree.borrow_mut();
+        let loid = self.nid2loid.get(&id).unwrap();
+        match lo.parent(*loid) {
+          Some(parent_loid) => {
+            lo.remove_child(parent_loid, *loid);
+            Some(removed)
+          }
+          None => None,
+        }
       }
       None => None,
     };
