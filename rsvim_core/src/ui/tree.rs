@@ -6,9 +6,9 @@ use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::tree::Root;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
@@ -19,7 +19,11 @@ pub use internal::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use taffy::Style;
+use taffy::TaffyResult;
 use taffy::TaffyTree;
+use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 
 pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
@@ -35,13 +39,13 @@ pub fn new_layout_tree() -> TaffyTreeRc {
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  RootContainer(RootContainer),
+  Root(Root),
   Window(Window),
   CommandLine(CommandLine),
 }
 
-inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
-widget_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+inode_dispatcher!(TreeNode, Root, Window, CommandLine);
+widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -169,10 +173,40 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+    let lotree = new_layout_tree();
+
+    let (root_loid, root_shape) = {
+      let root_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(canvas_size.width()),
+          height: taffy::Dimension::from_length(canvas_size.height()),
+        },
+        ..Default::default()
+      };
+
+      let mut lo = lotree.borrow_mut();
+      let root_loid = lo.new_leaf(root_style)?;
+      lo.compute_layout(root_loid, taffy::Size::MAX_CONTENT)?;
+      let root_layout = lo.layout(root_loid)?;
+      let root_pos = point!(root_layout.location.x, root_layout.location.y);
+      let root_pos = point_as!(root_pos, u16);
+      let root_size = size!(root_layout.size.width, root_layout.size.height);
+      let root_size = size_as!(root_size, u16);
+      (
+        root_loid,
+        rect!(
+          root_pos.x(),
+          root_pos.y(),
+          root_pos.x() + root_size.width(),
+          root_pos.y() + root_size.height()
+        ),
+      )
+    };
+
     let shape = size_into_rect!(canvas_size, isize);
-    let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
+    let root = Root::new(shape);
+    let root_node = TreeNode::Root(root);
     Tree {
       base: Itree::new(root_node),
       command_line_id: None,

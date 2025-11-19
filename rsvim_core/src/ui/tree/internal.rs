@@ -1,6 +1,7 @@
 //! Internal tree structure.
 
 pub mod inode;
+pub mod iroot;
 pub mod itree;
 pub mod shapes;
 
@@ -12,4 +13,5 @@ mod itree_tests;
 mod shapes_tests;
 
 pub use inode::*;
+pub use iroot::*;
 pub use itree::*;

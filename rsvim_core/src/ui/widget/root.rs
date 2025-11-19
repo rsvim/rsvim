@@ -12,7 +12,7 @@ pub struct RootContainer {
 }
 
 impl RootContainer {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(shape: U16Rect) -> Self {
     RootContainer {
       base: InodeBase::new(shape),
     }
