@@ -13,6 +13,7 @@ pub use crate::rc_ptr;
 pub use crate::rc_refcell_ptr;
 pub use crate::rect;
 pub use crate::rect_as;
+pub use crate::rect_from_layout;
 pub use crate::size;
 pub use crate::size_as;
 pub use crate::size_into_rect;

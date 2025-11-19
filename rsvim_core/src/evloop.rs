@@ -567,6 +567,8 @@ impl EventLoop {
         .unwrap();
       let window_layout = lo.layout(window_loid).unwrap();
       let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+      let window_shape = rect_from_layout!(window_layout, u16);
+      let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
     };
 
     let window_shape = size_into_rect!(canvas_size, isize);

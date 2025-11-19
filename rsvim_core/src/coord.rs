@@ -57,36 +57,6 @@ pub type IRect = Rect<isize>;
 pub type URect = Rect<usize>;
 pub type U16Rect = Rect<u16>;
 
-pub trait RectExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn from_layout(value: &taffy::Layout) -> Rect<T> {
-    let pos = geo::point!(x: value.location.x as T, y: value.location.y as T);
-    let size = Size::new(value.size.width as T, value.size.height as T);
-    Rect::new(
-      (pos.x(), pos.y()),
-      (pos.x() + size.width(), pos.y() + size.height()),
-    )
-  }
-}
-
-pub trait TaffyRectExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Rect<T>;
-}
-
-impl<T> TaffyRectExt<T> for taffy::geometry::Rect<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Rect<T> {
-    Rect::new((self.left, self.top), (self.right, self.bottom))
-  }
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 // Size
 pub struct Size<T>
@@ -115,31 +85,6 @@ where
 
   pub fn height(&self) -> T {
     self.height
-  }
-}
-
-pub trait SizeExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn from(value: taffy::geometry::Size<T>) -> Size<T> {
-    Size::new(value.width, value.height)
-  }
-}
-
-pub trait TaffySizeExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Size<T>;
-}
-
-impl<T> TaffySizeExt<T> for taffy::geometry::Size<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Size<T> {
-    Size::new(self.width, self.height)
   }
 }
 
@@ -182,6 +127,20 @@ macro_rules! rect_as {
       ($r.max().x as $ty, $r.max().y as $ty),
     ) as $crate::coord::Rect<$ty>
   };
+}
+
+#[macro_export]
+macro_rules! rect_from_layout {
+  ($l:ident,$tt:ty) => {
+    {
+      let pos = geo::point!(x: $l.location.x as $tt, y: $l.location.y as $tt);
+      let size = Size::new($l.size.width as $tt, $l.size.height as $tt);
+      Rect::new(
+        (pos.x(), pos.y()),
+        (pos.x() + size.width(), pos.y() + size.height()),
+      )
+    }
+  }
 }
 
 #[macro_export]
