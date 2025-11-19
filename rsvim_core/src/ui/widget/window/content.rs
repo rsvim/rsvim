@@ -22,8 +22,13 @@ pub struct Content {
 
 impl Content {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
-    let base = InodeBase::new(shape);
+  pub fn new(
+    loid: LayoutNodeId,
+    shape: IRect,
+    buffer: BufferWk,
+    viewport: ViewportWk,
+  ) -> Self {
+    let base = InodeBase::new(loid, shape);
     Content {
       base,
       buffer,

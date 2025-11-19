@@ -83,7 +83,7 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content =
-      Content::new(root_shape, buffer.clone(), Arc::downgrade(&viewport));
+      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
