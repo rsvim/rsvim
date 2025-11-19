@@ -402,10 +402,7 @@ where
     }
   }
 
-  /// Get the iterator.
-  ///
-  /// By default, it iterates in pre-order iterator which starts from the root.
-  /// For the children under the same node, it visits from lower z-index to higher.
+  /// Get the level-order iterator on this tree, starts from root node.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.root_id))
   }
