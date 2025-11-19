@@ -18,6 +18,7 @@ use std::fmt::Debug;
 use std::iter::Iterator;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
@@ -477,6 +478,15 @@ where
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
 
+    let child_actual_shape = {
+      let child_loid = child_node.loid();
+      let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+      let mut lo = self.lotree.borrow_mut();
+      lo.add_child(*parent_loid, child_loid).unwrap();
+      lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
+        .unwrap();
+      let child_layout = lo.layout(child_loid).unwrap();
+    };
     child_node.set_actual_shape(&shapes::make_actual_shape(
       child_node.shape(),
       &parent_actual_shape,
