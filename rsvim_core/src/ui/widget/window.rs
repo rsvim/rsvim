@@ -59,30 +59,21 @@ pub struct Window {
 impl Window {
   pub fn new(
     lotree: TaffyTreeRc,
-    style: Style,
+    loid: LayoutNodeId,
+    shape: U16Rect,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let mut lo = lotree.borrow_mut();
-    let root_loid = lo.new_leaf(style)?;
-
-    let root = Root::new(root_loid, root_shape);
+    let root = Root::new(loid, shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
 
     let mut base = Itree::new(lotree, root_node);
 
     let (viewport, cursor_viewport) = {
-      // The layout will be calculated when this "window" node is inserted into
-      // the TUI tree, and thus we can finally get the shape of this "window"
-      // and update the viewport.
-      // For now, let's simply use a dummy shape.
-      let dummy_root_shape = rect!(0, 0, 1, 1);
-
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport =
-        Viewport::view(opts, buffer.text(), &dummy_root_shape, 0, 0);
+      let viewport = Viewport::view(opts, buffer.text(), &shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
