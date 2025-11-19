@@ -486,14 +486,22 @@ where
       lo.compute_layout(child_loid, taffy::Size::MAX_CONTENT)
         .unwrap();
       let child_layout = lo.layout(child_loid).unwrap();
+      let child_pos = point!(child_layout.location.x, child_layout.location.y);
+      let child_pos = point_as!(child_pos, u16);
+      let child_size = size!(child_layout.size.width, child_layout.size.height);
+      let child_size = size_as!(child_size, u16);
+      rect!(
+        child_pos.x(),
+        child_pos.y(),
+        child_pos.x() + child_size.width(),
+        child_pos.y() + child_size.height()
+      )
     };
-    child_node.set_actual_shape(&shapes::make_actual_shape(
-      child_node.shape(),
-      &parent_actual_shape,
-    ));
+    child_node.set_actual_shape(&child_actual_shape);
 
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
+
     // Create edge between child and its parent.
     self.relationships.borrow_mut().add_child(
       parent_id,
