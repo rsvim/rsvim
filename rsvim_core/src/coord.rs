@@ -51,31 +51,6 @@ pub type IPos = Point<isize>;
 pub type UPos = Point<usize>;
 pub type U16Pos = Point<u16>;
 
-pub trait PointExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn from(value: taffy::geometry::Point<T>) -> Point<T> {
-    geo::point!(x: value.x, y: value.y)
-  }
-}
-
-pub trait TaffyPointExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Point<T>;
-}
-
-impl<T> TaffyPointExt<T> for taffy::geometry::Point<T>
-where
-  T: geo::CoordNum,
-{
-  fn into(&self) -> Point<T> {
-    geo::point!(x: self.x, y: self.y)
-  }
-}
-
 // Rectangle
 pub type Rect<T> = geo::Rect<T>;
 pub type IRect = Rect<isize>;
@@ -86,8 +61,13 @@ pub trait RectExt<T>
 where
   T: geo::CoordNum,
 {
-  fn from(value: taffy::geometry::Rect<T>) -> Rect<T> {
-    Rect::new((value.left, value.top), (value.right, value.bottom))
+  fn from_layout(value: &taffy::Layout) -> Rect<T> {
+    let pos = geo::point!(x: value.location.x as T, y: value.location.y as T);
+    let size = Size::new(value.size.width as T, value.size.height as T);
+    Rect::new(
+      (pos.x(), pos.y()),
+      (pos.x() + size.width(), pos.y() + size.height()),
+    )
   }
 }
 

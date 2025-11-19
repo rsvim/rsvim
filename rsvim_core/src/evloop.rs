@@ -37,6 +37,9 @@ use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
+use taffy::Style;
+use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -536,14 +539,36 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
+    let tree_root_loid = tree.root_loid();
 
     let window_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_length(canvas_size.width()),
-        height: taffy::Dimension::from_length(canvas_size.height()),
+        width: taffy::Dimension::percent(100.0),
+        height: taffy::Dimension::auto(),
       },
       ..Default::default()
     };
+    let cmdline_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::percent(100.0),
+        height: taffy::Dimension::from_length(1),
+      },
+      ..Default::default()
+    };
+
+    let (window_loid, window_shape, cmdline_loid, cmdline_shape) = {
+      let lotree = tree.lotree();
+      let mut lo = lotree.borrow_mut();
+      let window_loid = lo.new_leaf(window_style).unwrap();
+      let cmdline_loid = lo.new_leaf(cmdline_style).unwrap();
+      lo.add_child(tree_root_loid, window_loid).unwrap();
+      lo.add_child(tree_root_loid, cmdline_loid).unwrap();
+      lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
+        .unwrap();
+      let window_layout = lo.layout(window_loid).unwrap();
+      let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+    };
+
     let window_shape = size_into_rect!(canvas_size, isize);
     let mut window = {
       let buffers = lock!(self.buffers);
