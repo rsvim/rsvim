@@ -281,8 +281,10 @@ where
 {
   pub fn new(style: Style, root_node: T) -> TaffyResult<Self> {
     let lotree = new_layout_tree();
-    let mut lo = lotree.borrow_mut();
-    let root_loid = lo.new_leaf(style)?;
+    let root_loid = {
+      let mut lo = lotree.borrow_mut();
+      lo.new_leaf(style)?
+    };
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
