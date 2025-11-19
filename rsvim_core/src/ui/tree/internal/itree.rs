@@ -1,18 +1,18 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::tree::InodeBase;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use crate::ui::widget::Widgetable;
+use crate::ui::tree::new_layout_tree;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::Style;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
@@ -274,34 +274,15 @@ where
   }
 }
 
-#[derive(Debug, Clone)]
-/// Dummy root container node for itree.
-pub struct RootContainer {
-  base: InodeBase,
-}
-
-impl RootContainer {
-  pub fn new(shape: IRect) -> Self {
-    RootContainer {
-      base: InodeBase::new(shape),
-    }
-  }
-}
-
-inode_impl!(RootContainer, base);
-
-impl Widgetable for RootContainer {}
-
 // Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(shape: IRect) -> Self {
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = RootContainer(root);
-    let root_actual_shape = root.actual_shape();
+  pub fn new(style: Style, root_node: T) -> TaffyResult<Self> {
+    let lotree = new_layout_tree();
+    let mut lo = lotree.borrow_mut();
+    let root_loid = lo.new_leaf(style)?;
 
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
