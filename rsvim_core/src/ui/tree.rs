@@ -21,6 +21,8 @@ use std::rc::Rc;
 use std::rc::Weak;
 use taffy::TaffyTree;
 
+pub type LayoutNodeId = taffy::NodeId;
+pub type TreeNodeId = i32;
 pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
 pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
