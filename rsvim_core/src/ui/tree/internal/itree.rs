@@ -407,17 +407,7 @@ where
   /// By default, it iterates in pre-order iterator which starts from the root.
   /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
-  }
-
-  /// For internal usage.
-  pub fn _nid2loid(&self, id: TreeNodeId) -> Option<LayoutNodeId> {
-    self.nid2loid.get(&id).copied()
-  }
-
-  /// For internal usage.
-  pub fn _loid2nid(&self, loid: LayoutNodeId) -> Option<TreeNodeId> {
-    self.loid2nid.get(&loid).copied()
+    ItreeIter::new(self, Some(self.root_id))
   }
 }
 // Attributes }
