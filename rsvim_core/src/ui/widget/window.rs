@@ -86,7 +86,7 @@ impl Window {
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
-    base.bounded_insert(root_id, content_node);
+    base.insert(root_id, content_node);
 
     Window {
       base,
