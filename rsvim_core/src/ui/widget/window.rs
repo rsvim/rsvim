@@ -27,6 +27,7 @@ use content::Content;
 use opt::*;
 use root::RootContainer;
 use std::sync::Arc;
+use taffy::Style;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -55,7 +56,12 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(
+    lotree: TaffyTreeRc,
+    style: Style,
+    opts: &WindowOptions,
+    buffer: BufferWk,
+  ) -> Self {
     let root = RootContainer::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);
