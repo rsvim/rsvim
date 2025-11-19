@@ -178,7 +178,7 @@ impl EventLoop {
     let canvas = Canvas::to_arc(canvas);
 
     // UI Tree
-    let tree = Tree::to_arc(Tree::new(canvas_size));
+    let tree = Tree::to_arc(Tree::new(canvas_size).unwrap());
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
