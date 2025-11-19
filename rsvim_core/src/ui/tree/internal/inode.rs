@@ -15,10 +15,6 @@ pub type TreeNodeId = i32;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn loid(&self) -> LayoutNodeId;
-
-  fn lotree(&self) -> TaffyTreeRc;
-
   fn depth(&self) -> usize;
 
   fn set_depth(&mut self, depth: usize);
@@ -51,14 +47,6 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.id()
-      }
-
-      fn loid(&self) -> LayoutNodeId {
-        self.$base_name.loid()
-      }
-
-      fn lotree(&self) -> TaffyTreeRc {
-        self.$base_name.lotree()
       }
 
       fn depth(&self) -> usize {
@@ -119,14 +107,6 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
-      }
-
-      fn loid(&self) -> LayoutNodeId {
-        self.$base_name.loid()
-      }
-
-      fn lotree(&self) -> TaffyTreeRc {
-        self.$base_name.lotree()
       }
 
       fn depth(&self) -> usize {
@@ -237,22 +217,6 @@ macro_rules! inode_enum_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.id(),
-          )*
-        }
-      }
-
-      fn loid(&self) -> LayoutNodeId {
-        match self {
-          $(
-            $enum::$variant(e) => e.loid(),
-          )*
-        }
-      }
-
-      fn lotree(&self) -> TaffyTreeRc {
-        match self {
-          $(
-            $enum::$variant(e) => e.lotree(),
           )*
         }
       }
@@ -374,8 +338,6 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  loid: LayoutNodeId,
-  lotree: TaffyTreeRc,
   depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
@@ -386,20 +348,10 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(
-    lotree: TaffyTreeRc,
-    style: Style,
-    shape: IRect,
-  ) -> TaffyResult<Self> {
-    let loid = {
-      let mut lo = lotree.borrow_mut();
-      lo.new_leaf(style)?
-    };
+  pub fn new(shape: IRect) -> TaffyResult<Self> {
     let actual_shape = rect_as!(shape, u16);
     Ok(InodeBase {
       id: next_node_id(),
-      loid,
-      lotree,
       depth: 0,
       shape,
       actual_shape,
@@ -410,14 +362,6 @@ impl InodeBase {
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn loid(&self) -> LayoutNodeId {
-    self.loid
-  }
-
-  pub fn lotree(&self) -> TaffyTreeRc {
-    self.lotree.clone()
   }
 
   pub fn depth(&self) -> usize {
