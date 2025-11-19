@@ -1,5 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
+use crate::inode_enum_dispatcher;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::tree::InodeBase;
@@ -212,6 +213,41 @@ impl Relationships {
 }
 
 #[derive(Debug, Clone)]
+/// Dummy Itree root node.
+pub struct ItreeRootNode {
+  base: InodeBase,
+}
+
+impl ItreeRootNode {
+  pub fn new(shape: IRect) -> Self {
+    ItreeRootNode {
+      base: InodeBase::new(shape),
+    }
+  }
+}
+
+inode_impl!(ItreeRootNode, base);
+
+impl Widgetable for ItreeRootNode {}
+
+#[derive(Debug, Clone)]
+/// Dummy Itree node enum.
+pub enum ItreeNode<T>
+where
+  T: Inodeable,
+{
+  Root(ItreeRootNode),
+  Child(T),
+}
+
+impl<T> Inodeable for ItreeNode<T>
+where
+  T: Inodeable,
+{
+  inode_enum_dispatcher!(ItreeNode, Root, Child);
+}
+
+#[derive(Debug, Clone)]
 pub struct Itree<T>
 where
   T: Inodeable,
@@ -219,7 +255,7 @@ where
   // Layout tree
   lotree: TaffyTreeRc,
   // Tree nodes
-  nodes: FoldMap<TreeNodeId, T>,
+  nodes: FoldMap<TreeNodeId, ItreeNode<T>>,
 
   // Root node
   root_id: TreeNodeId,
@@ -277,33 +313,6 @@ where
   }
 }
 
-#[derive(Debug, Clone)]
-/// Commandline root container.
-pub struct ItreeRootNode {
-  base: InodeBase,
-}
-
-impl ItreeRootNode {
-  pub fn new(shape: IRect) -> Self {
-    ItreeRootNode {
-      base: InodeBase::new(shape),
-    }
-  }
-}
-
-inode_impl!(ItreeRootNode, base);
-
-impl Widgetable for ItreeRootNode {}
-
-#[derive(Debug, Clone)]
-pub enum ItreeNode<T>
-where
-  T: Inodeable,
-{
-  Root(ItreeRootNode),
-  Child(T),
-}
-
 // Attributes {
 impl<T> Itree<T>
 where
@@ -320,13 +329,13 @@ where
     let root_id = root.id();
     let root_node = ItreeNode::Root(root);
 
-    let root_id = root_node.id();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
     let mut nid2loid = FoldMap::new();
     let mut loid2nid = FoldMap::new();
     nid2loid.insert(root_id, root_loid);
     loid2nid.insert(root_loid, root_id);
+
     Ok(Itree {
       lotree,
       nodes,

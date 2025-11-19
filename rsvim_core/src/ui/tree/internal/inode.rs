@@ -208,109 +208,107 @@ macro_rules! inode_itree_impl {
 #[macro_export]
 macro_rules! inode_enum_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
-    impl Inodeable for $enum {
-      fn id(&self) -> $crate::ui::tree::TreeNodeId {
-        match self {
-          $(
-            $enum::$variant(e) => e.id(),
-          )*
-        }
+    fn id(&self) -> $crate::ui::tree::TreeNodeId {
+      match self {
+        $(
+          $enum::$variant(e) => e.id(),
+        )*
       }
+    }
 
-      fn depth(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.depth(),
-          )*
-        }
+    fn depth(&self) -> usize {
+      match self {
+        $(
+          $enum::$variant(e) => e.depth(),
+        )*
       }
+    }
 
-      fn set_depth(&mut self, depth: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_depth(depth),
-          )*
-        }
+    fn set_depth(&mut self, depth: usize) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_depth(depth),
+        )*
       }
+    }
 
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
+    fn zindex(&self) -> usize {
+      match self {
+        $(
+          $enum::$variant(e) => e.zindex(),
+        )*
       }
+    }
 
-      fn set_zindex(&mut self, zindex: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_zindex(zindex),
-          )*
-        }
+    fn set_zindex(&mut self, zindex: usize) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_zindex(zindex),
+        )*
       }
+    }
 
-      fn shape(&self) -> &IRect {
-        match self {
-          $(
-            $enum::$variant(e) => e.shape(),
-          )*
-        }
+    fn shape(&self) -> &IRect {
+      match self {
+        $(
+          $enum::$variant(e) => e.shape(),
+        )*
       }
+    }
 
-      fn set_shape(&mut self, shape: &IRect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_shape(shape),
-          )*
-        }
+    fn set_shape(&mut self, shape: &IRect) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_shape(shape),
+        )*
       }
+    }
 
-      fn actual_shape(&self) -> &U16Rect {
-        match self {
-          $(
-            $enum::$variant(e) => e.actual_shape(),
-          )*
-        }
+    fn actual_shape(&self) -> &U16Rect {
+      match self {
+        $(
+          $enum::$variant(e) => e.actual_shape(),
+        )*
       }
+    }
 
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_actual_shape(actual_shape),
-          )*
-        }
+    fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_actual_shape(actual_shape),
+        )*
       }
+    }
 
-      fn enabled(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.enabled(),
-          )*
-        }
+    fn enabled(&self) -> bool {
+      match self {
+        $(
+          $enum::$variant(e) => e.enabled(),
+        )*
       }
+    }
 
-      fn set_enabled(&mut self, enabled: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_enabled(enabled),
-          )*
-        }
+    fn set_enabled(&mut self, enabled: bool) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_enabled(enabled),
+        )*
       }
+    }
 
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
+    fn visible(&self) -> bool {
+      match self {
+        $(
+          $enum::$variant(e) => e.visible(),
+        )*
       }
+    }
 
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
-          )*
-        }
+    fn set_visible(&mut self, visible: bool) {
+      match self {
+        $(
+          $enum::$variant(e) => e.set_visible(visible),
+        )*
       }
     }
   }

@@ -36,7 +36,9 @@ pub enum WindowNode {
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+impl Inodeable for WindowNode {
+  inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+}
 widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 
 #[derive(Debug, Clone)]
