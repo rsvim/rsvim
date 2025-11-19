@@ -2,7 +2,6 @@
 
 pub mod content;
 pub mod opt;
-pub mod root;
 
 #[cfg(test)]
 mod content_tests;

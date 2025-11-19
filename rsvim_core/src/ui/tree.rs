@@ -181,6 +181,7 @@ impl Tree {
           width: taffy::Dimension::from_length(canvas_size.width()),
           height: taffy::Dimension::from_length(canvas_size.height()),
         },
+        flex_direction: taffy::FlexDirection::Column,
         ..Default::default()
       };
 

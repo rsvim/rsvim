@@ -3,7 +3,6 @@
 pub mod indicator;
 pub mod input;
 pub mod message;
-pub mod root;
 
 #[cfg(test)]
 pub mod indicator_tests;
@@ -29,35 +28,24 @@ use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
-use root::RootContainer;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
-  RootContainer(RootContainer),
+  Root(Root),
   Indicator(Indicator),
   Input(Input),
   Cursor(Cursor),
   Message(Message),
 }
 
-inode_dispatcher!(
-  CommandLineNode,
-  RootContainer,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
-widget_dispatcher!(
-  CommandLineNode,
-  RootContainer,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
+inode_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
+
+widget_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
@@ -76,7 +64,12 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
+  pub fn new(
+    lotree: TaffyTreeRc,
+    loid: LayoutNodeId,
+    shape: U16Rect,
+    text_contents: TextContentsWk,
+  ) -> TaffyResult<Self> {
     // Force cmdline window options.
     let options = WindowOptionsBuilder::default()
       .wrap(false)
@@ -85,11 +78,11 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let root = RootContainer::new(shape);
+    let root = Root::new(loid, shape);
     let root_id = root.id();
-    let root_node = CommandLineNode::RootContainer(root);
+    let root_node = CommandLineNode::Root(root);
 
-    let mut base = Itree::new(root_node);
+    let mut base = Itree::new(lotree.clone(), root_node);
 
     let indicator_shape = rect!(
       shape.min().x,
