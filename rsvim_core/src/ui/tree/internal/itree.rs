@@ -366,6 +366,11 @@ where
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.root_id))
   }
+
+  /// Get layout tree.
+  pub fn lotree(&self) -> TaffyTreeRc {
+    self.lotree.clone()
+  }
 }
 // Attributes }
 
@@ -466,7 +471,7 @@ where
   ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationships.borrow().contains_id(parent_id));
+    debug_assert!(self.lotree.borrow().contains_id(parent_id));
 
     // Child node.
     let child_id = child_node.id();
