@@ -220,9 +220,9 @@ pub struct ItreeRootNode {
 }
 
 impl ItreeRootNode {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(loid: LayoutNodeId, shape: IRect) -> Self {
     ItreeRootNode {
-      base: InodeBase::new(shape),
+      base: InodeBase::new(loid, shape),
     }
   }
 }
@@ -232,23 +232,6 @@ inode_impl!(ItreeRootNode, base);
 impl Widgetable for ItreeRootNode {}
 
 #[derive(Debug, Clone)]
-/// Dummy Itree node enum.
-pub enum ItreeNode<T>
-where
-  T: Inodeable,
-{
-  Root(ItreeRootNode),
-  Child(T),
-}
-
-impl<T> Inodeable for ItreeNode<T>
-where
-  T: Inodeable,
-{
-  inode_enum_dispatcher!(ItreeNode, Root, Child);
-}
-
-#[derive(Debug, Clone)]
 pub struct Itree<T>
 where
   T: Inodeable,
@@ -256,7 +239,7 @@ where
   // Layout tree
   lotree: TaffyTreeRc,
   // Tree nodes
-  nodes: FoldMap<TreeNodeId, ItreeNode<T>>,
+  nodes: FoldMap<TreeNodeId, T>,
 
   // Root node
   root_id: TreeNodeId,
@@ -315,7 +298,7 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(style: Style, shape: IRect) -> TaffyResult<Self> {
+  pub fn new(lotree: TaffyTreeRc, root_node: T) -> TaffyResult<Self> {
     let lotree = new_layout_tree();
     let root_loid = {
       let mut lo = lotree.borrow_mut();
