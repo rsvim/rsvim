@@ -68,7 +68,7 @@ impl Window {
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
 
-    let mut base = Itree::new(lotree, root_node);
+    let mut base = Itree::new(lotree.clone(), root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
