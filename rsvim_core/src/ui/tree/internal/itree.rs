@@ -283,15 +283,21 @@ where
     let lotree = new_layout_tree();
     let mut lo = lotree.borrow_mut();
     let root_loid = lo.new_leaf(style)?;
-
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
-    Itree {
+    let mut nid2loid = FoldMap::new();
+    let mut loid2nid = FoldMap::new();
+    nid2loid.insert(root_id, root_loid);
+    loid2nid.insert(root_loid, root_id);
+    Ok(Itree {
+      lotree,
       nodes,
-      relationships,
-    }
+      root_id,
+      root_loid,
+      nid2loid,
+      loid2nid,
+    })
   }
 
   #[cfg(not(test))]
