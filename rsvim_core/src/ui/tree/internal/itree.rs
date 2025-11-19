@@ -478,7 +478,6 @@ where
     let child_loid = child_node.loid();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_shape = *parent_node.actual_shape();
 
     let child_actual_shape = {
       let mut lo = self.lotree.borrow_mut();
