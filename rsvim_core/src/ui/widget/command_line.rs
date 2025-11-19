@@ -24,7 +24,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
@@ -53,7 +53,7 @@ impl Inodeable for CommandLineNode {
   );
 }
 
-widget_enum_dispatcher!(
+widget_dispatcher!(
   CommandLineNode,
   RootContainer,
   Indicator,

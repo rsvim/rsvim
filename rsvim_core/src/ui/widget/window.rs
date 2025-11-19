@@ -22,7 +22,7 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 use content::Content;
 use opt::*;
 use root::RootContainer;
@@ -39,7 +39,7 @@ pub enum WindowNode {
 impl Inodeable for WindowNode {
   inode_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 }
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+widget_dispatcher!(WindowNode, RootContainer, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the

@@ -14,7 +14,7 @@ use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 pub use internal::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -43,7 +43,7 @@ pub enum TreeNode {
 impl Inodeable for TreeNode {
   inode_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 }
-widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+widget_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
