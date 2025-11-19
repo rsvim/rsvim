@@ -11,6 +11,7 @@ use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::new_layout_tree;
 use crate::ui::widget::Widgetable;
+use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -362,11 +363,22 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationships.borrow().parent_id(id)
+    let loid = self.nid2loid.get(&id)?;
+    let parent_loid = self.lotree.borrow().parent(*loid)?;
+    self.loid2nid.get(&parent_loid).copied()
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
+    if let Some(loid) = self.nid2loid.get(&id) {
+      if let Ok(children_loids) = self.lotree.borrow().children(*loid) {
+        return children_loids
+          .iter()
+          .filter(|i| self.loid2nid.contains_key(i))
+          .map(|i| *self.loid2nid.get(i).unwrap())
+          .collect_vec();
+      }
+    }
+    vec![]
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
