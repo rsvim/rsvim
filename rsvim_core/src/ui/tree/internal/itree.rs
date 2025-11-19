@@ -355,28 +355,11 @@ where
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
-    // Never get the internal root node.
-    debug_assert!(id != self.root_id);
-
-    match self.nodes.get(&id) {
-      Some(n) => match n {
-        ItreeNode::Root(_) => unreachable!(),
-        ItreeNode::Child(c) => Some(c),
-      },
-      None => None,
-    }
+    self.nodes.get(&id)
   }
 
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut T> {
-    // Never get the internal root node.
-    debug_assert!(id != self.root_id);
-    match self.nodes.get_mut(&id) {
-      Some(n) => match n {
-        ItreeNode::Root(_) => unreachable!(),
-        ItreeNode::Child(c) => Some(c),
-      },
-      None => None,
-    }
+    self.nodes.get_mut(&id)
   }
 
   /// Get the level-order iterator on this tree, starts from root node.
