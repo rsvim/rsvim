@@ -268,7 +268,7 @@ where
 }
 
 #[derive(Debug)]
-/// The pre-order iterator of the tree.
+/// The level-order iterator of the tree.
 ///
 /// For each node, it first visits the node itself, then visits all its children.
 /// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
@@ -412,6 +412,16 @@ where
   /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
+  }
+
+  /// For internal usage.
+  pub fn _nid2loid(&self, id: TreeNodeId) -> Option<LayoutNodeId> {
+    self.nid2loid.get(&id).copied()
+  }
+
+  /// For internal usage.
+  pub fn _loid2nid(&self, loid: LayoutNodeId) -> Option<TreeNodeId> {
+    self.loid2nid.get(&loid).copied()
   }
 }
 // Attributes }
