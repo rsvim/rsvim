@@ -279,36 +279,47 @@ where
 
 #[derive(Debug, Clone)]
 /// Commandline root container.
-pub struct RootContainer {
+pub struct ItreeRootNode {
   base: InodeBase,
 }
 
-impl RootContainer {
+impl ItreeRootNode {
   pub fn new(shape: IRect) -> Self {
-    RootContainer {
+    ItreeRootNode {
       base: InodeBase::new(shape),
     }
   }
 }
 
-inode_impl!(RootContainer, base);
+inode_impl!(ItreeRootNode, base);
 
-impl Widgetable for RootContainer {}
+impl Widgetable for ItreeRootNode {}
+
+#[derive(Debug, Clone)]
+pub enum ItreeNode<T>
+where
+  T: Inodeable,
+{
+  Root(ItreeRootNode),
+  Child(T),
+}
 
 // Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(
-    lotree: TaffyTreeRc,
-    style: Style,
-    root_node: T,
-  ) -> TaffyResult<Self> {
+  pub fn new(style: Style, shape: IRect) -> TaffyResult<Self> {
+    let lotree = new_layout_tree();
     let root_loid = {
       let mut lo = lotree.borrow_mut();
       lo.new_leaf(style)?
     };
+
+    let root_node = ItreeRootNode::new(shape);
+    let root_id = root_node.id();
+    let root_node = ItreeNode::Root(root_node);
+
     let root_id = root_node.id();
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
