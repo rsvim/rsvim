@@ -506,45 +506,6 @@ where
     result
   }
 
-  /// Insert a node to the tree.
-  ///
-  /// It works similar to [`insert`](Itree::insert) method, except it limits the inserted node
-  /// boundary based the parent's actual shape. This affects two aspects:
-  ///
-  /// 1. For size, if the inserted `child_node` is larger than the parent actual shape. The size
-  ///    will be truncated to fit its parent. The bottom-right part will be removed, while the
-  ///    top-left part will be keeped.
-  /// 2. For position, if the inserted `child_node` hits the boundary of its parent. It simply
-  ///    stops at its parent boundary.
-  ///
-  /// # Returns
-  ///
-  /// 1. `None` if the `child_node` doesn't exist.
-  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
-  ///
-  /// # Panics
-  ///
-  /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
-    // Panics if `parent_id` not exists.
-    debug_assert!(self.nodes.contains_key(&parent_id));
-
-    let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_shape = parent_node.actual_shape();
-
-    // Bound child shape
-    child_node.set_shape(&shapes::bound_shape(
-      child_node.shape(),
-      parent_actual_shape,
-    ));
-
-    self.insert(parent_id, child_node)
-  }
-
   /// Remove a node by its ID.
   ///
   /// This operation breaks the connection between the removed node and its parent.
