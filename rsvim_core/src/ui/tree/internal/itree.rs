@@ -536,10 +536,7 @@ where
         debug_assert!(relation_removed);
         Some(removed)
       }
-      None => {
-        debug_assert!(!self.relationships.borrow().contains_id(id));
-        None
-      }
+      None => None,
     };
 
     self._internal_check();
