@@ -204,17 +204,16 @@ impl Tree {
       )
     };
 
-    let shape = size_into_rect!(canvas_size, isize);
-    let root = Root::new(shape);
+    let root = Root::new(root_loid, root_shape);
     let root_node = TreeNode::Root(root);
-    Tree {
-      base: Itree::new(root_node),
+    Ok(Tree {
+      base: Itree::new(lotree, root_node),
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
-    }
+    })
   }
 
   /// Root node ID.
