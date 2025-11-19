@@ -24,7 +24,7 @@ impl Content {
   /// Make window content.
   pub fn new(
     loid: LayoutNodeId,
-    shape: IRect,
+    shape: U16Rect,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> Self {

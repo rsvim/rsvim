@@ -25,10 +25,10 @@ use crate::ui::widget::cursor::Cursor;
 use crate::widget_dispatcher;
 use content::Content;
 use opt::*;
-use root::RootContainer;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
@@ -82,14 +82,36 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+    let (content_loid, content_shape) = {
+      let content_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::percent(100.0),
+          height: taffy::Dimension::percent(100.0),
+        },
+        ..Default::default()
+      };
+
+      let mut lo = lotree.borrow_mut();
+      let content_loid = lo.new_leaf(content_style)?;
+      lo.add_child(loid, content_loid).unwrap();
+      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
+      let content_layout = lo.layout(content_loid)?;
+      let content_shape = rect_from_layout!(content_layout, u16);
+      (content_loid, content_shape)
+    };
+
+    let content = Content::new(
+      content_loid,
+      content_shape,
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    );
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
     base.insert(root_id, content_node);
 
-    Window {
+    Ok(Window {
       base,
       options: *opts,
       content_id,
@@ -97,7 +119,7 @@ impl Window {
       buffer,
       viewport,
       cursor_viewport,
-    }
+    })
   }
 }
 
