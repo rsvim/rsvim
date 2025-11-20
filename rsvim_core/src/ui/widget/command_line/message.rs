@@ -19,11 +19,12 @@ pub struct Message {
 
 impl Message {
   pub fn new(
-    shape: IRect,
+    loid: LayoutNodeId,
+    shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(shape);
+    let base = InodeBase::new(loid, shape);
     Message {
       base,
       text_contents,

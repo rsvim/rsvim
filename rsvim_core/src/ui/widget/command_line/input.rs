@@ -19,11 +19,12 @@ pub struct Input {
 
 impl Input {
   pub fn new(
-    shape: IRect,
+    loid: LayoutNodeId,
+    shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(shape);
+    let base = InodeBase::new(loid, shape);
     Input {
       base,
       text_contents,

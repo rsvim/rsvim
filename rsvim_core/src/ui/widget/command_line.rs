@@ -120,29 +120,29 @@ impl CommandLine {
       let message_loid = lo.new_leaf(message_style).unwrap();
       lo.add_child(loid, indicator_loid).unwrap();
       lo.add_child(loid, input_loid).unwrap();
+      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
+      let indicator_layout = lo.layout(indicator_loid)?;
+      let input_layout = lo.layout(input_loid)?;
+      let indicator_shape = rect_from_layout!(indicator_layout, u16);
+      let input_shape = rect_from_layout!(input_layout, u16);
 
-      (indicator_loid, input_loid, message_loid)
+      (
+        indicator_loid,
+        indicator_shape,
+        input_loid,
+        input_shape,
+        message_loid,
+        shape,
+      )
     };
 
-    let indicator_shape = rect!(
-      shape.min().x,
-      shape.min().y,
-      shape.min().x + 1,
-      shape.max().y
-    );
-    let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
+    let indicator =
+      Indicator::new(indicator_loid, indicator_shape, IndicatorSymbol::Empty);
     let indicator_id = indicator.id();
     let mut indicator_node = CommandLineNode::Indicator(indicator);
     // Indicator by default is invisible
     indicator_node.set_visible(false);
-    base.bounded_insert(root_id, indicator_node);
-
-    let input_shape = rect!(
-      shape.min().x + 1,
-      shape.min().y,
-      shape.max().x,
-      shape.max().y
-    );
+    base.insert(root_id, indicator_node);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
@@ -176,6 +176,7 @@ impl CommandLine {
     let message_viewport = Viewport::to_arc(message_viewport);
 
     let input = Input::new(
+      input_loid,
       input_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -187,7 +188,8 @@ impl CommandLine {
     base.bounded_insert(root_id, input_node);
 
     let message = Message::new(
-      shape,
+      message_loid,
+      message_shape,
       text_contents.clone(),
       Arc::downgrade(&message_viewport),
     );
