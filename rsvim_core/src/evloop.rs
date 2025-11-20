@@ -556,6 +556,19 @@ impl EventLoop {
       },
       ..Default::default()
     };
+    let cursor_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1),
+        height: taffy::Dimension::from_length(1),
+      },
+      padding: taffy::Rect {
+        left: taffy::LengthPercentage::from_length(0),
+        top: taffy::LengthPercentage::from_length(0),
+        right: taffy::LengthPercentage::auto(),
+        bottom: taffy::LengthPercentage::auto(),
+      },
+      ..Default::default()
+    };
 
     let (window_loid, window_shape, cmdline_loid, cmdline_shape) = {
       let lotree = tree.lotree();
