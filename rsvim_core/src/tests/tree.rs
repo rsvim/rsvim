@@ -17,7 +17,7 @@ pub fn make_tree_with_buffers(
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
   // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
@@ -41,7 +41,7 @@ pub fn make_tree_with_buffers(
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   tree_arc.clone()
