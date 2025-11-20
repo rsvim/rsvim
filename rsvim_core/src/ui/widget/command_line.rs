@@ -185,7 +185,7 @@ impl CommandLine {
     let mut input_node = CommandLineNode::Input(input);
     // Input by default is invisible
     input_node.set_visible(false);
-    base.bounded_insert(root_id, input_node);
+    base.insert(root_id, input_node);
 
     let message = Message::new(
       message_loid,
@@ -195,7 +195,7 @@ impl CommandLine {
     );
     let message_id = message.id();
     let message_node = CommandLineNode::Message(message);
-    base.bounded_insert(root_id, message_node);
+    base.insert(root_id, message_node);
 
     Self {
       base,
