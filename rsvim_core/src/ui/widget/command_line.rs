@@ -94,7 +94,7 @@ impl CommandLine {
     ) = {
       let indicator_style = Style {
         size: taffy::Size {
-          width: taffy::Dimension::from_length(1),
+          width: taffy::Dimension::from_length(1_u16),
           height: taffy::Dimension::auto(),
         },
         ..Default::default()
