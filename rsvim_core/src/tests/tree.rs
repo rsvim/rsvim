@@ -53,16 +53,6 @@ pub fn make_tree_with_buffers(
     ..Default::default()
   };
 
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
-      Arc::downgrade(buf),
-    )
-    .unwrap()
-  };
-
   let (window_loid, window_shape, cursor_loid, cursor_shape) = {
     let lotree = tree.lotree();
     let mut lo = lotree.borrow_mut();
@@ -77,6 +67,18 @@ pub fn make_tree_with_buffers(
     let window_shape = rect_from_layout!(window_layout, u16);
     let cursor_shape = rect!(0, 0, 1, 1);
     (window_loid, window_shape, cursor_loid, cursor_shape)
+  };
+
+  let mut window = {
+    let (_, buf) = buffers.first_key_value().unwrap();
+    Window::new(
+      tree.lotree(),
+      window_loid,
+      window_shape,
+      tree.global_local_options(),
+      Arc::downgrade(buf),
+    )
+    .unwrap()
   };
   let window_id = window.id();
 
