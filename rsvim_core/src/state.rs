@@ -83,7 +83,7 @@ pub trait Stateful {
 
 /// Generate enum dispatcher for `Stateful`.
 #[macro_export]
-macro_rules! state_machine_dispatcher {
+macro_rules! state_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
       fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
@@ -119,7 +119,7 @@ pub enum StateMachine {
   TerminalMode(TerminalStateful),
 }
 
-state_machine_dispatcher!(
+state_dispatcher!(
   StateMachine,
   NormalMode,
   VisualMode,
