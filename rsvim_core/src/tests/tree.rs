@@ -73,19 +73,10 @@ pub fn make_tree_with_buffers(
     lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
       .unwrap();
     let window_layout = lo.layout(window_loid).unwrap();
-    let cmdline_layout = lo.layout(cmdline_loid).unwrap();
     let cursor_layout = lo.layout(cursor_loid).unwrap();
     let window_shape = rect_from_layout!(window_layout, u16);
-    let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
-    let cursor_shape = rect_from_layout!(cursor_layout, u16);
-    (
-      window_loid,
-      window_shape,
-      cmdline_loid,
-      cmdline_shape,
-      cursor_loid,
-      cursor_shape,
-    )
+    let cursor_shape = rect!(0, 0, 1, 1);
+    (window_loid, window_shape, cursor_loid, cursor_shape)
   };
   let window_id = window.id();
 
