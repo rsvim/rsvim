@@ -12,7 +12,7 @@ use std::fmt::Debug;
 
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
@@ -24,6 +24,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
+    loid: LayoutNodeId,
     shape: IRect,
     blinking: bool,
     hidden: bool,
@@ -33,7 +34,7 @@ impl Cursor {
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
     Cursor {
-      base: InodeBase::new(shape),
+      base: InodeBase::new(loid, shape),
       flags,
       style,
     }
