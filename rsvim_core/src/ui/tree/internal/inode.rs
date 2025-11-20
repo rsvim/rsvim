@@ -239,6 +239,10 @@ impl InodeBase {
     self.id
   }
 
+  pub fn loid(&self) -> LayoutNodeId {
+    self.loid
+  }
+
   pub fn actual_shape(&self) -> &U16Rect {
     &self.actual_shape
   }
