@@ -573,20 +573,38 @@ impl EventLoop {
       ..Default::default()
     };
 
-    let (window_loid, window_shape, cmdline_loid, cmdline_shape) = {
+    let (
+      window_loid,
+      window_shape,
+      cmdline_loid,
+      cmdline_shape,
+      cursor_loid,
+      cursor_shape,
+    ) = {
       let lotree = tree.lotree();
       let mut lo = lotree.borrow_mut();
       let window_loid = lo.new_leaf(window_style).unwrap();
       let cmdline_loid = lo.new_leaf(cmdline_style).unwrap();
+      let cursor_loid = lo.new_leaf(cursor_style).unwrap();
       lo.add_child(tree_root_loid, window_loid).unwrap();
       lo.add_child(tree_root_loid, cmdline_loid).unwrap();
+      lo.add_child(window_loid, cursor_loid).unwrap();
       lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
         .unwrap();
       let window_layout = lo.layout(window_loid).unwrap();
       let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+      let cursor_layout = lo.layout(cursor_loid).unwrap();
       let window_shape = rect_from_layout!(window_layout, u16);
       let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
-      (window_loid, window_shape, cmdline_loid, cmdline_shape)
+      let cursor_shape = rect_from_layout!(cursor_layout, u16);
+      (
+        window_loid,
+        window_shape,
+        cmdline_loid,
+        cmdline_shape,
+        cursor_loid,
+        cursor_shape,
+      )
     };
 
     let mut window = {
@@ -605,8 +623,8 @@ impl EventLoop {
     let window_id = window.id();
 
     // Initialize cursor inside the default window.
-    let cursor_shape = rect!(0, 0, 1, 1);
     let cursor = Cursor::new(
+      cursor_loid,
       cursor_shape,
       canvas_cursor.blinking(),
       canvas_cursor.hidden(),
@@ -618,8 +636,12 @@ impl EventLoop {
     tree.bounded_insert(tree_root_id, TreeNode::Window(window));
     tree.set_current_window_id(Some(window_id));
 
-    let cmdline =
-      CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
+    let cmdline = CommandLine::new(
+      tree.lotree(),
+      cmdline_loid,
+      cmdline_shape,
+      Arc::downgrade(&self.contents),
+    );
 
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
