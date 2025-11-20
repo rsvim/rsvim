@@ -36,8 +36,12 @@ pub struct Indicator {
 }
 
 impl Indicator {
-  pub fn new(shape: IRect, symbol: IndicatorSymbol) -> Self {
-    let base = InodeBase::new(shape);
+  pub fn new(
+    loid: LayoutNodeId,
+    shape: U16Rect,
+    symbol: IndicatorSymbol,
+  ) -> Self {
+    let base = InodeBase::new(loid, shape);
     Indicator { base, symbol }
   }
 
