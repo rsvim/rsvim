@@ -179,16 +179,17 @@ pub fn make_tree_with_buffers_cmdline(
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
-      tree.global_local_options(),
+      tree.lotree(),
+      window_loid,
       window_shape,
+      tree.global_local_options(),
       Arc::downgrade(buf),
     )
   };
   let window_id = window.id();
 
   // cursor
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
+  let cursor = Cursor::default(cursor_loid, cursor_shape);
   window.insert_cursor(cursor);
 
   tree.bounded_insert(tree_root_id, TreeNode::Window(window));
