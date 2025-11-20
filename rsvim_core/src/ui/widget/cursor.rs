@@ -41,13 +41,7 @@ impl Cursor {
   }
 
   pub fn default(loid: LayoutNodeId, shape: U16Rect) -> Self {
-    Cursor {
-      base: InodeBase::new(loid, shape),
-      // blinking=false
-      // hidden=false
-      flags: Flags::empty(),
-      style: CursorStyle::SteadyBlock,
-    }
+    Self::new(loid, shape, false, false, CursorStyle::SteadyBlock)
   }
 
   pub fn blinking(&self) -> bool {
