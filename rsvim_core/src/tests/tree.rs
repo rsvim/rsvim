@@ -11,6 +11,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -83,8 +84,7 @@ pub fn make_tree_with_buffers(
   let window_id = window.id();
 
   // Cursor.
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
+  let cursor = Cursor::default(cursor_loid, cursor_shape);
   window.insert_cursor(cursor);
 
   tree.insert(tree_root_id, TreeNode::Window(window));
@@ -102,12 +102,44 @@ pub fn make_tree_with_buffers_cmdline(
   text_contents: TextContentsArc,
 ) -> TreeArc {
   // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
   let tree_root_id = tree.root_id();
+
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::auto(),
+    },
+    ..Default::default()
+  };
+  let cmdline_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    ..Default::default()
+  };
+  let cursor_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(1_u16),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    padding: taffy::Rect {
+      left: taffy::LengthPercentage::from_length(0_u16),
+      top: taffy::LengthPercentage::from_length(0_u16),
+      right: taffy::LengthPercentage::calc(
+        taffy::style::CompactLength::auto().calc_value(),
+      ),
+      bottom: taffy::LengthPercentage::calc(
+        taffy::style::CompactLength::auto().calc_value(),
+      ),
+    },
+    ..Default::default()
+  };
 
   // window
   let window_shape = size_into_rect!(canvas_size, isize);
