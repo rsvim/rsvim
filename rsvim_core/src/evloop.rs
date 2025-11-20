@@ -641,7 +641,8 @@ impl EventLoop {
       cmdline_loid,
       cmdline_shape,
       Arc::downgrade(&self.contents),
-    );
+    )
+    .unwrap();
 
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
