@@ -108,6 +108,7 @@ pub fn make_tree_with_buffers_cmdline(
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
   let tree_root_id = tree.root_id();
+  let tree_root_loid = tree.root_loid();
 
   let window_style = Style {
     size: taffy::Size {
@@ -139,6 +140,38 @@ pub fn make_tree_with_buffers_cmdline(
       ),
     },
     ..Default::default()
+  };
+
+  let (
+    window_loid,
+    window_shape,
+    cmdline_loid,
+    cmdline_shape,
+    cursor_loid,
+    cursor_shape,
+  ) = {
+    let lotree = tree.lotree();
+    let mut lo = lotree.borrow_mut();
+    let window_loid = lo.new_leaf(window_style).unwrap();
+    let cmdline_loid = lo.new_leaf(cmdline_style).unwrap();
+    let cursor_loid = lo.new_leaf(cursor_style).unwrap();
+    lo.add_child(tree_root_loid, window_loid).unwrap();
+    lo.add_child(tree_root_loid, cmdline_loid).unwrap();
+    lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
+      .unwrap();
+    let window_layout = lo.layout(window_loid).unwrap();
+    let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+    let window_shape = rect_from_layout!(window_layout, u16);
+    let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
+    let cursor_shape = rect!(0, 0, 1, 1); // dummy shape
+    (
+      window_loid,
+      window_shape,
+      cmdline_loid,
+      cmdline_shape,
+      cursor_loid,
+      cursor_shape,
+    )
   };
 
   // window
