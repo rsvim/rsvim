@@ -34,10 +34,11 @@ use taffy::prelude::TaffyMaxContent;
 pub enum WindowNode {
   Root(Root),
   Content(Content),
+  Cursor(Cursor),
 }
 
-inode_dispatcher!(WindowNode, Root, Content);
-widget_dispatcher!(WindowNode, Root, Content);
+inode_dispatcher!(WindowNode, Root, Content, Cursor);
+widget_dispatcher!(WindowNode, Root, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -47,11 +48,10 @@ pub struct Window {
   options: WindowOptions,
 
   content_id: TreeNodeId,
+  cursor_id: Option<TreeNodeId>,
 
   buffer: BufferWk,
   viewport: ViewportArc,
-
-  cursor: Option<Cursor>,
   cursor_viewport: CursorViewportArc,
 }
 
