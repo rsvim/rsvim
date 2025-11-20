@@ -197,7 +197,7 @@ impl CommandLine {
     let message_node = CommandLineNode::Message(message);
     base.insert(root_id, message_node);
 
-    Self {
+    Ok(Self {
       base,
       options,
       indicator_id,
@@ -207,7 +207,7 @@ impl CommandLine {
       input_viewport,
       input_cursor_viewport,
       message_viewport,
-    }
+    })
   }
 }
 
