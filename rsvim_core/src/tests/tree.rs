@@ -9,6 +9,8 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::prelude::FromLength;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -23,15 +25,66 @@ pub fn make_tree_with_buffers(
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
   let tree_root_id = tree.root_id();
+  let tree_root_loid = tree.root_loid();
 
   // Window
-  let window_shape = size_into_rect!(canvas_size, isize);
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::auto(),
+    },
+    ..Default::default()
+  };
+  let cursor_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(1_u16),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    padding: taffy::Rect {
+      left: taffy::LengthPercentage::from_length(0_u16),
+      top: taffy::LengthPercentage::from_length(0_u16),
+      right: taffy::LengthPercentage::calc(
+        taffy::style::CompactLength::auto().calc_value(),
+      ),
+      bottom: taffy::LengthPercentage::calc(
+        taffy::style::CompactLength::auto().calc_value(),
+      ),
+    },
+    ..Default::default()
+  };
+
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
       tree.global_local_options(),
       window_shape,
       Arc::downgrade(buf),
+    )
+    .unwrap()
+  };
+
+  let (window_loid, window_shape, cursor_loid, cursor_shape) = {
+    let lotree = tree.lotree();
+    let mut lo = lotree.borrow_mut();
+    let window_loid = lo.new_leaf(window_style).unwrap();
+    let cursor_loid = lo.new_leaf(cursor_style).unwrap();
+    lo.add_child(tree_root_loid, window_loid).unwrap();
+    lo.add_child(window_loid, cursor_loid).unwrap();
+    lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
+      .unwrap();
+    let window_layout = lo.layout(window_loid).unwrap();
+    let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+    let cursor_layout = lo.layout(cursor_loid).unwrap();
+    let window_shape = rect_from_layout!(window_layout, u16);
+    let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
+    let cursor_shape = rect_from_layout!(cursor_layout, u16);
+    (
+      window_loid,
+      window_shape,
+      cmdline_loid,
+      cmdline_shape,
+      cursor_loid,
+      cursor_shape,
     )
   };
   let window_id = window.id();
