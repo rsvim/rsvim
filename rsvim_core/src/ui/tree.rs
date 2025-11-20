@@ -412,16 +412,6 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
-  /// See [`Itree::bounded_insert`].
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
-    self.insert_guard(&child_node);
-    self.base.bounded_insert(parent_id, child_node)
-  }
-
   fn remove_guard(&mut self, id: TreeNodeId) {
     if self.command_line_id == Some(id) {
       self.command_line_id = None;

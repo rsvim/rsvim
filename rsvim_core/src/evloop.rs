@@ -633,7 +633,7 @@ impl EventLoop {
     let _previous_inserted_cursor = window.insert_cursor(cursor);
     debug_assert!(_previous_inserted_cursor.is_none());
 
-    tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+    tree.insert(tree_root_id, TreeNode::Window(window));
     tree.set_current_window_id(Some(window_id));
 
     let cmdline = CommandLine::new(
@@ -644,7 +644,7 @@ impl EventLoop {
     )
     .unwrap();
 
-    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+    tree.insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }
