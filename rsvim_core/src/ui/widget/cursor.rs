@@ -25,7 +25,7 @@ pub struct Cursor {
 impl Cursor {
   pub fn new(
     loid: LayoutNodeId,
-    shape: IRect,
+    shape: U16Rect,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
@@ -40,9 +40,9 @@ impl Cursor {
     }
   }
 
-  pub fn default(shape: IRect) -> Self {
+  pub fn default(loid: LayoutNodeId, shape: U16Rect) -> Self {
     Cursor {
-      base: InodeBase::new(shape),
+      base: InodeBase::new(loid, shape),
       // blinking=false
       // hidden=false
       flags: Flags::empty(),
