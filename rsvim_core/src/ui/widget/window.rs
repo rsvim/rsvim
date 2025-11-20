@@ -66,20 +66,7 @@ impl Window {
     let root = Root::new(loid, shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
-
     let mut base = Itree::new(lotree.clone(), root_node);
-
-    let (viewport, cursor_viewport) = {
-      let buffer = buffer.upgrade().unwrap();
-      let buffer = lock!(buffer);
-      let viewport = Viewport::view(opts, buffer.text(), &shape, 0, 0);
-      let cursor_viewport =
-        CursorViewport::from_top_left(&viewport, buffer.text());
-      (viewport, cursor_viewport)
-    };
-
-    let viewport = Viewport::to_arc(viewport);
-    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let (content_loid, content_shape) = {
       let content_style = Style {
@@ -98,6 +85,18 @@ impl Window {
       let content_shape = rect_from_layout!(content_layout, u16);
       (content_loid, content_shape)
     };
+
+    let (viewport, cursor_viewport) = {
+      let buffer = buffer.upgrade().unwrap();
+      let buffer = lock!(buffer);
+      let viewport = Viewport::view(opts, buffer.text(), &content_shape, 0, 0);
+      let cursor_viewport =
+        CursorViewport::from_top_left(&viewport, buffer.text());
+      (viewport, cursor_viewport)
+    };
+
+    let viewport = Viewport::to_arc(viewport);
+    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content = Content::new(
       content_loid,

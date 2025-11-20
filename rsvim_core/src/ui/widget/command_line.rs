@@ -82,29 +82,46 @@ impl CommandLine {
     let root = Root::new(loid, shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
-
     let mut base = Itree::new(lotree.clone(), root_node);
 
-    let indicator_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(1),
-        height: taffy::Dimension::auto(),
-      },
-      ..Default::default()
-    };
-    let input_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
-      },
-      ..Default::default()
-    };
-    let message_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
-      },
-      ..Default::default()
+    let (
+      indicator_loid,
+      indicator_shape,
+      input_loid,
+      input_shape,
+      message_loid,
+      message_shape,
+    ) = {
+      let indicator_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(1),
+          height: taffy::Dimension::auto(),
+        },
+        ..Default::default()
+      };
+      let input_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::auto(),
+          height: taffy::Dimension::auto(),
+        },
+        ..Default::default()
+      };
+      let message_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::auto(),
+          height: taffy::Dimension::auto(),
+        },
+        ..Default::default()
+      };
+
+      let mut lo = lotree.borrow_mut();
+      let indicator_loid = lo.new_leaf(indicator_style).unwrap();
+      let input_loid = lo.new_leaf(input_style).unwrap();
+      let message_loid = lo.new_leaf(message_style).unwrap();
+      lo.add_child(loid, indicator_loid).unwrap();
+      lo.add_child(loid, input_loid).unwrap();
+
+      (indicator_loid, input_loid, message_loid)
     };
 
     let indicator_shape = rect!(

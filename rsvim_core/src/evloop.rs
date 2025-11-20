@@ -551,18 +551,18 @@ impl EventLoop {
     let cmdline_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::auto(),
-        height: taffy::Dimension::from_length(1),
+        height: taffy::Dimension::from_length(1_u16),
       },
       ..Default::default()
     };
     let cursor_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_length(1),
-        height: taffy::Dimension::from_length(1),
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
       },
       padding: taffy::Rect {
-        left: taffy::LengthPercentage::from_length(0),
-        top: taffy::LengthPercentage::from_length(0),
+        left: taffy::LengthPercentage::from_length(0_u16),
+        top: taffy::LengthPercentage::from_length(0_u16),
         right: taffy::LengthPercentage::calc(
           taffy::style::CompactLength::auto().calc_value(),
         ),
