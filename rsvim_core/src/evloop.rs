@@ -34,12 +34,12 @@ use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
-use parking_lot::lock_api::RawRwLockUpgradeFair;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
@@ -564,8 +564,12 @@ impl EventLoop {
       padding: taffy::Rect {
         left: taffy::LengthPercentage::from_length(0),
         top: taffy::LengthPercentage::from_length(0),
-        right: taffy::LengthPercentage::auto(),
-        bottom: taffy::LengthPercentage::auto(),
+        right: taffy::LengthPercentage::calc(
+          taffy::style::CompactLength::auto().calc_value(),
+        ),
+        bottom: taffy::LengthPercentage::calc(
+          taffy::style::CompactLength::auto().calc_value(),
+        ),
       },
       ..Default::default()
     };
