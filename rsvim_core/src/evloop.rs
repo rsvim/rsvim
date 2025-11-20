@@ -588,22 +588,19 @@ impl EventLoop {
       let cursor_loid = lo.new_leaf(cursor_style).unwrap();
       lo.add_child(tree_root_loid, window_loid).unwrap();
       lo.add_child(tree_root_loid, cmdline_loid).unwrap();
-      lo.add_child(window_loid, cursor_loid).unwrap();
       lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
         .unwrap();
       let window_layout = lo.layout(window_loid).unwrap();
       let cmdline_layout = lo.layout(cmdline_loid).unwrap();
-      let cursor_layout = lo.layout(cursor_loid).unwrap();
       let window_shape = rect_from_layout!(window_layout, u16);
       let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
-      let cursor_shape = rect_from_layout!(cursor_layout, u16);
       (
         window_loid,
         window_shape,
         cmdline_loid,
         cmdline_shape,
         cursor_loid,
-        cursor_shape,
+        rect!(0, 0, 1, 1),
       )
     };
 
