@@ -175,7 +175,6 @@ pub fn make_tree_with_buffers_cmdline(
   };
 
   // window
-  let window_shape = size_into_rect!(canvas_size, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
@@ -185,6 +184,7 @@ pub fn make_tree_with_buffers_cmdline(
       tree.global_local_options(),
       Arc::downgrade(buf),
     )
+    .unwrap()
   };
   let window_id = window.id();
 
@@ -192,7 +192,7 @@ pub fn make_tree_with_buffers_cmdline(
   let cursor = Cursor::default(cursor_loid, cursor_shape);
   window.insert_cursor(cursor);
 
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   // command-line
