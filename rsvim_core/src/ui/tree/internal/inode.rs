@@ -3,7 +3,6 @@
 use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::Dummy;
-use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {

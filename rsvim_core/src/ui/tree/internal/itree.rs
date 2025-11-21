@@ -97,6 +97,12 @@ impl Irelationship {
     let loid = self.nid2loid.get(&id).unwrap();
     self.lo.layout(*loid)
   }
+
+  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    let loid = self.nid2loid.get(&id)?;
+    let parent_loid = self.lo.parent(*loid)?;
+    self.loid2nid.get(&parent_loid).copied()
+  }
 }
 
 impl Default for Irelationship {
@@ -118,49 +124,6 @@ where
 
   // Root node
   root_id: TreeNodeId,
-}
-
-#[derive(Debug)]
-/// The level-order iterator of the tree, start from tree root.
-pub struct ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  tree: &'a Itree<T>,
-  que: VecDeque<TreeNodeId>,
-}
-
-impl<'a, T> Iterator for ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a T;
-
-  fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
-        }
-      }
-      self.tree.node(id)
-    } else {
-      None
-    }
-  }
-}
-
-impl<'a, T> ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
-    let mut que = VecDeque::new();
-    if let Some(id) = start_node_id {
-      que.push_back(id);
-    }
-    Self { tree, que }
-  }
 }
 
 // Attributes {
@@ -195,23 +158,8 @@ where
     })
   }
 
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
-  fn _internal_check(&self) {
-    debug_assert!(!self.nodes.is_empty());
-    debug_assert!(self.relationship.borrow().total_node_count() != 0);
-    debug_assert_eq!(self.nid2loid.len(), self.nodes.len());
-    debug_assert_eq!(self.loid2nid.len(), self.nodes.len());
-  }
-
   pub fn root_id(&self) -> TreeNodeId {
     self.root_id
-  }
-
-  pub fn root_loid(&self) -> LayoutNodeId {
-    *self.nid2loid.get(&self.root_id).unwrap()
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
@@ -626,3 +574,46 @@ where
   }
 }
 // Movement }
+
+#[derive(Debug)]
+/// The level-order iterator of the tree, start from tree root.
+pub struct ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  tree: &'a Itree<T>,
+  que: VecDeque<TreeNodeId>,
+}
+
+impl<'a, T> Iterator for ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  type Item = &'a T;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(id) = self.que.pop_front() {
+      for child_id in self.tree.children_ids(id) {
+        if self.tree.node(child_id).is_some() {
+          self.que.push_back(child_id);
+        }
+      }
+      self.tree.node(id)
+    } else {
+      None
+    }
+  }
+}
+
+impl<'a, T> ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+    let mut que = VecDeque::new();
+    if let Some(id) = start_node_id {
+      que.push_back(id);
+    }
+    Self { tree, que }
+  }
+}
