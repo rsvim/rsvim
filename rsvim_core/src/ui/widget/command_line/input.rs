@@ -42,11 +42,12 @@ inode_impl!(CommandLineInput, base);
 
 impl Widgetable for CommandLineInput {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let contents = self.text_contents.upgrade().unwrap();
-    let contents = lock!(contents);
-    let viewport = self.viewport.upgrade().unwrap();
-
-    viewport.draw(contents.command_line_input(), actual_shape, canvas);
+    if self.base.visible() {
+      let actual_shape = self.actual_shape();
+      let contents = self.text_contents.upgrade().unwrap();
+      let contents = lock!(contents);
+      let viewport = self.viewport.upgrade().unwrap();
+      viewport.draw(contents.command_line_input(), actual_shape, canvas);
+    }
   }
 }
