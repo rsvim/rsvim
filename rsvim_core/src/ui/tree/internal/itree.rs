@@ -10,7 +10,17 @@ use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
+
+#[derive(Debug, Clone)]
+pub struct Irelation {
+  lotree: TaffyTree,
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
+}
+
+arc_mutex_ptr!(Irelation);
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>
