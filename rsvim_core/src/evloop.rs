@@ -612,7 +612,7 @@ impl EventLoop {
         tree.lotree(),
         window_loid,
         window_shape,
-        tree.global_local_options(),
+        *tree.global_local_options(),
         Arc::downgrade(buf),
       )
       .unwrap()

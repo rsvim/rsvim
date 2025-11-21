@@ -48,7 +48,7 @@ impl Window {
   pub fn new(
     id: TreeNodeId,
     shape: U16Rect,
-    opts: &WindowOptions,
+    opts: WindowOptions,
     content_id: TreeNodeId,
     content_shape: U16Rect,
     buffer: BufferWk,
@@ -58,7 +58,7 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(opts, buffer.text(), &content_shape, 0, 0);
+      let viewport = Viewport::view(&opts, buffer.text(), &content_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -69,7 +69,7 @@ impl Window {
 
     Window {
       base,
-      options: *opts,
+      options: opts,
       content_id,
       cursor_id: None,
       buffer,

@@ -398,7 +398,7 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
     window_style: Style,
-    window_opts: &WindowOptions,
+    window_opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
     let content_style = Style {
@@ -446,6 +446,7 @@ impl Tree {
   pub fn insert_new_cursor(
     &mut self,
     parent_id: TreeNodeId,
+    cursor_opts: WindowOptions,
   ) -> TaffyResult<TreeNodeId> {
   }
 

@@ -67,10 +67,10 @@ pub struct Cursor {
 }
 
 impl Cursor {
-  pub fn new(id: TreeNodeId, shape: U16Rect, options: CursorOptions) -> Self {
+  pub fn new(id: TreeNodeId, shape: U16Rect, opts: CursorOptions) -> Self {
     Cursor {
       base: InodeBase::new(id, shape),
-      options,
+      options: opts,
     }
   }
 
