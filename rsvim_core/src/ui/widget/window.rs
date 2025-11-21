@@ -47,7 +47,6 @@ impl Window {
   pub fn new(
     base: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     opts: WindowOptions,
     content_id: TreeNodeId,
     content_shape: U16Rect,
