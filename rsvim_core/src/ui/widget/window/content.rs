@@ -1,6 +1,7 @@
 //! Vim window's text content widget.
 
 use crate::buf::BufferWk;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -18,6 +19,8 @@ pub struct WindowContent {
   buffer: BufferWk,
   viewport: ViewportWk,
 }
+
+inode_impl!(WindowContent);
 
 impl WindowContent {
   /// Make window content.
