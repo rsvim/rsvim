@@ -8,6 +8,7 @@ use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
+use icu::collections::codepointtrie::SmallCodePointTrie;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -102,6 +103,21 @@ impl Irelationship {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
     self.loid2nid.get(&parent_loid)
+  }
+
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    match self.nid2loid.get(&id) {
+      Some(loid) => {
+        let children_loids = self.lo.children(*loid)?;
+        Ok(
+          children_loids
+            .iter()
+            .map(|i| *self.loid2nid.get(i).unwrap())
+            .collect_vec(),
+        )
+      }
+      None => Err(taffy::TaffyError::InvalidParentNode(LayoutNodeId::new(0))),
+    }
   }
 }
 
