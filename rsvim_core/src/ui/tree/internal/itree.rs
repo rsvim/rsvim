@@ -183,16 +183,10 @@ where
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    if let Some(loid) = self.nid2loid.get(&id) {
-      if let Ok(children_loids) = self.relationship.borrow().children(*loid) {
-        return children_loids
-          .iter()
-          .filter(|i| self.loid2nid.contains_key(i))
-          .map(|i| *self.loid2nid.get(i).unwrap())
-          .collect_vec();
-      }
+    match self.relationship.borrow().children(id) {
+      Ok(children) => children,
+      Err(_) => vec![],
     }
-    vec![]
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
