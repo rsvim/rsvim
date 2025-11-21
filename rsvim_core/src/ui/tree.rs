@@ -569,6 +569,7 @@ impl Tree {
     self._insert(cmdline_node);
 
     let indicator = CommandLineIndicator::new(
+      self.relationship(),
       indicator_id,
       indicator_shape,
       indicator_symbol,
@@ -577,6 +578,7 @@ impl Tree {
     self._insert(indicator_node);
 
     let input = CommandLineInput::new(
+      self.relationship(),
       input_id,
       input_shape,
       text_contents.clone(),
