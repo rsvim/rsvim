@@ -27,7 +27,7 @@ impl WindowContent {
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> TaffyResult<Self> {
-    let base = InodeBase::new(content_id, content_shape);
+    let base = InodeBase::new(id, shape);
     Ok(WindowContent {
       base,
       buffer,

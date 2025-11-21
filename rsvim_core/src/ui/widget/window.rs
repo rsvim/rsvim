@@ -49,27 +49,11 @@ impl Window {
     id: TreeNodeId,
     shape: U16Rect,
     opts: &WindowOptions,
+    content_id: TreeNodeId,
+    content_shape: U16Rect,
     buffer: BufferWk,
-  ) -> TaffyResult<Self> {
-    let mut base = InodeBase::new(id, shape);
-
-    let content_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
-      },
-      ..Default::default()
-    };
-
-    let (content_id, content_shape) = {
-      let rel = relationship.borrow_mut();
-      let content_id = rel.new_leaf(style)?;
-      rel.add_child(parent_id, content_id)?;
-      rel.compute_layout(content_id, taffy::Size::MAX_CONTENT)?;
-      let content_layout = rel.layout(content_id)?;
-      let content_shape = u16rect_from_layout!(content_layout);
-      (content_id, content_shape)
-    };
+  ) -> Self {
+    let base = InodeBase::new(id, shape);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
@@ -83,17 +67,7 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content = WindowContent::new(
-      content_id,
-      content_shape,
-      buffer.clone(),
-      Arc::downgrade(&viewport),
-    )?;
-    let content_node = WindowNode::Content(content);
-
-    base.insert(root_id, content_node);
-
-    Ok(Window {
+    Window {
       base,
       options: *opts,
       content_id,
@@ -101,7 +75,7 @@ impl Window {
       buffer,
       viewport,
       cursor_viewport,
-    })
+    }
   }
 }
 

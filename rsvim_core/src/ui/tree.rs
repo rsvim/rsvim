@@ -25,6 +25,7 @@ pub use internal::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
@@ -168,7 +169,6 @@ impl Tree {
       flex_direction: taffy::FlexDirection::Column,
       ..Default::default()
     };
-
     let (root_id, root_shape) = {
       let mut base = base.borrow_mut();
       make_new_node(&mut base, root_style, None)?
@@ -401,23 +401,48 @@ impl Tree {
     window_opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let mut base = self.base.borrow_mut();
-
-    let window_id = base.new_leaf(window_style)?;
-    base.add_child(parent_id, window_id)?;
-    base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+    let window_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let content_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let (window_id, window_shape, content_id, content_shape) = {
+      let mut base = self.base.borrow_mut();
+      let (window_id, window_shape) =
+        make_new_node(&mut base, window_style, Some(parent_id))?;
+      let (content_id, content_shape) =
+        make_new_node(&mut base, content_style, Some(window_id))?;
+      (window_id, window_shape, content_id, content_shape)
+    };
 
     let window = Window::new(
-      self.base.relationship(),
-      window_style,
-      parent_id,
+      window_id,
+      window_shape,
       window_opts,
+      content_id,
+      content_shape,
       buffer,
     )?;
     let window_node = TreeNode::Window(window);
+    self.nodes.insert(window_id, window_node);
+    let content = WindowContent::new(
+      content_id,
+      content_shape,
+      buffer.clone(),
+      Arc::downgrade(&window.viewport()),
+    )?;
+    let content_node = TreeNode::WindowContent(content);
 
     self.insert_guard(&window_node);
-    self.base.insert(parent_id, window_node);
 
     Ok(window_id)
   }
