@@ -201,11 +201,8 @@ impl Tree {
   }
 
   /// Get the children IDs by a node `id`.
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    match self.base.borrow().children(id) {
-      Ok(children) => children,
-      Err(_) => vec![],
-    }
+  pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self.base.borrow().children(id)
   }
 
   /// Get the node struct by its `id`.

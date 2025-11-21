@@ -622,9 +622,11 @@ impl<'a> Iterator for TreeIter<'a> {
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
+      if let Ok(children_ids) = self.tree.children_ids(id) {
+        for child_id in children_ids {
+          if self.tree.node(child_id).is_some() {
+            self.que.push_back(child_id);
+          }
         }
       }
       self.tree.node(id)
