@@ -140,18 +140,13 @@ impl Tree {
     })
   }
 
-  pub fn lotree(&self) -> TaffyTreeRc {
-    self.base.lotree()
+  pub fn relationship(&self) -> IrelationshipRc {
+    self.base.relationship()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self.base.root_id()
-  }
-
-  /// Root node ID.
-  pub fn root_loid(&self) -> LayoutNodeId {
-    self.base.root_loid()
   }
 
   /// Get the parent ID by a node `id`.
