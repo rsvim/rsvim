@@ -418,10 +418,8 @@ impl Tree {
     let window = Window::new(
       self.relationship(),
       window_id,
-      window_shape,
       window_opts,
       content_id,
-      content_shape,
       buffer.clone(),
     )?;
     let viewport = window.viewport();
