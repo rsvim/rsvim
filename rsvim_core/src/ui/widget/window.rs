@@ -49,7 +49,6 @@ impl Window {
     id: TreeNodeId,
     opts: WindowOptions,
     content_id: TreeNodeId,
-    content_shape: U16Rect,
     buffer: BufferWk,
   ) -> Self {
     let (viewport, cursor_viewport) = {
