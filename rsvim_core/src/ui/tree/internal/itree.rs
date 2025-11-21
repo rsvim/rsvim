@@ -102,6 +102,11 @@ impl Irelationship {
     self.lo.style(*loid)
   }
 
+  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+    let layout = self.layout(id)?;
+    Ok(rect_from_layout!(layout, isize))
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
@@ -148,7 +153,7 @@ pub fn make_new_node(
   }
   rel.compute_layout(id, taffy::Size::MAX_CONTENT)?;
   let layout = rel.layout(id)?;
-  let shape = u16rect_from_layout!(layout);
+  let shape = rect_from_layout!(layout, u16);
   Ok((id, shape))
 }
 
