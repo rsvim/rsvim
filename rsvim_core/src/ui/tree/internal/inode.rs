@@ -2,6 +2,7 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::Dummy;
 use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
 
@@ -233,4 +234,14 @@ impl InodeBase {
   pub fn set_visible(&mut self, value: bool) {
     self.flags.set(Flags::VISIBLE, value);
   }
+}
+
+#[derive(Debug, Clone)]
+/// The dispatchable inode.
+pub enum InodeDispatch<T>
+where
+  T: Inodeable,
+{
+  Root(Dummy),
+  Other(T),
 }
