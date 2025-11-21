@@ -29,9 +29,6 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::prelude::TaffyMaxContent;
 
-inode_dispatcher!(WindowNode, Root, Content, Cursor);
-widget_dispatcher!(WindowNode, Root, Content, Cursor);
-
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
@@ -49,13 +46,12 @@ pub struct Window {
 
 impl Window {
   pub fn new(
-    relationship: IrelationshipRc,
-    style: Style,
-    parent_id: TreeNodeId,
+    id: TreeNodeId,
+    shape: U16Rect,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let mut base = Itree::new(relationship, style, Some(parent_id))?;
+    let mut base = InodeBase::new(id, shape);
 
     let content_style = Style {
       size: taffy::Size {

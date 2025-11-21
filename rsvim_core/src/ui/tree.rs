@@ -401,12 +401,11 @@ impl Tree {
     window_opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let rel = self.base.relationship();
-    let mut rel = rel.borrow_mut();
+    let mut base = self.base.borrow_mut();
 
-    let window_id = rel.new_leaf(window_style)?;
-    rel.add_child(parent_id, window_id)?;
-    rel.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+    let window_id = base.new_leaf(window_style)?;
+    base.add_child(parent_id, window_id)?;
+    base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
 
     let window = Window::new(
       self.base.relationship(),
