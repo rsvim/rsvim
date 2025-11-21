@@ -8,7 +8,6 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_impl;
 use crate::prelude::*;
 use crate::rect_as;
 use crate::ui::tree::*;
@@ -35,7 +34,8 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
@@ -48,11 +48,9 @@ pub struct CommandLine {
   message_viewport: ViewportArc,
 }
 
-inode_impl!(CommandLine, base);
-
 impl CommandLine {
   pub fn new(
-    relationship: IrelationshipRc,
+    base: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     indicator_id: TreeNodeId,
@@ -70,8 +68,6 @@ impl CommandLine {
       .scroll_off(0)
       .build()
       .unwrap();
-
-    let base = InodeBase::new(relationship, id, shape);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
@@ -106,6 +102,7 @@ impl CommandLine {
 
     Ok(Self {
       base,
+      id,
       options,
       indicator_id,
       input_id,

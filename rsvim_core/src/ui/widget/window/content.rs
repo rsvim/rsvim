@@ -1,7 +1,6 @@
 //! Vim window's text content widget.
 
 use crate::buf::BufferWk;
-use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -41,8 +40,6 @@ impl WindowContent {
     self.viewport = viewport;
   }
 }
-
-inode_impl!(WindowContent, base);
 
 impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
