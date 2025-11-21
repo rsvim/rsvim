@@ -12,7 +12,7 @@ use std::fmt::Debug;
 
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct CursorOptions {
   // blinking=false
   // hidden=false
@@ -63,56 +63,27 @@ impl Default for CursorOptions {
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
-  // blinking=false
-  // hidden=false
-  flags: Flags,
-  style: CursorStyle,
+  options: CursorOptions,
 }
 
 impl Cursor {
-  pub fn new(
-    loid: LayoutNodeId,
-    shape: U16Rect,
-    blinking: bool,
-    hidden: bool,
-    style: CursorStyle,
-  ) -> Self {
-    let mut flags = Flags::empty();
-    flags.set(Flags::BLINKING, blinking);
-    flags.set(Flags::HIDDEN, hidden);
+  pub fn new(id: TreeNodeId, shape: U16Rect, options: &CursorOptions) -> Self {
     Cursor {
-      base: InodeBase::new(loid, shape),
-      flags,
-      style,
+      base: InodeBase::new(id, shape),
+      options,
     }
   }
 
-  pub fn default(loid: LayoutNodeId, shape: U16Rect) -> Self {
-    Self::new(loid, shape, false, false, CursorStyle::SteadyBlock)
+  pub fn default(loid: TreeNodeId, shape: U16Rect) -> Self {
+    Self::new(loid, shape, &CursorOptions::default())
   }
 
-  pub fn blinking(&self) -> bool {
-    self.flags.contains(Flags::BLINKING)
+  pub fn options(&self) -> &CursorOptions {
+    &self.options
   }
 
-  pub fn set_blinking(&mut self, value: bool) {
-    self.flags.set(Flags::BLINKING, value);
-  }
-
-  pub fn hidden(&self) -> bool {
-    self.flags.contains(Flags::HIDDEN)
-  }
-
-  pub fn set_hidden(&mut self, value: bool) {
-    self.flags.set(Flags::HIDDEN, value);
-  }
-
-  pub fn style(&self) -> &CursorStyle {
-    &self.style
-  }
-
-  pub fn set_style(&mut self, value: &CursorStyle) {
-    self.style = *value;
+  pub fn set_options(&mut self, options: &CursorOptions) {
+    self.options = *options;
   }
 }
 
@@ -129,9 +100,9 @@ impl Widgetable for Cursor {
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
-      self.blinking(),
-      self.hidden(),
-      self.style,
+      self.options().blinking(),
+      self.options().hidden(),
+      *self.options().style(),
     ));
   }
 }
