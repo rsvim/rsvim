@@ -57,16 +57,12 @@ pub struct Window {
 
 impl Window {
   pub fn new(
-    lotree: TaffyTreeRc,
-    loid: LayoutNodeId,
-    shape: U16Rect,
+    relationship: IrelationshipRc,
+    style: Style,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let root = Dummy::new(loid, shape);
-    let root_id = root.id();
-    let root_node = WindowNode::Root(root);
-    let mut base = Itree::new(lotree.clone(), root_node);
+    let mut base = Itree::new(relationship, style)?;
 
     let (content_loid, content_shape) = {
       let content_style = Style {

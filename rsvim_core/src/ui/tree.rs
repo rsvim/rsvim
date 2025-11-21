@@ -2,6 +2,7 @@
 
 pub mod internal;
 
+use crate::buf::BufferWk;
 use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -131,7 +132,7 @@ impl Tree {
     };
 
     Ok(Tree {
-      base: Itree::new(relationship, root_style).unwrap(),
+      base: Itree::new(relationship, root_style, None).unwrap(),
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
@@ -347,21 +348,25 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
     window_style: Style,
+    window_opts: &WindowOptions,
+    buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
     let rel = self.base.relationship();
     let mut rel = rel.borrow_mut();
 
     let window_id = rel.new_leaf(window_style)?;
     rel.add_child(parent_id, window_id)?;
-    rel
-      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
-      .unwrap();
-    let window_layout = lo.layout(window_id).unwrap();
-    let cmdline_layout = lo.layout(cmdline_loid).unwrap();
-    let window_shape = rect_from_layout!(window_layout, u16);
+    rel.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+    let window_layout = rel.layout(window_id)?;
+    let window_shape = u16rect_from_layout!(window_layout);
+
+    let window =
+      Window::new(self.base.relationship(), window_style, window_opts, buffer);
 
     self.insert_guard(&child_node);
-    self.base.insert(parent_id, child_node)
+    self.base.insert(parent_id, child_node);
+
+    Ok(window_id)
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {

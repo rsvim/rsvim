@@ -157,11 +157,15 @@ where
 {
   pub fn new(
     relationship: IrelationshipRc,
-    root_style: Style,
+    style: Style,
+    parent_id: Option<TreeNodeId>,
   ) -> TaffyResult<Self> {
     let (root_id, root_shape) = {
       let mut rel = relationship.borrow_mut();
-      let root_id = rel.new_leaf(root_style)?;
+      let root_id = rel.new_leaf(style)?;
+      if let Some(parent_id) = parent_id {
+        rel.add_child(parent_id, root_id)?;
+      }
       rel.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       let root_layout = rel.layout(root_id)?;
       let root_shape = u16rect_from_layout!(root_layout);
