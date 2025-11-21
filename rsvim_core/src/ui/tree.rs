@@ -181,10 +181,10 @@ impl Tree {
       ..Default::default()
     };
     let (root_id, root_shape) = {
-      let mut relo = relationship.borrow_mut();
-      let root_id = relo.new_leaf(root_style)?;
-      relo.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
-      let root_layout = relo.layout(root_id)?;
+      let mut rel = relationship.borrow_mut();
+      let root_id = rel.new_leaf(root_style)?;
+      rel.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
+      let root_layout = rel.layout(root_id)?;
       let root_shape = u16rect_from_layout!(root_layout);
       (root_id, root_shape)
     };
