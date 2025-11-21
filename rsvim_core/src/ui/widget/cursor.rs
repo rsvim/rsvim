@@ -67,7 +67,7 @@ pub struct Cursor {
 }
 
 impl Cursor {
-  pub fn new(id: TreeNodeId, shape: U16Rect, options: &CursorOptions) -> Self {
+  pub fn new(id: TreeNodeId, shape: U16Rect, options: CursorOptions) -> Self {
     Cursor {
       base: InodeBase::new(id, shape),
       options,
@@ -75,15 +75,15 @@ impl Cursor {
   }
 
   pub fn default(loid: TreeNodeId, shape: U16Rect) -> Self {
-    Self::new(loid, shape, &CursorOptions::default())
+    Self::new(loid, shape, CursorOptions::default())
   }
 
   pub fn options(&self) -> &CursorOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &CursorOptions) {
-    self.options = *options;
+  pub fn set_options(&mut self, options: CursorOptions) {
+    self.options = options;
   }
 }
 
