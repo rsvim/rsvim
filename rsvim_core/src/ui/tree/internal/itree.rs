@@ -98,7 +98,7 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(lotree: TaffyTreeRc, root_node: T) -> Self {
+  pub fn new(relationship: IrelationshipRc, root_node: T) -> Self {
     let root_id = root_node.id();
     let root_loid = root_node.loid();
 

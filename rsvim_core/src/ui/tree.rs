@@ -135,7 +135,10 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 /// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
-  // Internal implementation.
+  // Internal relationship.
+  relationship: IrelationshipRc,
+
+  // Internal tree.
   base: Itree<TreeNode>,
 
   // CommandLine node ID.
@@ -167,6 +170,8 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+    let relationship = Irelationship::to_rc(Irelationship::new());
+
     let lotree = new_layout_tree();
 
     let (root_loid, root_shape) = {
@@ -190,6 +195,7 @@ impl Tree {
     let root = Dummy::new(root_loid, root_shape);
     let root_node = TreeNode::Root(root);
     Ok(Tree {
+      relationship,
       base: Itree::new(lotree, root_node),
       command_line_id: None,
       window_ids: BTreeSet::new(),
