@@ -37,7 +37,7 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
-  base: Itree<CommandLineNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
@@ -52,8 +52,7 @@ pub struct CommandLine {
 
 impl CommandLine {
   pub fn new(
-    lotree: TaffyTreeRc,
-    loid: LayoutNodeId,
+    id: TreeNodeId,
     shape: U16Rect,
     text_contents: TextContentsWk,
   ) -> TaffyResult<Self> {
@@ -65,7 +64,7 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let root = Dummy::new(loid, shape);
+    let root = Dummy::new(id, shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
     let mut base = Itree::new(lotree.clone(), root_node);
@@ -104,9 +103,9 @@ impl CommandLine {
       let indicator_loid = lo.new_leaf(indicator_style).unwrap();
       let input_loid = lo.new_leaf(input_style).unwrap();
       let message_loid = lo.new_leaf(message_style).unwrap();
-      lo.add_child(loid, indicator_loid).unwrap();
-      lo.add_child(loid, input_loid).unwrap();
-      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
+      lo.add_child(id, indicator_loid).unwrap();
+      lo.add_child(id, input_loid).unwrap();
+      lo.compute_layout(id, taffy::Size::MAX_CONTENT)?;
       let indicator_layout = lo.layout(indicator_loid)?;
       let input_layout = lo.layout(input_loid)?;
       let indicator_shape = rect_from_layout!(indicator_layout, u16);

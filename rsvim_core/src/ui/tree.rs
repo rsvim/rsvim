@@ -3,6 +3,7 @@
 pub mod internal;
 
 use crate::buf::BufferWk;
+use crate::content::TextContentsWk;
 use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -395,7 +396,7 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
-  /// See [`Itree::insert`].
+  /// Create new window node, and insert it as a child to the provided parent_id.
   pub fn insert_new_window(
     &mut self,
     parent_id: TreeNodeId,
@@ -445,6 +446,7 @@ impl Tree {
     Ok(window_id)
   }
 
+  /// Create new cursor node, and insert it as a child to the provided parent_id.
   pub fn insert_new_cursor(
     &mut self,
     parent_id: TreeNodeId,
@@ -480,6 +482,94 @@ impl Tree {
     self.nodes.insert(cursor_id, cursor_node);
 
     Ok(cursor_id)
+  }
+
+  /// Create new cmdline node, and insert it as a child to the provided parent_id.
+  pub fn insert_new_cmdline(
+    &mut self,
+    parent_id: TreeNodeId,
+    cmdline_style: Style,
+    text_contents: TextContentsWk,
+  ) -> TaffyResult<TreeNodeId> {
+    let indicator_style = Style {
+      display: taffy::Display::None,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let input_style = Style {
+      display: taffy::Display::None,
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let message_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+
+    let (
+      cmdline_id,
+      cmdline_shape,
+      indicator_id,
+      indicator_shape,
+      input_id,
+      input_shape,
+      message_id,
+      message_shape,
+    ) = {
+      let mut base = self.base.borrow_mut();
+      let (cmdline_id, cmdline_shape) =
+        make_new_node(&mut base, cmdline_style, Some(parent_id))?;
+      let (indicator_id, indicator_shape) =
+        make_new_node(&mut base, indicator_style, Some(cmdline_id))?;
+      let (input_id, input_shape) =
+        make_new_node(&mut base, input_style, Some(cmdline_id))?;
+      let (message_id, message_shape) =
+        make_new_node(&mut base, message_style, Some(cmdline_id))?;
+      (
+        cmdline_id,
+        cmdline_shape,
+        indicator_id,
+        indicator_shape,
+        input_id,
+        input_shape,
+        message_id,
+        message_shape,
+      )
+    };
+
+    let window = Window::new(
+      cmdline_id,
+      cmdline_shape,
+      window_opts,
+      input_id,
+      input_shape,
+      buffer.clone(),
+    );
+    let viewport = window.viewport();
+    let window_node = TreeNode::Window(window);
+    self.insert_guard(&window_node);
+    self.nodes.insert(cmdline_id, window_node);
+
+    let content = WindowContent::new(
+      input_id,
+      input_shape,
+      buffer,
+      Arc::downgrade(&viewport),
+    );
+    let content_node = TreeNode::WindowContent(content);
+    self.insert_guard(&content_node);
+    self.nodes.insert(input_id, content_node);
+
+    Ok(cmdline_id)
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {
