@@ -39,7 +39,6 @@ impl CommandLineIndicator {
   pub fn new(
     base: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     symbol: IndicatorSymbol,
   ) -> Self {
     CommandLineIndicator { base, id, symbol }
