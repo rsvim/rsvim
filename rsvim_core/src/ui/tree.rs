@@ -436,7 +436,7 @@ impl Tree {
       content_shape,
       buffer,
       Arc::downgrade(&viewport),
-    )?;
+    );
     let content_node = TreeNode::WindowContent(content);
     self.nodes.insert(content_id, content_node);
 

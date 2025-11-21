@@ -26,13 +26,13 @@ impl WindowContent {
     shape: U16Rect,
     buffer: BufferWk,
     viewport: ViewportWk,
-  ) -> TaffyResult<Self> {
+  ) -> Self {
     let base = InodeBase::new(id, shape);
-    Ok(WindowContent {
+    WindowContent {
       base,
       buffer,
       viewport,
-    })
+    }
   }
 
   pub fn set_viewport(&mut self, viewport: ViewportWk) {
