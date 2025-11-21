@@ -79,16 +79,7 @@ impl Window {
   }
 }
 
-inode_itree_impl!(Window, base);
-
-impl Widgetable for Window {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      node.draw(canvas);
-    }
-  }
-}
+impl Widgetable for Window {}
 
 // Attributes
 impl Window {

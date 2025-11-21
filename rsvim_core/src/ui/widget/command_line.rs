@@ -117,20 +117,6 @@ impl CommandLine {
   }
 }
 
-inode_itree_impl!(CommandLine, base);
-
-impl Widgetable for CommandLine {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      if !node.visible() {
-        continue;
-      }
-      node.draw(canvas);
-    }
-  }
-}
-
 impl CommandLine {
   /// Get window local options.
   pub fn options(&self) -> &WindowOptions {

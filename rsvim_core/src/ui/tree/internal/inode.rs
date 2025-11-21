@@ -57,66 +57,6 @@ macro_rules! inode_impl {
   };
 }
 
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
-      fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
-      }
-
-      fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_visible(visible);
-      }
-    }
-  };
-}
-
 /// Generate enum dispatcher for `Inode`.
 #[macro_export]
 macro_rules! inode_dispatcher {

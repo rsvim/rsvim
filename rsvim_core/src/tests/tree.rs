@@ -87,7 +87,7 @@ pub fn make_tree_with_buffers(
   let cursor = Cursor::default(cursor_loid, cursor_shape);
   window.insert_cursor(cursor);
 
-  tree.insert(tree_root_id, TreeNode::Window(window));
+  tree._insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   tree_arc.clone()
@@ -192,7 +192,7 @@ pub fn make_tree_with_buffers_cmdline(
   let cursor = Cursor::default(cursor_loid, cursor_shape);
   window.insert_cursor(cursor);
 
-  tree.insert(tree_root_id, TreeNode::Window(window));
+  tree._insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   // command-line
