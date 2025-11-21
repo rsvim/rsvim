@@ -8,11 +8,9 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_dispatcher;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::rect_as;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;

@@ -597,7 +597,8 @@ impl Tree {
     Ok(cmdline_id)
   }
 
-  fn _remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+  fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+    // guard
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
     }
@@ -607,6 +608,7 @@ impl Tree {
     {
       self.current_window_id = Some(*last_window_id);
     }
+
     self.nodes.remove(&id)
   }
 }
