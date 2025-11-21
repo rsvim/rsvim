@@ -150,7 +150,7 @@ arc_mutex_ptr!(Tree);
 impl Tree {
   /// Make UI tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let relationship = Irelationship::to_rc(Irelationship::new());
+    let base = Irelationship::to_rc(Irelationship::new());
 
     let root_style = Style {
       size: taffy::Size {
@@ -162,8 +162,8 @@ impl Tree {
     };
 
     let (root_id, root_shape) = {
-      let mut rel = relationship.borrow_mut();
-      make_new_node(&mut rel, root_style, None)?
+      let mut base = base.borrow_mut();
+      make_new_node(&mut base, root_style, None)?
     };
 
     let root = Root::new(root_id, root_shape);
@@ -172,7 +172,7 @@ impl Tree {
     nodes.insert(root_id, root_node);
 
     Ok(Tree {
-      base: relationship,
+      base,
       nodes,
       command_line_id: None,
       window_ids: BTreeSet::new(),
