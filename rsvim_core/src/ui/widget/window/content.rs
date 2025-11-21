@@ -22,28 +22,17 @@ pub struct Content {
 impl Content {
   /// Make window content.
   pub fn new(
-    relationship: &mut Irelationship,
-    style: Style,
-    parent_id: TreeNodeId,
+    id: TreeNodeId,
+    shape: U16Rect,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> TaffyResult<Self> {
-    let (content_id, content_shape) = {
-      let rel = relationship;
-      let content_id = rel.new_leaf(style)?;
-      rel.add_child(parent_id, content_id)?;
-      rel.compute_layout(content_id, taffy::Size::MAX_CONTENT)?;
-      let content_layout = rel.layout(content_id)?;
-      let content_shape = u16rect_from_layout!(content_layout);
-      (content_id, content_shape)
-    };
-
     let base = InodeBase::new(content_id, content_shape);
-    Content {
+    Ok(Content {
       base,
       buffer,
       viewport,
-    }
+    })
   }
 
   pub fn set_viewport(&mut self, viewport: ViewportWk) {

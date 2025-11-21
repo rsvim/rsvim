@@ -65,22 +65,22 @@ impl Window {
   ) -> TaffyResult<Self> {
     let mut base = Itree::new(relationship, style, Some(parent_id))?;
 
-    let (content_loid, content_shape) = {
-      let content_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::auto(),
-          height: taffy::Dimension::auto(),
-        },
-        ..Default::default()
-      };
+    let content_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
 
-      let mut lo = lotree.borrow_mut();
-      let content_loid = lo.new_leaf(content_style)?;
-      lo.add_child(loid, content_loid).unwrap();
-      lo.compute_layout(loid, taffy::Size::MAX_CONTENT)?;
-      let content_layout = lo.layout(content_loid)?;
-      let content_shape = rect_from_layout!(content_layout, u16);
-      (content_loid, content_shape)
+    let (content_id, content_shape) = {
+      let rel = relationship.borrow_mut();
+      let content_id = rel.new_leaf(style)?;
+      rel.add_child(parent_id, content_id)?;
+      rel.compute_layout(content_id, taffy::Size::MAX_CONTENT)?;
+      let content_layout = rel.layout(content_id)?;
+      let content_shape = u16rect_from_layout!(content_layout);
+      (content_id, content_shape)
     };
 
     let (viewport, cursor_viewport) = {
@@ -95,12 +95,15 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content = Content::new(
-      content_loid,
-      content_shape,
-      buffer.clone(),
-      Arc::downgrade(&viewport),
-    );
+    let content = {
+      let mut rel = relationship.borrow_mut();
+      Content::new(
+        content_id,
+        content_shape,
+        buffer.clone(),
+        Arc::downgrade(&viewport),
+      )
+    };
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
