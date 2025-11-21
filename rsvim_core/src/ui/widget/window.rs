@@ -101,7 +101,6 @@ impl Window {
       buffer.clone(),
       Arc::downgrade(&viewport),
     )?;
-    let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
     base.insert(root_id, content_node);

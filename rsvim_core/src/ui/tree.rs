@@ -356,8 +356,6 @@ impl Tree {
     let window_id = rel.new_leaf(window_style)?;
     rel.add_child(parent_id, window_id)?;
     rel.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
-    let window_layout = rel.layout(window_id)?;
-    let window_shape = u16rect_from_layout!(window_layout);
 
     let window = Window::new(
       self.base.relationship(),
@@ -365,10 +363,11 @@ impl Tree {
       parent_id,
       window_opts,
       buffer,
-    );
+    )?;
+    let window_node = TreeNode::Window(window);
 
-    self.insert_guard(&child_node);
-    self.base.insert(parent_id, child_node);
+    self.insert_guard(&window_node);
+    self.base.insert(parent_id, window_node);
 
     Ok(window_id)
   }
