@@ -530,8 +530,7 @@ impl EventLoop {
 
   /// Initialize windows.
   pub fn _init_windows(&mut self) -> IoResult<()> {
-    // Initialize default window, with default buffer.
-    let (canvas_size, canvas_cursor) = {
+    let (_canvas_size, canvas_cursor) = {
       let canvas = lock!(self.canvas);
       let canvas_size = canvas.size();
       let canvas_cursor = *canvas.frame().cursor();
@@ -555,7 +554,7 @@ impl EventLoop {
       ..Default::default()
     };
 
-    // Initialize default window.
+    // Initialize default window with default buffer.
     let window_id = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
