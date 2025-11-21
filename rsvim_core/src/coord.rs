@@ -144,6 +144,13 @@ macro_rules! rect_from_layout {
 }
 
 #[macro_export]
+macro_rules! u16rect_from_layout {
+  ($l:ident) => {
+    $crate::rect_from_layout!($l, u16)
+  };
+}
+
+#[macro_export]
 macro_rules! size {
   ($width:expr,$height:expr) => {
     $crate::coord::Size::new($width, $height)

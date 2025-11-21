@@ -172,8 +172,6 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let relationship = Irelationship::to_rc(Irelationship::new());
 
-    let lotree = new_layout_tree();
-
     let (root_loid, root_shape) = {
       let root_style = Style {
         size: taffy::Size {
