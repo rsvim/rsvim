@@ -54,6 +54,8 @@ impl CommandLine {
   pub fn new(
     id: TreeNodeId,
     shape: U16Rect,
+    indicator_id: TreeNodeId,
+    indicator_id: TreeNodeId,
     text_contents: TextContentsWk,
   ) -> TaffyResult<Self> {
     // Force cmdline window options.
@@ -64,62 +66,7 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let root = Dummy::new(id, shape);
-    let root_id = root.id();
-    let root_node = CommandLineNode::Root(root);
-    let mut base = Itree::new(lotree.clone(), root_node);
-
-    let (
-      indicator_loid,
-      indicator_shape,
-      input_loid,
-      input_shape,
-      message_loid,
-      message_shape,
-    ) = {
-      let indicator_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::from_length(1_u16),
-          height: taffy::Dimension::auto(),
-        },
-        ..Default::default()
-      };
-      let input_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::auto(),
-          height: taffy::Dimension::auto(),
-        },
-        ..Default::default()
-      };
-      let message_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::auto(),
-          height: taffy::Dimension::auto(),
-        },
-        ..Default::default()
-      };
-
-      let mut lo = lotree.borrow_mut();
-      let indicator_loid = lo.new_leaf(indicator_style).unwrap();
-      let input_loid = lo.new_leaf(input_style).unwrap();
-      let message_loid = lo.new_leaf(message_style).unwrap();
-      lo.add_child(id, indicator_loid).unwrap();
-      lo.add_child(id, input_loid).unwrap();
-      lo.compute_layout(id, taffy::Size::MAX_CONTENT)?;
-      let indicator_layout = lo.layout(indicator_loid)?;
-      let input_layout = lo.layout(input_loid)?;
-      let indicator_shape = rect_from_layout!(indicator_layout, u16);
-      let input_shape = rect_from_layout!(input_layout, u16);
-
-      (
-        indicator_loid,
-        indicator_shape,
-        input_loid,
-        input_shape,
-        message_loid,
-        shape,
-      )
-    };
+    let base = InodeBase::new(id, shape);
 
     let indicator = CommandLineIndicator::new(
       indicator_loid,
