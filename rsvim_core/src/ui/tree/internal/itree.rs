@@ -120,11 +120,11 @@ impl Irelationship {
   pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
-    id: TreeNodeId,
+    child_id: TreeNodeId,
   ) -> TaffyResult<()> {
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
-    let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.add_child(*parent_loid, *loid)
+    let child_loid = self.nid2loid.get(&child_id).unwrap();
+    self.lo.add_child(*parent_loid, *child_loid)
   }
 }
 

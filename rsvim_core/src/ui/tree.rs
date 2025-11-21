@@ -90,7 +90,7 @@ widget_dispatcher!(TreeNode, Window, CommandLine);
 ///   higher priority to display and process the input events.
 pub struct Tree {
   // Internal tree.
-  base: Itree<TreeNode>,
+  base: IrelationshipRc,
 
   // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
