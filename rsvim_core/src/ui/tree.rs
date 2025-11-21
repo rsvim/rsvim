@@ -7,6 +7,7 @@ use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::canvas::CursorStyle;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
@@ -30,6 +31,7 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
 pub type TreeNodeId = i32;
@@ -446,8 +448,36 @@ impl Tree {
   pub fn insert_new_cursor(
     &mut self,
     parent_id: TreeNodeId,
-    cursor_opts: WindowOptions,
+    blinking: bool,
+    hidden: bool,
+    style: CursorStyle,
   ) -> TaffyResult<TreeNodeId> {
+    let cursor_style = Style {
+      position: taffy::Position::Absolute,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(0_u16),
+        top: taffy::LengthPercentageAuto::from_length(0_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      ..Default::default()
+    };
+
+    let (cursor_id, cursor_shape) = {
+      let mut base = self.base.borrow_mut();
+      let (cursor_id, cursor_shape) =
+        make_new_node(&mut base, cursor_style, Some(parent_id))?;
+      (cursor_id, cursor_shape)
+    };
+
+    let cursor = Cursor::new(cursor_id, cursor_shape, blinking, hidden, style);
+    let cursor_node = TreeNode::Cursor(cursor);
+    self.insert_guard(&cursor_node);
+    self.nodes.insert(window_id, window_node);
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {
