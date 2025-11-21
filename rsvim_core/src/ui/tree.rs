@@ -174,12 +174,14 @@ impl Tree {
       flex_direction: taffy::FlexDirection::Column,
       ..Default::default()
     };
-    let (root_id, root_shape) = {
+    let root_id = {
       let mut base = base.borrow_mut();
-      make_new_node(&mut base, root_style, None)?
+      let root_id = rel.new_leaf(root_style)?;
+      rel.compute_layout(id, taffy::Size::MAX_CONTENT)?;
+      root_id
     };
 
-    let root = Root::new(root_id, root_shape);
+    let root = Root::new(base.clone(), root_id);
     let root_node = TreeNode::Root(root);
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);

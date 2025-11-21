@@ -52,13 +52,9 @@ impl CommandLine {
   pub fn new(
     base: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     indicator_id: TreeNodeId,
-    indicator_shape: U16Rect,
     input_id: TreeNodeId,
-    input_shape: U16Rect,
     message_id: TreeNodeId,
-    message_shape: U16Rect,
     text_contents: TextContentsWk,
   ) -> TaffyResult<Self> {
     // Force cmdline window options.

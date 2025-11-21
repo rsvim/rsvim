@@ -8,17 +8,16 @@ use crate::ui::widget::Widgetable;
 #[derive(Debug, Clone)]
 /// Root node.
 pub struct Root {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
 }
 
 impl Root {
-  pub fn new(id: TreeNodeId, shape: U16Rect) -> Self {
-    Root {
-      base: InodeBase::new(id, shape),
-    }
+  pub fn new(base: IrelationshipRc, id: TreeNodeId) -> Self {
+    Root { base, id }
   }
 }
 
-inode_impl!(Root, base);
+inode_impl!(Root);
 
 impl Widgetable for Root {}
