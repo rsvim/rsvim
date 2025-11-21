@@ -49,6 +49,15 @@ impl Irelationship {
     }
   }
 
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
+
+  #[cfg(test)]
+  fn _internal_check(&self) {
+    debug_assert_eq!(self.lo.total_node_count(), self.nid2loid.len());
+    debug_assert_eq!(self.lo.total_node_count(), self.loid2nid.len());
+  }
+
   pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
     let loid = self.lo.new_leaf(style)?;
     let nid = next_node_id();
