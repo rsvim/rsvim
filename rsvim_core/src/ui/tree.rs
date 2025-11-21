@@ -136,7 +136,7 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 ///
 pub struct Tree {
   // Internal relationship.
-  relationship: IrelationshipRc,
+  lo: IrelationshipRc,
 
   // Internal tree.
   base: Itree<TreeNode>,
@@ -170,19 +170,18 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let relationship = Irelationship::to_rc(Irelationship::new());
+    let lotree = Irelationship::to_rc(Irelationship::new());
 
+    let root_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(canvas_size.width()),
+        height: taffy::Dimension::from_length(canvas_size.height()),
+      },
+      flex_direction: taffy::FlexDirection::Column,
+      ..Default::default()
+    };
     let (root_id, root_shape) = {
-      let root_style = Style {
-        size: taffy::Size {
-          width: taffy::Dimension::from_length(canvas_size.width()),
-          height: taffy::Dimension::from_length(canvas_size.height()),
-        },
-        flex_direction: taffy::FlexDirection::Column,
-        ..Default::default()
-      };
-
-      let mut lo = relationship.borrow_mut();
+      let mut lo = lotree.borrow_mut();
       let root_id = lo.new_leaf(root_style)?;
       lo.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       let root_layout = lo.layout(root_id)?;
@@ -192,8 +191,9 @@ impl Tree {
 
     let root = Dummy::new(root_id, root_shape);
     let root_node = TreeNode::Root(root);
+
     Ok(Tree {
-      relationship,
+      lo: lotree.clone(),
       base: Itree::new(lotree, root_node),
       command_line_id: None,
       window_ids: BTreeSet::new(),
