@@ -95,15 +95,12 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content = {
-      let mut rel = relationship.borrow_mut();
-      Content::new(
-        content_id,
-        content_shape,
-        buffer.clone(),
-        Arc::downgrade(&viewport),
-      )
-    };
+    let content = Content::new(
+      content_id,
+      content_shape,
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    )?;
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
