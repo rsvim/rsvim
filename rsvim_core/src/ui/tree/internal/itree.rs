@@ -172,6 +172,15 @@ impl Irelationship {
   pub fn clear_actual_shape(&mut self, id: TreeNodeId) {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
+    while let Some(parent_id) = q.pop_front() {
+      let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+      cached_actual_shapes.remove(&parent_id);
+      if let Ok(children_ids) = self.children(parent_id) {
+        for child_id in children_ids.iter() {
+          q.push_back(*child_id);
+        }
+      }
+    }
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
