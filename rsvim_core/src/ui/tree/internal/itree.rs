@@ -97,6 +97,11 @@ impl Irelationship {
     self.lo.layout(*loid)
   }
 
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.style(*loid)
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
@@ -104,18 +109,14 @@ impl Irelationship {
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    match self.nid2loid.get(&id) {
-      Some(loid) => {
-        let children_loids = self.lo.children(*loid)?;
-        Ok(
-          children_loids
-            .iter()
-            .map(|i| *self.loid2nid.get(i).unwrap())
-            .collect_vec(),
-        )
-      }
-      None => Err(taffy::TaffyError::InvalidParentNode(taffy::NodeId::new(0))),
-    }
+    let loid = self.nid2loid.get(&id).unwrap();
+    let children_loids = self.lo.children(*loid)?;
+    Ok(
+      children_loids
+        .iter()
+        .map(|i| *self.loid2nid.get(i).unwrap())
+        .collect_vec(),
+    )
   }
 
   pub fn add_child(
