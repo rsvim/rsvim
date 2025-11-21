@@ -69,6 +69,7 @@ impl Irelationship {
         }
       }
     }
+    debug_assert_eq!(no_parent_nodes, 1);
     for (loid, nid) in self.loid2nid.iter() {
       debug_assert!(self.nid2loid.contains_key(nid));
       debug_assert_eq!(*self.nid2loid.get(nid).unwrap(), *loid);
