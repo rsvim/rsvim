@@ -12,29 +12,6 @@ use std::fmt::Debug;
 
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-#[derive(Debug, Clone, Copy)]
-pub struct CursorOptions {
-  // blinking=false
-  // hidden=false
-  flags: Flags,
-  style: CursorStyle,
-}
-
-impl CursorOptions {
-  pub fn new(blinking: bool, hidden: bool, style: CursorStyle) -> Self {
-    let mut flags = Flags::empty();
-    flags.set(Flags::BLINKING, blinking);
-    flags.set(Flags::HIDDEN, hidden);
-    Self { flags, style }
-  }
-}
-
-impl Default for CursorOptions {
-  fn default() -> Self {
-    Self::new(false, false, CursorStyle::SteadyBlock)
-  }
-}
-
 #[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
@@ -102,9 +79,9 @@ impl Widgetable for Cursor {
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
-      self.options().blinking(),
-      self.options().hidden(),
-      *self.options().style(),
+      self.blinking(),
+      self.hidden(),
+      *self.style(),
     ));
   }
 }
