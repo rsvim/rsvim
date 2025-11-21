@@ -7,13 +7,9 @@ use crate::ui::tree::TreeNodeId;
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn relationship(&self) -> IrelationshipRc;
-
-  fn shape(&self) -> IRect;
-
   fn actual_shape(&self) -> U16Rect;
 
-  fn actual_shape(&self) -> U16Rect;
+  fn set_actual_shape(&self) -> U16Rect;
 
   fn visible(&self) -> bool;
 }
