@@ -374,11 +374,12 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  fn insert_guard(&mut self, node: &TreeNode) {
-    match node {
-      TreeNode::CommandLine(command_line) => {
+  fn insert(&mut self, child_node: TreeNode) {
+    // guard
+    match child_node {
+      TreeNode::CommandLine(cmdline) => {
         // When insert command-line widget, update `command_line_id`.
-        self.command_line_id = Some(command_line.id());
+        self.command_line_id = Some(cmdline.id());
       }
       TreeNode::Window(window) => {
         // When insert window widget, update `window_ids`.
@@ -386,10 +387,6 @@ impl Tree {
       }
       _ => { /* Skip */ }
     }
-  }
-
-  fn _insert(&mut self, child_node: TreeNode) {
-    self.insert_guard(&child_node);
     self.nodes.insert(child_node.id(), child_node);
   }
 
@@ -428,7 +425,7 @@ impl Tree {
     );
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
-    self._insert(window_node);
+    self.insert(window_node);
 
     let content = WindowContent::new(
       self.relationship(),
@@ -438,7 +435,7 @@ impl Tree {
       Arc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
-    self._insert(content_node);
+    self.insert(content_node);
 
     Ok(window_id)
   }
@@ -482,7 +479,7 @@ impl Tree {
       style,
     );
     let cursor_node = TreeNode::Cursor(cursor);
-    self._insert(cursor_node);
+    self.insert(cursor_node);
 
     Ok(cursor_id)
   }
@@ -566,7 +563,7 @@ impl Tree {
     let message_viewport = cmdline.message_viewport();
 
     let cmdline_node = TreeNode::CommandLine(cmdline);
-    self._insert(cmdline_node);
+    self.insert(cmdline_node);
 
     let indicator = CommandLineIndicator::new(
       self.relationship(),
@@ -575,7 +572,7 @@ impl Tree {
       indicator_symbol,
     );
     let indicator_node = TreeNode::CommandLineIndicator(indicator);
-    self._insert(indicator_node);
+    self.insert(indicator_node);
 
     let input = CommandLineInput::new(
       self.relationship(),
@@ -585,7 +582,7 @@ impl Tree {
       Arc::downgrade(&input_viewport),
     );
     let input_node = TreeNode::CommandLineInput(input);
-    self._insert(input_node);
+    self.insert(input_node);
 
     let message = CommandLineMessage::new(
       self.relationship(),
@@ -595,12 +592,12 @@ impl Tree {
       Arc::downgrade(&message_viewport),
     );
     let message_node = TreeNode::CommandLineMessage(message);
-    self._insert(message_node);
+    self.insert(message_node);
 
     Ok(cmdline_id)
   }
 
-  fn remove_guard(&mut self, id: TreeNodeId) {
+  fn _remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
     }
@@ -610,10 +607,6 @@ impl Tree {
     {
       self.current_window_id = Some(*last_window_id);
     }
-  }
-
-  fn _remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self.remove_guard(id);
     self.nodes.remove(&id)
   }
 }

@@ -9,6 +9,7 @@ pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
 use crate::inode_dispatcher;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::rect_as;
 use crate::ui::canvas::Canvas;
@@ -48,6 +49,8 @@ pub struct CommandLine {
   input_cursor_viewport: CursorViewportArc,
   message_viewport: ViewportArc,
 }
+
+inode_impl!(CommandLine, base);
 
 impl CommandLine {
   pub fn new(
