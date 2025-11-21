@@ -32,7 +32,7 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  Root(Root),
+  Root(Dummy),
   Content(Content),
   Cursor(Cursor),
 }
@@ -63,7 +63,7 @@ impl Window {
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let root = Root::new(loid, shape);
+    let root = Dummy::new(loid, shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
     let mut base = Itree::new(lotree.clone(), root_node);

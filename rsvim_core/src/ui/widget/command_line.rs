@@ -37,7 +37,7 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
-  Root(Root),
+  Root(Dummy),
   Indicator(Indicator),
   Input(Input),
   Cursor(Cursor),
@@ -79,7 +79,7 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let root = Root::new(loid, shape);
+    let root = Dummy::new(loid, shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
     let mut base = Itree::new(lotree.clone(), root_node);

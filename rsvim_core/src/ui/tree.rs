@@ -29,16 +29,10 @@ pub type TreeNodeId = i32;
 pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
 pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
-pub fn new_layout_tree() -> TaffyTreeRc {
-  let mut layout_tree = TaffyTree::new();
-  layout_tree.disable_rounding();
-  Rc::new(RefCell::new(layout_tree))
-}
-
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  Root(Root),
+  Root(Dummy),
   Window(Window),
   CommandLine(CommandLine),
 }
@@ -193,7 +187,7 @@ impl Tree {
       (root_loid, root_shape)
     };
 
-    let root = Root::new(root_loid, root_shape);
+    let root = Dummy::new(root_loid, root_shape);
     let root_node = TreeNode::Root(root);
     Ok(Tree {
       base: Itree::new(lotree, root_node),
