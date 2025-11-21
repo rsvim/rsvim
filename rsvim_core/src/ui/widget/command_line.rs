@@ -35,20 +35,6 @@ use taffy::prelude::FromLength;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum CommandLineNode {
-  Root(Dummy),
-  Indicator(CommandLineIndicator),
-  Input(CommandLineInput),
-  Cursor(Cursor),
-  Message(CommandLineMessage),
-}
-
-inode_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
-
-widget_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
-
-#[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
   base: Itree<CommandLineNode>,
