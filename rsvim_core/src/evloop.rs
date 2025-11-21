@@ -539,7 +539,6 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
-    let tree_root_loid = tree.root_loid();
 
     let window_style = Style {
       size: taffy::Size {

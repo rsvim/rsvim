@@ -342,6 +342,28 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
+  /// See [`Itree::insert`].
+  pub fn insert_new_window(
+    &mut self,
+    parent_id: TreeNodeId,
+    window_style: Style,
+  ) -> TaffyResult<TreeNodeId> {
+    let rel = self.base.relationship();
+    let mut rel = rel.borrow_mut();
+
+    let window_id = rel.new_leaf(window_style)?;
+    rel.add_child(parent_id, window_id)?;
+    rel
+      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
+      .unwrap();
+    let window_layout = lo.layout(window_id).unwrap();
+    let cmdline_layout = lo.layout(cmdline_loid).unwrap();
+    let window_shape = rect_from_layout!(window_layout, u16);
+
+    self.insert_guard(&child_node);
+    self.base.insert(parent_id, child_node)
+  }
+
   fn remove_guard(&mut self, id: TreeNodeId) {
     if self.command_line_id == Some(id) {
       self.command_line_id = None;

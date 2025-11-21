@@ -5,10 +5,8 @@ use crate::ui::tree::Dummy;
 use crate::ui::tree::InodeDispatch;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::LayoutNodeId;
-use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use icu::collections::codepointtrie::SmallCodePointTrie;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -118,6 +116,16 @@ impl Irelationship {
       }
       None => Err(taffy::TaffyError::InvalidParentNode(LayoutNodeId::new(0))),
     }
+  }
+
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.add_child(*parent_loid, *loid)
   }
 }
 
