@@ -630,6 +630,17 @@ impl EventLoop {
     let _previous_inserted_cursor = window.insert_cursor(cursor);
     debug_assert!(_previous_inserted_cursor.is_none());
 
+    let window_id = {
+      let buffers = lock!(self.buffers);
+      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      tree.insert_new_window(
+        tree_root_id,
+        window_style,
+        tree.global_local_options(),
+        Arc::downgrade(buf),
+      ).unwrap();
+    }
+
     tree.insert(tree_root_id, TreeNode::Window(window));
     tree.set_current_window_id(Some(window_id));
 

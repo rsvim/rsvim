@@ -443,6 +443,12 @@ impl Tree {
     Ok(window_id)
   }
 
+  pub fn insert_new_cursor(
+    &mut self,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+  }
+
   fn remove_guard(&mut self, id: TreeNodeId) {
     if self.command_line_id == Some(id) {
       self.command_line_id = None;

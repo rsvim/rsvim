@@ -13,6 +13,53 @@ use std::fmt::Debug;
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
 #[derive(Debug, Clone)]
+pub struct CursorOptions {
+  // blinking=false
+  // hidden=false
+  flags: Flags,
+  style: CursorStyle,
+}
+
+impl CursorOptions {
+  pub fn new(blinking: bool, hidden: bool, style: CursorStyle) -> Self {
+    let mut flags = Flags::empty();
+    flags.set(Flags::BLINKING, blinking);
+    flags.set(Flags::HIDDEN, hidden);
+    Self { flags, style }
+  }
+
+  pub fn blinking(&self) -> bool {
+    self.flags.contains(Flags::BLINKING)
+  }
+
+  pub fn set_blinking(&mut self, value: bool) {
+    self.flags.set(Flags::BLINKING, value);
+  }
+
+  pub fn hidden(&self) -> bool {
+    self.flags.contains(Flags::HIDDEN)
+  }
+
+  pub fn set_hidden(&mut self, value: bool) {
+    self.flags.set(Flags::HIDDEN, value);
+  }
+
+  pub fn style(&self) -> &CursorStyle {
+    &self.style
+  }
+
+  pub fn set_style(&mut self, style: &CursorStyle) {
+    self.style = *style;
+  }
+}
+
+impl Default for CursorOptions {
+  fn default() -> Self {
+    Self::new(false, false, CursorStyle::SteadyBlock)
+  }
+}
+
+#[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
