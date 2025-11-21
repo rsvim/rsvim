@@ -431,7 +431,7 @@ impl Tree {
       content_id,
       content_shape,
       buffer,
-    )?;
+    );
     let window_node = TreeNode::Window(window);
     self.nodes.insert(window_id, window_node);
     let content = WindowContent::new(
