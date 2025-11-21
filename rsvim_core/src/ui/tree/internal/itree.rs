@@ -167,6 +167,13 @@ impl Irelationship {
     }
   }
 
+  /// Clear the cached actual_shapes since the provided id. All its
+  /// descendants actual_shape will be cleared as well.
+  pub fn clear_actual_shape(&mut self, id: TreeNodeId) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(id);
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
