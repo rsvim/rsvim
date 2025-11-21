@@ -376,7 +376,7 @@ impl Tree {
 impl Tree {
   fn insert(&mut self, child_node: TreeNode) {
     // guard
-    match child_node {
+    match &child_node {
       TreeNode::CommandLine(cmdline) => {
         // When insert command-line widget, update `command_line_id`.
         self.command_line_id = Some(cmdline.id());
@@ -387,6 +387,7 @@ impl Tree {
       }
       _ => { /* Skip */ }
     }
+
     self.nodes.insert(child_node.id(), child_node);
   }
 
