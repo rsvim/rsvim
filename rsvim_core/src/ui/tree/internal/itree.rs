@@ -18,6 +18,8 @@ pub struct Irelationship {
   lotree: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
   loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
+  root_id: TreeNodeId,
+  root_loid: LayoutNodeId,
 }
 
 arc_mutex_ptr!(Irelationship);
