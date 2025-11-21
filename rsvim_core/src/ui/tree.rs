@@ -12,6 +12,7 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::input::CommandLineInput;
 use crate::ui::widget::command_line::message::CommandLineMessage;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::Root;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
@@ -38,6 +39,7 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 /// The value holder for each widget.
 pub enum TreeNode {
   Root(Root),
+  Cursor(Cursor),
   Window(Window),
   WindowContent(WindowContent),
   CommandLine(CommandLine),
@@ -49,6 +51,7 @@ pub enum TreeNode {
 inode_dispatcher!(
   TreeNode,
   Root,
+  Cursor,
   Window,
   WindowContent,
   CommandLine,
@@ -56,9 +59,11 @@ inode_dispatcher!(
   CommandLineIndicator,
   CommandLineMessage
 );
+
 widget_dispatcher!(
   TreeNode,
   Root,
+  Cursor,
   Window,
   WindowContent,
   CommandLine,

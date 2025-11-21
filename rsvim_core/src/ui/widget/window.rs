@@ -29,14 +29,6 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::prelude::TaffyMaxContent;
 
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  Root(Dummy),
-  Content(WindowContent),
-  Cursor(Cursor),
-}
-
 inode_dispatcher!(WindowNode, Root, Content, Cursor);
 widget_dispatcher!(WindowNode, Root, Content, Cursor);
 
