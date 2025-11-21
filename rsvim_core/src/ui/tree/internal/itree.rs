@@ -8,6 +8,7 @@ use crate::ui::tree::TreeNode;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
+use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
@@ -33,6 +34,8 @@ pub struct Irelationship {
   lo: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
   loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
+  // Cached actual_shape for each node.
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
 rc_refcell_ptr!(Irelationship);
@@ -45,6 +48,7 @@ impl Irelationship {
       lo,
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
+      cached_actual_shapes: RefCell::new(FoldMap::new()),
     }
   }
 
@@ -102,9 +106,65 @@ impl Irelationship {
     self.lo.style(*loid)
   }
 
+  /// Logical location/size on unlimited canvas.
+  /// The top-left location can be negative.
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     let layout = self.layout(id)?;
     Ok(rect_from_layout!(layout, isize))
+  }
+
+  /// Actual location/size on real-world canvas on limited terminal.
+  /// The top-left location can never be negative.
+  ///
+  /// A node's actual shape is always truncated by its parent actual shape.
+  /// Unless the node itself is the root node and doesn't have a parent, in
+  /// such case, the root node logical shape is actual shape.
+  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+    match self.parent(id) {
+      Some(parent_id) => {
+        // Non-root node truncated by its parent's actual shape.
+        let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+        match cached_actual_shapes.get(&id) {
+          Some(actual_shape) => {
+            // Use caches to shorten the recursive query path.
+            Ok(*actual_shape)
+          }
+          None => {
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(*parent_id)?;
+            let left = num_traits::clamp(
+              shape.min().x,
+              0,
+              parent_actual_shape.max().x as isize,
+            );
+            let top = num_traits::clamp(
+              shape.min().y,
+              0,
+              parent_actual_shape.max().y as isize,
+            );
+            let right = num_traits::clamp(
+              shape.max().x,
+              0,
+              parent_actual_shape.max().x as isize,
+            );
+            let bottom = num_traits::clamp(
+              shape.max().y,
+              0,
+              parent_actual_shape.max().y as isize,
+            );
+            let truncated = rect!(left, top, right, bottom);
+            let truncated = rect_as!(truncated, u16);
+            cached_actual_shapes.insert(id, truncated);
+            Ok(truncated)
+          }
+        }
+      }
+      None => {
+        // Root node doesn't have a parent.
+        let shape = self.shape(id)?;
+        Ok(rect_as!(shape, u16))
+      }
+    }
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
