@@ -423,7 +423,7 @@ impl Tree {
       window_opts,
       content_id,
       content_shape,
-      buffer,
+      buffer.clone(),
     );
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
@@ -434,7 +434,7 @@ impl Tree {
     let content = WindowContent::new(
       content_id,
       content_shape,
-      buffer.clone(),
+      buffer,
       Arc::downgrade(&viewport),
     )?;
     let content_node = TreeNode::WindowContent(content);
