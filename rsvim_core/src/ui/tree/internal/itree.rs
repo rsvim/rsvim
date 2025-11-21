@@ -12,6 +12,7 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 use taffy::AvailableSpace;
+use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
@@ -52,6 +53,11 @@ impl Irelationship {
   ) -> TaffyResult<()> {
     let loid = self.nid2loid.get(&id).unwrap();
     self.lo.compute_layout(*loid, available_size)
+  }
+
+  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.layout(*loid)
   }
 }
 
