@@ -19,12 +19,13 @@ pub struct CommandLineMessage {
 
 impl CommandLineMessage {
   pub fn new(
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(id, shape);
+    let base = InodeBase::new(relationship, id, shape);
     CommandLineMessage {
       base,
       text_contents,
