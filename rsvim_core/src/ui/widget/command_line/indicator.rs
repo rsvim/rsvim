@@ -30,19 +30,19 @@ impl std::fmt::Display for IndicatorSymbol {
 
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
-pub struct Indicator {
+pub struct CommandLineIndicator {
   base: InodeBase,
   symbol: IndicatorSymbol,
 }
 
-impl Indicator {
+impl CommandLineIndicator {
   pub fn new(
     loid: LayoutNodeId,
     shape: U16Rect,
     symbol: IndicatorSymbol,
   ) -> Self {
     let base = InodeBase::new(loid, shape);
-    Indicator { base, symbol }
+    CommandLineIndicator { base, symbol }
   }
 
   pub fn symbol(&self) -> IndicatorSymbol {
@@ -54,9 +54,9 @@ impl Indicator {
   }
 }
 
-inode_impl!(Indicator, base);
+inode_impl!(CommandLineIndicator, base);
 
-impl Widgetable for Indicator {
+impl Widgetable for CommandLineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let upos: U16Pos = actual_shape.min().into();

@@ -22,7 +22,7 @@ use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::widget_dispatcher;
-use content::Content;
+use content::WindowContent;
 use opt::*;
 use std::sync::Arc;
 use taffy::Style;
@@ -33,7 +33,7 @@ use taffy::prelude::TaffyMaxContent;
 /// The value holder for each window widget.
 pub enum WindowNode {
   Root(Dummy),
-  Content(Content),
+  Content(WindowContent),
   Cursor(Cursor),
 }
 
@@ -95,7 +95,7 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content = Content::new(
+    let content = WindowContent::new(
       content_id,
       content_shape,
       buffer.clone(),
@@ -227,7 +227,7 @@ impl EditableWidgetable for Window {
 // Sub-Widgets {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &Content {
+  pub fn content(&self) -> &WindowContent {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -243,7 +243,7 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut Content {
+  pub fn content_mut(&mut self) -> &mut WindowContent {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),

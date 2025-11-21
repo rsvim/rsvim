@@ -9,7 +9,11 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::indicator::CommandLineIndicator;
+use crate::ui::widget::command_line::input::CommandLineInput;
+use crate::ui::widget::command_line::message::CommandLineMessage;
 use crate::ui::widget::window::Window;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
@@ -32,12 +36,35 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
+  Root(Dummy),
   Window(Window),
+  WindowContent(WindowContent),
   CommandLine(CommandLine),
+  CommandLineIndicator(CommandLineIndicator),
+  CommandLineInput(CommandLineInput),
+  CommandLineMessage(CommandLineMessage),
 }
 
-inode_dispatcher!(TreeNode, Window, CommandLine);
-widget_dispatcher!(TreeNode, Window, CommandLine);
+inode_dispatcher!(
+  TreeNode,
+  Root,
+  Window,
+  WindowContent,
+  CommandLine,
+  CommandLineIndicator,
+  CommandLineIndicator,
+  CommandLineMessage
+);
+widget_dispatcher!(
+  TreeNode,
+  Root,
+  Window,
+  WindowContent,
+  CommandLine,
+  CommandLineIndicator,
+  CommandLineInput,
+  CommandLineMessage
+);
 
 #[derive(Debug, Clone)]
 /// The widget tree (UI tree).

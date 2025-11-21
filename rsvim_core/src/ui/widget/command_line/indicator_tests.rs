@@ -30,7 +30,7 @@ mod tests_nowrap {
 
   fn make_canvas(
     terminal_size: U16Size,
-    cmdline_indicator: &Indicator,
+    cmdline_indicator: &CommandLineIndicator,
   ) -> Canvas {
     let mut canvas = Canvas::new(terminal_size);
     cmdline_indicator.draw(&mut canvas);
@@ -72,7 +72,8 @@ mod tests_nowrap {
 
     let expect = vec![":"];
 
-    let cmdline_indicator = Indicator::new(terminal_shape, IndicatorSymbol::Ex);
+    let cmdline_indicator =
+      CommandLineIndicator::new(terminal_shape, IndicatorSymbol::Ex);
     let actual = make_canvas(terminal_size, &cmdline_indicator);
     assert_canvas(&actual, &expect);
   }
