@@ -9,7 +9,6 @@ pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
 use crate::inode_dispatcher;
-use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::rect_as;
 use crate::ui::canvas::Canvas;
@@ -52,6 +51,7 @@ pub struct CommandLine {
 
 impl CommandLine {
   pub fn new(
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     indicator_id: TreeNodeId,
@@ -70,7 +70,7 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let base = InodeBase::new(id, shape);
+    let base = InodeBase::new(relationship, id, shape);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);

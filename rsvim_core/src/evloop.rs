@@ -588,7 +588,7 @@ impl EventLoop {
     )
     .unwrap();
 
-    tree.insert(tree_root_id, TreeNode::CommandLine(cmdline));
+    tree._insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }

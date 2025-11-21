@@ -9,8 +9,6 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_dispatcher;
-use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -46,6 +44,7 @@ pub struct Window {
 
 impl Window {
   pub fn new(
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     opts: WindowOptions,
@@ -53,7 +52,7 @@ impl Window {
     content_shape: U16Rect,
     buffer: BufferWk,
   ) -> Self {
-    let base = InodeBase::new(id, shape);
+    let base = InodeBase::new(relationship, id, shape);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();

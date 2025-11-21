@@ -36,8 +36,13 @@ pub struct CommandLineIndicator {
 }
 
 impl CommandLineIndicator {
-  pub fn new(id: TreeNodeId, shape: U16Rect, symbol: IndicatorSymbol) -> Self {
-    let base = InodeBase::new(id, shape);
+  pub fn new(
+    relationship: IrelationshipRc,
+    id: TreeNodeId,
+    shape: U16Rect,
+    symbol: IndicatorSymbol,
+  ) -> Self {
+    let base = InodeBase::new(relationship, id, shape);
     CommandLineIndicator { base, symbol }
   }
 

@@ -22,12 +22,13 @@ pub struct WindowContent {
 impl WindowContent {
   /// Make window content.
   pub fn new(
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(id, shape);
+    let base = InodeBase::new(relationship, id, shape);
     WindowContent {
       base,
       buffer,

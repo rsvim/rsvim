@@ -24,13 +24,14 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
-    let base = InodeBase::new(id, shape);
+    let base = InodeBase::new(relationship, id, shape);
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);

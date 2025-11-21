@@ -418,6 +418,7 @@ impl Tree {
     };
 
     let window = Window::new(
+      self.relationship(),
       window_id,
       window_shape,
       window_opts,
@@ -430,6 +431,7 @@ impl Tree {
     self._insert(window_node);
 
     let content = WindowContent::new(
+      self.relationship(),
       content_id,
       content_shape,
       buffer,
@@ -471,7 +473,14 @@ impl Tree {
       (cursor_id, cursor_shape)
     };
 
-    let cursor = Cursor::new(cursor_id, cursor_shape, blinking, hidden, style);
+    let cursor = Cursor::new(
+      self.relationship(),
+      cursor_id,
+      cursor_shape,
+      blinking,
+      hidden,
+      style,
+    );
     let cursor_node = TreeNode::Cursor(cursor);
     self._insert(cursor_node);
 
@@ -542,6 +551,7 @@ impl Tree {
     };
 
     let cmdline = CommandLine::new(
+      self.relationship(),
       cmdline_id,
       cmdline_shape,
       indicator_id,
