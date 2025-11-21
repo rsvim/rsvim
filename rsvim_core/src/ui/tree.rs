@@ -120,8 +120,11 @@ pub struct Tree {
   // Internal relationship.
   base: IrelationshipRc,
 
-  // Tree nodes
+  // Tree nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
+
+  // Root node ID.
+  root_id: TreeNodeId,
 
   // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
@@ -174,6 +177,7 @@ impl Tree {
     Ok(Tree {
       base,
       nodes,
+      root_id,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
@@ -183,22 +187,25 @@ impl Tree {
   }
 
   pub fn relationship(&self) -> IrelationshipRc {
-    self.base.relationship()
+    self.base.clone()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self.base.root_id()
+    self.root_id
   }
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.base.parent_id(id)
+    self.base.borrow().parent(id).copied()
   }
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.base.children_ids(id)
+    match self.base.borrow().children(id) {
+      Ok(children) => children,
+      Err(_) => vec![],
+    }
   }
 
   /// Get the node struct by its `id`.
