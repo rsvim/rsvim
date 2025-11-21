@@ -14,13 +14,13 @@ use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
-pub struct Irelation {
+pub struct Irelationship {
   lotree: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
   loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
-arc_mutex_ptr!(Irelation);
+arc_mutex_ptr!(Irelationship);
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>
