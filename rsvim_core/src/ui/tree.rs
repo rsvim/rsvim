@@ -113,7 +113,7 @@ widget_dispatcher!(
 /// - Children are displayed inside their parent's geometric shape, clipped by
 ///   boundaries. While the size of each node can be logically infinite on the
 ///   imaginary canvas.
-/// - `visible` (or `enabled`) attributes of a child are implicitly
+/// - The `visible` (or `enabled`) attributes of a child is implicitly
 ///   inherited from it's parent, unless they're explicitly been set.
 ///
 /// # Priority
