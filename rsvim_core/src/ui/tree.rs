@@ -40,11 +40,19 @@ inode_dispatcher!(TreeNode, Window, CommandLine);
 widget_dispatcher!(TreeNode, Window, CommandLine);
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The widget tree (UI tree).
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// The widget tree manages all UI widgets and rendering on the canvas, each
+/// widgiet is a node on the tree, the tree has a root node, and all other
+/// nodes inside is the root node's descendants. The root node is the terminal
+/// itself, while each node inside renders a part of the terminal.
+///
+/// We use [taffy] to manage the parent-child relationships among all the
+/// nodes, and calculate layout for the whole TUI. The tree structure contains
+/// a [TaffyTree] pointer. Each node holds a weak reference point to that
+/// [TaffyTree], and also a [taffy::Style] to indicate what style this node
+/// wants to be, a [taffy::Layout] to cache the layout result that how this
+/// node is going to render itself.
 ///
 /// # Terms
 ///
@@ -54,85 +62,53 @@ widget_dispatcher!(TreeNode, Window, CommandLine);
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// # Guarantees
+/// Taffy implements several layout algorithms in
+/// [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) specification:
+/// - flexbox
+/// - grid
+/// - block
 ///
-/// ## Ownership
+/// They are just right to laying out Rsvim UI widgets as well. But layout just
+/// tells a node where it should be rendering, it is still need to implement
+/// the rendering method by itself.
 ///
-/// Parent owns all its children.
+/// # Ownership
 ///
-/// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// Parent owns its children:
 ///
-/// ## Priority
+/// - Children will be destroyed when their parent is.
+/// - Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries. While the size of each node can be logically infinite on the
+///   imaginary canvas.
+/// - The `visible` and `enabled` attributes of a child are implicitly
+///   inherited from it's parent, unless they're explicitly been set.
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// # Priority
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
+/// Children have higher priority than their parent to both display and process
+/// input events:
 ///
-/// # Attributes
+/// - Children are always displayed on top of their parent, and has higher
+///   priority to process a user's input event when the event occurs within the
+///   shape of the child. The event will fallback to their parent if the child
+///   doesn't process it.
+/// - For children that shade each other, the one with higher z-index has
+///   higher priority to display and process the input events.
 ///
-/// ## Shape (position and size)
+/// ## Visible/Enabled
 ///
-/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-/// default relative to its parent top-left corner, and the size is by default logically
-/// infinite. While rendering to the terminal device, we need to calculate its absolute position
-/// and actual size.
+/// A widget can be hidden/disabled, this is useful for some special use cases.
+/// For example, when implementing the "command-line" UI widget, we actually
+/// have multiple command-line widgets:
 ///
-/// There're two kinds of positions:
-/// * Relative: Based on it's parent's position.
-/// * Absolute: Based on the terminal device.
+/// - The "input" widget for receiving user's input command contents.
+/// - The "message" widget for printing Rsvim echoing messages.
+/// - The "search" widget for searching forward/backward.
 ///
-/// There're two kinds of sizes:
-/// * Logical: An infinite size on the imaginary canvas.
-/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///   bounded by the terminal device's actual shape.
-///
-/// The shape boundary uses top-left open, bottom-right closed interval. For example the
-/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-/// The width and height of the shape is both `10`.
-///
-/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-/// position and actual size right after it's shape is been changed, and also caches the result.
-/// Thus we simply get the cached results when need.
-///
-/// ## Z-index
-///
-/// The z-index arranges the display priority of the content stack when multiple children
-/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-/// those widgets have the same z-index, the later inserted one will cover the previous inserted
-/// ones.
-///
-/// The z-index only works for the children under the same parent. For a child widget, it always
-/// covers/overrides its parent display.
-/// To change the visibility priority between children and parent, you need to change the
-/// relationship between them.
-///
-/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-/// still covers C, because it's a sibling of B.
-///
-/// ## Visible and enabled
-///
-/// A widget can be visible or invisible. When it's visible, it handles user's input events,
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
-///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
-///
+/// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
+/// 2 are hidden/disabled.
+/// Thus we have to remove the other 2 nodes from the layout tree, the make
+/// sure they won't break our TUI layout.
 pub struct Tree {
   // Internal relationship.
   relationship: IrelationshipRc,
