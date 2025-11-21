@@ -44,7 +44,7 @@ widget_dispatcher!(WindowNode, Root, Content, Cursor);
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
