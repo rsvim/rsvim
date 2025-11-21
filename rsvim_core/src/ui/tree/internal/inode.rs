@@ -1,10 +1,8 @@
 //! The node structure of the internal tree.
 
-use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::IrelationshipRc;
 use crate::ui::tree::TreeNodeId;
-use taffy::TaffyResult;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
