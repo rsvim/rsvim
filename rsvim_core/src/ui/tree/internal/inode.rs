@@ -4,12 +4,9 @@ use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
-use std::sync::atomic::AtomicI32;
-use std::sync::atomic::Ordering;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
-  fn loid(&self) -> LayoutNodeId;
 
   fn actual_shape(&self) -> &U16Rect;
 
@@ -31,10 +28,6 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.id()
-      }
-
-      fn loid(&self) -> LayoutNodeId {
-        self.$base_name.loid()
       }
 
       fn actual_shape(&self) -> &U16Rect {
@@ -71,10 +64,6 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
-      }
-
-      fn loid(&self) -> LayoutNodeId {
-        self.$base_name.root_loid()
       }
 
       fn actual_shape(&self) -> &U16Rect {
@@ -141,14 +130,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn loid(&self) -> LayoutNodeId {
-        match self {
-          $(
-            $enum::$variant(e) => e.loid(),
-          )*
-        }
-      }
-
       fn actual_shape(&self) -> &U16Rect {
         match self {
           $(
@@ -210,7 +191,6 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  loid: LayoutNodeId,
   actual_shape: U16Rect,
   // enabled
   // visible
@@ -228,10 +208,6 @@ impl InodeBase {
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn loid(&self) -> LayoutNodeId {
-    self.loid
   }
 
   pub fn actual_shape(&self) -> &U16Rect {
