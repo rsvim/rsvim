@@ -1,6 +1,5 @@
 //! Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 
-use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
@@ -31,19 +30,19 @@ impl std::fmt::Display for IndicatorSymbol {
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 pub struct CommandLineIndicator {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   symbol: IndicatorSymbol,
 }
 
 impl CommandLineIndicator {
   pub fn new(
-    relationship: IrelationshipRc,
+    base: IrelationshipRc,
     id: TreeNodeId,
     shape: U16Rect,
     symbol: IndicatorSymbol,
   ) -> Self {
-    let base = InodeBase::new(relationship, id, shape);
-    CommandLineIndicator { base, symbol }
+    CommandLineIndicator { base, id, symbol }
   }
 
   pub fn symbol(&self) -> IndicatorSymbol {
@@ -54,8 +53,6 @@ impl CommandLineIndicator {
     self.symbol = symbol;
   }
 }
-
-inode_impl!(CommandLineIndicator, base);
 
 impl Widgetable for CommandLineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
