@@ -477,7 +477,9 @@ impl Tree {
     let cursor = Cursor::new(cursor_id, cursor_shape, blinking, hidden, style);
     let cursor_node = TreeNode::Cursor(cursor);
     self.insert_guard(&cursor_node);
-    self.nodes.insert(window_id, window_node);
+    self.nodes.insert(cursor_id, cursor_node);
+
+    Ok(cursor_id)
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {

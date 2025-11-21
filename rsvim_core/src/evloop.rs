@@ -554,94 +554,31 @@ impl EventLoop {
       },
       ..Default::default()
     };
-    let cursor_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_length(1_u16),
-      },
-      padding: taffy::Rect {
-        left: taffy::LengthPercentage::from_length(0_u16),
-        top: taffy::LengthPercentage::from_length(0_u16),
-        right: taffy::LengthPercentage::calc(
-          taffy::style::CompactLength::auto().calc_value(),
-        ),
-        bottom: taffy::LengthPercentage::calc(
-          taffy::style::CompactLength::auto().calc_value(),
-        ),
-      },
-      ..Default::default()
-    };
 
-    let (
-      window_loid,
-      window_shape,
-      cmdline_loid,
-      cmdline_shape,
-      cursor_loid,
-      cursor_shape,
-    ) = {
-      let lotree = tree.lotree();
-      let mut lo = lotree.borrow_mut();
-      let window_loid = lo.new_leaf(window_style).unwrap();
-      let cmdline_loid = lo.new_leaf(cmdline_style).unwrap();
-      let cursor_loid = lo.new_leaf(cursor_style).unwrap();
-      lo.add_child(tree_root_loid, window_loid).unwrap();
-      lo.add_child(tree_root_loid, cmdline_loid).unwrap();
-      lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
-        .unwrap();
-      let window_layout = lo.layout(window_loid).unwrap();
-      let cmdline_layout = lo.layout(cmdline_loid).unwrap();
-      let window_shape = rect_from_layout!(window_layout, u16);
-      let cmdline_shape = rect_from_layout!(cmdline_layout, u16);
-      let cursor_shape = rect!(0, 0, 1, 1); // dummy shape
-      (
-        window_loid,
-        window_shape,
-        cmdline_loid,
-        cmdline_shape,
-        cursor_loid,
-        cursor_shape,
-      )
-    };
-
-    let mut window = {
-      let buffers = lock!(self.buffers);
-      let (buf_id, buf) = buffers.first_key_value().unwrap();
-      trace!("Bind first buffer to default window {:?}", buf_id);
-      Window::new(
-        tree.lotree(),
-        window_loid,
-        window_shape,
-        *tree.global_local_options(),
-        Arc::downgrade(buf),
-      )
-      .unwrap()
-    };
-    let window_id = window.id();
-
-    // Initialize cursor inside the default window.
-    let cursor = Cursor::new(
-      cursor_loid,
-      cursor_shape,
-      canvas_cursor.blinking(),
-      canvas_cursor.hidden(),
-      canvas_cursor.style(),
-    );
-    let _previous_inserted_cursor = window.insert_cursor(cursor);
-    debug_assert!(_previous_inserted_cursor.is_none());
-
+    // Initialize default window.
     let window_id = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
-      tree.insert_new_window(
-        tree_root_id,
-        window_style,
-        *tree.global_local_options(),
-        Arc::downgrade(buf),
-      ).unwrap();
-    }
+      tree
+        .insert_new_window(
+          tree_root_id,
+          window_style,
+          *tree.global_local_options(),
+          Arc::downgrade(buf),
+        )
+        .unwrap()
+    };
 
-    tree.insert(tree_root_id, TreeNode::Window(window));
+    // Initialize cursor inside the default window.
+    let cursor_id = tree
+      .insert_new_cursor(
+        window_id,
+        canvas_cursor.blinking(),
+        canvas_cursor.hidden(),
+        canvas_cursor.style(),
+      )
+      .unwrap();
+
     tree.set_current_window_id(Some(window_id));
 
     let cmdline = CommandLine::new(
