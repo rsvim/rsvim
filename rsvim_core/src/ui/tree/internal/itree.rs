@@ -1,9 +1,10 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
-use crate::ui::tree::Dummy;
 use crate::ui::tree::InodeDispatch;
 use crate::ui::tree::Inodeable;
+use crate::ui::tree::Tree;
+use crate::ui::tree::TreeNode;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
@@ -229,8 +230,8 @@ where
   }
 
   /// Get the level-order iterator on this tree, starts from root node.
-  pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.root_id))
+  pub fn iter(&self) -> TreeIter<'_, T> {
+    TreeIter::new(self, Some(self.root_id))
   }
 }
 // Attributes }
@@ -611,19 +612,13 @@ where
 
 #[derive(Debug)]
 /// The level-order iterator of the tree, start from tree root.
-pub struct ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  tree: &'a Itree<T>,
+pub struct TreeIter<'a> {
+  tree: &'a Tree,
   que: VecDeque<TreeNodeId>,
 }
 
-impl<'a, T> Iterator for ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a T;
+impl<'a> Iterator for TreeIter<'a> {
+  type Item = &'a TreeNode;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
@@ -639,11 +634,8 @@ where
   }
 }
 
-impl<'a, T> ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+impl<'a> TreeIter<'a> {
+  pub fn new(tree: &'a Tree, start_node_id: Option<TreeNodeId>) -> Self {
     let mut que = VecDeque::new();
     if let Some(id) = start_node_id {
       que.push_back(id);
