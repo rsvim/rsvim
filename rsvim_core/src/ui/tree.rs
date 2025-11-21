@@ -32,13 +32,12 @@ pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  Root(Dummy),
   Window(Window),
   CommandLine(CommandLine),
 }
 
-inode_dispatcher!(TreeNode, Root, Window, CommandLine);
-widget_dispatcher!(TreeNode, Root, Window, CommandLine);
+inode_dispatcher!(TreeNode, Window, CommandLine);
+widget_dispatcher!(TreeNode, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -178,21 +177,10 @@ impl Tree {
       flex_direction: taffy::FlexDirection::Column,
       ..Default::default()
     };
-    let (root_id, root_shape) = {
-      let mut rel = relationship.borrow_mut();
-      let root_id = rel.new_leaf(root_style)?;
-      rel.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
-      let root_layout = rel.layout(root_id)?;
-      let root_shape = u16rect_from_layout!(root_layout);
-      (root_id, root_shape)
-    };
-
-    let root = Dummy::new(root_id, root_shape);
-    let root_node = TreeNode::Root(root);
 
     Ok(Tree {
       relationship: relationship.clone(),
-      base: Itree::new(relationship, root_node),
+      base: Itree::new(relationship, root_style).unwrap(),
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,

@@ -1,6 +1,8 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::Dummy;
+use crate::ui::tree::InodeDispatch;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
@@ -85,11 +87,10 @@ where
   relationship: IrelationshipRc,
 
   // Tree nodes
-  nodes: FoldMap<TreeNodeId, T>,
+  nodes: FoldMap<TreeNodeId, InodeDispatch<T>>,
 
   // Root node
   root_id: TreeNodeId,
-  root_loid: LayoutNodeId,
 }
 
 #[derive(Debug)]
@@ -140,25 +141,30 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(relationship: IrelationshipRc, root_node: T) -> Self {
+  pub fn new(
+    relationship: IrelationshipRc,
+    root_style: Style,
+  ) -> TaffyResult<Self> {
+    let (root_id, root_shape) = {
+      let mut rel = relationship.borrow_mut();
+      let root_id = rel.new_leaf(root_style)?;
+      rel.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
+      let root_layout = rel.layout(root_id)?;
+      let root_shape = u16rect_from_layout!(root_layout);
+      (root_id, root_shape)
+    };
+
+    let root = Dummy::new(root_id, root_shape);
+    let root_node = InodeDispatch::Root(root);
     let root_id = root_node.id();
-    let root_loid = root_node.loid();
 
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
 
-    let mut nid2loid = FoldMap::new();
-    let mut loid2nid = FoldMap::new();
-    nid2loid.insert(root_id, root_loid);
-    loid2nid.insert(root_loid, root_id);
-
     Itree {
-      relationship: lotree,
+      relationship,
       nodes,
       root_id,
-      root_loid,
-      nid2loid,
-      loid2nid,
     }
   }
 
