@@ -27,7 +27,6 @@ impl WindowContent {
   pub fn new(
     base: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> Self {

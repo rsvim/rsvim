@@ -408,13 +408,14 @@ impl Tree {
       },
       ..Default::default()
     };
-    let (window_id, window_shape, content_id, content_shape) = {
+    let (window_id, content_id) = {
       let mut base = self.base.borrow_mut();
-      let (window_id, window_shape) =
-        make_new_node(&mut base, window_style, Some(parent_id))?;
-      let (content_id, content_shape) =
-        make_new_node(&mut base, content_style, Some(window_id))?;
-      (window_id, window_shape, content_id, content_shape)
+      let window_id = base.new_leaf(window_style)?;
+      base.add_child(parent_id, window_id)?;
+      let content_id = base.new_leaf(content_style)?;
+      base.add_child(window_id, content_id)?;
+      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      (window_id, content_id)
     };
 
     let window = Window::new(
@@ -431,7 +432,6 @@ impl Tree {
     let content = WindowContent::new(
       self.relationship(),
       content_id,
-      content_shape,
       buffer,
       Arc::downgrade(&viewport),
     );
