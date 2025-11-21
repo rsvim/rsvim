@@ -161,11 +161,11 @@ where
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
 
-    Itree {
+    Ok(Itree {
       relationship,
       nodes,
       root_id,
-    }
+    })
   }
 
   #[cfg(not(test))]
