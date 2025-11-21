@@ -275,7 +275,7 @@ impl<'a> TreeIter<'a> {
 
 #[macro_export]
 macro_rules! inode_impl {
-  ($name:ident) => {
+  ($name:ty) => {
     impl $name {
       fn id(&self) -> TreeNodeId {
         self.id
