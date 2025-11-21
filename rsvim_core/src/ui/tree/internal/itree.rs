@@ -201,11 +201,6 @@ where
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.root_id))
   }
-
-  /// Get layout tree.
-  pub fn lotree(&self) -> TaffyTreeRc {
-    self.relationship.clone()
-  }
 }
 // Attributes }
 
