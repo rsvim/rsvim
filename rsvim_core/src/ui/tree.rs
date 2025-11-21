@@ -89,9 +89,6 @@ widget_dispatcher!(TreeNode, Window, CommandLine);
 /// - For children that shade each other, the one with higher z-index has
 ///   higher priority to display and process the input events.
 pub struct Tree {
-  // Internal relationship.
-  relationship: IrelationshipRc,
-
   // Internal tree.
   base: Itree<TreeNode>,
 
@@ -134,7 +131,6 @@ impl Tree {
     };
 
     Ok(Tree {
-      relationship: relationship.clone(),
       base: Itree::new(relationship, root_style).unwrap(),
       command_line_id: None,
       window_ids: BTreeSet::new(),

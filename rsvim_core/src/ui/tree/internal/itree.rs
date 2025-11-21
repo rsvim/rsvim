@@ -174,6 +174,10 @@ where
     })
   }
 
+  pub fn relationship(&self) -> IrelationshipRc {
+    self.relationship.clone()
+  }
+
   pub fn root_id(&self) -> TreeNodeId {
     self.root_id
   }
