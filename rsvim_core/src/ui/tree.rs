@@ -161,8 +161,19 @@ impl Tree {
       ..Default::default()
     };
 
+    let (root_id, root_shape) = {
+      let mut rel = relationship.borrow_mut();
+      make_new_node(&mut rel, root_style, None)?
+    };
+
+    let root = Root::new(root_id, root_shape);
+    let root_node = TreeNode::Root(root);
+    let mut nodes = FoldMap::new();
+    nodes.insert(root_id, root_node);
+
     Ok(Tree {
-      base: Itree::new(relationship, root_style, None).unwrap(),
+      base: relationship,
+      nodes,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
