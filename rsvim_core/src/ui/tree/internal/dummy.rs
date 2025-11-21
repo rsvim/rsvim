@@ -12,9 +12,9 @@ pub struct Dummy {
 }
 
 impl Dummy {
-  pub fn new(loid: LayoutNodeId, shape: U16Rect) -> Self {
+  pub fn new(id: TreeNodeId, shape: U16Rect) -> Self {
     Dummy {
-      base: InodeBase::new(loid, shape),
+      base: InodeBase::new(id, shape),
     }
   }
 }

@@ -172,7 +172,7 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let relationship = Irelationship::to_rc(Irelationship::new());
 
-    let (root_loid, root_shape) = {
+    let (root_id, root_shape) = {
       let root_style = Style {
         size: taffy::Size {
           width: taffy::Dimension::from_length(canvas_size.width()),
@@ -190,7 +190,7 @@ impl Tree {
       (root_id, root_shape)
     };
 
-    let root = Dummy::new(root_loid, root_shape);
+    let root = Dummy::new(root_id, root_shape);
     let root_node = TreeNode::Root(root);
     Ok(Tree {
       relationship,

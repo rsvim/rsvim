@@ -226,10 +226,9 @@ pub struct InodeBase {
 }
 
 impl InodeBase {
-  pub fn new(loid: LayoutNodeId, actual_shape: U16Rect) -> Self {
+  pub fn new(id: TreeNodeId, actual_shape: U16Rect) -> Self {
     InodeBase {
-      id: next_node_id(),
-      loid,
+      id,
       actual_shape,
       flags: FLAGS,
     }
