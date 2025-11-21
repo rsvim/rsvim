@@ -98,10 +98,10 @@ impl Irelationship {
     self.lo.layout(*loid)
   }
 
-  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
-    self.loid2nid.get(&parent_loid).copied()
+    self.loid2nid.get(&parent_loid)
   }
 }
 
@@ -163,9 +163,7 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    let loid = self.nid2loid.get(&id)?;
-    let parent_loid = self.relationship.borrow().parent(*loid)?;
-    self.loid2nid.get(&parent_loid).copied()
+    self.relationship.borrow().parent(id).copied()
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
