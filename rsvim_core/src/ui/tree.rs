@@ -167,8 +167,6 @@ arc_mutex_ptr!(Tree);
 // Node {
 impl Tree {
   /// Make a widget tree.
-  ///
-  /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let relationship = Irelationship::to_rc(Irelationship::new());
 
