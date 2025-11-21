@@ -59,10 +59,11 @@ impl Window {
   pub fn new(
     relationship: IrelationshipRc,
     style: Style,
+    parent_id: TreeNodeId,
     opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let mut base = Itree::new(relationship, style)?;
+    let mut base = Itree::new(relationship, style, Some(parent_id))?;
 
     let (content_loid, content_shape) = {
       let content_style = Style {

@@ -360,8 +360,13 @@ impl Tree {
     let window_layout = rel.layout(window_id)?;
     let window_shape = u16rect_from_layout!(window_layout);
 
-    let window =
-      Window::new(self.base.relationship(), window_style, window_opts, buffer);
+    let window = Window::new(
+      self.base.relationship(),
+      window_style,
+      parent_id,
+      window_opts,
+      buffer,
+    );
 
     self.insert_guard(&child_node);
     self.base.insert(parent_id, child_node);
