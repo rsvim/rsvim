@@ -1,12 +1,9 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
-use crate::ui::tree::InodeDispatch;
-use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
