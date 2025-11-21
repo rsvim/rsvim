@@ -20,7 +20,7 @@ pub struct Irelationship {
   pub loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
-arc_mutex_ptr!(Irelationship);
+rc_refcell_ptr!(Irelationship);
 
 impl Irelationship {
   pub fn new() -> Self {
@@ -40,17 +40,14 @@ where
   T: Inodeable,
 {
   // Layout tree
-  lotree: TaffyTreeRc,
+  relationship: IrelationshipRc,
+
   // Tree nodes
   nodes: FoldMap<TreeNodeId, T>,
 
   // Root node
   root_id: TreeNodeId,
   root_loid: LayoutNodeId,
-
-  // Maps between node ID and layout node ID
-  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
-  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 #[derive(Debug)]
@@ -114,7 +111,7 @@ where
     loid2nid.insert(root_loid, root_id);
 
     Itree {
-      lotree,
+      relationship: lotree,
       nodes,
       root_id,
       root_loid,
@@ -129,7 +126,7 @@ where
   #[cfg(test)]
   fn _internal_check(&self) {
     debug_assert!(!self.nodes.is_empty());
-    debug_assert!(self.lotree.borrow().total_node_count() != 0);
+    debug_assert!(self.relationship.borrow().total_node_count() != 0);
     debug_assert_eq!(self.nid2loid.len(), self.nodes.len());
     debug_assert_eq!(self.loid2nid.len(), self.nodes.len());
   }
@@ -144,13 +141,13 @@ where
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
-    let parent_loid = self.lotree.borrow().parent(*loid)?;
+    let parent_loid = self.relationship.borrow().parent(*loid)?;
     self.loid2nid.get(&parent_loid).copied()
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
     if let Some(loid) = self.nid2loid.get(&id) {
-      if let Ok(children_loids) = self.lotree.borrow().children(*loid) {
+      if let Ok(children_loids) = self.relationship.borrow().children(*loid) {
         return children_loids
           .iter()
           .filter(|i| self.loid2nid.contains_key(i))
@@ -176,7 +173,7 @@ where
 
   /// Get layout tree.
   pub fn lotree(&self) -> TaffyTreeRc {
-    self.lotree.clone()
+    self.relationship.clone()
   }
 }
 // Attributes }
@@ -285,7 +282,7 @@ where
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
 
     let child_actual_shape = {
-      let mut lo = self.lotree.borrow_mut();
+      let mut lo = self.relationship.borrow_mut();
       lo.add_child(*parent_loid, child_loid).unwrap();
       lo.compute_layout(*parent_loid, taffy::Size::MAX_CONTENT)
         .unwrap();
@@ -335,7 +332,7 @@ where
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
-        let mut lo = self.lotree.borrow_mut();
+        let mut lo = self.relationship.borrow_mut();
         let loid = self.nid2loid.get(&id).unwrap();
         match lo.parent(*loid) {
           Some(parent_loid) => {
