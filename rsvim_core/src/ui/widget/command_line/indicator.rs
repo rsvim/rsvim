@@ -36,12 +36,8 @@ pub struct CommandLineIndicator {
 }
 
 impl CommandLineIndicator {
-  pub fn new(
-    loid: LayoutNodeId,
-    shape: U16Rect,
-    symbol: IndicatorSymbol,
-  ) -> Self {
-    let base = InodeBase::new(loid, shape);
+  pub fn new(id: TreeNodeId, shape: U16Rect, symbol: IndicatorSymbol) -> Self {
+    let base = InodeBase::new(id, shape);
     CommandLineIndicator { base, symbol }
   }
 

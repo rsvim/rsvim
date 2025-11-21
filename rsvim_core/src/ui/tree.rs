@@ -13,6 +13,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::input::CommandLineInput;
+use crate::ui::widget::command_line::message;
 use crate::ui::widget::command_line::message::CommandLineMessage;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::Root;
@@ -546,15 +547,21 @@ impl Tree {
       )
     };
 
-    let window = Window::new(
+    let cmdline = CommandLine::new(
       cmdline_id,
       cmdline_shape,
-      window_opts,
+      indicator_id,
+      indicator_shape,
       input_id,
       input_shape,
-      buffer.clone(),
-    );
-    let viewport = window.viewport();
+      message_id,
+      message_shape,
+      text_contents,
+    )?;
+    let input_viewport = cmdline.input_viewport();
+    let input_cursor_viewport = cmdline.input_cursor_viewport();
+    let message_viewport = cmdline.message_viewport();
+
     let window_node = TreeNode::Window(window);
     self.insert_guard(&window_node);
     self.nodes.insert(cmdline_id, window_node);
