@@ -272,3 +272,18 @@ impl<'a> TreeIter<'a> {
     Self { tree, que }
   }
 }
+
+#[macro_export]
+macro_rules! inode_impl {
+  ($name:ident) => {
+    impl $name {
+      fn id(&self) -> TreeNodeId {
+        self.id
+      }
+
+      fn relationship(&self) -> IrelationshipRc {
+        self.base.clone()
+      }
+    }
+  };
+}
