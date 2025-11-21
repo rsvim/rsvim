@@ -183,6 +183,13 @@ impl Irelationship {
     }
   }
 
+  /// Whether the node is visible, e.g. style is `display: none`.
+  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    let style = self.lo.style(*loid)?;
+    style.display == taffy::Display::None
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
