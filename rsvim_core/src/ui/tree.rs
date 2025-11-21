@@ -401,13 +401,6 @@ impl Tree {
     window_opts: &WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let window_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
-      },
-      ..Default::default()
-    };
     let content_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::auto(),
@@ -432,17 +425,20 @@ impl Tree {
       content_shape,
       buffer,
     );
+    let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
+
+    self.insert_guard(&window_node);
     self.nodes.insert(window_id, window_node);
+
     let content = WindowContent::new(
       content_id,
       content_shape,
       buffer.clone(),
-      Arc::downgrade(&window.viewport()),
+      Arc::downgrade(&viewport),
     )?;
     let content_node = TreeNode::WindowContent(content);
-
-    self.insert_guard(&window_node);
+    self.nodes.insert(content_id, content_node);
 
     Ok(window_id)
   }
