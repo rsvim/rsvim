@@ -245,3 +245,57 @@ where
   Root(Dummy),
   Other(T),
 }
+
+impl<T> Inodeable for InodeDispatch<T>
+where
+  T: Inodeable,
+{
+  fn id(&self) -> TreeNodeId {
+    match self {
+      InodeDispatch::Root(e) => e.id(),
+      InodeDispatch::Other(e) => e.id(),
+    }
+  }
+
+  fn actual_shape(&self) -> &U16Rect {
+    match self {
+      InodeDispatch::Root(e) => e.actual_shape(),
+      InodeDispatch::Other(e) => e.actual_shape(),
+    }
+  }
+
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    match self {
+      InodeDispatch::Root(e) => e.set_actual_shape(actual_shape),
+      InodeDispatch::Other(e) => e.set_actual_shape(actual_shape),
+    }
+  }
+
+  fn enabled(&self) -> bool {
+    match self {
+      InodeDispatch::Root(e) => e.enabled(),
+      InodeDispatch::Other(e) => e.enabled(),
+    }
+  }
+
+  fn set_enabled(&mut self, enabled: bool) {
+    match self {
+      InodeDispatch::Root(e) => e.set_enabled(enabled),
+      InodeDispatch::Other(e) => e.set_enabled(enabled),
+    }
+  }
+
+  fn visible(&self) -> bool {
+    match self {
+      InodeDispatch::Root(e) => e.visible(),
+      InodeDispatch::Other(e) => e.visible(),
+    }
+  }
+
+  fn set_visible(&mut self, visible: bool) {
+    match self {
+      InodeDispatch::Root(e) => e.set_visible(visible),
+      InodeDispatch::Other(e) => e.set_visible(visible),
+    }
+  }
+}
