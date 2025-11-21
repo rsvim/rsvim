@@ -210,12 +210,12 @@ impl Tree {
 
   /// Get the node struct by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self.base.node(id)
+    self.nodes.get(&id)
   }
 
   /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self.base.node_mut(id)
+    self.nodes.get_mut(&id)
   }
 
   // /// See [`Itree::iter`].
