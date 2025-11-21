@@ -1,4 +1,4 @@
-//! Common root node.
+//! Root node.
 
 use crate::inode_impl;
 use crate::prelude::*;
@@ -6,19 +6,19 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone)]
-/// Root container.
-pub struct Dummy {
+/// Root node.
+pub struct Root {
   base: InodeBase,
 }
 
-impl Dummy {
+impl Root {
   pub fn new(id: TreeNodeId, shape: U16Rect) -> Self {
-    Dummy {
+    Root {
       base: InodeBase::new(id, shape),
     }
   }
 }
 
-inode_impl!(Dummy, base);
+inode_impl!(Root, base);
 
-impl Widgetable for Dummy {}
+impl Widgetable for Root {}
