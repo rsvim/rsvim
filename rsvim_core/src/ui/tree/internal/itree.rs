@@ -15,14 +15,24 @@ use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Irelationship {
-  lotree: TaffyTree,
-  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
-  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
-  root_id: TreeNodeId,
-  root_loid: LayoutNodeId,
+  pub lo: TaffyTree,
+  pub nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  pub loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 arc_mutex_ptr!(Irelationship);
+
+impl Irelationship {
+  pub fn new() -> Self {
+    let mut lo = TaffyTree::new();
+    lo.disable_rounding();
+    Self {
+      lo,
+      nid2loid: FoldMap::new(),
+      loid2nid: FoldMap::new(),
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>
