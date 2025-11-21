@@ -6,17 +6,26 @@ use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-use crate::ui::tree::next_node_id;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
+
+/// Next unique UI widget ID.
+///
+/// NOTE: Start from 100001, so be different from buffer ID.
+pub fn next_node_id() -> TreeNodeId {
+  static VALUE: AtomicI32 = AtomicI32::new(100001);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
 
 #[derive(Debug, Clone)]
 pub struct Irelationship {

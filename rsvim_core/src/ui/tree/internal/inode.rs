@@ -200,14 +200,6 @@ macro_rules! inode_dispatcher {
   }
 }
 
-/// Next unique UI widget ID.
-///
-/// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> TreeNodeId {
-  static VALUE: AtomicI32 = AtomicI32::new(100001);
-  VALUE.fetch_add(1, Ordering::Relaxed)
-}
-
 flags_impl!(Flags, u8, ENABLED, VISIBLE);
 
 // enabled=true
