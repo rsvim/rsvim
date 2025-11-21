@@ -588,6 +588,7 @@ impl Tree {
     self._insert(input_node);
 
     let message = CommandLineMessage::new(
+      self.relationship(),
       message_id,
       message_shape,
       text_contents,
