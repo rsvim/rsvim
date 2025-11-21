@@ -427,7 +427,6 @@ impl Tree {
     );
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
-
     self.insert_guard(&window_node);
     self.nodes.insert(window_id, window_node);
 
@@ -438,6 +437,7 @@ impl Tree {
       Arc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
+    self.insert_guard(&content_node);
     self.nodes.insert(content_id, content_node);
 
     Ok(window_id)
