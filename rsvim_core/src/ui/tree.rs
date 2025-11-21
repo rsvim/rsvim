@@ -215,11 +215,11 @@ impl Tree {
     self.nodes.get_mut(&id)
   }
 
-  // /// See [`Itree::iter`].
-  // pub fn iter(&self) -> TreeIter {
-  //   self.base.iter()
-  // }
-  //
+  /// See [`Itree::iter`].
+  pub fn iter(&self) -> TreeIter {
+    TreeIter::new(self, Some(self.root_id))
+  }
+
   // /// See [`Itree::iter_mut`].
   // pub fn iter_mut(&mut self) -> TreeIterMut {
   //   self.base.iter_mut()
