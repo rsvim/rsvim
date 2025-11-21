@@ -117,8 +117,11 @@ widget_dispatcher!(
 /// - For children that shade each other, the one with higher z-index has
 ///   higher priority to display and process the input events.
 pub struct Tree {
-  // Internal tree.
+  // Internal relationship.
   base: IrelationshipRc,
+
+  // Tree nodes
+  nodes: FoldMap<TreeNodeId, TreeNode>,
 
   // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
