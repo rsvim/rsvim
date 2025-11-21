@@ -94,21 +94,6 @@ widget_dispatcher!(TreeNode, Window, CommandLine);
 ///   doesn't process it.
 /// - For children that shade each other, the one with higher z-index has
 ///   higher priority to display and process the input events.
-///
-/// ## Visible/Enabled
-///
-/// A widget can be hidden/disabled, this is useful for some special use cases.
-/// For example, when implementing the "command-line" UI widget, we actually
-/// have multiple command-line widgets:
-///
-/// - The "input" widget for receiving user's input command contents.
-/// - The "message" widget for printing Rsvim echoing messages.
-/// - The "search" widget for searching forward/backward.
-///
-/// At a certain time, only 1 of these 3 widgets is visible/enabled, the other
-/// 2 are hidden/disabled.
-/// Thus we have to remove the other 2 nodes from the layout tree, the make
-/// sure they won't break our TUI layout.
 pub struct Tree {
   // Internal relationship.
   relationship: IrelationshipRc,
