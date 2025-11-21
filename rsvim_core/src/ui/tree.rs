@@ -423,7 +423,7 @@ impl Tree {
       content_id,
       content_shape,
       buffer.clone(),
-    );
+    )?;
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
     self.insert(window_node);
