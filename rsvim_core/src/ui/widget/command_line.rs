@@ -55,7 +55,11 @@ impl CommandLine {
     id: TreeNodeId,
     shape: U16Rect,
     indicator_id: TreeNodeId,
-    indicator_id: TreeNodeId,
+    indicator_shape: U16Rect,
+    input_id: TreeNodeId,
+    input_shape: U16Rect,
+    message_id: TreeNodeId,
+    message_shape: U16Rect,
     text_contents: TextContentsWk,
   ) -> TaffyResult<Self> {
     // Force cmdline window options.
@@ -67,17 +71,6 @@ impl CommandLine {
       .unwrap();
 
     let base = InodeBase::new(id, shape);
-
-    let indicator = CommandLineIndicator::new(
-      indicator_loid,
-      indicator_shape,
-      IndicatorSymbol::Empty,
-    );
-    let indicator_id = indicator.id();
-    let mut indicator_node = CommandLineNode::Indicator(indicator);
-    // Indicator by default is invisible
-    indicator_node.set_visible(false);
-    base.insert(root_id, indicator_node);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
