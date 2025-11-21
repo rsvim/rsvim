@@ -636,7 +636,7 @@ impl EventLoop {
       tree.insert_new_window(
         tree_root_id,
         window_style,
-        tree.global_local_options(),
+        *tree.global_local_options(),
         Arc::downgrade(buf),
       ).unwrap();
     }

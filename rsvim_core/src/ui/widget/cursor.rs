@@ -27,6 +27,42 @@ impl CursorOptions {
     flags.set(Flags::HIDDEN, hidden);
     Self { flags, style }
   }
+}
+
+impl Default for CursorOptions {
+  fn default() -> Self {
+    Self::new(false, false, CursorStyle::SteadyBlock)
+  }
+}
+
+#[derive(Debug, Clone)]
+/// Cursor widget.
+pub struct Cursor {
+  base: InodeBase,
+  // blinking=false
+  // hidden=false
+  flags: Flags,
+  style: CursorStyle,
+}
+
+impl Cursor {
+  pub fn new(
+    id: TreeNodeId,
+    shape: U16Rect,
+    blinking: bool,
+    hidden: bool,
+    style: CursorStyle,
+  ) -> Self {
+    let base = InodeBase::new(id, shape);
+    let mut flags = Flags::empty();
+    flags.set(Flags::BLINKING, blinking);
+    flags.set(Flags::HIDDEN, hidden);
+    Self { base, flags, style }
+  }
+
+  pub fn default(id: TreeNodeId, shape: U16Rect) -> Self {
+    Self::new(id, shape, false, false, CursorStyle::SteadyBlock)
+  }
 
   pub fn blinking(&self) -> bool {
     self.flags.contains(Flags::BLINKING)
@@ -50,40 +86,6 @@ impl CursorOptions {
 
   pub fn set_style(&mut self, style: &CursorStyle) {
     self.style = *style;
-  }
-}
-
-impl Default for CursorOptions {
-  fn default() -> Self {
-    Self::new(false, false, CursorStyle::SteadyBlock)
-  }
-}
-
-#[derive(Debug, Clone)]
-/// Cursor widget.
-pub struct Cursor {
-  base: InodeBase,
-  options: CursorOptions,
-}
-
-impl Cursor {
-  pub fn new(id: TreeNodeId, shape: U16Rect, opts: CursorOptions) -> Self {
-    Cursor {
-      base: InodeBase::new(id, shape),
-      options: opts,
-    }
-  }
-
-  pub fn default(loid: TreeNodeId, shape: U16Rect) -> Self {
-    Self::new(loid, shape, CursorOptions::default())
-  }
-
-  pub fn options(&self) -> &CursorOptions {
-    &self.options
-  }
-
-  pub fn set_options(&mut self, options: CursorOptions) {
-    self.options = options;
   }
 }
 
