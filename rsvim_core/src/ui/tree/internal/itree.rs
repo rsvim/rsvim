@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::tree::Dummy;
 use crate::ui::tree::InodeDispatch;
 use crate::ui::tree::Inodeable;
-use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
@@ -31,8 +30,8 @@ pub fn next_node_id() -> TreeNodeId {
 #[derive(Debug, Clone)]
 pub struct Irelationship {
   lo: TaffyTree,
-  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
-  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
+  nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
+  loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
 }
 
 rc_refcell_ptr!(Irelationship);
@@ -114,7 +113,7 @@ impl Irelationship {
             .collect_vec(),
         )
       }
-      None => Err(taffy::TaffyError::InvalidParentNode(LayoutNodeId::new(0))),
+      None => Err(taffy::TaffyError::InvalidParentNode(taffy::NodeId::new(0))),
     }
   }
 

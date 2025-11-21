@@ -25,7 +25,6 @@ use taffy::TaffyTree;
 use taffy::prelude::FromLength;
 use taffy::prelude::TaffyMaxContent;
 
-pub type LayoutNodeId = taffy::NodeId;
 pub type TreeNodeId = i32;
 pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
 pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;

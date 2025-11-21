@@ -7,28 +7,38 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
 pub struct Content {
   base: InodeBase,
-
-  // Buffer.
   buffer: BufferWk,
-
-  // Viewport.
   viewport: ViewportWk,
 }
 
 impl Content {
   /// Make window content.
   pub fn new(
-    loid: LayoutNodeId,
-    shape: U16Rect,
+    relationship: &mut Irelationship,
+    style: Style,
+    parent_id: TreeNodeId,
     buffer: BufferWk,
     viewport: ViewportWk,
-  ) -> Self {
-    let base = InodeBase::new(loid, shape);
+  ) -> TaffyResult<Self> {
+    let (content_id, content_shape) = {
+      let rel = relationship;
+      let content_id = rel.new_leaf(style)?;
+      rel.add_child(parent_id, content_id)?;
+      rel.compute_layout(content_id, taffy::Size::MAX_CONTENT)?;
+      let content_layout = rel.layout(content_id)?;
+      let content_shape = u16rect_from_layout!(content_layout);
+      (content_id, content_shape)
+    };
+
+    let base = InodeBase::new(content_id, content_shape);
     Content {
       base,
       buffer,
