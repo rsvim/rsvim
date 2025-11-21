@@ -6,18 +6,21 @@ use crate::ui::tree::LayoutNodeId;
 use crate::ui::tree::TaffyTreeRc;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
+use crate::ui::tree::next_node_id;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::Style;
+use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Irelationship {
-  pub lo: TaffyTree,
-  pub nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
-  pub loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
+  lo: TaffyTree,
+  nid2loid: FoldMap<TreeNodeId, LayoutNodeId>,
+  loid2nid: FoldMap<LayoutNodeId, TreeNodeId>,
 }
 
 rc_refcell_ptr!(Irelationship);
@@ -31,6 +34,20 @@ impl Irelationship {
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
     }
+  }
+
+  pub fn new_leaf(&self, style: Style) -> TaffyResult<TreeNodeId> {
+    let loid = self.lo.new_leaf(style)?;
+    let nid = next_node_id();
+    self.nid2loid.insert(nid, loid);
+    self.loid2nid.insert(loid, nid);
+    Ok(nid)
+  }
+}
+
+impl Default for Irelationship {
+  fn default() -> Self {
+    Self::new()
   }
 }
 
