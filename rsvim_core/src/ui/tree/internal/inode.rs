@@ -9,6 +9,10 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn relationship(&self) -> IrelationshipRc;
 
+  fn shape(&self) -> IRect;
+
+  fn actual_shape(&self) -> U16Rect;
+
   fn actual_shape(&self) -> U16Rect;
 
   fn visible(&self) -> bool;
@@ -25,6 +29,10 @@ macro_rules! inode_impl {
 
       fn relationship(&self) -> IrelationshipRc {
         self.$base_name.relationship()
+      }
+
+      fn shape(&self) -> IRect {
+        self.$base_name.actual_shape()
       }
 
       fn actual_shape(&self) -> U16Rect {
@@ -55,6 +63,14 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.relationship(),
+          )*
+        }
+      }
+
+      fn shape(&self) -> IRect {
+        match self {
+          $(
+            $enum::$variant(e) => e.actual_shape(),
           )*
         }
       }
