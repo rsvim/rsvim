@@ -12,6 +12,7 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::command_line::input::CommandLineInput;
 use crate::ui::widget::command_line::message;
 use crate::ui::widget::command_line::message::CommandLineMessage;
@@ -387,14 +388,9 @@ impl Tree {
     }
   }
 
-  /// See [`Itree::insert`].
-  pub fn insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
+  fn _insert(&mut self, child_node: TreeNode) {
     self.insert_guard(&child_node);
-    self.base.insert(parent_id, child_node)
+    self.nodes.insert(child_node.id(), child_node);
   }
 
   /// Create new window node, and insert it as a child to the provided parent_id.
@@ -431,8 +427,7 @@ impl Tree {
     );
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
-    self.insert_guard(&window_node);
-    self.nodes.insert(window_id, window_node);
+    self._insert(window_node);
 
     let content = WindowContent::new(
       content_id,
@@ -441,8 +436,7 @@ impl Tree {
       Arc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
-    self.insert_guard(&content_node);
-    self.nodes.insert(content_id, content_node);
+    self._insert(content_node);
 
     Ok(window_id)
   }
@@ -479,8 +473,7 @@ impl Tree {
 
     let cursor = Cursor::new(cursor_id, cursor_shape, blinking, hidden, style);
     let cursor_node = TreeNode::Cursor(cursor);
-    self.insert_guard(&cursor_node);
-    self.nodes.insert(cursor_id, cursor_node);
+    self._insert(cursor_node);
 
     Ok(cursor_id)
   }
@@ -490,6 +483,7 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
     cmdline_style: Style,
+    indicator_symbol: IndicatorSymbol,
     text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
     let indicator_style = Style {
@@ -556,25 +550,39 @@ impl Tree {
       input_shape,
       message_id,
       message_shape,
-      text_contents,
+      text_contents.clone(),
     )?;
     let input_viewport = cmdline.input_viewport();
-    let input_cursor_viewport = cmdline.input_cursor_viewport();
     let message_viewport = cmdline.message_viewport();
 
-    let window_node = TreeNode::Window(window);
-    self.insert_guard(&window_node);
-    self.nodes.insert(cmdline_id, window_node);
+    let cmdline_node = TreeNode::CommandLine(cmdline);
+    self._insert(cmdline_node);
 
-    let content = WindowContent::new(
+    let indicator = CommandLineIndicator::new(
+      indicator_id,
+      indicator_shape,
+      indicator_symbol,
+    );
+    let indicator_node = TreeNode::CommandLineIndicator(indicator);
+    self._insert(indicator_node);
+
+    let input = CommandLineInput::new(
       input_id,
       input_shape,
-      buffer,
-      Arc::downgrade(&viewport),
+      text_contents.clone(),
+      Arc::downgrade(&input_viewport),
     );
-    let content_node = TreeNode::WindowContent(content);
-    self.insert_guard(&content_node);
-    self.nodes.insert(input_id, content_node);
+    let input_node = TreeNode::CommandLineInput(input);
+    self._insert(input_node);
+
+    let message = CommandLineMessage::new(
+      message_id,
+      message_shape,
+      text_contents,
+      Arc::downgrade(&message_viewport),
+    );
+    let message_node = TreeNode::CommandLineMessage(message);
+    self._insert(message_node);
 
     Ok(cmdline_id)
   }

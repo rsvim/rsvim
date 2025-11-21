@@ -19,12 +19,12 @@ pub struct CommandLineInput {
 
 impl CommandLineInput {
   pub fn new(
-    loid: LayoutNodeId,
+    id: TreeNodeId,
     shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(loid, shape);
+    let base = InodeBase::new(id, shape);
     CommandLineInput {
       base,
       text_contents,

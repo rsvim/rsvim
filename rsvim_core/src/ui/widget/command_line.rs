@@ -103,28 +103,6 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let input = CommandLineInput::new(
-      input_loid,
-      input_shape,
-      text_contents.clone(),
-      Arc::downgrade(&input_viewport),
-    );
-    let input_id = input.id();
-    let mut input_node = CommandLineNode::Input(input);
-    // Input by default is invisible
-    input_node.set_visible(false);
-    base.insert(root_id, input_node);
-
-    let message = CommandLineMessage::new(
-      message_loid,
-      message_shape,
-      text_contents.clone(),
-      Arc::downgrade(&message_viewport),
-    );
-    let message_id = message.id();
-    let message_node = CommandLineNode::Message(message);
-    base.insert(root_id, message_node);
-
     Ok(Self {
       base,
       options,
