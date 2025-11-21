@@ -50,11 +50,14 @@ impl Window {
     opts: WindowOptions,
     content_id: TreeNodeId,
     buffer: BufferWk,
-  ) -> Self {
+  ) -> TaffyResult<Self> {
     let (viewport, cursor_viewport) = {
+      let base = base.borrow();
+      let content_actual_shape = base.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(&opts, buffer.text(), &content_shape, 0, 0);
+      let viewport =
+        Viewport::view(&opts, buffer.text(), &content_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -63,7 +66,7 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    Window {
+    Ok(Window {
       base,
       id,
       options: opts,
@@ -72,7 +75,7 @@ impl Window {
       buffer,
       viewport,
       cursor_viewport,
-    }
+    })
   }
 }
 
