@@ -11,6 +11,7 @@ use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::AvailableSpace;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
@@ -36,12 +37,21 @@ impl Irelationship {
     }
   }
 
-  pub fn new_leaf(&self, style: Style) -> TaffyResult<TreeNodeId> {
+  pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
     let loid = self.lo.new_leaf(style)?;
     let nid = next_node_id();
     self.nid2loid.insert(nid, loid);
     self.loid2nid.insert(loid, nid);
     Ok(nid)
+  }
+
+  pub fn compute_layout(
+    &mut self,
+    id: TreeNodeId,
+    available_size: taffy::Size<AvailableSpace>,
+  ) -> TaffyResult<()> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.compute_layout(*loid, available_size)
   }
 }
 
