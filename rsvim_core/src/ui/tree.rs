@@ -546,7 +546,6 @@ impl Tree {
     let indicator = CommandLineIndicator::new(
       self.relationship(),
       indicator_id,
-      indicator_shape,
       indicator_symbol,
     );
     let indicator_node = TreeNode::CommandLineIndicator(indicator);
