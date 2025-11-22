@@ -462,21 +462,15 @@ impl Tree {
       ..Default::default()
     };
 
-    let (cursor_id, cursor_shape) = {
+    let cursor_id = {
       let mut base = self.base.borrow_mut();
       let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
-      (cursor_id, cursor_shape)
+      cursor_id
     };
 
-    let cursor = Cursor::new(
-      self.relationship(),
-      cursor_id,
-      cursor_shape,
-      blinking,
-      hidden,
-      style,
-    );
+    let cursor =
+      Cursor::new(self.relationship(), cursor_id, blinking, hidden, style);
     let cursor_node = TreeNode::Cursor(cursor);
     self.insert(cursor_node);
 

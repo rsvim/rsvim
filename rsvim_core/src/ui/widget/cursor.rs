@@ -15,7 +15,8 @@ flags_impl!(Flags, u8, BLINKING, HIDDEN);
 #[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   // blinking=false
   // hidden=false
   flags: Flags,
@@ -26,16 +27,19 @@ impl Cursor {
   pub fn new(
     relationship: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
-    let base = InodeBase::new(relationship, id, shape);
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
-    Self { base, flags, style }
+    Self {
+      base,
+      id,
+      flags,
+      style,
+    }
   }
 
   pub fn default(
@@ -78,7 +82,7 @@ impl Cursor {
   }
 }
 
-inode_impl!(Cursor, base);
+inode_impl!(Cursor);
 
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
