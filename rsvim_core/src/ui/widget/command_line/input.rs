@@ -40,8 +40,6 @@ impl CommandLineInput {
   }
 }
 
-inode_impl!(CommandLineInput, base);
-
 impl Widgetable for CommandLineInput {
   fn draw(&self, canvas: &mut Canvas) {
     if self.base.visible() {

@@ -8,20 +8,18 @@ use crate::ui::tree::internal::TreeNodeId;
 
 #[derive(Copy, Clone, Debug)]
 struct TestValue {
+  base: IrelationshipRc,
+  id: TreeNodeId,
   value: i32,
-  base: InodeBase,
 }
 
 impl TestValue {
-  pub fn new(value: i32, shape: IRect) -> Self {
-    TestValue {
-      value,
-      base: InodeBase::new(shape),
-    }
+  pub fn new(base: IrelationshipRc, id: TreeNodeId, value: i32) -> Self {
+    TestValue { base, id, value }
   }
 }
 
-inode_impl!(TestValue, base);
+inode_impl!(TestValue);
 
 macro_rules! print_node {
   ($node: ident, $name: expr) => {
