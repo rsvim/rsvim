@@ -12,10 +12,11 @@ use std::fmt::Debug;
 
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   // blinking=false
   // hidden=false
   flags: Flags,
@@ -24,7 +25,8 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    shape: IRect,
+    base: IrelationshipRc,
+    id: TreeNodeId,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
@@ -32,21 +34,16 @@ impl Cursor {
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
-    Cursor {
-      base: InodeBase::new(shape),
+    Self {
+      base,
+      id,
       flags,
       style,
     }
   }
 
-  pub fn default(shape: IRect) -> Self {
-    Cursor {
-      base: InodeBase::new(shape),
-      // blinking=false
-      // hidden=false
-      flags: Flags::empty(),
-      style: CursorStyle::SteadyBlock,
-    }
+  pub fn default(base: IrelationshipRc, id: TreeNodeId) -> Self {
+    Self::new(base, id, false, false, CursorStyle::SteadyBlock)
   }
 
   pub fn blinking(&self) -> bool {
@@ -69,16 +66,16 @@ impl Cursor {
     &self.style
   }
 
-  pub fn set_style(&mut self, value: &CursorStyle) {
-    self.style = *value;
+  pub fn set_style(&mut self, style: &CursorStyle) {
+    self.style = *style;
   }
 }
 
-inode_impl!(Cursor, base);
+inode_impl!(Cursor);
 
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
+    let actual_shape = self.base.borrow().actual_shape(self.id).unwrap();
     let pos: U16Pos = actual_shape.min().into();
     // trace!(
     //   "draw, actual shape:{:?}, top-left pos:{:?}",
@@ -89,7 +86,7 @@ impl Widgetable for Cursor {
       pos,
       self.blinking(),
       self.hidden(),
-      self.style,
+      *self.style(),
     ));
   }
 }

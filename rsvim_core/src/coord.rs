@@ -57,27 +57,6 @@ pub type IRect = Rect<isize>;
 pub type URect = Rect<usize>;
 pub type U16Rect = Rect<u16>;
 
-pub trait RectExt<T>
-where
-  T: geo::CoordNum,
-{
-  fn top_left(&self) -> Coord<T>;
-  fn bottom_right(&self) -> Coord<T>;
-}
-
-impl<T> RectExt<T> for Rect<T>
-where
-  T: geo::CoordNum,
-{
-  fn top_left(&self) -> Coord<T> {
-    self.min()
-  }
-
-  fn bottom_right(&self) -> Coord<T> {
-    self.max()
-  }
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 // Size
 pub struct Size<T>
@@ -87,6 +66,10 @@ where
   width: T,
   height: T,
 }
+
+pub type ISize = Size<isize>;
+pub type USize = Size<usize>;
+pub type U16Size = Size<u16>;
 
 impl<T> Size<T>
 where
@@ -104,10 +87,6 @@ where
     self.height
   }
 }
-
-pub type ISize = Size<isize>;
-pub type USize = Size<usize>;
-pub type U16Size = Size<u16>;
 
 #[macro_export]
 macro_rules! point {
@@ -148,6 +127,20 @@ macro_rules! rect_as {
       ($r.max().x as $ty, $r.max().y as $ty),
     ) as $crate::coord::Rect<$ty>
   };
+}
+
+#[macro_export]
+macro_rules! rect_from_layout {
+  ($l:ident,$tt:ty) => {
+    {
+      let pos = geo::point!(x: $l.location.x as $tt, y: $l.location.y as $tt);
+      let size = Size::new($l.size.width as $tt, $l.size.height as $tt);
+      Rect::new(
+        (pos.x(), pos.y()),
+        (pos.x() + size.width(), pos.y() + size.height()),
+      )
+    }
+  }
 }
 
 #[macro_export]

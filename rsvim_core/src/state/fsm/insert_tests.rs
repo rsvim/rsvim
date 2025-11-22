@@ -26,7 +26,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::CompactString;
@@ -248,8 +248,11 @@ pub fn make_canvas(
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
   let shape = size_into_rect!(terminal_size, isize);
-  let window_content =
-    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+  let window_content = WindowContent::new(
+    shape,
+    Arc::downgrade(&buffer),
+    Arc::downgrade(&viewport),
+  );
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas

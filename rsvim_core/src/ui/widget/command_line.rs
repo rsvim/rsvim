@@ -3,17 +3,13 @@
 pub mod indicator;
 pub mod input;
 pub mod message;
-pub mod root;
 
 #[cfg(test)]
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::rect_as;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
@@ -24,46 +20,22 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
-use indicator::Indicator;
+use crate::widget_dispatcher;
+use indicator::CommandLineIndicator;
 use indicator::IndicatorSymbol;
-use input::Input;
-use message::Message;
-use root::RootContainer;
+use input::CommandLineInput;
+use message::CommandLineMessage;
 use std::sync::Arc;
-
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum CommandLineNode {
-  RootContainer(RootContainer),
-  Indicator(Indicator),
-  Input(Input),
-  Cursor(Cursor),
-  Message(Message),
-}
-
-inode_enum_dispatcher!(
-  CommandLineNode,
-  RootContainer,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
-
-widget_enum_dispatcher!(
-  CommandLineNode,
-  RootContainer,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
-  base: Itree<CommandLineNode>,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
@@ -77,7 +49,14 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
+  pub fn new(
+    base: IrelationshipRc,
+    id: TreeNodeId,
+    indicator_id: TreeNodeId,
+    input_id: TreeNodeId,
+    message_id: TreeNodeId,
+    text_contents: TextContentsWk,
+  ) -> TaffyResult<Self> {
     // Force cmdline window options.
     let options = WindowOptionsBuilder::default()
       .wrap(false)
@@ -85,32 +64,6 @@ impl CommandLine {
       .scroll_off(0)
       .build()
       .unwrap();
-
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = CommandLineNode::RootContainer(root);
-
-    let mut base = Itree::new(root_node);
-
-    let indicator_shape = rect!(
-      shape.min().x,
-      shape.min().y,
-      shape.min().x + 1,
-      shape.max().y
-    );
-    let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
-    let indicator_id = indicator.id();
-    let mut indicator_node = CommandLineNode::Indicator(indicator);
-    // Indicator by default is invisible
-    indicator_node.set_visible(false);
-    base.bounded_insert(root_id, indicator_node);
-
-    let input_shape = rect!(
-      shape.min().x + 1,
-      shape.min().y,
-      shape.max().x,
-      shape.max().y
-    );
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
@@ -143,28 +96,9 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let input = Input::new(
-      input_shape,
-      text_contents.clone(),
-      Arc::downgrade(&input_viewport),
-    );
-    let input_id = input.id();
-    let mut input_node = CommandLineNode::Input(input);
-    // Input by default is invisible
-    input_node.set_visible(false);
-    base.bounded_insert(root_id, input_node);
-
-    let message = Message::new(
-      shape,
-      text_contents.clone(),
-      Arc::downgrade(&message_viewport),
-    );
-    let message_id = message.id();
-    let message_node = CommandLineNode::Message(message);
-    base.bounded_insert(root_id, message_node);
-
-    Self {
+    Ok(Self {
       base,
+      id,
       options,
       indicator_id,
       input_id,
@@ -173,21 +107,7 @@ impl CommandLine {
       input_viewport,
       input_cursor_viewport,
       message_viewport,
-    }
-  }
-}
-
-inode_itree_impl!(CommandLine, base);
-
-impl Widgetable for CommandLine {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      if !node.visible() {
-        continue;
-      }
-      node.draw(canvas);
-    }
+    })
   }
 }
 
@@ -328,7 +248,7 @@ impl CommandLine {
 // Widgets {
 impl CommandLine {
   /// Command-line input widget.
-  pub fn input(&self) -> &Input {
+  pub fn input(&self) -> &CommandLineInput {
     debug_assert!(self.base.node(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.input_id).unwrap(),
@@ -345,7 +265,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line input widget.
-  pub fn input_mut(&mut self) -> &mut Input {
+  pub fn input_mut(&mut self) -> &mut CommandLineInput {
     debug_assert!(self.base.node_mut(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.input_id).unwrap(),
@@ -362,7 +282,7 @@ impl CommandLine {
   }
 
   /// Command-line message widget
-  pub fn message(&self) -> &Message {
+  pub fn message(&self) -> &CommandLineMessage {
     debug_assert!(self.base.node(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.message_id).unwrap(),
@@ -379,7 +299,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line message widget.
-  pub fn message_mut(&mut self) -> &mut Message {
+  pub fn message_mut(&mut self) -> &mut CommandLineMessage {
     debug_assert!(self.base.node_mut(self.message_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.message_id).unwrap(),
@@ -396,7 +316,7 @@ impl CommandLine {
   }
 
   /// Command-line indicator widget.
-  pub fn indicator(&self) -> &Indicator {
+  pub fn indicator(&self) -> &CommandLineIndicator {
     debug_assert!(self.base.node(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.indicator_id).unwrap(),
@@ -413,7 +333,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line indicator widget.
-  pub fn indicator_mut(&mut self) -> &mut Indicator {
+  pub fn indicator_mut(&mut self) -> &mut CommandLineIndicator {
     debug_assert!(self.base.node_mut(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.indicator_id).unwrap(),

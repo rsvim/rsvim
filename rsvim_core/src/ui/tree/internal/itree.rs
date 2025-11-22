@@ -1,57 +1,52 @@
-//! Internal tree structure that implements the widget tree.
+//! Internal tree and relationship.
 
 use crate::prelude::*;
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::TreeNodeId;
-use crate::ui::tree::internal::shapes;
+use crate::ui::tree::Tree;
+use crate::ui::tree::TreeNode;
+use crate::ui::tree::TreeNodeId;
+use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
+use taffy::AvailableSpace;
+use taffy::Layout;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::TaffyTree;
+use taffy::prelude::TaffyMaxContent;
 
-#[derive(Debug, Clone)]
-pub struct Relationships {
-  // Root id.
-  root_id: TreeNodeId,
-
-  // Maps node id => its parent node id.
-  parent_id: FoldMap<TreeNodeId, TreeNodeId>,
-
-  // Maps node id => all its children node ids.
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+/// Next unique UI widget ID.
+///
+/// NOTE: Start from 100001, so be different from buffer ID.
+pub fn next_node_id() -> TreeNodeId {
+  static VALUE: AtomicI32 = AtomicI32::new(100001);
+  VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-impl Relationships {
-  pub fn new(root_id: TreeNodeId) -> Self {
-    let mut children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>> = FoldMap::new();
-    children_ids.insert(root_id, Vec::new());
+#[derive(Debug, Clone)]
+pub struct Irelationship {
+  lo: TaffyTree,
+  nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
+  loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
+  // Cached actual_shape for each node.
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+}
 
+rc_refcell_ptr!(Irelationship);
+
+impl Irelationship {
+  pub fn new() -> Self {
+    let mut lo = TaffyTree::new();
+    lo.disable_rounding();
     Self {
-      root_id,
-      parent_id: FoldMap::new(),
-      children_ids,
+      lo,
+      nid2loid: FoldMap::new(),
+      loid2nid: FoldMap::new(),
+      cached_actual_shapes: RefCell::new(FoldMap::new()),
     }
-  }
-
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.parent_id.get(&id).cloned()
-  }
-
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    match self.children_ids.get(&id) {
-      Some(children_ids) => children_ids.to_vec(),
-      None => Vec::new(),
-    }
-  }
-
-  #[allow(dead_code)]
-  pub fn is_empty(&self) -> bool {
-    self.children_ids.is_empty()
-  }
-
-  #[allow(dead_code)]
-  pub fn len(&self) -> usize {
-    self.children_ids.len()
   }
 
   #[cfg(not(test))]
@@ -59,190 +54,232 @@ impl Relationships {
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(self.root_id);
-
-    while let Some(id) = que.pop_front() {
-      let children_ids = self.children_ids(id);
-      for c in children_ids {
-        let p = self.parent_id.get(&c).cloned();
-        debug_assert!(p.is_some());
-        debug_assert_eq!(p.unwrap(), id);
-      }
-      match self.parent_id.get(&id).cloned() {
-        Some(parent) => {
-          debug_assert_eq!(
-            self
-              .children_ids(parent)
-              .iter()
-              .cloned()
-              .filter(|c| *c == id)
-              .count(),
-            1
-          );
+    debug_assert_eq!(self.lo.total_node_count(), self.nid2loid.len());
+    debug_assert_eq!(self.lo.total_node_count(), self.loid2nid.len());
+    let mut no_parent_nodes = 0_usize;
+    for (nid, loid) in self.nid2loid.iter() {
+      debug_assert!(self.loid2nid.contains_key(loid));
+      debug_assert_eq!(*self.loid2nid.get(loid).unwrap(), *nid);
+      match self.lo.parent(*loid) {
+        Some(parent_loid) => {
+          debug_assert!(self.loid2nid.contains_key(&parent_loid));
         }
-        None => debug_assert_eq!(id, self.root_id),
+        None => {
+          no_parent_nodes += 1;
+        }
+      }
+    }
+    debug_assert_eq!(no_parent_nodes, 1);
+    for (loid, nid) in self.loid2nid.iter() {
+      debug_assert!(self.nid2loid.contains_key(nid));
+      debug_assert_eq!(*self.nid2loid.get(nid).unwrap(), *loid);
+    }
+  }
+
+  pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
+    let loid = self.lo.new_leaf(style)?;
+    let nid = next_node_id();
+    self.nid2loid.insert(nid, loid);
+    self.loid2nid.insert(loid, nid);
+    Ok(nid)
+  }
+
+  pub fn compute_layout(
+    &mut self,
+    id: TreeNodeId,
+    available_size: taffy::Size<AvailableSpace>,
+  ) -> TaffyResult<()> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.compute_layout(*loid, available_size)
+  }
+
+  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.layout(*loid)
+  }
+
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.style(*loid)
+  }
+
+  /// Logical location/size on unlimited canvas.
+  /// The top-left location can be negative.
+  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+    let layout = self.layout(id)?;
+    Ok(rect_from_layout!(layout, isize))
+  }
+
+  /// Actual location/size on real-world canvas on limited terminal.
+  /// The top-left location can never be negative.
+  ///
+  /// A node's actual shape is always truncated by its parent actual shape.
+  /// Unless the node itself is the root node and doesn't have a parent, in
+  /// such case, the root node logical shape is actual shape.
+  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+    match self.parent(id) {
+      Some(parent_id) => {
+        // Non-root node truncated by its parent's actual shape.
+        let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+        match cached_actual_shapes.get(&id) {
+          Some(actual_shape) => {
+            // Use caches to shorten the recursive query path.
+            Ok(*actual_shape)
+          }
+          None => {
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(*parent_id)?;
+            let left = num_traits::clamp(
+              shape.min().x,
+              0,
+              parent_actual_shape.max().x as isize,
+            );
+            let top = num_traits::clamp(
+              shape.min().y,
+              0,
+              parent_actual_shape.max().y as isize,
+            );
+            let right = num_traits::clamp(
+              shape.max().x,
+              0,
+              parent_actual_shape.max().x as isize,
+            );
+            let bottom = num_traits::clamp(
+              shape.max().y,
+              0,
+              parent_actual_shape.max().y as isize,
+            );
+            let truncated = rect!(left, top, right, bottom);
+            let truncated = rect_as!(truncated, u16);
+            cached_actual_shapes.insert(id, truncated);
+            Ok(truncated)
+          }
+        }
+      }
+      None => {
+        // Root node doesn't have a parent.
+        let shape = self.shape(id)?;
+        Ok(rect_as!(shape, u16))
       }
     }
   }
 
-  pub fn root_id(&self) -> TreeNodeId {
-    self.root_id
+  /// Clear the cached actual_shapes since the provided id. All its
+  /// descendants actual_shape will be cleared as well.
+  pub fn clear_actual_shape(&mut self, id: TreeNodeId) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(id);
+    while let Some(parent_id) = q.pop_front() {
+      let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+      cached_actual_shapes.remove(&parent_id);
+      if let Ok(children_ids) = self.children(parent_id) {
+        for child_id in children_ids.iter() {
+          q.push_back(*child_id);
+        }
+      }
+    }
   }
 
-  pub fn contains_id(&self, id: TreeNodeId) -> bool {
-    self._internal_check();
-    self.children_ids.contains_key(&id)
+  /// Whether the node is visible, e.g. style is `display: none`.
+  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    let style = self.lo.style(*loid)?;
+    Ok(style.display == taffy::Display::None)
   }
 
-  pub fn add_child<T>(
+  pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
+    let loid = self.nid2loid.get(&id)?;
+    let parent_loid = self.lo.parent(*loid)?;
+    self.loid2nid.get(&parent_loid)
+  }
+
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    let loid = self.nid2loid.get(&id).unwrap();
+    let children_loids = self.lo.children(*loid)?;
+    Ok(
+      children_loids
+        .iter()
+        .map(|i| *self.loid2nid.get(i).unwrap())
+        .collect_vec(),
+    )
+  }
+
+  pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
-    child_zindex: usize,
-    nodes: &FoldMap<TreeNodeId, T>,
-  ) where
-    T: Inodeable,
-  {
-    debug_assert!(!self.contains_id(child_id));
-    self._internal_check();
-
-    // Initialize children_ids vector.
-    self.children_ids.insert(child_id, Vec::new());
-
-    // Binds connection from child => parent.
-    self.parent_id.insert(child_id, parent_id);
-
-    // Binds connection from parent => child.
-    //
-    // NOTE: It inserts child to the `children_ids` vector which belongs to the parent, and the
-    // children are sorted by their Z-index value from lower to higher (UI widget node with higher
-    // Z-index has a higher priority to show on the final TUI, but the order is reversed when
-    // rendering). For those children that share the same Z-index value, it inserts at the end of
-    // those children.
-    let higher_zindex_pos: Vec<usize> = self
-      .children_ids
-      .get(&parent_id)
-      .unwrap()
-      .iter()
-      .enumerate()
-      .filter(|(_index, cid)| match nodes.get(cid) {
-        Some(cnode) => cnode.zindex() > child_zindex,
-        None => false,
-      })
-      .map(|(index, _cid)| index)
-      .collect();
-    match higher_zindex_pos.first() {
-      Some(insert_pos) => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .insert(*insert_pos, child_id);
-      }
-      None => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .push(child_id);
-      }
-    }
-
-    self._internal_check();
+  ) -> TaffyResult<()> {
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let child_loid = self.nid2loid.get(&child_id).unwrap();
+    self.lo.add_child(*parent_loid, *child_loid)
   }
 
-  pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
-    self._internal_check();
+  pub fn new_with_parent(
+    &mut self,
+    style: Style,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    let id = self.new_leaf(style)?;
+    self.add_child(parent_loid, id)?;
+    Ok(id)
+  }
 
-    let result = match self.parent_id.remove(&child_id) {
-      Some(removed_parent) => {
-        match self.children_ids.get_mut(&removed_parent) {
-          Some(to_be_removed_children) => {
-            let to_be_removed_child = to_be_removed_children
-              .iter()
-              .enumerate()
-              .filter(|(_idx, c)| **c == child_id)
-              .map(|(idx, c)| (idx, *c))
-              .collect::<Vec<(usize, TreeNodeId)>>();
-            if !to_be_removed_child.is_empty() {
-              debug_assert_eq!(to_be_removed_child.len(), 1);
-              let to_be_removed = to_be_removed_child[0];
-              to_be_removed_children.remove(to_be_removed.0);
-
-              // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
-              // api.
-              let children_of_to_be_removed_exists =
-                self.children_ids.contains_key(&to_be_removed.1);
-              let children_of_to_be_removed_is_empty = self
-                .children_ids
-                .get(&to_be_removed.1)
-                .is_none_or(|children| children.is_empty());
-              if children_of_to_be_removed_exists
-                && children_of_to_be_removed_is_empty
-              {
-                self.children_ids.remove(&to_be_removed.1);
-              }
-
-              true
-            } else {
-              false
-            }
-          }
-          None => false,
-        }
-      }
-      None => false,
-    };
-
-    self._internal_check();
-    result
+  pub fn new_with_children(
+    &mut self,
+    style: Style,
+    children: &[TreeNodeId],
+  ) -> TaffyResult<TreeNodeId> {
+    let children_loids = children
+      .iter()
+      .map(|i| *self.nid2loid.get(i).unwrap())
+      .collect_vec();
+    let loid = self.lo.new_with_children(style, &children_loids)?;
+    let id = next_node_id();
+    self.nid2loid.insert(id, loid);
+    self.loid2nid.insert(loid, id);
+    Ok(id)
   }
 }
 
-#[derive(Debug, Clone)]
-pub struct Itree<T>
-where
-  T: Inodeable,
-{
-  // Nodes collection, maps from node ID to its node struct.
-  nodes: FoldMap<TreeNodeId, T>,
+impl Default for Irelationship {
+  fn default() -> Self {
+    Self::new()
+  }
+}
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
-  relationships: RefCell<Relationships>,
+pub fn make_new_node(
+  relationship: &mut Irelationship,
+  style: Style,
+  parent_id: Option<TreeNodeId>,
+) -> TaffyResult<(TreeNodeId, U16Rect)> {
+  let rel = relationship;
+  let id = rel.new_leaf(style)?;
+  if let Some(parent_id) = parent_id {
+    rel.add_child(parent_id, id)?;
+  }
+  rel.compute_layout(id, taffy::Size::MAX_CONTENT)?;
+  let layout = rel.layout(id)?;
+  let shape = rect_from_layout!(layout, u16);
+  Ok((id, shape))
 }
 
 #[derive(Debug)]
-/// The pre-order iterator of the tree.
-///
-/// For each node, it first visits the node itself, then visits all its children.
-/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-/// This also follows the order when rendering the widget tree to terminal device.
-pub struct ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  tree: &'a Itree<T>,
+/// The level-order iterator of the tree, start from tree root.
+pub struct TreeIter<'a> {
+  tree: &'a Tree,
   que: VecDeque<TreeNodeId>,
 }
 
-impl<'a, T> Iterator for ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a T;
+impl<'a> Iterator for TreeIter<'a> {
+  type Item = &'a TreeNode;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
+      if let Ok(children_ids) = self.tree.children_ids(id) {
+        for child_id in children_ids {
+          if self.tree.node(child_id).is_some() {
+            self.que.push_back(child_id);
+          }
         }
       }
       self.tree.node(id)
@@ -252,11 +289,8 @@ where
   }
 }
 
-impl<'a, T> ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+impl<'a> TreeIter<'a> {
+  pub fn new(tree: &'a Tree, start_node_id: Option<TreeNodeId>) -> Self {
     let mut que = VecDeque::new();
     if let Some(id) = start_node_id {
       que.push_back(id);
@@ -265,530 +299,17 @@ where
   }
 }
 
-// Attributes {
-impl<T> Itree<T>
-where
-  T: Inodeable,
-{
-  pub fn new(root_node: T) -> Self {
-    let root_id = root_node.id();
-    let mut nodes = FoldMap::new();
-    nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
-    Itree {
-      nodes,
-      relationships,
-    }
-  }
-
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
-  fn _internal_check(&self) {
-    debug_assert!(!self.nodes.is_empty());
-    debug_assert!(!self.relationships.borrow().is_empty());
-    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
-
-    let root_id = self.relationships.borrow().root_id();
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(root_id);
-
-    while let Some(id) = que.pop_front() {
-      let parent = self.relationships.borrow().parent_id(id);
-      if id == root_id {
-        debug_assert!(parent.is_none());
-      } else {
-        debug_assert!(parent.is_some());
-        let parents_children =
-          self.relationships.borrow().children_ids(parent.unwrap());
-        for c in parents_children {
-          let child_parent = self.relationships.borrow().parent_id(c);
-          debug_assert!(child_parent.is_some());
-          debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
-        }
+#[macro_export]
+macro_rules! inode_impl {
+  ($name:tt) => {
+    impl $name {
+      fn id(&self) -> TreeNodeId {
+        self.id
       }
 
-      let children_ids = self.relationships.borrow().children_ids(id);
-      debug_assert_eq!(
-        children_ids.len(),
-        children_ids
-          .iter()
-          .cloned()
-          .collect::<FoldSet<TreeNodeId>>()
-          .len()
-      );
-      for c in children_ids {
-        let child_parent = self.relationships.borrow().parent_id(c);
-        debug_assert!(child_parent.is_some());
-        debug_assert_eq!(child_parent.unwrap(), id);
+      fn relationship(&self) -> IrelationshipRc {
+        self.base.clone()
       }
     }
-  }
-
-  pub fn len(&self) -> usize {
-    self.nodes.len()
-  }
-
-  pub fn is_empty(&self) -> bool {
-    self.nodes.len() <= 1
-  }
-
-  pub fn root_id(&self) -> TreeNodeId {
-    self.relationships.borrow().root_id()
-  }
-
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.nodes.keys().copied().collect()
-  }
-
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationships.borrow().parent_id(id)
-  }
-
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
-  }
-
-  pub fn node(&self, id: TreeNodeId) -> Option<&T> {
-    self.nodes.get(&id)
-  }
-
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut T> {
-    self.nodes.get_mut(&id)
-  }
-
-  /// Get the iterator.
-  ///
-  /// By default, it iterates in pre-order iterator which starts from the root.
-  /// For the children under the same node, it visits from lower z-index to higher.
-  pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
-  }
+  };
 }
-// Attributes }
-
-// Insert/Remove {
-impl<T> Itree<T>
-where
-  T: Inodeable,
-{
-  /// Update the `start_id` node attributes, and all the descendants attributes of this node.
-  ///
-  /// Below attributes will be update:
-  ///
-  /// 1. [`depth`](Inode::depth()): The child depth should always be the parent's depth + 1.
-  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
-  ///    by parent's boundaries.
-  fn update_descendant_attributes(
-    &mut self,
-    start_id: TreeNodeId,
-    start_parent_id: TreeNodeId,
-  ) {
-    // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
-
-    // Tuple of (child_id, parent_id, parent_depth, parent_actual_shape)
-    type ChildAndParent = (TreeNodeId, TreeNodeId, usize, U16Rect);
-
-    // trace!("before create que");
-    let mut que: VecDeque<ChildAndParent> = VecDeque::new();
-    let pnode = self.nodes.get_mut(&start_parent_id).unwrap();
-    let pnode_id = pnode.id();
-    let pnode_depth = pnode.depth();
-    let pnode_actual_shape = *pnode.actual_shape();
-    que.push_back((start_id, pnode_id, pnode_depth, pnode_actual_shape));
-    // trace!("after create que");
-
-    // Iterate all descendants, and update their attributes.
-    while let Some(child_and_parent) = que.pop_front() {
-      let cnode_id = child_and_parent.0;
-      let _pnode_id = child_and_parent.1;
-      let pnode_depth = child_and_parent.2;
-      let pnode_actual_shape = child_and_parent.3;
-
-      // trace!("before update cnode attr: {:?}", cnode);
-      let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      let cnode_depth = pnode_depth + 1;
-      let cnode_shape = *cnode_ref.shape();
-      let cnode_actual_shape =
-        shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
-
-      // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
-
-      // let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      cnode_ref.set_depth(cnode_depth);
-      cnode_ref.set_actual_shape(&cnode_actual_shape);
-
-      // raw_nodes
-      //   .as_mut()
-      //   .get_mut(&cnode_id)
-      //   .unwrap()
-      //   .set_depth(cnode_depth);
-      // raw_nodes
-      //   .as_mut()
-      //   .get_mut(&cnode_id)
-      //   .unwrap()
-      //   .set_actual_shape(&cnode_actual_shape);
-
-      for dnode_id in self.children_ids(cnode_id).iter() {
-        if self.nodes.contains_key(dnode_id) {
-          que.push_back((*dnode_id, cnode_id, cnode_depth, cnode_actual_shape));
-        }
-      }
-    }
-  }
-
-  /// Insert a node to the tree, i.e. push it to the children vector of the parent.
-  ///
-  /// This operation builds the connection between the parent and the inserted child.
-  ///
-  /// It also sorts the children vector after inserted by the z-index value,
-  /// and updates both the inserted child's attributes and all its descendants attributes.
-  ///
-  /// Below node attributes need to update:
-  ///
-  /// 1. [`depth`](Inodeable::depth()): The child depth should be always the parent depth + 1.
-  /// 2. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
-  ///
-  /// # Returns
-  ///
-  /// 1. `None` if the `child_node` doesn't exist.
-  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
-  ///
-  /// # Panics
-  ///
-  /// If `parent_id` doesn't exist.
-  pub fn insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
-    self._internal_check();
-    debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationships.borrow().contains_id(parent_id));
-
-    // Child node.
-    let child_id = child_node.id();
-    let child_zindex = child_node.zindex();
-
-    debug_assert!(!self.relationships.borrow().contains_id(child_id));
-
-    // Update attributes for both the newly inserted child, and all its descendants (if the child
-    // itself is also a sub-tree in current relationship).
-    //
-    // NOTE: This is useful when we want to move some widgets and all its children nodes to another
-    // place. We don't need to remove all the nodes (which could be slow), but only need to move
-    // the root of the tree.
-    //
-    // The attributes to be updated:
-    // 1. Depth.
-    // 2. Actual shape.
-    let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_depth = parent_node.depth();
-    let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_depth(parent_depth + 1);
-    child_node.set_actual_shape(&shapes::make_actual_shape(
-      child_node.shape(),
-      &parent_actual_shape,
-    ));
-
-    // Insert node into collection.
-    let result = self.nodes.insert(child_id, child_node);
-    // Create edge between child and its parent.
-    self.relationships.borrow_mut().add_child(
-      parent_id,
-      child_id,
-      child_zindex,
-      &self.nodes,
-    );
-
-    // Update all the descendants attributes under the `child_id` node.
-    for dnode_id in self.children_ids(child_id).iter() {
-      self.update_descendant_attributes(*dnode_id, child_id);
-    }
-
-    self._internal_check();
-    result
-  }
-
-  /// Insert a node to the tree.
-  ///
-  /// It works similar to [`insert`](Itree::insert) method, except it limits the inserted node
-  /// boundary based the parent's actual shape. This affects two aspects:
-  ///
-  /// 1. For size, if the inserted `child_node` is larger than the parent actual shape. The size
-  ///    will be truncated to fit its parent. The bottom-right part will be removed, while the
-  ///    top-left part will be keeped.
-  /// 2. For position, if the inserted `child_node` hits the boundary of its parent. It simply
-  ///    stops at its parent boundary.
-  ///
-  /// # Returns
-  ///
-  /// 1. `None` if the `child_node` doesn't exist.
-  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
-  ///
-  /// # Panics
-  ///
-  /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
-    // Panics if `parent_id` not exists.
-    debug_assert!(self.nodes.contains_key(&parent_id));
-
-    let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_shape = parent_node.actual_shape();
-
-    // Bound child shape
-    child_node.set_shape(&shapes::bound_shape(
-      child_node.shape(),
-      parent_actual_shape,
-    ));
-
-    self.insert(parent_id, child_node)
-  }
-
-  /// Remove a node by its ID.
-  ///
-  /// This operation breaks the connection between the removed node and its parent.
-  ///
-  /// But the relationships between the removed node and its descendants still remains in the tree,
-  /// thus once you insert it back in the same tree, its descendants are still connected with the removed node.
-  ///
-  /// # Returns
-  ///
-  /// 1. `None` if node `id` doesn't exist.
-  /// 2. The removed node on the node `id`.
-  ///
-  /// # Panics
-  ///
-  /// If the node `id` is the root node id since root node cannot be removed.
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
-    // Cannot remove root node.
-    debug_assert_ne!(id, self.relationships.borrow().root_id());
-    self._internal_check();
-
-    // Remove child node from collection.
-    let result = match self.nodes.remove(&id) {
-      Some(removed) => {
-        // Remove node/edge relationship.
-        debug_assert!(self.relationships.borrow().contains_id(id));
-        // Remove edges between `id` and its parent.
-        let relation_removed = self.relationships.borrow_mut().remove_child(id);
-        debug_assert!(relation_removed);
-        Some(removed)
-      }
-      None => {
-        debug_assert!(!self.relationships.borrow().contains_id(id));
-        None
-      }
-    };
-
-    self._internal_check();
-    result
-  }
-}
-// Insert/Remove }
-
-// Movement {
-
-impl<T> Itree<T>
-where
-  T: Inodeable,
-{
-  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances.
-  ///
-  /// * The node moves left when `x < 0`.
-  /// * The node moves right when `x > 0`.
-  /// * The node moves up when `y < 0`.
-  /// * The node moves down when `y > 0`.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_by(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
-      Some(node) => {
-        let current_shape = *node.shape();
-        let current_top_left_pos: IPos = current_shape.min().into();
-        self.move_to(
-          id,
-          current_top_left_pos.x() + x,
-          current_top_left_pos.y() + y,
-        )
-      }
-      None => None,
-    }
-  }
-
-  /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
-  ///
-  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
-  /// its parent, it simply stops moving.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_by(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    match self.parent_id(id) {
-      Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = self
-          .nodes
-          .get(&parent_id)
-          .map(|parent_node| *parent_node.actual_shape());
-
-        match maybe_parent_actual_shape {
-          Some(parent_actual_shape) => {
-            match self.nodes.get_mut(&id) {
-              Some(node) => {
-                let current_shape = *node.shape();
-                let current_top_left_pos: IPos = current_shape.min().into();
-                let expected_top_left_pos: IPos = point!(
-                  current_top_left_pos.x() + x,
-                  current_top_left_pos.y() + y
-                );
-                let expected_shape = rect!(
-                  expected_top_left_pos.x(),
-                  expected_top_left_pos.y(),
-                  expected_top_left_pos.x() + current_shape.width(),
-                  expected_top_left_pos.y() + current_shape.height()
-                );
-
-                let final_shape =
-                  shapes::bound_shape(&expected_shape, &parent_actual_shape);
-                let final_top_left_pos: IPos = final_shape.min().into();
-
-                // Real movement
-                let final_x = final_top_left_pos.x() - current_top_left_pos.x();
-                let final_y = final_top_left_pos.y() - current_top_left_pos.y();
-                self.move_by(id, final_x, final_y)
-              }
-              None => None,
-            }
-          }
-          None => None,
-        }
-      }
-      None => None,
-    }
-  }
-
-  /// Move node to position `(x, y)`, the `(x, y)` is the new position.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
-  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_to(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
-      Some(node) => {
-        let current_shape = *node.shape();
-        let next_top_left_pos: IPos = point!(x, y);
-        let next_shape = rect!(
-          next_top_left_pos.x(),
-          next_top_left_pos.y(),
-          next_top_left_pos.x() + current_shape.width(),
-          next_top_left_pos.y() + current_shape.height()
-        );
-        node.set_shape(&next_shape);
-
-        // Update all the descendants attributes under the `id` node.
-        self.update_descendant_attributes(id, self.parent_id(id).unwrap());
-
-        Some(next_shape)
-      }
-      None => None,
-    }
-  }
-
-  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
-  ///
-  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
-  /// its parent, it simply stops moving.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
-  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_to(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    match self.parent_id(id) {
-      Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = self
-          .nodes
-          .get(&parent_id)
-          .map(|parent_node| *parent_node.actual_shape());
-
-        match maybe_parent_actual_shape {
-          Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
-            Some(node) => {
-              let current_shape = *node.shape();
-              let expected_top_left_pos: IPos = point!(x, y);
-              let expected_shape = rect!(
-                expected_top_left_pos.x(),
-                expected_top_left_pos.y(),
-                expected_top_left_pos.x() + current_shape.width(),
-                expected_top_left_pos.y() + current_shape.height()
-              );
-
-              let final_shape =
-                shapes::bound_shape(&expected_shape, &parent_actual_shape);
-              let final_top_left_pos: IPos = final_shape.min().into();
-
-              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
-            }
-            None => None,
-          },
-          None => None,
-        }
-      }
-      None => None,
-    }
-  }
-}
-// Movement }

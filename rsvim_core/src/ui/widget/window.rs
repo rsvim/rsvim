@@ -2,7 +2,6 @@
 
 pub mod content;
 pub mod opt;
-pub mod root;
 
 #[cfg(test)]
 mod content_tests;
@@ -10,8 +9,7 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -22,28 +20,20 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::widget_enum_dispatcher;
-use content::Content;
+use crate::widget_dispatcher;
+use content::WindowContent;
 use opt::*;
-use root::RootContainer;
 use std::sync::Arc;
-
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  RootContainer(RootContainer),
-  Content(Content),
-  Cursor(Cursor),
-}
-
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -54,56 +44,45 @@ pub struct Window {
   cursor_viewport: CursorViewportArc,
 }
 
+inode_impl!(Window);
+
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
-
-    let mut base = Itree::new(root_node);
-
+  pub fn new(
+    base: IrelationshipRc,
+    id: TreeNodeId,
+    opts: WindowOptions,
+    content_id: TreeNodeId,
+    buffer: BufferWk,
+  ) -> TaffyResult<Self> {
     let (viewport, cursor_viewport) = {
+      let base = base.borrow();
+      let content_actual_shape = base.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+        Viewport::view(&opts, buffer.text(), &content_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
+
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
-    let content_id = content.id();
-    let content_node = WindowNode::Content(content);
-
-    base.bounded_insert(root_id, content_node);
-
-    Window {
+    Ok(Window {
       base,
-      options: *opts,
+      id,
+      options: opts,
       content_id,
       cursor_id: None,
       buffer,
       viewport,
       cursor_viewport,
-    }
+    })
   }
 }
 
-inode_itree_impl!(Window, base);
-
-impl Widgetable for Window {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      node.draw(canvas);
-    }
-  }
-}
+impl Widgetable for Window {}
 
 // Attributes
 impl Window {
@@ -204,7 +183,7 @@ impl EditableWidgetable for Window {
 // Sub-Widgets {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &Content {
+  pub fn content(&self) -> &WindowContent {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -220,7 +199,7 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut Content {
+  pub fn content_mut(&mut self) -> &mut WindowContent {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),

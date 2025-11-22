@@ -29,14 +29,14 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
+use taffy::Style;
+use taffy::prelude::FromLength;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -178,7 +178,7 @@ impl EventLoop {
     let canvas = Canvas::to_arc(canvas);
 
     // UI Tree
-    let tree = Tree::to_arc(Tree::new(canvas_size));
+    let tree = Tree::to_arc(Tree::new(canvas_size).unwrap());
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
@@ -527,8 +527,7 @@ impl EventLoop {
 
   /// Initialize windows.
   pub fn _init_windows(&mut self) -> IoResult<()> {
-    // Initialize default window, with default buffer.
-    let (canvas_size, canvas_cursor) = {
+    let (_canvas_size, canvas_cursor) = {
       let canvas = lock!(self.canvas);
       let canvas_size = canvas.size();
       let canvas_cursor = *canvas.frame().cursor();
@@ -536,44 +535,57 @@ impl EventLoop {
     };
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
-    let window_shape = size_into_rect!(canvas_size, isize);
-    let mut window = {
+
+    let window_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let cmdline_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      ..Default::default()
+    };
+
+    // Initialize default window with default buffer.
+    let window_id = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
-      trace!("Bind first buffer to default window {:?}", buf_id);
-      Window::new(
-        tree.global_local_options(),
-        window_shape,
-        Arc::downgrade(buf),
-      )
+      tree
+        .insert_new_window(
+          tree_root_id,
+          window_style,
+          *tree.global_local_options(),
+          Arc::downgrade(buf),
+        )
+        .unwrap()
     };
-    let window_id = window.id();
 
     // Initialize cursor inside the default window.
-    let cursor_shape = rect!(0, 0, 1, 1);
-    let cursor = Cursor::new(
-      cursor_shape,
-      canvas_cursor.blinking(),
-      canvas_cursor.hidden(),
-      canvas_cursor.style(),
-    );
-    let _previous_inserted_cursor = window.insert_cursor(cursor);
-    debug_assert!(_previous_inserted_cursor.is_none());
+    let cursor_id = tree
+      .insert_new_cursor(
+        window_id,
+        canvas_cursor.blinking(),
+        canvas_cursor.hidden(),
+        canvas_cursor.style(),
+      )
+      .unwrap();
 
-    tree.bounded_insert(tree_root_id, TreeNode::Window(window));
     tree.set_current_window_id(Some(window_id));
 
-    // Initialize default command-line.
-    let cmdline_shape = rect!(
-      0,
-      canvas_size.height().saturating_sub(1) as isize,
-      canvas_size.width() as isize,
-      canvas_size.height() as isize
-    );
-    let cmdline =
-      CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
+    let cmdline = CommandLine::new(
+      tree.lotree(),
+      cmdline_loid,
+      cmdline_shape,
+      Arc::downgrade(&self.contents),
+    )
+    .unwrap();
 
-    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+    tree._insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }

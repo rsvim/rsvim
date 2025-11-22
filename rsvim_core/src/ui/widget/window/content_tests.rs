@@ -53,8 +53,11 @@ pub fn make_canvas(
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
   let shape = size_into_rect!(terminal_size, isize);
-  let window_content =
-    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+  let window_content = WindowContent::new(
+    shape,
+    Arc::downgrade(&buffer),
+    Arc::downgrade(&viewport),
+  );
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
