@@ -464,8 +464,7 @@ impl Tree {
 
     let (cursor_id, cursor_shape) = {
       let mut base = self.base.borrow_mut();
-      let cursor_id = base.new_leaf(cursor_style)?;
-      base.add_child(parent_id, cursor_id)?;
+      let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
       base.compute_layout(id, taffy::Size::MAX_CONTENT)?;
       (cursor_id, cursor_shape)
     };
