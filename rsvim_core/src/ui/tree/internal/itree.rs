@@ -1,4 +1,4 @@
-//! Internal tree structure that implements the widget tree.
+//! Internal tree and relationship.
 
 use crate::prelude::*;
 use crate::ui::tree::Tree;
