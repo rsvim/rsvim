@@ -410,10 +410,8 @@ impl Tree {
     };
     let (window_id, content_id) = {
       let mut base = self.base.borrow_mut();
-      let window_id = base.new_leaf(window_style)?;
-      base.add_child(parent_id, window_id)?;
-      let content_id = base.new_leaf(content_style)?;
-      base.add_child(window_id, content_id)?;
+      let window_id = base.new_with_parent(window_style, parent_id)?;
+      let content_id = base.new_with_parent(content_style, window_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       (window_id, content_id)
     };
