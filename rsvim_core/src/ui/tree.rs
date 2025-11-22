@@ -554,7 +554,6 @@ impl Tree {
     let input = CommandLineInput::new(
       self.relationship(),
       input_id,
-      input_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
     );

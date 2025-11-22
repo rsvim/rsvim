@@ -12,22 +12,24 @@ use crate::ui::widget::Widgetable;
 #[derive(Debug, Clone)]
 /// Commandline message.
 pub struct CommandLineMessage {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   text_contents: TextContentsWk,
   viewport: ViewportWk,
 }
+
+inode_impl!(CommandLineMessage);
 
 impl CommandLineMessage {
   pub fn new(
     relationship: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(relationship, id, shape);
     CommandLineMessage {
       base,
+      id,
       text_contents,
       viewport,
     }
@@ -37,8 +39,6 @@ impl CommandLineMessage {
     self.viewport = viewport;
   }
 }
-
-inode_impl!(CommandLineMessage, base);
 
 impl Widgetable for CommandLineMessage {
   fn draw(&self, canvas: &mut Canvas) {
