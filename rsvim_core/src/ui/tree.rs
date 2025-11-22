@@ -526,14 +526,19 @@ impl Tree {
       message_shape,
     ) = {
       let mut base = self.base.borrow_mut();
-      let (indicator_id, indicator_shape) =
-        make_new_node(&mut base, indicator_style, Some(cmdline_id))?;
-      let (input_id, input_shape) =
-        make_new_node(&mut base, input_style, Some(cmdline_id))?;
-      let (message_id, message_shape) =
-        make_new_node(&mut base, message_style, Some(cmdline_id))?;
-      let (cmdline_id, cmdline_shape) =
-        make_new_node(&mut base, cmdline_style, Some(parent_id))?;
+      let indicator_id = base.new_leaf(indicator_style)?;
+      let input_id = base.new_leaf(input_style)?;
+      let message_id = base.new_leaf(message_style)?;
+      // make_new_node(&mut base, indicator_style, Some(cmdline_id))?;
+      // let (input_id, input_shape) =
+      //   make_new_node(&mut base, input_style, Some(cmdline_id))?;
+      // let (message_id, message_shape) =
+      //   make_new_node(&mut base, message_style, Some(cmdline_id))?;
+      let cmdline_id = base.new_with_children(
+        cmdline_style,
+        &[indicator_id, input_id, message_id],
+      )?;
+      base.add_child(parent_id, cmdline_id)?;
       (
         cmdline_id,
         cmdline_shape,
