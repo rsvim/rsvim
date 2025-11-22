@@ -219,10 +219,25 @@ impl Irelationship {
     style: Style,
     parent_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
-    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
-    let loid = base.new_leaf(style)?;
-    base.add_child(parent_loid, loid)?;
-    Ok(loid)
+    let id = self.new_leaf(style)?;
+    self.add_child(parent_loid, id)?;
+    Ok(id)
+  }
+
+  pub fn new_with_children(
+    &mut self,
+    style: Style,
+    children: &[TreeNodeId],
+  ) -> TaffyResult<TreeNodeId> {
+    let children_loids = children
+      .iter()
+      .map(|i| *self.nid2loid.get(i).unwrap())
+      .collect_vec();
+    let loid = self.lo.new_with_children(style, &children_loids)?;
+    let id = next_node_id();
+    self.nid2loid.insert(id, loid);
+    self.loid2nid.insert(loid, id);
+    Ok(id)
   }
 }
 
