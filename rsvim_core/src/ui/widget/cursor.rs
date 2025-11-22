@@ -25,7 +25,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    relationship: IrelationshipRc,
+    base: IrelationshipRc,
     id: TreeNodeId,
     blinking: bool,
     hidden: bool,
