@@ -563,7 +563,6 @@ impl Tree {
     let message = CommandLineMessage::new(
       self.relationship(),
       message_id,
-      message_shape,
       text_contents,
       Arc::downgrade(&message_viewport),
     );
