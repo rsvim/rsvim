@@ -465,7 +465,7 @@ impl Tree {
     let (cursor_id, cursor_shape) = {
       let mut base = self.base.borrow_mut();
       let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
-      base.compute_layout(id, taffy::Size::MAX_CONTENT)?;
+      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       (cursor_id, cursor_shape)
     };
 
@@ -515,16 +515,7 @@ impl Tree {
       ..Default::default()
     };
 
-    let (
-      cmdline_id,
-      cmdline_shape,
-      indicator_id,
-      indicator_shape,
-      input_id,
-      input_shape,
-      message_id,
-      message_shape,
-    ) = {
+    let (cmdline_id, indicator_id, input_id, message_id) = {
       let mut base = self.base.borrow_mut();
       let indicator_id = base.new_leaf(indicator_style)?;
       let input_id = base.new_leaf(input_style)?;
@@ -534,28 +525,16 @@ impl Tree {
         &[indicator_id, input_id, message_id],
       )?;
       base.add_child(parent_id, cmdline_id)?;
-      (
-        cmdline_id,
-        cmdline_shape,
-        indicator_id,
-        indicator_shape,
-        input_id,
-        input_shape,
-        message_id,
-        message_shape,
-      )
+      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      (cmdline_id, indicator_id, input_id, message_id)
     };
 
     let cmdline = CommandLine::new(
       self.relationship(),
       cmdline_id,
-      cmdline_shape,
       indicator_id,
-      indicator_shape,
       input_id,
-      input_shape,
       message_id,
-      message_shape,
       text_contents.clone(),
     )?;
     let input_viewport = cmdline.input_viewport();
