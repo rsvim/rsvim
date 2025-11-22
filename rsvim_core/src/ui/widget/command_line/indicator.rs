@@ -1,5 +1,6 @@
 //! Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
@@ -34,6 +35,8 @@ pub struct CommandLineIndicator {
   id: TreeNodeId,
   symbol: IndicatorSymbol,
 }
+
+inode_impl!(CommandLineIndicator);
 
 impl CommandLineIndicator {
   pub fn new(

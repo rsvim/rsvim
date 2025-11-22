@@ -12,22 +12,24 @@ use crate::ui::widget::Widgetable;
 #[derive(Debug, Clone)]
 /// Commandline input content.
 pub struct CommandLineInput {
-  base: InodeBase,
+  base: IrelationshipRc,
+  id: TreeNodeId,
   text_contents: TextContentsWk,
   viewport: ViewportWk,
 }
+
+inode_impl!(CommandLineInput);
 
 impl CommandLineInput {
   pub fn new(
     relationship: IrelationshipRc,
     id: TreeNodeId,
-    shape: U16Rect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(relationship, id, shape);
     CommandLineInput {
       base,
+      id,
       text_contents,
       viewport,
     }
