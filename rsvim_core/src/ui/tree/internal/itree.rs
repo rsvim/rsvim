@@ -213,6 +213,17 @@ impl Irelationship {
     let child_loid = self.nid2loid.get(&child_id).unwrap();
     self.lo.add_child(*parent_loid, *child_loid)
   }
+
+  pub fn new_with_parent(
+    &mut self,
+    style: Style,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let loid = base.new_leaf(style)?;
+    base.add_child(parent_loid, loid)?;
+    Ok(loid)
+  }
 }
 
 impl Default for Irelationship {
