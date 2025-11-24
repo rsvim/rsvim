@@ -278,22 +278,6 @@ impl Default for Irelationship {
   }
 }
 
-pub fn make_new_node(
-  relationship: &mut Irelationship,
-  style: Style,
-  parent_id: Option<TreeNodeId>,
-) -> TaffyResult<(TreeNodeId, U16Rect)> {
-  let rel = relationship;
-  let id = rel.new_leaf(style)?;
-  if let Some(parent_id) = parent_id {
-    rel.add_child(parent_id, id)?;
-  }
-  rel.compute_layout(id, taffy::Size::MAX_CONTENT)?;
-  let layout = rel.layout(id)?;
-  let shape = rect_from_layout!(layout, u16);
-  Ok((id, shape))
-}
-
 #[derive(Debug)]
 /// The level-order iterator of the tree, start from tree root.
 pub struct TreeIter<'a> {
