@@ -118,13 +118,13 @@ fn insert1() {
    *     n4  n5    n6
    * ```
    */
-  tree.add_child(nid1, nid2).unwrap();
-  tree.add_child(nid1, nid3).unwrap();
-  tree.add_child(nid2, nid4).unwrap();
-  tree.add_child(nid2, nid5).unwrap();
-  tree.add_child(nid3, nid6).unwrap();
+  tree.borrow_mut().add_child(nid1, nid2).unwrap();
+  tree.borrow_mut().add_child(nid1, nid3).unwrap();
+  tree.borrow_mut().add_child(nid2, nid4).unwrap();
+  tree.borrow_mut().add_child(nid2, nid5).unwrap();
+  tree.borrow_mut().add_child(nid3, nid6).unwrap();
 
-  assert!(tree.parent(nid1).is_none());
+  assert!(tree.borrow().parent(nid1).is_none());
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
   assert!(nid3 < nid4);
