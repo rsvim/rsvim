@@ -58,29 +58,50 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let s1 = rect!(0, 0, 1, 1);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let mut tree = Irelationship::new();
+  let tree_rc = Irelationship::to_rc(tree);
 
-  let s2 = rect!(0, 0, 1, 1);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
+  let nid1 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n1 = TestValue::new(tree_rc, nid1, 1);
 
-  let s3 = rect!(0, 0, 1, 1);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
+  let nid2 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n2 = TestValue::new(tree_rc, nid2, 2);
 
-  let s4 = rect!(0, 0, 1, 1);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
+  let nid3 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n3 = TestValue::new(tree_rc, nid3, 3);
 
-  let s5 = rect!(0, 0, 1, 1);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
+  let nid4 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n4 = TestValue::new(tree_rc, nid4, 4);
 
-  let s6 = rect!(0, 0, 1, 1);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
+  let nid5 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n5 = TestValue::new(tree_rc, nid5, 5);
+
+  let nid6 = tree
+    .new_leaf(Style {
+      ..Default::default()
+    })
+    .unwrap();
+  let n6 = TestValue::new(tree_rc, nid6, 6);
 
   /*
    * The tree looks like:
@@ -92,14 +113,13 @@ fn insert1() {
    *     n4  n5    n6
    * ```
    */
-  let mut tree = Itree::new(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
+  tree.add_child(nid1, nid2).unwrap();
+  tree.add_child(nid1, nid3).unwrap();
+  tree.add_child(nid2, nid4).unwrap();
+  tree.add_child(nid2, nid5).unwrap();
+  tree.add_child(nid3, nid6).unwrap();
 
-  assert!(tree.root_id() == nid1);
+  assert!(tree.parent(nid1).is_none());
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
