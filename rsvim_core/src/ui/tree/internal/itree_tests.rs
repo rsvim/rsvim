@@ -218,13 +218,26 @@ fn insert2() {
 fn shape1() {
   // test_log_init();
 
-  let s1 = rect!(0, 0, 20, 20);
-  let us1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let mut tree = Irelationship::new();
+  let nid1 = tree
+    .new_leaf(Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(20_u16),
+        height: taffy::Dimension::from_length(20_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
+  let nid2 = tree
+    .new_leaf(Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(15_u16),
+        height: taffy::Dimension::from_length(15_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
 
-  let s2 = rect!(0, 0, 15, 15);
-  let us2 = rect!(0, 0, 15, 15);
   let n2 = TestValue::new(2, s2);
   let nid2 = n2.id();
 
