@@ -120,19 +120,6 @@ fn insert1() {
   tree.add_child(nid3, nid6).unwrap();
 
   assert!(tree.parent(nid1).is_none());
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  info!("n1:{:?}", n1);
-  info!("n2:{:?}", n2);
-  info!("n3:{:?}", n3);
-  info!("n4:{:?}", n4);
-  info!("n5:{:?}", n5);
-  info!("n6:{:?}", n6);
-
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
   assert!(nid3 < nid4);
