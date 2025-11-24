@@ -77,10 +77,12 @@ impl Irelationship {
   }
 
   pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
     let loid = self.lo.new_leaf(style)?;
     let nid = next_node_id();
     self.nid2loid.insert(nid, loid);
     self.loid2nid.insert(loid, nid);
+    self._internal_check();
     Ok(nid)
   }
 
@@ -89,24 +91,35 @@ impl Irelationship {
     id: TreeNodeId,
     available_size: taffy::Size<AvailableSpace>,
   ) -> TaffyResult<()> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.compute_layout(*loid, available_size)
+    let result = self.lo.compute_layout(*loid, available_size)?;
+    self._internal_check();
+    Ok(result)
   }
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.layout(*loid)
+    let result = self.lo.layout(*loid)?;
+    self._internal_check();
+    Ok(result)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.style(*loid)
+    let result = self.lo.style(*loid)?;
+    self._internal_check();
+    Ok(result)
   }
 
   /// Logical location/size on unlimited canvas.
   /// The top-left location can be negative.
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+    self._internal_check();
     let layout = self.layout(id)?;
+    self._internal_check();
     Ok(rect_from_layout!(layout, isize))
   }
 
@@ -117,14 +130,15 @@ impl Irelationship {
   /// Unless the node itself is the root node and doesn't have a parent, in
   /// such case, the root node logical shape is actual shape.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
-    match self.parent(id) {
+    self._internal_check();
+    let result = match self.parent(id) {
       Some(parent_id) => {
         // Non-root node truncated by its parent's actual shape.
         let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
         match cached_actual_shapes.get(&id) {
           Some(actual_shape) => {
             // Use caches to shorten the recursive query path.
-            Ok(*actual_shape)
+            *actual_shape
           }
           None => {
             let shape = self.shape(id)?;
@@ -152,16 +166,18 @@ impl Irelationship {
             let truncated = rect!(left, top, right, bottom);
             let truncated = rect_as!(truncated, u16);
             cached_actual_shapes.insert(id, truncated);
-            Ok(truncated)
+            truncated
           }
         }
       }
       None => {
         // Root node doesn't have a parent.
         let shape = self.shape(id)?;
-        Ok(rect_as!(shape, u16))
+        rect_as!(shape, u16)
       }
-    }
+    };
+    self._internal_check();
+    Ok(result)
   }
 
   /// Clear the cached actual_shapes since the provided id. All its
