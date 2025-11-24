@@ -184,28 +184,21 @@ fn insert2() {
   assert_eq!(tree.children(nid[9]).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
-    let result = tree
-      .children_ids(parent_id)
+    tree
+      .children(parent_id)
+      .unwrap()
       .iter()
       .filter(|cid| **cid == child_id)
       .collect::<Vec<_>>()
       .len()
-      == 1;
-    info!(
-      "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
-      parent_id,
-      child_id,
-      tree.children_ids(parent_id),
-      result
-    );
-    result
+      == 1
   };
 
-  assert!(contains_child(nid1, nid2));
-  assert!(contains_child(nid1, nid3));
-  assert!(!contains_child(nid1, nid4));
-  assert!(!contains_child(nid1, nid5));
-  assert!(!contains_child(nid1, nid7));
+  assert!(contains_child(nid[1], nid[2]));
+  assert!(contains_child(nid[1], nid[3]));
+  assert!(!contains_child(nid[1], nid[4]));
+  assert!(!contains_child(nid[1], nid[5]));
+  assert!(!contains_child(nid[1], nid[7]));
 
   assert!(contains_child(nid2, nid4));
   assert!(contains_child(nid2, nid5));
