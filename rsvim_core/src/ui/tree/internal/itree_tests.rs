@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -47,7 +49,6 @@ fn new() {
       ..Default::default()
     })
     .unwrap();
-  let n1 = TestValue::new(Irelationship::to_rc(tree), nid1, 1);
 
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.parent(nid1), None);
@@ -58,36 +59,39 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
-  let tree_rc = Irelationship::to_rc(tree);
+  let tree = Irelationship::to_rc(Irelationship::new());
 
   let nid1 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n1 = TestValue::new(tree_rc, nid1, 1);
+  let n1 = TestValue::new(tree, nid1, 1);
 
   let nid2 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n2 = TestValue::new(tree_rc, nid2, 2);
+  let n2 = TestValue::new(tree, nid2, 2);
 
   let nid3 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n3 = TestValue::new(tree_rc, nid3, 3);
+  let n3 = TestValue::new(tree, nid3, 3);
 
   let nid4 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n4 = TestValue::new(tree_rc, nid4, 4);
+  let n4 = TestValue::new(tree, nid4, 4);
 
   let nid5 = tree
     .new_leaf(Style {
