@@ -58,55 +58,17 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let tree = Irelationship::to_rc(Irelationship::new());
+  let mut tree = Irelationship::new();
 
-  let nid1 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
+  let nid = (0..7)
+    .map(|i| {
+      tree
+        .new_leaf(Style {
+          ..Default::default()
+        })
+        .unwrap()
     })
-    .unwrap();
-  let n1 = TestValue::new(tree, nid1, 1);
-
-  let nid2 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
-    })
-    .unwrap();
-  let n2 = TestValue::new(tree, nid2, 2);
-
-  let nid3 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
-    })
-    .unwrap();
-  let n3 = TestValue::new(tree, nid3, 3);
-
-  let nid4 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
-    })
-    .unwrap();
-  let n4 = TestValue::new(tree, nid4, 4);
-
-  let nid5 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
-    })
-    .unwrap();
-  let n5 = TestValue::new(tree, nid5, 5);
-
-  let nid6 = tree
-    .borrow_mut()
-    .new_leaf(Style {
-      ..Default::default()
-    })
-    .unwrap();
-  let n6 = TestValue::new(tree, nid6, 6);
+    .collect_vec();
 
   /*
    * The tree looks like:
@@ -118,11 +80,11 @@ fn insert1() {
    *     n4  n5    n6
    * ```
    */
-  tree.borrow_mut().add_child(nid1, nid2).unwrap();
-  tree.borrow_mut().add_child(nid1, nid3).unwrap();
-  tree.borrow_mut().add_child(nid2, nid4).unwrap();
-  tree.borrow_mut().add_child(nid2, nid5).unwrap();
-  tree.borrow_mut().add_child(nid3, nid6).unwrap();
+  tree.add_child(nid[1], nid[2]).unwrap();
+  tree.add_child(nid[1], nid[3]).unwrap();
+  tree.add_child(nid[2], nid[4]).unwrap();
+  tree.add_child(nid[2], nid[5]).unwrap();
+  tree.add_child(nid[3], nid[6]).unwrap();
 
   assert!(tree.borrow().parent(nid1).is_none());
   assert!(nid1 < nid2);
