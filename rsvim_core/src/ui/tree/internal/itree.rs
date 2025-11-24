@@ -184,6 +184,7 @@ impl Irelationship {
   /// Clear the cached actual_shapes since the provided id. All its
   /// descendants actual_shape will be cleared as well.
   fn clear_actual_shape(&mut self, id: TreeNodeId) {
+    self._internal_check();
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
@@ -195,6 +196,7 @@ impl Irelationship {
         }
       }
     }
+    self._internal_check();
   }
 
   /// Whether the node is visible, e.g. style is `display: none`.
