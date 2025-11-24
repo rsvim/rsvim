@@ -209,9 +209,9 @@ fn insert2() {
   assert!(!contains_child(nid[3], nid[4]));
   assert!(!contains_child(nid[3], nid[5]));
 
-  assert!(contains_child(nid5, nid7));
-  assert!(contains_child(nid7, nid8));
-  assert!(contains_child(nid7, nid9));
+  assert!(contains_child(nid[5], nid[7]));
+  assert!(contains_child(nid[7], nid[8]));
+  assert!(contains_child(nid[7], nid[9]));
 }
 
 #[test]
