@@ -1,10 +1,9 @@
-use itertools::Itertools;
-
 use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
+use itertools::Itertools;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -94,18 +93,20 @@ fn insert1() {
   let n4 = TestValue::new(tree, nid4, 4);
 
   let nid5 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n5 = TestValue::new(tree_rc, nid5, 5);
+  let n5 = TestValue::new(tree, nid5, 5);
 
   let nid6 = tree
+    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n6 = TestValue::new(tree_rc, nid6, 6);
+  let n6 = TestValue::new(tree, nid6, 6);
 
   /*
    * The tree looks like:
