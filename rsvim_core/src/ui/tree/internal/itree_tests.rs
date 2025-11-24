@@ -86,23 +86,22 @@ fn insert1() {
   tree.add_child(nid[2], nid[5]).unwrap();
   tree.add_child(nid[3], nid[6]).unwrap();
 
-  assert!(tree.borrow().parent(nid1).is_none());
-  assert!(nid1 < nid2);
-  assert!(nid2 < nid3);
-  assert!(nid3 < nid4);
-  assert!(nid4 < nid5);
-  assert!(nid5 < nid6);
+  assert!(tree.parent(nid[1]).is_none());
+  assert!(nid[1] < nid[2]);
+  assert!(nid[2] < nid[3]);
+  assert!(nid[3] < nid[4]);
+  assert!(nid[4] < nid[5]);
+  assert!(nid[5] < nid[6]);
 
-  assert_eq!(tree.borrow().children(nid1).unwrap().len(), 2);
-  assert_eq!(tree.borrow().children(nid2).unwrap().len(), 2);
-  assert_eq!(tree.borrow().children(nid3).unwrap().len(), 1);
-  assert_eq!(tree.borrow().children(nid4).unwrap().len(), 0);
-  assert_eq!(tree.borrow().children(nid5).unwrap().len(), 0);
-  assert_eq!(tree.borrow().children(nid6).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[1]).unwrap().len(), 2);
+  assert_eq!(tree.children(nid[2]).unwrap().len(), 2);
+  assert_eq!(tree.children(nid[3]).unwrap().len(), 1);
+  assert_eq!(tree.children(nid[4]).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[5]).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[6]).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
     tree
-      .borrow()
       .children(parent_id)
       .unwrap()
       .iter()
@@ -112,19 +111,19 @@ fn insert1() {
       == 1
   };
 
-  assert!(contains_child(nid1, nid2));
-  assert!(contains_child(nid1, nid3));
-  assert!(!contains_child(nid1, nid4));
-  assert!(!contains_child(nid1, nid5));
-  assert!(!contains_child(nid1, nid6));
+  assert!(contains_child(nid[1], nid[2]));
+  assert!(contains_child(nid[1], nid[3]));
+  assert!(!contains_child(nid[1], nid[4]));
+  assert!(!contains_child(nid[1], nid[5]));
+  assert!(!contains_child(nid[1], nid[6]));
 
-  assert!(contains_child(nid2, nid4));
-  assert!(contains_child(nid2, nid5));
-  assert!(!contains_child(nid2, nid6));
+  assert!(contains_child(nid[2], nid[2]));
+  assert!(contains_child(nid[2], nid[5]));
+  assert!(!contains_child(nid[2], nid[6]));
 
-  assert!(contains_child(nid3, nid6));
-  assert!(!contains_child(nid3, nid4));
-  assert!(!contains_child(nid3, nid5));
+  assert!(contains_child(nid[3], nid[6]));
+  assert!(!contains_child(nid[3], nid[4]));
+  assert!(!contains_child(nid[3], nid[5]));
 }
 
 #[test]
