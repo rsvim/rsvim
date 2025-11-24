@@ -131,12 +131,12 @@ fn insert1() {
   assert!(nid4 < nid5);
   assert!(nid5 < nid6);
 
-  assert_eq!(tree.children(nid1).unwrap().len(), 2);
-  assert_eq!(tree.children(nid2).unwrap().len(), 2);
-  assert_eq!(tree.children(nid3).unwrap().len(), 1);
-  assert_eq!(tree.children(nid4).unwrap().len(), 0);
-  assert_eq!(tree.children(nid5).unwrap().len(), 0);
-  assert_eq!(tree.children(nid6).unwrap().len(), 0);
+  assert_eq!(tree.borrow().children(nid1).unwrap().len(), 2);
+  assert_eq!(tree.borrow().children(nid2).unwrap().len(), 2);
+  assert_eq!(tree.borrow().children(nid3).unwrap().len(), 1);
+  assert_eq!(tree.borrow().children(nid4).unwrap().len(), 0);
+  assert_eq!(tree.borrow().children(nid5).unwrap().len(), 0);
+  assert_eq!(tree.borrow().children(nid6).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
     tree
