@@ -19,12 +19,6 @@ impl TestValue {
   }
 }
 
-macro_rules! print_node {
-  ($node: ident, $name: expr) => {
-    info!("{}: {:?}", $name, $node.clone());
-  };
-}
-
 macro_rules! assert_parent_child_depth {
   ($parent: ident, $child: ident) => {
     assert_eq!($parent.depth() + 1, $child.depth());
@@ -236,15 +230,15 @@ fn insert2() {
   let n7 = tree.node(nid7).unwrap();
   let n8 = tree.node(nid8).unwrap();
   let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
+  info!("n7:{:?}", n7);
+  info!("n8:{:?}", n8);
+  info!("n9:{:?}", n9);
 
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
@@ -396,15 +390,15 @@ fn shape1() {
   let n7 = tree.node(nid7).unwrap();
   let n8 = tree.node(nid8).unwrap();
   let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
+  info!("n7:{:?}", n7);
+  info!("n8:{:?}", n8);
+  info!("n9:{:?}", n9);
 
   let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
   let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
@@ -477,12 +471,12 @@ fn shape2() {
   let n4 = tree.node(nid4).unwrap();
   let n5 = tree.node(nid5).unwrap();
   let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
 
   let expects = [us1, us2, us3, us4, us5, us6];
   let nodes = [n1, n2, n3, n4, n5, n6];
@@ -683,15 +677,15 @@ fn get1() {
   let n7 = tree.node(nid7).unwrap();
   let n8 = tree.node(nid8).unwrap();
   let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
+  info!("n7:{:?}", n7);
+  info!("n8:{:?}", n8);
+  info!("n9:{:?}", n9);
 }
 
 #[test]
@@ -755,12 +749,12 @@ fn get2() {
   let n4 = tree.node(nid4).unwrap();
   let n5 = tree.node(nid5).unwrap();
   let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
 
   let expects = [us1, us2, us3, us4, us5, us6];
   let nodes = [n1, n2, n3, n4, n5, n6];
@@ -804,9 +798,9 @@ fn move_by1() {
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
 
   // n3 Move: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -876,9 +870,9 @@ fn bounded_move_by1() {
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
 
   // n3 bounded move by: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -948,9 +942,9 @@ fn move_to1() {
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
 
   // n3 Move: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -1020,9 +1014,9 @@ fn bounded_move_to1() {
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
 
   // n3 bounded move to: (x, y)
   let moves: Vec<(isize, isize)> = vec![
