@@ -108,7 +108,6 @@ impl Irelationship {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let result = self.lo.layout(*loid);
-    self._internal_check();
     result
   }
 
@@ -116,7 +115,6 @@ impl Irelationship {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let result = self.lo.style(*loid);
-    self._internal_check();
     result
   }
 
@@ -126,7 +124,6 @@ impl Irelationship {
     self._internal_check();
     let layout = self.layout(id)?;
     let result = Ok(rect_from_layout!(layout, isize));
-    self._internal_check();
     result
   }
 
@@ -208,7 +205,6 @@ impl Irelationship {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
-    self._internal_check();
     Ok(style.display == taffy::Display::None)
   }
 
@@ -217,7 +213,6 @@ impl Irelationship {
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
     let result = self.loid2nid.get(&parent_loid);
-    self._internal_check();
     result
   }
 
@@ -231,7 +226,6 @@ impl Irelationship {
         .map(|i| *self.loid2nid.get(i).unwrap())
         .collect_vec(),
     );
-    self._internal_check();
     result
   }
 
@@ -274,6 +268,18 @@ impl Irelationship {
     self.loid2nid.insert(loid, id);
     self._internal_check();
     Ok(id)
+  }
+
+  pub fn child_at_index(
+    &self,
+    parent_id: TreeNodeId,
+    child_index: usize,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let child_loid = self.lo.child_at_index(*parent_loid, child_index)?;
+    let child_id = self.loid2nid.get(&child_loid).unwrap();
+    Ok(*child_id)
   }
 }
 

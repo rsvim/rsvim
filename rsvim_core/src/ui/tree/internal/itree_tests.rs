@@ -125,6 +125,7 @@ fn insert1() {
   assert!(nid3 < nid4);
   assert!(nid4 < nid5);
   assert!(nid5 < nid6);
+  assert!(tree);
 
   assert_parent_child_depth!(n1, n2);
   assert_parent_child_depth!(n1, n3);
