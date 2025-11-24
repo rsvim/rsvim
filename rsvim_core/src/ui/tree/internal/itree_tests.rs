@@ -2,24 +2,22 @@ use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-use crate::ui::tree::internal::InodeBase;
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::TreeNodeId;
+use crate::ui::tree::*;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct TestValue {
   base: IrelationshipRc,
   id: TreeNodeId,
   value: i32,
 }
 
+inode_impl!(TestValue);
+
 impl TestValue {
   pub fn new(base: IrelationshipRc, id: TreeNodeId, value: i32) -> Self {
     TestValue { base, id, value }
   }
 }
-
-inode_impl!(TestValue);
 
 macro_rules! print_node {
   ($node: ident, $name: expr) => {
@@ -112,12 +110,12 @@ fn insert1() {
   let n4 = tree.node(nid4).unwrap();
   let n5 = tree.node(nid5).unwrap();
   let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
+  info!("n1:{:?}", n1);
+  info!("n2:{:?}", n2);
+  info!("n3:{:?}", n3);
+  info!("n4:{:?}", n4);
+  info!("n5:{:?}", n5);
+  info!("n6:{:?}", n6);
 
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
