@@ -24,7 +24,7 @@ jobs:
     name: Check
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Tsc
         run: |
           npm install -g typescript
@@ -109,7 +109,7 @@ jobs:
       - name: Install Rust
         run: |
           rustup component add rust-src clippy llvm-tools
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
       - name: Nextest Run
@@ -145,7 +145,7 @@ jobs:
           rustup update --no-self-update ${{ matrix.rust_version }}
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build Release
         run: |
           cargo build --release
