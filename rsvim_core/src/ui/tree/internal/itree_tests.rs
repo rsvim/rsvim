@@ -238,9 +238,6 @@ fn shape1() {
     })
     .unwrap();
 
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
-
   let s3 = rect!(10, 10, 18, 19);
   let us3 = rect!(10, 10, 18, 19);
   let n3 = TestValue::new(3, s3);
