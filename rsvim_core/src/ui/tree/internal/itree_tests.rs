@@ -163,7 +163,7 @@ fn insert2() {
   tree.add_child(nid[7], nid[8]);
   tree.add_child(nid[7], nid[9]);
 
-  assert!(tree.parent(nid1).is_none());
+  assert!(tree.parent(nid[1]).is_none());
   assert!(nid[1] < nid[2]);
   assert!(nid[2] < nid[3]);
   assert!(nid[3] < nid[4]);
@@ -173,15 +173,15 @@ fn insert2() {
   assert!(nid[7] < nid[8]);
   assert!(nid[8] < nid[9]);
 
-  assert_eq!(tree.children_ids(nid1).len(), 2);
-  assert_eq!(tree.children_ids(nid2).len(), 2);
-  assert_eq!(tree.children_ids(nid3).len(), 1);
-  assert_eq!(tree.children_ids(nid4).len(), 0);
-  assert_eq!(tree.children_ids(nid5).len(), 1);
-  assert_eq!(tree.children_ids(nid6).len(), 0);
-  assert_eq!(tree.children_ids(nid7).len(), 2);
-  assert_eq!(tree.children_ids(nid8).len(), 0);
-  assert_eq!(tree.children_ids(nid9).len(), 0);
+  assert_eq!(tree.children(nid[1]).unwrap().len(), 2);
+  assert_eq!(tree.children(nid[2]).unwrap().len(), 2);
+  assert_eq!(tree.children(nid[3]).unwrap().len(), 1);
+  assert_eq!(tree.children(nid[4]).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[5]).unwrap().len(), 1);
+  assert_eq!(tree.children(nid[6]).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[7]).unwrap().len(), 2);
+  assert_eq!(tree.children(nid[8]).unwrap().len(), 0);
+  assert_eq!(tree.children(nid[9]).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
     let result = tree
