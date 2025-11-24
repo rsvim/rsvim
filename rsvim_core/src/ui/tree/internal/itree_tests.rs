@@ -140,6 +140,7 @@ fn insert1() {
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
     tree
+      .borrow()
       .children(parent_id)
       .unwrap()
       .iter()
