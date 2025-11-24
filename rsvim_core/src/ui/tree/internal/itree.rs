@@ -49,6 +49,11 @@ impl Irelationship {
     }
   }
 
+  pub fn len(&self) -> usize {
+    self._internal_check();
+    self.nid2loid.len()
+  }
+
   #[cfg(not(test))]
   fn _internal_check(&self) {}
 
