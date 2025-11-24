@@ -95,16 +95,16 @@ swc_common = "=17.0.1"
 swc_config = "=3.1.2"
 swc_config_macro = "=1.0.1"
 swc_ecma_ast = "=18.0.0"
-swc_ecma_codegen = "=20.0.0"
+swc_ecma_codegen = "=20.0.2"
 swc_ecma_codegen_macros = "=2.0.2"
 swc_ecma_loader = "=17.0.0"
 swc_ecma_lexer = "=26.0.0"
-swc_ecma_parser = "=27.0.4"
-swc_ecma_transforms_base = { version = "=30.0.0", features = [
+swc_ecma_parser = "=27.0.7"
+swc_ecma_transforms_base = { version = "=30.0.1", features = [
   "inline-helpers",
 ] }
 swc_ecma_transforms_classes = "=30.0.0"
-swc_ecma_transforms_compat = "=34.0.0"
+swc_ecma_transforms_compat = "=35.0.0"
 swc_ecma_transforms_macros = "=1.0.1"
 swc_ecma_transforms_optimization = "=32.0.0"
 swc_ecma_transforms_proposal = "=30.0.0"
