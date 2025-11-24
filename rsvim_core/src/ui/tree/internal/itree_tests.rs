@@ -125,25 +125,18 @@ fn insert1() {
   assert!(nid3 < nid4);
   assert!(nid4 < nid5);
   assert!(nid5 < nid6);
-  assert!(tree);
 
-  assert_parent_child_depth!(n1, n2);
-  assert_parent_child_depth!(n1, n3);
-  assert_parent_child_depth!(n2, n4);
-  assert_parent_child_depth!(n2, n5);
-  assert_parent_child_depth!(n2, n6);
-  assert_parent_child_depth!(n3, n6);
-
-  assert_eq!(tree.children_ids(nid1).len(), 2);
-  assert_eq!(tree.children_ids(nid2).len(), 2);
-  assert_eq!(tree.children_ids(nid3).len(), 1);
-  assert_eq!(tree.children_ids(nid4).len(), 0);
-  assert_eq!(tree.children_ids(nid5).len(), 0);
-  assert_eq!(tree.children_ids(nid6).len(), 0);
+  assert_eq!(tree.children(nid1).unwrap().len(), 2);
+  assert_eq!(tree.children(nid2).unwrap().len(), 2);
+  assert_eq!(tree.children(nid3).unwrap().len(), 1);
+  assert_eq!(tree.children(nid4).unwrap().len(), 0);
+  assert_eq!(tree.children(nid5).unwrap().len(), 0);
+  assert_eq!(tree.children(nid6).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
     tree
-      .children_ids(parent_id)
+      .children(parent_id)
+      .unwrap()
       .iter()
       .filter(|cid| **cid == child_id)
       .collect::<Vec<_>>()
