@@ -41,19 +41,17 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
-  let tree = Irelationship::to_rc(Irelationship::new());
+  let mut tree = Irelationship::new();
   let nid1 = tree
-    .borrow_mut()
     .new_leaf(Style {
       ..Default::default()
     })
     .unwrap();
-  let n1 = TestValue::new(tree, nid1, 1);
+  let n1 = TestValue::new(Irelationship::to_rc(tree), nid1, 1);
 
-  assert_eq!(tree.borrow().len(), 1);
-  assert_eq!(tree.root_id(), nid1);
-  assert!(tree.parent_id(nid1).is_none());
-  assert!(tree.children_ids(nid1).is_empty());
+  assert_eq!(tree.len(), 1);
+  assert_eq!(tree.parent(nid1), None);
+  assert_eq!(tree.children(nid1), Ok(vec![]));
 }
 
 #[test]
