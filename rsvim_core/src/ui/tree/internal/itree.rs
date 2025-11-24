@@ -93,26 +93,26 @@ impl Irelationship {
   ) -> TaffyResult<()> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.compute_layout(*loid, available_size)?;
+    let result = self.lo.compute_layout(*loid, available_size);
     self.clear_actual_shape(id);
     self._internal_check();
-    Ok(result)
+    result
   }
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.layout(*loid)?;
+    let result = self.lo.layout(*loid);
     self._internal_check();
-    Ok(result)
+    result
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.style(*loid)?;
+    let result = self.lo.style(*loid);
     self._internal_check();
-    Ok(result)
+    result
   }
 
   /// Logical location/size on unlimited canvas.
@@ -120,8 +120,9 @@ impl Irelationship {
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     self._internal_check();
     let layout = self.layout(id)?;
+    let result = Ok(rect_from_layout!(layout, isize));
     self._internal_check();
-    Ok(rect_from_layout!(layout, isize))
+    result
   }
 
   /// Actual location/size on real-world canvas on limited terminal.
@@ -139,7 +140,7 @@ impl Irelationship {
         match cached_actual_shapes.get(&id) {
           Some(actual_shape) => {
             // Use caches to shorten the recursive query path.
-            *actual_shape
+            Ok(*actual_shape)
           }
           None => {
             let shape = self.shape(id)?;
@@ -167,24 +168,23 @@ impl Irelationship {
             let truncated = rect!(left, top, right, bottom);
             let truncated = rect_as!(truncated, u16);
             cached_actual_shapes.insert(id, truncated);
-            truncated
+            Ok(truncated)
           }
         }
       }
       None => {
         // Root node doesn't have a parent.
         let shape = self.shape(id)?;
-        rect_as!(shape, u16)
+        Ok(rect_as!(shape, u16))
       }
     };
     self._internal_check();
-    Ok(result)
+    result
   }
 
   /// Clear the cached actual_shapes since the provided id. All its
   /// descendants actual_shape will be cleared as well.
   fn clear_actual_shape(&mut self, id: TreeNodeId) {
-    self._internal_check();
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
@@ -196,31 +196,38 @@ impl Irelationship {
         }
       }
     }
-    self._internal_check();
   }
 
   /// Whether the node is visible, e.g. style is `display: none`.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
+    self._internal_check();
     Ok(style.display == taffy::Display::None)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
-    self.loid2nid.get(&parent_loid)
+    let result = self.loid2nid.get(&parent_loid);
+    self._internal_check();
+    result
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let children_loids = self.lo.children(*loid)?;
-    Ok(
+    let result = Ok(
       children_loids
         .iter()
         .map(|i| *self.loid2nid.get(i).unwrap())
         .collect_vec(),
-    )
+    );
+    self._internal_check();
+    result
   }
 
   pub fn add_child(
@@ -228,9 +235,12 @@ impl Irelationship {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> TaffyResult<()> {
+    self._internal_check();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let child_loid = self.nid2loid.get(&child_id).unwrap();
-    self.lo.add_child(*parent_loid, *child_loid)
+    let result = self.lo.add_child(*parent_loid, *child_loid);
+    self._internal_check();
+    result
   }
 
   pub fn new_with_parent(
@@ -239,7 +249,7 @@ impl Irelationship {
     parent_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
     let id = self.new_leaf(style)?;
-    self.add_child(parent_loid, id)?;
+    self.add_child(parent_id, id)?;
     Ok(id)
   }
 
@@ -248,6 +258,7 @@ impl Irelationship {
     style: Style,
     children: &[TreeNodeId],
   ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
     let children_loids = children
       .iter()
       .map(|i| *self.nid2loid.get(i).unwrap())
@@ -256,6 +267,7 @@ impl Irelationship {
     let id = next_node_id();
     self.nid2loid.insert(id, loid);
     self.loid2nid.insert(loid, id);
+    self._internal_check();
     Ok(id)
   }
 }
