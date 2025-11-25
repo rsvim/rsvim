@@ -547,7 +547,8 @@ mod tests_view_nowrap {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -598,7 +599,8 @@ mod tests_view_nowrap {
       "",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -669,7 +671,8 @@ mod tests_view_nowrap {
       "\t* The extra\t",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -701,7 +704,8 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -727,7 +731,8 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -753,7 +758,8 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
