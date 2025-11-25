@@ -477,6 +477,13 @@ impl Tree {
     Ok(cursor_id)
   }
 
+  pub fn insert_new_default_cursor(
+    &mut self,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    self.insert_new_cursor(parent_id, false, false, CursorStyle::SteadyBlock)
+  }
+
   /// Create new cmdline node, and insert it as a child to the provided parent_id.
   pub fn insert_new_cmdline(
     &mut self,

@@ -52,40 +52,18 @@ pub fn make_tree_with_buffers(
     ..Default::default()
   };
 
-  let (window_loid, window_shape, cursor_loid, cursor_shape) = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    let window_id = tree.insert_new_window(
+  let (_, buf) = buffers.first_key_value().unwrap();
+  let window_id = tree
+    .insert_new_window(
       tree_root_id,
       window_style,
       tree.global_local_options(),
       Arc::downgrade(buf),
-    );
-    let cursor_id = tree.insert_new_cursor(
-      window_id,
-      window_style,
-      tree.global_local_options(),
-      Arc::downgrade(buf),
-    );
-  };
-
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.lotree(),
-      window_loid,
-      window_shape,
-      tree.global_local_options(),
-      Arc::downgrade(buf),
     )
-    .unwrap()
-  };
-  let window_id = window.id();
+    .unwrap();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
+  let cursor_id = tree.insert_new_default_cursor(window_content_id).unwrap();
 
-  // Cursor.
-  let cursor = Cursor::default(cursor_loid, cursor_shape);
-  window.insert_cursor(cursor);
-
-  tree._insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   tree_arc.clone()
