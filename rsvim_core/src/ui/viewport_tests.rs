@@ -807,7 +807,8 @@ mod tests_view_nowrap {
       "",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
