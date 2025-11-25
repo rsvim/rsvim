@@ -412,14 +412,14 @@ fn shape1() {
 
   assert!(tree.parent(nid1).is_none());
 
-  let ids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
   let expect_actual_shapes = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
   let expect_shapes = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
   for i in 0..9 {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
-    let actual_us = tree.actual_shape(ids[i]).unwrap();
-    let actual_s = tree.shape(ids[i]).unwrap();
+    let actual_us = tree.actual_shape(nids[i]).unwrap();
+    let actual_s = tree.shape(nids[i]).unwrap();
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
@@ -543,27 +543,20 @@ fn shape2() {
   tree.add_child(nid2, nid4).unwrap();
   tree.add_child(nid4, nid5).unwrap();
   tree.add_child(nid5, nid6).unwrap();
+  tree.compute_layout(nid1, taffy::Size::MAX_CONTENT).unwrap();
 
   assert!(tree.parent(nid1).is_none());
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  info!("n1:{:?}", n1);
-  info!("n2:{:?}", n2);
-  info!("n3:{:?}", n3);
-  info!("n4:{:?}", n4);
-  info!("n5:{:?}", n5);
-  info!("n6:{:?}", n6);
 
-  let expects = [us1, us2, us3, us4, us5, us6];
-  let nodes = [n1, n2, n3, n4, n5, n6];
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6];
   for i in 0..6 {
-    let expect = expects[i];
-    let node = &nodes[i];
-    assert_node_actual_shape_eq!(node, expect, i);
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_actual_shapes[i];
+    let actual_us = tree.actual_shape(nids[i]).unwrap();
+    let actual_s = tree.shape(nids[i]).unwrap();
+    assert_eq!(expect_s, actual_s);
+    assert_eq!(expect_us, actual_us);
   }
 }
 
