@@ -11,6 +11,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
@@ -26,7 +27,6 @@ pub fn make_tree_with_buffers(
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
   let tree_root_id = tree.root_id();
-  let tree_root_loid = tree.root_loid();
 
   // Window
   let window_style = Style {
@@ -37,19 +37,16 @@ pub fn make_tree_with_buffers(
     ..Default::default()
   };
   let cursor_style = Style {
+    position: taffy::Position::Absolute,
     size: taffy::Size {
       width: taffy::Dimension::from_length(1_u16),
       height: taffy::Dimension::from_length(1_u16),
     },
-    padding: taffy::Rect {
-      left: taffy::LengthPercentage::from_length(0_u16),
-      top: taffy::LengthPercentage::from_length(0_u16),
-      right: taffy::LengthPercentage::calc(
-        taffy::style::CompactLength::auto().calc_value(),
-      ),
-      bottom: taffy::LengthPercentage::calc(
-        taffy::style::CompactLength::auto().calc_value(),
-      ),
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(0_u16),
+      top: taffy::LengthPercentageAuto::from_length(0_u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
     },
     ..Default::default()
   };
