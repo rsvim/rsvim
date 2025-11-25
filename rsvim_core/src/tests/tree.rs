@@ -5,6 +5,7 @@ use crate::content::TextContentsArc;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
@@ -65,18 +66,6 @@ pub fn make_tree_with_buffers(
       tree.global_local_options(),
       Arc::downgrade(buf),
     );
-    let mut lo = lo.borrow_mut();
-    let window_loid = lo.new_leaf(window_style).unwrap();
-    let cursor_loid = lo.new_leaf(cursor_style).unwrap();
-    lo.add_child(tree_root_loid, window_loid).unwrap();
-    lo.add_child(window_loid, cursor_loid).unwrap();
-    lo.compute_layout(tree_root_loid, taffy::Size::MAX_CONTENT)
-      .unwrap();
-    let window_layout = lo.layout(window_loid).unwrap();
-    let cursor_layout = lo.layout(cursor_loid).unwrap();
-    let window_shape = rect_from_layout!(window_layout, u16);
-    let cursor_shape = rect!(0, 0, 1, 1);
-    (window_loid, window_shape, cursor_loid, cursor_shape)
   };
 
   let mut window = {

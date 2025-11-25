@@ -569,9 +569,10 @@ impl EventLoop {
     };
 
     // Initialize cursor inside the default window.
+    let window_content_id = tree.window(window_id).unwrap().content_id();
     let _cursor_id = tree
       .insert_new_cursor(
-        window_id,
+        window_content_id,
         canvas_cursor.blinking(),
         canvas_cursor.hidden(),
         canvas_cursor.style(),
