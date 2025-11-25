@@ -45,11 +45,11 @@ pub fn make_wrap_linebreak() -> WindowOptions {
     .unwrap()
 }
 
-pub fn make_window(
+pub fn make_window_viewport(
   terminal_size: U16Size,
   buffer: BufferArc,
   window_options: WindowOptions,
-) -> (Tree, TreeNodeId) {
+) -> ViewportArc {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
   let window_id = tree
@@ -66,7 +66,7 @@ pub fn make_window(
       Arc::downgrade(&buffer),
     )
     .unwrap();
-  (tree, window_id)
+  tree.window(window_id).unwrap().viewport()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -406,9 +406,7 @@ mod tests_view_nowrap {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -463,9 +461,8 @@ mod tests_view_nowrap {
       "     * The extra parts are ",
       "",
     ];
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -518,9 +515,7 @@ mod tests_view_nowrap {
       "  2. When the line is too long ",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -547,9 +542,7 @@ mod tests_view_nowrap {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -599,9 +592,7 @@ mod tests_view_nowrap {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -671,9 +662,7 @@ mod tests_view_nowrap {
       "\t* The extra\t",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
@@ -704,9 +693,7 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -731,9 +718,7 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -758,9 +743,7 @@ mod tests_view_nowrap {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -807,9 +790,7 @@ mod tests_view_nowrap {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -865,9 +846,7 @@ mod tests_view_nowrap_eol {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
+    let actual = make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -911,7 +890,8 @@ mod tests_view_nowrap_eol {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -955,7 +935,8 @@ mod tests_view_nowrap_eol {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1001,7 +982,8 @@ mod tests_view_nowrap_eol {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1054,7 +1036,8 @@ mod tests_view_nowrap_startcol {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1114,7 +1097,7 @@ mod tests_view_nowrap_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let mut window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), &mut window, 0, 6);
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1174,7 +1157,7 @@ mod tests_view_nowrap_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let mut window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), &mut window, 0, 15);
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1234,7 +1217,7 @@ mod tests_view_nowrap_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let mut window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), &mut window, 0, 60);
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1285,7 +1268,7 @@ mod tests_view_nowrap_startcol {
     let expect = vec!["", "", "", "", "", "", "", ""];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let mut window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), &mut window, 0, 500);
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1349,7 +1332,8 @@ mod tests_view_wrap_nolinebreak {
       "s several ",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1395,7 +1379,8 @@ mod tests_view_wrap_nolinebreak {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1444,7 +1429,8 @@ mod tests_view_wrap_nolinebreak {
       "hings we want to test:\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1461,7 +1447,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1490,7 +1477,8 @@ mod tests_view_wrap_nolinebreak {
       " are been set. If the extra",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1532,7 +1520,8 @@ mod tests_view_wrap_nolinebreak {
       "\tenough to\tcomple",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1574,7 +1563,8 @@ mod tests_view_wrap_nolinebreak {
       "\tenough\tto", // 7 fills
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1616,7 +1606,8 @@ mod tests_view_wrap_nolinebreak {
       "一行之中，那么行wrap和词wrap两", // 1 fills
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1659,7 +1650,8 @@ mod tests_view_wrap_nolinebreak {
       "一行之中，那么行wrap和词wrap两", // 1 fills
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1688,7 +1680,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1717,7 +1710,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1746,7 +1740,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -1796,7 +1791,8 @@ mod tests_view_wrap_nolinebreak {
       "ral things we",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1833,7 +1829,8 @@ mod tests_view_wrap_nolinebreak {
       "4th.\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1871,7 +1868,8 @@ mod tests_view_wrap_nolinebreak {
       "5th.\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -1918,7 +1916,8 @@ mod tests_view_wrap_nolinebreak {
       "ndow content wi",
       "dget, then the ",
     ];
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2001,7 +2000,8 @@ mod tests_view_wrap_nolinebreak {
       "ndow content wi",
       "dget, then the ",
     ];
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2069,7 +2069,8 @@ mod tests_view_wrap_nolinebreak {
       "ll test lines.\n",
       "",
     ];
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2144,7 +2145,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "s small en",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2192,7 +2194,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "s small en",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2240,7 +2243,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "s small en",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2288,7 +2292,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "s small en",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2328,7 +2333,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "4th.\r\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2370,7 +2376,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "4th.\r\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2412,7 +2419,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "4th.\r",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2454,7 +2462,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "4th.\r",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2495,7 +2504,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "5th.\r\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2536,7 +2546,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "5th.\r\n",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2577,7 +2588,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "5th.\r",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2618,7 +2630,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "5th.\r",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -2667,7 +2680,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), window, 0, 3);
     let expect_fills: BTreeMap<usize, usize> =
@@ -2710,7 +2723,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), window, 0, 3);
     let expect_fills: BTreeMap<usize, usize> =
@@ -2758,7 +2771,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), window, 0, 15);
     let expect_fills: BTreeMap<usize, usize> =
@@ -2801,7 +2814,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), window, 1, 60);
     let expect_fills: BTreeMap<usize, usize> =
@@ -2834,7 +2847,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let (mut tree, window_id) =
-      make_window(terminal_size, buf.clone(), win_opts);
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window_mut(window_id).unwrap();
     let actual = update_viewport(buf.clone(), window, 0, 13);
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -2890,7 +2903,8 @@ mod tests_view_wrap_linebreak {
       "it ",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -2947,7 +2961,8 @@ mod tests_view_wrap_linebreak {
       "\to long to be ",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -3005,7 +3020,8 @@ mod tests_view_wrap_linebreak {
       "",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -3034,7 +3050,8 @@ mod tests_view_wrap_linebreak {
     let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
@@ -3082,7 +3099,8 @@ mod tests_view_wrap_linebreak {
       "word-wrap doesn't affect the ",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -3134,7 +3152,8 @@ mod tests_view_wrap_linebreak {
       "单词的换行两个选项都不会影响",
     ];
 
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
     let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
@@ -3187,7 +3206,9 @@ mod tests_view_wrap_linebreak {
       "渲染的最终效果。\n",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3239,7 +3260,9 @@ mod tests_view_wrap_linebreak {
       "文本内容的长度足够短，短到可以",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3290,7 +3313,9 @@ mod tests_view_wrap_linebreak {
       "it ",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -3341,7 +3366,9 @@ mod tests_view_wrap_linebreak {
       "it contai",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -3415,7 +3442,9 @@ mod tests_view_wrap_linebreak {
       "渲染效果。\n",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3487,7 +3516,9 @@ mod tests_view_wrap_linebreak {
       "换行选项都不",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3515,7 +3546,9 @@ mod tests_view_wrap_linebreak {
     let buffer = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let (tree, window_id) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -3541,7 +3574,7 @@ mod tests_view_wrap_linebreak {
     let buffer = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let window = make_window_viewport(terminal_size, buffer.clone(), &win_opts);
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -3590,7 +3623,7 @@ mod tests_view_wrap_linebreak {
       "want to test:",
     ];
 
-    let window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let window = make_window_viewport(terminal_size, buffer.clone(), &win_opts);
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -3645,7 +3678,8 @@ mod tests_view_wrap_linebreak_startcol {
       "several ",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 3);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -3696,7 +3730,8 @@ mod tests_view_wrap_linebreak_startcol {
       "things we ",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 6);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -3747,7 +3782,8 @@ mod tests_view_wrap_linebreak_startcol {
       "enough to ",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 20);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3798,7 +3834,8 @@ mod tests_view_wrap_linebreak_startcol {
       "and word-",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 60);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -3850,7 +3887,8 @@ mod tests_view_wrap_linebreak_startcol {
       "短，短到可以完整的放入一个窗口",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 15);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
@@ -3889,7 +3927,8 @@ mod tests_view_wrap_linebreak_startcol {
       "ogetmoresmoothbeh",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window =
+      make_window_viewport(terminal_size, buf.clone(), &win_opts);
     let actual = update_viewport(buf.clone(), &mut window, 0, 70);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -3932,7 +3971,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -4104,7 +4143,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -4325,7 +4364,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -4552,7 +4591,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -4783,7 +4822,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -4942,7 +4981,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -5172,7 +5211,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -5402,7 +5441,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -5640,7 +5679,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -5874,7 +5913,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6087,7 +6126,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6298,7 +6337,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6400,7 +6439,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6649,7 +6688,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6720,7 +6759,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -6801,7 +6840,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7056,7 +7095,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7308,7 +7347,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7392,7 +7431,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7469,7 +7508,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7671,7 +7710,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -7876,7 +7915,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -8048,7 +8087,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -8130,7 +8169,7 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -8414,7 +8453,7 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -8699,7 +8738,7 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -9009,7 +9048,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -9270,7 +9309,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -9525,7 +9564,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -9820,7 +9859,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -10075,7 +10114,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -10331,7 +10370,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -10546,7 +10585,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -11049,7 +11088,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -11472,7 +11511,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -11908,7 +11947,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -12334,7 +12373,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -12760,7 +12799,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -13193,7 +13232,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -13626,7 +13665,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -14157,7 +14196,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -14543,7 +14582,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -14820,7 +14859,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -15180,7 +15219,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -15569,7 +15608,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -15958,7 +15997,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -16240,7 +16279,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -16520,7 +16559,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -16878,7 +16917,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -17235,7 +17274,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -17430,7 +17469,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -17765,7 +17804,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -18234,7 +18273,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -18660,7 +18699,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
+    let window = Rc::new(RefCell::new(make_window_viewport(
       terminal_size,
       buf.clone(),
       &win_opts,
