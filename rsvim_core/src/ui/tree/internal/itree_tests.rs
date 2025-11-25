@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use itertools::Itertools;
+use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Clone, Debug)]
@@ -427,11 +428,28 @@ fn shape1() {
 fn shape2() {
   // test_log_init();
 
+  let mut tree = Irelationship::new();
+  let nid1 = tree
+    .new_leaf(Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(20_u16),
+        height: taffy::Dimension::from_length(20_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
 
+  let nid2 = tree
+    .new_leaf(Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_percent(0.5),
+        height: taffy::Dimension::from_percent(0.5),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s2 = rect!(0, 0, 20, 20);
   let us2 = rect!(0, 0, 20, 20);
   let n2 = TestValue::new(2, s2);
