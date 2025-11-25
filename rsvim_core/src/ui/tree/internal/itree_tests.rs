@@ -549,7 +549,7 @@ fn shape2() {
 
   let nids = [nid1, nid2, nid3, nid4, nid5, nid6];
   let expect_actual_shapes: [U16Rect; 6] = [us1, us2, us3, us4, us5, us6];
-  let expect_shapes = [s1, s2, s3, s4, s5, s6];
+  let expect_shapes: [IRect; 6] = [s1, s2, s3, s4, s5, s6];
   for i in 0..6 {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_actual_shapes[i];
