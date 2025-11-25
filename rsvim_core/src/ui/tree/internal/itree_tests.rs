@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use itertools::Itertools;
+use taffy::prelude::TaffyMaxContent;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -154,14 +155,14 @@ fn insert2() {
    *         n8   n9
    * ```
    */
-  tree.add_child(nid[1], nid[2]);
-  tree.add_child(nid[1], nid[3]);
-  tree.add_child(nid[2], nid[4]);
-  tree.add_child(nid[2], nid[5]);
-  tree.add_child(nid[3], nid[6]);
-  tree.add_child(nid[5], nid[7]);
-  tree.add_child(nid[7], nid[8]);
-  tree.add_child(nid[7], nid[9]);
+  tree.add_child(nid[1], nid[2]).unwrap();
+  tree.add_child(nid[1], nid[3]).unwrap();
+  tree.add_child(nid[2], nid[4]).unwrap();
+  tree.add_child(nid[2], nid[5]).unwrap();
+  tree.add_child(nid[3], nid[6]).unwrap();
+  tree.add_child(nid[5], nid[7]).unwrap();
+  tree.add_child(nid[7], nid[8]).unwrap();
+  tree.add_child(nid[7], nid[9]).unwrap();
 
   assert!(tree.parent(nid[1]).is_none());
   assert!(nid[1] < nid[2]);
@@ -228,6 +229,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let us1 = rect!(0, 0, 20, 20);
+
   let nid2 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -244,6 +247,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let us2 = rect!(0, 0, 20, 20);
+
   let nid3 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -308,21 +313,56 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let nid7 = tree
+    .new_leaf(Style {
+      position: taffy::Position::Absolute,
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(3_u16),
+        top: taffy::LengthPercentageAuto::from_length(6_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(3_u16),
+        height: taffy::Dimension::from_length(19_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
+  let nid8 = tree
+    .new_leaf(Style {
+      position: taffy::Position::Absolute,
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(-1_i16),
+        top: taffy::LengthPercentageAuto::from_length(-2_i16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(3_u16),
+        height: taffy::Dimension::from_length(3_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
+  let nid9 = tree
+    .new_leaf(Style {
+      position: taffy::Position::Absolute,
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(5_u16),
+        top: taffy::LengthPercentageAuto::from_length(6_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(4_u16),
+        height: taffy::Dimension::from_length(2_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
 
-  let s7 = rect!(3, 6, 15, 25);
-  let us7 = rect!(3, 6, 10, 15);
-  let n7 = TestValue::new(7, s7);
-  let nid7 = n7.id();
-
-  let s8 = rect!(-1, -2, 2, 1);
-  let us8 = rect!(3, 6, 5, 7);
-  let n8 = TestValue::new(8, s8);
-  let nid8 = n8.id();
-
-  let s9 = rect!(5, 6, 9, 8);
   let us9 = rect!(8, 12, 10, 14);
-  let n9 = TestValue::new(9, s9);
-  let nid9 = n9.id();
 
   /*
    * The tree looks like:
@@ -338,35 +378,17 @@ fn shape1() {
    *         n8   n9
    * ```
    */
-  let mut tree = Itree::new(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
-  tree.insert(nid5, n7);
-  tree.insert(nid7, n8);
-  tree.insert(nid7, n9);
+  tree.add_child(nid1, nid2).unwrap();
+  tree.add_child(nid1, nid2).unwrap();
+  tree.add_child(nid2, nid4).unwrap();
+  tree.add_child(nid2, nid5).unwrap();
+  tree.add_child(nid3, nid6).unwrap();
+  tree.add_child(nid5, nid7).unwrap();
+  tree.add_child(nid7, nid8).unwrap();
+  tree.add_child(nid7, nid9).unwrap();
+  tree.compute_layout(nid1, taffy::Size::MAX_CONTENT).unwrap();
 
-  assert!(tree.root_id() == nid1);
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  let n7 = tree.node(nid7).unwrap();
-  let n8 = tree.node(nid8).unwrap();
-  let n9 = tree.node(nid9).unwrap();
-  info!("n1:{:?}", n1);
-  info!("n2:{:?}", n2);
-  info!("n3:{:?}", n3);
-  info!("n4:{:?}", n4);
-  info!("n5:{:?}", n5);
-  info!("n6:{:?}", n6);
-  info!("n7:{:?}", n7);
-  info!("n8:{:?}", n8);
-  info!("n9:{:?}", n9);
+  assert!(tree.parent(nid1).is_none());
 
   let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
   let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
