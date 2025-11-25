@@ -463,7 +463,8 @@ mod tests_view_nowrap {
       "     * The extra parts are ",
       "",
     ];
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -517,7 +518,8 @@ mod tests_view_nowrap {
       "  2. When the line is too long ",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
