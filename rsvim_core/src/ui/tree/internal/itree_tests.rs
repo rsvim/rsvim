@@ -23,24 +23,6 @@ impl TestValue {
   }
 }
 
-macro_rules! assert_parent_child_depth {
-  ($parent: ident, $child: ident) => {
-    assert_eq!($parent.depth() + 1, $child.depth());
-  };
-}
-
-macro_rules! assert_node_actual_shape_eq {
-  ($node: ident, $expect: expr, $index: expr) => {
-    assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
-  };
-}
-
-macro_rules! assert_node_value_eq {
-  ($node: ident, $expect: expr) => {
-    assert_eq!($node.value, $expect);
-  };
-}
-
 #[test]
 fn new() {
   // test_log_init();
