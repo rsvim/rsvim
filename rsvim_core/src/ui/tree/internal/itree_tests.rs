@@ -5,6 +5,7 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use itertools::Itertools;
 use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
 #[derive(Clone, Debug)]
@@ -444,36 +445,84 @@ fn shape2() {
   let nid2 = tree
     .new_leaf(Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_percent(0.5),
-        height: taffy::Dimension::from_percent(0.5),
+        width: taffy::Dimension::from_percent(0.99),
+        height: taffy::Dimension::from_percent(0.99),
       },
       ..Default::default()
     })
     .unwrap();
   let s2 = rect!(0, 0, 20, 20);
   let us2 = rect!(0, 0, 20, 20);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
 
+  let nid3 = tree
+    .new_leaf(Style {
+      min_size: taffy::Size {
+        width: taffy::Dimension::from_length(5_u16),
+        height: taffy::Dimension::from_length(5_u16),
+      },
+      size: taffy::Size {
+        width: taffy::Dimension::from_percent(0.01),
+        height: taffy::Dimension::from_percent(0.01),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s3 = rect!(-2, -2, -1, 0);
   let us3 = rect!(0, 0, 0, 0);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
 
+  let nid4 = tree
+    .new_leaf(Style {
+      min_size: taffy::Size {
+        width: taffy::Dimension::from_length(5_u16),
+        height: taffy::Dimension::from_length(5_u16),
+      },
+      size: taffy::Size {
+        width: taffy::Dimension::from_percent(0.01),
+        height: taffy::Dimension::from_percent(0.01),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s4 = rect!(3, 5, 20, 20);
   let us4 = rect!(3, 5, 20, 20);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
 
+  let nid5 = tree
+    .new_leaf(Style {
+      position: taffy::Position::Absolute,
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(-3_i16),
+        top: taffy::LengthPercentageAuto::from_length(-5_i16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      min_size: taffy::Size {
+        width: taffy::Dimension::from_length(18_u16),
+        height: taffy::Dimension::from_length(25_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s5 = rect!(-3, -5, 15, 20);
   let us5 = rect!(3, 5, 18, 20);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
 
+  let nid6 = tree
+    .new_leaf(Style {
+      position: taffy::Position::Absolute,
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(8_i16),
+        top: taffy::LengthPercentageAuto::from_length(13_i16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      min_size: taffy::Size {
+        width: taffy::Dimension::from_length(10_u16),
+        height: taffy::Dimension::from_length(12_u16),
+      },
+      ..Default::default()
+    })
+    .unwrap();
   let s6 = rect!(8, 13, 18, 25);
   let us6 = rect!(11, 18, 18, 20);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
 
   /*
    * The tree looks like:
@@ -489,14 +538,13 @@ fn shape2() {
    *     n6
    * ```
    */
-  let mut tree = Itree::new(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid4, n5);
-  tree.insert(nid5, n6);
+  tree.add_child(nid1, nid2).unwrap();
+  tree.add_child(nid1, nid3).unwrap();
+  tree.add_child(nid2, nid4).unwrap();
+  tree.add_child(nid4, nid5).unwrap();
+  tree.add_child(nid5, nid6).unwrap();
 
-  assert!(tree.root_id() == nid1);
+  assert!(tree.parent(nid1).is_none());
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
   let n3 = tree.node(nid3).unwrap();
