@@ -27,6 +27,8 @@ use std::io::BufWriter;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Once;
+use taffy::Style;
+use taffy::prelude::TaffyAuto;
 
 pub fn make_nowrap() -> WindowOptions {
   WindowOptionsBuilder::default().wrap(false).build().unwrap()
@@ -46,16 +48,25 @@ pub fn make_wrap_linebreak() -> WindowOptions {
 pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &WindowOptions,
-) -> Window {
-  let mut tree = Tree::new(terminal_size);
+  window_options: WindowOptions,
+) -> (Tree, TreeNodeId) {
+  let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
-  let window_shape = size_into_rect!(terminal_size, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
+  let window_id = tree
+    .insert_new_window(
+      tree.root_id(),
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::AUTO,
+          height: taffy::Dimension::AUTO,
+        },
+        ..Default::default()
+      },
+      window_options,
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  (tree, window_id)
 }
 
 #[allow(clippy::too_many_arguments)]
