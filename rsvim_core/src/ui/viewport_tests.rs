@@ -1746,7 +1746,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
@@ -1795,7 +1796,8 @@ mod tests_view_wrap_nolinebreak {
       "ral things we",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -1831,7 +1833,8 @@ mod tests_view_wrap_nolinebreak {
       "4th.\n",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -1868,7 +1871,8 @@ mod tests_view_wrap_nolinebreak {
       "5th.\n",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -1914,7 +1918,8 @@ mod tests_view_wrap_nolinebreak {
       "ndow content wi",
       "dget, then the ",
     ];
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let window = tree.window(window_id).unwrap();
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
