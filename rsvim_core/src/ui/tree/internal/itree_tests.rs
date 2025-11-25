@@ -229,6 +229,7 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
 
   let nid2 = tree
@@ -247,7 +248,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let us2 = rect!(0, 0, 20, 20);
+  let s2 = rect!(0, 0, 15, 15);
+  let us2 = rect!(0, 0, 15, 15);
 
   let nid3 = tree
     .new_leaf(Style {
@@ -265,6 +267,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s3 = rect!(10, 10, 18, 19);
+  let us3 = rect!(10, 10, 18, 19);
+
   let nid4 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -281,6 +286,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s4 = rect!(3, 5, 20, 14);
+  let us4 = rect!(3, 5, 20, 14);
+
   let nid5 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -297,6 +305,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s5 = rect!(-3, -5, 10, 20);
+  let us5 = rect!(0, 0, 10, 15);
+
   let nid6 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -313,6 +324,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s6 = rect!(3, 6, 6, 10);
+  let us6 = rect!(13, 16, 16, 19);
+
   let nid7 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -329,6 +343,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s7 = rect!(3, 6, 6, 20);
+  let us7 = rect!(3, 6, 10, 15);
+
   let nid8 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -345,6 +362,9 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
+  let s8 = rect!(-1, -2, 2, 1);
+  let us8 = rect!(3, 6, 5, 7);
+
   let nid9 = tree
     .new_leaf(Style {
       position: taffy::Position::Absolute,
@@ -361,7 +381,7 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-
+  let s9 = rect!(5, 6, 9, 8);
   let us9 = rect!(8, 12, 10, 14);
 
   /*
@@ -390,12 +410,16 @@ fn shape1() {
 
   assert!(tree.parent(nid1).is_none());
 
-  let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
-  let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
+  let ids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
   for i in 0..9 {
-    let expect = expects[i];
-    let node = nodes[i];
-    assert_node_actual_shape_eq!(node, expect, i);
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
+    let actual_us = tree.actual_shape(ids[i]).unwrap();
+    let actual_s = tree.shape(ids[i]).unwrap();
+    assert_eq!(expect_us, actual_us);
+    assert_eq!(expect_s, actual_s);
   }
 }
 
