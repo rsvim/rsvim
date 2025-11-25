@@ -2038,10 +2038,9 @@ mod tests_view_wrap_nolinebreak {
       "ll test lines.\n",
       "",
     ];
-    let (tree, window_id) =
+
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2114,10 +2113,8 @@ mod tests_view_wrap_nolinebreak_eol {
       "s small en",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
