@@ -39,11 +39,12 @@ pub fn make_tree_with_buffers(
   };
 
   let (_, buf) = buffers.first_key_value().unwrap();
+  let window_opts = *tree.global_local_options();
   let window_id = tree
     .insert_new_window(
       tree_root_id,
       window_style,
-      *tree.global_local_options(),
+      window_opts,
       Arc::downgrade(buf),
     )
     .unwrap();
@@ -87,11 +88,12 @@ pub fn make_tree_with_buffers_cmdline(
   };
 
   let (_, buf) = buffers.first_key_value().unwrap();
+  let window_opts = *tree.global_local_options();
   let window_id = tree
     .insert_new_window(
       tree_root_id,
       window_style,
-      *tree.global_local_options(),
+      window_opts,
       Arc::downgrade(buf),
     )
     .unwrap();
