@@ -1219,10 +1219,9 @@ mod tests_view_nowrap_startcol {
       "",
     ];
 
-    let (mut tree, window_id) =
+    let (mut tree, window_id, _actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let mut window = tree.window_mut(window_id).unwrap();
-    let actual = update_viewport(buf.clone(), &mut window, 0, 60);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 60);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1270,10 +1269,9 @@ mod tests_view_nowrap_startcol {
 
     let expect = vec!["", "", "", "", "", "", "", ""];
 
-    let (mut tree, window_id) =
+    let (mut tree, window_id, _actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let mut window = tree.window_mut(window_id).unwrap();
-    let actual = update_viewport(buf.clone(), &mut window, 0, 500);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 500);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1335,10 +1333,8 @@ mod tests_view_wrap_nolinebreak {
       "s several ",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
@@ -1382,10 +1378,8 @@ mod tests_view_wrap_nolinebreak {
       "",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -1432,10 +1426,8 @@ mod tests_view_wrap_nolinebreak {
       "hings we want to test:\n",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
