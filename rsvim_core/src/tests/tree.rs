@@ -52,8 +52,20 @@ pub fn make_tree_with_buffers(
   };
 
   let (window_loid, window_shape, cursor_loid, cursor_shape) = {
-    let lotree = tree.lotree();
-    let mut lo = lotree.borrow_mut();
+    let (_, buf) = buffers.first_key_value().unwrap();
+    let window_id = tree.insert_new_window(
+      tree_root_id,
+      window_style,
+      tree.global_local_options(),
+      Arc::downgrade(buf),
+    );
+    let cursor_id = tree.insert_new_cursor(
+      window_id,
+      window_style,
+      tree.global_local_options(),
+      Arc::downgrade(buf),
+    );
+    let mut lo = lo.borrow_mut();
     let window_loid = lo.new_leaf(window_style).unwrap();
     let cursor_loid = lo.new_leaf(cursor_style).unwrap();
     lo.add_child(tree_root_loid, window_loid).unwrap();

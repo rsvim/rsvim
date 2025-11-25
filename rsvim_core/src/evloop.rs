@@ -29,6 +29,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -574,18 +575,16 @@ impl EventLoop {
         canvas_cursor.style(),
       )
       .unwrap();
-
     tree.set_current_window_id(Some(window_id));
 
-    let cmdline = CommandLine::new(
-      tree.lotree(),
-      cmdline_loid,
-      cmdline_shape,
-      Arc::downgrade(&self.contents),
-    )
-    .unwrap();
-
-    tree._insert(tree_root_id, TreeNode::CommandLine(cmdline));
+    let cmdline_id = tree
+      .insert_new_cmdline(
+        tree_root_id,
+        cmdline_style,
+        IndicatorSymbol::Empty,
+        Arc::downgrade(&self.contents),
+      )
+      .unwrap();
 
     Ok(())
   }
