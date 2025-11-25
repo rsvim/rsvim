@@ -339,3 +339,18 @@ macro_rules! inode_impl {
     }
   };
 }
+
+#[macro_export]
+macro_rules! inode_dispatcher {
+  ($name:tt) => {
+    impl $name {
+      fn id(&self) -> TreeNodeId {
+        self.id
+      }
+
+      fn relationship(&self) -> IrelationshipRc {
+        self.base.clone()
+      }
+    }
+  };
+}
