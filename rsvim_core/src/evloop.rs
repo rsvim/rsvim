@@ -30,6 +30,7 @@ use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -555,19 +556,20 @@ impl EventLoop {
     // Initialize default window with default buffer.
     let window_id = {
       let buffers = lock!(self.buffers);
-      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      let (_buf_id, buf) = buffers.first_key_value().unwrap();
+      let window_opts = *tree.global_local_options();
       tree
         .insert_new_window(
           tree_root_id,
           window_style,
-          *tree.global_local_options(),
+          window_opts,
           Arc::downgrade(buf),
         )
         .unwrap()
     };
 
     // Initialize cursor inside the default window.
-    let cursor_id = tree
+    let _cursor_id = tree
       .insert_new_cursor(
         window_id,
         canvas_cursor.blinking(),
@@ -577,7 +579,7 @@ impl EventLoop {
       .unwrap();
     tree.set_current_window_id(Some(window_id));
 
-    let cmdline_id = tree
+    let _cmdline_id = tree
       .insert_new_cmdline(
         tree_root_id,
         cmdline_style,
