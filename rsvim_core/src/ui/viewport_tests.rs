@@ -1442,10 +1442,8 @@ mod tests_view_wrap_nolinebreak {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
@@ -1472,10 +1470,8 @@ mod tests_view_wrap_nolinebreak {
       " are been set. If the extra",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -1515,10 +1511,8 @@ mod tests_view_wrap_nolinebreak {
       "\tenough to\tcomple",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -1558,10 +1552,8 @@ mod tests_view_wrap_nolinebreak {
       "\tenough\tto", // 7 fills
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
