@@ -1909,7 +1909,7 @@ mod tests_view_wrap_nolinebreak {
       "dget, then the ",
     ];
 
-    let (_tree, _window_id, actual) =
+    let (mut tree, window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -1940,7 +1940,7 @@ mod tests_view_wrap_nolinebreak {
       "t affect the re",
       "ndering.\n",
     ];
-    let actual = update_viewport(buf.clone(), &mut window, 2, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 2, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -1992,7 +1992,7 @@ mod tests_view_wrap_nolinebreak {
       "dget, then the ",
     ];
 
-    let (_tree, _window_id, actual) =
+    let (mut tree, window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -2023,7 +2023,7 @@ mod tests_view_wrap_nolinebreak {
       "n and again. Th",
       "is operation al",
     ];
-    let actual = update_viewport(buf.clone(), &mut window, 6, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 6, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -2060,7 +2060,7 @@ mod tests_view_wrap_nolinebreak {
       "",
     ];
 
-    let (_tree, _window_id, actual) =
+    let (mut tree, window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
@@ -2076,7 +2076,7 @@ mod tests_view_wrap_nolinebreak {
 
     let expect =
       vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
-    let actual = update_viewport(buf.clone(), &mut window, 1, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 1, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
