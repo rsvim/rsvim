@@ -61,7 +61,7 @@ impl CommandLineIndicator {
 impl Widgetable for CommandLineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
     if self.visible().unwrap() {
-      let actual_shape = self.actual_shape();
+      let actual_shape = self.actual_shape().unwrap();
       let upos: U16Pos = actual_shape.min().into();
       let symbol = self.symbol;
       let symbol = format!("{symbol}").to_compact_string();
