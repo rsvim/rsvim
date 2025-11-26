@@ -16683,11 +16683,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -16698,7 +16695,6 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "ompletely put ins",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -17047,11 +17043,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -17063,7 +17056,6 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         "But still it ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -17242,11 +17234,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -17258,7 +17247,6 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         "But still it ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -17577,11 +17565,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
