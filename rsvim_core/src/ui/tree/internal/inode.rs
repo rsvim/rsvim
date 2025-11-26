@@ -17,6 +17,25 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn visible(&self) -> bool;
 }
 
+pub struct InodeBase {
+  relationship: IrelationshipRc,
+  id: TreeNodeId,
+}
+
+impl InodeBase {
+  pub fn new(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
+    Self { id, relationship }
+  }
+
+  pub fn id(&self) -> TreeNodeId {
+    self.id
+  }
+
+  pub fn relationship(&self) -> IrelationshipRc {
+    self.relationship.clone()
+  }
+}
+
 #[macro_export]
 macro_rules! inode_impl {
   ($name:tt) => {
