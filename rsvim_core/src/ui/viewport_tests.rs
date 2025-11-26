@@ -340,7 +340,8 @@ pub fn search_up_viewport(
 }
 
 pub fn search_left_viewport(
-  window: Rc<RefCell<Window>>,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -349,7 +350,8 @@ pub fn search_left_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Left,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -359,7 +361,8 @@ pub fn search_left_viewport(
 }
 
 pub fn search_right_viewport(
-  window: Rc<RefCell<Window>>,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -368,7 +371,8 @@ pub fn search_right_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Right,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -11244,7 +11248,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 47);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 20, 0, 47);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 5)]
