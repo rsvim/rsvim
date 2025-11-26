@@ -6496,7 +6496,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 314, 6, 29);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 314, 6, 29);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
@@ -6518,7 +6518,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec!["7. The extra part", "s...", "", ""];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 314, 7, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 314, 7, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(7, 0)].into_iter().collect();
