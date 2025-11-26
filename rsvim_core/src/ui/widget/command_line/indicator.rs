@@ -31,8 +31,7 @@ impl std::fmt::Display for IndicatorSymbol {
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
 pub struct CommandLineIndicator {
-  base: IrelationshipRc,
-  id: TreeNodeId,
+  base: InodeBase,
   symbol: IndicatorSymbol,
 }
 
@@ -40,11 +39,14 @@ inode_impl!(CommandLineIndicator);
 
 impl CommandLineIndicator {
   pub fn new(
-    base: IrelationshipRc,
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     symbol: IndicatorSymbol,
   ) -> Self {
-    CommandLineIndicator { base, id, symbol }
+    CommandLineIndicator {
+      base: InodeBase::new(relationship, id),
+      symbol,
+    }
   }
 
   pub fn symbol(&self) -> IndicatorSymbol {
