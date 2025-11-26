@@ -11865,7 +11865,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 27, 0, 68);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 27, 0, 68);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 1), (4, 6)]
@@ -11891,7 +11891,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "\tenough", "to\tcomp"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 26, 0, 61);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 26, 0, 61);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 3)]
@@ -11917,7 +11917,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "l\tenough", "to\tcom"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 25, 0, 60);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 25, 0, 60);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 4)]
@@ -11943,7 +11943,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "ll\tenough", "to\tco"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 24, 0, 59);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 24, 0, 59);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 5)]
@@ -11969,7 +11969,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 23, 0, 58);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 23, 0, 58);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 6)]
