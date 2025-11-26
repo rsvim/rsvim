@@ -8140,7 +8140,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["put\tinsi", "", "wrap\toptio", "line-wrap\t", ""];
 
       let actual =
-        search_up_viewport(window.clone(), buf.clone(), 3, 55, 3, 109);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 55, 3, 109);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 2), (4, 0), (5, 0), (6, 0), (7, 0)]
