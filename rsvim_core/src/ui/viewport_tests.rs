@@ -3080,10 +3080,8 @@ mod tests_view_wrap_linebreak {
       "单词的换行两个选项都不会影响",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3134,10 +3132,8 @@ mod tests_view_wrap_linebreak {
       "渲染的最终效果。\n",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3188,10 +3184,8 @@ mod tests_view_wrap_linebreak {
       "文本内容的长度足够短，短到可以",
     ];
 
-    let (tree, window_id) =
+    let (_tree, _window_id, actual) =
       make_window_viewport(terminal_size, buf.clone(), win_opts);
-    let window = tree.window(window_id).unwrap();
-    let actual = window.viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
