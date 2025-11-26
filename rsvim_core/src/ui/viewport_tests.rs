@@ -10691,7 +10691,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 39, 2, 46);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 39, 2, 46);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
@@ -10723,7 +10723,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 38, 2, 46);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 38, 2, 46);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
@@ -10755,7 +10755,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 37, 2, 46);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 37, 2, 46);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
@@ -10787,7 +10787,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 2, 2, 16);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 2, 2, 16);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 7), (4, 7), (5, 0), (6, 0)]
@@ -10819,7 +10819,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 1, 2, 8);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 1, 2, 8);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
