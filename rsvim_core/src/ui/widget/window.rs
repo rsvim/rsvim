@@ -32,8 +32,7 @@ use taffy::prelude::TaffyMaxContent;
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: IrelationshipRc,
-  id: TreeNodeId,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -48,14 +47,16 @@ inode_impl!(Window);
 
 impl Window {
   pub fn new(
-    base: IrelationshipRc,
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     opts: WindowOptions,
     content_id: TreeNodeId,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
+    let base = InodeBase::new(relationship.clone(), id);
+
     let (viewport, cursor_viewport) = {
-      let base = base.borrow();
+      let base = relationship.borrow();
       let content_actual_shape = base.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
@@ -71,7 +72,6 @@ impl Window {
 
     Ok(Window {
       base,
-      id,
       options: opts,
       content_id,
       cursor_id: None,
