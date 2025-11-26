@@ -11699,7 +11699,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "to\tc", "pletely\tpu"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 37, 0, 77);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 37, 0, 77);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 6), (4, 0)]
