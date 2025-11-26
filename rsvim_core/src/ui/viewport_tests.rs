@@ -195,7 +195,7 @@ pub fn make_canvas(
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size);
+  let mut tree = Tree::new(terminal_size).unwrap();
   let tree_root_id = tree.root_id();
   tree.set_global_local_options(window_options);
   let shape = size_into_rect!(terminal_size, isize);
