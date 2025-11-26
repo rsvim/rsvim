@@ -53,8 +53,6 @@ impl Window {
     content_id: TreeNodeId,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
-    let base = InodeBase::new(relationship.clone(), id);
-
     let (viewport, cursor_viewport) = {
       let base = relationship.borrow();
       let content_actual_shape = base.actual_shape(content_id)?;
@@ -70,6 +68,7 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
+    let base = InodeBase::new(relationship, id);
     Ok(Window {
       base,
       options: opts,
