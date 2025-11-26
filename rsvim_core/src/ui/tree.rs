@@ -176,8 +176,8 @@ impl Tree {
     };
     let root_id = {
       let mut base = base.borrow_mut();
-      let root_id = rel.new_leaf(root_style)?;
-      rel.compute_layout(id, taffy::Size::MAX_CONTENT)?;
+      let root_id = base.new_leaf(root_style)?;
+      base.compute_layout(id, taffy::Size::MAX_CONTENT)?;
       root_id
     };
 
