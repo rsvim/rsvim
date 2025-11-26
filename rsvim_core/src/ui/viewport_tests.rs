@@ -11140,7 +11140,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 22, 0, 57);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 22, 0, 57);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 7)]
@@ -11166,7 +11166,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 21, 0, 56);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 21, 0, 56);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -11192,7 +11192,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "test:\n", "\tsmall", "long\tt"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 20, 0, 48);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 20, 0, 48);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 4)]
@@ -11218,7 +11218,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 3, 19, 0, 47);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 3, 19, 0, 47);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 5)]
