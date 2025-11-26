@@ -4453,7 +4453,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 0, 3, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 0, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
@@ -4497,11 +4497,8 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -4512,7 +4509,6 @@ mod tests_search_anchor_downward_nowrap {
         "1. When the line ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -4538,7 +4534,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 0, 12, 0, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 0, 12, 0, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4565,7 +4561,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 1, 43, 0, 27);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 43, 0, 27);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4592,7 +4588,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 1, 44, 0, 28);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 1, 44, 0, 28);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4615,7 +4611,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["", "t lines.\n", " we want to test:", "completely put in"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 52, 0, 36);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 52, 0, 36);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4638,7 +4634,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["", " lines.\n", "we want to test:\n", "ompletely put ins"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 53, 0, 37);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4660,7 +4656,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "s.\n", "nt to test:\n", "tely put inside.\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 60, 0, 42);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 0, 42);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -4687,7 +4683,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 37);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 40, 1, 37);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
@@ -4728,11 +4724,8 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -4743,7 +4736,6 @@ mod tests_search_anchor_downward_nowrap {
         "1. When the line ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -4769,7 +4761,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 22);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 40, 1, 22);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
@@ -4791,7 +4783,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "not\tset.\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 99, 2, 138);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 99, 2, 138);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 1)].into_iter().collect();
