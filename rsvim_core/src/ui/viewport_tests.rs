@@ -191,30 +191,17 @@ pub fn assert_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: WindowOptions,
+  _window_options: WindowOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size).unwrap();
-  let tree_root_id = tree.root_id();
-  tree.set_global_local_options(window_options);
-  let shape = size_into_rect!(terminal_size, isize);
-  let window_id = tree
-    .insert_new_window(
-      tree_root_id,
-      Style {
-        size: taffy::Size {
-          width: taffy::Dimension::AUTO,
-          height: taffy::Dimension::AUTO,
-        },
-        ..Default::default()
-      },
-      window_options,
-      Arc::downgrade(&buffer),
-    )
-    .unwrap();
-  let window = tree.window(window_id).unwrap();
-  let window_content = window.content_mut();
+  let window_content = WindowContent::new(
+    tree.relationship(),
+    next_node_id(),
+    buffer,
+    Arc::downgrade(&viewport),
+  );
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
