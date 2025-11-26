@@ -12664,7 +12664,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
         vec!["", "ines.\r\n", " want to test:\r\n", "is\t", "too\tlong"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 20, 0, 39);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 20, 0, 39);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 7), (4, 2)]
@@ -12690,7 +12690,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", ".\r\n", "t to test:\r\n", "is\tsmal", "o\tlong"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 43);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 24, 0, 43);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 0)]
@@ -12716,7 +12716,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "\r\n", " to test:\r\n", "is\tsmall", "\tlong"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 25, 0, 44);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 25, 0, 44);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 0)]
