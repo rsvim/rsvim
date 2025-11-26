@@ -18452,11 +18452,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -18467,7 +18464,6 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         "word that cannot ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
