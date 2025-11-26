@@ -16334,7 +16334,6 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         "ompletely put ins",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
