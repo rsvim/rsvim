@@ -199,7 +199,7 @@ pub fn make_canvas(
   let window_content = WindowContent::new(
     tree.relationship(),
     next_node_id(),
-    buffer,
+    Arc::downgrade(&buffer),
     Arc::downgrade(&viewport),
   );
   let mut canvas = Canvas::new(terminal_size);
