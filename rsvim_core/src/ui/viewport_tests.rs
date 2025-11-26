@@ -9314,7 +9314,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         "ains several thin",
       ];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 1, 32, 1, 0);
+      let actual =
+        search_up_viewport(&mut tree, window_id, buf.clone(), 1, 32, 1, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0)].into_iter().collect();
@@ -9341,7 +9342,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         "But still it cont",
       ];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 0, 8, 0, 0);
+      let actual =
+        search_up_viewport(&mut tree, window_id, buf.clone(), 0, 8, 0, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
