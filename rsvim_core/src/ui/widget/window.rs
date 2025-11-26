@@ -64,7 +64,6 @@ impl Window {
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
-
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 

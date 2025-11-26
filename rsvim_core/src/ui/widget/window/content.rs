@@ -14,8 +14,7 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
 pub struct WindowContent {
-  base: IrelationshipRc,
-  id: TreeNodeId,
+  base: InodeBase,
   buffer: BufferWk,
   viewport: ViewportWk,
 }
@@ -25,14 +24,13 @@ inode_impl!(WindowContent);
 impl WindowContent {
   /// Make window content.
   pub fn new(
-    base: IrelationshipRc,
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> Self {
     WindowContent {
-      base,
-      id,
+      base: InodeBase::new(relationship, id),
       buffer,
       viewport,
     }
