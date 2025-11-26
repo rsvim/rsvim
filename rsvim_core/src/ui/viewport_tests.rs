@@ -196,13 +196,25 @@ pub fn make_canvas(
   viewport: ViewportArc,
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(&window_options);
+  let tree_root_id = tree.root_id();
+  tree.set_global_local_options(window_options);
   let shape = size_into_rect!(terminal_size, isize);
-  let window_content = WindowContent::new(
-    shape,
-    Arc::downgrade(&buffer),
-    Arc::downgrade(&viewport),
-  );
+  let window_id = tree
+    .insert_new_window(
+      tree_root_id,
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::AUTO,
+          height: taffy::Dimension::AUTO,
+        },
+        ..Default::default()
+      },
+      window_options,
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  let window = tree.window(window_id).unwrap();
+  let window_content = window.content_mut();
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
   canvas
