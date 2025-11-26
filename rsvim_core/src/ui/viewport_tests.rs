@@ -10189,11 +10189,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -10206,7 +10203,6 @@ mod tests_search_anchor_upward_wrap_linebreak {
         " several things we ",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -10230,12 +10226,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
         " several things we   ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas =
+        make_canvas(terminal_size, win_opts, buf.clone(), actual);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -10251,7 +10243,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 10, 0, 9, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 10, 0, 9, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(9, 0), (10, 0)].into_iter().collect();
