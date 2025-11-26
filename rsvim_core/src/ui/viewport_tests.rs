@@ -10335,7 +10335,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual =
-        search_up_viewport(window.clone(), buf.clone(), 5, 80, 5, 23);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 5, 80, 5, 23);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
@@ -10396,11 +10396,8 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -10412,7 +10409,6 @@ mod tests_search_anchor_horizontally_nowrap {
         "\t2. When",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
@@ -10443,7 +10439,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 0, 2, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 0, 2, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -10475,7 +10471,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 6, 1, 2, 0);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 6, 1, 2, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
