@@ -7,9 +7,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
