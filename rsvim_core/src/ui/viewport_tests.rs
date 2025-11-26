@@ -255,14 +255,15 @@ pub fn update_viewport(
 
 fn search_viewport(
   direction: ViewportSearchDirection,
-  window: Rc<RefCell<Window>>,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  let mut window = window.borrow_mut();
+  let window = tree.window_mut(window_id).unwrap();
   let old = window.viewport();
   let buf = lock!(buf);
   let opts = *window.options();
@@ -297,7 +298,8 @@ fn search_viewport(
 }
 
 pub fn search_down_viewport(
-  window: Rc<RefCell<Window>>,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -306,7 +308,8 @@ pub fn search_down_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Down,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -316,7 +319,8 @@ pub fn search_down_viewport(
 }
 
 pub fn search_up_viewport(
-  window: Rc<RefCell<Window>>,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -325,7 +329,8 @@ pub fn search_up_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Up,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -3746,9 +3751,9 @@ mod tests_view_wrap_linebreak_startcol {
       "and word-",
     ];
 
-    let mut window =
-      make_window_viewport(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 60);
+    let (mut tree, window_id, _actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 60);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3799,9 +3804,9 @@ mod tests_view_wrap_linebreak_startcol {
       "短，短到可以完整的放入一个窗口",
     ];
 
-    let mut window =
-      make_window_viewport(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 15);
+    let (mut tree, window_id, _actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 15);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3839,9 +3844,9 @@ mod tests_view_wrap_linebreak_startcol {
       "ogetmoresmoothbeh",
     ];
 
-    let mut window =
-      make_window_viewport(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 70);
+    let (mut tree, window_id, _actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 70);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3883,11 +3888,8 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -3899,7 +3901,6 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
@@ -3929,7 +3930,7 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 15, 0, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 15, 0, 0);
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
@@ -3960,7 +3961,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 1, 1, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 1, 1, 0);
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
           .into_iter()
@@ -3986,7 +3987,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 3, 2, 1);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 3, 2, 1);
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
           .into_iter()
@@ -4011,7 +4012,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 3, 3, 0);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 3, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
@@ -4055,11 +4056,8 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -4071,7 +4069,6 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
@@ -4102,7 +4099,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 40, 0, 24);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 40, 0, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4128,7 +4125,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "t\tinside.\n", ""];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 130, 0, 113);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 130, 0, 113);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4154,7 +4151,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "mpletely\tp", ":\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 100, 0, 95);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 100, 0, 95);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4180,7 +4177,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "", "not\tset.\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 100, 1, 146);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 100, 1, 146);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 1)]
@@ -4206,7 +4203,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 50, 2, 85);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 50, 2, 85);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
