@@ -14,9 +14,10 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> TaffyResult<U16Rect>;
 
-  fn visible(&self) -> bool;
+  fn visible(&self) -> TaffyResult<bool>;
 }
 
+#[derive(Debug, Clone)]
 pub struct InodeBase {
   relationship: IrelationshipRc,
   id: TreeNodeId,
@@ -55,15 +56,23 @@ macro_rules! inode_impl {
   ($name:tt) => {
     impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.id
+        self.base.id()
       }
 
       fn relationship(&self) -> IrelationshipRc {
-        self.base.clone()
+        self.base.relationship()
       }
 
-      fn relationship(&self) -> IrelationshipRc {
-        self.base.clone()
+      fn shape(&self) -> TaffyResult<IRect> {
+        self.base.shape()
+      }
+
+      fn actual_shape(&self) -> TaffyResult<U16Rect> {
+        self.base.actual_shape()
+      }
+
+      fn visible(&self) -> TaffyResult<bool> {
+        self.base.visible()
       }
     }
   };
@@ -85,6 +94,30 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.relationship(),
+          )*
+        }
+      }
+
+      fn shape(&self) -> TaffyResult<IRect> {
+        match self {
+          $(
+            $enum::$variant(e) => e.shape(),
+          )*
+        }
+      }
+
+      fn actual_shape(&self) -> TaffyResult<U16Rect> {
+        match self {
+          $(
+            $enum::$variant(e) => e.actual_shape(),
+          )*
+        }
+      }
+
+      fn visible(&self) -> TaffyResult<bool> {
+        match self {
+          $(
+            $enum::$variant(e) => e.visible(),
           )*
         }
       }
