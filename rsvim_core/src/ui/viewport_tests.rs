@@ -10659,7 +10659,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual =
-        search_left_viewport(window.clone(), buf.clone(), 6, 40, 2, 46);
+        search_left_viewport(&mut tree, window_id, buf.clone(), 6, 40, 2, 46);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
