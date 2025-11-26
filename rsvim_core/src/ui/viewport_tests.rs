@@ -10044,7 +10044,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual =
-        search_up_viewport(window.clone(), buf.clone(), 4, 35, 4, 35);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 35);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 6)].into_iter().collect();
@@ -11274,7 +11274,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 24, 0, 47);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 24, 0, 47);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 5)]
@@ -11318,11 +11318,8 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
