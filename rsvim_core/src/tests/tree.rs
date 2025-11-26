@@ -64,7 +64,7 @@ pub fn make_tree_with_buffers_cmdline(
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
   let tree_root_id = tree.root_id();
 
   let window_style = Style {
