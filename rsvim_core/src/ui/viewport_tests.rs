@@ -5445,7 +5445,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", "t lines.\r\n", " we want to test:", "completely put in"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 52, 0, 36);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 52, 0, 36);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -5472,7 +5472,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 53, 0, 37);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
