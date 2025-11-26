@@ -34,8 +34,7 @@ use taffy::prelude::TaffyMaxContent;
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
-  base: IrelationshipRc,
-  id: TreeNodeId,
+  base: InodeBase,
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
@@ -50,7 +49,7 @@ pub struct CommandLine {
 
 impl CommandLine {
   pub fn new(
-    base: IrelationshipRc,
+    relationship: IrelationshipRc,
     id: TreeNodeId,
     indicator_id: TreeNodeId,
     input_id: TreeNodeId,
@@ -91,14 +90,14 @@ impl CommandLine {
       );
       (input_viewport, input_cursor_viewport, message_viewport)
     };
-
     let input_viewport = Viewport::to_arc(input_viewport);
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
+    let base = InodeBase::new(relationship, id);
+
     Ok(Self {
       base,
-      id,
       options,
       indicator_id,
       input_id,
