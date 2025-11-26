@@ -5148,7 +5148,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 40, 0, 24);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 2, 40, 0, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -5174,7 +5174,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "t\tinside.\r", ""];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 130, 0, 113);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 130, 0, 113);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -5200,7 +5200,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "to\tcom", "etely\tput:"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 30, 0, 79);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 4, 30, 0, 79);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 4), (4, 0)]
@@ -5226,7 +5226,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "inside.\r", "", "options\ta"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 80, 1, 120);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 5, 80, 1, 120);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 2), (4, 0), (5, 1)]
