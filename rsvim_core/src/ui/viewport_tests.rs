@@ -12742,7 +12742,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", ":\r\n", "small\t", "long\tto"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 26, 0, 52);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 26, 0, 52);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 4), (4, 0)]
