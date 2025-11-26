@@ -342,14 +342,22 @@ macro_rules! inode_impl {
 
 #[macro_export]
 macro_rules! inode_dispatcher {
-  ($name:tt) => {
-    impl $name {
+  ($enum:ident, $($variant:tt),*) => {
+    impl $enum {
       fn id(&self) -> TreeNodeId {
-        self.id
+        match self {
+          $(
+            $enum::$variant(e) => e.id(),
+          )*
+        }
       }
 
       fn relationship(&self) -> IrelationshipRc {
-        self.base.clone()
+        match self {
+          $(
+            $enum::$variant(e) => e.relationship(),
+          )*
+        }
       }
     }
   };
