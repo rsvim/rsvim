@@ -4805,7 +4805,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "too\tlong?\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 168, 3, 271);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 6, 168, 3, 271);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0)].into_iter().collect();
@@ -4832,7 +4832,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 25, 4, 24);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 7, 25, 4, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
@@ -4879,11 +4879,8 @@ mod tests_search_anchor_downward_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window_viewport(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id, actual) =
+      make_window_viewport(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -4895,7 +4892,6 @@ mod tests_search_anchor_downward_nowrap_eol {
         "\t2. When",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
           .into_iter()
