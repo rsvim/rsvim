@@ -9236,7 +9236,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual =
-        search_up_viewport(window.clone(), buf.clone(), 4, 35, 4, 24);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 4, 35, 4, 24);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
@@ -9259,7 +9259,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual =
-        search_up_viewport(window.clone(), buf.clone(), 3, 36, 3, 29);
+        search_up_viewport(&mut tree, window_id, buf.clone(), 3, 36, 3, 29);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 5)].into_iter().collect();
@@ -9286,7 +9286,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         "\t1. When",
       ];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 2, 30, 2, 0);
+      let actual =
+        search_up_viewport(&mut tree, window_id, buf.clone(), 2, 30, 2, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
