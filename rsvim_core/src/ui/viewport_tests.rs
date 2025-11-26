@@ -11621,7 +11621,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tt", "completely"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 34, 0, 67);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 34, 0, 67);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 7)]
@@ -11647,7 +11647,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 35, 0, 68);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 35, 0, 68);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 1), (4, 6)]
@@ -11673,7 +11673,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "to\t", "mpletely\tp"];
 
       let actual =
-        search_right_viewport(window.clone(), buf.clone(), 3, 36, 0, 76);
+        search_right_viewport(&mut tree, window_id, buf.clone(), 3, 36, 0, 76);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 7), (4, 0)]
