@@ -26,13 +26,27 @@ impl InodeBase {
   pub fn new(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
     Self { id, relationship }
   }
+}
 
-  pub fn id(&self) -> TreeNodeId {
+impl Inodeable for InodeBase {
+  fn id(&self) -> TreeNodeId {
     self.id
   }
 
-  pub fn relationship(&self) -> IrelationshipRc {
+  fn relationship(&self) -> IrelationshipRc {
     self.relationship.clone()
+  }
+
+  fn shape(&self) -> TaffyResult<IRect> {
+    self.relationship.borrow().shape(self.id)
+  }
+
+  fn actual_shape(&self) -> TaffyResult<U16Rect> {
+    self.relationship.borrow().actual_shape(self.id)
+  }
+
+  fn visible(&self) -> TaffyResult<bool> {
+    self.relationship.borrow().visible(self.id)
   }
 }
 
