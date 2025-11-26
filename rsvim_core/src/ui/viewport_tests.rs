@@ -5495,7 +5495,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", "s.\r\n", "nt to test:\r\n", "tely put inside.\r\n"];
 
       let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 60, 0, 42);
+        search_down_viewport(&mut tree, window_id, buf.clone(), 3, 60, 0, 42);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
