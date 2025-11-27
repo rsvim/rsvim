@@ -16,7 +16,10 @@ use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::command_line::input::CommandLineInput;
 use crate::ui::widget::command_line::message;
 use crate::ui::widget::command_line::message::CommandLineMessage;
+use crate::ui::widget::cursor::BLINKING;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::cursor::HIDDEN;
+use crate::ui::widget::cursor::STYLE;
 use crate::ui::widget::root::Root;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
@@ -481,7 +484,7 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
-    self.insert_new_cursor(parent_id, false, false, CursorStyle::SteadyBlock)
+    self.insert_new_cursor(parent_id, BLINKING, HIDDEN, STYLE)
   }
 
   /// Create new cmdline node, and insert it as a child to the provided parent_id.
