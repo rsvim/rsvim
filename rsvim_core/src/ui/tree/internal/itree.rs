@@ -242,6 +242,20 @@ impl Itree {
     result
   }
 
+  pub fn remove_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let child_loid = self.nid2loid.get(&child_id).unwrap();
+    let removed_loid = self.lo.remove_child(*parent_loid, *child_loid)?;
+    let removed_id = *self.loid2nid.get(&removed_loid).unwrap();
+    self._internal_check();
+    Ok(removed_id)
+  }
+
   pub fn new_with_parent(
     &mut self,
     style: Style,
