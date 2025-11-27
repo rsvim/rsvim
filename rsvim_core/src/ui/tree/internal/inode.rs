@@ -5,7 +5,6 @@ use crate::ui::tree::IrelationshipRc;
 use crate::ui::tree::TreeNodeId;
 use taffy::Layout;
 use taffy::Style;
-use taffy::TaffyResult;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
