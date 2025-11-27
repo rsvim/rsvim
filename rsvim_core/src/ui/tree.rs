@@ -742,7 +742,7 @@ impl Tree {
       self.node(old_parent_id).unwrap(),
       TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
     ));
-    match self.node_mut(old_parent_id).unwrap() {
+    let old_parent_id = match self.node_mut(old_parent_id).unwrap() {
       TreeNode::WindowContent(_content) => {
         // Cursor is inside a window content widget.
         let old_window_id = *lotree.parent(old_parent_id).unwrap();
@@ -752,12 +752,15 @@ impl Tree {
         if old_window_id == parent_id {
           return None;
         }
-        if let TreeNode::Window(window) = self.node_mut(old_window_id).unwrap()
-        {
-          lotree.remove_child(old_parent_id, cursor_id);
-          let _removed = window.clear_cursor_id();
-          debug_assert_eq!(_removed, Some(cursor_id));
+        match self.node_mut(old_window_id).unwrap() {
+          TreeNode::Window(window) => {
+            lotree.remove_child(old_parent_id, cursor_id);
+            let _removed = window.clear_cursor_id();
+            debug_assert_eq!(_removed, Some(cursor_id));
+          }
+          _ => unreachable!(),
         }
+        old_window_id
       }
       TreeNode::CommandLineInput(_input) => {
         // Cursor is inside the command-line input widget.
@@ -767,29 +770,33 @@ impl Tree {
         if old_cmdline_id == parent_id {
           return None;
         }
-        if let TreeNode::CommandLine(cmdline) =
-          self.node_mut(old_cmdline_id).unwrap()
-        {
-          lotree.remove_child(old_parent_id, cursor_id);
-          let _removed = cmdline.clear_cursor_id();
-          debug_assert_eq!(_removed, Some(cursor_id));
+        match self.node_mut(old_cmdline_id).unwrap() {
+          TreeNode::CommandLine(cmdline) => {
+            lotree.remove_child(old_parent_id, cursor_id);
+            let _removed = cmdline.clear_cursor_id();
+            debug_assert_eq!(_removed, Some(cursor_id));
+          }
+          _ => unreachable!(),
         }
+        old_cmdline_id
       }
       _ => unreachable!(),
-    }
+    };
     debug_assert!(self.nodes.contains_key(&parent_id));
     match self.node_mut(parent_id).unwrap() {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
         lotree.add_child(content_id, cursor_id);
+        window.set_cursor_id(cursor_id);
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
         lotree.add_child(cmdline_input_id, cursor_id);
+        cmdline.set_cursor_id(cursor_id);
       }
       _ => unreachable!(),
     }
-    None
+    Some(old_parent_id)
   }
 }
 

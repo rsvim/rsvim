@@ -378,23 +378,22 @@ impl CommandLine {
 
 // Cursor {
 impl CommandLine {
-  /// Enable/insert cursor widget in commandline, i.e. when user start command-line mode, the
-  /// cursor moves to the command-line widget and allow receive user ex command or search patterns.
+  /// Set cursor ID in commandline, e.g. user starts command-line mode, and
+  /// cursor moves into the command-line widget.
   ///
   /// # Returns
-  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
-  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<CommandLineNode> {
-    self.cursor_id = Some(cursor.id());
-    self
-      .base
-      .bounded_insert(self.input_id, CommandLineNode::Cursor(cursor))
+  /// It returns the previous cursor ID.
+  pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
+    self.cursor_id = Some(cursor_id);
+    old
   }
 
-  /// Disable/remove cursor widget from commandline, i.e. when user leaves command-line mode, the
-  /// command-line content widget doesn't contain cursor any longer.
+  /// Clear cursor widget from commandline, e.g. user leaves command-line mode,
+  /// cursor moves out of command-line widget.
   ///
   /// # Returns
-  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
+  /// It returns the previous cursor ID.
   pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
     let old = self.cursor_id;
     self.cursor_id = None;

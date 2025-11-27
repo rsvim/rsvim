@@ -250,7 +250,7 @@ impl Window {
   ///
   /// # Returns
   /// It returns the previous cursor ID.
-  pub fn set_cursor(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
     let old = self.cursor_id;
     self.cursor_id = Some(cursor_id);
     old
