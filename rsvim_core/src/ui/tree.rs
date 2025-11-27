@@ -817,7 +817,8 @@ impl Tree {
     ));
     let shape = lotree.shape(cursor_id).unwrap();
     let pos: IPos = shape.min().into();
-    let new_pos = point!(pos.x() + x, pos.y() + y);
+    let new_x = pos.x() + x;
+    let new_y = pos.y() + y;
   }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
