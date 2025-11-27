@@ -635,13 +635,12 @@ impl Tree {
 
   pub fn set_cmdline_input_cursor_viewport(
     &mut self,
-    id: TreeNodeId,
     cursor_viewport: CursorViewportArc,
   ) -> CursorViewportArc {
-    debug_assert!(self.window_ids.contains(&id));
-    let window = self.window_mut(id).unwrap();
-    let old = window.cursor_viewport();
-    window.set_cursor_viewport(cursor_viewport.clone());
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.input_cursor_viewport();
+    cmdline.set_input_cursor_viewport(cursor_viewport.clone());
     old
   }
 }
