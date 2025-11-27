@@ -241,7 +241,7 @@ pub fn update_viewport(
   start_column: usize,
 ) -> ViewportArc {
   let buf = lock!(buf);
-  let window = tree.window(window_id).unwrap();
+  let window = tree.window_mut(window_id).unwrap();
   let window_actual_shape = window.actual_shape();
   let viewport = Viewport::view(
     window.options(),
