@@ -623,10 +623,10 @@ impl Tree {
     let input_id = cmdline.input_id();
     debug_assert!(self.nodes.contains_key(&input_id));
     let input_node = self.node_mut(input_id).unwrap();
-    debug_assert!(matches!(input_node, TreeNode::WindowContent(_)));
+    debug_assert!(matches!(input_node, TreeNode::CommandLineInput(_)));
     match input_node {
-      TreeNode::WindowContent(window_content) => {
-        window_content.set_viewport(Arc::downgrade(&viewport))
+      TreeNode::CommandLineInput(input) => {
+        input.set_viewport(Arc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
