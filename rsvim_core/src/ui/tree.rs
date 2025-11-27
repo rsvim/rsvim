@@ -442,7 +442,7 @@ impl Tree {
   }
 
   /// Create new cursor node, and insert it as a child to the provided parent_id.
-  pub fn insert_new_cursor(
+  pub fn add_new_cursor(
     &mut self,
     parent_id: TreeNodeId,
     blinking: bool,
@@ -482,7 +482,7 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
-    self.insert_new_cursor(parent_id, BLINKING, HIDDEN, STYLE)
+    self.add_new_cursor(parent_id, BLINKING, HIDDEN, STYLE)
   }
 
   /// Create new cmdline node, and insert it as a child to the provided parent_id.
