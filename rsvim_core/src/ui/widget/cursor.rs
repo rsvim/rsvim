@@ -28,7 +28,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    lotree: ItreeRc,
+    lotree: ItreeWk,
     id: TreeNodeId,
     blinking: bool,
     hidden: bool,
@@ -44,7 +44,7 @@ impl Cursor {
     }
   }
 
-  pub fn default(lotree: ItreeRc, id: TreeNodeId) -> Self {
+  pub fn default(lotree: ItreeWk, id: TreeNodeId) -> Self {
     Self::new(lotree, id, BLINKING, HIDDEN, STYLE)
   }
 
