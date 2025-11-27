@@ -637,6 +637,27 @@ impl Tree {
     cmdline.set_input_cursor_viewport(cursor_viewport.clone());
     old
   }
+
+  pub fn set_cmdline_message_viewport(
+    &mut self,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.message_viewport();
+    cmdline.set_message_viewport(viewport.clone());
+    let message_id = cmdline.message_id();
+    debug_assert!(self.nodes.contains_key(&message_id));
+    let input_node = self.node_mut(message_id).unwrap();
+    debug_assert!(matches!(input_node, TreeNode::CommandLineMessage(_)));
+    match input_node {
+      TreeNode::CommandLineMessage(message) => {
+        message.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
+    }
+    old
+  }
 }
 
 // Movement {
