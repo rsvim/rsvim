@@ -5,6 +5,9 @@ use crate::content::TextContentsArc;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::cursor::BLINKING;
+use crate::ui::widget::cursor::HIDDEN;
+use crate::ui::widget::cursor::STYLE;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 use taffy::Style;
@@ -44,7 +47,9 @@ pub fn make_tree_with_buffers(
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
-  let _cursor_id = tree.add_new_default_cursor(window_content_id).unwrap();
+  let _cursor_id = tree
+    .add_new_cursor(window_content_id, BLINKING, HIDDEN, STYLE)
+    .unwrap();
 
   tree.set_current_window_id(Some(window_id));
 
