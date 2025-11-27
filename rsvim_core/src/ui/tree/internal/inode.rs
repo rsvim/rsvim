@@ -53,11 +53,11 @@ impl Inodeable for InodeBase {
     self.relationship.borrow().visible(self.id).unwrap()
   }
 
-  fn layout(&self) -> Layout {
+  fn layout(&self) -> taffy::Layout {
     self.relationship.borrow().layout(self.id).unwrap().clone()
   }
 
-  fn style(&self) -> Style {
+  fn style(&self) -> taffy::Style {
     self.relationship.borrow().style(self.id).unwrap().clone()
   }
 }
