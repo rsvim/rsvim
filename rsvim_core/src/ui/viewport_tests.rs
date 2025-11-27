@@ -297,7 +297,7 @@ fn search_viewport(
       target_cursor_char,
     ),
   ));
-  tree.set_viewport(window_id, viewport);
+  tree.set_window_viewport(window_id, viewport);
   viewport
 }
 
