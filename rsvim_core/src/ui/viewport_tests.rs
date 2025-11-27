@@ -6021,7 +6021,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "But still it cont",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -6326,7 +6325,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "t:\n",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -6967,7 +6965,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "t:\r",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -7217,7 +7214,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "4th.\r\n",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
@@ -10272,12 +10268,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "                     ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas =
+        make_canvas(terminal_size, win_opts, buf.clone(), actual);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -10318,12 +10310,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "        or           ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas =
+        make_canvas(terminal_size, win_opts, buf.clone(), actual);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -10364,12 +10352,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "options        are   ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas =
+        make_canvas(terminal_size, win_opts, buf.clone(), actual);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
