@@ -200,7 +200,7 @@ impl Tree {
     })
   }
 
-  pub fn relationship(&self) -> ItreeRc {
+  pub fn lotree(&self) -> ItreeRc {
     self.lotree.clone()
   }
 
@@ -419,7 +419,7 @@ impl Tree {
     };
 
     let window = Window::new(
-      self.relationship(),
+      self.lotree(),
       window_id,
       window_opts,
       content_id,
@@ -430,7 +430,7 @@ impl Tree {
     self.insert(window_node);
 
     let content = WindowContent::new(
-      self.relationship(),
+      self.lotree(),
       content_id,
       buffer,
       Arc::downgrade(&viewport),
@@ -471,8 +471,7 @@ impl Tree {
       cursor_id
     };
 
-    let cursor =
-      Cursor::new(self.relationship(), cursor_id, blinking, hidden, style);
+    let cursor = Cursor::new(self.lotree(), cursor_id, blinking, hidden, style);
     let cursor_node = TreeNode::Cursor(cursor);
     self.insert(cursor_node);
 
@@ -533,7 +532,7 @@ impl Tree {
     };
 
     let cmdline = CommandLine::new(
-      self.relationship(),
+      self.lotree(),
       cmdline_id,
       indicator_id,
       input_id,
@@ -546,16 +545,13 @@ impl Tree {
     let cmdline_node = TreeNode::CommandLine(cmdline);
     self.insert(cmdline_node);
 
-    let indicator = CommandLineIndicator::new(
-      self.relationship(),
-      indicator_id,
-      indicator_symbol,
-    );
+    let indicator =
+      CommandLineIndicator::new(self.lotree(), indicator_id, indicator_symbol);
     let indicator_node = TreeNode::CommandLineIndicator(indicator);
     self.insert(indicator_node);
 
     let input = CommandLineInput::new(
-      self.relationship(),
+      self.lotree(),
       input_id,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -564,7 +560,7 @@ impl Tree {
     self.insert(input_node);
 
     let message = CommandLineMessage::new(
-      self.relationship(),
+      self.lotree(),
       message_id,
       text_contents,
       Arc::downgrade(&message_viewport),

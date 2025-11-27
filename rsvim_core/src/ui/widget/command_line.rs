@@ -45,7 +45,7 @@ inode_impl!(CommandLine);
 
 impl CommandLine {
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     indicator_id: TreeNodeId,
     input_id: TreeNodeId,
@@ -61,7 +61,7 @@ impl CommandLine {
       .unwrap();
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let relationship = relationship.borrow();
+      let relationship = lotree.borrow();
       let input_actual_shape = relationship.actual_shape(input_id)?;
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
@@ -92,7 +92,7 @@ impl CommandLine {
     let message_viewport = Viewport::to_arc(message_viewport);
 
     Ok(Self {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       options,
       indicator_id,
       input_id,
