@@ -14358,7 +14358,6 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         "But still it cont",
       ];
 
-      let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
