@@ -151,21 +151,11 @@ impl CommandLine {
   /// Set viewport for input.
   pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport.clone();
-    if let Some(CommandLineNode::Input(input)) =
-      self.base.node_mut(self.input_id)
-    {
-      input.set_viewport(Arc::downgrade(&viewport));
-    }
   }
 
   /// Set viewport for message.
   pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
     self.message_viewport = viewport.clone();
-    if let Some(CommandLineNode::Message(message)) =
-      self.base.node_mut(self.message_id)
-    {
-      message.set_viewport(Arc::downgrade(&viewport));
-    }
   }
 
   /// Get cursor viewport for input.

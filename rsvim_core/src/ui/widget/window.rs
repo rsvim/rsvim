@@ -114,7 +114,7 @@ impl Window {
 
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
-    self.viewport = viewport.clone();
+    self.viewport = viewport;
   }
 
   /// Get cursor viewport.
@@ -123,8 +123,8 @@ impl Window {
   }
 
   /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
-    self.cursor_viewport = cursor_viewport;
+  pub fn set_cursor_viewport(&mut self, viewport: CursorViewportArc) {
+    self.cursor_viewport = viewport;
   }
 }
 // Viewport }
