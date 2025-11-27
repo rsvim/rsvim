@@ -40,6 +40,7 @@ pub struct Window {
 }
 
 inode_impl!(Window);
+impl Widgetable for Window {}
 
 impl Window {
   pub fn new(
@@ -75,8 +76,6 @@ impl Window {
     })
   }
 }
-
-impl Widgetable for Window {}
 
 // Attributes
 impl Window {
