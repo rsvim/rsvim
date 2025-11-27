@@ -815,8 +815,9 @@ impl Tree {
       self.node(parent_id).unwrap(),
       TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
     ));
-    let cursor_actual_shape = lotree.actual_shape(cursor_id).unwrap();
-    let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
+    let shape = lotree.shape(cursor_id).unwrap();
+    let pos: IPos = shape.min().into();
+    let new_pos = point!(pos.x() + x, pos.y() + y);
   }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.

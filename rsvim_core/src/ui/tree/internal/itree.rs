@@ -118,6 +118,20 @@ impl Itree {
     result
   }
 
+  pub fn location(&self, id: TreeNodeId) -> TaffyResult<IPos> {
+    self._internal_check();
+    let layout = self.layout(id)?;
+    let location = point!(layout.location.x, layout.location.y);
+    Ok(point_as!(location, isize))
+  }
+
+  pub fn size(&self, id: TreeNodeId) -> TaffyResult<ISize> {
+    self._internal_check();
+    let layout = self.layout(id)?;
+    let size = size!(layout.size.width, layout.size.height);
+    Ok(size_as!(size, isize))
+  }
+
   /// Logical location/size on unlimited canvas.
   /// The top-left location can be negative.
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
