@@ -719,6 +719,8 @@ impl Tree {
     old
   }
 
+  /// Jump cursor to a new parent widget.
+  ///
   /// Cursor's parent widget must be either a Window or a CommandLine.
   /// Here we allow allow window ID or command-line ID as the parent ID.
   ///
