@@ -735,7 +735,7 @@ impl Tree {
   ) -> Option<TreeNodeId> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
-    let lotree = lotree.borrow_mut();
+    let mut lotree = lotree.borrow_mut();
     let old_parent_id = *lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&old_parent_id));
     debug_assert!(matches!(
@@ -754,6 +754,7 @@ impl Tree {
         }
         if let TreeNode::Window(window) = self.node_mut(old_window_id).unwrap()
         {
+          lotree.remove_child(old_parent_id, cursor_id);
           let _removed = window.clear_cursor_id();
           debug_assert_eq!(_removed, Some(cursor_id));
         }
@@ -769,6 +770,7 @@ impl Tree {
         if let TreeNode::CommandLine(cmdline) =
           self.node_mut(old_cmdline_id).unwrap()
         {
+          lotree.remove_child(old_parent_id, cursor_id);
           let _removed = cmdline.clear_cursor_id();
           debug_assert_eq!(_removed, Some(cursor_id));
         }
@@ -779,9 +781,11 @@ impl Tree {
     match self.node_mut(parent_id).unwrap() {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
+        lotree.add_child(content_id, cursor_id);
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
+        lotree.add_child(cmdline_input_id, cursor_id);
       }
       _ => unreachable!(),
     }

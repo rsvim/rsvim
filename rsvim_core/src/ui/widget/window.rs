@@ -246,24 +246,20 @@ impl Window {
 
 // Cursor {
 impl Window {
-  /// Enable/insert cursor widget in window, i.e. when user moves cursor to a window, the window
-  /// content widget contains this cursor, and allow user moving cursor (or inserting text at
-  /// cursor).
+  /// Set cursor widget ID in window, e.g. user moves cursor into this window.
   ///
   /// # Returns
-  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
-  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<WindowNode> {
-    self.cursor_id = Some(cursor.id());
-    self
-      .base
-      .bounded_insert(self.content_id, WindowNode::Cursor(cursor))
+  /// It returns the previous cursor ID.
+  pub fn set_cursor(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
+    self.cursor_id = Some(cursor_id);
+    old
   }
 
   /// Clear cursor ID from window, e.g. user cursor leaves this window.
   ///
   /// # Returns
-  ///
-  /// It returns the previous cursor ID if exists, otherwise it returns `None`.
+  /// It returns the previous cursor ID.
   pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
     let old = self.cursor_id;
     self.cursor_id = None;
