@@ -63,15 +63,15 @@ macro_rules! inode_impl {
         self.base.relationship()
       }
 
-      fn shape(&self) -> TaffyResult<IRect> {
+      fn shape(&self) -> IRect {
         self.base.shape()
       }
 
-      fn actual_shape(&self) -> TaffyResult<U16Rect> {
+      fn actual_shape(&self) -> U16Rect {
         self.base.actual_shape()
       }
 
-      fn visible(&self) -> TaffyResult<bool> {
+      fn visible(&self) -> bool {
         self.base.visible()
       }
     }
@@ -98,7 +98,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn shape(&self) -> TaffyResult<IRect> {
+      fn shape(&self) -> IRect {
         match self {
           $(
             $enum::$variant(e) => e.shape(),
@@ -106,7 +106,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn actual_shape(&self) -> TaffyResult<U16Rect> {
+      fn actual_shape(&self) -> U16Rect {
         match self {
           $(
             $enum::$variant(e) => e.actual_shape(),
@@ -114,7 +114,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn visible(&self) -> TaffyResult<bool> {
+      fn visible(&self) -> bool {
         match self {
           $(
             $enum::$variant(e) => e.visible(),
