@@ -802,6 +802,9 @@ impl Tree {
   /// Moves cursor to (x,y) position. X is column, Y is row.
   /// It returns new position/shape of the cursor if moved successfully,
   /// otherwise it returns `None` if doesn't move.
+  ///
+  /// NOTE: Cursor movement is bounded, it will never go out of its parent
+  /// widget.
   pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {}
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
