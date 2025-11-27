@@ -166,7 +166,7 @@ arc_mutex_ptr!(Tree);
 impl Tree {
   /// Make UI tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let base = Itree::to_rc(Itree::new());
+    let lotree = Itree::to_rc(Itree::new());
 
     let root_style = Style {
       size: taffy::Size {
@@ -177,19 +177,19 @@ impl Tree {
       ..Default::default()
     };
     let root_id = {
-      let mut base = base.borrow_mut();
+      let mut base = lotree.borrow_mut();
       let root_id = base.new_leaf(root_style)?;
       base.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       root_id
     };
 
-    let root = Root::new(base.clone(), root_id);
+    let root = Root::new(lotree.clone(), root_id);
     let root_node = TreeNode::Root(root);
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
 
     Ok(Tree {
-      lotree: base,
+      lotree,
       nodes,
       root_id,
       command_line_id: None,
