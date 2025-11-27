@@ -828,6 +828,14 @@ impl Tree {
       parent_shape.min().y,
       parent_shape.max().y,
     );
+    let mut style = lotree.style(cursor_id).unwrap().clone();
+    style.inset = taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(new_x as i16),
+      top: taffy::LengthPercentageAuto::from_length(new_y as i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    };
+    lotree.set_style(cursor_id, style).unwrap();
   }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
