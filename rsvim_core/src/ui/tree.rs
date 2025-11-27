@@ -627,8 +627,7 @@ impl Tree {
     self.nodes.remove(&id)
   }
 
-  pub fn set_window_cursor(&mut self, window_id: TreeNodeId) {}
-
+  /// Set window viewport, returns old viewport.
   pub fn set_window_viewport(
     &mut self,
     id: TreeNodeId,
@@ -651,6 +650,7 @@ impl Tree {
     old
   }
 
+  /// Set window cursor_viewport, returns old cursor_viewport.
   pub fn set_window_cursor_viewport(
     &mut self,
     id: TreeNodeId,
@@ -663,6 +663,7 @@ impl Tree {
     old
   }
 
+  /// Set command-line input viewport, returns old viewport.
   pub fn set_cmdline_input_viewport(
     &mut self,
     viewport: ViewportArc,
@@ -684,6 +685,7 @@ impl Tree {
     old
   }
 
+  /// Set command-line input cursor_viewport, returns old cursor_viewport.
   pub fn set_cmdline_input_cursor_viewport(
     &mut self,
     cursor_viewport: CursorViewportArc,
@@ -695,6 +697,7 @@ impl Tree {
     old
   }
 
+  /// Set command-line message viewport, returns old viewport.
   pub fn set_cmdline_message_viewport(
     &mut self,
     viewport: ViewportArc,
@@ -714,6 +717,21 @@ impl Tree {
       _ => unreachable!(),
     }
     old
+  }
+
+  /// Cursor's parent widget must be either a Window or a CommandLine.
+  /// Here we allow allow window ID or command-line ID as the parent ID.
+  ///
+  /// NOTE: While inside the internal implementations, cursor node's parent is
+  /// either a window content node, or a command-line input node.
+  pub fn set_cursor_parent_widget(
+    &mut self,
+    parent_id: TreeNodeId,
+  ) -> Option<TreeNodeId> {
+    match self.cursor_id {
+      Some(cursor_id) => {}
+      None => None,
+    }
   }
 }
 
