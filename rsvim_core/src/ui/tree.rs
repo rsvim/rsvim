@@ -478,7 +478,7 @@ impl Tree {
     Ok(cursor_id)
   }
 
-  pub fn insert_new_default_cursor(
+  pub fn add_new_default_cursor(
     &mut self,
     parent_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
