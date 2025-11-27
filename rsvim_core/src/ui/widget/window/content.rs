@@ -44,7 +44,6 @@ impl Widgetable for WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
     let viewport = self.viewport.upgrade().unwrap();
-
     viewport.draw(buffer.text(), &actual_shape, canvas);
   }
 }
