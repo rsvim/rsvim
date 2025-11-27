@@ -89,10 +89,8 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let base = InodeBase::new(relationship, id);
-
     Ok(Self {
-      base,
+      base: InodeBase::new(relationship, id),
       options,
       indicator_id,
       input_id,
