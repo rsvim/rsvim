@@ -589,11 +589,11 @@ impl Tree {
     window.set_viewport(viewport.clone());
     let content_id = window.content_id();
     debug_assert!(self.nodes.contains_key(&id));
-    let window_content_node = self.node_mut(content_id).unwrap();
-    debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
-    match window_content_node {
-      TreeNode::WindowContent(window_content) => {
-        window_content.set_viewport(Arc::downgrade(&viewport))
+    let content_node = self.node_mut(content_id).unwrap();
+    debug_assert!(matches!(content_node, TreeNode::WindowContent(_)));
+    match content_node {
+      TreeNode::WindowContent(content) => {
+        content.set_viewport(Arc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
@@ -621,10 +621,10 @@ impl Tree {
     let old = cmdline.input_viewport();
     cmdline.set_input_viewport(viewport.clone());
     let input_id = cmdline.input_id();
-    debug_assert!(self.nodes.contains_key(&id));
-    let window_content_node = self.node_mut(input_id).unwrap();
-    debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
-    match window_content_node {
+    debug_assert!(self.nodes.contains_key(&input_id));
+    let input_node = self.node_mut(input_id).unwrap();
+    debug_assert!(matches!(input_node, TreeNode::WindowContent(_)));
+    match input_node {
       TreeNode::WindowContent(window_content) => {
         window_content.set_viewport(Arc::downgrade(&viewport))
       }
