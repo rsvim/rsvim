@@ -288,6 +288,7 @@ fn search_viewport(
     start_line,
     start_column,
   );
+  let viewport = Viewport::to_arc(viewport);
   window.set_cursor_viewport(CursorViewport::to_arc(
     CursorViewport::from_position(
       &viewport,
@@ -296,8 +297,8 @@ fn search_viewport(
       target_cursor_char,
     ),
   ));
-  window.set_viewport(Viewport::to_arc(viewport));
-  window.viewport()
+  tree.set_viewport(window_id, viewport);
+  viewport
 }
 
 pub fn search_down_viewport(
