@@ -185,15 +185,21 @@ impl Itree {
               0,
               parent_actual_shape.max().y as isize,
             );
-            let right = num_traits::clamp(
-              shape.max().x,
-              0,
-              parent_actual_shape.max().x as isize,
+            let right = num_traits::clamp_min(
+              num_traits::clamp(
+                shape.max().x,
+                0,
+                parent_actual_shape.max().x as isize,
+              ),
+              left + 1,
             );
-            let bottom = num_traits::clamp(
-              shape.max().y,
-              0,
-              parent_actual_shape.max().y as isize,
+            let bottom = num_traits::clamp_min(
+              num_traits::clamp(
+                shape.max().y,
+                0,
+                parent_actual_shape.max().y as isize,
+              ),
+              top + 1,
             );
             let truncated = rect!(left, top, right, bottom);
             let truncated = rect_as!(truncated, u16);
