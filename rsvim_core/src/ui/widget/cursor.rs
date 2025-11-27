@@ -40,8 +40,8 @@ impl Cursor {
     }
   }
 
-  pub fn default(base: IrelationshipRc, id: TreeNodeId) -> Self {
-    Self::new(base, id, false, false, CursorStyle::SteadyBlock)
+  pub fn default(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
+    Self::new(relationship, id, false, false, CursorStyle::SteadyBlock)
   }
 
   pub fn blinking(&self) -> bool {
