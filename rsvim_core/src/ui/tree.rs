@@ -817,25 +817,24 @@ impl Tree {
     ));
     let shape = lotree.shape(cursor_id).unwrap();
     let parent_shape = lotree.shape(parent_id).unwrap();
+    let x = num_traits::clamp(x, parent_shape.min().x, parent_shape.max().x);
+    let y = num_traits::clamp(y, parent_shape.min().y, parent_shape.max().y);
     let pos: IPos = shape.min().into();
-    let new_x = num_traits::clamp(
-      pos.x() + x,
-      parent_shape.min().x,
-      parent_shape.max().x,
-    );
-    let new_y = num_traits::clamp(
-      pos.y() + y,
-      parent_shape.min().y,
-      parent_shape.max().y,
-    );
+    if pos.x() == x && pos.y() == y {
+      return None;
+    }
     let mut style = lotree.style(cursor_id).unwrap().clone();
     style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_x as i16),
-      top: taffy::LengthPercentageAuto::from_length(new_y as i16),
+      left: taffy::LengthPercentageAuto::from_length(x as i16),
+      top: taffy::LengthPercentageAuto::from_length(y as i16),
       right: taffy::LengthPercentageAuto::AUTO,
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
     lotree.set_style(cursor_id, style).unwrap();
+    lotree
+      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
+      .unwrap();
+    Some(lotree.shape(cursor_id).unwrap())
   }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
