@@ -28,7 +28,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     blinking: bool,
     hidden: bool,
@@ -38,14 +38,14 @@ impl Cursor {
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
     Self {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       flags,
       style,
     }
   }
 
-  pub fn default(relationship: ItreeRc, id: TreeNodeId) -> Self {
-    Self::new(relationship, id, BLINKING, HIDDEN, STYLE)
+  pub fn default(lotree: ItreeRc, id: TreeNodeId) -> Self {
+    Self::new(lotree, id, BLINKING, HIDDEN, STYLE)
   }
 
   pub fn blinking(&self) -> bool {
