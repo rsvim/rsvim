@@ -611,6 +611,40 @@ impl Tree {
     window.set_cursor_viewport(cursor_viewport.clone());
     old
   }
+
+  pub fn set_cmdline_input_viewport(
+    &mut self,
+    id: TreeNodeId,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert_eq!(self.command_line_id, Some(id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.viewport();
+    window.set_viewport(viewport.clone());
+    let content_id = window.content_id();
+    debug_assert!(self.nodes.contains_key(&id));
+    let window_content_node = self.node_mut(content_id).unwrap();
+    debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
+    match window_content_node {
+      TreeNode::WindowContent(window_content) => {
+        window_content.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
+    }
+    old
+  }
+
+  pub fn set_cmdline_input_cursor_viewport(
+    &mut self,
+    id: TreeNodeId,
+    cursor_viewport: CursorViewportArc,
+  ) -> CursorViewportArc {
+    debug_assert!(self.window_ids.contains(&id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.cursor_viewport();
+    window.set_cursor_viewport(cursor_viewport.clone());
+    old
+  }
 }
 // Insert/Remove }
 

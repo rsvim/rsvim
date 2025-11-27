@@ -143,14 +143,14 @@ impl CommandLine {
     self.input_viewport.clone()
   }
 
-  /// Get message viewport.
-  pub fn message_viewport(&self) -> ViewportArc {
-    self.message_viewport.clone()
-  }
-
   /// Set viewport for input.
   pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
     self.input_viewport = viewport;
+  }
+
+  /// Get message viewport.
+  pub fn message_viewport(&self) -> ViewportArc {
+    self.message_viewport.clone()
   }
 
   /// Set viewport for message.
