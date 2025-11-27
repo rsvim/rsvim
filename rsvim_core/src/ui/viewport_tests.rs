@@ -242,8 +242,7 @@ pub fn update_viewport(
 ) -> ViewportArc {
   let buf = lock!(buf);
   let window = tree.window(window_id).unwrap();
-  let window_actual_shape =
-    window.relationship().borrow().actual_shape(id).unwrap();
+  let window_actual_shape = window.actual_shape();
   let viewport = Viewport::view(
     window.options(),
     buf.text(),
