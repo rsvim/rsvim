@@ -21,7 +21,6 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use content::WindowContent;
 use opt::*;
-use std::sync::Arc;
 use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
