@@ -11,7 +11,6 @@ mod opt_tests;
 use crate::buf::BufferWk;
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
@@ -20,13 +19,10 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::widget_dispatcher;
 use content::WindowContent;
 use opt::*;
 use std::sync::Arc;
-use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
