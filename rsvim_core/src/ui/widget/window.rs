@@ -259,36 +259,15 @@ impl Window {
       .bounded_insert(self.content_id, WindowNode::Cursor(cursor))
   }
 
-  /// Disable/remove cursor widget from window, i.e. when user cursor leaves window, the window
-  /// content widget doesn't contain this cursor any longer.
+  /// Clear cursor ID from window, e.g. user cursor leaves this window.
   ///
   /// # Returns
-  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
-  pub fn remove_cursor(&mut self) -> Option<WindowNode> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
-        debug_assert!(self.base.parent_id(cursor_id).is_some());
-        debug_assert_eq!(
-          self.base.parent_id(cursor_id).unwrap(),
-          self.content_id
-        );
-        self.cursor_id = None;
-        let cursor_node = self.base.remove(cursor_id);
-        debug_assert!(cursor_node.is_some());
-        debug_assert!(matches!(
-          cursor_node.as_ref().unwrap(),
-          WindowNode::Cursor(_)
-        ));
-        cursor_node
-      }
-      None => {
-        debug_assert!(self.cursor_id.is_none());
-        debug_assert!(self.base.node(self.content_id).is_some());
-        debug_assert!(self.base.children_ids(self.content_id).is_empty());
-        None
-      }
-    }
+  ///
+  /// It returns the previous cursor ID if exists, otherwise it returns `None`.
+  pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
+    self.cursor_id = None;
+    old
   }
 
   /// Bounded move cursor by x(columns) and y(rows).

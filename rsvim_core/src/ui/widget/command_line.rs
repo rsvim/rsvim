@@ -395,31 +395,8 @@ impl CommandLine {
   ///
   /// # Returns
   /// It returns the removed cursor widget if exists, otherwise it returns `None`.
-  pub fn remove_cursor(&mut self) -> Option<CommandLineNode> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
-        debug_assert!(self.base.parent_id(cursor_id).is_some());
-        debug_assert_eq!(
-          self.base.parent_id(cursor_id).unwrap(),
-          self.input_id
-        );
-        self.cursor_id = None;
-        let cursor_node = self.base.remove(cursor_id);
-        debug_assert!(cursor_node.is_some());
-        debug_assert!(matches!(
-          cursor_node.as_ref().unwrap(),
-          CommandLineNode::Cursor(_)
-        ));
-        cursor_node
-      }
-      None => {
-        debug_assert!(self.cursor_id.is_none());
-        debug_assert!(self.base.node(self.input_id).is_some());
-        debug_assert!(self.base.children_ids(self.input_id).is_empty());
-        None
-      }
-    }
+  pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+    self.cursor_id = None;
   }
 
   /// Bounded move cursor by x(columns) and y(rows).

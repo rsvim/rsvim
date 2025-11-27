@@ -28,7 +28,6 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
 use std::cell::RefCell;
-use std::hint::unreachable_unchecked;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::Arc;
@@ -726,14 +725,52 @@ impl Tree {
   ///
   /// NOTE: While inside the internal implementations, cursor node's parent is
   /// either a window content node, or a command-line input node.
+  ///
+  /// # Returns
+  /// It returns old parent widget ID if jumped successfully, otherwise it
+  /// returns `None` if not jumped, e.g. it still stays in current widget.
   pub fn jump_cursor_to(
     &mut self,
     parent_id: TreeNodeId,
   ) -> Option<TreeNodeId> {
-    match self.cursor_id {
-      Some(cursor_id) => {}
-      None => None,
+    let cursor_id = self.cursor_id.unwrap();
+    let lotree = self.lotree.clone();
+    let lotree = lotree.borrow_mut();
+    let old_parent_id = *lotree.parent(cursor_id).unwrap();
+    debug_assert!(self.nodes.contains_key(&old_parent_id));
+    debug_assert!(matches!(self.node(old_parent_id).unwrap(), TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)));
+    match self.node_mut(old_parent_id).unwrap() {
+      TreeNode::WindowContent(content) => {
+        // Cursor is inside a window content widget.
+        let old_window_id = *lotree.parent(old_parent_id).unwrap();
+        debug_assert!(self.nodes.contains_key(&old_window_id));
+        // If new parent is the same window.
+        if old_window_id == parent_id {
+          return None;
+        }
+        if let TreeNode::Window(window) = self.node_mut(old_window_id).unwrap() {
+          window.clear_cursor_id();
+        }
+      }
+      TreeNode::CommandLineInput(input) => {
+        // Cursor is inside the command-line input widget.
+        let old_cmdline_id = *lotree.parent(old_parent_id).unwrap();
+        debug_assert!(self.nodes.contains_key(&old_cmdline_id));
+        // If new parent is the same window.
+        if old_cmdline_id == parent_id {
+          return None;
+        }
+        if let TreeNode::CommandLine(cmdline) = self.node_mut(old_cmdline_id).unwrap() {
+          cmdline.clear_cursor_id();
+        }
+      }
+      _ => unreachable!(),
     }
+        debug_assert!(self.nodes.contains_key(&parent_id));
+        match self.node_mut(parent_id) => {
+
+        }
+    None
   }
 }
 
