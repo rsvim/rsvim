@@ -8,8 +8,6 @@ mod content_tests;
 #[cfg(test)]
 mod opt_tests;
 
-use std::rc::Rc;
-
 use crate::buf::BufferWk;
 use crate::inode_impl;
 use crate::prelude::*;
