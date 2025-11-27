@@ -185,8 +185,9 @@ impl Itree {
               0,
               parent_actual_shape.max().y as isize,
             );
-            // Here we force the shape must be at least 1x1 size, it cannot be
-            // invisible, then we cannot even render it.
+            // Here we force the shape always inside the terminal, and its size
+            // must be at least 1x1. This ensures it will never be invisible in
+            // the terminal, which we cannot even render.
             let right = num_traits::clamp_min(
               num_traits::clamp(
                 shape.max().x,
