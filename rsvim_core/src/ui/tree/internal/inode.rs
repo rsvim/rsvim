@@ -7,7 +7,7 @@ use crate::ui::tree::TreeNodeId;
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn relationship(&self) -> ItreeRc;
+  fn lotree(&self) -> ItreeRc;
 
   fn shape(&self) -> IRect;
 
@@ -22,13 +22,13 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
 #[derive(Debug, Clone)]
 pub struct InodeBase {
-  relationship: ItreeRc,
+  lotree: ItreeRc,
   id: TreeNodeId,
 }
 
 impl InodeBase {
-  pub fn new(relationship: ItreeRc, id: TreeNodeId) -> Self {
-    Self { id, relationship }
+  pub fn new(lotree: ItreeRc, id: TreeNodeId) -> Self {
+    Self { lotree, id }
   }
 }
 
@@ -37,28 +37,28 @@ impl Inodeable for InodeBase {
     self.id
   }
 
-  fn relationship(&self) -> ItreeRc {
-    self.relationship.clone()
+  fn lotree(&self) -> ItreeRc {
+    self.lotree.clone()
   }
 
   fn shape(&self) -> IRect {
-    self.relationship.borrow().shape(self.id).unwrap()
+    self.lotree.borrow().shape(self.id).unwrap()
   }
 
   fn actual_shape(&self) -> U16Rect {
-    self.relationship.borrow().actual_shape(self.id).unwrap()
+    self.lotree.borrow().actual_shape(self.id).unwrap()
   }
 
   fn visible(&self) -> bool {
-    self.relationship.borrow().visible(self.id).unwrap()
+    self.lotree.borrow().visible(self.id).unwrap()
   }
 
   fn layout(&self) -> taffy::Layout {
-    self.relationship.borrow().layout(self.id).unwrap().clone()
+    self.lotree.borrow().layout(self.id).unwrap().clone()
   }
 
   fn style(&self) -> taffy::Style {
-    self.relationship.borrow().style(self.id).unwrap().clone()
+    self.lotree.borrow().style(self.id).unwrap().clone()
   }
 }
 
@@ -70,8 +70,8 @@ macro_rules! inode_impl {
         self.base.id()
       }
 
-      fn relationship(&self) -> ItreeRc {
-        self.base.relationship()
+      fn lotree(&self) -> ItreeRc {
+        self.base.lotree()
       }
 
       fn shape(&self) -> IRect {
@@ -109,10 +109,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn relationship(&self) -> ItreeRc {
+      fn lotree(&self) -> ItreeRc {
         match self {
           $(
-            $enum::$variant(e) => e.relationship(),
+            $enum::$variant(e) => e.lotree(),
           )*
         }
       }
