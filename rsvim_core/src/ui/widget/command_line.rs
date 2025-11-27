@@ -396,7 +396,9 @@ impl CommandLine {
   /// # Returns
   /// It returns the removed cursor widget if exists, otherwise it returns `None`.
   pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
     self.cursor_id = None;
+    old
   }
 
   /// Bounded move cursor by x(columns) and y(rows).
