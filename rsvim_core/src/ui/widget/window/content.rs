@@ -21,7 +21,7 @@ inode_impl!(WindowContent);
 impl WindowContent {
   /// Make window content.
   pub fn new(
-    lotree: ItreeRc,
+    lotree: ItreeWk,
     id: TreeNodeId,
     buffer: BufferWk,
     viewport: ViewportWk,

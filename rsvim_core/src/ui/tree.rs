@@ -412,7 +412,7 @@ impl Tree {
     };
 
     let window = Window::new(
-      self.lotree(),
+      Rc::downgrade(&self.lotree()),
       window_id,
       window_opts,
       content_id,
@@ -423,7 +423,7 @@ impl Tree {
     self._insert(window_node);
 
     let content = WindowContent::new(
-      self.lotree(),
+      Rc::downgrade(&self.lotree()),
       content_id,
       buffer,
       Arc::downgrade(&viewport),
@@ -464,7 +464,13 @@ impl Tree {
       cursor_id
     };
 
-    let cursor = Cursor::new(self.lotree(), cursor_id, blinking, hidden, style);
+    let cursor = Cursor::new(
+      Rc::downgrade(&self.lotree()),
+      cursor_id,
+      blinking,
+      hidden,
+      style,
+    );
     let cursor_node = TreeNode::Cursor(cursor);
     self._insert(cursor_node);
 
@@ -518,7 +524,7 @@ impl Tree {
     };
 
     let cmdline = CommandLine::new(
-      self.lotree(),
+      Rc::downgrade(&self.lotree()),
       cmdline_id,
       indicator_id,
       input_id,
@@ -531,13 +537,16 @@ impl Tree {
     let cmdline_node = TreeNode::CommandLine(cmdline);
     self._insert(cmdline_node);
 
-    let indicator =
-      CommandLineIndicator::new(self.lotree(), indicator_id, indicator_symbol);
+    let indicator = CommandLineIndicator::new(
+      Rc::downgrade(&self.lotree()),
+      indicator_id,
+      indicator_symbol,
+    );
     let indicator_node = TreeNode::CommandLineIndicator(indicator);
     self._insert(indicator_node);
 
     let input = CommandLineInput::new(
-      self.lotree(),
+      Rc::downgrade(&self.lotree()),
       input_id,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -546,7 +555,7 @@ impl Tree {
     self._insert(input_node);
 
     let message = CommandLineMessage::new(
-      self.lotree(),
+      Rc::downgrade(&self.lotree()),
       message_id,
       text_contents,
       Arc::downgrade(&message_viewport),
