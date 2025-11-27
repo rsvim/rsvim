@@ -721,8 +721,8 @@ impl Tree {
 
   /// Jump cursor to a new parent widget.
   ///
-  /// Cursor's parent widget must be either a Window or a CommandLine.
-  /// Here we allow allow window ID or command-line ID as the parent ID.
+  /// Cursor's parent widget must be either a Window or a CommandLine. Here we
+  /// only allow window ID or command-line ID as the parent ID.
   ///
   /// NOTE: While inside the internal implementations, cursor node's parent is
   /// either a window content node, or a command-line input node.
