@@ -14,7 +14,6 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use crate::ui::widget::command_line::input::CommandLineInput;
-use crate::ui::widget::command_line::message;
 use crate::ui::widget::command_line::message::CommandLineMessage;
 use crate::ui::widget::cursor::BLINKING;
 use crate::ui::widget::cursor::Cursor;

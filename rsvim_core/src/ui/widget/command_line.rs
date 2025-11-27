@@ -16,20 +16,14 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
-use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_dispatcher;
 use indicator::CommandLineIndicator;
-use indicator::IndicatorSymbol;
 use input::CommandLineInput;
 use message::CommandLineMessage;
 use std::sync::Arc;
-use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::FromLength;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
@@ -65,7 +59,8 @@ impl CommandLine {
       .unwrap();
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let input_actual_shape = rect_as!(input_shape, u16);
+      let relationship = relationship.borrow();
+      let input_actual_shape = relationship.actual_shape(input_id)?;
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
@@ -80,7 +75,7 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = rect_as!(shape, u16);
+      let message_actual_shape = relationship.actual_shape(message_id)?;
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
