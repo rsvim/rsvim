@@ -164,11 +164,8 @@ impl CommandLine {
   }
 
   /// Set cursor viewport for input.
-  pub fn set_input_cursor_viewport(
-    &mut self,
-    cursor_viewport: CursorViewportArc,
-  ) {
-    self.input_cursor_viewport = cursor_viewport;
+  pub fn set_input_cursor_viewport(&mut self, viewport: CursorViewportArc) {
+    self.input_cursor_viewport = viewport;
   }
 }
 // Viewport }
