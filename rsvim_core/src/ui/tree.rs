@@ -585,7 +585,7 @@ impl Tree {
     debug_assert!(self.window_ids.contains(&id));
     let window = self.window_mut(id).unwrap();
     let old = window.viewport();
-    window.set_viewport(viewport);
+    window.set_viewport(viewport.clone());
     let content_id = window.content_id();
     let window_content_node = self.node_mut(content_id).unwrap();
     debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
