@@ -197,7 +197,7 @@ pub fn make_canvas(
 ) -> Canvas {
   let tree = Tree::new(terminal_size).unwrap();
   let window_content = WindowContent::new(
-    tree.lotree(),
+    Rc::downgrade(&tree.lotree()),
     next_node_id(),
     Arc::downgrade(&buffer),
     Arc::downgrade(&viewport),
