@@ -61,8 +61,8 @@ impl CommandLine {
       .unwrap();
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let relationship = lotree.borrow();
-      let input_actual_shape = relationship.actual_shape(input_id)?;
+      let lotree = lotree.borrow();
+      let input_actual_shape = lotree.actual_shape(input_id)?;
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
@@ -77,7 +77,7 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = relationship.actual_shape(message_id)?;
+      let message_actual_shape = lotree.actual_shape(message_id)?;
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),

@@ -38,13 +38,9 @@ pub struct CommandLineIndicator {
 inode_impl!(CommandLineIndicator);
 
 impl CommandLineIndicator {
-  pub fn new(
-    relationship: ItreeRc,
-    id: TreeNodeId,
-    symbol: IndicatorSymbol,
-  ) -> Self {
+  pub fn new(lotree: ItreeRc, id: TreeNodeId, symbol: IndicatorSymbol) -> Self {
     CommandLineIndicator {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       symbol,
     }
   }
