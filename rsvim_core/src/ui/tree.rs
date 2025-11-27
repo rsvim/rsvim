@@ -589,10 +589,11 @@ impl Tree {
     let content_id = window.content_id();
     let window_content_node = self.node_mut(content_id).unwrap();
     debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
-    if let TreeNode::WindowContent(window_content) = window_content_node {
-      window_content.set_viewport(Arc::downgrade(&viewport));
-    } else {
-      unreachable!();
+    match window_content_node {
+      TreeNode::WindowContent(window_content) => {
+        window_content.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
     }
     old
   }
