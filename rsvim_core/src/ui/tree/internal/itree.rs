@@ -107,15 +107,19 @@ impl Itree {
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.layout(*loid);
-    result
+    self.lo.layout(*loid)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.style(*loid);
-    result
+    self.lo.style(*loid)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.set_style(*loid, style)
   }
 
   pub fn location(&self, id: TreeNodeId) -> TaffyResult<IPos> {
