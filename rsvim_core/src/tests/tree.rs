@@ -44,7 +44,7 @@ pub fn make_tree_with_buffers(
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
-  let _cursor_id = tree.insert_new_default_cursor(window_content_id).unwrap();
+  let _cursor_id = tree.add_new_default_cursor(window_content_id).unwrap();
 
   tree.set_current_window_id(Some(window_id));
 
@@ -93,10 +93,10 @@ pub fn make_tree_with_buffers_cmdline(
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
-  let _cursor_id = tree.insert_new_default_cursor(window_content_id).unwrap();
+  let _cursor_id = tree.add_new_default_cursor(window_content_id).unwrap();
   tree.set_current_window_id(Some(window_id));
 
-  let _cmdline_id = tree.insert_new_cmdline(
+  let _cmdline_id = tree.add_new_cmdline(
     tree_root_id,
     cmdline_style,
     IndicatorSymbol::Empty,
