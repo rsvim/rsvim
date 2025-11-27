@@ -35,8 +35,8 @@ impl Cursor {
     style: CursorStyle,
   ) -> Self {
     let mut flags = Flags::empty();
-    flags.set(Flags::BLINKING, BLINKING);
-    flags.set(Flags::HIDDEN, HIDDEN);
+    flags.set(Flags::BLINKING, blinking);
+    flags.set(Flags::HIDDEN, hidden);
     Self {
       base: InodeBase::new(relationship, id),
       flags,
