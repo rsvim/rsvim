@@ -98,7 +98,9 @@ pub fn make_tree_with_buffers_cmdline(
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
-  let _cursor_id = tree.add_new_default_cursor(window_content_id).unwrap();
+  let _cursor_id = tree
+    .add_new_cursor(window_content_id, BLINKING, HIDDEN, STYLE)
+    .unwrap();
   tree.set_current_window_id(Some(window_id));
 
   let _cmdline_id = tree.add_new_cmdline(
