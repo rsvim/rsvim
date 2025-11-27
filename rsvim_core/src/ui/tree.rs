@@ -9,6 +9,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::canvas::CursorStyle;
+use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
@@ -596,6 +597,18 @@ impl Tree {
       }
       _ => unreachable!(),
     }
+    old
+  }
+
+  pub fn set_window_cursor_viewport(
+    &mut self,
+    id: TreeNodeId,
+    cursor_viewport: CursorViewportArc,
+  ) -> CursorViewportArc {
+    debug_assert!(self.window_ids.contains(&id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.cursor_viewport();
+    window.set_cursor_viewport(cursor_viewport.clone());
     old
   }
 }
