@@ -64,7 +64,7 @@ inode_dispatcher!(
   WindowContent,
   CommandLine,
   CommandLineIndicator,
-  CommandLineIndicator,
+  CommandLineInput,
   CommandLineMessage
 );
 
