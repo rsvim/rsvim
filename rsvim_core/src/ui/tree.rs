@@ -158,9 +158,6 @@ pub struct Tree {
 
 arc_mutex_ptr!(Tree);
 
-// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-// pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
-
 // Node {
 impl Tree {
   /// Make UI tree.
@@ -281,9 +278,8 @@ impl Tree {
     &self.window_ids
   }
 }
-// Node {
+// Node }
 
-// Widget {
 impl Tree {
   /// Window widget.
   pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
@@ -373,9 +369,7 @@ impl Tree {
     }
   }
 }
-// Widget }
 
-// Insert/Remove {
 impl Tree {
   fn _insert(&mut self, child_node: TreeNode) {
     // guard
@@ -644,7 +638,6 @@ impl Tree {
     old
   }
 }
-// Insert/Remove }
 
 // Movement {
 impl Tree {
