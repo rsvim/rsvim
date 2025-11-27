@@ -3,6 +3,8 @@
 use crate::prelude::*;
 use crate::ui::tree::IrelationshipRc;
 use crate::ui::tree::TreeNodeId;
+use taffy::Layout;
+use taffy::Style;
 use taffy::TaffyResult;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
@@ -15,6 +17,10 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn actual_shape(&self) -> U16Rect;
 
   fn visible(&self) -> bool;
+
+  fn layout(&self) -> Layout;
+
+  fn style(&self) -> Style;
 }
 
 #[derive(Debug, Clone)]
@@ -49,6 +55,14 @@ impl Inodeable for InodeBase {
   fn visible(&self) -> bool {
     self.relationship.borrow().visible(self.id).unwrap()
   }
+
+  fn layout(&self) -> Layout {
+    self.relationship.borrow().layout(self.id).unwrap().clone()
+  }
+
+  fn style(&self) -> Style {
+    self.relationship.borrow().style(self.id).unwrap().clone()
+  }
 }
 
 #[macro_export]
@@ -73,6 +87,14 @@ macro_rules! inode_impl {
 
       fn visible(&self) -> bool {
         self.base.visible()
+      }
+
+      fn layout(&self) -> taffy::Layout {
+        self.base.layout()
+      }
+
+      fn style(&self) -> taffy::Style {
+        self.base.style()
       }
     }
   };
@@ -118,6 +140,22 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.visible(),
+          )*
+        }
+      }
+
+      fn layout(&self) -> taffy::Layout {
+        match self {
+          $(
+            $enum::$variant(e) => e.layout(),
+          )*
+        }
+      }
+
+      fn style(&self) -> taffy::Style {
+        match self {
+          $(
+            $enum::$variant(e) => e.style(),
           )*
         }
       }
