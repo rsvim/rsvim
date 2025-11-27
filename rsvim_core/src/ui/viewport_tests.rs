@@ -250,6 +250,7 @@ pub fn update_viewport(
     start_line,
     start_column,
   );
+  let viewport = Viewport::to_arc(viewport);
   tree.set_window_viewport(window_id, viewport.clone());
   viewport
 }
