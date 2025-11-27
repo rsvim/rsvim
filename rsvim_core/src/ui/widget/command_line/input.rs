@@ -21,13 +21,13 @@ inode_impl!(CommandLineInput);
 
 impl CommandLineInput {
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
     CommandLineInput {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       text_contents,
       viewport,
     }

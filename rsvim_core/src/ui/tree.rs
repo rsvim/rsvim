@@ -130,8 +130,8 @@ widget_dispatcher!(
 /// - For children that shade each other, the one with higher z-index has
 ///   higher priority to display and process the input events.
 pub struct Tree {
-  // Internal relationship.
-  base: ItreeRc,
+  // Internal tree.
+  lotree: ItreeRc,
 
   // Tree nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
@@ -189,7 +189,7 @@ impl Tree {
     nodes.insert(root_id, root_node);
 
     Ok(Tree {
-      base,
+      lotree: base,
       nodes,
       root_id,
       command_line_id: None,
@@ -201,7 +201,7 @@ impl Tree {
   }
 
   pub fn relationship(&self) -> ItreeRc {
-    self.base.clone()
+    self.lotree.clone()
   }
 
   /// Root node ID.
@@ -211,12 +211,12 @@ impl Tree {
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.base.borrow().parent(id).copied()
+    self.lotree.borrow().parent(id).copied()
   }
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    self.base.borrow().children(id)
+    self.lotree.borrow().children(id)
   }
 
   /// Get the node struct by its `id`.
@@ -411,7 +411,7 @@ impl Tree {
       ..Default::default()
     };
     let (window_id, content_id) = {
-      let mut base = self.base.borrow_mut();
+      let mut base = self.lotree.borrow_mut();
       let window_id = base.new_with_parent(window_style, parent_id)?;
       let content_id = base.new_with_parent(content_style, window_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
@@ -465,7 +465,7 @@ impl Tree {
     };
 
     let cursor_id = {
-      let mut base = self.base.borrow_mut();
+      let mut base = self.lotree.borrow_mut();
       let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
@@ -519,7 +519,7 @@ impl Tree {
     };
 
     let (cmdline_id, indicator_id, input_id, message_id) = {
-      let mut base = self.base.borrow_mut();
+      let mut base = self.lotree.borrow_mut();
       let indicator_id = base.new_leaf(indicator_style)?;
       let input_id = base.new_leaf(input_style)?;
       let message_id = base.new_leaf(message_style)?;
@@ -602,7 +602,7 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.bounded_move_by(id, x, y)
+    self.lotree.bounded_move_by(id, x, y)
   }
 
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
@@ -613,7 +613,7 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.bounded_move_to(id, x, y)
+    self.lotree.bounded_move_to(id, x, y)
   }
 }
 // Movement }
