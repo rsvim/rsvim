@@ -9,6 +9,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::canvas::CursorStyle;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
@@ -375,7 +376,7 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  fn insert(&mut self, child_node: TreeNode) {
+  fn _insert(&mut self, child_node: TreeNode) {
     // guard
     match &child_node {
       TreeNode::CommandLine(cmdline) => {
@@ -424,7 +425,7 @@ impl Tree {
     )?;
     let viewport = window.viewport();
     let window_node = TreeNode::Window(window);
-    self.insert(window_node);
+    self._insert(window_node);
 
     let content = WindowContent::new(
       self.lotree(),
@@ -433,7 +434,7 @@ impl Tree {
       Arc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
-    self.insert(content_node);
+    self._insert(content_node);
 
     Ok(window_id)
   }
@@ -470,7 +471,7 @@ impl Tree {
 
     let cursor = Cursor::new(self.lotree(), cursor_id, blinking, hidden, style);
     let cursor_node = TreeNode::Cursor(cursor);
-    self.insert(cursor_node);
+    self._insert(cursor_node);
 
     Ok(cursor_id)
   }
@@ -533,12 +534,12 @@ impl Tree {
     let message_viewport = cmdline.message_viewport();
 
     let cmdline_node = TreeNode::CommandLine(cmdline);
-    self.insert(cmdline_node);
+    self._insert(cmdline_node);
 
     let indicator =
       CommandLineIndicator::new(self.lotree(), indicator_id, indicator_symbol);
     let indicator_node = TreeNode::CommandLineIndicator(indicator);
-    self.insert(indicator_node);
+    self._insert(indicator_node);
 
     let input = CommandLineInput::new(
       self.lotree(),
@@ -547,7 +548,7 @@ impl Tree {
       Arc::downgrade(&input_viewport),
     );
     let input_node = TreeNode::CommandLineInput(input);
-    self.insert(input_node);
+    self._insert(input_node);
 
     let message = CommandLineMessage::new(
       self.lotree(),
@@ -556,12 +557,12 @@ impl Tree {
       Arc::downgrade(&message_viewport),
     );
     let message_node = TreeNode::CommandLineMessage(message);
-    self.insert(message_node);
+    self._insert(message_node);
 
     Ok(cmdline_id)
   }
 
-  fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+  fn _remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     // guard
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
@@ -574,6 +575,26 @@ impl Tree {
     }
 
     self.nodes.remove(&id)
+  }
+
+  pub fn set_window_viewport(
+    &mut self,
+    id: TreeNodeId,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert!(self.window_ids.contains(&id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.viewport();
+    window.set_viewport(viewport);
+    let content_id = window.content_id();
+    let window_content_node = self.node_mut(content_id).unwrap();
+    debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
+    if let TreeNode::WindowContent(window_content) = window_content_node {
+      window_content.set_viewport(Arc::downgrade(&viewport));
+    } else {
+      unreachable!();
+    }
+    old
   }
 }
 // Insert/Remove }
