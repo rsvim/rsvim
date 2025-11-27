@@ -10,6 +10,10 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use std::fmt::Debug;
 
+pub const BLINKING: bool = false;
+pub const HIDDEN: bool = false;
+pub const STYLE: CursorStyle = CursorStyle::SteadyBlock;
+
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
 #[derive(Debug, Clone)]
@@ -31,8 +35,8 @@ impl Cursor {
     style: CursorStyle,
   ) -> Self {
     let mut flags = Flags::empty();
-    flags.set(Flags::BLINKING, blinking);
-    flags.set(Flags::HIDDEN, hidden);
+    flags.set(Flags::BLINKING, BLINKING);
+    flags.set(Flags::HIDDEN, HIDDEN);
     Self {
       base: InodeBase::new(relationship, id),
       flags,
@@ -41,7 +45,7 @@ impl Cursor {
   }
 
   pub fn default(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
-    Self::new(relationship, id, false, false, CursorStyle::SteadyBlock)
+    Self::new(relationship, id, BLINKING, HIDDEN, STYLE)
   }
 
   pub fn blinking(&self) -> bool {
