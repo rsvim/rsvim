@@ -805,7 +805,19 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {}
+  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    let cursor_id = self.cursor_id.unwrap();
+    let lotree = self.lotree.clone();
+    let mut lotree = lotree.borrow_mut();
+    let parent_id = *lotree.parent(cursor_id).unwrap();
+    debug_assert!(self.nodes.contains_key(&parent_id));
+    debug_assert!(matches!(
+      self.node(parent_id).unwrap(),
+      TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
+    ));
+    let cursor_actual_shape = lotree.actual_shape(cursor_id).unwrap();
+    let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
+  }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
   /// It returns new position/shape of the cursor if moved successfully,
