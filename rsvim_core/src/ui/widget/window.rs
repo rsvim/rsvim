@@ -43,15 +43,15 @@ inode_impl!(Window);
 
 impl Window {
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     opts: WindowOptions,
     content_id: TreeNodeId,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
     let (viewport, cursor_viewport) = {
-      let base = relationship.borrow();
-      let content_actual_shape = base.actual_shape(content_id)?;
+      let lotree = lotree.borrow();
+      let content_actual_shape = lotree.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
@@ -63,7 +63,7 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let base = InodeBase::new(relationship, id);
+    let base = InodeBase::new(lotree, id);
     Ok(Window {
       base,
       options: opts,
