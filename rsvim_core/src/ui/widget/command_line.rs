@@ -8,8 +8,8 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
+use crate::inode_impl;
 use crate::prelude::*;
-use crate::rect_as;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
@@ -40,6 +40,8 @@ pub struct CommandLine {
   input_cursor_viewport: CursorViewportArc,
   message_viewport: ViewportArc,
 }
+
+inode_impl!(CommandLine);
 
 impl CommandLine {
   pub fn new(
