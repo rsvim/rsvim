@@ -614,16 +614,15 @@ impl Tree {
 
   pub fn set_cmdline_input_viewport(
     &mut self,
-    id: TreeNodeId,
     viewport: ViewportArc,
   ) -> ViewportArc {
-    debug_assert_eq!(self.command_line_id, Some(id));
-    let window = self.window_mut(id).unwrap();
-    let old = window.viewport();
-    window.set_viewport(viewport.clone());
-    let content_id = window.content_id();
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.input_viewport();
+    cmdline.set_input_viewport(viewport.clone());
+    let input_id = cmdline.input_id();
     debug_assert!(self.nodes.contains_key(&id));
-    let window_content_node = self.node_mut(content_id).unwrap();
+    let window_content_node = self.node_mut(input_id).unwrap();
     debug_assert!(matches!(window_content_node, TreeNode::WindowContent(_)));
     match window_content_node {
       TreeNode::WindowContent(window_content) => {
