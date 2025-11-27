@@ -1,13 +1,13 @@
 //! Internal tree node.
 
 use crate::prelude::*;
-use crate::ui::tree::ItreeRc;
+use crate::ui::tree::ItreeWk;
 use crate::ui::tree::TreeNodeId;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn lotree(&self) -> ItreeRc;
+  fn lotree(&self) -> ItreeWk;
 
   fn shape(&self) -> IRect;
 
@@ -22,12 +22,12 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
 #[derive(Debug, Clone)]
 pub struct InodeBase {
-  lotree: ItreeRc,
+  lotree: ItreeWk,
   id: TreeNodeId,
 }
 
 impl InodeBase {
-  pub fn new(lotree: ItreeRc, id: TreeNodeId) -> Self {
+  pub fn new(lotree: ItreeWk, id: TreeNodeId) -> Self {
     Self { lotree, id }
   }
 }
@@ -37,28 +37,60 @@ impl Inodeable for InodeBase {
     self.id
   }
 
-  fn lotree(&self) -> ItreeRc {
+  fn lotree(&self) -> ItreeWk {
     self.lotree.clone()
   }
 
   fn shape(&self) -> IRect {
-    self.lotree.borrow().shape(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .shape(self.id)
+      .unwrap()
   }
 
   fn actual_shape(&self) -> U16Rect {
-    self.lotree.borrow().actual_shape(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .actual_shape(self.id)
+      .unwrap()
   }
 
   fn visible(&self) -> bool {
-    self.lotree.borrow().visible(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .visible(self.id)
+      .unwrap()
   }
 
   fn layout(&self) -> taffy::Layout {
-    self.lotree.borrow().layout(self.id).unwrap().clone()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .layout(self.id)
+      .unwrap()
+      .clone()
   }
 
   fn style(&self) -> taffy::Style {
-    self.lotree.borrow().style(self.id).unwrap().clone()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .style(self.id)
+      .unwrap()
+      .clone()
   }
 }
 
@@ -70,7 +102,7 @@ macro_rules! inode_impl {
         self.base.id()
       }
 
-      fn lotree(&self) -> ItreeRc {
+      fn lotree(&self) -> ItreeWk {
         self.base.lotree()
       }
 
@@ -109,7 +141,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn lotree(&self) -> ItreeRc {
+      fn lotree(&self) -> ItreeWk {
         match self {
           $(
             $enum::$variant(e) => e.lotree(),
