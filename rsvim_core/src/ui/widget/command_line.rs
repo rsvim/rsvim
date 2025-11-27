@@ -4,9 +4,6 @@ pub mod indicator;
 pub mod input;
 pub mod message;
 
-#[cfg(test)]
-pub mod indicator_tests;
-
 use crate::content::TextContentsWk;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -16,6 +13,7 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
+use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
@@ -42,6 +40,7 @@ pub struct CommandLine {
 }
 
 inode_impl!(CommandLine);
+impl Widgetable for CommandLine {}
 
 impl CommandLine {
   pub fn new(
