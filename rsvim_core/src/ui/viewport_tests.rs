@@ -265,6 +265,7 @@ fn search_viewport(
   expect_start_column: usize,
 ) -> ViewportArc {
   let window = tree.window_mut(window_id).unwrap();
+  let window_actual_shape = window.actual_shape();
   let old = window.viewport();
   let buf = lock!(buf);
   let opts = *window.options();
@@ -272,7 +273,7 @@ fn search_viewport(
     direction,
     &opts,
     buf.text(),
-    window.actual_shape(),
+    &window_actual_shape,
     target_cursor_line,
     target_cursor_char,
   );
@@ -282,7 +283,7 @@ fn search_viewport(
   let viewport = Viewport::view(
     &opts,
     buf.text(),
-    window.actual_shape(),
+    &window_actual_shape,
     start_line,
     start_column,
   );
