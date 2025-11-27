@@ -7,7 +7,6 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
@@ -22,13 +21,13 @@ inode_impl!(WindowContent);
 impl WindowContent {
   /// Make window content.
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     buffer: BufferWk,
     viewport: ViewportWk,
   ) -> Self {
     WindowContent {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       buffer,
       viewport,
     }

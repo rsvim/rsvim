@@ -21,13 +21,13 @@ inode_impl!(CommandLineMessage);
 
 impl CommandLineMessage {
   pub fn new(
-    relationship: ItreeRc,
+    lotree: ItreeRc,
     id: TreeNodeId,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
     CommandLineMessage {
-      base: InodeBase::new(relationship, id),
+      base: InodeBase::new(lotree, id),
       text_contents,
       viewport,
     }
