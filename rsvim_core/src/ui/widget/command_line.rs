@@ -150,12 +150,12 @@ impl CommandLine {
 
   /// Set viewport for input.
   pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
-    self.input_viewport = viewport.clone();
+    self.input_viewport = viewport;
   }
 
   /// Set viewport for message.
   pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
-    self.message_viewport = viewport.clone();
+    self.message_viewport = viewport;
   }
 
   /// Get cursor viewport for input.
