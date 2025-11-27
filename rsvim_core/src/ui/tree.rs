@@ -28,6 +28,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
 use std::cell::RefCell;
+use std::hint::unreachable_unchecked;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::Arc;
@@ -141,6 +142,9 @@ pub struct Tree {
   // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
 
+  // Cursor node ID.
+  cursor_id: Option<TreeNodeId>,
+
   // All window node IDs.
   window_ids: BTreeSet<TreeNodeId>,
 
@@ -189,6 +193,7 @@ impl Tree {
       nodes,
       root_id,
       command_line_id: None,
+      cursor_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
@@ -238,6 +243,11 @@ impl Tree {
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
+  }
+
+  /// Get cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
   }
 
   /// Get current window node ID.
@@ -327,6 +337,42 @@ impl Tree {
   pub fn current_window_mut(&mut self) -> Option<&mut Window> {
     match self.current_window_id {
       Some(current_window_id) => self.window_mut(current_window_id),
+      None => None,
+    }
+  }
+
+  pub fn cursor(&self) -> Option<&Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.nodes.contains_key(&cursor_id));
+        let cursor_node = self.node(cursor_id).unwrap();
+        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+        match cursor_node {
+          TreeNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.nodes.contains_key(&cursor_id));
+        let cursor_node = self.node_mut(cursor_id).unwrap();
+        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+        match cursor_node {
+          TreeNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
       None => None,
     }
   }
@@ -580,6 +626,8 @@ impl Tree {
 
     self.nodes.remove(&id)
   }
+
+  pub fn set_window_cursor(&mut self, window_id: TreeNodeId) {}
 
   pub fn set_window_viewport(
     &mut self,
