@@ -28,9 +28,7 @@ use crate::state::ops::cmdline_ops;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
-use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -559,7 +557,7 @@ impl EventLoop {
       let (_buf_id, buf) = buffers.first_key_value().unwrap();
       let window_opts = *tree.global_local_options();
       tree
-        .insert_new_window(
+        .add_new_window(
           tree_root_id,
           window_style,
           window_opts,

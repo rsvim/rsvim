@@ -396,7 +396,7 @@ impl Tree {
   }
 
   /// Create new window node, and insert it as a child to the provided parent_id.
-  pub fn insert_new_window(
+  pub fn add_new_window(
     &mut self,
     parent_id: TreeNodeId,
     window_style: Style,
