@@ -10,11 +10,11 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn relationship(&self) -> IrelationshipRc;
 
-  fn shape(&self) -> TaffyResult<IRect>;
+  fn shape(&self) -> IRect;
 
-  fn actual_shape(&self) -> TaffyResult<U16Rect>;
+  fn actual_shape(&self) -> U16Rect;
 
-  fn visible(&self) -> TaffyResult<bool>;
+  fn visible(&self) -> bool;
 }
 
 #[derive(Debug, Clone)]
@@ -38,16 +38,16 @@ impl Inodeable for InodeBase {
     self.relationship.clone()
   }
 
-  fn shape(&self) -> TaffyResult<IRect> {
-    self.relationship.borrow().shape(self.id)
+  fn shape(&self) -> IRect {
+    self.relationship.borrow().shape(self.id).unwrap()
   }
 
-  fn actual_shape(&self) -> TaffyResult<U16Rect> {
-    self.relationship.borrow().actual_shape(self.id)
+  fn actual_shape(&self) -> U16Rect {
+    self.relationship.borrow().actual_shape(self.id).unwrap()
   }
 
-  fn visible(&self) -> TaffyResult<bool> {
-    self.relationship.borrow().visible(self.id)
+  fn visible(&self) -> bool {
+    self.relationship.borrow().visible(self.id).unwrap()
   }
 }
 
