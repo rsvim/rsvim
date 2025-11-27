@@ -10,7 +10,7 @@ use taffy::prelude::TaffyMaxContent;
 
 #[derive(Clone, Debug)]
 struct TestValue {
-  base: IrelationshipRc,
+  base: ItreeRc,
   id: TreeNodeId,
   value: i32,
 }
@@ -18,7 +18,7 @@ struct TestValue {
 inode_impl!(TestValue);
 
 impl TestValue {
-  pub fn new(base: IrelationshipRc, id: TreeNodeId, value: i32) -> Self {
+  pub fn new(base: ItreeRc, id: TreeNodeId, value: i32) -> Self {
     TestValue { base, id, value }
   }
 }
@@ -27,7 +27,7 @@ impl TestValue {
 fn new() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
+  let mut tree = Itree::new();
   let nid1 = tree
     .new_leaf(Style {
       ..Default::default()
@@ -43,7 +43,7 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
+  let mut tree = Itree::new();
   let nid = (0..7)
     .map(|_i| {
       tree
@@ -114,7 +114,7 @@ fn insert1() {
 fn insert2() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
+  let mut tree = Itree::new();
   let nid = (0..10)
     .map(|_i| {
       tree
@@ -203,7 +203,7 @@ fn insert2() {
 fn shape1() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
+  let mut tree = Itree::new();
   let nid1 = tree
     .new_leaf(Style {
       size: taffy::Size {
@@ -411,7 +411,7 @@ fn shape1() {
 fn shape2() {
   // test_log_init();
 
-  let mut tree = Irelationship::new();
+  let mut tree = Itree::new();
   let nid1 = tree
     .new_leaf(Style {
       size: taffy::Size {

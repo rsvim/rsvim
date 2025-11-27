@@ -28,7 +28,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    relationship: IrelationshipRc,
+    relationship: ItreeRc,
     id: TreeNodeId,
     blinking: bool,
     hidden: bool,
@@ -44,7 +44,7 @@ impl Cursor {
     }
   }
 
-  pub fn default(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
+  pub fn default(relationship: ItreeRc, id: TreeNodeId) -> Self {
     Self::new(relationship, id, BLINKING, HIDDEN, STYLE)
   }
 

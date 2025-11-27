@@ -131,7 +131,7 @@ widget_dispatcher!(
 ///   higher priority to display and process the input events.
 pub struct Tree {
   // Internal relationship.
-  base: IrelationshipRc,
+  base: ItreeRc,
 
   // Tree nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
@@ -166,7 +166,7 @@ arc_mutex_ptr!(Tree);
 impl Tree {
   /// Make UI tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let base = Irelationship::to_rc(Irelationship::new());
+    let base = Itree::to_rc(Itree::new());
 
     let root_style = Style {
       size: taffy::Size {
@@ -200,7 +200,7 @@ impl Tree {
     })
   }
 
-  pub fn relationship(&self) -> IrelationshipRc {
+  pub fn relationship(&self) -> ItreeRc {
     self.base.clone()
   }
 

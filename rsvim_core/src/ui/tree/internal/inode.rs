@@ -1,13 +1,13 @@
 //! Internal tree node.
 
 use crate::prelude::*;
-use crate::ui::tree::IrelationshipRc;
+use crate::ui::tree::ItreeRc;
 use crate::ui::tree::TreeNodeId;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn relationship(&self) -> IrelationshipRc;
+  fn relationship(&self) -> ItreeRc;
 
   fn shape(&self) -> IRect;
 
@@ -22,12 +22,12 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
 #[derive(Debug, Clone)]
 pub struct InodeBase {
-  relationship: IrelationshipRc,
+  relationship: ItreeRc,
   id: TreeNodeId,
 }
 
 impl InodeBase {
-  pub fn new(relationship: IrelationshipRc, id: TreeNodeId) -> Self {
+  pub fn new(relationship: ItreeRc, id: TreeNodeId) -> Self {
     Self { id, relationship }
   }
 }
@@ -37,7 +37,7 @@ impl Inodeable for InodeBase {
     self.id
   }
 
-  fn relationship(&self) -> IrelationshipRc {
+  fn relationship(&self) -> ItreeRc {
     self.relationship.clone()
   }
 
@@ -70,7 +70,7 @@ macro_rules! inode_impl {
         self.base.id()
       }
 
-      fn relationship(&self) -> IrelationshipRc {
+      fn relationship(&self) -> ItreeRc {
         self.base.relationship()
       }
 
@@ -109,7 +109,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn relationship(&self) -> IrelationshipRc {
+      fn relationship(&self) -> ItreeRc {
         match self {
           $(
             $enum::$variant(e) => e.relationship(),

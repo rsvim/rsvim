@@ -27,7 +27,7 @@ pub fn next_node_id() -> TreeNodeId {
 }
 
 #[derive(Debug, Clone)]
-pub struct Irelationship {
+pub struct Itree {
   lo: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
   loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
@@ -35,9 +35,9 @@ pub struct Irelationship {
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
-rc_refcell_ptr!(Irelationship);
+rc_refcell_ptr!(Itree);
 
-impl Irelationship {
+impl Itree {
   pub fn new() -> Self {
     let mut lo = TaffyTree::new();
     lo.disable_rounding();
@@ -283,7 +283,7 @@ impl Irelationship {
   }
 }
 
-impl Default for Irelationship {
+impl Default for Itree {
   fn default() -> Self {
     Self::new()
   }

@@ -45,7 +45,7 @@ inode_impl!(CommandLine);
 
 impl CommandLine {
   pub fn new(
-    relationship: IrelationshipRc,
+    relationship: ItreeRc,
     id: TreeNodeId,
     indicator_id: TreeNodeId,
     input_id: TreeNodeId,

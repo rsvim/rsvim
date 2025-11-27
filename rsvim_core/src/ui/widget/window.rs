@@ -43,7 +43,7 @@ inode_impl!(Window);
 
 impl Window {
   pub fn new(
-    relationship: IrelationshipRc,
+    relationship: ItreeRc,
     id: TreeNodeId,
     opts: WindowOptions,
     content_id: TreeNodeId,

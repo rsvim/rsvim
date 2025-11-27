@@ -8,12 +8,12 @@ use crate::ui::widget::Widgetable;
 #[derive(Debug, Clone)]
 /// Root node.
 pub struct Root {
-  base: IrelationshipRc,
+  base: ItreeRc,
   id: TreeNodeId,
 }
 
 impl Root {
-  pub fn new(base: IrelationshipRc, id: TreeNodeId) -> Self {
+  pub fn new(base: ItreeRc, id: TreeNodeId) -> Self {
     Root { base, id }
   }
 }

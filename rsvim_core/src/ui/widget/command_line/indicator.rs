@@ -39,7 +39,7 @@ inode_impl!(CommandLineIndicator);
 
 impl CommandLineIndicator {
   pub fn new(
-    relationship: IrelationshipRc,
+    relationship: ItreeRc,
     id: TreeNodeId,
     symbol: IndicatorSymbol,
   ) -> Self {
