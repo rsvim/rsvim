@@ -1,4 +1,4 @@
-//! Internal tree and relationship.
+//! Internal tree.
 
 use crate::prelude::*;
 use crate::ui::tree::Tree;
