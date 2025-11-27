@@ -3,8 +3,6 @@
 use crate::prelude::*;
 use crate::ui::tree::IrelationshipRc;
 use crate::ui::tree::TreeNodeId;
-use taffy::Layout;
-use taffy::Style;
 
 pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn id(&self) -> TreeNodeId;
@@ -17,9 +15,9 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn visible(&self) -> bool;
 
-  fn layout(&self) -> Layout;
+  fn layout(&self) -> taffy::Layout;
 
-  fn style(&self) -> Style;
+  fn style(&self) -> taffy::Style;
 }
 
 #[derive(Debug, Clone)]
