@@ -724,7 +724,7 @@ impl Tree {
   ///
   /// NOTE: While inside the internal implementations, cursor node's parent is
   /// either a window content node, or a command-line input node.
-  pub fn set_cursor_parent(
+  pub fn jump_cursor_to(
     &mut self,
     parent_id: TreeNodeId,
   ) -> Option<TreeNodeId> {
