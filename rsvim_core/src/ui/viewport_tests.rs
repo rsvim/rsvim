@@ -195,7 +195,7 @@ pub fn make_canvas(
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size).unwrap();
+  let tree = Tree::new(terminal_size).unwrap();
   let window_content = WindowContent::new(
     tree.relationship(),
     next_node_id(),
