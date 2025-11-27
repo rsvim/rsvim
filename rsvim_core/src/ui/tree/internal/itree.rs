@@ -141,6 +141,16 @@ impl Itree {
     result
   }
 
+  pub fn actual_location(&self, id: TreeNodeId) -> TaffyResult<U16Pos> {
+    let actual_shape = self.actual_shape(id)?;
+    Ok(actual_shape.min().into())
+  }
+
+  pub fn actual_size(&self, id: TreeNodeId) -> TaffyResult<U16Size> {
+    let actual_shape = self.actual_shape(id)?;
+    Ok(size!(actual_shape.width(), actual_shape.height()))
+  }
+
   /// Actual location/size on real-world canvas on limited terminal.
   /// The top-left location can never be negative.
   ///
