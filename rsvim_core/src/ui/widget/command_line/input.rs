@@ -21,7 +21,7 @@ inode_impl!(CommandLineInput);
 
 impl CommandLineInput {
   pub fn new(
-    lotree: ItreeRc,
+    lotree: ItreeWk,
     id: TreeNodeId,
     text_contents: TextContentsWk,
     viewport: ViewportWk,

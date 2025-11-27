@@ -8,6 +8,8 @@ mod content_tests;
 #[cfg(test)]
 mod opt_tests;
 
+use std::rc::Rc;
+
 use crate::buf::BufferWk;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -43,13 +45,14 @@ impl Widgetable for Window {}
 
 impl Window {
   pub fn new(
-    lotree: ItreeRc,
+    lotree: ItreeWk,
     id: TreeNodeId,
     opts: WindowOptions,
     content_id: TreeNodeId,
     buffer: BufferWk,
   ) -> TaffyResult<Self> {
     let (viewport, cursor_viewport) = {
+      let lotree = lotree.upgrade().unwrap();
       let lotree = lotree.borrow();
       let content_actual_shape = lotree.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
@@ -63,9 +66,8 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let base = InodeBase::new(lotree, id);
     Ok(Window {
-      base,
+      base: InodeBase::new(lotree, id),
       options: opts,
       content_id,
       cursor_id: None,
