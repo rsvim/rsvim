@@ -124,16 +124,16 @@ impl Itree {
   /// Actual location/size on real-world canvas on limited terminal.
   /// The top-left location can never be negative.
   ///
-  /// A node's actual shape is always truncated by its parent actual shape.
+  /// A node's shape is always truncated by its parent shape.
   /// Unless the node itself is the root node and doesn't have a parent, in
-  /// such case, the root node logical shape is actual shape.
+  /// such case, the root node logical shape does not need to be truncated.
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
     let result = match self.parent(id) {
       Some(parent_id) => {
         // Non-root node truncated by its parent's actual shape.
-        let mut cached_actual_shapes = self.cached_shapes.borrow_mut();
-        match cached_actual_shapes.get(&id) {
+        let mut cached_shapes = self.cached_shapes.borrow_mut();
+        match cached_shapes.get(&id) {
           Some(actual_shape) => {
             // Use caches to shorten the recursive query path.
             Ok(*actual_shape)
@@ -149,8 +149,7 @@ impl Itree {
             let bottom =
               num_traits::clamp(shape.max().y, 0, parent_shape.max().y);
             let truncated = rect!(left, top, right, bottom);
-            let truncated = rect_as!(truncated, u16);
-            cached_actual_shapes.insert(id, truncated);
+            cached_shapes.insert(id, truncated);
             Ok(truncated)
           }
         }
@@ -158,7 +157,7 @@ impl Itree {
       None => {
         // Root node doesn't have a parent.
         let shape = self.shape(id)?;
-        Ok(rect_as!(shape, u16))
+        Ok(shape)
       }
     };
     self._internal_check();
