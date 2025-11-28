@@ -109,6 +109,17 @@ impl Itree {
     self.lo.layout(*loid)
   }
 
+  pub fn layout_shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+    let layout = self.layout(id)?;
+    let shape = rect!(
+      layout.location.x,
+      layout.location.y,
+      layout.location.x + layout.size.width,
+      layout.location.y + layout.size.height
+    );
+    Ok(rect_as!(shape, isize))
+  }
+
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
@@ -136,23 +147,26 @@ impl Itree {
         if cached.is_some() {
           Ok(cached.unwrap())
         } else {
-          let layout = self.layout(id)?;
-          let shape = rect!(
-            layout.location.x,
-            layout.location.y,
-            layout.size.width + layout.location.x,
-            layout.size.height + layout.location.y
-          );
-          let shape = rect_as!(shape, u16);
+          let shape = self.layout_shape(id)?;
           let parent_shape = self.shape(*parent_id)?;
-          let left = num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
-          let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
-          let right = num_traits::clamp(shape.max().x, 0, parent_shape.max().x);
-          let bottom =
-            num_traits::clamp(shape.max().y, 0, parent_shape.max().y);
-          let truncated = rect!(left, top, right, bottom);
-          self.cached_shapes.borrow_mut().insert(id, truncated);
-          Ok(truncated)
+          let left =
+            num_traits::clamp(shape.min().x, 0, parent_shape.max().x as isize);
+          let top =
+            num_traits::clamp(shape.min().y, 0, parent_shape.max().y as isize);
+          let right = num_traits::clamp(
+            shape.max().x,
+            left,
+            parent_shape.max().x as isize,
+          );
+          let bottom = num_traits::clamp(
+            shape.max().y,
+            top,
+            parent_shape.max().y as isize,
+          );
+          let shape = rect!(left, top, right, bottom);
+          let shape = rect_as!(shape, u16);
+          self.cached_shapes.borrow_mut().insert(id, shape);
+          Ok(shape)
         }
       }
       None => {
