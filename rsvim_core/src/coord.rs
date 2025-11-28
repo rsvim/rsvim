@@ -42,8 +42,6 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-use geo::Point;
-
 // Coord
 pub type Coord<T> = geo::Coord<T>;
 
