@@ -52,7 +52,7 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let lotree = lotree.upgrade().unwrap();
       let lotree = lotree.borrow();
-      let content_actual_shape = lotree.actual_shape(content_id)?;
+      let content_actual_shape = lotree.shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =

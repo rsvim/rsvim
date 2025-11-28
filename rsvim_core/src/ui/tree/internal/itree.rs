@@ -121,23 +121,13 @@ impl Itree {
     self.lo.set_style(*loid, style)
   }
 
-  pub fn actual_location(&self, id: TreeNodeId) -> TaffyResult<U16Pos> {
-    let actual_shape = self.actual_shape(id)?;
-    Ok(actual_shape.min().into())
-  }
-
-  pub fn actual_size(&self, id: TreeNodeId) -> TaffyResult<U16Size> {
-    let actual_shape = self.actual_shape(id)?;
-    Ok(size!(actual_shape.width(), actual_shape.height()))
-  }
-
   /// Actual location/size on real-world canvas on limited terminal.
   /// The top-left location can never be negative.
   ///
   /// A node's actual shape is always truncated by its parent actual shape.
   /// Unless the node itself is the root node and doesn't have a parent, in
   /// such case, the root node logical shape is actual shape.
-  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
     let result = match self.parent(id) {
       Some(parent_id) => {
@@ -150,36 +140,17 @@ impl Itree {
           }
           None => {
             let shape = self.shape(id)?;
-            let parent_actual_shape = self.actual_shape(*parent_id)?;
-            let left = num_traits::clamp(
-              shape.min().x,
-              0,
-              parent_actual_shape.max().x as isize,
-            );
-            let top = num_traits::clamp(
-              shape.min().y,
-              0,
-              parent_actual_shape.max().y as isize,
-            );
+            let parent_shape = self.shape(*parent_id)?;
+            let left =
+              num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
+            let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
             // Here we force the shape always inside the terminal, and its size
             // must be at least 1x1. This ensures it will never be invisible in
             // the terminal, which we cannot even render.
-            let right = num_traits::clamp_min(
-              num_traits::clamp(
-                shape.max().x,
-                0,
-                parent_actual_shape.max().x as isize,
-              ),
-              left + 1,
-            );
-            let bottom = num_traits::clamp_min(
-              num_traits::clamp(
-                shape.max().y,
-                0,
-                parent_actual_shape.max().y as isize,
-              ),
-              top + 1,
-            );
+            let right =
+              num_traits::clamp(shape.max().x, 0, parent_shape.max().x);
+            let bottom =
+              num_traits::clamp(shape.max().y, 0, parent_shape.max().y);
             let truncated = rect!(left, top, right, bottom);
             let truncated = rect_as!(truncated, u16);
             cached_actual_shapes.insert(id, truncated);

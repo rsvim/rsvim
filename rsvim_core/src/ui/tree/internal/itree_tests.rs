@@ -400,7 +400,7 @@ fn shape1() {
   for i in 0..9 {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
-    let actual_us = tree.actual_shape(nids[i]).unwrap();
+    let actual_us = tree.shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
@@ -535,7 +535,7 @@ fn shape2() {
   for i in 0..6 {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_actual_shapes[i];
-    let actual_us = tree.actual_shape(nids[i]).unwrap();
+    let actual_us = tree.shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
     assert_eq!(expect_s, actual_s);
     assert_eq!(expect_us, actual_us);
