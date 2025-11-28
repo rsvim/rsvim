@@ -176,7 +176,6 @@ impl Itree {
         Ok(shape)
       }
     };
-    self._internal_check();
     result
   }
 
