@@ -136,7 +136,14 @@ impl Itree {
         if cached.is_some() {
           Ok(cached.unwrap())
         } else {
-          let shape = self.shape(id)?;
+          let layout = self.layout(id)?;
+          let shape = rect!(
+            layout.location.x,
+            layout.location.y,
+            layout.size.width + layout.location.x,
+            layout.size.height + layout.location.y
+          );
+          let shape = rect_as!(shape, u16);
           let parent_shape = self.shape(*parent_id)?;
           let left = num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
           let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
@@ -151,6 +158,11 @@ impl Itree {
       None => {
         // Root node doesn't have a parent.
         let shape = self.shape(id)?;
+        let left = num_traits::clamp_min(shape.location().x(), 0);
+        let top = num_traits::clamp_min(shape.location().y(), 0);
+        let right = num_traits::clamp_min(shape.max().x, left);
+        let bottom = num_traits::clamp_min(shape.max().y, top);
+        let shape = rect!(left, top, right, bottom);
         Ok(shape)
       }
     };
