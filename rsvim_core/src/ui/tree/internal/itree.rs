@@ -131,27 +131,21 @@ impl Itree {
     self._internal_check();
     let result = match self.parent(id) {
       Some(parent_id) => {
-        // Non-root node truncated by its parent's actual shape.
-        let mut cached_shapes = self.cached_shapes.borrow_mut();
-        match cached_shapes.get(&id) {
-          Some(actual_shape) => {
-            // Use caches to shorten the recursive query path.
-            Ok(*actual_shape)
-          }
-          None => {
-            let shape = self.shape(id)?;
-            let parent_shape = self.shape(*parent_id)?;
-            let left =
-              num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
-            let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
-            let right =
-              num_traits::clamp(shape.max().x, 0, parent_shape.max().x);
-            let bottom =
-              num_traits::clamp(shape.max().y, 0, parent_shape.max().y);
-            let truncated = rect!(left, top, right, bottom);
-            cached_shapes.insert(id, truncated);
-            Ok(truncated)
-          }
+        // Non-root node truncated by its parent's shape.
+        let cached = self.cached_shapes.borrow().get(&id).copied();
+        if cached.is_some() {
+          Ok(cached.unwrap())
+        } else {
+          let shape = self.shape(id)?;
+          let parent_shape = self.shape(*parent_id)?;
+          let left = num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
+          let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
+          let right = num_traits::clamp(shape.max().x, 0, parent_shape.max().x);
+          let bottom =
+            num_traits::clamp(shape.max().y, 0, parent_shape.max().y);
+          let truncated = rect!(left, top, right, bottom);
+          self.cached_shapes.borrow_mut().insert(id, truncated);
+          Ok(truncated)
         }
       }
       None => {
