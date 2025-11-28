@@ -98,7 +98,7 @@ impl Itree {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let result = self.lo.compute_layout(*loid, available_size);
-    self.clear_actual_shape(id);
+    self.clear_cached_shapes(id);
     self._internal_check();
     result
   }
@@ -181,7 +181,7 @@ impl Itree {
 
   /// Clear the cached actual_shapes since the provided id. All its
   /// descendants actual_shape will be cleared as well.
-  fn clear_actual_shape(&mut self, id: TreeNodeId) {
+  fn clear_cached_shapes(&mut self, id: TreeNodeId) {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
