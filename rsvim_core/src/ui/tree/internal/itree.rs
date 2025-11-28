@@ -144,9 +144,6 @@ impl Itree {
             let left =
               num_traits::clamp(shape.min().x, 0, parent_shape.max().x);
             let top = num_traits::clamp(shape.min().y, 0, parent_shape.max().y);
-            // Here we force the shape always inside the terminal, and its size
-            // must be at least 1x1. This ensures it will never be invisible in
-            // the terminal, which we cannot even render.
             let right =
               num_traits::clamp(shape.max().x, 0, parent_shape.max().x);
             let bottom =
