@@ -42,6 +42,8 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
+use geo::Point;
+
 // Coord
 pub type Coord<T> = geo::Coord<T>;
 
@@ -56,6 +58,27 @@ pub type Rect<T> = geo::Rect<T>;
 pub type IRect = Rect<isize>;
 pub type URect = Rect<usize>;
 pub type U16Rect = Rect<u16>;
+
+pub trait RectExt<T>
+where
+  T: geo::CoordNum,
+{
+  fn size(&self) -> Size<T>;
+  fn location(&self) -> Point<T>;
+}
+
+impl<T> RectExt<T> for Rect<T>
+where
+  T: geo::CoordNum,
+{
+  fn size(&self) -> Size<T> {
+    Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
+  }
+
+  fn location(&self) -> Point<T> {
+    geo::point!(x: self.min().x, y: self.min().y)
+  }
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 // Size

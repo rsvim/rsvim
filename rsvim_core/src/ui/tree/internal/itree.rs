@@ -16,7 +16,6 @@ use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
-use taffy::prelude::TaffyMaxContent;
 
 /// Next unique UI widget ID.
 ///
@@ -32,7 +31,7 @@ pub struct Itree {
   nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
   loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
   // Cached actual_shape for each node.
-  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+  cached_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
 rc_refcell_ptr!(Itree);
@@ -45,7 +44,7 @@ impl Itree {
       lo,
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
-      cached_actual_shapes: RefCell::new(FoldMap::new()),
+      cached_shapes: RefCell::new(FoldMap::new()),
     }
   }
 
@@ -122,29 +121,6 @@ impl Itree {
     self.lo.set_style(*loid, style)
   }
 
-  pub fn location(&self, id: TreeNodeId) -> TaffyResult<IPos> {
-    self._internal_check();
-    let layout = self.layout(id)?;
-    let location = point!(layout.location.x, layout.location.y);
-    Ok(point_as!(location, isize))
-  }
-
-  pub fn size(&self, id: TreeNodeId) -> TaffyResult<ISize> {
-    self._internal_check();
-    let layout = self.layout(id)?;
-    let size = size!(layout.size.width, layout.size.height);
-    Ok(size_as!(size, isize))
-  }
-
-  /// Logical location/size on unlimited canvas.
-  /// The top-left location can be negative.
-  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
-    self._internal_check();
-    let layout = self.layout(id)?;
-    let result = Ok(rect_from_layout!(layout, isize));
-    result
-  }
-
   pub fn actual_location(&self, id: TreeNodeId) -> TaffyResult<U16Pos> {
     let actual_shape = self.actual_shape(id)?;
     Ok(actual_shape.min().into())
@@ -166,7 +142,7 @@ impl Itree {
     let result = match self.parent(id) {
       Some(parent_id) => {
         // Non-root node truncated by its parent's actual shape.
-        let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+        let mut cached_actual_shapes = self.cached_shapes.borrow_mut();
         match cached_actual_shapes.get(&id) {
           Some(actual_shape) => {
             // Use caches to shorten the recursive query path.
@@ -227,7 +203,7 @@ impl Itree {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
-      let mut cached_actual_shapes = self.cached_actual_shapes.borrow_mut();
+      let mut cached_actual_shapes = self.cached_shapes.borrow_mut();
       cached_actual_shapes.remove(&parent_id);
       if let Ok(children_ids) = self.children(parent_id) {
         for child_id in children_ids.iter() {
