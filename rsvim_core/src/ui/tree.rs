@@ -2,38 +2,98 @@
 
 pub mod internal;
 
-use crate::inode_enum_dispatcher;
+use crate::buf::BufferWk;
+use crate::content::TextContentsWk;
+use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::canvas::CursorStyle;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::root::RootContainer;
+use crate::ui::widget::command_line::indicator::CommandLineIndicator;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::command_line::input::CommandLineInput;
+use crate::ui::widget::command_line::message::CommandLineMessage;
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::root::Root;
 use crate::ui::widget::window::Window;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 pub use internal::*;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::rc::Weak;
+use std::sync::Arc;
+use taffy::Style;
+use taffy::TaffyError;
+use taffy::TaffyResult;
+use taffy::TaffyTree;
+use taffy::prelude::FromLength;
+use taffy::prelude::TaffyAuto;
+use taffy::prelude::TaffyMaxContent;
+
+pub type TreeNodeId = i32;
+pub type TaffyTreeRc = Rc<RefCell<TaffyTree>>;
+pub type TaffyTreeWk = Weak<RefCell<TaffyTree>>;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  RootContainer(RootContainer),
+  Root(Root),
+  Cursor(Cursor),
   Window(Window),
+  WindowContent(WindowContent),
   CommandLine(CommandLine),
+  CommandLineIndicator(CommandLineIndicator),
+  CommandLineInput(CommandLineInput),
+  CommandLineMessage(CommandLineMessage),
 }
 
-inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
-widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+inode_dispatcher!(
+  TreeNode,
+  Root,
+  Cursor,
+  Window,
+  WindowContent,
+  CommandLine,
+  CommandLineIndicator,
+  CommandLineInput,
+  CommandLineMessage
+);
+
+widget_dispatcher!(
+  TreeNode,
+  Root,
+  Cursor,
+  Window,
+  WindowContent,
+  CommandLine,
+  CommandLineIndicator,
+  CommandLineInput,
+  CommandLineMessage
+);
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The widget tree (UI tree).
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// The widget tree manages all UI widgets and rendering on the canvas, each
+/// widgiet is a node on the tree, the tree has a root node, and all other
+/// nodes inside is the root node's descendants. The root node is the terminal
+/// itself, while each node inside renders a part of the terminal.
+///
+/// We use [taffy] to manage the parent-child relationships among all the
+/// nodes, and calculate layout for the whole TUI. The tree structure contains
+/// a [TaffyTree] pointer. Each node holds a weak reference point to that
+/// [TaffyTree], and also a [taffy::Style] to indicate what style this node
+/// wants to be, a [taffy::Layout] to cache the layout result that how this
+/// node is going to render itself.
 ///
 /// # Terms
 ///
@@ -43,181 +103,138 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// # Guarantees
+/// Taffy implements CSS layout algorithms, they are just right to laying out
+/// Rsvim UI widgets as well. But layout just tells a node where it should be
+/// rendering, it is still need to implement the rendering method by itself.
 ///
-/// ## Ownership
+/// # Ownership
 ///
-/// Parent owns all its children.
+/// Parent owns its children:
 ///
-/// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// - Children will be destroyed when their parent is.
+/// - Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries. While the size of each node can be logically infinite on the
+///   imaginary canvas.
+/// - The `visible` (or `enabled`) attributes of a child is implicitly
+///   inherited from it's parent, unless they're explicitly been set.
 ///
-/// ## Priority
+/// # Priority
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// Children have higher priority than their parent to both display and process
+/// input events:
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
-///
-/// # Attributes
-///
-/// ## Shape (position and size)
-///
-/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-/// default relative to its parent top-left corner, and the size is by default logically
-/// infinite. While rendering to the terminal device, we need to calculate its absolute position
-/// and actual size.
-///
-/// There're two kinds of positions:
-/// * Relative: Based on it's parent's position.
-/// * Absolute: Based on the terminal device.
-///
-/// There're two kinds of sizes:
-/// * Logical: An infinite size on the imaginary canvas.
-/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///   bounded by the terminal device's actual shape.
-///
-/// The shape boundary uses top-left open, bottom-right closed interval. For example the
-/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-/// The width and height of the shape is both `10`.
-///
-/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-/// position and actual size right after it's shape is been changed, and also caches the result.
-/// Thus we simply get the cached results when need.
-///
-/// ## Z-index
-///
-/// The z-index arranges the display priority of the content stack when multiple children
-/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-/// those widgets have the same z-index, the later inserted one will cover the previous inserted
-/// ones.
-///
-/// The z-index only works for the children under the same parent. For a child widget, it always
-/// covers/overrides its parent display.
-/// To change the visibility priority between children and parent, you need to change the
-/// relationship between them.
-///
-/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-/// still covers C, because it's a sibling of B.
-///
-/// ## Visible and enabled
-///
-/// A widget can be visible or invisible. When it's visible, it handles user's input events,
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
-///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
-///
+/// - Children are always displayed on top of their parent, and has higher
+///   priority to process a user's input event when the event occurs within the
+///   shape of the child. The event will fallback to their parent if the child
+///   doesn't process it.
+/// - For children that shade each other, the one with higher z-index has
+///   higher priority to display and process the input events.
 pub struct Tree {
-  // Internal implementation.
-  base: Itree<TreeNode>,
+  // Internal tree.
+  lotree: ItreeRc,
 
-  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  // Tree nodes.
+  nodes: FoldMap<TreeNodeId, TreeNode>,
+
+  // Root node ID.
+  root_id: TreeNodeId,
+
+  // CommandLine node ID.
   command_line_id: Option<TreeNodeId>,
 
-  // All [`Window`](crate::ui::widget::Window) node IDs.
+  // Cursor node ID.
+  cursor_id: Option<TreeNodeId>,
+
+  // All window node IDs.
   window_ids: BTreeSet<TreeNodeId>,
 
   // The *current* window node ID.
   //
-  // The **current** window means user is focused on the window widget, i.e. it contains the
-  // cursor, since the cursor is like the mouse on the screen.
-  //
-  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
-  // widget. But we still keeps the **current window**, this field is actually the **previous**
-  // current window.
+  // The **current** window means it contains cursor, even when user is typing
+  // commands in cmdline widget, the cursor is actually in the cmdline widget,
+  // the **current** window is the latest window that contains the cursor.
   current_window_id: Option<TreeNodeId>,
 
-  // Global options for windows.
+  // Global window options.
   global_options: WindowGlobalOptions,
-
-  // Global-local options for windows.
   global_local_options: WindowOptions,
 }
 
 arc_mutex_ptr!(Tree);
 
-// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-// pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
-
 // Node {
 impl Tree {
-  /// Make a widget tree.
-  ///
-  /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
-    let shape = size_into_rect!(canvas_size, isize);
-    let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
-    Tree {
-      base: Itree::new(root_node),
+  /// Make UI tree.
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+    let lotree = Itree::to_rc(Itree::new());
+
+    let root_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(canvas_size.width()),
+        height: taffy::Dimension::from_length(canvas_size.height()),
+      },
+      flex_direction: taffy::FlexDirection::Column,
+      ..Default::default()
+    };
+    let root_id = {
+      let mut base = lotree.borrow_mut();
+      let root_id = base.new_leaf(root_style)?;
+      base.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
+      root_id
+    };
+
+    let root = Root::new(lotree.clone(), root_id);
+    let root_node = TreeNode::Root(root);
+    let mut nodes = FoldMap::new();
+    nodes.insert(root_id, root_node);
+
+    Ok(Tree {
+      lotree,
+      nodes,
+      root_id,
       command_line_id: None,
+      cursor_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
-    }
+    })
   }
 
-  /// Nodes count, include the root node.
-  pub fn len(&self) -> usize {
-    self.base.len()
-  }
-
-  /// Whether the tree is empty.
-  pub fn is_empty(&self) -> bool {
-    self.base.is_empty()
+  pub fn lotree(&self) -> ItreeRc {
+    self.lotree.clone()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self.base.root_id()
-  }
-
-  /// All node IDs collection.
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.base.node_ids()
+    self.root_id
   }
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.base.parent_id(id)
+    self.lotree.borrow().parent(id).copied()
   }
 
   /// Get the children IDs by a node `id`.
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.base.children_ids(id)
+  pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self.lotree.borrow().children(id)
   }
 
   /// Get the node struct by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self.base.node(id)
+    self.nodes.get(&id)
   }
 
   /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self.base.node_mut(id)
+    self.nodes.get_mut(&id)
   }
 
-  // /// See [`Itree::iter`].
-  // pub fn iter(&self) -> TreeIter {
-  //   self.base.iter()
-  // }
-  //
+  /// See [`Itree::iter`].
+  pub fn iter(&self) -> TreeIter {
+    TreeIter::new(self, Some(self.root_id))
+  }
+
   // /// See [`Itree::iter_mut`].
   // pub fn iter_mut(&mut self) -> TreeIterMut {
   //   self.base.iter_mut()
@@ -226,6 +243,11 @@ impl Tree {
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
+  }
+
+  /// Get cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
   }
 
   /// Get current window node ID.
@@ -266,9 +288,8 @@ impl Tree {
     &self.window_ids
   }
 }
-// Node {
+// Node }
 
-// Widget {
 impl Tree {
   /// Window widget.
   pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
@@ -320,6 +341,42 @@ impl Tree {
     }
   }
 
+  pub fn cursor(&self) -> Option<&Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.nodes.contains_key(&cursor_id));
+        let cursor_node = self.node(cursor_id).unwrap();
+        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+        match cursor_node {
+          TreeNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.nodes.contains_key(&cursor_id));
+        let cursor_node = self.node_mut(cursor_id).unwrap();
+        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+        match cursor_node {
+          TreeNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
   // Command-line widget.
   pub fn command_line(&self) -> Option<&CommandLine> {
     match self.command_line_id {
@@ -358,15 +415,14 @@ impl Tree {
     }
   }
 }
-// Widget }
 
-// Insert/Remove {
 impl Tree {
-  fn insert_guard(&mut self, node: &TreeNode) {
-    match node {
-      TreeNode::CommandLine(command_line) => {
+  fn _insert(&mut self, child_node: TreeNode) {
+    // guard
+    match &child_node {
+      TreeNode::CommandLine(cmdline) => {
         // When insert command-line widget, update `command_line_id`.
-        self.command_line_id = Some(command_line.id());
+        self.command_line_id = Some(cmdline.id());
       }
       TreeNode::Window(window) => {
         // When insert window widget, update `window_ids`.
@@ -374,29 +430,212 @@ impl Tree {
       }
       _ => { /* Skip */ }
     }
+
+    self.nodes.insert(child_node.id(), child_node);
   }
 
-  /// See [`Itree::insert`].
-  pub fn insert(
+  /// Create new window node, and insert it as a child to the provided parent_id.
+  pub fn add_new_window(
     &mut self,
     parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
-    self.insert_guard(&child_node);
-    self.base.insert(parent_id, child_node)
+    window_style: Style,
+    window_opts: WindowOptions,
+    buffer: BufferWk,
+  ) -> TaffyResult<TreeNodeId> {
+    let content_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let (window_id, content_id) = {
+      let mut lotree = self.lotree.borrow_mut();
+      let window_id = lotree.new_with_parent(window_style, parent_id)?;
+      let content_id = lotree.new_with_parent(content_style, window_id)?;
+      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+
+      // We don't allow zero-area widget.
+      let window_actual_shape = lotree.actual_shape(window_id)?;
+      let content_actual_shape = lotree.actual_shape(content_id)?;
+      if window_actual_shape.size().is_zero()
+        || content_actual_shape.size().is_zero()
+      {
+        return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
+      }
+
+      (window_id, content_id)
+    };
+
+    let window = Window::new(
+      Rc::downgrade(&self.lotree()),
+      window_id,
+      window_opts,
+      content_id,
+      buffer.clone(),
+    )?;
+    let viewport = window.viewport();
+    let window_node = TreeNode::Window(window);
+    self._insert(window_node);
+
+    let content = WindowContent::new(
+      Rc::downgrade(&self.lotree()),
+      content_id,
+      buffer,
+      Arc::downgrade(&viewport),
+    );
+    let content_node = TreeNode::WindowContent(content);
+    self._insert(content_node);
+
+    Ok(window_id)
   }
 
-  /// See [`Itree::bounded_insert`].
-  pub fn bounded_insert(
+  /// Create new cursor node, and insert it as a child to the provided parent_id.
+  pub fn add_new_cursor(
     &mut self,
     parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
-    self.insert_guard(&child_node);
-    self.base.bounded_insert(parent_id, child_node)
+    blinking: bool,
+    hidden: bool,
+    style: CursorStyle,
+  ) -> TaffyResult<TreeNodeId> {
+    let cursor_style = Style {
+      position: taffy::Position::Absolute,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(0_u16),
+        top: taffy::LengthPercentageAuto::from_length(0_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      ..Default::default()
+    };
+
+    let cursor_id = {
+      let mut base = self.lotree.borrow_mut();
+      let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
+      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      cursor_id
+    };
+
+    let cursor = Cursor::new(
+      Rc::downgrade(&self.lotree()),
+      cursor_id,
+      blinking,
+      hidden,
+      style,
+    );
+    let cursor_node = TreeNode::Cursor(cursor);
+    self._insert(cursor_node);
+
+    Ok(cursor_id)
   }
 
-  fn remove_guard(&mut self, id: TreeNodeId) {
+  /// Create new cmdline node, and insert it as a child to the provided parent_id.
+  pub fn add_new_cmdline(
+    &mut self,
+    parent_id: TreeNodeId,
+    cmdline_style: Style,
+    indicator_symbol: IndicatorSymbol,
+    text_contents: TextContentsWk,
+  ) -> TaffyResult<TreeNodeId> {
+    let indicator_style = Style {
+      display: taffy::Display::None,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let input_style = Style {
+      display: taffy::Display::None,
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+    let message_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::auto(),
+        height: taffy::Dimension::auto(),
+      },
+      ..Default::default()
+    };
+
+    let (cmdline_id, indicator_id, input_id, message_id) = {
+      let mut lotree = self.lotree.borrow_mut();
+      let indicator_id = lotree.new_leaf(indicator_style)?;
+      let input_id = lotree.new_leaf(input_style)?;
+      let message_id = lotree.new_leaf(message_style)?;
+      let cmdline_id = lotree.new_with_children(
+        cmdline_style,
+        &[indicator_id, input_id, message_id],
+      )?;
+      lotree.add_child(parent_id, cmdline_id)?;
+      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+
+      // We don't allow zero-area widget.
+      let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;
+      let input_actual_shape = lotree.actual_shape(input_id)?;
+      let message_actual_shape = lotree.actual_shape(message_id)?;
+      if cmdline_actual_shape.size().is_zero()
+        || input_actual_shape.size().is_zero()
+        || message_actual_shape.size().is_zero()
+      {
+        return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
+      }
+
+      (cmdline_id, indicator_id, input_id, message_id)
+    };
+
+    let cmdline = CommandLine::new(
+      Rc::downgrade(&self.lotree()),
+      cmdline_id,
+      indicator_id,
+      input_id,
+      message_id,
+      text_contents.clone(),
+    )?;
+    let input_viewport = cmdline.input_viewport();
+    let message_viewport = cmdline.message_viewport();
+
+    let cmdline_node = TreeNode::CommandLine(cmdline);
+    self._insert(cmdline_node);
+
+    let indicator = CommandLineIndicator::new(
+      Rc::downgrade(&self.lotree()),
+      indicator_id,
+      indicator_symbol,
+    );
+    let indicator_node = TreeNode::CommandLineIndicator(indicator);
+    self._insert(indicator_node);
+
+    let input = CommandLineInput::new(
+      Rc::downgrade(&self.lotree()),
+      input_id,
+      text_contents.clone(),
+      Arc::downgrade(&input_viewport),
+    );
+    let input_node = TreeNode::CommandLineInput(input);
+    self._insert(input_node);
+
+    let message = CommandLineMessage::new(
+      Rc::downgrade(&self.lotree()),
+      message_id,
+      text_contents,
+      Arc::downgrade(&message_viewport),
+    );
+    let message_node = TreeNode::CommandLineMessage(message);
+    self._insert(message_node);
+
+    Ok(cmdline_id)
+  }
+
+  fn _remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+    // guard
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
     }
@@ -406,15 +645,254 @@ impl Tree {
     {
       self.current_window_id = Some(*last_window_id);
     }
+
+    self.nodes.remove(&id)
   }
 
-  /// See [`Itree::remove`].
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self.remove_guard(id);
-    self.base.remove(id)
+  /// Set window viewport, returns old viewport.
+  pub fn set_window_viewport(
+    &mut self,
+    id: TreeNodeId,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert!(self.window_ids.contains(&id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.viewport();
+    window.set_viewport(viewport.clone());
+    let content_id = window.content_id();
+    debug_assert!(self.nodes.contains_key(&id));
+    let content_node = self.node_mut(content_id).unwrap();
+    debug_assert!(matches!(content_node, TreeNode::WindowContent(_)));
+    match content_node {
+      TreeNode::WindowContent(content) => {
+        content.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
+    }
+    old
+  }
+
+  /// Set window cursor_viewport, returns old cursor_viewport.
+  pub fn set_window_cursor_viewport(
+    &mut self,
+    id: TreeNodeId,
+    cursor_viewport: CursorViewportArc,
+  ) -> CursorViewportArc {
+    debug_assert!(self.window_ids.contains(&id));
+    let window = self.window_mut(id).unwrap();
+    let old = window.cursor_viewport();
+    window.set_cursor_viewport(cursor_viewport.clone());
+    old
+  }
+
+  /// Set command-line input viewport, returns old viewport.
+  pub fn set_cmdline_input_viewport(
+    &mut self,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.input_viewport();
+    cmdline.set_input_viewport(viewport.clone());
+    let input_id = cmdline.input_id();
+    debug_assert!(self.nodes.contains_key(&input_id));
+    let input_node = self.node_mut(input_id).unwrap();
+    debug_assert!(matches!(input_node, TreeNode::CommandLineInput(_)));
+    match input_node {
+      TreeNode::CommandLineInput(input) => {
+        input.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
+    }
+    old
+  }
+
+  /// Set command-line input cursor_viewport, returns old cursor_viewport.
+  pub fn set_cmdline_input_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) -> CursorViewportArc {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.input_cursor_viewport();
+    cmdline.set_input_cursor_viewport(cursor_viewport.clone());
+    old
+  }
+
+  /// Set command-line message viewport, returns old viewport.
+  pub fn set_cmdline_message_viewport(
+    &mut self,
+    viewport: ViewportArc,
+  ) -> ViewportArc {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline = self.command_line_mut().unwrap();
+    let old = cmdline.message_viewport();
+    cmdline.set_message_viewport(viewport.clone());
+    let message_id = cmdline.message_id();
+    debug_assert!(self.nodes.contains_key(&message_id));
+    let input_node = self.node_mut(message_id).unwrap();
+    debug_assert!(matches!(input_node, TreeNode::CommandLineMessage(_)));
+    match input_node {
+      TreeNode::CommandLineMessage(message) => {
+        message.set_viewport(Arc::downgrade(&viewport))
+      }
+      _ => unreachable!(),
+    }
+    old
+  }
+
+  /// Jump cursor to a new parent widget.
+  ///
+  /// Cursor's parent widget must be either a Window or a CommandLine. Here we
+  /// only allow window ID or command-line ID as the parent ID.
+  ///
+  /// NOTE: While inside the internal implementations, cursor node's parent is
+  /// either a window content node, or a command-line input node.
+  ///
+  /// # Returns
+  /// It returns old parent widget ID if jumped successfully, otherwise it
+  /// returns `None` if not jumped, e.g. it still stays in current widget.
+  pub fn jump_cursor_to(
+    &mut self,
+    parent_id: TreeNodeId,
+  ) -> Option<TreeNodeId> {
+    let cursor_id = self.cursor_id.unwrap();
+    let lotree = self.lotree.clone();
+    let mut lotree = lotree.borrow_mut();
+    let old_parent_id = *lotree.parent(cursor_id).unwrap();
+    debug_assert!(self.nodes.contains_key(&old_parent_id));
+    debug_assert!(matches!(
+      self.node(old_parent_id).unwrap(),
+      TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
+    ));
+    let old_parent_id = match self.node_mut(old_parent_id).unwrap() {
+      TreeNode::WindowContent(_content) => {
+        // Cursor is inside a window content widget.
+        let old_window_id = *lotree.parent(old_parent_id).unwrap();
+        debug_assert_eq!(self.current_window_id, Some(old_window_id));
+        debug_assert!(self.nodes.contains_key(&old_window_id));
+        // If new parent is the same window.
+        if old_window_id == parent_id {
+          return None;
+        }
+        match self.node_mut(old_window_id).unwrap() {
+          TreeNode::Window(window) => {
+            lotree.remove_child(old_parent_id, cursor_id);
+            let _removed = window.clear_cursor_id();
+            debug_assert_eq!(_removed, Some(cursor_id));
+          }
+          _ => unreachable!(),
+        }
+        old_window_id
+      }
+      TreeNode::CommandLineInput(_input) => {
+        // Cursor is inside the command-line input widget.
+        let old_cmdline_id = *lotree.parent(old_parent_id).unwrap();
+        debug_assert!(self.nodes.contains_key(&old_cmdline_id));
+        // If new parent is the same window.
+        if old_cmdline_id == parent_id {
+          return None;
+        }
+        match self.node_mut(old_cmdline_id).unwrap() {
+          TreeNode::CommandLine(cmdline) => {
+            lotree.remove_child(old_parent_id, cursor_id);
+            let _removed = cmdline.clear_cursor_id();
+            debug_assert_eq!(_removed, Some(cursor_id));
+          }
+          _ => unreachable!(),
+        }
+        old_cmdline_id
+      }
+      _ => unreachable!(),
+    };
+    debug_assert!(self.nodes.contains_key(&parent_id));
+    match self.node_mut(parent_id).unwrap() {
+      TreeNode::Window(window) => {
+        let content_id = window.content_id();
+        lotree.add_child(content_id, cursor_id);
+        window.set_cursor_id(cursor_id);
+      }
+      TreeNode::CommandLine(cmdline) => {
+        let cmdline_input_id = cmdline.input_id();
+        lotree.add_child(cmdline_input_id, cursor_id);
+        cmdline.set_cursor_id(cursor_id);
+      }
+      _ => unreachable!(),
+    }
+    Some(old_parent_id)
+  }
+
+  /// Moves cursor to (x,y) position. X is column, Y is row.
+  /// It returns new position/shape of the cursor if moved successfully,
+  /// otherwise it returns `None` if doesn't move.
+  ///
+  /// NOTE: Cursor movement is bounded, it will never go out of its parent
+  /// widget.
+  pub fn move_cursor_to(&mut self, x: u16, y: u16) -> Option<U16Rect> {
+    let cursor_id = self.cursor_id.unwrap();
+    let lotree = self.lotree.clone();
+    let mut lotree = lotree.borrow_mut();
+    let parent_id = *lotree.parent(cursor_id).unwrap();
+    debug_assert!(self.nodes.contains_key(&parent_id));
+    debug_assert!(matches!(
+      self.node(parent_id).unwrap(),
+      TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
+    ));
+    let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
+    let new_x = num_traits::clamp(
+      x,
+      parent_actual_shape.min().x,
+      parent_actual_shape.max().x,
+    );
+    let new_y = num_traits::clamp(
+      y,
+      parent_actual_shape.min().y,
+      parent_actual_shape.max().y,
+    );
+    let actual_shape = lotree.actual_shape(cursor_id).unwrap();
+    let pos: U16Pos = actual_shape.min().into();
+    // If the new position is same with current position, no need to move.
+    if pos.x() == new_x && pos.y() == new_y {
+      return None;
+    }
+
+    let mut style = lotree.style(cursor_id).unwrap().clone();
+    style.inset = taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(new_x),
+      top: taffy::LengthPercentageAuto::from_length(new_y),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    };
+    lotree.set_style(cursor_id, style).unwrap();
+    lotree
+      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
+      .unwrap();
+    Some(lotree.actual_shape(cursor_id).unwrap())
+  }
+
+  /// Moves cursor by (x,y) offset. X is column, Y is row.
+  /// It returns new position/shape of the cursor if moved successfully,
+  /// otherwise it returns `None` if doesn't move.
+  ///
+  /// NOTE: Cursor movement is bounded, it will never go out of its parent
+  /// widget.
+  pub fn move_cursor_by(&mut self, x: i16, y: i16) -> Option<U16Rect> {
+    let (new_x, new_y) = {
+      let cursor_id = self.cursor_id.unwrap();
+      let lotree = self.lotree.clone();
+      let lotree = lotree.borrow_mut();
+      let pos = lotree.actual_shape(cursor_id).unwrap().min();
+      let new_x =
+        num_traits::clamp((pos.x as isize) + x as isize, 0, u16::MAX as isize)
+          as u16;
+      let new_y =
+        num_traits::clamp((pos.y as isize) + y as isize, 0, u16::MAX as isize)
+          as u16;
+      (new_x, new_y)
+    };
+    self.move_cursor_to(new_x, new_y)
   }
 }
-// Insert/Remove }
 
 // Movement {
 impl Tree {
@@ -426,7 +904,7 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.bounded_move_by(id, x, y)
+    self.lotree.bounded_move_by(id, x, y)
   }
 
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
@@ -437,7 +915,7 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.bounded_move_to(id, x, y)
+    self.lotree.bounded_move_to(id, x, y)
   }
 }
 // Movement }
@@ -464,7 +942,7 @@ impl Tree {
     &mut self.global_local_options
   }
 
-  pub fn set_global_local_options(&mut self, options: &WindowOptions) {
+  pub fn set_global_local_options(&mut self, options: WindowOptions) {
     self.global_local_options = *options;
   }
 }
@@ -475,7 +953,7 @@ impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = lock!(canvas);
-    for node in self.base.iter() {
+    for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
       if !node.visible() {
         continue;

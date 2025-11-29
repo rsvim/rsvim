@@ -4,11 +4,14 @@ use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::cursor::BLINKING;
+use crate::ui::widget::cursor::HIDDEN;
+use crate::ui::widget::cursor::STYLE;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::prelude::FromLength;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -17,31 +20,37 @@ pub fn make_tree_with_buffers(
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
   // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
   let tree_root_id = tree.root_id();
 
   // Window
-  let window_shape = size_into_rect!(canvas_size, isize);
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::auto(),
+    },
+    ..Default::default()
+  };
+
+  let (_, buf) = buffers.first_key_value().unwrap();
+  let window_opts = *tree.global_local_options();
+  let window_id = tree
+    .add_new_window(
+      tree_root_id,
+      window_style,
+      window_opts,
       Arc::downgrade(buf),
     )
-  };
-  let window_id = window.id();
+    .unwrap();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
+  let _cursor_id = tree
+    .add_new_cursor(window_content_id, BLINKING, HIDDEN, STYLE)
+    .unwrap();
 
-  // Cursor.
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
-  window.insert_cursor(cursor);
-
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
   tree.set_current_window_id(Some(window_id));
 
   tree_arc.clone()
@@ -56,44 +65,50 @@ pub fn make_tree_with_buffers_cmdline(
   text_contents: TextContentsArc,
 ) -> TreeArc {
   // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
   let tree_root_id = tree.root_id();
 
-  // window
-  let window_shape = size_into_rect!(canvas_size, isize);
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::auto(),
+    },
+    ..Default::default()
+  };
+  let cmdline_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    ..Default::default()
+  };
+
+  let (_, buf) = buffers.first_key_value().unwrap();
+  let window_opts = *tree.global_local_options();
+  let window_id = tree
+    .add_new_window(
+      tree_root_id,
+      window_style,
+      window_opts,
       Arc::downgrade(buf),
     )
-  };
-  let window_id = window.id();
-
-  // cursor
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
-  window.insert_cursor(cursor);
-
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+    .unwrap();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
+  let _cursor_id = tree
+    .add_new_cursor(window_content_id, BLINKING, HIDDEN, STYLE)
+    .unwrap();
   tree.set_current_window_id(Some(window_id));
 
-  // command-line
-  let cmdline_shape = rect!(
-    0,
-    canvas_size.height().saturating_sub(1) as isize,
-    canvas_size.width() as isize,
-    canvas_size.height() as isize
+  let _cmdline_id = tree.add_new_cmdline(
+    tree_root_id,
+    cmdline_style,
+    IndicatorSymbol::Empty,
+    Arc::downgrade(&text_contents),
   );
-  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
-  let _cmdline_id = cmdline.id();
-
-  tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
   tree_arc.clone()
 }

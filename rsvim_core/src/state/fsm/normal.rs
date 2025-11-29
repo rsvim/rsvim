@@ -10,7 +10,6 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
-use crate::ui::widget::window::WindowNode;
 use compact_str::CompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -124,7 +123,7 @@ impl NormalStateful {
     // Remove cursor from current window
     let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
-    let cursor = match current_window.remove_cursor().unwrap() {
+    let cursor = match current_window.clear_cursor_id().unwrap() {
       WindowNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBar);
         cursor

@@ -142,7 +142,7 @@ impl CommandLineExStateful {
     debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent
-    let cursor = match cmdline.remove_cursor().unwrap() {
+    let cursor = match cmdline.clear_cursor_id().unwrap() {
       CommandLineNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
         cursor

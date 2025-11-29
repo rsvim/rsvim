@@ -2,7 +2,6 @@
 
 pub mod content;
 pub mod opt;
-pub mod root;
 
 #[cfg(test)]
 mod content_tests;
@@ -10,10 +9,8 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_enum_dispatcher;
-use crate::inode_itree_impl;
+use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
@@ -22,28 +19,15 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::widget_enum_dispatcher;
-use content::Content;
+use content::WindowContent;
 use opt::*;
-use root::RootContainer;
-use std::sync::Arc;
-
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  RootContainer(RootContainer),
-  Content(Content),
-  Cursor(Cursor),
-}
-
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -54,20 +38,25 @@ pub struct Window {
   cursor_viewport: CursorViewportArc,
 }
 
+inode_impl!(Window);
+impl Widgetable for Window {}
+
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let root = RootContainer::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
-
-    let mut base = Itree::new(root_node);
-
+  pub fn new(
+    lotree: ItreeWk,
+    id: TreeNodeId,
+    opts: WindowOptions,
+    content_id: TreeNodeId,
+    buffer: BufferWk,
+  ) -> TaffyResult<Self> {
     let (viewport, cursor_viewport) = {
+      let lotree = lotree.upgrade().unwrap();
+      let lotree = lotree.borrow();
+      let content_actual_shape = lotree.actual_shape(content_id)?;
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+        Viewport::view(&opts, buffer.text(), &content_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -75,33 +64,15 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
-    let content_id = content.id();
-    let content_node = WindowNode::Content(content);
-
-    base.bounded_insert(root_id, content_node);
-
-    Window {
-      base,
-      options: *opts,
+    Ok(Window {
+      base: InodeBase::new(lotree, id),
+      options: opts,
       content_id,
       cursor_id: None,
       buffer,
       viewport,
       cursor_viewport,
-    }
-  }
-}
-
-inode_itree_impl!(Window, base);
-
-impl Widgetable for Window {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      node.draw(canvas);
-    }
+    })
   }
 }
 
@@ -142,12 +113,7 @@ impl Window {
 
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
-    self.viewport = viewport.clone();
-    if let Some(WindowNode::Content(content)) =
-      self.base.node_mut(self.content_id)
-    {
-      content.set_viewport(Arc::downgrade(&viewport));
-    }
+    self.viewport = viewport;
   }
 
   /// Get cursor viewport.
@@ -156,8 +122,8 @@ impl Window {
   }
 
   /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
-    self.cursor_viewport = cursor_viewport;
+  pub fn set_cursor_viewport(&mut self, viewport: CursorViewportArc) {
+    self.cursor_viewport = viewport;
   }
 }
 // Viewport }
@@ -204,7 +170,7 @@ impl EditableWidgetable for Window {
 // Sub-Widgets {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &Content {
+  pub fn content(&self) -> &WindowContent {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -220,7 +186,7 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut Content {
+  pub fn content_mut(&mut self) -> &mut WindowContent {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),
@@ -280,49 +246,24 @@ impl Window {
 
 // Cursor {
 impl Window {
-  /// Enable/insert cursor widget in window, i.e. when user moves cursor to a window, the window
-  /// content widget contains this cursor, and allow user moving cursor (or inserting text at
-  /// cursor).
+  /// Set cursor widget ID in window, e.g. user moves cursor into this window.
   ///
   /// # Returns
-  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
-  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<WindowNode> {
-    self.cursor_id = Some(cursor.id());
-    self
-      .base
-      .bounded_insert(self.content_id, WindowNode::Cursor(cursor))
+  /// It returns the previous cursor ID.
+  pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
+    self.cursor_id = Some(cursor_id);
+    old
   }
 
-  /// Disable/remove cursor widget from window, i.e. when user cursor leaves window, the window
-  /// content widget doesn't contain this cursor any longer.
+  /// Clear cursor ID from window, e.g. user cursor leaves this window.
   ///
   /// # Returns
-  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
-  pub fn remove_cursor(&mut self) -> Option<WindowNode> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
-        debug_assert!(self.base.parent_id(cursor_id).is_some());
-        debug_assert_eq!(
-          self.base.parent_id(cursor_id).unwrap(),
-          self.content_id
-        );
-        self.cursor_id = None;
-        let cursor_node = self.base.remove(cursor_id);
-        debug_assert!(cursor_node.is_some());
-        debug_assert!(matches!(
-          cursor_node.as_ref().unwrap(),
-          WindowNode::Cursor(_)
-        ));
-        cursor_node
-      }
-      None => {
-        debug_assert!(self.cursor_id.is_none());
-        debug_assert!(self.base.node(self.content_id).is_some());
-        debug_assert!(self.base.children_ids(self.content_id).is_empty());
-        None
-      }
-    }
+  /// It returns the previous cursor ID.
+  pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+    let old = self.cursor_id;
+    self.cursor_id = None;
+    old
   }
 
   /// Bounded move cursor by x(columns) and y(rows).

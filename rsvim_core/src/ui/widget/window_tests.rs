@@ -29,7 +29,8 @@ fn make_window_from_size(
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
-  let window_shape = size_into_rect!(terminal_size, isize);
+  let window_shape = terminal_size.into_rect();
+  let window_shape = rect_as!(window_shape, isize);
   Window::new(
     tree.global_local_options(),
     window_shape,
