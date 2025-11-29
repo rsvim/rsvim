@@ -111,6 +111,13 @@ where
   pub fn is_zero(&self) -> bool {
     self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
   }
+
+  pub fn into_rect(&self) -> Rect<T> {
+    Rect::new(
+      (T::from(0).unwrap(), T::from(0).unwrap()),
+      (self.width(), self.height()),
+    )
+  }
 }
 
 #[macro_export]
