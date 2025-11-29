@@ -32,6 +32,7 @@ use std::rc::Rc;
 use std::rc::Weak;
 use std::sync::Arc;
 use taffy::Style;
+use taffy::TaffyError;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
@@ -449,10 +450,20 @@ impl Tree {
       ..Default::default()
     };
     let (window_id, content_id) = {
-      let mut base = self.lotree.borrow_mut();
-      let window_id = base.new_with_parent(window_style, parent_id)?;
-      let content_id = base.new_with_parent(content_style, window_id)?;
-      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      let mut lotree = self.lotree.borrow_mut();
+      let window_id = lotree.new_with_parent(window_style, parent_id)?;
+      let content_id = lotree.new_with_parent(content_style, window_id)?;
+      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+
+      // We don't allow zero-area widget.
+      let window_actual_shape = lotree.actual_shape(window_id)?;
+      let content_actual_shape = lotree.actual_shape(content_id)?;
+      if window_actual_shape.size().is_zero()
+        || content_actual_shape.size().is_zero()
+      {
+        return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
+      }
+
       (window_id, content_id)
     };
 
@@ -555,16 +566,28 @@ impl Tree {
     };
 
     let (cmdline_id, indicator_id, input_id, message_id) = {
-      let mut base = self.lotree.borrow_mut();
-      let indicator_id = base.new_leaf(indicator_style)?;
-      let input_id = base.new_leaf(input_style)?;
-      let message_id = base.new_leaf(message_style)?;
-      let cmdline_id = base.new_with_children(
+      let mut lotree = self.lotree.borrow_mut();
+      let indicator_id = lotree.new_leaf(indicator_style)?;
+      let input_id = lotree.new_leaf(input_style)?;
+      let message_id = lotree.new_leaf(message_style)?;
+      let cmdline_id = lotree.new_with_children(
         cmdline_style,
         &[indicator_id, input_id, message_id],
       )?;
-      base.add_child(parent_id, cmdline_id)?;
-      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      lotree.add_child(parent_id, cmdline_id)?;
+      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+
+      // We don't allow zero-area widget.
+      let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;
+      let input_actual_shape = lotree.actual_shape(input_id)?;
+      let message_actual_shape = lotree.actual_shape(message_id)?;
+      if cmdline_actual_shape.size().is_zero()
+        || input_actual_shape.size().is_zero()
+        || message_actual_shape.size().is_zero()
+      {
+        return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
+      }
+
       (cmdline_id, indicator_id, input_id, message_id)
     };
 
