@@ -132,8 +132,8 @@ impl Itree {
     self.lo.set_style(*loid, style)
   }
 
-  /// Actual location/size on real-world canvas on limited terminal.
-  /// The top-left location can never be negative.
+  /// Actual location/size in limited terminal device. The top-left location
+  /// can never be negative.
   ///
   /// A node's shape is always truncated by its parent shape.
   /// Unless the node itself is the root node and doesn't have a parent, in
