@@ -534,7 +534,7 @@ fn shape2() {
   let expect_shapes: [IRect; 6] = [s1, s2, s3, s4, s5, s6];
   for i in 0..6 {
     let expect_us = expect_actual_shapes[i];
-    let expect_s = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.actual_shape(nids[i]).unwrap();
     assert_eq!(expect_s, actual_s);
