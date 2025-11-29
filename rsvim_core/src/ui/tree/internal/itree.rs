@@ -109,7 +109,7 @@ impl Itree {
     self.lo.layout(*loid)
   }
 
-  pub fn layout_shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     let layout = self.layout(id)?;
     let shape = rect!(
       layout.location.x,
@@ -138,7 +138,7 @@ impl Itree {
   /// A node's shape is always truncated by its parent shape.
   /// Unless the node itself is the root node and doesn't have a parent, in
   /// such case, the root node logical shape does not need to be truncated.
-  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
     let result = match self.parent(id) {
       Some(parent_id) => {
@@ -147,8 +147,8 @@ impl Itree {
         match cached {
           Some(cached) => Ok(cached),
           None => {
-            let shape = self.layout_shape(id)?;
-            let parent_shape = self.shape(*parent_id)?;
+            let shape = self.shape(id)?;
+            let parent_shape = self.actual_shape(*parent_id)?;
             let left = num_traits::clamp(
               shape.min().x,
               0,
@@ -178,7 +178,7 @@ impl Itree {
       }
       None => {
         // Root node doesn't have a parent.
-        let shape = self.layout_shape(id)?;
+        let shape = self.shape(id)?;
         let left = num_traits::clamp_min(shape.min().x, 0);
         let top = num_traits::clamp_min(shape.min().y, 0);
         let right = num_traits::clamp_min(shape.max().x, left);

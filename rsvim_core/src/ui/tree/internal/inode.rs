@@ -47,7 +47,7 @@ impl Inodeable for InodeBase {
       .upgrade()
       .unwrap()
       .borrow()
-      .shape(self.id)
+      .actual_shape(self.id)
       .unwrap()
   }
 
@@ -57,7 +57,7 @@ impl Inodeable for InodeBase {
       .upgrade()
       .unwrap()
       .borrow()
-      .shape(self.id)
+      .actual_shape(self.id)
       .unwrap()
   }
 

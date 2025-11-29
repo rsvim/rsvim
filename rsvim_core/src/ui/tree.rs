@@ -815,8 +815,8 @@ impl Tree {
       self.node(parent_id).unwrap(),
       TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
     ));
-    let shape = lotree.shape(cursor_id).unwrap();
-    let parent_shape = lotree.shape(parent_id).unwrap();
+    let shape = lotree.actual_shape(cursor_id).unwrap();
+    let parent_shape = lotree.actual_shape(parent_id).unwrap();
     let new_x =
       num_traits::clamp(x, parent_shape.min().x, parent_shape.max().x);
     let new_y =
@@ -836,7 +836,7 @@ impl Tree {
     lotree
       .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
       .unwrap();
-    Some(lotree.shape(cursor_id).unwrap())
+    Some(lotree.actual_shape(cursor_id).unwrap())
   }
 
   /// Moves cursor by (x,y) offset. X is column, Y is row.
