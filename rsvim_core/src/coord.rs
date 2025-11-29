@@ -59,8 +59,7 @@ pub type U16Rect = Rect<u16>;
 
 pub trait RectExt<T>
 where
-  T:
-    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
+  T: geo::CoordNum,
 {
   fn size(&self) -> Size<T>;
   fn location(&self) -> Point<T>;
@@ -68,8 +67,7 @@ where
 
 impl<T> RectExt<T> for Rect<T>
 where
-  T:
-    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
+  T: geo::CoordNum,
 {
   fn size(&self) -> Size<T> {
     Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
@@ -84,8 +82,7 @@ where
 // Size
 pub struct Size<T>
 where
-  T:
-    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
+  T: geo::CoordNum,
 {
   width: T,
   height: T,
@@ -97,8 +94,7 @@ pub type U16Size = Size<u16>;
 
 impl<T> Size<T>
 where
-  T:
-    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
+  T: geo::CoordNum,
 {
   pub fn new(width: T, height: T) -> Self {
     Self { width, height }
