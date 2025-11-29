@@ -195,10 +195,3 @@ macro_rules! size_into_rect {
     ) as $crate::coord::Rect<$ty>
   };
 }
-
-#[macro_export]
-macro_rules! size_is_zero {
-  ($s:ident) => {
-    ($s.width() == 0 || $s.height() == 0)
-  };
-}
