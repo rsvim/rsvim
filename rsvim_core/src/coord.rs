@@ -59,7 +59,8 @@ pub type U16Rect = Rect<u16>;
 
 pub trait RectExt<T>
 where
-  T: geo::CoordNum,
+  T:
+    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
 {
   fn size(&self) -> Size<T>;
   fn location(&self) -> Point<T>;
@@ -67,7 +68,8 @@ where
 
 impl<T> RectExt<T> for Rect<T>
 where
-  T: geo::CoordNum,
+  T:
+    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
 {
   fn size(&self) -> Size<T> {
     Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
@@ -82,7 +84,8 @@ where
 // Size
 pub struct Size<T>
 where
-  T: geo::CoordNum,
+  T:
+    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
 {
   width: T,
   height: T,
@@ -94,7 +97,8 @@ pub type U16Size = Size<u16>;
 
 impl<T> Size<T>
 where
-  T: geo::CoordNum,
+  T:
+    num_traits::NumCast + num_traits::Num + std::fmt::Debug + Copy + PartialOrd,
 {
   pub fn new(width: T, height: T) -> Self {
     Self { width, height }
@@ -106,6 +110,10 @@ where
 
   pub fn height(&self) -> T {
     self.height
+  }
+
+  pub fn is_zero(&self) -> bool {
+    self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
   }
 }
 
@@ -189,5 +197,12 @@ macro_rules! size_into_rect {
       (0 as $ty, 0 as $ty),
       ($s.width() as $ty, $s.height() as $ty),
     ) as $crate::coord::Rect<$ty>
+  };
+}
+
+#[macro_export]
+macro_rules! size_is_zero {
+  ($s:ident) => {
+    ($s.width() == 0 || $s.height() == 0)
   };
 }
