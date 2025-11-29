@@ -144,29 +144,36 @@ impl Itree {
       Some(parent_id) => {
         // Non-root node truncated by its parent's shape.
         let cached = self.cached_shapes.borrow().get(&id).copied();
-        if cached.is_some() {
-          Ok(cached.unwrap())
-        } else {
-          let shape = self.layout_shape(id)?;
-          let parent_shape = self.shape(*parent_id)?;
-          let left =
-            num_traits::clamp(shape.min().x, 0, parent_shape.max().x as isize);
-          let top =
-            num_traits::clamp(shape.min().y, 0, parent_shape.max().y as isize);
-          let right = num_traits::clamp(
-            shape.max().x,
-            left,
-            parent_shape.max().x as isize,
-          );
-          let bottom = num_traits::clamp(
-            shape.max().y,
-            top,
-            parent_shape.max().y as isize,
-          );
-          let shape = rect!(left, top, right, bottom);
-          let shape = rect_as!(shape, u16);
-          self.cached_shapes.borrow_mut().insert(id, shape);
-          Ok(shape)
+        match cached {
+          Some(cached) => Ok(cached),
+          None => {
+            let shape = self.layout_shape(id)?;
+            let parent_shape = self.shape(*parent_id)?;
+            let left = num_traits::clamp(
+              shape.min().x,
+              0,
+              parent_shape.max().x as isize,
+            );
+            let top = num_traits::clamp(
+              shape.min().y,
+              0,
+              parent_shape.max().y as isize,
+            );
+            let right = num_traits::clamp(
+              shape.max().x,
+              left,
+              parent_shape.max().x as isize,
+            );
+            let bottom = num_traits::clamp(
+              shape.max().y,
+              top,
+              parent_shape.max().y as isize,
+            );
+            let shape = rect!(left, top, right, bottom);
+            let shape = rect_as!(shape, u16);
+            self.cached_shapes.borrow_mut().insert(id, shape);
+            Ok(shape)
+          }
         }
       }
       None => {
