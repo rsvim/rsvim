@@ -62,7 +62,6 @@ where
   T: geo::CoordNum,
 {
   fn size(&self) -> Size<T>;
-  fn location(&self) -> Point<T>;
 }
 
 impl<T> RectExt<T> for Rect<T>
@@ -71,10 +70,6 @@ where
 {
   fn size(&self) -> Size<T> {
     Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
-  }
-
-  fn location(&self) -> Point<T> {
-    geo::point!(x: self.min().x, y: self.min().y)
   }
 }
 

@@ -805,7 +805,7 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_cursor_to(&mut self, x: u16, y: u16) -> Option<U16Rect> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
     let mut lotree = lotree.borrow_mut();
@@ -815,20 +815,28 @@ impl Tree {
       self.node(parent_id).unwrap(),
       TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
     ));
-    let shape = lotree.actual_shape(cursor_id).unwrap();
-    let parent_shape = lotree.actual_shape(parent_id).unwrap();
-    let new_x =
-      num_traits::clamp(x, parent_shape.min().x, parent_shape.max().x);
-    let new_y =
-      num_traits::clamp(y, parent_shape.min().y, parent_shape.max().y);
-    let pos: IPos = shape.min().into();
+    let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
+    let new_x = num_traits::clamp(
+      x,
+      parent_actual_shape.min().x,
+      parent_actual_shape.max().x,
+    );
+    let new_y = num_traits::clamp(
+      y,
+      parent_actual_shape.min().y,
+      parent_actual_shape.max().y,
+    );
+    let actual_shape = lotree.actual_shape(cursor_id).unwrap();
+    let pos: U16Pos = actual_shape.min().into();
+    // If the new position is same with current position, no need to move.
     if pos.x() == new_x && pos.y() == new_y {
       return None;
     }
+
     let mut style = lotree.style(cursor_id).unwrap().clone();
     style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_x as i16),
-      top: taffy::LengthPercentageAuto::from_length(new_y as i16),
+      left: taffy::LengthPercentageAuto::from_length(new_x),
+      top: taffy::LengthPercentageAuto::from_length(new_y),
       right: taffy::LengthPercentageAuto::AUTO,
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
@@ -845,14 +853,14 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_cursor_by(&mut self, x: u16, y: u16) -> Option<U16Rect> {
     let (new_x, new_y) = {
       let cursor_id = self.cursor_id.unwrap();
       let lotree = self.lotree.clone();
       let lotree = lotree.borrow_mut();
-      let pos = lotree.location(cursor_id).unwrap();
-      let new_x = pos.x() + x;
-      let new_y = pos.y() + y;
+      let pos = lotree.actual_shape(cursor_id).unwrap().min();
+      let new_x = pos.x + x;
+      let new_y = pos.y + y;
       (new_x, new_y)
     };
     self.move_cursor_to(new_x, new_y)
