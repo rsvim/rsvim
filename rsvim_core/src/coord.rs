@@ -190,15 +190,3 @@ macro_rules! size_as {
       as $crate::coord::Size<$ty>
   };
 }
-
-/// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
-/// is `(width, height)` where width/height is from `Size<T>`.
-#[macro_export]
-macro_rules! size_into_rect {
-  ($s:ident,$ty:ty) => {
-    $crate::coord::Rect::new(
-      (0 as $ty, 0 as $ty),
-      ($s.width() as $ty, $s.height() as $ty),
-    ) as $crate::coord::Rect<$ty>
-  };
-}
