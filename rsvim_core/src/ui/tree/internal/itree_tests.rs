@@ -536,7 +536,7 @@ fn shape2() {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
     let actual_us = tree.actual_shape(nids[i]).unwrap();
-    let actual_s = tree.actual_shape(nids[i]).unwrap();
+    let actual_s = tree.shape(nids[i]).unwrap();
     assert_eq!(expect_s, actual_s);
     assert_eq!(expect_us, actual_us);
   }
