@@ -853,14 +853,18 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_by(&mut self, x: u16, y: u16) -> Option<U16Rect> {
+  pub fn move_cursor_by(&mut self, x: i16, y: i16) -> Option<U16Rect> {
     let (new_x, new_y) = {
       let cursor_id = self.cursor_id.unwrap();
       let lotree = self.lotree.clone();
       let lotree = lotree.borrow_mut();
       let pos = lotree.actual_shape(cursor_id).unwrap().min();
-      let new_x = pos.x + x;
-      let new_y = pos.y + y;
+      let new_x =
+        num_traits::clamp((pos.x as isize) + x as isize, 0, u16::MAX as isize)
+          as u16;
+      let new_y =
+        num_traits::clamp((pos.y as isize) + y as isize, 0, u16::MAX as isize)
+          as u16;
       (new_x, new_y)
     };
     self.move_cursor_to(new_x, new_y)
