@@ -236,13 +236,7 @@ impl Itree {
       None => {
         // Root node doesn't have a parent.
         let shape = self.shape(id)?;
-        let left = num_traits::clamp_min(shape.min().x, 0);
-        let top = num_traits::clamp_min(shape.min().y, 0);
-        let right = num_traits::clamp_min(shape.max().x, left);
-        let bottom = num_traits::clamp_min(shape.max().y, top);
-        let shape = rect!(left, top, right, bottom);
-        let shape = rect_as!(shape, u16);
-        Ok(shape)
+        Ok(rect_as!(shape, u16))
       }
     };
     result
