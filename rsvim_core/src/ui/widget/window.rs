@@ -18,8 +18,6 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::cursor::Cursor;
-use content::WindowContent;
 use opt::*;
 use taffy::TaffyResult;
 
@@ -187,24 +185,6 @@ impl Window {
     let old = self.cursor_id;
     self.cursor_id = None;
     old
-  }
-
-  /// Bounded move cursor by x(columns) and y(rows).
-  ///
-  /// # Panics
-  /// It panics if cursor not exist.
-  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
-    let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_by(cursor_id, x, y)
-  }
-
-  /// Bounded move cursor to position x(columns) and y(rows).
-  ///
-  /// # Panics
-  /// It panics if cursor not exist.
-  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
-    let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_to(cursor_id, x, y)
   }
 }
 // Cursor }
