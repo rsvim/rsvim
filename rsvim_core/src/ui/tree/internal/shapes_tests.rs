@@ -20,7 +20,7 @@ fn convert_to_actual_shape1() {
         let input_actual_parent_shape = rect!(0, 0, p as u16, q as u16);
         let expect =
           rect!(0, 0, min(t.max().x, p) as u16, min(t.max().y, q) as u16);
-        let actual = make_actual_shape(t, &input_actual_parent_shape);
+        let actual = convert_to_actual_shape(t, &input_actual_parent_shape);
         info!("expect:{:?}, actual:{:?}", expect, actual);
         assert_eq!(actual, expect);
       }
@@ -47,7 +47,7 @@ fn convert_to_actual_shape2() {
     rect!(5, 3, 5, 3),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = make_actual_shape(&p.0, &p.1);
+    let actual = convert_to_actual_shape(&p.0, &p.1);
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
