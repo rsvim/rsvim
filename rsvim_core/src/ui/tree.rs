@@ -870,11 +870,11 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_to(&mut self, x: u16, y: u16) -> Option<U16Rect> {
+  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<U16Rect> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
     let mut lotree = lotree.borrow_mut();
-    let parent_id = *lotree.parent(cursor_id).unwrap();
+    let parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(matches!(
       self.node(parent_id).unwrap(),
@@ -883,25 +883,25 @@ impl Tree {
     let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
     let new_x = num_traits::clamp(
       x,
-      parent_actual_shape.min().x,
-      parent_actual_shape.max().x,
+      parent_actual_shape.min().x as isize,
+      parent_actual_shape.max().x as isize,
     );
     let new_y = num_traits::clamp(
       y,
-      parent_actual_shape.min().y,
-      parent_actual_shape.max().y,
+      parent_actual_shape.min().y as isize,
+      parent_actual_shape.max().y as isize,
     );
     let actual_shape = lotree.actual_shape(cursor_id).unwrap();
     let pos: U16Pos = actual_shape.min().into();
     // If the new position is same with current position, no need to move.
-    if pos.x() == new_x && pos.y() == new_y {
+    if pos.x() as isize == new_x && pos.y() as isize == new_y {
       return None;
     }
 
     let mut style = lotree.style(cursor_id).unwrap().clone();
     style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_x),
-      top: taffy::LengthPercentageAuto::from_length(new_y),
+      left: taffy::LengthPercentageAuto::from_length(new_x as i16),
+      top: taffy::LengthPercentageAuto::from_length(new_y as i16),
       right: taffy::LengthPercentageAuto::AUTO,
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
