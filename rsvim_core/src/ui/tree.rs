@@ -470,7 +470,7 @@ impl Tree {
     }
   }
 
-  /// Get mutable command-line input widget.
+  /// Mutable command-line input widget.
   pub fn command_line_input_mut(&mut self) -> &mut CommandLineInput {
     let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
@@ -483,7 +483,7 @@ impl Tree {
     }
   }
 
-  /// Get command-line message widget.
+  /// Command-line message widget.
   pub fn command_line_message(&self) -> &CommandLineMessage {
     let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
