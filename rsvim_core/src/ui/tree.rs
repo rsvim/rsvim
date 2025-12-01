@@ -928,8 +928,12 @@ impl Tree {
   pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = lock!(canvas);
     for node in self.iter() {
-      // trace!("Draw tree:{:?}", node);
+      // Node is invisible
       if !node.visible() {
+        continue;
+      }
+      // Actual size is 0
+      if node.actual_shape().size().is_zero() {
         continue;
       }
       node.draw(&mut canvas);
