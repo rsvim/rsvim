@@ -126,6 +126,10 @@ macro_rules! inode_impl {
         self.base.actual_shape()
       }
 
+      fn no_display(&self) -> bool {
+        self.base.no_display()
+      }
+
       fn visible(&self) -> bool {
         self.base.visible()
       }
@@ -173,6 +177,15 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.actual_shape(),
+          )*
+        }
+      }
+
+
+      fn no_display(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.no_display(),
           )*
         }
       }
