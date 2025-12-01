@@ -953,11 +953,11 @@ impl Tree {
   ///
   /// # Panics
   /// It panics if cursor doesn't exist.
-  pub fn cursor_mut(&self) -> &Cursor {
+  pub fn cursor_mut(&self) -> &mut Cursor {
     debug_assert!(self.cursor_id.is_some());
     let cursor_id = self.cursor_id.unwrap();
     debug_assert!(self.nodes.contains_key(&cursor_id));
-    match self.node_mut(&cursor_id).unwrap() {
+    match self.node_mut(cursor_id).unwrap() {
       TreeNode::Cursor(cursor) => cursor,
       _ => unreachable!(),
     }
