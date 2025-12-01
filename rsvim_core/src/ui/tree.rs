@@ -19,6 +19,7 @@ use crate::ui::widget::command_line::input::CommandLineInput;
 use crate::ui::widget::command_line::message::CommandLineMessage;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::Root;
+use crate::ui::widget::window;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
@@ -652,15 +653,15 @@ impl Tree {
   /// Set window viewport, returns old viewport.
   pub fn set_window_viewport(
     &mut self,
-    id: TreeNodeId,
+    window_id: TreeNodeId,
     viewport: ViewportArc,
   ) -> ViewportArc {
-    debug_assert!(self.window_ids.contains(&id));
-    let window = self.window_mut(id).unwrap();
+    debug_assert!(self.window_ids.contains(&window_id));
+    let window = self.window_mut(window_id).unwrap();
     let old = window.viewport();
     window.set_viewport(viewport.clone());
     let content_id = window.content_id();
-    debug_assert!(self.nodes.contains_key(&id));
+    debug_assert!(self.nodes.contains_key(&window_id));
     let content_node = self.node_mut(content_id).unwrap();
     debug_assert!(matches!(content_node, TreeNode::WindowContent(_)));
     match content_node {
@@ -675,14 +676,55 @@ impl Tree {
   /// Set window cursor_viewport, returns old cursor_viewport.
   pub fn set_window_cursor_viewport(
     &mut self,
-    id: TreeNodeId,
+    window_id: TreeNodeId,
     cursor_viewport: CursorViewportArc,
   ) -> CursorViewportArc {
-    debug_assert!(self.window_ids.contains(&id));
-    let window = self.window_mut(id).unwrap();
+    debug_assert!(self.window_ids.contains(&window_id));
+    let window = self.window_mut(window_id).unwrap();
     let old = window.cursor_viewport();
     window.set_cursor_viewport(cursor_viewport.clone());
     old
+  }
+
+  /// Get window content widget by window ID.
+  pub fn window_content(&self, window_id: TreeNodeId) -> &WindowContent {
+    debug_assert!(self.window_ids.contains(&window_id));
+    let content_id = match self.node(window_id) {
+      Some(window_node) => match window_node {
+        TreeNode::Window(window) => window.content_id(),
+        _ => unreachable!(),
+      },
+      None => unreachable!(),
+    };
+    match self.node(content_id) {
+      Some(content_node) => match content_node {
+        TreeNode::WindowContent(content) => content,
+        _ => unreachable!(),
+      },
+      None => unreachable!(),
+    }
+  }
+
+  /// Get window content widget by window ID.
+  pub fn window_content_mut(
+    &mut self,
+    window_id: TreeNodeId,
+  ) -> &mut WindowContent {
+    debug_assert!(self.window_ids.contains(&window_id));
+    let content_id = match self.node(window_id) {
+      Some(window_node) => match window_node {
+        TreeNode::Window(window) => window.content_id(),
+        _ => unreachable!(),
+      },
+      None => unreachable!(),
+    };
+    match self.node_mut(content_id) {
+      Some(content_node) => match content_node {
+        TreeNode::WindowContent(content) => content,
+        _ => unreachable!(),
+      },
+      None => unreachable!(),
+    }
   }
 
   /// Set command-line input viewport, returns old viewport.
