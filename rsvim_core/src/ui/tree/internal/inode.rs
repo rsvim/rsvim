@@ -18,8 +18,6 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
   fn visible(&self) -> bool;
 
   fn layout(&self) -> taffy::Layout;
-
-  fn style(&self) -> taffy::Style;
 }
 
 #[derive(Debug, Clone)]
@@ -93,17 +91,6 @@ impl Inodeable for InodeBase {
       .unwrap()
       .clone()
   }
-
-  fn style(&self) -> taffy::Style {
-    self
-      .lotree
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .style(self.id)
-      .unwrap()
-      .clone()
-  }
 }
 
 #[macro_export]
@@ -136,10 +123,6 @@ macro_rules! inode_impl {
 
       fn layout(&self) -> taffy::Layout {
         self.base.layout()
-      }
-
-      fn style(&self) -> taffy::Style {
-        self.base.style()
       }
     }
   };
@@ -201,14 +184,6 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.layout(),
-          )*
-        }
-      }
-
-      fn style(&self) -> taffy::Style {
-        match self {
-          $(
-            $enum::$variant(e) => e.style(),
           )*
         }
       }
