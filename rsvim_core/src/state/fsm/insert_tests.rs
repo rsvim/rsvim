@@ -241,16 +241,14 @@ pub fn assert_viewport(
 
 pub fn make_canvas(
   terminal_size: U16Size,
-  window_options: WindowOptions,
+  _window_options: WindowOptions,
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(&window_options);
-  let shape = rect_from_size!(terminal_size);
-  let shape = rect_as!(shape, isize);
+  let tree = Tree::new(terminal_size).unwrap();
   let window_content = WindowContent::new(
-    shape,
+    Rc::downgrade(&tree.lotree()),
+    next_node_id(),
     Arc::downgrade(&buffer),
     Arc::downgrade(&viewport),
   );
