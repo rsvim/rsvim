@@ -47,7 +47,7 @@ impl Inodeable for InodeBase {
       .upgrade()
       .unwrap()
       .borrow()
-      .actual_shape(self.id)
+      .shape(self.id)
       .unwrap()
   }
 
@@ -69,6 +69,7 @@ impl Inodeable for InodeBase {
       .borrow()
       .visible(self.id)
       .unwrap()
+      && !self.actual_shape().size().is_zero()
   }
 
   fn layout(&self) -> taffy::Layout {

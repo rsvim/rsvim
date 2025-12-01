@@ -932,10 +932,6 @@ impl Tree {
       if !node.visible() {
         continue;
       }
-      // Actual size is 0
-      if node.actual_shape().size().is_zero() {
-        continue;
-      }
       node.draw(&mut canvas);
     }
   }
