@@ -121,6 +121,7 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Jump cursor from current window to command-line.
+    tree.cursor_mut().
     let _old_window_id = tree.jump_cursor_to(tree.command_line_id().unwrap());
     debug_assert!(_old_window_id.is_some());
     debug_assert_eq!(_old_window_id, tree.current_window_id());
@@ -135,8 +136,8 @@ impl NormalStateful {
     debug_assert!(current_window.cursor_id().is_none());
 
     // Insert to command-line
-    debug_assert!(tree.command_line_mut().is_some());
-    let cmdline = tree.command_line_mut().unwrap();
+    debug_assert!(tree.cmdline_mut().is_some());
+    let cmdline = tree.cmdline_mut().unwrap();
 
     cmdline.show_input();
 

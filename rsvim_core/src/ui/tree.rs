@@ -420,7 +420,7 @@ impl Tree {
   }
 
   // Command-line widget.
-  pub fn command_line(&self) -> Option<&CommandLine> {
+  pub fn cmdline(&self) -> Option<&CommandLine> {
     match self.command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node(cmdline_id).is_some());
@@ -439,7 +439,7 @@ impl Tree {
   }
 
   // Mutable command-line widget.
-  pub fn command_line_mut(&mut self) -> Option<&mut CommandLine> {
+  pub fn cmdline_mut(&mut self) -> Option<&mut CommandLine> {
     match self.command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node_mut(cmdline_id).is_some());
@@ -458,7 +458,7 @@ impl Tree {
   }
 
   /// Command-line input widget.
-  pub fn command_line_input(&self) -> &CommandLineInput {
+  pub fn cmdline_input(&self) -> &CommandLineInput {
     let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
       self.node(input_id).unwrap(),
@@ -811,7 +811,7 @@ impl Tree {
     viewport: ViewportArc,
   ) -> ViewportArc {
     debug_assert!(self.command_line_id.is_some());
-    let cmdline = self.command_line_mut().unwrap();
+    let cmdline = self.cmdline_mut().unwrap();
     let old = cmdline.input_viewport();
     cmdline.set_input_viewport(viewport.clone());
     let input_id = cmdline.input_id();
@@ -833,7 +833,7 @@ impl Tree {
     cursor_viewport: CursorViewportArc,
   ) -> CursorViewportArc {
     debug_assert!(self.command_line_id.is_some());
-    let cmdline = self.command_line_mut().unwrap();
+    let cmdline = self.cmdline_mut().unwrap();
     let old = cmdline.input_cursor_viewport();
     cmdline.set_input_cursor_viewport(cursor_viewport.clone());
     old
@@ -845,7 +845,7 @@ impl Tree {
     viewport: ViewportArc,
   ) -> ViewportArc {
     debug_assert!(self.command_line_id.is_some());
-    let cmdline = self.command_line_mut().unwrap();
+    let cmdline = self.cmdline_mut().unwrap();
     let old = cmdline.message_viewport();
     cmdline.set_message_viewport(viewport.clone());
     let message_id = cmdline.message_id();
@@ -865,9 +865,9 @@ impl Tree {
     &mut self,
     show_input: bool,
   ) -> TaffyResult<()> {
-    let input_id = self.command_line().unwrap().input_id();
-    let indicator_id = self.command_line().unwrap().indicator_id();
-    let message_id = self.command_line().unwrap().message_id();
+    let input_id = self.cmdline().unwrap().input_id();
+    let indicator_id = self.cmdline().unwrap().indicator_id();
+    let message_id = self.cmdline().unwrap().message_id();
 
     let mut lotree = self.lotree.borrow_mut();
     let mut input_style = lotree.style(input_id)?.clone();

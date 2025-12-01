@@ -7870,7 +7870,7 @@ mod tests_goto_command_line_ex_mode {
 
     let tree = data_access.tree.clone();
     let actual_cursor = lock!(tree.clone())
-      .command_line()
+      .cmdline()
       .unwrap()
       .input_cursor_viewport();
     assert_eq!(actual_cursor.line_idx(), 0);
@@ -7956,7 +7956,7 @@ mod tests_goto_command_line_ex_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);

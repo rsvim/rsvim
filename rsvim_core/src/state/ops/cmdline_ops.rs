@@ -14,13 +14,13 @@ fn set_message(
   text_contents: &mut TextContents,
   payload: String,
 ) {
-  debug_assert!(tree.command_line().is_some());
+  debug_assert!(tree.cmdline().is_some());
 
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
   message_text.insert_at(0, 0, payload.to_compact_string());
 
-  let cmdline = tree.command_line_mut().unwrap();
+  let cmdline = tree.cmdline_mut().unwrap();
   let opts = *cmdline.options();
   let actual_shape = *cmdline.message().actual_shape();
 
@@ -68,12 +68,12 @@ pub fn cmdline_clear_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
 ) {
-  debug_assert!(tree.command_line().is_some());
+  debug_assert!(tree.cmdline().is_some());
 
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
 
-  let cmdline = tree.command_line_mut().unwrap();
+  let cmdline = tree.cmdline_mut().unwrap();
   let opts = *cmdline.options();
   let actual_shape = *cmdline.message().actual_shape();
 
