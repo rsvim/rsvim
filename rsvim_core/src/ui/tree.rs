@@ -881,18 +881,12 @@ impl Tree {
       TreeNode::WindowContent(_) | TreeNode::CommandLineInput(_)
     ));
     let parent_actual_shape = lotree.actual_shape(parent_id).unwrap();
-    let new_x = num_traits::clamp(
-      x,
-      parent_actual_shape.min().x as isize,
-      parent_actual_shape.max().x as isize,
-    );
-    let new_y = num_traits::clamp(
-      y,
-      parent_actual_shape.min().y as isize,
-      parent_actual_shape.max().y as isize,
-    );
-    let actual_shape = lotree.actual_shape(cursor_id).unwrap();
-    let pos: U16Pos = actual_shape.min().into();
+    let new_x =
+      num_traits::clamp(x, 0, parent_actual_shape.size().width() as isize);
+    let new_y =
+      num_traits::clamp(y, 0, parent_actual_shape.size().height() as isize);
+    let shape = lotree.shape(cursor_id).unwrap();
+    let pos: U16Pos = shape.min().into();
     // If the new position is same with current position, no need to move.
     if pos.x() as isize == new_x && pos.y() as isize == new_y {
       return None;
