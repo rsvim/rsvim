@@ -215,7 +215,7 @@ impl Itree {
     Ok(no_display || actual_shape.size().is_zero())
   }
 
-  pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
+  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
