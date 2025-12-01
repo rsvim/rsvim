@@ -46,7 +46,7 @@ fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 ///    parent's shape.
 /// 2. If the relative shape is outside of it's parent or the terminal, it will
 ///    be automatically bounded inside of it's parent or the terminal's shape.
-fn convert_shape_to_actual_shape(
+fn convert_to_actual_shape(
   shape: &IRect,
   parent_actual_shape: &U16Rect,
 ) -> U16Rect {
@@ -222,31 +222,14 @@ impl Itree {
           Some(cached) => Ok(cached),
           None => {
             let shape = self.shape(id)?;
-            let parent_shape = self.actual_shape(*parent_id)?;
-            let left = num_traits::clamp(
-              shape.min().x,
-              0,
-              parent_shape.max().x as isize,
-            );
-            let top = num_traits::clamp(
-              shape.min().y,
-              0,
-              parent_shape.max().y as isize,
-            );
-            let right = num_traits::clamp(
-              shape.max().x,
-              left,
-              parent_shape.max().x as isize,
-            );
-            let bottom = num_traits::clamp(
-              shape.max().y,
-              top,
-              parent_shape.max().y as isize,
-            );
-            let shape = rect!(left, top, right, bottom);
-            let shape = rect_as!(shape, u16);
-            self.cached_actual_shapes.borrow_mut().insert(id, shape);
-            Ok(shape)
+            let parent_actual_shape = self.actual_shape(*parent_id)?;
+            let actual_shape =
+              convert_to_actual_shape(&shape, &parent_actual_shape);
+            self
+              .cached_actual_shapes
+              .borrow_mut()
+              .insert(id, actual_shape);
+            Ok(actual_shape)
           }
         }
       }
@@ -285,7 +268,8 @@ impl Itree {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
-    Ok(style.display == taffy::Display::None)
+    let actual_shape = self.actual_shape(id)?;
+    Ok(style.display == taffy::Display::None || actual_shape.size().is_zero())
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
