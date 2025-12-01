@@ -503,7 +503,7 @@ impl Tree {
   }
 
   /// Mutable command-line message widget.
-  pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
+  pub fn cmdline_message_mut(&mut self) -> Option<&mut CommandLineMessage> {
     let message_id = match self.cmdline() {
       Some(cmdline) => cmdline.message_id(),
       None => return None,
