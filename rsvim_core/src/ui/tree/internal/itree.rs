@@ -257,6 +257,13 @@ impl Itree {
     }
   }
 
+  pub fn no_display(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    let style = self.lo.style(*loid)?;
+    Ok(style.display == taffy::Display::None)
+  }
+
   /// Whether the node is visible, e.g. style is `display: none`.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self._internal_check();
