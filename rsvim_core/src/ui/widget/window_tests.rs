@@ -39,7 +39,6 @@ fn make_window_from_size(
     },
     ..Default::default()
   };
-
   let window_id = tree
     .add_new_window(
       tree.root_id(),
@@ -48,7 +47,6 @@ fn make_window_from_size(
       Arc::downgrade(&buffer),
     )
     .unwrap();
-
   (tree, window_id)
 }
 
@@ -112,7 +110,7 @@ fn draw_after_init1() {
 
   let window_local_options =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let window =
+  let (tree, window_id) =
     make_window_from_size(terminal_size, buf.clone(), window_local_options);
   let mut actual = Canvas::new(terminal_size);
   window.draw(&mut actual);
