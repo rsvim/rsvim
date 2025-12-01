@@ -458,28 +458,32 @@ impl Tree {
   }
 
   /// Command-line input widget.
-  pub fn cmdline_input(&self) -> &CommandLineInput {
-    let input_id = self.cmdline().input_id();
-    debug_assert!(matches!(
-      self.node(input_id).unwrap(),
-      TreeNode::CommandLineInput(_)
-    ));
-    match self.node(input_id).unwrap() {
-      TreeNode::CommandLineInput(input) => input,
-      _ => unreachable!(),
+  pub fn cmdline_input(&self) -> Option<&CommandLineInput> {
+    let input_id = match self.cmdline() {
+      Some(cmdline) => cmdline.input_id(),
+      None => return None,
+    };
+    match self.node(input_id) {
+      Some(input_node) => match input_node {
+        TreeNode::CommandLineInput(input) => Some(input),
+        _ => None,
+      },
+      None => None,
     }
   }
 
   /// Mutable command-line input widget.
   pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
-    let input_id = self.cmdline().input_id();
-    debug_assert!(matches!(
-      self.node(input_id).unwrap(),
-      TreeNode::CommandLineInput(_)
-    ));
-    match self.node_mut(input_id).unwrap() {
-      TreeNode::CommandLineInput(input) => input,
-      _ => unreachable!(),
+    let input_id = match self.cmdline() {
+      Some(cmdline) => cmdline.input_id(),
+      None => return None,
+    };
+    match self.node_mut(input_id) {
+      Some(input_node) => match input_node {
+        TreeNode::CommandLineInput(input) => Some(input),
+        _ => None,
+      },
+      None => None,
     }
   }
 
@@ -1037,34 +1041,6 @@ impl Tree {
       (new_x, new_y)
     };
     self.move_cursor_to(new_x, new_y)
-  }
-
-  /// Get cursor widget.
-  ///
-  /// # Panics
-  /// It panics if cursor doesn't exist.
-  pub fn cursor(&self) -> &Cursor {
-    debug_assert!(self.cursor_id.is_some());
-    let cursor_id = self.cursor_id.unwrap();
-    debug_assert!(self.nodes.contains_key(&cursor_id));
-    match self.node(cursor_id).unwrap() {
-      TreeNode::Cursor(cursor) => cursor,
-      _ => unreachable!(),
-    }
-  }
-
-  /// Get mutable cursor widget.
-  ///
-  /// # Panics
-  /// It panics if cursor doesn't exist.
-  pub fn cursor_mut(&mut self) -> &mut Cursor {
-    debug_assert!(self.cursor_id.is_some());
-    let cursor_id = self.cursor_id.unwrap();
-    debug_assert!(self.nodes.contains_key(&cursor_id));
-    match self.node_mut(cursor_id).unwrap() {
-      TreeNode::Cursor(cursor) => cursor,
-      _ => unreachable!(),
-    }
   }
 }
 

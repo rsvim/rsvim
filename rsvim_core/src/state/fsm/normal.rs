@@ -121,29 +121,19 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Jump cursor from current window to command-line.
-    tree.cursor_mut().
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
     let _old_window_id = tree.jump_cursor_to(tree.command_line_id().unwrap());
     debug_assert!(_old_window_id.is_some());
     debug_assert_eq!(_old_window_id, tree.current_window_id());
 
-    let cursor = match current_window.clear_cursor_id().unwrap() {
-      WindowNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBar);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(current_window.cursor_id().is_none());
+    tree.move_cursor_to(0, 0);
 
-    // Insert to command-line
-    debug_assert!(tree.cmdline_mut().is_some());
-    let cmdline = tree.cmdline_mut().unwrap();
+    // Command-line show input/indicator, hide message.
+    tree.cmdline_show_input();
 
-    cmdline.show_input();
-
-    let _previous_cursor = cmdline.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    cmdline.move_cursor_to(0, 0);
     cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
