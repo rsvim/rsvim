@@ -23,7 +23,7 @@ pub struct Cursor {
   // blinking=false
   // hidden=false
   flags: Flags,
-  style: CursorStyle,
+  cursor_style: CursorStyle,
 }
 
 impl Cursor {
@@ -32,7 +32,7 @@ impl Cursor {
     id: TreeNodeId,
     blinking: bool,
     hidden: bool,
-    style: CursorStyle,
+    cursor_style: CursorStyle,
   ) -> Self {
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
@@ -40,7 +40,7 @@ impl Cursor {
     Self {
       base: InodeBase::new(lotree, id),
       flags,
-      style,
+      cursor_style,
     }
   }
 
@@ -64,12 +64,12 @@ impl Cursor {
     self.flags.set(Flags::HIDDEN, value);
   }
 
-  pub fn style(&self) -> &CursorStyle {
-    &self.style
+  pub fn cursor_style(&self) -> &CursorStyle {
+    &self.cursor_style
   }
 
-  pub fn set_style(&mut self, style: &CursorStyle) {
-    self.style = *style;
+  pub fn set_cursor_style(&mut self, style: &CursorStyle) {
+    self.cursor_style = *style;
   }
 }
 
@@ -88,7 +88,7 @@ impl Widgetable for Cursor {
       pos,
       self.blinking(),
       self.hidden(),
-      *self.style(),
+      *self.cursor_style(),
     ));
   }
 }

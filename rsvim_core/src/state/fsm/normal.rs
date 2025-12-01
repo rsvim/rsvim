@@ -220,7 +220,7 @@ impl NormalStateful {
 
     let current_window = tree.current_window_mut().unwrap();
     let cursor = current_window.cursor_mut().unwrap();
-    cursor.set_style(&CursorStyle::SteadyBar);
+    cursor.set_cursor_style(&CursorStyle::SteadyBar);
 
     StateMachine::InsertMode(super::InsertStateful::default())
   }

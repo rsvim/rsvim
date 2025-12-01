@@ -183,7 +183,7 @@ impl InsertStateful {
     debug_assert!(current_window.cursor_mut().is_some());
     let cursor = current_window.cursor_mut().unwrap();
     debug_assert_eq!(_cursor_id, cursor.id());
-    cursor.set_style(&CursorStyle::SteadyBlock);
+    cursor.set_cursor_style(&CursorStyle::SteadyBlock);
 
     StateMachine::NormalMode(super::NormalStateful::default())
   }
