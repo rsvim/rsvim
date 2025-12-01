@@ -471,7 +471,7 @@ impl Tree {
   }
 
   /// Mutable command-line input widget.
-  pub fn command_line_input_mut(&mut self) -> &mut CommandLineInput {
+  pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
     let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
       self.node(input_id).unwrap(),
@@ -484,7 +484,7 @@ impl Tree {
   }
 
   /// Command-line message widget.
-  pub fn command_line_message(&self) -> &CommandLineMessage {
+  pub fn cmdline_message(&self) -> &CommandLineMessage {
     let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
@@ -497,7 +497,7 @@ impl Tree {
   }
 
   /// Mutable command-line message widget.
-  pub fn command_line_message_mut(&mut self) -> &mut CommandLineMessage {
+  pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
     let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
@@ -510,7 +510,7 @@ impl Tree {
   }
 
   /// Command-line indicator widget.
-  pub fn command_line_indicator(&self) -> &CommandLineIndicator {
+  pub fn cmdline_indicator(&self) -> &CommandLineIndicator {
     let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
@@ -523,7 +523,7 @@ impl Tree {
   }
 
   /// Mutable command-line indicator widget.
-  pub fn command_line_indicator_mut(&mut self) -> &mut CommandLineIndicator {
+  pub fn cmdline_indicator_mut(&mut self) -> &mut CommandLineIndicator {
     let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
@@ -861,10 +861,7 @@ impl Tree {
     old
   }
 
-  fn _command_line_toggle_input(
-    &mut self,
-    show_input: bool,
-  ) -> TaffyResult<()> {
+  fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let input_id = self.cmdline().unwrap().input_id();
     let indicator_id = self.cmdline().unwrap().indicator_id();
     let message_id = self.cmdline().unwrap().message_id();
@@ -891,13 +888,13 @@ impl Tree {
   }
 
   /// Show input/indicator widget, hide message widget in command-line.
-  pub fn command_line_show_input(&mut self) -> TaffyResult<()> {
-    self._command_line_toggle_input(true)
+  pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
+    self._cmdline_toggle_input(true)
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
-  pub fn command_line_show_message(&mut self) -> TaffyResult<()> {
-    self._command_line_toggle_input(false)
+  pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
+    self._cmdline_toggle_input(false)
   }
 
   /// Jump cursor to a new parent widget.
