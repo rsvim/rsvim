@@ -11,4 +11,4 @@ mod shapes_tests;
 
 pub use inode::*;
 pub use itree::*;
-pub use shapes::*;
+use shapes::*;

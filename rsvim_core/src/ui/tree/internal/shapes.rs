@@ -1,86 +1,60 @@
-//! Conversion between relative shape and actual shape.
+//! Internal tree relative shape and actual shape converters.
 
-#![allow(clippy::let_and_return)]
-
-use crate::point_as;
 use crate::prelude::*;
+
+/// Bound (truncate) relative shape based on its parent's size.
+pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+  let parent_size = parent_actual_shape.size();
+  let min_x = num_traits::clamp(shape.min().x, 0, parent_size.width() as isize);
+  let min_y =
+    num_traits::clamp(shape.min().y, 0, parent_size.height() as isize);
+  let max_x =
+    num_traits::clamp(shape.max().x, min_x, parent_size.width() as isize);
+  let max_y =
+    num_traits::clamp(shape.max().y, min_y, parent_size.height() as isize);
+  rect!(min_x, min_y, max_x, max_y)
+}
 
 /// Convert relative shape to actual shape, based on its parent's actual shape.
 ///
 /// NOTE:
-/// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
-/// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
-///    automatically bounded inside of it's parent or the terminal's shape.
-pub fn make_actual_shape(
+/// 1. If the widget doesn't have a parent, use the terminal shape as its
+///    parent's shape.
+/// 2. If the relative shape is outside of it's parent or the terminal, it will
+///    be automatically bounded inside of it's parent or the terminal's shape.
+pub fn convert_to_actual_shape(
   shape: &IRect,
   parent_actual_shape: &U16Rect,
 ) -> U16Rect {
-  // trace!(
-  //   "shape:{:?}, parent_actual_shape:{:?}",
-  //   shape, parent_actual_shape
-  // );
-  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_top_left_ipos: IPos =
-    point_as!(parent_actual_top_left_pos, isize);
-  let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
-  let parent_actual_bottom_right_ipos: IPos =
-    point_as!(parent_actual_bottom_right_pos, isize);
+  let parent_min_pos: U16Pos = parent_actual_shape.min().into();
+  let parent_min_pos: IPos = point_as!(parent_min_pos, isize);
+  let parent_max_pos: U16Pos = parent_actual_shape.max().into();
+  let parent_max_pos: IPos = point_as!(parent_max_pos, isize);
 
-  let top_left_pos: IPos = shape.min().into();
-  let bottom_right_pos: IPos = shape.max().into();
+  let min_pos: IPos = shape.min().into();
+  let max_pos: IPos = shape.max().into();
 
-  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_top_left_ipos;
-  let actual_top_left_x = num_traits::clamp(
-    actual_top_left_ipos.x(),
-    parent_actual_top_left_ipos.x(),
-    parent_actual_bottom_right_ipos.x(),
+  let actual_min_pos: IPos = min_pos + parent_min_pos;
+  let actual_min_x = num_traits::clamp(
+    actual_min_pos.x(),
+    parent_min_pos.x(),
+    parent_max_pos.x(),
   );
-  let actual_top_left_y = num_traits::clamp(
-    actual_top_left_ipos.y(),
-    parent_actual_top_left_ipos.y(),
-    parent_actual_bottom_right_ipos.y(),
+  let actual_min_y = num_traits::clamp(
+    actual_min_pos.y(),
+    parent_min_pos.y(),
+    parent_max_pos.y(),
   );
-  let actual_top_left_pos: U16Pos =
-    point!(actual_top_left_x as u16, actual_top_left_y as u16);
-  // trace!(
-  //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
-  //   actual_top_left_ipos, actual_top_left_pos
-  // );
 
-  let actual_bottom_right_ipos: IPos =
-    bottom_right_pos + parent_actual_top_left_ipos;
-  let actual_bottom_right_x = num_traits::clamp(
-    actual_bottom_right_ipos.x(),
-    parent_actual_top_left_ipos.x(),
-    parent_actual_bottom_right_ipos.x(),
-  );
-  let actual_bottom_right_y = num_traits::clamp(
-    actual_bottom_right_ipos.y(),
-    parent_actual_top_left_ipos.y(),
-    parent_actual_bottom_right_ipos.y(),
-  );
-  let actual_bottom_right_pos: U16Pos =
-    point!(actual_bottom_right_x as u16, actual_bottom_right_y as u16);
+  let actual_max_pos: IPos = max_pos + parent_min_pos;
+  let actual_max_x =
+    num_traits::clamp(actual_max_pos.x(), actual_min_x, parent_max_pos.x());
+  let actual_max_y =
+    num_traits::clamp(actual_max_pos.y(), actual_min_y, parent_max_pos.y());
 
-  let actual_isize = size!(
-    (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
-    (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize)
-  );
-  // trace!(
-  //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
-  //   actual_isize, actual_top_left_pos
-  // );
-
-  let actual_shape = rect!(
-    actual_top_left_pos.x(),
-    actual_top_left_pos.y(),
-    actual_top_left_pos.x() + actual_isize.width() as u16,
-    actual_top_left_pos.y() + actual_isize.height() as u16
-  );
-  // trace!(
-  //   "actual_isize:{:?}, actual_shape:{:?}",
-  //   actual_isize, actual_shape
-  // );
+  let actual_shape =
+    rect!(actual_min_x, actual_min_y, actual_max_x, actual_max_y);
+  let actual_shape = rect_as!(actual_shape, u16);
 
   actual_shape
 }

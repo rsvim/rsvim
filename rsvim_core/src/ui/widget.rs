@@ -54,7 +54,7 @@ pub trait EditableWidgetable {
 
   fn editable_options(&self) -> &WindowOptions;
 
-  fn editable_actual_shape(&self) -> &U16Rect;
+  fn editable_actual_shape(&self) -> U16Rect;
 
   fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect>;
 
