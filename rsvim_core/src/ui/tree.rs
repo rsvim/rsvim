@@ -488,28 +488,32 @@ impl Tree {
   }
 
   /// Command-line message widget.
-  pub fn cmdline_message(&self) -> &CommandLineMessage {
-    let message_id = self.cmdline().message_id();
-    debug_assert!(matches!(
-      self.node(message_id).unwrap(),
-      TreeNode::CommandLineMessage(_)
-    ));
-    match self.node(message_id).unwrap() {
-      TreeNode::CommandLineMessage(message) => message,
-      _ => unreachable!(),
+  pub fn cmdline_message(&self) -> Option<&CommandLineMessage> {
+    let message_id = match self.cmdline() {
+      Some(cmdline) => cmdline.message_id(),
+      None => return None,
+    };
+    match self.node(message_id) {
+      Some(message_node) => match message_node {
+        TreeNode::CommandLineMessage(message) => Some(message),
+        _ => None,
+      },
+      None => None,
     }
   }
 
   /// Mutable command-line message widget.
   pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
-    let message_id = self.cmdline().message_id();
-    debug_assert!(matches!(
-      self.node(message_id).unwrap(),
-      TreeNode::CommandLineMessage(_)
-    ));
-    match self.node_mut(message_id).unwrap() {
-      TreeNode::CommandLineMessage(message) => message,
-      _ => unreachable!(),
+    let message_id = match self.cmdline() {
+      Some(cmdline) => cmdline.message_id(),
+      None => return None,
+    };
+    match self.node_mut(message_id) {
+      Some(message_node) => match message_node {
+        TreeNode::CommandLineMessage(message) => Some(message),
+        _ => None,
+      },
+      None => None,
     }
   }
 
