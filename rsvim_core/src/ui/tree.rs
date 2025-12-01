@@ -692,6 +692,7 @@ impl Tree {
   /// It panics if window_id doesn't exist.
   pub fn window_content(&self, window_id: TreeNodeId) -> &WindowContent {
     debug_assert!(self.window_ids.contains(&window_id));
+    debug_assert!(matches!(self.node(window_id).unwrap(), TreeNode::Window(_)));
     let content_id = match self.node(window_id).unwrap() {
       TreeNode::Window(window) => window.content_id(),
       _ => unreachable!(),
@@ -714,6 +715,7 @@ impl Tree {
     window_id: TreeNodeId,
   ) -> &mut WindowContent {
     debug_assert!(self.window_ids.contains(&window_id));
+    debug_assert!(matches!(self.node(window_id).unwrap(), TreeNode::Window(_)));
     let content_id = match self.node(window_id).unwrap() {
       TreeNode::Window(window) => window.content_id(),
       _ => unreachable!(),
@@ -787,6 +789,44 @@ impl Tree {
   pub fn cmdline_input(&self) -> &CommandLineInput {
     debug_assert!(self.command_line_id.is_some());
     let cmdline_id = self.command_line_id.unwrap();
+    debug_assert!(matches!(
+      self.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    let input_id = match self.node(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline.input_id(),
+      _ => unreachable!(),
+    };
+    debug_assert!(matches!(
+      self.node(input_id).unwrap(),
+      TreeNode::CommandLineInput(_)
+    ));
+    match self.node(input_id).unwrap() {
+      TreeNode::CommandLineInput(input) => input,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Get mutable command-line input widget.
+  pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline_id = self.command_line_id.unwrap();
+    debug_assert!(matches!(
+      self.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    let input_id = match self.node(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline.input_id(),
+      _ => unreachable!(),
+    };
+    debug_assert!(matches!(
+      self.node(input_id).unwrap(),
+      TreeNode::CommandLineInput(_)
+    ));
+    match self.node_mut(input_id).unwrap() {
+      TreeNode::CommandLineInput(input) => input,
+      _ => unreachable!(),
+    }
   }
 
   /// Jump cursor to a new parent widget.
