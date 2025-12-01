@@ -174,7 +174,7 @@ impl Window {
     let lotree = self.lotree().upgrade().unwrap();
     let lotree = lotree.borrow();
     debug_assert!(lotree.parent(self.content_id).is_some());
-    debug_assert_eq!(*lotree.parent(self.content_id).unwrap(), self.id());
+    debug_assert_eq!(lotree.parent(self.content_id).unwrap(), self.id());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
       WindowNode::Content(_)
