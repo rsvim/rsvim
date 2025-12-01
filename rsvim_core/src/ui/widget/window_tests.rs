@@ -12,7 +12,10 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::next_node_id;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::*;
 use compact_str::ToCompactString;
 use ropey::Rope;
@@ -20,11 +23,12 @@ use ropey::RopeBuilder;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufWriter;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Once;
 use taffy::Style;
 
-fn make_window_from_size(
+fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
   window_options: WindowOptions,
@@ -48,6 +52,50 @@ fn make_window_from_size(
     )
     .unwrap();
   (tree, window_id)
+}
+
+fn make_canvas(
+  terminal_size: U16Size,
+  _window_options: WindowOptions,
+  buffer: BufferArc,
+  viewport: ViewportArc,
+) -> Canvas {
+  let tree = Tree::new(terminal_size).unwrap();
+  let window_content = WindowContent::new(
+    Rc::downgrade(&tree.lotree()),
+    next_node_id(),
+    Arc::downgrade(&buffer),
+    Arc::downgrade(&viewport),
+  );
+  let mut canvas = Canvas::new(terminal_size);
+  window_content.draw(&mut canvas);
+  canvas
+}
+
+pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+  let actual = actual
+    .frame()
+    .raw_symbols()
+    .iter()
+    .map(|cs| cs.join(""))
+    .collect::<Vec<_>>();
+  info!("actual:{}", actual.len());
+  for a in actual.iter() {
+    info!("{:?}", a);
+  }
+  info!("expect:{}", expect.len());
+  for e in expect.iter() {
+    info!("{:?}", e);
+  }
+
+  assert_eq!(actual.len(), expect.len());
+  for i in 0..actual.len() {
+    let e = &expect[i];
+    let a = &actual[i];
+    info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+    assert_eq!(e.len(), a.len());
+    assert_eq!(e, a);
+  }
 }
 
 fn do_test_draw(actual: &Canvas, expect: &[&str]) {
@@ -108,11 +156,14 @@ fn draw_after_init1() {
     "          ",
   ];
 
-  let window_local_options =
+  let window_opts =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let (tree, window_id) =
-    make_window_from_size(terminal_size, buf.clone(), window_local_options);
-  let mut actual = Canvas::new(terminal_size);
-  window.draw(&mut actual);
-  do_test_draw(&actual, &expect);
+  let (tree, window_id) = make_window(terminal_size, buf.clone(), window_opts);
+  let actual = make_canvas(
+    terminal_size,
+    window_opts,
+    buf.clone(),
+    tree.window(window_id).unwrap().viewport(),
+  );
+  assert_canvas(&actual, expect);
 }
