@@ -1,11 +1,11 @@
-//! Conversion between logical shape and actual shape.
+//! Conversion between relative shape and actual shape.
 
 #![allow(clippy::let_and_return)]
 
 use crate::point_as;
 use crate::prelude::*;
 
-/// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
+/// Convert relative shape to actual shape, based on its parent's actual shape.
 ///
 /// NOTE:
 /// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
