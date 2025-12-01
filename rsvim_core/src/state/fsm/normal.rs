@@ -120,9 +120,11 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Remove cursor from current window
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
+    // Jump cursor from current window to command-line.
+    let _old_window_id = tree.jump_cursor_to(tree.command_line_id().unwrap());
+    debug_assert!(_old_window_id.is_some());
+    debug_assert_eq!(_old_window_id, tree.current_window_id());
+
     let cursor = match current_window.clear_cursor_id().unwrap() {
       WindowNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBar);

@@ -325,6 +325,51 @@ impl Tree {
     }
   }
 
+  /// Window content widget.
+  pub fn window_content(
+    &self,
+    window_id: TreeNodeId,
+  ) -> Option<&WindowContent> {
+    let content_id = match self.node(window_id) {
+      Some(window_node) => match window_node {
+        TreeNode::Window(window) => window.content_id(),
+        _ => return None,
+      },
+      None => return None,
+    };
+    match self.node(content_id) {
+      Some(content_node) => match content_node {
+        TreeNode::WindowContent(content) => Some(content),
+        _ => None,
+      },
+      None => None,
+    }
+  }
+
+  /// Get mutable window content widget by window ID.
+  ///
+  /// # Panics
+  /// It panics if window_id doesn't exist.
+  pub fn window_content_mut(
+    &mut self,
+    window_id: TreeNodeId,
+  ) -> Option<&mut WindowContent> {
+    let content_id = match self.node(window_id) {
+      Some(window_node) => match window_node {
+        TreeNode::Window(window) => window.content_id(),
+        _ => return None,
+      },
+      None => return None,
+    };
+    match self.node_mut(content_id) {
+      Some(content_node) => match content_node {
+        TreeNode::WindowContent(content) => Some(content),
+        _ => None,
+      },
+      None => None,
+    }
+  }
+
   // Current window widget.
   pub fn current_window(&self) -> Option<&Window> {
     match self.current_window_id {
@@ -683,49 +728,6 @@ impl Tree {
     let old = window.cursor_viewport();
     window.set_cursor_viewport(cursor_viewport.clone());
     old
-  }
-
-  /// Get window content widget by window ID.
-  ///
-  /// # Panics
-  /// It panics if window_id doesn't exist.
-  pub fn window_content(&self, window_id: TreeNodeId) -> &WindowContent {
-    debug_assert!(self.window_ids.contains(&window_id));
-    debug_assert!(matches!(self.node(window_id).unwrap(), TreeNode::Window(_)));
-    let content_id = match self.node(window_id).unwrap() {
-      TreeNode::Window(window) => window.content_id(),
-      _ => unreachable!(),
-    };
-    match self.node(content_id) {
-      Some(content_node) => match content_node {
-        TreeNode::WindowContent(content) => content,
-        _ => unreachable!(),
-      },
-      None => unreachable!(),
-    }
-  }
-
-  /// Get mutable window content widget by window ID.
-  ///
-  /// # Panics
-  /// It panics if window_id doesn't exist.
-  pub fn window_content_mut(
-    &mut self,
-    window_id: TreeNodeId,
-  ) -> &mut WindowContent {
-    debug_assert!(self.window_ids.contains(&window_id));
-    debug_assert!(matches!(self.node(window_id).unwrap(), TreeNode::Window(_)));
-    let content_id = match self.node(window_id).unwrap() {
-      TreeNode::Window(window) => window.content_id(),
-      _ => unreachable!(),
-    };
-    match self.node_mut(content_id) {
-      Some(content_node) => match content_node {
-        TreeNode::WindowContent(content) => content,
-        _ => unreachable!(),
-      },
-      None => unreachable!(),
-    }
   }
 
   /// Set command-line input viewport, returns old viewport.
