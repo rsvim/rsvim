@@ -471,7 +471,7 @@ impl Tree {
   }
 
   /// Get mutable command-line input widget.
-  pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
+  pub fn command_line_input_mut(&mut self) -> &mut CommandLineInput {
     let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
       self.node(input_id).unwrap(),
@@ -484,7 +484,7 @@ impl Tree {
   }
 
   /// Get command-line message widget.
-  pub fn cmdline_message(&self) -> &CommandLineMessage {
+  pub fn command_line_message(&self) -> &CommandLineMessage {
     let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
@@ -496,8 +496,8 @@ impl Tree {
     }
   }
 
-  /// Get mutable command-line message widget.
-  pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
+  /// Mutable command-line message widget.
+  pub fn command_line_message_mut(&mut self) -> &mut CommandLineMessage {
     let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
@@ -509,8 +509,8 @@ impl Tree {
     }
   }
 
-  /// Get command-line indicator widget.
-  pub fn cmdline_indicator(&self) -> &CommandLineIndicator {
+  /// Command-line indicator widget.
+  pub fn command_line_indicator(&self) -> &CommandLineIndicator {
     let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
@@ -522,8 +522,8 @@ impl Tree {
     }
   }
 
-  /// Get mutable command-line indicator widget.
-  pub fn cmdline_indicator_mut(&mut self) -> &mut CommandLineIndicator {
+  /// Mutable command-line indicator widget.
+  pub fn command_line_indicator_mut(&mut self) -> &mut CommandLineIndicator {
     let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
