@@ -687,14 +687,14 @@ impl Tree {
   }
 
   /// Get window content widget by window ID.
+  ///
+  /// # Panics
+  /// It panics if window_id doesn't exist.
   pub fn window_content(&self, window_id: TreeNodeId) -> &WindowContent {
     debug_assert!(self.window_ids.contains(&window_id));
-    let content_id = match self.node(window_id) {
-      Some(window_node) => match window_node {
-        TreeNode::Window(window) => window.content_id(),
-        _ => unreachable!(),
-      },
-      None => unreachable!(),
+    let content_id = match self.node(window_id).unwrap() {
+      TreeNode::Window(window) => window.content_id(),
+      _ => unreachable!(),
     };
     match self.node(content_id) {
       Some(content_node) => match content_node {
@@ -705,18 +705,18 @@ impl Tree {
     }
   }
 
-  /// Get window content widget by window ID.
+  /// Get mutable window content widget by window ID.
+  ///
+  /// # Panics
+  /// It panics if window_id doesn't exist.
   pub fn window_content_mut(
     &mut self,
     window_id: TreeNodeId,
   ) -> &mut WindowContent {
     debug_assert!(self.window_ids.contains(&window_id));
-    let content_id = match self.node(window_id) {
-      Some(window_node) => match window_node {
-        TreeNode::Window(window) => window.content_id(),
-        _ => unreachable!(),
-      },
-      None => unreachable!(),
+    let content_id = match self.node(window_id).unwrap() {
+      TreeNode::Window(window) => window.content_id(),
+      _ => unreachable!(),
     };
     match self.node_mut(content_id) {
       Some(content_node) => match content_node {
@@ -933,6 +933,34 @@ impl Tree {
       (new_x, new_y)
     };
     self.move_cursor_to(new_x, new_y)
+  }
+
+  /// Get cursor widget.
+  ///
+  /// # Panics
+  /// It panics if cursor doesn't exist.
+  pub fn cursor(&self) -> &Cursor {
+    debug_assert!(self.cursor_id.is_some());
+    let cursor_id = self.cursor_id.unwrap();
+    debug_assert!(self.nodes.contains_key(&cursor_id));
+    match self.node(cursor_id).unwrap() {
+      TreeNode::Cursor(cursor) => cursor,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Get mutable cursor widget.
+  ///
+  /// # Panics
+  /// It panics if cursor doesn't exist.
+  pub fn cursor_mut(&self) -> &Cursor {
+    debug_assert!(self.cursor_id.is_some());
+    let cursor_id = self.cursor_id.unwrap();
+    debug_assert!(self.nodes.contains_key(&cursor_id));
+    match self.node_mut(&cursor_id).unwrap() {
+      TreeNode::Cursor(cursor) => cursor,
+      _ => unreachable!(),
+    }
   }
 }
 

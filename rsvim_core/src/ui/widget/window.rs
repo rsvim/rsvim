@@ -169,41 +169,6 @@ impl EditableWidgetable for Window {
 
 // Sub-Widgets {
 impl Window {
-  /// Window content widget.
-  pub fn content(&self) -> &WindowContent {
-    let lotree = self.lotree().upgrade().unwrap();
-    let lotree = lotree.borrow();
-    debug_assert!(lotree.parent(self.content_id).is_some());
-    debug_assert_eq!(lotree.parent(self.content_id).unwrap(), self.id());
-    debug_assert!(matches!(
-      self.base.node(self.content_id).unwrap(),
-      WindowNode::Content(_)
-    ));
-    match self.base.node(self.content_id).unwrap() {
-      WindowNode::Content(w) => {
-        debug_assert_eq!(w.id(), self.content_id);
-        w
-      }
-      _ => unreachable!(),
-    }
-  }
-
-  /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut WindowContent {
-    debug_assert!(self.base.node_mut(self.content_id).is_some());
-    debug_assert!(matches!(
-      self.base.node_mut(self.content_id).unwrap(),
-      WindowNode::Content(_)
-    ));
-    match self.base.node_mut(self.content_id).unwrap() {
-      WindowNode::Content(w) => {
-        debug_assert_eq!(w.id(), self.content_id);
-        w
-      }
-      _ => unreachable!(),
-    }
-  }
-
   /// Cursor widget.
   pub fn cursor(&self) -> Option<&Cursor> {
     match self.cursor_id {
