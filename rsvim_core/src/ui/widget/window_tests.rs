@@ -165,5 +165,5 @@ fn draw_after_init1() {
     buf.clone(),
     tree.window(window_id).unwrap().viewport(),
   );
-  assert_canvas(&actual, expect);
+  assert_canvas(&actual, &expect);
 }
