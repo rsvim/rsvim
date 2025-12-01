@@ -886,9 +886,9 @@ impl Tree {
     let new_y =
       num_traits::clamp(y, 0, parent_actual_shape.size().height() as isize);
     let shape = lotree.shape(cursor_id).unwrap();
-    let pos: U16Pos = shape.min().into();
+    let pos = shape.min();
     // If the new position is same with current position, no need to move.
-    if pos.x() as isize == new_x && pos.y() as isize == new_y {
+    if pos.x == new_x && pos.y == new_y {
       return None;
     }
 
