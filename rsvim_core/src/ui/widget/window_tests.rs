@@ -45,7 +45,7 @@ fn make_window_from_size(
       tree.root_id(),
       window_style,
       window_options,
-      Arc::downgrade(buffer),
+      Arc::downgrade(&buffer),
     )
     .unwrap();
 
