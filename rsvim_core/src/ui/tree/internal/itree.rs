@@ -89,7 +89,6 @@ pub struct Itree {
   loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
 
   // Cached shapes for each node.
-  cached_shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
@@ -103,7 +102,6 @@ impl Itree {
       lo,
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
-      cached_shapes: RefCell::new(FoldMap::new()),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
     }
   }
@@ -258,7 +256,6 @@ impl Itree {
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
       self.cached_actual_shapes.borrow_mut().remove(&parent_id);
-      self.cached_shapes.borrow_mut().remove(&parent_id);
       if let Ok(children_ids) = self.children(parent_id) {
         for child_id in children_ids.iter() {
           q.push_back(*child_id);
