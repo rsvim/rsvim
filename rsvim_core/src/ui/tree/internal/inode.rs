@@ -181,7 +181,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-
       fn no_display(&self) -> bool {
         match self {
           $(
