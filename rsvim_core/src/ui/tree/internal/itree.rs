@@ -87,8 +87,10 @@ pub struct Itree {
   lo: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
   loid2nid: FoldMap<taffy::NodeId, TreeNodeId>,
-  // Cached actual_shape for each node.
-  cached_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+
+  // Cached shapes for each node.
+  cached_shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
 rc_refcell_ptr!(Itree);
@@ -102,6 +104,7 @@ impl Itree {
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
       cached_shapes: RefCell::new(FoldMap::new()),
+      cached_actual_shapes: RefCell::new(FoldMap::new()),
     }
   }
 
@@ -200,7 +203,7 @@ impl Itree {
     let result = match self.parent(id) {
       Some(parent_id) => {
         // Non-root node truncated by its parent's shape.
-        let cached = self.cached_shapes.borrow().get(&id).copied();
+        let cached = self.cached_actual_shapes.borrow().get(&id).copied();
         match cached {
           Some(cached) => Ok(cached),
           None => {
@@ -228,7 +231,7 @@ impl Itree {
             );
             let shape = rect!(left, top, right, bottom);
             let shape = rect_as!(shape, u16);
-            self.cached_shapes.borrow_mut().insert(id, shape);
+            self.cached_actual_shapes.borrow_mut().insert(id, shape);
             Ok(shape)
           }
         }
@@ -254,8 +257,8 @@ impl Itree {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(id);
     while let Some(parent_id) = q.pop_front() {
-      let mut cached_actual_shapes = self.cached_shapes.borrow_mut();
-      cached_actual_shapes.remove(&parent_id);
+      self.cached_actual_shapes.borrow_mut().remove(&parent_id);
+      self.cached_shapes.borrow_mut().remove(&parent_id);
       if let Ok(children_ids) = self.children(parent_id) {
         for child_id in children_ids.iter() {
           q.push_back(*child_id);
