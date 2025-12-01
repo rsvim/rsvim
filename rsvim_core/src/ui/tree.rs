@@ -861,34 +861,6 @@ impl Tree {
     old
   }
 
-  /// Get command-line widget.
-  pub fn cmdline(&self) -> &CommandLine {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline,
-      _ => unreachable!(),
-    }
-  }
-
-  /// Get mutable command-line widget.
-  pub fn cmdline_mut(&mut self) -> &mut CommandLine {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    match self.node_mut(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline,
-      _ => unreachable!(),
-    }
-  }
-
   fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let input_id = self.cmdline().input_id();
     let indicator_id = self.cmdline().indicator_id();
@@ -916,12 +888,12 @@ impl Tree {
   }
 
   /// Show input/indicator widget, hide message widget in command-line.
-  pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
+  pub fn command_line_show_input(&mut self) -> TaffyResult<()> {
     self._cmdline_toggle_input(true)
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
-  pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
+  pub fn command_line_show_message(&mut self) -> TaffyResult<()> {
     self._cmdline_toggle_input(false)
   }
 
