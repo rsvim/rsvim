@@ -891,7 +891,7 @@ impl Tree {
     }
   }
 
-  fn _cmdline_show_input_impl(&mut self, show_input: bool) -> TaffyResult<()> {
+  fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let input_id = self.cmdline().input_id();
     let indicator_id = self.cmdline().indicator_id();
     let message_id = self.cmdline().message_id();
@@ -919,30 +919,12 @@ impl Tree {
 
   /// Show input/indicator widget, hide message widget in command-line.
   pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
-    let input_id = self.cmdline().input_id();
-    let indicator_id = self.cmdline().indicator_id();
-    let message_id = self.cmdline().message_id();
-
-    let mut lotree = self.lotree.borrow_mut();
-    let mut input_style = lotree.style(input_id)?.clone();
-    let mut indicator_style = lotree.style(indicator_id)?.clone();
-    let mut message_style = lotree.style(message_id)?.clone();
-
-    input_style.display = taffy::Display::Flex;
-    indicator_style.display = taffy::Display::Flex;
-    message_style.display = taffy::Display::None;
-
-    lotree.set_style(input_id, input_style)?;
-    lotree.set_style(indicator_id, indicator_style)?;
-    lotree.set_style(message_id, message_style)?;
-    Ok(())
+    self._cmdline_toggle_input(true)
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
   pub fn cmdline_show_message(&mut self) {
-    let input_id = self.cmdline().input_id();
-    let indicator_id = self.cmdline().indicator_id();
-    let message_id = self.cmdline().message_id();
+    self._cmdline_toggle_input(false)
   }
 
   /// Jump cursor to a new parent widget.
