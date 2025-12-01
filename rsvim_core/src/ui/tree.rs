@@ -783,6 +783,12 @@ impl Tree {
     old
   }
 
+  /// Get command-line input widget.
+  pub fn cmdline_input(&self) -> &CommandLineInput {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline_id = self.command_line_id.unwrap();
+  }
+
   /// Jump cursor to a new parent widget.
   ///
   /// Cursor's parent widget must be either a Window or a CommandLine. Here we
@@ -801,7 +807,7 @@ impl Tree {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
     let mut lotree = lotree.borrow_mut();
-    let old_parent_id = *lotree.parent(cursor_id).unwrap();
+    let old_parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&old_parent_id));
     debug_assert!(matches!(
       self.node(old_parent_id).unwrap(),
@@ -810,7 +816,7 @@ impl Tree {
     let old_parent_id = match self.node_mut(old_parent_id).unwrap() {
       TreeNode::WindowContent(_content) => {
         // Cursor is inside a window content widget.
-        let old_window_id = *lotree.parent(old_parent_id).unwrap();
+        let old_window_id = lotree.parent(old_parent_id).unwrap();
         debug_assert_eq!(self.current_window_id, Some(old_window_id));
         debug_assert!(self.nodes.contains_key(&old_window_id));
         // If new parent is the same window.
@@ -829,7 +835,7 @@ impl Tree {
       }
       TreeNode::CommandLineInput(_input) => {
         // Cursor is inside the command-line input widget.
-        let old_cmdline_id = *lotree.parent(old_parent_id).unwrap();
+        let old_cmdline_id = lotree.parent(old_parent_id).unwrap();
         debug_assert!(self.nodes.contains_key(&old_cmdline_id));
         // If new parent is the same window.
         if old_cmdline_id == parent_id {
@@ -912,18 +918,14 @@ impl Tree {
   ///
   /// NOTE: Cursor movement is bounded, it will never go out of its parent
   /// widget.
-  pub fn move_cursor_by(&mut self, x: i16, y: i16) -> Option<U16Rect> {
+  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<U16Rect> {
     let (new_x, new_y) = {
       let cursor_id = self.cursor_id.unwrap();
       let lotree = self.lotree.clone();
       let lotree = lotree.borrow_mut();
       let pos = lotree.actual_shape(cursor_id).unwrap().min();
-      let new_x =
-        num_traits::clamp((pos.x as isize) + x as isize, 0, u16::MAX as isize)
-          as u16;
-      let new_y =
-        num_traits::clamp((pos.y as isize) + y as isize, 0, u16::MAX as isize)
-          as u16;
+      let new_x = num_traits::clamp((pos.x as isize) + x, 0, u16::MAX as isize);
+      let new_y = num_traits::clamp((pos.y as isize) + y, 0, u16::MAX as isize);
       (new_x, new_y)
     };
     self.move_cursor_to(new_x, new_y)
