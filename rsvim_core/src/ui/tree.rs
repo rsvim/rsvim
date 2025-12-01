@@ -19,7 +19,6 @@ use crate::ui::widget::command_line::input::CommandLineInput;
 use crate::ui::widget::command_line::message::CommandLineMessage;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::Root;
-use crate::ui::widget::window;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowGlobalOptions;

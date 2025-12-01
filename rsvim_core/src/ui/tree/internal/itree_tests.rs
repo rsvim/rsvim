@@ -17,8 +17,11 @@ struct TestValue {
 inode_impl!(TestValue);
 
 impl TestValue {
-  pub fn new(base: ItreeRc, id: TreeNodeId, value: i32) -> Self {
-    TestValue { base, id, value }
+  pub fn new(lotree: ItreeWk, id: TreeNodeId, value: i32) -> Self {
+    TestValue {
+      base: InodeBase::new(lotree, id),
+      value,
+    }
   }
 }
 
