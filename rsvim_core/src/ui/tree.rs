@@ -892,10 +892,24 @@ impl Tree {
   }
 
   /// Show input/indicator widget, hide message widget in command-line.
-  pub fn cmdline_show_input(&mut self) {
+  pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
     let input_id = self.cmdline().input_id();
     let indicator_id = self.cmdline().indicator_id();
     let message_id = self.cmdline().message_id();
+
+    let mut lotree = self.lotree.borrow_mut();
+    let mut input_style = lotree.style(input_id)?.clone();
+    let mut indicator_style = lotree.style(indicator_id)?.clone();
+    let mut message_style = lotree.style(message_id)?.clone();
+
+    input_style.display = taffy::Display::Flex;
+    indicator_style.display = taffy::Display::Flex;
+    message_style.display = taffy::Display::None;
+
+    lotree.set_style(input_id, input_style).unwrap();
+    lotree.set_style(indicator_id, indicator_style).unwrap();
+    lotree.set_style(message_id, message_style).unwrap();
+    Ok(())
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
