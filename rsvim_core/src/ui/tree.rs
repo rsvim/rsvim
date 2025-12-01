@@ -923,7 +923,7 @@ impl Tree {
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
-  pub fn cmdline_show_message(&mut self) {
+  pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
     self._cmdline_toggle_input(false)
   }
 
