@@ -36,10 +36,6 @@ fn convert_shape_to_actual_shape(
   shape: &IRect,
   parent_actual_shape: &U16Rect,
 ) -> U16Rect {
-  // trace!(
-  //   "shape:{:?}, parent_actual_shape:{:?}",
-  //   shape, parent_actual_shape
-  // );
   let parent_min_pos: U16Pos = parent_actual_shape.min().into();
   let parent_min_pos: IPos = point_as!(parent_min_pos, isize);
   let parent_max_pos: U16Pos = parent_actual_shape.max().into();
@@ -59,44 +55,16 @@ fn convert_shape_to_actual_shape(
     parent_min_pos.y(),
     parent_max_pos.y(),
   );
-  let actual_min_pos: U16Pos = point!(actual_min_x as u16, actual_min_y as u16);
-  // trace!(
-  //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
-  //   actual_top_left_ipos, actual_top_left_pos
-  // );
 
   let actual_max_pos: IPos = max_pos + parent_min_pos;
-  let actual_max_x = num_traits::clamp(
-    actual_max_pos.x(),
-    parent_min_pos.x(),
-    parent_max_pos.x(),
-  );
-  let actual_max_y = num_traits::clamp(
-    actual_max_pos.y(),
-    parent_min_pos.y(),
-    parent_max_pos.y(),
-  );
-  let actual_max_pos: U16Pos = point!(actual_max_x as u16, actual_max_y as u16);
+  let actual_max_x =
+    num_traits::clamp(actual_max_pos.x(), actual_min_x, parent_max_pos.x());
+  let actual_max_y =
+    num_traits::clamp(actual_max_pos.y(), actual_min_y, parent_max_pos.y());
 
-  let actual_size = size!(
-    (actual_max_pos.x() as isize) - (actual_min_pos.x() as isize),
-    (actual_max_pos.y() as isize) - (actual_min_pos.y() as isize)
-  );
-  // trace!(
-  //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
-  //   actual_isize, actual_top_left_pos
-  // );
-
-  let actual_shape = rect!(
-    actual_min_pos.x(),
-    actual_min_pos.y(),
-    actual_min_pos.x() + actual_size.width() as u16,
-    actual_min_pos.y() + actual_size.height() as u16
-  );
-  // trace!(
-  //   "actual_isize:{:?}, actual_shape:{:?}",
-  //   actual_isize, actual_shape
-  // );
+  let actual_shape =
+    rect!(actual_min_x, actual_min_y, actual_max_x, actual_max_y);
+  let actual_shape = rect_as!(actual_shape, u16);
 
   actual_shape
 }
