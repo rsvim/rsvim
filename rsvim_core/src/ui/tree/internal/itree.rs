@@ -179,7 +179,7 @@ impl Itree {
     let shape = rect_as!(shape, isize);
     match self.parent(id) {
       Some(parent_id) => {
-        let parent_actual_shape = self.actual_shape(id)?;
+        let parent_actual_shape = self.actual_shape(parent_id)?;
         let bounded_shape = bound_shape(&shape, &parent_actual_shape);
         Ok(bounded_shape)
       }
