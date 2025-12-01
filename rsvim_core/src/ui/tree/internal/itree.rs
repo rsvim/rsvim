@@ -25,6 +25,82 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+/// Convert relative shape to actual shape, based on its parent's actual shape.
+///
+/// NOTE:
+/// 1. If the widget doesn't have a parent, use the terminal shape as its
+///    parent's shape.
+/// 2. If the relative shape is outside of it's parent or the terminal, it will
+///    be automatically bounded inside of it's parent or the terminal's shape.
+fn convert_shape_to_actual_shape(
+  shape: &IRect,
+  parent_actual_shape: &U16Rect,
+) -> U16Rect {
+  // trace!(
+  //   "shape:{:?}, parent_actual_shape:{:?}",
+  //   shape, parent_actual_shape
+  // );
+  let parent_min_pos: U16Pos = parent_actual_shape.min().into();
+  let parent_min_pos: IPos = point_as!(parent_min_pos, isize);
+  let parent_max_pos: U16Pos = parent_actual_shape.max().into();
+  let parent_max_pos: IPos = point_as!(parent_max_pos, isize);
+
+  let min_pos: IPos = shape.min().into();
+  let max_pos: IPos = shape.max().into();
+
+  let actual_min_pos: IPos = min_pos + parent_min_pos;
+  let actual_min_x = num_traits::clamp(
+    actual_min_pos.x(),
+    parent_min_pos.x(),
+    parent_max_pos.x(),
+  );
+  let actual_min_y = num_traits::clamp(
+    actual_min_pos.y(),
+    parent_min_pos.y(),
+    parent_max_pos.y(),
+  );
+  let actual_min_pos: U16Pos = point!(actual_min_x as u16, actual_min_y as u16);
+  // trace!(
+  //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
+  //   actual_top_left_ipos, actual_top_left_pos
+  // );
+
+  let actual_max_pos: IPos = max_pos + parent_min_pos;
+  let actual_max_x = num_traits::clamp(
+    actual_max_pos.x(),
+    parent_min_pos.x(),
+    parent_max_pos.x(),
+  );
+  let actual_max_y = num_traits::clamp(
+    actual_max_pos.y(),
+    parent_min_pos.y(),
+    parent_max_pos.y(),
+  );
+  let actual_max_pos: U16Pos = point!(actual_max_x as u16, actual_max_y as u16);
+
+  let actual_size = size!(
+    (actual_max_pos.x() as isize) - (actual_min_pos.x() as isize),
+    (actual_max_pos.y() as isize) - (actual_min_pos.y() as isize)
+  );
+  // trace!(
+  //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
+  //   actual_isize, actual_top_left_pos
+  // );
+
+  let actual_shape = rect!(
+    actual_min_pos.x(),
+    actual_min_pos.y(),
+    actual_min_pos.x() + actual_size.width() as u16,
+    actual_min_pos.y() + actual_size.height() as u16
+  );
+  // trace!(
+  //   "actual_isize:{:?}, actual_shape:{:?}",
+  //   actual_isize, actual_shape
+  // );
+
+  actual_shape
+}
+
 #[derive(Debug, Clone)]
 pub struct Itree {
   lo: TaffyTree,
