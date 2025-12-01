@@ -11,6 +11,7 @@ use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::*;
 use compact_str::ToCompactString;
@@ -21,22 +22,34 @@ use std::io::BufReader;
 use std::io::BufWriter;
 use std::sync::Arc;
 use std::sync::Once;
+use taffy::Style;
 
 fn make_window_from_size(
   terminal_size: U16Size,
   buffer: BufferArc,
   window_options: WindowOptions,
-) -> Window {
+) -> (Tree, TreeNodeId) {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size);
-  let window_shape = rect_as!(window_shape, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
-  .unwrap()
+
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::auto(),
+      height: taffy::Dimension::auto(),
+    },
+    ..Default::default()
+  };
+
+  let window_id = tree
+    .add_new_window(
+      tree.root_id(),
+      window_style,
+      window_options,
+      Arc::downgrade(buffer),
+    )
+    .unwrap();
+
+  (tree, window_id)
 }
 
 fn do_test_draw(actual: &Canvas, expect: &[&str]) {
