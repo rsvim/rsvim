@@ -7,6 +7,7 @@ use crate::ui::tree::TreeNodeId;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::f32::MIN_EXP;
 use std::fmt::Debug;
 use std::iter::Iterator;
 use std::sync::atomic::AtomicI32;
@@ -175,7 +176,22 @@ impl Itree {
       layout.location.x + layout.size.width,
       layout.location.y + layout.size.height
     );
-    Ok(rect_as!(shape, isize))
+    let shape = rect_as!(shape, isize);
+    match self.parent(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(id)?;
+        let bounded_shape = bound_shape(&shape, &parent_actual_shape);
+        Ok(bounded_shape)
+      }
+      None => {
+        let min_x = num_traits::clamp_min(shape.min().x, 0);
+        let min_y = num_traits::clamp_min(shape.min().y, 0);
+        let max_x = num_traits::clamp_min(shape.max().x, min_x);
+        let max_y = num_traits::clamp_min(shape.max().y, min_y);
+        let bounded_shape = rect!(min_x, min_y, max_x, max_y);
+        Ok(bounded_shape)
+      }
+    }
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
