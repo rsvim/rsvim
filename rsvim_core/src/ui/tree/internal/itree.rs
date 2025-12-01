@@ -25,6 +25,19 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+/// Bound (truncate) relative shape based on its parent's size.
+fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+  let parent_size = parent_actual_shape.size();
+  let min_x = num_traits::clamp(shape.min().x, 0, parent_size.width() as isize);
+  let min_y =
+    num_traits::clamp(shape.min().y, 0, parent_size.height() as isize);
+  let max_x =
+    num_traits::clamp(shape.max().x, min_x, parent_size.width() as isize);
+  let max_y =
+    num_traits::clamp(shape.max().y, min_y, parent_size.height() as isize);
+  rect!(min_x, min_y, max_x, max_y)
+}
+
 /// Convert relative shape to actual shape, based on its parent's actual shape.
 ///
 /// NOTE:
