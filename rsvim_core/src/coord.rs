@@ -106,13 +106,6 @@ where
   pub fn is_zero(&self) -> bool {
     self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
   }
-
-  pub fn into_rect(&self) -> Rect<T> {
-    Rect::new(
-      (T::from(0).unwrap(), T::from(0).unwrap()),
-      (self.width(), self.height()),
-    )
-  }
 }
 
 #[macro_export]
@@ -160,13 +153,18 @@ macro_rules! rect_as {
 macro_rules! rect_from_layout {
   ($l:ident) => {{
     Rect::new(
-      ($l.location.x as isize, $l.location.y as isize),
+      ($l.location.x, $l.location.y),
       (
-        ($l.location.x + $l.size.width) as isize,
-        ($l.location.y + $l.size.height) as isize,
+        $l.location.x + $l.size.width,
+        $l.location.y + $l.size.height,
       ),
     )
   }};
+}
+
+#[macro_export]
+macro_rules! rect_from_size {
+  ($s:ident) => {{ Rect::new((0, 0), ($s.width(), $s.height())) }};
 }
 
 #[macro_export]

@@ -247,7 +247,7 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
-  let shape = terminal_size.into_rect();
+  let shape = rect_from_size!(terminal_size);
   let shape = rect_as!(shape, isize);
   let window_content = WindowContent::new(
     shape,

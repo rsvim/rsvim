@@ -32,7 +32,7 @@ pub fn make_viewport(
   start_column_idx: usize,
 ) -> ViewportArc {
   let buffer = lock!(buffer);
-  let actual_shape = terminal_size.into_rect();
+  let actual_shape = rect_from_size!(terminal_size);
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),
@@ -51,7 +51,7 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
-  let shape = terminal_size.into_rect();
+  let shape = rect_from_size!(terminal_size);
   let shape = rect_as!(shape, isize);
   let window_content = WindowContent::new(
     shape,
