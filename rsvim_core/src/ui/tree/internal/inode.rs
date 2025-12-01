@@ -137,6 +137,10 @@ macro_rules! inode_impl {
       fn layout(&self) -> taffy::Layout {
         self.base.layout()
       }
+
+      fn style(&self) -> taffy::Style {
+        self.base.style()
+      }
     }
   };
 }
