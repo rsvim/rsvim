@@ -829,6 +829,50 @@ impl Tree {
     }
   }
 
+  /// Get command-line message widget.
+  pub fn cmdline_message(&self) -> &CommandLineMessage {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline_id = self.command_line_id.unwrap();
+    debug_assert!(matches!(
+      self.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    let message_id = match self.node(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline.message_id(),
+      _ => unreachable!(),
+    };
+    debug_assert!(matches!(
+      self.node(message_id).unwrap(),
+      TreeNode::CommandLineMessage(_)
+    ));
+    match self.node(message_id).unwrap() {
+      TreeNode::CommandLineMessage(message) => message,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Get mutable command-line message widget.
+  pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline_id = self.command_line_id.unwrap();
+    debug_assert!(matches!(
+      self.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    let message_id = match self.node(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline.message_id(),
+      _ => unreachable!(),
+    };
+    debug_assert!(matches!(
+      self.node(message_id).unwrap(),
+      TreeNode::CommandLineMessage(_)
+    ));
+    match self.node_mut(message_id).unwrap() {
+      TreeNode::CommandLineMessage(message) => message,
+      _ => unreachable!(),
+    }
+  }
+
   /// Jump cursor to a new parent widget.
   ///
   /// Cursor's parent widget must be either a Window or a CommandLine. Here we
