@@ -183,7 +183,7 @@ impl Tree {
       root_id
     };
 
-    let root = Root::new(lotree.clone(), root_id);
+    let root = Root::new(Rc::downgrade(&lotree), root_id);
     let root_node = TreeNode::Root(root);
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
