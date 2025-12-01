@@ -891,13 +891,19 @@ impl Tree {
     }
   }
 
+  /// Show input/indicator widget, hide message widget in command-line.
   pub fn cmdline_show_input(&mut self) {
-    self.indicator_mut().set_visible(false);
-    self.input_mut().set_visible(false);
-    self.message_mut().set_visible(true);
+    let input_id = self.cmdline().input_id();
+    let indicator_id = self.cmdline().indicator_id();
+    let message_id = self.cmdline().message_id();
   }
 
-  pub fn cmdline_show_message(&mut self) {}
+  /// Show message widget, hide input/indicator widget in command-line.
+  pub fn cmdline_show_message(&mut self) {
+    let input_id = self.cmdline().input_id();
+    let indicator_id = self.cmdline().indicator_id();
+    let message_id = self.cmdline().message_id();
+  }
 
   /// Jump cursor to a new parent widget.
   ///
