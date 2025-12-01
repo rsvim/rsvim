@@ -861,10 +861,13 @@ impl Tree {
     old
   }
 
-  fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
-    let input_id = self.cmdline().input_id();
-    let indicator_id = self.cmdline().indicator_id();
-    let message_id = self.cmdline().message_id();
+  fn _command_line_toggle_input(
+    &mut self,
+    show_input: bool,
+  ) -> TaffyResult<()> {
+    let input_id = self.command_line().unwrap().input_id();
+    let indicator_id = self.command_line().unwrap().indicator_id();
+    let message_id = self.command_line().unwrap().message_id();
 
     let mut lotree = self.lotree.borrow_mut();
     let mut input_style = lotree.style(input_id)?.clone();
@@ -889,12 +892,12 @@ impl Tree {
 
   /// Show input/indicator widget, hide message widget in command-line.
   pub fn command_line_show_input(&mut self) -> TaffyResult<()> {
-    self._cmdline_toggle_input(true)
+    self._command_line_toggle_input(true)
   }
 
   /// Show message widget, hide input/indicator widget in command-line.
   pub fn command_line_show_message(&mut self) -> TaffyResult<()> {
-    self._cmdline_toggle_input(false)
+    self._command_line_toggle_input(false)
   }
 
   /// Jump cursor to a new parent widget.
