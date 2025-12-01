@@ -158,16 +158,15 @@ macro_rules! rect_as {
 
 #[macro_export]
 macro_rules! rect_from_layout {
-  ($l:ident,$tt:ty) => {
-    {
-      let pos = geo::point!(x: $l.location.x as $tt, y: $l.location.y as $tt);
-      let size = Size::new($l.size.width as $tt, $l.size.height as $tt);
-      Rect::new(
-        (pos.x(), pos.y()),
-        (pos.x() + size.width(), pos.y() + size.height()),
-      )
-    }
-  }
+  ($l:ident) => {{
+    Rect::new(
+      ($l.location.x as isize, $l.location.y as isize),
+      (
+        ($l.location.x + $l.size.width) as isize,
+        ($l.location.y + $l.size.height) as isize,
+      ),
+    )
+  }};
 }
 
 #[macro_export]
