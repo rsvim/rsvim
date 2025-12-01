@@ -122,7 +122,7 @@ impl Itree {
     let shape = rect_as!(shape, isize);
     match self.parent(id) {
       Some(parent_id) => {
-        let parent_actual_shape = self.actual_shape(*parent_id)?;
+        let parent_actual_shape = self.actual_shape(parent_id)?;
         let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
         Ok(bounded_shape)
       }
@@ -165,7 +165,7 @@ impl Itree {
           Some(cached) => Ok(cached),
           None => {
             let shape = self.shape(id)?;
-            let parent_actual_shape = self.actual_shape(*parent_id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
             let actual_shape =
               shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
             self
@@ -219,7 +219,7 @@ impl Itree {
     self._internal_check();
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
-    let result = self.loid2nid.get(&parent_loid);
+    let result = self.loid2nid.get(&parent_loid).copied();
     result
   }
 
