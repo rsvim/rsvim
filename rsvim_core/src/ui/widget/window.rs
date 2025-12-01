@@ -153,7 +153,7 @@ impl EditableWidgetable for Window {
     self.options()
   }
 
-  fn editable_actual_shape(&self) -> &U16Rect {
+  fn editable_actual_shape(&self) -> U16Rect {
     self.content().actual_shape()
   }
 

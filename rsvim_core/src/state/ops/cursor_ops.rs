@@ -251,7 +251,7 @@ fn _update_viewport(
   let new_viewport = Viewport::to_arc(Viewport::view(
     vnode.editable_options(),
     text,
-    vnode.editable_actual_shape(),
+    &vnode.editable_actual_shape(),
     start_line,
     start_column,
   ));
@@ -396,7 +396,7 @@ pub fn raw_viewport_scroll_to(
   let new_viewport = Viewport::to_arc(Viewport::view(
     vnode.editable_options(),
     text,
-    vnode.editable_actual_shape(),
+    &vnode.editable_actual_shape(),
     line_idx,
     column_idx,
   ));

@@ -196,7 +196,7 @@ impl EditableWidgetable for CommandLine {
     self.options()
   }
 
-  fn editable_actual_shape(&self) -> &U16Rect {
+  fn editable_actual_shape(&self) -> U16Rect {
     self.input().actual_shape()
   }
 
