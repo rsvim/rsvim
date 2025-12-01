@@ -13,6 +13,8 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> U16Rect;
 
+  fn no_display(&self) -> bool;
+
   fn visible(&self) -> bool;
 
   fn layout(&self) -> taffy::Layout;
@@ -61,6 +63,16 @@ impl Inodeable for InodeBase {
       .unwrap()
   }
 
+  fn no_display(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .no_display(self.id)
+      .unwrap()
+  }
+
   fn visible(&self) -> bool {
     self
       .lotree
@@ -69,7 +81,6 @@ impl Inodeable for InodeBase {
       .borrow()
       .visible(self.id)
       .unwrap()
-      && !self.actual_shape().size().is_zero()
   }
 
   fn layout(&self) -> taffy::Layout {
