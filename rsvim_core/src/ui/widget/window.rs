@@ -167,51 +167,6 @@ impl EditableWidgetable for Window {
 }
 // Editable Viewport }
 
-// Sub-Widgets {
-impl Window {
-  /// Cursor widget.
-  pub fn cursor(&self) -> Option<&Cursor> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
-        debug_assert!(matches!(
-          self.base.node(cursor_id).unwrap(),
-          WindowNode::Cursor(_)
-        ));
-        match self.base.node(cursor_id).unwrap() {
-          WindowNode::Cursor(c) => {
-            debug_assert_eq!(c.id(), cursor_id);
-            Some(c)
-          }
-          _ => None,
-        }
-      }
-      None => None,
-    }
-  }
-
-  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.base.node_mut(cursor_id).is_some());
-        debug_assert!(matches!(
-          self.base.node_mut(cursor_id).unwrap(),
-          WindowNode::Cursor(_)
-        ));
-        match self.base.node_mut(cursor_id).unwrap() {
-          WindowNode::Cursor(c) => {
-            debug_assert_eq!(c.id(), cursor_id);
-            Some(c)
-          }
-          _ => None,
-        }
-      }
-      None => None,
-    }
-  }
-}
-// Sub-Widgets }
-
 // Cursor {
 impl Window {
   /// Set cursor widget ID in window, e.g. user moves cursor into this window.
