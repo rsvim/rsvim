@@ -11,6 +11,7 @@ use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
+use crate::ui::tree::next_node_id;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -22,6 +23,7 @@ use ropey::RopeBuilder;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufWriter;
+use std::rc::Rc;
 use std::sync::Arc;
 
 pub fn make_viewport(
