@@ -10,8 +10,7 @@ use taffy::prelude::TaffyMaxContent;
 
 #[derive(Clone, Debug)]
 struct TestValue {
-  base: ItreeRc,
-  id: TreeNodeId,
+  base: InodeBase,
   value: i32,
 }
 
