@@ -785,18 +785,37 @@ impl Tree {
     old
   }
 
-  /// Get command-line input widget.
-  pub fn cmdline_input(&self) -> &CommandLineInput {
+  /// Get command-line widget.
+  pub fn cmdline(&self) -> &CommandLine {
     debug_assert!(self.command_line_id.is_some());
     let cmdline_id = self.command_line_id.unwrap();
     debug_assert!(matches!(
       self.node(cmdline_id).unwrap(),
       TreeNode::CommandLine(_)
     ));
-    let input_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.input_id(),
+    match self.node(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
-    };
+    }
+  }
+
+  /// Get mutable command-line widget.
+  pub fn cmdline(&mut self) -> &mut CommandLine {
+    debug_assert!(self.command_line_id.is_some());
+    let cmdline_id = self.command_line_id.unwrap();
+    debug_assert!(matches!(
+      self.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    match self.node_mut(cmdline_id).unwrap() {
+      TreeNode::CommandLine(cmdline) => cmdline,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Get command-line input widget.
+  pub fn cmdline_input(&self) -> &CommandLineInput {
+    let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
       self.node(input_id).unwrap(),
       TreeNode::CommandLineInput(_)
@@ -809,16 +828,7 @@ impl Tree {
 
   /// Get mutable command-line input widget.
   pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let input_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.input_id(),
-      _ => unreachable!(),
-    };
+    let input_id = self.cmdline().input_id();
     debug_assert!(matches!(
       self.node(input_id).unwrap(),
       TreeNode::CommandLineInput(_)
@@ -831,16 +841,7 @@ impl Tree {
 
   /// Get command-line message widget.
   pub fn cmdline_message(&self) -> &CommandLineMessage {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let message_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.message_id(),
-      _ => unreachable!(),
-    };
+    let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
       TreeNode::CommandLineMessage(_)
@@ -853,16 +854,7 @@ impl Tree {
 
   /// Get mutable command-line message widget.
   pub fn cmdline_message_mut(&mut self) -> &mut CommandLineMessage {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let message_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.message_id(),
-      _ => unreachable!(),
-    };
+    let message_id = self.cmdline().message_id();
     debug_assert!(matches!(
       self.node(message_id).unwrap(),
       TreeNode::CommandLineMessage(_)
@@ -875,16 +867,7 @@ impl Tree {
 
   /// Get command-line indicator widget.
   pub fn cmdline_indicator(&self) -> &CommandLineIndicator {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let indicator_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.indicator_id(),
-      _ => unreachable!(),
-    };
+    let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
       TreeNode::CommandLineIndicator(_)
@@ -897,16 +880,7 @@ impl Tree {
 
   /// Get mutable command-line indicator widget.
   pub fn cmdline_indicator_mut(&mut self) -> &mut CommandLineIndicator {
-    debug_assert!(self.command_line_id.is_some());
-    let cmdline_id = self.command_line_id.unwrap();
-    debug_assert!(matches!(
-      self.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let indicator_id = match self.node(cmdline_id).unwrap() {
-      TreeNode::CommandLine(cmdline) => cmdline.indicator_id(),
-      _ => unreachable!(),
-    };
+    let indicator_id = self.cmdline().indicator_id();
     debug_assert!(matches!(
       self.node(indicator_id).unwrap(),
       TreeNode::CommandLineIndicator(_)
@@ -916,6 +890,14 @@ impl Tree {
       _ => unreachable!(),
     }
   }
+
+  pub fn cmdline_show_input(&mut self) {
+    self.indicator_mut().set_visible(false);
+    self.input_mut().set_visible(false);
+    self.message_mut().set_visible(true);
+  }
+
+  pub fn cmdline_show_message(&mut self) {}
 
   /// Jump cursor to a new parent widget.
   ///
