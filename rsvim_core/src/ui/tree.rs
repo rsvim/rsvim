@@ -473,7 +473,7 @@ impl Tree {
   }
 
   /// Mutable command-line input widget.
-  pub fn cmdline_input_mut(&mut self) -> &mut CommandLineInput {
+  pub fn cmdline_input_mut(&mut self) -> Option<&mut CommandLineInput> {
     let input_id = match self.cmdline() {
       Some(cmdline) => cmdline.input_id(),
       None => return None,
