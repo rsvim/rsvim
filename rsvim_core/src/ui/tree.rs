@@ -800,7 +800,7 @@ impl Tree {
   }
 
   /// Get mutable command-line widget.
-  pub fn cmdline(&mut self) -> &mut CommandLine {
+  pub fn cmdline_mut(&mut self) -> &mut CommandLine {
     debug_assert!(self.command_line_id.is_some());
     let cmdline_id = self.command_line_id.unwrap();
     debug_assert!(matches!(
