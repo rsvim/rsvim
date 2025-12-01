@@ -894,7 +894,7 @@ impl Tree {
   }
 }
 
-// Global options {
+// Options {
 impl Tree {
   pub fn global_options(&self) -> &WindowGlobalOptions {
     &self.global_options
@@ -920,7 +920,7 @@ impl Tree {
     self.global_local_options = options;
   }
 }
-// Global options }
+// Options }
 
 // Draw {
 impl Tree {
