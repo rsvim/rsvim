@@ -894,32 +894,6 @@ impl Tree {
   }
 }
 
-// Movement {
-impl Tree {
-  /// Bounded move by x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::bounded_move_by`].
-  pub fn bounded_move_by(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    self.lotree.bounded_move_by(id, x, y)
-  }
-
-  /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::bounded_move_to`].
-  pub fn bounded_move_to(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    self.lotree.bounded_move_to(id, x, y)
-  }
-}
-// Movement }
-
 // Global options {
 impl Tree {
   pub fn global_options(&self) -> &WindowGlobalOptions {
@@ -930,8 +904,8 @@ impl Tree {
     &mut self.global_options
   }
 
-  pub fn set_global_options(&mut self, options: &WindowGlobalOptions) {
-    self.global_options = *options;
+  pub fn set_global_options(&mut self, options: WindowGlobalOptions) {
+    self.global_options = options;
   }
 
   pub fn global_local_options(&self) -> &WindowOptions {
@@ -943,7 +917,7 @@ impl Tree {
   }
 
   pub fn set_global_local_options(&mut self, options: WindowOptions) {
-    self.global_local_options = *options;
+    self.global_local_options = options;
   }
 }
 // Global options }
