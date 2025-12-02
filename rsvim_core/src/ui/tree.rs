@@ -318,10 +318,7 @@ impl Tree {
     &self,
     window_id: TreeNodeId,
   ) -> Option<&WindowContent> {
-    let content_id = match self.node(window_id)? {
-      TreeNode::Window(window) => window.content_id(),
-      _ => return None,
-    };
+    let content_id = self.node(window_id)?.content_id();
     match self.node(content_id)? {
       TreeNode::WindowContent(content) => Some(content),
       _ => None,
@@ -333,10 +330,7 @@ impl Tree {
     &mut self,
     window_id: TreeNodeId,
   ) -> Option<&mut WindowContent> {
-    let content_id = match self.node(window_id)? {
-      TreeNode::Window(window) => window.content_id(),
-      _ => return None,
-    };
+    let content_id = self.node(window_id)?.content_id();
     match self.node_mut(content_id)? {
       TreeNode::WindowContent(content) => Some(content),
       _ => None,
@@ -397,87 +391,55 @@ impl Tree {
 
   /// Command-line input widget.
   pub fn cmdline_input(&self) -> Option<&CommandLineInput> {
-    let input_id = match self.cmdline() {
-      Some(cmdline) => cmdline.input_id(),
-      None => return None,
-    };
-    match self.node(input_id) {
-      Some(input_node) => match input_node {
-        TreeNode::CommandLineInput(input) => Some(input),
-        _ => None,
-      },
-      None => None,
+    let input_id = self.cmdline()?.input_id();
+    match self.node(input_id)? {
+      TreeNode::CommandLineInput(input) => Some(input),
+      _ => None,
     }
   }
 
   /// Mutable command-line input widget.
   pub fn cmdline_input_mut(&mut self) -> Option<&mut CommandLineInput> {
-    let input_id = match self.cmdline() {
-      Some(cmdline) => cmdline.input_id(),
-      None => return None,
-    };
-    match self.node_mut(input_id) {
-      Some(input_node) => match input_node {
-        TreeNode::CommandLineInput(input) => Some(input),
-        _ => None,
-      },
-      None => None,
+    let input_id = self.cmdline()?.input_id();
+    match self.node_mut(input_id)? {
+      TreeNode::CommandLineInput(input) => Some(input),
+      _ => None,
     }
   }
 
   /// Command-line message widget.
   pub fn cmdline_message(&self) -> Option<&CommandLineMessage> {
-    let message_id = match self.cmdline() {
-      Some(cmdline) => cmdline.message_id(),
-      None => return None,
-    };
-    match self.node(message_id) {
-      Some(message_node) => match message_node {
-        TreeNode::CommandLineMessage(message) => Some(message),
-        _ => None,
-      },
-      None => None,
+    let message_id = self.cmdline()?.message_id();
+    match self.node(message_id)? {
+      TreeNode::CommandLineMessage(message) => Some(message),
+      _ => None,
     }
   }
 
   /// Mutable command-line message widget.
   pub fn cmdline_message_mut(&mut self) -> Option<&mut CommandLineMessage> {
-    let message_id = match self.cmdline() {
-      Some(cmdline) => cmdline.message_id(),
-      None => return None,
-    };
-    match self.node_mut(message_id) {
-      Some(message_node) => match message_node {
-        TreeNode::CommandLineMessage(message) => Some(message),
-        _ => None,
-      },
-      None => None,
+    let message_id = self.cmdline()?.message_id();
+    match self.node_mut(message_id)? {
+      TreeNode::CommandLineMessage(message) => Some(message),
+      _ => None,
     }
   }
 
   /// Command-line indicator widget.
-  pub fn cmdline_indicator(&self) -> &CommandLineIndicator {
-    let indicator_id = self.cmdline().indicator_id();
-    debug_assert!(matches!(
-      self.node(indicator_id).unwrap(),
-      TreeNode::CommandLineIndicator(_)
-    ));
-    match self.node(indicator_id).unwrap() {
+  pub fn cmdline_indicator(&self) -> Option<&CommandLineIndicator> {
+    let indicator_id = self.cmdline()?.indicator_id();
+    match self.node(indicator_id)? {
       TreeNode::CommandLineIndicator(indicator) => indicator,
-      _ => unreachable!(),
+      _ => None,
     }
   }
 
   /// Mutable command-line indicator widget.
   pub fn cmdline_indicator_mut(&mut self) -> &mut CommandLineIndicator {
-    let indicator_id = self.cmdline().indicator_id();
-    debug_assert!(matches!(
-      self.node(indicator_id).unwrap(),
-      TreeNode::CommandLineIndicator(_)
-    ));
-    match self.node_mut(indicator_id).unwrap() {
+    let indicator_id = self.cmdline()?.indicator_id();
+    match self.node_mut(indicator_id)? {
       TreeNode::CommandLineIndicator(indicator) => indicator,
-      _ => unreachable!(),
+      _ => None,
     }
   }
 }
