@@ -359,25 +359,17 @@ impl Tree {
         debug_assert_eq!(Some(cursor.id()), self.cursor_id);
         Some(cursor)
       }
-      _ => unreachable!(),
+      _ => None,
     }
   }
 
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.nodes.contains_key(&cursor_id));
-        let cursor_node = self.node_mut(cursor_id).unwrap();
-        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-        match cursor_node {
-          TreeNode::Cursor(w) => {
-            debug_assert_eq!(w.id(), cursor_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+    match self.node_mut(self.cursor_id?)? {
+      TreeNode::Cursor(cursor) => {
+        debug_assert_eq!(Some(cursor.id()), self.cursor_id);
+        Some(cursor)
       }
-      None => None,
+      _ => None,
     }
   }
 
