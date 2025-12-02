@@ -36,6 +36,7 @@ pub struct Window {
 }
 
 inode_impl!(Window);
+
 impl Widgetable for Window {}
 
 impl Window {

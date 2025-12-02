@@ -34,6 +34,7 @@ pub struct CommandLine {
 }
 
 inode_impl!(CommandLine);
+
 impl Widgetable for CommandLine {}
 
 impl CommandLine {
