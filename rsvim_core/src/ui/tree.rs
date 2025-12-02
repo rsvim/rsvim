@@ -1056,6 +1056,20 @@ impl Tree {
       _ => unreachable!(),
     }
   }
+
+  pub fn editable_cursor_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match node {
+      TreeNode::Window(window) => window.cursor_id(),
+      TreeNode::CommandLine(cmdline) => cmdline.cursor_id(),
+      _ => unreachable!(),
+    }
+  }
 }
 // Editable widgets }
 
