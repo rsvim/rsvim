@@ -93,7 +93,7 @@ impl Stateful for NormalStateful {
         self.goto_insert_mode(&data_access, insert_motion)
       }
       Operation::GotoCommandLineExMode => {
-        self.goto_command_line_ex_mode(&data_access)
+        self.goto_cmdline_ex_mode(&data_access)
       }
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
@@ -113,7 +113,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_command_line_ex_mode(
+  pub fn goto_cmdline_ex_mode(
     &self,
     data_access: &StateDataAccess,
   ) -> StateMachine {
@@ -134,14 +134,15 @@ impl NormalStateful {
     // Command-line show input/indicator, hide message.
     tree.cmdline_show_input();
 
-    cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
+    // Set command-line indicator.
+    tree.cmdline_indicator_mut().set_symbol(IndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_forward_mode(
+  fn _goto_cmdline_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
@@ -152,7 +153,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_backward_mode(
+  fn _goto_cmdline_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {

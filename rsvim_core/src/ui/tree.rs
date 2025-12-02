@@ -301,7 +301,7 @@ impl Tree {
             debug_assert_eq!(w.id(), window_id);
             Some(w)
           }
-          _ => unreachable!(), // Other variants not allowed.
+          _ => None,
         }
       }
       None => None,
