@@ -370,10 +370,7 @@ impl Tree {
   // Command-line widget.
   pub fn cmdline(&self) -> Option<&CommandLine> {
     match self.node(self.command_line_id?)? {
-      TreeNode::CommandLine(cmdline) => {
-        debug_assert_eq!(Some(cmdline.id()), self.cursor_id);
-        Some(cmdline)
-      }
+      TreeNode::CommandLine(cmdline) => Some(cmdline),
       _ => None,
     }
   }
@@ -381,10 +378,7 @@ impl Tree {
   // Mutable command-line widget.
   pub fn cmdline_mut(&mut self) -> Option<&mut CommandLine> {
     match self.node_mut(self.command_line_id?)? {
-      TreeNode::CommandLine(cmdline) => {
-        debug_assert_eq!(Some(cmdline.id()), self.cursor_id);
-        Some(cmdline)
-      }
+      TreeNode::CommandLine(cmdline) => Some(cmdline),
       _ => None,
     }
   }
