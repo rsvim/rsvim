@@ -290,6 +290,7 @@ impl Tree {
 }
 // Node }
 
+// Widget {
 impl Tree {
   /// Window widget.
   pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
@@ -459,6 +460,7 @@ impl Tree {
     }
   }
 }
+// Widget }
 
 impl Tree {
   fn _insert(&mut self, child_node: TreeNode) {
