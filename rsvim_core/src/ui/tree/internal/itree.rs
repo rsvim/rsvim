@@ -162,7 +162,7 @@ impl Itree {
   /// such case, the root node logical shape does not need to be truncated.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
-    let result = match self.parent(id) {
+    match self.parent(id) {
       Some(parent_id) => {
         // Non-root node truncated by its parent's shape.
         let cached = self.cached_actual_shapes.borrow().get(&id).copied();
@@ -186,8 +186,7 @@ impl Itree {
         let shape = self.shape(id)?;
         Ok(rect_as!(shape, u16))
       }
-    };
-    result
+    }
   }
 
   /// Clear the cached actual_shapes since the provided id. All its
