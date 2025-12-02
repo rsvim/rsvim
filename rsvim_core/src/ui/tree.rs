@@ -961,7 +961,7 @@ impl Tree {
 // - Window, the actual editable component is "Window Content".
 // - Command-line, the actual editable component is "Command-line Input".
 impl Tree {
-  fn editable_viewport(&self, id: TreeNodeId) -> ViewportArc {
+  pub fn editable_viewport(&self, id: TreeNodeId) -> ViewportArc {
     debug_assert!(self.nodes.contains_key(&id));
     let node = self.node(id).unwrap();
     debug_assert!(matches!(
@@ -975,7 +975,11 @@ impl Tree {
     }
   }
 
-  fn set_editable_viewport(&mut self, id: TreeNodeId, viewport: ViewportArc) {
+  pub fn set_editable_viewport(
+    &mut self,
+    id: TreeNodeId,
+    viewport: ViewportArc,
+  ) {
     debug_assert!(self.nodes.contains_key(&id));
     let node = self.node_mut(id).unwrap();
     debug_assert!(matches!(
@@ -989,7 +993,7 @@ impl Tree {
     };
   }
 
-  fn editable_cursor_viewport(&self, id: TreeNodeId) -> CursorViewportArc {
+  pub fn editable_cursor_viewport(&self, id: TreeNodeId) -> CursorViewportArc {
     debug_assert!(self.nodes.contains_key(&id));
     let node = self.node(id).unwrap();
     debug_assert!(matches!(
@@ -1003,7 +1007,7 @@ impl Tree {
     }
   }
 
-  fn set_editable_cursor_viewport(
+  pub fn set_editable_cursor_viewport(
     &mut self,
     id: TreeNodeId,
     cursor_viewport: CursorViewportArc,
@@ -1025,7 +1029,7 @@ impl Tree {
     };
   }
 
-  fn editable_options(&self, id: TreeNodeId) -> &WindowOptions {
+  pub fn editable_options(&self, id: TreeNodeId) -> &WindowOptions {
     debug_assert!(self.nodes.contains_key(&id));
     let node = self.node(id).unwrap();
     debug_assert!(matches!(
@@ -1039,7 +1043,7 @@ impl Tree {
     }
   }
 
-  fn editable_actual_shape(&self, id: TreeNodeId) -> U16Rect {
+  pub fn editable_actual_shape(&self, id: TreeNodeId) -> U16Rect {
     debug_assert!(self.nodes.contains_key(&id));
     let node = self.node(id).unwrap();
     debug_assert!(matches!(

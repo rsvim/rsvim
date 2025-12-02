@@ -9,7 +9,6 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
-use crate::ui::widget::EditableWidgetable;
 use compact_str::CompactString;
 
 #[derive(Debug, Copy, Clone)]
@@ -242,28 +241,6 @@ pub fn editable_tree_node_mut(
 // NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
-fn _update_viewport(
-  vnode: &mut dyn EditableWidgetable,
-  text: &Text,
-  start_line: usize,
-  start_column: usize,
-) -> ViewportArc {
-  let new_viewport = Viewport::to_arc(Viewport::view(
-    vnode.editable_options(),
-    text,
-    &vnode.editable_actual_shape(),
-    start_line,
-    start_column,
-  ));
-
-  vnode.set_editable_viewport(new_viewport.clone());
-
-  new_viewport
-}
-
-// NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
-// on "cmdline-message", since the formers have cursor inside and can be
-// editing, while the ladder doesn't.
 fn _update_cursor_viewport(
   vnode: &mut dyn EditableWidgetable,
   viewport: &Viewport,
@@ -431,13 +408,10 @@ fn _update_viewport_after_text_changed(
 ) {
   let vnode = editable_tree_node_mut(tree, id);
 
-  let viewport = vnode.editable_viewport();
-  let cursor_viewport = vnode.editable_cursor_viewport();
-  trace!("before viewport:{:?}", vnode.editable_viewport());
-  trace!(
-    "before cursor_viewport:{:?}",
-    vnode.editable_cursor_viewport()
-  );
+  let viewport = tree.editable_viewport(id);
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+  trace!("before viewport:{:?}", viewport);
+  trace!("before cursor_viewport:{:?}", cursor_viewport);
 
   let start_line = std::cmp::min(
     viewport.start_line_idx(),
@@ -450,8 +424,14 @@ fn _update_viewport_after_text_changed(
     text.width_before(start_line, bufline_len_chars),
   );
 
-  let updated_viewport =
-    _update_viewport(vnode, text, start_line, start_column);
+  let updated_viewport = Viewport::to_arc(Viewport::view(
+    tree.editable_options(id),
+    text,
+    &tree.editable_actual_shape(id),
+    start_line,
+    start_column,
+  ));
+  tree.set_editable_viewport(id, updated_viewport.clone());
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   raw_cursor_viewport_move_to(
