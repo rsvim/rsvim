@@ -13,11 +13,9 @@ use crate::state::ops::cmdline_ops;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
-use crossterm::cursor;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
@@ -148,7 +146,7 @@ impl CommandLineExStateful {
     debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
     // Command-line show message, hide input/indicator.
-    tree.cmdline_show_message();
+    tree.cmdline_show_message().unwrap();
 
     // Move cursor to previous position.
     let current_window = tree.current_window().unwrap();
