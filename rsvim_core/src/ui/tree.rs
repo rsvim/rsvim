@@ -1147,18 +1147,10 @@ impl Tree {
       TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
     match node {
-      TreeNode::Window(window) => window.options(),
-      TreeNode::CommandLine(cmdline) => cmdline.options(),
+      TreeNode::Window(_) => self.window_content(id).unwrap().actual_shape(),
+      TreeNode::CommandLine(_) => self.cmdline_input().unwrap().actual_shape(),
       _ => unreachable!(),
     }
-  }
-
-  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
-    self.move_cursor_to(x, y)
-  }
-
-  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id()
   }
 }
 // Editable widgets }
