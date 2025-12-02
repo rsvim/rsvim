@@ -375,39 +375,23 @@ impl Tree {
 
   // Command-line widget.
   pub fn cmdline(&self) -> Option<&CommandLine> {
-    match self.command_line_id {
-      Some(cmdline_id) => {
-        debug_assert!(self.node(cmdline_id).is_some());
-        let cmdline_node = self.node(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
-        match cmdline_node {
-          TreeNode::CommandLine(w) => {
-            debug_assert_eq!(w.id(), cmdline_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+    match self.node(self.command_line_id?)? {
+      TreeNode::CommandLine(cmdline) => {
+        debug_assert_eq!(Some(cmdline.id()), self.cursor_id);
+        Some(cmdline)
       }
-      None => None,
+      _ => None,
     }
   }
 
   // Mutable command-line widget.
   pub fn cmdline_mut(&mut self) -> Option<&mut CommandLine> {
-    match self.command_line_id {
-      Some(cmdline_id) => {
-        debug_assert!(self.node_mut(cmdline_id).is_some());
-        let cmdline_node = self.node_mut(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
-        match cmdline_node {
-          TreeNode::CommandLine(w) => {
-            debug_assert_eq!(w.id(), cmdline_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+    match self.node_mut(self.command_line_id?)? {
+      TreeNode::CommandLine(cmdline) => {
+        debug_assert_eq!(Some(cmdline.id()), self.cursor_id);
+        Some(cmdline)
       }
-      None => None,
+      _ => None,
     }
   }
 
