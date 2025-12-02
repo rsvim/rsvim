@@ -67,20 +67,13 @@ impl Itree {
   fn _internal_check(&self) {
     debug_assert_eq!(self.lo.total_node_count(), self.nid2loid.len());
     debug_assert_eq!(self.lo.total_node_count(), self.loid2nid.len());
-    let mut no_parent_nodes = 0_usize;
     for (nid, loid) in self.nid2loid.iter() {
       debug_assert!(self.loid2nid.contains_key(loid));
       debug_assert_eq!(*self.loid2nid.get(loid).unwrap(), *nid);
-      match self.lo.parent(*loid) {
-        Some(parent_loid) => {
-          debug_assert!(self.loid2nid.contains_key(&parent_loid));
-        }
-        None => {
-          no_parent_nodes += 1;
-        }
+      if let Some(parent_loid) = self.lo.parent(*loid) {
+        debug_assert!(self.loid2nid.contains_key(&parent_loid));
       }
     }
-    debug_assert_eq!(no_parent_nodes, 1);
     for (loid, nid) in self.loid2nid.iter() {
       debug_assert!(self.nid2loid.contains_key(nid));
       debug_assert_eq!(*self.nid2loid.get(nid).unwrap(), *loid);

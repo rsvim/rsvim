@@ -85,7 +85,7 @@ fn insert1() {
   assert!(!contains_child(nid[1], nid[5]));
   assert!(!contains_child(nid[1], nid[6]));
 
-  assert!(contains_child(nid[2], nid[2]));
+  assert!(contains_child(nid[2], nid[4]));
   assert!(contains_child(nid[2], nid[5]));
   assert!(!contains_child(nid[2], nid[6]));
 
