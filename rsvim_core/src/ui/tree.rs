@@ -1084,9 +1084,7 @@ impl Tree {
     ));
     let _ = match node {
       TreeNode::Window(_) => self.set_window_viewport(id, viewport),
-      TreeNode::CommandLine(cmdline) => {
-        self.set_cmdline_input_viewport(viewport)
-      }
+      TreeNode::CommandLine(_) => self.set_cmdline_input_viewport(viewport),
       _ => unreachable!(),
     };
   }
