@@ -653,7 +653,7 @@ impl Viewport {
     for (line_idx, line_viewport) in self.lines.iter() {
       match last_line_idx {
         Some(last_line_idx1) => debug_assert_eq!(last_line_idx1 + 1, *line_idx),
-        None => { /* Skip */ }
+        None => {}
       }
       last_line_idx = Some(*line_idx);
       let mut last_row_viewport: Option<RowViewport> = None;
@@ -664,7 +664,7 @@ impl Viewport {
         // );
         match last_row_idx {
           Some(last_row_idx1) => debug_assert_eq!(last_row_idx1 + 1, *row_idx),
-          None => { /* Skip */ }
+          None => {}
         }
         last_row_idx = Some(*row_idx);
         match last_row_viewport {
@@ -679,7 +679,7 @@ impl Viewport {
               row_viewport.start_char_idx()
             )
           }
-          None => { /* Skip */ }
+          None => {}
         }
         last_row_viewport = Some(*row_viewport);
       }

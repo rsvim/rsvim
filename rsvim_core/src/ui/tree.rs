@@ -456,7 +456,7 @@ impl Tree {
         // When insert window widget, update `window_ids`.
         self.window_ids.insert(window.id());
       }
-      _ => { /* Skip */ }
+      _ => {}
     }
 
     self.nodes.insert(child_node.id(), child_node);

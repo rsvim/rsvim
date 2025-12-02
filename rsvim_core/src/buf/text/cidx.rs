@@ -97,7 +97,7 @@ impl ColumnIndex {
         Some(last_width1) => {
           debug_assert!(*w >= last_width1);
         }
-        None => { /* Skip */ }
+        None => {}
       }
       last_width = Some(*w);
       debug_assert!(self.width2char.contains_key(w));
@@ -458,7 +458,7 @@ impl ColumnIndex {
               self.truncate_since_char(*c);
               return;
             }
-            None => { /* Skip */ }
+            None => {}
           }
         }
       }
