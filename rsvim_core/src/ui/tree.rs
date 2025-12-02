@@ -1055,6 +1055,8 @@ impl Tree {
 // cursor into it, and start typing. For these high-level widgets, actual only
 // 1 of the sub-components contains the cursor and allow accepting user typings.
 //
+// Since these are all editable widgets, they can share some common logic.
+//
 // For now we only have two kinds of high-level widgets:
 // - Window, the actual editable component is "Window Content".
 // - Command-line, the actual editable component is "Command-line Input".
@@ -1073,8 +1075,20 @@ impl Tree {
     }
   }
 
-  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
-    self.set_viewport(viewport);
+  fn set_editable_viewport(&mut self, id: TreeNodeId, viewport: ViewportArc) {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node_mut(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    let _ = match node {
+      TreeNode::Window(_) => self.set_window_viewport(id, viewport),
+      TreeNode::CommandLine(cmdline) => {
+        self.set_cmdline_input_viewport(viewport)
+      }
+      _ => unreachable!(),
+    };
   }
 
   fn editable_cursor_viewport(&self) -> CursorViewportArc {
