@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+#![allow(clippy::too_many_arguments)]
 
 use super::viewport::*;
 use crate::buf::BufferArc;
