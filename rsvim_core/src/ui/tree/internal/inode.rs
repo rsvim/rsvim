@@ -84,14 +84,13 @@ impl Inodeable for InodeBase {
   }
 
   fn layout(&self) -> taffy::Layout {
-    self
+    *self
       .lotree
       .upgrade()
       .unwrap()
       .borrow()
       .layout(self.id)
       .unwrap()
-      .clone()
   }
 
   fn style(&self) -> taffy::Style {
