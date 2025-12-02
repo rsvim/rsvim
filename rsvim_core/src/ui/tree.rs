@@ -231,7 +231,7 @@ impl Tree {
   }
 
   /// See [`Itree::iter`].
-  pub fn iter(&self) -> TreeIter {
+  pub fn iter<'s>(&'s self) -> TreeIter<'s> {
     TreeIter::new(self, Some(self.root_id))
   }
 
@@ -354,13 +354,10 @@ impl Tree {
   }
 
   pub fn cursor(&self) -> Option<&Cursor> {
-    if cfg!(debug_assertions) {
-      match self.node(self.cursor_id?)? {
-        TreeNode::Cursor(cursor) => {
-          debug_assert_eq!(Some(cursor.id()), self.cursor_id);
-        }
-        _ => {}
-      }
+    if cfg!(debug_assertions)
+      && let TreeNode::Cursor(cursor) = self.node(self.cursor_id?)?
+    {
+      debug_assert_eq!(Some(cursor.id()), self.cursor_id);
     }
     match self.node(self.cursor_id?)? {
       TreeNode::Cursor(cursor) => Some(cursor),
@@ -369,13 +366,10 @@ impl Tree {
   }
 
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
-    if cfg!(debug_assertions) {
-      match self.node(self.cursor_id?)? {
-        TreeNode::Cursor(cursor) => {
-          debug_assert_eq!(Some(cursor.id()), self.cursor_id);
-        }
-        _ => {}
-      }
+    if cfg!(debug_assertions)
+      && let TreeNode::Cursor(cursor) = self.node(self.cursor_id?)?
+    {
+      debug_assert_eq!(Some(cursor.id()), self.cursor_id);
     }
     match self.node_mut(self.cursor_id?)? {
       TreeNode::Cursor(cursor) => Some(cursor),
@@ -385,13 +379,11 @@ impl Tree {
 
   // Command-line widget.
   pub fn cmdline(&self) -> Option<&CommandLine> {
-    if cfg!(debug_assertions) {
-      match self.node(self.command_line_id?)? {
-        TreeNode::CommandLine(cmdline) => {
-          debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
-        }
-        _ => {}
-      }
+    if cfg!(debug_assertions)
+      && let TreeNode::CommandLine(cmdline) =
+        self.node(self.command_line_id?)?
+    {
+      debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
     }
     match self.node(self.command_line_id?)? {
       TreeNode::CommandLine(cmdline) => Some(cmdline),
@@ -401,13 +393,11 @@ impl Tree {
 
   // Mutable command-line widget.
   pub fn cmdline_mut(&mut self) -> Option<&mut CommandLine> {
-    if cfg!(debug_assertions) {
-      match self.node(self.command_line_id?)? {
-        TreeNode::CommandLine(cmdline) => {
-          debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
-        }
-        _ => {}
-      }
+    if cfg!(debug_assertions)
+      && let TreeNode::CommandLine(cmdline) =
+        self.node(self.command_line_id?)?
+    {
+      debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
     }
     match self.node_mut(self.command_line_id?)? {
       TreeNode::CommandLine(cmdline) => Some(cmdline),
@@ -867,7 +857,7 @@ impl Tree {
         }
         match self.node_mut(old_window_id).unwrap() {
           TreeNode::Window(window) => {
-            lotree.remove_child(old_parent_id, cursor_id);
+            lotree.remove_child(old_parent_id, cursor_id).unwrap();
             let _removed = window.clear_cursor_id();
             debug_assert_eq!(_removed, Some(cursor_id));
           }
@@ -885,7 +875,7 @@ impl Tree {
         }
         match self.node_mut(old_cmdline_id).unwrap() {
           TreeNode::CommandLine(cmdline) => {
-            lotree.remove_child(old_parent_id, cursor_id);
+            lotree.remove_child(old_parent_id, cursor_id).unwrap();
             let _removed = cmdline.clear_cursor_id();
             debug_assert_eq!(_removed, Some(cursor_id));
           }
@@ -899,12 +889,12 @@ impl Tree {
     match self.node_mut(parent_id).unwrap() {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
-        lotree.add_child(content_id, cursor_id);
+        lotree.add_child(content_id, cursor_id).unwrap();
         window.set_cursor_id(cursor_id);
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
-        lotree.add_child(cmdline_input_id, cursor_id);
+        lotree.add_child(cmdline_input_id, cursor_id).unwrap();
         cmdline.set_cursor_id(cursor_id);
       }
       _ => unreachable!(),
