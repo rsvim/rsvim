@@ -54,7 +54,5 @@ pub fn convert_to_actual_shape(
 
   let actual_shape =
     rect!(actual_min_x, actual_min_y, actual_max_x, actual_max_y);
-  let actual_shape = rect_as!(actual_shape, u16);
-
-  actual_shape
+  rect_as!(actual_shape, u16)
 }
