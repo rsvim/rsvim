@@ -8,23 +8,6 @@ use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
-#[derive(Clone, Debug)]
-struct TestValue {
-  base: InodeBase,
-  value: i32,
-}
-
-inode_impl!(TestValue);
-
-impl TestValue {
-  pub fn new(lotree: ItreeWk, id: TreeNodeId, value: i32) -> Self {
-    TestValue {
-      base: InodeBase::new(lotree, id),
-      value,
-    }
-  }
-}
-
 #[test]
 fn new() {
   // test_log_init();
