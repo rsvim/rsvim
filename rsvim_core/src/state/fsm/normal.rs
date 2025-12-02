@@ -133,7 +133,7 @@ impl NormalStateful {
     tree.move_cursor_to(0, 0);
 
     // Command-line show input/indicator, hide message.
-    tree.cmdline_show_input();
+    tree.cmdline_show_input().unwrap();
 
     // Set command-line indicator.
     tree
