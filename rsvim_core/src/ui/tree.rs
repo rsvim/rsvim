@@ -445,7 +445,7 @@ impl Tree {
 }
 
 impl Tree {
-  fn _insert(&mut self, child_node: TreeNode) {
+  fn _insert(&mut self, child_node: &TreeNode) {
     // guard
     match &child_node {
       TreeNode::CommandLine(cmdline) => {
