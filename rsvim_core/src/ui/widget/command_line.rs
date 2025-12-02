@@ -12,15 +12,9 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use indicator::CommandLineIndicator;
-use input::CommandLineInput;
-use message::CommandLineMessage;
-use std::sync::Arc;
 use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
