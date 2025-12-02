@@ -293,8 +293,7 @@ impl Tree {
 impl Tree {
   /// Window widget.
   pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
-    let node = self.node(window_id)?;
-    match node {
+    match self.node(window_id)? {
       TreeNode::Window(window) => {
         debug_assert_eq!(window.id(), window_id);
         Some(window)
@@ -305,18 +304,12 @@ impl Tree {
 
   /// Mutable window widget.
   pub fn window_mut(&mut self, window_id: TreeNodeId) -> Option<&mut Window> {
-    match self.node_mut(window_id) {
-      Some(window_node) => {
-        debug_assert!(matches!(window_node, TreeNode::Window(_)));
-        match window_node {
-          TreeNode::Window(w) => {
-            debug_assert_eq!(w.id(), window_id);
-            Some(w)
-          }
-          _ => None,
-        }
+    match self.node_mut(window_id)? {
+      TreeNode::Window(window) => {
+        debug_assert_eq!(window.id(), window_id);
+        Some(window)
       }
-      None => None,
+      _ => None,
     }
   }
 
