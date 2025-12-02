@@ -171,61 +171,6 @@ impl CommandLine {
 }
 // Viewport }
 
-// Editable Viewport {
-impl EditableWidgetable for CommandLine {
-  fn editable_viewport(&self) -> ViewportArc {
-    self.input_viewport()
-  }
-
-  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
-    self.set_input_viewport(viewport);
-  }
-
-  fn editable_cursor_viewport(&self) -> CursorViewportArc {
-    self.input_cursor_viewport()
-  }
-
-  fn set_editable_cursor_viewport(
-    &mut self,
-    cursor_viewport: CursorViewportArc,
-  ) {
-    self.set_input_cursor_viewport(cursor_viewport);
-  }
-
-  fn editable_options(&self) -> &WindowOptions {
-    self.options()
-  }
-
-  fn editable_actual_shape(&self) -> U16Rect {
-    self.input().actual_shape()
-  }
-
-  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
-    self.move_cursor_to(x, y)
-  }
-
-  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id()
-  }
-}
-// Editable Viewport }
-
-// Show/Hide switch {
-impl CommandLine {
-  pub fn show_message(&mut self) {
-    self.indicator_mut().set_visible(false);
-    self.input_mut().set_visible(false);
-    self.message_mut().set_visible(true);
-  }
-
-  pub fn show_input(&mut self) {
-    self.indicator_mut().set_visible(true);
-    self.input_mut().set_visible(true);
-    self.message_mut().set_visible(false);
-  }
-}
-// Show/Hide switch }
-
 // Cursor {
 impl CommandLine {
   /// Set cursor ID in commandline, e.g. user starts command-line mode, and
@@ -248,24 +193,6 @@ impl CommandLine {
     let old = self.cursor_id;
     self.cursor_id = None;
     old
-  }
-
-  /// Bounded move cursor by x(columns) and y(rows).
-  ///
-  /// # Panics
-  /// It panics if cursor not exist.
-  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
-    let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_by(cursor_id, x, y)
-  }
-
-  /// Bounded move cursor to position x(columns) and y(rows).
-  ///
-  /// # Panics
-  /// It panics if cursor not exist.
-  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
-    let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_to(cursor_id, x, y)
   }
 }
 // Cursor }
