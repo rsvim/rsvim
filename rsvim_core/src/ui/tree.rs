@@ -177,9 +177,9 @@ impl Tree {
       ..Default::default()
     };
     let root_id = {
-      let mut base = lotree.borrow_mut();
-      let root_id = base.new_leaf(root_style)?;
-      base.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
+      let mut lotree = lotree.borrow_mut();
+      let root_id = lotree.new_leaf(root_style)?;
+      lotree.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       root_id
     };
 
