@@ -354,6 +354,14 @@ impl Tree {
   }
 
   pub fn cursor(&self) -> Option<&Cursor> {
+    if cfg!(debug_assertions) {
+      match self.node(self.cursor_id?)? {
+        TreeNode::Cursor(cursor) => {
+          debug_assert_eq!(Some(cursor.id()), self.cursor_id);
+        }
+        _ => {}
+      }
+    }
     match self.node(self.cursor_id?)? {
       TreeNode::Cursor(cursor) => Some(cursor),
       _ => None,
@@ -361,6 +369,14 @@ impl Tree {
   }
 
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    if cfg!(debug_assertions) {
+      match self.node(self.cursor_id?)? {
+        TreeNode::Cursor(cursor) => {
+          debug_assert_eq!(Some(cursor.id()), self.cursor_id);
+        }
+        _ => {}
+      }
+    }
     match self.node_mut(self.cursor_id?)? {
       TreeNode::Cursor(cursor) => Some(cursor),
       _ => None,
@@ -369,6 +385,14 @@ impl Tree {
 
   // Command-line widget.
   pub fn cmdline(&self) -> Option<&CommandLine> {
+    if cfg!(debug_assertions) {
+      match self.node(self.command_line_id?)? {
+        TreeNode::CommandLine(cmdline) => {
+          debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
+        }
+        _ => {}
+      }
+    }
     match self.node(self.command_line_id?)? {
       TreeNode::CommandLine(cmdline) => Some(cmdline),
       _ => None,
@@ -377,6 +401,14 @@ impl Tree {
 
   // Mutable command-line widget.
   pub fn cmdline_mut(&mut self) -> Option<&mut CommandLine> {
+    if cfg!(debug_assertions) {
+      match self.node(self.command_line_id?)? {
+        TreeNode::CommandLine(cmdline) => {
+          debug_assert_eq!(Some(cmdline.id()), self.command_line_id);
+        }
+        _ => {}
+      }
+    }
     match self.node_mut(self.command_line_id?)? {
       TreeNode::CommandLine(cmdline) => Some(cmdline),
       _ => None,
