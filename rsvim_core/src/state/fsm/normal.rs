@@ -126,9 +126,9 @@ impl NormalStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
     let cmdline_id = tree.command_line_id().unwrap();
-    let _old_window_id = tree.jump_cursor_to(cmdline_id);
-    debug_assert!(_old_window_id.is_some());
-    debug_assert_eq!(_old_window_id, tree.current_window_id());
+    let _old_widget_id = tree.jump_cursor_to(cmdline_id);
+    debug_assert!(_old_widget_id.is_some());
+    debug_assert_eq!(_old_widget_id, tree.current_window_id());
 
     tree.move_cursor_to(0, 0);
 
