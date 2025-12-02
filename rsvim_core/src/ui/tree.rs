@@ -1048,6 +1048,64 @@ impl Tree {
   }
 }
 
+// Editable widgets {
+//
+// Editable is to describe a high-level widget, for example
+// "window", "command-line", they are all "editable" because user can jump
+// cursor into it, and start typing. For these high-level widgets, actual only
+// 1 of the sub-components contains the cursor and allow accepting user typings.
+//
+// For now we only have two kinds of high-level widgets:
+// - Window, the actual editable component is "Window Content".
+// - Command-line, the actual editable component is "Command-line Input".
+impl Tree {
+  fn editable_viewport(&self, id: TreeNodeId) -> ViewportArc {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match node {
+      TreeNode::Window(window) => window.viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.input_viewport(),
+      _ => unreachable!(),
+    }
+  }
+
+  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
+    self.set_viewport(viewport);
+  }
+
+  fn editable_cursor_viewport(&self) -> CursorViewportArc {
+    self.cursor_viewport()
+  }
+
+  fn set_editable_cursor_viewport(
+    &mut self,
+    cursor_viewport: CursorViewportArc,
+  ) {
+    self.set_cursor_viewport(cursor_viewport);
+  }
+
+  fn editable_options(&self) -> &WindowOptions {
+    self.options()
+  }
+
+  fn editable_actual_shape(&self) -> U16Rect {
+    self.content().actual_shape()
+  }
+
+  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    self.move_cursor_to(x, y)
+  }
+
+  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id()
+  }
+}
+// Editable widgets }
+
 // Options {
 impl Tree {
   pub fn global_options(&self) -> &WindowGlobalOptions {
