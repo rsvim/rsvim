@@ -332,7 +332,7 @@ mod tests_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_command_line_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -490,7 +490,7 @@ mod tests_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_command_line_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -644,7 +644,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Prepare
     {
-      stateful.goto_command_line_ex_mode(&data_access);
+      stateful.goto_cmdline_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
