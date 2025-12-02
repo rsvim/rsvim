@@ -455,16 +455,16 @@ impl Tree {
   pub fn cmdline_indicator(&self) -> Option<&CommandLineIndicator> {
     let indicator_id = self.cmdline()?.indicator_id();
     match self.node(indicator_id)? {
-      TreeNode::CommandLineIndicator(indicator) => indicator,
+      TreeNode::CommandLineIndicator(indicator) => Some(indicator),
       _ => None,
     }
   }
 
   /// Mutable command-line indicator widget.
-  pub fn cmdline_indicator_mut(&mut self) -> &mut CommandLineIndicator {
+  pub fn cmdline_indicator_mut(&mut self) -> Option<&mut CommandLineIndicator> {
     let indicator_id = self.cmdline()?.indicator_id();
     match self.node_mut(indicator_id)? {
-      TreeNode::CommandLineIndicator(indicator) => indicator,
+      TreeNode::CommandLineIndicator(indicator) => Some(indicator),
       _ => None,
     }
   }
