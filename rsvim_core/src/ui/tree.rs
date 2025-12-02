@@ -355,20 +355,14 @@ impl Tree {
 
   pub fn cursor(&self) -> Option<&Cursor> {
     match self.node(self.cursor_id?)? {
-      TreeNode::Cursor(cursor) => {
-        debug_assert_eq!(Some(cursor.id()), self.cursor_id);
-        Some(cursor)
-      }
+      TreeNode::Cursor(cursor) => Some(cursor),
       _ => None,
     }
   }
 
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
     match self.node_mut(self.cursor_id?)? {
-      TreeNode::Cursor(cursor) => {
-        debug_assert_eq!(Some(cursor.id()), self.cursor_id);
-        Some(cursor)
-      }
+      TreeNode::Cursor(cursor) => Some(cursor),
       _ => None,
     }
   }
