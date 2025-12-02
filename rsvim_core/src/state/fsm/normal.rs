@@ -135,7 +135,10 @@ impl NormalStateful {
     tree.cmdline_show_input();
 
     // Set command-line indicator.
-    tree.cmdline_indicator_mut().set_symbol(IndicatorSymbol::Ex);
+    tree
+      .cmdline_indicator_mut()
+      .unwrap()
+      .set_symbol(IndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
