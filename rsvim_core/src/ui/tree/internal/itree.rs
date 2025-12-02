@@ -55,6 +55,11 @@ impl Itree {
     self.nid2loid.len()
   }
 
+  pub fn is_empty(&self) -> usize {
+    self._internal_check();
+    self.nid2loid.is_empty()
+  }
+
   #[cfg(not(test))]
   fn _internal_check(&self) {}
 
