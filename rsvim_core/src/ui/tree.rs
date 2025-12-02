@@ -1089,23 +1089,68 @@ impl Tree {
     };
   }
 
-  fn editable_cursor_viewport(&self) -> CursorViewportArc {
-    self.cursor_viewport()
+  fn editable_cursor_viewport(&self, id: TreeNodeId) -> CursorViewportArc {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match node {
+      TreeNode::Window(window) => window.cursor_viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.input_cursor_viewport(),
+      _ => unreachable!(),
+    }
   }
 
   fn set_editable_cursor_viewport(
     &mut self,
+    id: TreeNodeId,
     cursor_viewport: CursorViewportArc,
   ) {
-    self.set_cursor_viewport(cursor_viewport);
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node_mut(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    let _ = match node {
+      TreeNode::Window(_) => {
+        self.set_window_cursor_viewport(id, cursor_viewport)
+      }
+      TreeNode::CommandLine(_) => {
+        self.set_cmdline_input_cursor_viewport(cursor_viewport)
+      }
+      _ => unreachable!(),
+    };
   }
 
-  fn editable_options(&self) -> &WindowOptions {
-    self.options()
+  fn editable_options(&self, id: TreeNodeId) -> &WindowOptions {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match node {
+      TreeNode::Window(window) => window.options(),
+      TreeNode::CommandLine(cmdline) => cmdline.options(),
+      _ => unreachable!(),
+    }
   }
 
-  fn editable_actual_shape(&self) -> U16Rect {
-    self.content().actual_shape()
+  fn editable_actual_shape(&self, id: TreeNodeId) -> U16Rect {
+    debug_assert!(self.nodes.contains_key(&id));
+    let node = self.node(id).unwrap();
+    debug_assert!(matches!(
+      node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match node {
+      TreeNode::Window(window) => window.options(),
+      TreeNode::CommandLine(cmdline) => cmdline.options(),
+      _ => unreachable!(),
+    }
   }
 
   fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
