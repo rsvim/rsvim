@@ -212,7 +212,7 @@ impl Tree {
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.lotree.borrow().parent(id).copied()
+    self.lotree.borrow().parent(id)
   }
 
   /// Get the children IDs by a node `id`.
