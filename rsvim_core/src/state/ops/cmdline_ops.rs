@@ -20,14 +20,16 @@ fn set_message(
   message_text.clear();
   message_text.insert_at(0, 0, payload.to_compact_string());
 
-  let cmdline = tree.cmdline_mut().unwrap();
-  let opts = *cmdline.options();
-  let actual_shape = *cmdline.message().actual_shape();
+  let opts = *tree.cmdline().unwrap().options();
+  let actual_shape = tree.cmdline_message().unwrap().actual_shape();
 
   let new_message_viewport =
     Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
 
-  cmdline.set_message_viewport(new_message_viewport);
+  tree
+    .cmdline_mut()
+    .unwrap()
+    .set_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_flush_pending_message(
@@ -73,12 +75,14 @@ pub fn cmdline_clear_message(
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
 
-  let cmdline = tree.cmdline_mut().unwrap();
-  let opts = *cmdline.options();
-  let actual_shape = *cmdline.message().actual_shape();
+  let opts = *tree.cmdline().unwrap().options();
+  let actual_shape = tree.cmdline_message().unwrap().actual_shape();
 
   let new_message_viewport =
     Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
 
-  cmdline.set_message_viewport(new_message_viewport);
+  tree
+    .cmdline_mut()
+    .unwrap()
+    .set_message_viewport(new_message_viewport);
 }
