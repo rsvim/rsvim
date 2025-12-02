@@ -345,35 +345,21 @@ impl Tree {
 
   // Current window widget.
   pub fn current_window(&self) -> Option<&Window> {
-    match self.current_window_id {
-      Some(current_window_id) => self.window(current_window_id),
-      None => None,
-    }
+    self.window(self.current_window_id?)
   }
 
   // Mutable current window widget.
   pub fn current_window_mut(&mut self) -> Option<&mut Window> {
-    match self.current_window_id {
-      Some(current_window_id) => self.window_mut(current_window_id),
-      None => None,
-    }
+    self.window_mut(self.current_window_id?)
   }
 
   pub fn cursor(&self) -> Option<&Cursor> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        debug_assert!(self.nodes.contains_key(&cursor_id));
-        let cursor_node = self.node(cursor_id).unwrap();
-        debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-        match cursor_node {
-          TreeNode::Cursor(w) => {
-            debug_assert_eq!(w.id(), cursor_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+    match self.node(self.cursor_id?)? {
+      TreeNode::Cursor(cursor) => {
+        debug_assert_eq!(Some(cursor.id()), self.cursor_id);
+        Some(cursor)
       }
-      None => None,
+      _ => unreachable!(),
     }
   }
 
