@@ -223,21 +223,19 @@ impl Itree {
     self._internal_check();
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
-    let result = self.loid2nid.get(&parent_loid).copied();
-    result
+    self.loid2nid.get(&parent_loid).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let children_loids = self.lo.children(*loid)?;
-    let result = Ok(
+    Ok(
       children_loids
         .iter()
         .map(|i| *self.loid2nid.get(i).unwrap())
         .collect_vec(),
-    );
-    result
+    )
   }
 
   pub fn add_child(
