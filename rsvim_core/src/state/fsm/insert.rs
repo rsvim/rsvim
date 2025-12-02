@@ -177,13 +177,10 @@ impl InsertStateful {
       false,
     );
 
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
-    let _cursor_id = current_window.cursor_id().unwrap();
-    debug_assert!(current_window.cursor_mut().is_some());
-    let cursor = current_window.cursor_mut().unwrap();
-    debug_assert_eq!(_cursor_id, cursor.id());
-    cursor.set_cursor_style(&CursorStyle::SteadyBlock);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
 
     StateMachine::NormalMode(super::NormalStateful::default())
   }
