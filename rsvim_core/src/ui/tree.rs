@@ -318,7 +318,10 @@ impl Tree {
     &self,
     window_id: TreeNodeId,
   ) -> Option<&WindowContent> {
-    let content_id = self.node(window_id)?.content_id();
+    let content_id = match self.node(window_id)? {
+      TreeNode::Window(window) => window.content_id(),
+      _ => return None,
+    };
     match self.node(content_id)? {
       TreeNode::WindowContent(content) => Some(content),
       _ => None,
@@ -330,7 +333,10 @@ impl Tree {
     &mut self,
     window_id: TreeNodeId,
   ) -> Option<&mut WindowContent> {
-    let content_id = self.node(window_id)?.content_id();
+    let content_id = match self.node(window_id)? {
+      TreeNode::Window(window) => window.content_id(),
+      _ => return None,
+    };
     match self.node_mut(content_id)? {
       TreeNode::WindowContent(content) => Some(content),
       _ => None,
