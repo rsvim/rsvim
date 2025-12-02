@@ -318,19 +318,13 @@ impl Tree {
     &self,
     window_id: TreeNodeId,
   ) -> Option<&WindowContent> {
-    let content_id = match self.node(window_id) {
-      Some(window_node) => match window_node {
-        TreeNode::Window(window) => window.content_id(),
-        _ => return None,
-      },
-      None => return None,
+    let content_id = match self.node(window_id)? {
+      TreeNode::Window(window) => window.content_id(),
+      _ => return None,
     };
-    match self.node(content_id) {
-      Some(content_node) => match content_node {
-        TreeNode::WindowContent(content) => Some(content),
-        _ => None,
-      },
-      None => None,
+    match self.node(content_id)? {
+      TreeNode::WindowContent(content) => Some(content),
+      _ => None,
     }
   }
 
