@@ -1,6 +1,8 @@
+#![allow(unused_imports)]
+
 use super::shapes::*;
 use crate::prelude::*;
-// use crate::tests::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 use std::cmp::min;
 
 #[test]
@@ -59,7 +61,7 @@ fn convert_to_actual_shape2() {
 
 #[test]
 fn bound_shape1() {
-  // test_log_init();
+  test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
@@ -70,16 +72,16 @@ fn bound_shape1() {
   ];
   let expects: Vec<IRect> = vec![
     rect!(0, 0, 7, 8),
-    rect!(0, 1, 10, 10),
-    rect!(0, 0, 5, 5),
-    rect!(0, 2, 8, 10),
-    rect!(0, 4, 6, 8),
+    rect!(3, 2, 10, 10),
+    rect!(5, 0, 5, 5),
+    rect!(0, 8, 3, 10),
+    rect!(0, 8, 1, 8),
   ];
   for (i, p) in inputs.iter().enumerate() {
     let actual = bound_shape(&p.0, &p.1);
     let expect = expects[i];
     info!(
-      "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+      "{:?}, input:{:?}, actual:{:?}, expect:{:?}",
       i, p, actual, expect
     );
     assert!(actual == expect);

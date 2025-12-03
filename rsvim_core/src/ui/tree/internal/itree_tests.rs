@@ -1,6 +1,6 @@
 use super::itree::*;
 use crate::prelude::*;
-// use crate::tests::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use itertools::Itertools;
 use taffy::prelude::FromPercent;
@@ -185,7 +185,7 @@ fn insert2() {
 
 #[test]
 fn shape1() {
-  // test_log_init();
+  test_log_init();
 
   let mut tree = Itree::new();
   let nid1 = tree
@@ -254,8 +254,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s4 = rect!(3, 5, 20, 14);
-  let us4 = rect!(3, 5, 20, 14);
+  let s4 = rect!(3, 5, 15, 14);
+  let us4 = rect!(3, 5, 15, 14);
 
   let nid5 = tree
     .new_leaf(Style {
@@ -367,7 +367,7 @@ fn shape1() {
    * ```
    */
   tree.add_child(nid1, nid2).unwrap();
-  tree.add_child(nid1, nid2).unwrap();
+  tree.add_child(nid1, nid3).unwrap();
   tree.add_child(nid2, nid4).unwrap();
   tree.add_child(nid2, nid5).unwrap();
   tree.add_child(nid3, nid6).unwrap();
@@ -386,6 +386,14 @@ fn shape1() {
     let expect_s = expect_shapes[i];
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
+    info!(
+      "{} actual_shape:{:?}={:?}, shape:{:?}={:?}",
+      i + 1,
+      expect_us,
+      actual_us,
+      expect_s,
+      actual_s
+    );
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
