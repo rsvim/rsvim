@@ -10,7 +10,9 @@ use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
+use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::assert_viewport;
+use crate::tests::viewport::make_canvas;
 use crate::tests::viewport::make_window;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
@@ -48,32 +50,6 @@ pub fn make_wrap_linebreak() -> WindowOptions {
     .line_break(true)
     .build()
     .unwrap()
-}
-
-pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
-  let actual = actual
-    .frame()
-    .raw_symbols()
-    .iter()
-    .map(|cs| cs.join(""))
-    .collect::<Vec<_>>();
-  info!("actual:{}", actual.len());
-  for a in actual.iter() {
-    info!("{:?}", a);
-  }
-  info!("expect:{}", expect.len());
-  for e in expect.iter() {
-    info!("{:?}", e);
-  }
-
-  assert_eq!(actual.len(), expect.len());
-  for i in 0..actual.len() {
-    let e = &expect[i];
-    let a = &actual[i];
-    info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
-    assert_eq!(e.len(), a.len());
-    assert_eq!(e, a);
-  }
 }
 
 pub fn update_viewport(
