@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use super::itree::*;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
@@ -273,7 +275,7 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s5 = rect!(-3, -5, 10, 20);
+  let s5 = rect!(0, 0, 10, 15);
   let us5 = rect!(0, 0, 10, 15);
 
   let nid6 = tree
@@ -292,7 +294,7 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s6 = rect!(3, 6, 6, 10);
+  let s6 = rect!(3, 6, 6, 9);
   let us6 = rect!(13, 16, 16, 19);
 
   let nid7 = tree
@@ -387,7 +389,7 @@ fn shape1() {
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
     info!(
-      "{} actual_shape:{:?}={:?}, shape:{:?}={:?}",
+      "{},actual_shape:{:?}(expect)={:?}(actual),shape:{:?}(expect)={:?}(actual)",
       i + 1,
       expect_us,
       actual_us,
