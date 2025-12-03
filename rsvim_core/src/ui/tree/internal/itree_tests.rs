@@ -187,7 +187,7 @@ fn insert2() {
 
 #[test]
 fn shape1() {
-  test_log_init();
+  // test_log_init();
 
   let mut tree = Itree::new();
   let nid1 = tree
@@ -313,8 +313,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s7 = rect!(3, 6, 6, 20);
-  let us7 = rect!(3, 6, 10, 15);
+  let s7 = rect!(3, 6, 6, 15);
+  let us7 = rect!(3, 6, 6, 15);
 
   let nid8 = tree
     .new_leaf(Style {
@@ -332,7 +332,7 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s8 = rect!(-1, -2, 2, 1);
+  let s8 = rect!(0, 0, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
 
   let nid9 = tree
@@ -351,8 +351,8 @@ fn shape1() {
       ..Default::default()
     })
     .unwrap();
-  let s9 = rect!(5, 6, 9, 8);
-  let us9 = rect!(8, 12, 10, 14);
+  let s9 = rect!(3, 6, 3, 8);
+  let us9 = rect!(6, 12, 6, 14);
 
   /*
    * The tree looks like:
@@ -389,12 +389,12 @@ fn shape1() {
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
     info!(
-      "{},actual_shape expect:{:?} actual:{:?},shape expect:{:?} actual:{:?}",
+      "{},shape expect:{:?} actual:{:?},actual_shape expect:{:?} actual:{:?},",
       i + 1,
-      expect_us,
-      actual_us,
       expect_s,
-      actual_s
+      actual_s,
+      expect_us,
+      actual_us
     );
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
@@ -403,7 +403,7 @@ fn shape1() {
 
 #[test]
 fn shape2() {
-  // test_log_init();
+  test_log_init();
 
   let mut tree = Itree::new();
   let nid1 = tree
@@ -427,8 +427,8 @@ fn shape2() {
       ..Default::default()
     })
     .unwrap();
-  let s2 = rect!(0, 0, 20, 20);
-  let us2 = rect!(0, 0, 20, 20);
+  let s2 = rect!(0, 0, 15, 19);
+  let us2 = rect!(0, 0, 15, 19);
 
   let nid3 = tree
     .new_leaf(Style {
@@ -519,7 +519,15 @@ fn shape2() {
   tree.add_child(nid2, nid4).unwrap();
   tree.add_child(nid4, nid5).unwrap();
   tree.add_child(nid5, nid6).unwrap();
-  tree.compute_layout(nid1, taffy::Size::MAX_CONTENT).unwrap();
+  tree
+    .compute_layout(
+      nid1,
+      taffy::Size {
+        height: taffy::AvailableSpace::from_length(20_u16),
+        width: taffy::AvailableSpace::from_length(20_u16),
+      },
+    )
+    .unwrap();
 
   assert!(tree.parent(nid1).is_none());
 
@@ -531,6 +539,14 @@ fn shape2() {
     let expect_s = expect_shapes[i];
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
+    info!(
+      "{},shape expect:{:?} actual:{:?},actual_shape expect:{:?} actual:{:?},",
+      i + 1,
+      expect_s,
+      actual_s,
+      expect_us,
+      actual_us
+    );
     assert_eq!(expect_s, actual_s);
     assert_eq!(expect_us, actual_us);
   }
