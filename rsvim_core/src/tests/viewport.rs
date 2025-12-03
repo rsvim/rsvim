@@ -14,6 +14,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::Widgetable;
 use log::info;
 use std::sync::Arc;
+use taffy::prelude::FromPercent;
 use taffy::Style;
 
 pub fn make_canvas(
@@ -29,8 +30,8 @@ pub fn make_canvas(
       tree_root_id,
       Style {
         size: taffy::Size {
-          width: taffy::Dimension::auto(),
-          height: taffy::Dimension::auto(),
+          height: taffy::Dimension::from_percent(1.0),
+          width: taffy::Dimension::from_percent(1.0),
         },
         ..Default::default()
       },
@@ -98,8 +99,8 @@ pub fn make_window(
   tree.set_global_local_options(window_options);
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::auto(),
-      height: taffy::Dimension::auto(),
+      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::from_percent(1.0),
     },
     ..Default::default()
   };

@@ -1,5 +1,7 @@
 //! Tree utils for testing.
 
+#![allow(unused_imports)]
+
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
@@ -12,6 +14,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -30,8 +33,8 @@ pub fn make_tree_with_buffers(
   // Window
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::auto(),
-      height: taffy::Dimension::auto(),
+      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::Dimension::from_percent(1.0),
     },
     ..Default::default()
   };
@@ -74,14 +77,14 @@ pub fn make_tree_with_buffers_cmdline(
 
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::auto(),
-      height: taffy::Dimension::auto(),
+      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::Dimension::from_percent(1.0),
     },
     ..Default::default()
   };
   let cmdline_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::auto(),
+      width: taffy::Dimension::from_percent(1.0),
       height: taffy::Dimension::from_length(1_u16),
     },
     ..Default::default()

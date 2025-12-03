@@ -2,10 +2,10 @@
 #![allow(clippy::too_many_arguments)]
 
 use super::viewport::*;
-use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
+use crate::buf::BufferArc;
 use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
@@ -13,11 +13,11 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
-use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
+use crate::ui::widget::window::Window;
+use crate::ui::widget::Widgetable;
 use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;
@@ -28,8 +28,10 @@ use std::io::BufWriter;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::Once;
-use taffy::Style;
 use taffy::prelude::TaffyAuto;
+use taffy::prelude::TaffyMaxContent;
+use taffy::prelude::FromPercent;
+use taffy::Style;
 
 pub fn make_nowrap() -> WindowOptions {
   WindowOptionsBuilder::default().wrap(false).build().unwrap()
@@ -58,8 +60,8 @@ pub fn make_window_viewport(
       tree.root_id(),
       Style {
         size: taffy::Size {
-          width: taffy::Dimension::AUTO,
-          height: taffy::Dimension::AUTO,
+          height: taffy::Dimension::from_percent(1.0),
+          width: taffy::Dimension::from_percent(1.0),
         },
         ..Default::default()
       },

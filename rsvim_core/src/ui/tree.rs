@@ -36,6 +36,7 @@ use taffy::TaffyError;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
@@ -490,8 +491,8 @@ impl Tree {
   ) -> TaffyResult<TreeNodeId> {
     let content_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
     };
@@ -591,22 +592,22 @@ impl Tree {
       display: taffy::Display::None,
       size: taffy::Size {
         width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::auto(),
+        height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
     };
     let input_style = Style {
       display: taffy::Display::None,
       size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
     };
     let message_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
     };

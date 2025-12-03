@@ -37,6 +37,7 @@ use std::sync::Arc;
 use std::time::Instant;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -538,14 +539,14 @@ impl EventLoop {
 
     let window_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::auto(),
-        height: taffy::Dimension::auto(),
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
     };
     let cmdline_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::auto(),
+        width: taffy::Dimension::from_percent(1.0),
         height: taffy::Dimension::from_length(1_u16),
       },
       ..Default::default()
