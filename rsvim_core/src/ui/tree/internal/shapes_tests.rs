@@ -61,7 +61,7 @@ fn convert_to_actual_shape2() {
 
 #[test]
 fn bound_shape1() {
-  test_log_init();
+  // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
     (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),

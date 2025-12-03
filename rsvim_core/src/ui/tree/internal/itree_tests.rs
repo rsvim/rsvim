@@ -403,7 +403,7 @@ fn shape1() {
 
 #[test]
 fn shape2() {
-  test_log_init();
+  // test_log_init();
 
   let mut tree = Itree::new();
   let nid1 = tree
