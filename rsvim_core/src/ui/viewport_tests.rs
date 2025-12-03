@@ -875,7 +875,7 @@ mod tests_view_nowrap_startcol {
       "",
     ];
 
-    let (mut tree, window_id, actual) =
+    let (mut tree, window_id, _actual) =
       make_window(terminal_size, buf.clone(), win_opts);
     let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_fills: BTreeMap<usize, usize> = vec![
@@ -2456,7 +2456,7 @@ mod tests_view_wrap_nolinebreak_startcol {
       "ngs we wan",
     ];
 
-    let (mut tree, window_id, actual) =
+    let (mut tree, window_id, _actual) =
       make_window(terminal_size, buf.clone(), win_opts);
     let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_fills: BTreeMap<usize, usize> =
