@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 //! Viewport, window, editing related test utils.
 
 use crate::buf::BufferArc;
@@ -8,11 +10,9 @@ use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::Widgetable;
 use log::info;
-use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
 
