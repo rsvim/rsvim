@@ -3,7 +3,7 @@ use crate::prelude::*;
 use std::mem;
 
 #[test]
-fn cast_geo_points() {
+fn cast_points() {
   let p1: IPos = point!(1, 2);
   let actual1 = point_as!(p1, usize);
   let actual1_x = actual1.x();
@@ -27,7 +27,7 @@ fn cast_geo_points() {
 }
 
 #[test]
-fn cast_geo_rects() {
+fn cast_rects() {
   let r1: IRect = rect!(1, 2, 3, 4);
   let actual1 = rect_as!(r1, u8);
   let actual1_min = actual1.min();
@@ -57,7 +57,7 @@ fn cast_geo_rects() {
 }
 
 #[test]
-fn cast_geo_sizes() {
+fn cast_sizes() {
   let s1: ISize = size!(1, 2);
   let actual1 = size_as!(s1, u8);
   let actual1_w = actual1.width();
@@ -81,7 +81,7 @@ fn cast_geo_sizes() {
 }
 
 #[test]
-fn cast_geo_size_into_rect() {
+fn cast_size_into_rect() {
   let s1: ISize = size!(1, 2);
   let actual = rect_from_size!(s1);
   let actual = rect_as!(actual, u8);
