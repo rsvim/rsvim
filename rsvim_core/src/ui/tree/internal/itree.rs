@@ -111,12 +111,7 @@ impl Itree {
 
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     let layout = self.layout(id)?;
-    let shape = rect!(
-      layout.location.x,
-      layout.location.y,
-      layout.location.x + layout.size.width,
-      layout.location.y + layout.size.height
-    );
+    let shape = rect_from_layout!(layout);
     let shape = rect_as!(shape, isize);
     match self.parent(id) {
       Some(parent_id) => {
