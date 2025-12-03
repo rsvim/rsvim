@@ -197,19 +197,20 @@ impl Itree {
     }
   }
 
-  pub fn no_display(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  /// Whether the node is visible, e.g. its style is not `display: none`.
+  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
-    Ok(style.display == taffy::Display::None)
+    Ok(style.display != taffy::Display::None)
   }
 
-  /// Whether the node is visible, e.g. style is `display: none`.
-  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  /// The node is visible and its size > 0, e.g. both height and width > 0.
+  pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self._internal_check();
-    let no_display = self.no_display(id)?;
+    let visible = self.visible(id)?;
     let actual_shape = self.actual_shape(id)?;
-    Ok(no_display || actual_shape.size().is_zero())
+    Ok(visible && !actual_shape.size().is_zero())
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {

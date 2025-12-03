@@ -13,11 +13,11 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> U16Rect;
 
-  /// Equivalent to `Style { display: None }`
-  fn enabled(&self) -> bool;
-
-  /// Equivalent to size area `height == 0` or `width == 0`.
+  /// The node is visible, e.g. its style is not `display: none`.
   fn visible(&self) -> bool;
+
+  /// The node is visible and its size > 0, e.g. both height and width > 0.
+  fn enabled(&self) -> bool;
 }
 
 #[derive(Debug, Clone)]
@@ -61,16 +61,6 @@ impl Inodeable for InodeBase {
       .unwrap()
   }
 
-  fn enabled(&self) -> bool {
-    self
-      .lotree
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .no_display(self.id)
-      .unwrap()
-  }
-
   fn visible(&self) -> bool {
     self
       .lotree
@@ -78,6 +68,16 @@ impl Inodeable for InodeBase {
       .unwrap()
       .borrow()
       .visible(self.id)
+      .unwrap()
+  }
+
+  fn enabled(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .enabled(self.id)
       .unwrap()
   }
 }
@@ -102,12 +102,12 @@ macro_rules! inode_impl {
         self.base.actual_shape()
       }
 
-      fn enabled(&self) -> bool {
-        self.base.enabled()
-      }
-
       fn visible(&self) -> bool {
         self.base.visible()
+      }
+
+      fn enabled(&self) -> bool {
+        self.base.enabled()
       }
     }
   };
@@ -149,18 +149,18 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn enabled(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.enabled(),
-          )*
-        }
-      }
-
       fn visible(&self) -> bool {
         match self {
           $(
             $enum::$variant(e) => e.visible(),
+          )*
+        }
+      }
+
+      fn enabled(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.enabled(),
           )*
         }
       }
