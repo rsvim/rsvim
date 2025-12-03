@@ -443,8 +443,8 @@ fn shape2() {
       ..Default::default()
     })
     .unwrap();
-  let s3 = rect!(-2, -2, -1, 0);
-  let us3 = rect!(0, 0, 0, 0);
+  let s3 = rect!(15, 0, 20, 5);
+  let us3 = rect!(15, 0, 20, 5);
 
   let nid4 = tree
     .new_leaf(Style {
@@ -459,8 +459,8 @@ fn shape2() {
       ..Default::default()
     })
     .unwrap();
-  let s4 = rect!(3, 5, 20, 20);
-  let us4 = rect!(3, 5, 20, 20);
+  let s4 = rect!(0, 0, 5, 5);
+  let us4 = rect!(0, 0, 5, 5);
 
   let nid5 = tree
     .new_leaf(Style {
@@ -478,8 +478,8 @@ fn shape2() {
       ..Default::default()
     })
     .unwrap();
-  let s5 = rect!(-3, -5, 15, 20);
-  let us5 = rect!(3, 5, 18, 20);
+  let s5 = rect!(0, 0, 5, 5);
+  let us5 = rect!(0, 0, 5, 5);
 
   let nid6 = tree
     .new_leaf(Style {
@@ -497,8 +497,8 @@ fn shape2() {
       ..Default::default()
     })
     .unwrap();
-  let s6 = rect!(8, 13, 18, 25);
-  let us6 = rect!(11, 18, 18, 20);
+  let s6 = rect!(5, 5, 5, 5);
+  let us6 = rect!(5, 5, 5, 5);
 
   /*
    * The tree looks like:
