@@ -13,8 +13,10 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> U16Rect;
 
+  /// Equivalent to `Style { display: None }`
   fn enabled(&self) -> bool;
 
+  /// Equivalent to size area `height == 0` or `width == 0`.
   fn visible(&self) -> bool;
 }
 
