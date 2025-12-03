@@ -389,7 +389,7 @@ fn shape1() {
     let actual_us = tree.actual_shape(nids[i]).unwrap();
     let actual_s = tree.shape(nids[i]).unwrap();
     info!(
-      "{},actual_shape:{:?}(expect)={:?}(actual),shape:{:?}(expect)={:?}(actual)",
+      "{},actual_shape expect:{:?} actual:{:?},shape expect:{:?} actual:{:?}",
       i + 1,
       expect_us,
       actual_us,
