@@ -1126,7 +1126,7 @@ impl Tree {
     let mut canvas = lock!(canvas);
     for node in self.iter() {
       // Node is invisible
-      if !node.visible() {
+      if !node.enabled() {
         continue;
       }
       node.draw(&mut canvas);

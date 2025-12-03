@@ -40,7 +40,7 @@ impl CommandLineInput {
 
 impl Widgetable for CommandLineInput {
   fn draw(&self, canvas: &mut Canvas) {
-    if self.visible() {
+    if self.enabled() {
       let actual_shape = self.actual_shape();
       let contents = self.text_contents.upgrade().unwrap();
       let contents = lock!(contents);
