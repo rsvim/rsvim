@@ -8,3 +8,4 @@ pub mod js;
 pub mod log;
 pub mod tree;
 pub mod viewport;
+mod fsm;
