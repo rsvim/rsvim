@@ -13,7 +13,7 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> U16Rect;
 
-  fn no_display(&self) -> bool;
+  fn enabled(&self) -> bool;
 
   fn visible(&self) -> bool;
 }
@@ -59,7 +59,7 @@ impl Inodeable for InodeBase {
       .unwrap()
   }
 
-  fn no_display(&self) -> bool {
+  fn enabled(&self) -> bool {
     self
       .lotree
       .upgrade()
@@ -100,8 +100,8 @@ macro_rules! inode_impl {
         self.base.actual_shape()
       }
 
-      fn no_display(&self) -> bool {
-        self.base.no_display()
+      fn enabled(&self) -> bool {
+        self.base.enabled()
       }
 
       fn visible(&self) -> bool {
@@ -147,10 +147,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn no_display(&self) -> bool {
+      fn enabled(&self) -> bool {
         match self {
           $(
-            $enum::$variant(e) => e.no_display(),
+            $enum::$variant(e) => e.enabled(),
           )*
         }
       }
