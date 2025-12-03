@@ -43,7 +43,8 @@ fn draw_after_init1() {
 
   let window_opts =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let (tree, window_id, viewport) = make_window(terminal_size, buf.clone(), window_opts);
+  let (tree, window_id, _viewport) =
+    make_window(terminal_size, buf.clone(), window_opts);
   let (_tree, actual) = make_canvas(
     terminal_size,
     window_opts,
