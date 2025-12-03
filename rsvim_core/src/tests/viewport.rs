@@ -21,7 +21,7 @@ pub fn make_canvas(
   terminal_size: U16Size,
   window_options: WindowOptions,
   buffer: BufferArc,
-  _viewport: ViewportArc,
+  viewport: ViewportArc,
 ) -> (Tree, Canvas) {
   let mut tree = Tree::new(terminal_size).unwrap();
   let tree_root_id = tree.root_id();
@@ -39,6 +39,7 @@ pub fn make_canvas(
       Arc::downgrade(&buffer),
     )
     .unwrap();
+  tree.set_window_viewport(window_id, viewport);
   let window_content = tree.window_content(window_id).unwrap();
   let mut canvas = Canvas::new(terminal_size);
   window_content.draw(&mut canvas);
