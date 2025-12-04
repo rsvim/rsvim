@@ -548,24 +548,9 @@ impl Tree {
     hidden: bool,
     style: CursorStyle,
   ) -> TaffyResult<TreeNodeId> {
-    let cursor_style = Style {
-      position: taffy::Position::Absolute,
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_length(1_u16),
-      },
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(0_u16),
-        top: taffy::LengthPercentageAuto::from_length(0_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
-      },
-      ..Default::default()
-    };
-
     let cursor_id = {
       let mut base = self.lotree.borrow_mut();
-      let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
+      let cursor_id = base.new_cursor_with_parent(point!(0, 0), parent_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
     };

@@ -18,7 +18,7 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 
-pub const CURSOR_UNINIT_ID: TreeNodeId = -1;
+pub const CURSOR_INVALID_ID: TreeNodeId = -1;
 pub const CURSOR_SIZE_LENGTH: u16 = 1;
 
 /// Next unique UI widget ID.
@@ -56,8 +56,8 @@ impl Itree {
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
-      cursor_id: CURSOR_UNINIT_ID,
-      cursor_parent_id: CURSOR_UNINIT_ID,
+      cursor_id: CURSOR_INVALID_ID,
+      cursor_parent_id: CURSOR_INVALID_ID,
       cursor_location: point!(0, 0),
       cursor_visible: true,
     }
@@ -174,13 +174,13 @@ impl Itree {
   }
 
   pub fn set_cursor_location(&mut self, location: IPos) -> TaffyResult<()> {
-    debug_assert_ne!(self.cursor_id, CURSOR_UNINIT_ID);
+    debug_assert_ne!(self.cursor_id, CURSOR_INVALID_ID);
     self.cursor_location = location;
     Ok(())
   }
 
   pub fn set_cursor_visible(&mut self, visible: bool) -> TaffyResult<()> {
-    debug_assert_ne!(self.cursor_id, CURSOR_UNINIT_ID);
+    debug_assert_ne!(self.cursor_id, CURSOR_INVALID_ID);
     self.cursor_visible = visible;
     Ok(())
   }
@@ -236,11 +236,12 @@ impl Itree {
 
   /// Whether the node is visible, e.g. its style is not `display: none`.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self._internal_check();
+
     if id == self.cursor_id {
       return Ok(self.cursor_visible);
     }
 
-    self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
     Ok(style.display != taffy::Display::None)
@@ -255,15 +256,16 @@ impl Itree {
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self._internal_check();
+
     if id == self.cursor_id {
-      return if self.cursor_parent_id != CURSOR_UNINIT_ID {
+      return if self.cursor_parent_id != CURSOR_INVALID_ID {
         Some(self.cursor_parent_id)
       } else {
         None
       };
     }
 
-    self._internal_check();
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
     self.loid2nid.get(&parent_loid).copied()
@@ -271,6 +273,11 @@ impl Itree {
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
+
+    if id == self.cursor_id {
+      return Ok(vec![]);
+    }
+
     let loid = self.nid2loid.get(&id).unwrap();
     let children_loids = self.lo.children(*loid)?;
     Ok(
@@ -299,11 +306,21 @@ impl Itree {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
+    if child_id == self.cursor_id {
+      debug_assert_eq!(parent_id, self.cursor_parent_id);
+      self.cursor_parent_id = CURSOR_INVALID_ID;
+      return Ok(self.cursor_id);
+    }
+
+    debug_assert_ne!(child_id, self.cursor_id);
+
     self._internal_check();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let child_loid = self.nid2loid.get(&child_id).unwrap();
     let removed_loid = self.lo.remove_child(*parent_loid, *child_loid)?;
+    debug_assert_eq!(removed_loid, *child_loid);
     let removed_id = *self.loid2nid.get(&removed_loid).unwrap();
+    debug_assert_eq!(removed_id, child_id);
     self._internal_check();
     Ok(removed_id)
   }
@@ -325,6 +342,7 @@ impl Itree {
   ) -> TaffyResult<TreeNodeId> {
     self.cursor_id = next_node_id();
     debug_assert_ne!(self.cursor_id, parent_id);
+    debug_assert!(self.nid2loid.contains_key(&parent_id));
     self.cursor_parent_id = parent_id;
     self.cursor_location = location;
     Ok(self.cursor_id)
@@ -346,18 +364,6 @@ impl Itree {
     self.loid2nid.insert(loid, id);
     self._internal_check();
     Ok(id)
-  }
-
-  pub fn child_at_index(
-    &self,
-    parent_id: TreeNodeId,
-    child_index: usize,
-  ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
-    let child_loid = self.lo.child_at_index(*parent_loid, child_index)?;
-    let child_id = self.loid2nid.get(&child_loid).unwrap();
-    Ok(*child_id)
   }
 }
 
