@@ -8765,7 +8765,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -8787,7 +8787,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 4), (4, 0), (5, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -8809,7 +8809,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
