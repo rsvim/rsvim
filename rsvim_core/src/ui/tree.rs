@@ -566,7 +566,7 @@ impl Tree {
 
     let cursor_id = {
       let lotree = self.lotree.clone();
-      let mut lotree = lock!(self.lotree);
+      let mut lotree = lock!(lotree);
       let cursor_id = lotree.new_with_parent(cursor_style, parent_id)?;
       lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
