@@ -137,15 +137,15 @@ impl CommandLineExStateful {
     let current_window_id = tree.current_window_id().unwrap();
     let cmdline_id = tree.command_line_id().unwrap();
 
-    tree
-      .cursor_mut()
-      .unwrap()
-      .set_cursor_style(CursorStyle::SteadyBlock);
     let _old_widget_id = tree.jump_cursor_to(current_window_id);
     debug_assert!(_old_widget_id.is_some());
     debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
-    // Command-line show message, hide input/indicator.
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
+    // Show message, hide input/indicator.
     tree.cmdline_show_message().unwrap();
 
     // Move cursor to previous position.
