@@ -18,6 +18,7 @@ use crate::state::ops::cursor_ops;
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
 use crate::tests::viewport::assert_viewport;
+use crate::tests::viewport::make_canvas;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::TreeArc;
 use crate::ui::tree::*;
@@ -108,24 +109,6 @@ pub fn get_viewport(tree: TreeArc) -> ViewportArc {
 pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   let tree = lock!(tree);
   tree.current_window().unwrap().cursor_viewport()
-}
-
-pub fn make_canvas(
-  terminal_size: U16Size,
-  _window_options: WindowOptions,
-  buffer: BufferArc,
-  viewport: ViewportArc,
-) -> Canvas {
-  let tree = Tree::new(terminal_size).unwrap();
-  let window_content = WindowContent::new(
-    Rc::downgrade(&tree.lotree()),
-    next_node_id(),
-    Arc::downgrade(&buffer),
-    Arc::downgrade(&viewport),
-  );
-  let mut canvas = Canvas::new(terminal_size);
-  window_content.draw(&mut canvas);
-  canvas
 }
 
 pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
@@ -2038,7 +2021,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2099,7 +2082,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2163,7 +2146,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2262,7 +2245,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2323,7 +2306,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2387,7 +2370,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2486,7 +2469,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2547,7 +2530,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2611,7 +2594,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2688,7 +2671,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2743,7 +2726,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2813,7 +2796,7 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2864,7 +2847,7 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2908,7 +2891,7 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2954,7 +2937,7 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2998,7 +2981,7 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3046,7 +3029,7 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3120,7 +3103,7 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3171,7 +3154,7 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3215,7 +3198,7 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3261,7 +3244,7 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3310,7 +3293,7 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3358,7 +3341,7 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3432,7 +3415,7 @@ mod tests_insert_text {
         "  1. When ",
         "  2. When ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3483,7 +3466,7 @@ mod tests_insert_text {
         "lo, RSVIM!",
         "This is a ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3527,7 +3510,7 @@ mod tests_insert_text {
         "ines again",
         "ine-breakl",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3573,7 +3556,7 @@ mod tests_insert_text {
         " too long ",
         "er cases? ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3617,7 +3600,7 @@ mod tests_insert_text {
         "The insert",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3665,7 +3648,7 @@ mod tests_insert_text {
         "he inserte",
         "nsert 4th ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3725,7 +3708,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3786,7 +3769,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3851,7 +3834,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3935,7 +3918,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3981,7 +3964,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4030,7 +4013,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4077,7 +4060,7 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4123,7 +4106,7 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4170,7 +4153,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4214,7 +4197,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4261,7 +4244,7 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4354,7 +4337,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4400,7 +4383,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4449,7 +4432,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4496,7 +4479,7 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4542,7 +4525,7 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4589,7 +4572,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4633,7 +4616,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4680,7 +4663,7 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4773,7 +4756,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4819,7 +4802,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4868,7 +4851,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4915,7 +4898,7 @@ mod tests_insert_text {
         "Go!       ",
         "3rd.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4961,7 +4944,7 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5008,7 +4991,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5052,7 +5035,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5099,7 +5082,7 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5162,7 +5145,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5225,7 +5208,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5288,7 +5271,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5327,7 +5310,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5369,7 +5352,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5449,7 +5432,7 @@ mod tests_insert_text {
         "could make",
         " it longer",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5493,7 +5476,7 @@ mod tests_insert_text {
         "!         ",
         "3rd.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5540,7 +5523,7 @@ mod tests_insert_text {
         "shorter!  ",
         "3rd.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5587,7 +5570,7 @@ mod tests_insert_text {
         "hat we    ",
         "must make ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5633,7 +5616,7 @@ mod tests_insert_text {
         "CCCCCCCCCC",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5680,7 +5663,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5724,7 +5707,7 @@ mod tests_insert_text {
         "DDDDDDDDDD",
         "8th.      ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5771,7 +5754,7 @@ mod tests_insert_text {
         "CCCDDDDDDD",
         "DDD       ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5834,7 +5817,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5897,7 +5880,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -5979,7 +5962,7 @@ mod tests_insert_text {
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6061,7 +6044,7 @@ mod tests_insert_text {
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6106,7 +6089,7 @@ mod tests_insert_text {
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6154,7 +6137,7 @@ mod tests_insert_text {
         "                                                                                                                                                                                                        ",
         "                                                                                                                                                                                                        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6246,7 +6229,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6307,7 +6290,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6368,7 +6351,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6429,7 +6412,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6481,7 +6464,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6533,7 +6516,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6585,7 +6568,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6637,7 +6620,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6689,7 +6672,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6743,7 +6726,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6797,7 +6780,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6893,7 +6876,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -6954,7 +6937,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7015,7 +6998,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7076,7 +7059,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7128,7 +7111,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7180,7 +7163,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7232,7 +7215,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7284,7 +7267,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7336,7 +7319,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7390,7 +7373,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7444,7 +7427,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7540,7 +7523,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7601,7 +7584,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7662,7 +7645,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7723,7 +7706,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7775,7 +7758,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7827,7 +7810,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7879,7 +7862,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7931,7 +7914,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7983,7 +7966,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8037,7 +8020,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8091,7 +8074,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8151,7 +8134,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8211,7 +8194,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8293,7 +8276,7 @@ mod tests_delete_text {
         "But still ",
         "it        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8346,7 +8329,7 @@ mod tests_delete_text {
         "But still ",
         "it        ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8399,7 +8382,7 @@ mod tests_delete_text {
         "it        ",
         "contains  ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8452,7 +8435,7 @@ mod tests_delete_text {
         " window   ",
         "content   ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8505,7 +8488,7 @@ mod tests_delete_text {
         "row of the",
         " window   ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8558,7 +8541,7 @@ mod tests_delete_text {
         "wrap      ",
         "doesn't   ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8611,7 +8594,7 @@ mod tests_delete_text {
         "wrap      ",
         "doesn't   ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8664,7 +8647,7 @@ mod tests_delete_text {
         "wrap      ",
         "doesn't   ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8706,7 +8689,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8750,7 +8733,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8794,7 +8777,7 @@ mod tests_delete_text {
         "          ",
         "          ",
       ];
-      let actual_canvas =
+      let (_tree, actual_canvas) =
         make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
