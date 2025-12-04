@@ -475,6 +475,9 @@ impl Tree {
         // When insert window widget, update `window_ids`.
         self.window_ids.insert(window.id());
       }
+      TreeNode::Cursor(cursor) => {
+        self.cursor_id = Some(cursor.id());
+      }
       _ => {}
     }
 
@@ -691,6 +694,9 @@ impl Tree {
       && let Some(last_window_id) = self.window_ids.last()
     {
       self.current_window_id = Some(*last_window_id);
+    }
+    if self.cursor_id == Some(id) {
+      self.cursor_id = None;
     }
 
     self.nodes.remove(&id)

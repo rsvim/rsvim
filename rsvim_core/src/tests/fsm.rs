@@ -8,6 +8,7 @@ use crate::prelude::*;
 use crate::state::StateDataAccess;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_buffers_manager;
+use crate::tests::tree::make_tree_with_buffers;
 use crate::ui::tree::TreeArc;
 use crate::ui::widget::window::opt::WindowOptions;
 use crossterm::event::Event;
@@ -30,8 +31,6 @@ pub fn make_fsm_context(
   TextContentsArc,
   StateDataAccess,
 ) {
-  use crate::tests::tree::make_tree_with_buffers;
-
   let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
   let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let tree =
