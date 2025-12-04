@@ -213,12 +213,12 @@ impl Tree {
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.lotree.borrow().parent(id)
+    lock!(self.lotree).parent(id)
   }
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    self.lotree.borrow().children(id)
+    lock!(self.lotree).children(id)
   }
 
   /// Get the node struct by its `id`.
@@ -500,7 +500,8 @@ impl Tree {
       ..Default::default()
     };
     let (window_id, content_id) = {
-      let mut lotree = self.lotree.borrow_mut();
+      let lotree = self.lotree.clone();
+      let mut lotree = lock!(lotree);
       let window_id = lotree.new_with_parent(window_style, parent_id)?;
       let content_id = lotree.new_with_parent(content_style, window_id)?;
       lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
@@ -518,7 +519,7 @@ impl Tree {
     };
 
     let window = Window::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       window_id,
       window_opts,
       content_id,
@@ -529,7 +530,7 @@ impl Tree {
     self._insert(window_node);
 
     let content = WindowContent::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       content_id,
       buffer,
       Arc::downgrade(&viewport),
@@ -564,14 +565,15 @@ impl Tree {
     };
 
     let cursor_id = {
-      let mut base = self.lotree.borrow_mut();
-      let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
-      base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      let lotree = self.lotree.clone();
+      let mut lotree = lock!(self.lotree);
+      let cursor_id = lotree.new_with_parent(cursor_style, parent_id)?;
+      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
     };
 
     let cursor = Cursor::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       cursor_id,
       blinking,
       hidden,
@@ -616,7 +618,8 @@ impl Tree {
     };
 
     let (cmdline_id, indicator_id, input_id, message_id) = {
-      let mut lotree = self.lotree.borrow_mut();
+      let lotree = self.lotree.clone();
+      let mut lotree = lock!(lotree);
       let indicator_id = lotree.new_leaf(indicator_style)?;
       let input_id = lotree.new_leaf(input_style)?;
       let message_id = lotree.new_leaf(message_style)?;
@@ -642,7 +645,7 @@ impl Tree {
     };
 
     let cmdline = CommandLine::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       cmdline_id,
       indicator_id,
       input_id,
@@ -656,7 +659,7 @@ impl Tree {
     self._insert(cmdline_node);
 
     let indicator = CommandLineIndicator::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       indicator_id,
       indicator_symbol,
     );
@@ -664,7 +667,7 @@ impl Tree {
     self._insert(indicator_node);
 
     let input = CommandLineInput::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       input_id,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -673,7 +676,7 @@ impl Tree {
     self._insert(input_node);
 
     let message = CommandLineMessage::new(
-      Rc::downgrade(&self.lotree()),
+      Arc::downgrade(&self.lotree()),
       message_id,
       text_contents,
       Arc::downgrade(&message_viewport),
@@ -799,7 +802,8 @@ impl Tree {
     let indicator_id = self.cmdline().unwrap().indicator_id();
     let message_id = self.cmdline().unwrap().message_id();
 
-    let mut lotree = self.lotree.borrow_mut();
+    let lotree = self.lotree.clone();
+    let mut lotree = lock!(lotree);
     let mut input_style = lotree.style(input_id)?.clone();
     let mut indicator_style = lotree.style(indicator_id)?.clone();
     let mut message_style = lotree.style(message_id)?.clone();
@@ -847,7 +851,7 @@ impl Tree {
   ) -> Option<TreeNodeId> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
-    let mut lotree = lotree.borrow_mut();
+    let mut lotree = lock!(lotree);
     let old_parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&old_parent_id));
     debug_assert!(matches!(
@@ -926,7 +930,7 @@ impl Tree {
   pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<U16Rect> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
-    let mut lotree = lotree.borrow_mut();
+    let mut lotree = lock!(lotree);
     let parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(matches!(
@@ -969,7 +973,7 @@ impl Tree {
     let (new_x, new_y) = {
       let cursor_id = self.cursor_id.unwrap();
       let lotree = self.lotree.clone();
-      let lotree = lotree.borrow_mut();
+      let lotree = lock!(lotree);
       let pos = lotree.actual_shape(cursor_id).unwrap().min();
       let new_x = num_traits::clamp((pos.x as isize) + x, 0, u16::MAX as isize);
       let new_y = num_traits::clamp((pos.y as isize) + y, 0, u16::MAX as isize);
