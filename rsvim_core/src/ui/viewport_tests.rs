@@ -11886,7 +11886,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11912,7 +11912,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11938,7 +11938,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11964,7 +11964,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11990,7 +11990,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12016,7 +12016,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12042,7 +12042,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12068,7 +12068,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12094,7 +12094,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12120,7 +12120,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12178,7 +12178,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12204,7 +12204,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12230,7 +12230,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12256,7 +12256,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12282,7 +12282,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12308,7 +12308,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12334,7 +12334,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12360,7 +12360,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12386,7 +12386,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12412,7 +12412,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12438,7 +12438,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12464,7 +12464,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12490,7 +12490,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12516,7 +12516,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12542,7 +12542,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12600,7 +12600,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12632,7 +12632,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12659,7 +12659,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12685,7 +12685,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12711,7 +12711,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12737,7 +12737,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12763,7 +12763,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12789,7 +12789,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12815,7 +12815,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12841,7 +12841,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12867,7 +12867,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12893,7 +12893,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12919,7 +12919,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12945,7 +12945,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -12971,7 +12971,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13029,7 +13029,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13061,7 +13061,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13087,7 +13087,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13113,7 +13113,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13139,7 +13139,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13165,7 +13165,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13191,7 +13191,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13217,7 +13217,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13243,7 +13243,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13269,7 +13269,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13295,7 +13295,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13321,7 +13321,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13347,7 +13347,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13373,7 +13373,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13399,7 +13399,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13454,7 +13454,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -13482,7 +13482,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13510,7 +13510,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13538,7 +13538,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13566,7 +13566,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13594,7 +13594,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13622,7 +13622,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13650,7 +13650,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13678,7 +13678,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13706,7 +13706,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13734,7 +13734,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13762,7 +13762,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13790,7 +13790,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13818,7 +13818,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13846,7 +13846,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13874,7 +13874,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13902,7 +13902,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13930,7 +13930,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 5)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -13981,7 +13981,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -14003,7 +14003,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14025,7 +14025,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14047,7 +14047,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14069,7 +14069,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14091,7 +14091,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14113,7 +14113,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14135,7 +14135,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14157,7 +14157,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14179,7 +14179,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14201,7 +14201,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14223,7 +14223,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14246,7 +14246,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14268,7 +14268,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14290,7 +14290,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14312,7 +14312,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14363,7 +14363,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -14385,7 +14385,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14407,7 +14407,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14429,7 +14429,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14452,7 +14452,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14475,7 +14475,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14498,7 +14498,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14520,7 +14520,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14542,7 +14542,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14564,7 +14564,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14587,7 +14587,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14635,7 +14635,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -14662,7 +14662,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -14689,7 +14689,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -14716,7 +14716,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 1)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -14738,7 +14738,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -14760,7 +14760,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -14787,7 +14787,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -14821,7 +14821,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -14843,7 +14843,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 6)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14865,7 +14865,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14887,7 +14887,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -14914,7 +14914,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -14941,7 +14941,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -14999,7 +14999,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -15021,7 +15021,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15043,7 +15043,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15065,7 +15065,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15087,7 +15087,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15109,7 +15109,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15131,7 +15131,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15153,7 +15153,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15175,7 +15175,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15197,7 +15197,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15219,7 +15219,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15241,7 +15241,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15264,7 +15264,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15286,7 +15286,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15308,7 +15308,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15330,7 +15330,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15384,7 +15384,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -15406,7 +15406,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15428,7 +15428,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15450,7 +15450,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15472,7 +15472,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15494,7 +15494,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15516,7 +15516,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15538,7 +15538,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15560,7 +15560,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15582,7 +15582,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15604,7 +15604,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15626,7 +15626,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15649,7 +15649,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15671,7 +15671,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15693,7 +15693,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15715,7 +15715,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15769,7 +15769,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -15791,7 +15791,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15813,7 +15813,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15835,7 +15835,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15858,7 +15858,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15881,7 +15881,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15904,7 +15904,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15926,7 +15926,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15948,7 +15948,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15970,7 +15970,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -15993,7 +15993,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16047,7 +16047,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16069,7 +16069,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16091,7 +16091,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16113,7 +16113,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 4)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16136,7 +16136,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16159,7 +16159,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16182,7 +16182,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 3)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16204,7 +16204,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16226,7 +16226,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16248,7 +16248,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 7)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16271,7 +16271,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16322,7 +16322,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16349,7 +16349,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16376,7 +16376,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16403,7 +16403,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 1)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16426,7 +16426,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16449,7 +16449,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16476,7 +16476,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -16510,7 +16510,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -16532,7 +16532,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 6)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16555,7 +16555,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16578,7 +16578,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16605,7 +16605,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -16632,7 +16632,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -16683,7 +16683,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16710,7 +16710,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16737,7 +16737,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -16764,7 +16764,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 1)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16786,7 +16786,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16808,7 +16808,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -16835,7 +16835,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -16869,7 +16869,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
@@ -16891,7 +16891,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 6)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16913,7 +16913,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16935,7 +16935,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -16962,7 +16962,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -16989,7 +16989,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -17044,7 +17044,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17072,7 +17072,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17100,7 +17100,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17128,7 +17128,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17156,7 +17156,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17184,7 +17184,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17235,7 +17235,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17263,7 +17263,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17291,7 +17291,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17319,7 +17319,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17347,7 +17347,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17375,7 +17375,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17403,7 +17403,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17431,7 +17431,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17459,7 +17459,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17487,7 +17487,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17515,7 +17515,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17566,7 +17566,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -17594,7 +17594,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17622,7 +17622,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17650,7 +17650,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17678,7 +17678,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17706,7 +17706,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17734,7 +17734,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17762,7 +17762,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17790,7 +17790,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17818,7 +17818,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17846,7 +17846,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17874,7 +17874,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17902,7 +17902,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17930,7 +17930,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17958,7 +17958,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -17986,7 +17986,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -18030,7 +18030,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18057,7 +18057,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18084,7 +18084,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18111,7 +18111,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18138,7 +18138,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18165,7 +18165,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18192,7 +18192,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18219,7 +18219,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18246,7 +18246,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18273,7 +18273,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18300,7 +18300,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18327,7 +18327,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18354,7 +18354,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18381,7 +18381,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18408,7 +18408,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18452,7 +18452,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18479,7 +18479,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18506,7 +18506,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18533,7 +18533,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18560,7 +18560,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18587,7 +18587,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18614,7 +18614,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18641,7 +18641,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -18668,7 +18668,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
