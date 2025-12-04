@@ -28,7 +28,6 @@ pub struct Window {
   options: WindowOptions,
 
   content_id: TreeNodeId,
-  cursor_id: Option<TreeNodeId>,
 
   buffer: BufferWk,
   viewport: ViewportArc,
@@ -66,7 +65,6 @@ impl Window {
       base: InodeBase::new(lotree, id),
       options: opts,
       content_id,
-      cursor_id: None,
       buffer,
       viewport,
       cursor_viewport,
@@ -89,11 +87,6 @@ impl Window {
   /// Get binded buffer.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
-  }
-
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
   }
 
   /// Content widget ID.
@@ -126,26 +119,26 @@ impl Window {
 }
 // Viewport }
 
-// Cursor {
-impl Window {
-  /// Set cursor widget ID in window, e.g. user moves cursor into this window.
-  ///
-  /// # Returns
-  /// It returns the previous cursor ID.
-  pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
-    let old = self.cursor_id;
-    self.cursor_id = Some(cursor_id);
-    old
-  }
-
-  /// Clear cursor ID from window, e.g. user cursor leaves this window.
-  ///
-  /// # Returns
-  /// It returns the previous cursor ID.
-  pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
-    let old = self.cursor_id;
-    self.cursor_id = None;
-    old
-  }
-}
-// Cursor }
+// // Cursor {
+// impl Window {
+//   /// Set cursor widget ID in window, e.g. user moves cursor into this window.
+//   ///
+//   /// # Returns
+//   /// It returns the previous cursor ID.
+//   pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+//     let old = self.cursor_id;
+//     self.cursor_id = Some(cursor_id);
+//     old
+//   }
+//
+//   /// Clear cursor ID from window, e.g. user cursor leaves this window.
+//   ///
+//   /// # Returns
+//   /// It returns the previous cursor ID.
+//   pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+//     let old = self.cursor_id;
+//     self.cursor_id = None;
+//     old
+//   }
+// }
+// // Cursor }

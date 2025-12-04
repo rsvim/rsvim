@@ -25,7 +25,6 @@ pub struct CommandLine {
 
   indicator_id: TreeNodeId,
   input_id: TreeNodeId,
-  cursor_id: Option<TreeNodeId>,
   message_id: TreeNodeId,
 
   input_viewport: ViewportArc,
@@ -92,7 +91,6 @@ impl CommandLine {
       indicator_id,
       input_id,
       message_id,
-      cursor_id: None,
       input_viewport,
       input_cursor_viewport,
       message_viewport,
@@ -109,11 +107,6 @@ impl CommandLine {
   /// Set window local options.
   pub fn set_options(&mut self, options: &WindowOptions) {
     self.options = *options;
-  }
-
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
   }
 
   /// Command-line indicator widget ID.
@@ -166,28 +159,28 @@ impl CommandLine {
 }
 // Viewport }
 
-// Cursor {
-impl CommandLine {
-  /// Set cursor ID in commandline, e.g. user starts command-line mode, and
-  /// cursor moves into the command-line widget.
-  ///
-  /// # Returns
-  /// It returns the previous cursor ID.
-  pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
-    let old = self.cursor_id;
-    self.cursor_id = Some(cursor_id);
-    old
-  }
-
-  /// Clear cursor widget from commandline, e.g. user leaves command-line mode,
-  /// cursor moves out of command-line widget.
-  ///
-  /// # Returns
-  /// It returns the previous cursor ID.
-  pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
-    let old = self.cursor_id;
-    self.cursor_id = None;
-    old
-  }
-}
-// Cursor }
+// // Cursor {
+// impl CommandLine {
+//   /// Set cursor ID in commandline, e.g. user starts command-line mode, and
+//   /// cursor moves into the command-line widget.
+//   ///
+//   /// # Returns
+//   /// It returns the previous cursor ID.
+//   pub fn set_cursor_id(&mut self, cursor_id: TreeNodeId) -> Option<TreeNodeId> {
+//     let old = self.cursor_id;
+//     self.cursor_id = Some(cursor_id);
+//     old
+//   }
+//
+//   /// Clear cursor widget from commandline, e.g. user leaves command-line mode,
+//   /// cursor moves out of command-line widget.
+//   ///
+//   /// # Returns
+//   /// It returns the previous cursor ID.
+//   pub fn clear_cursor_id(&mut self) -> Option<TreeNodeId> {
+//     let old = self.cursor_id;
+//     self.cursor_id = None;
+//     old
+//   }
+// }
+// // Cursor }

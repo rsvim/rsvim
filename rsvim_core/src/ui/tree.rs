@@ -865,10 +865,8 @@ impl Tree {
           return None;
         }
         match self.node_mut(old_window_id).unwrap() {
-          TreeNode::Window(window) => {
+          TreeNode::Window(_window) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
-            let _removed = window.clear_cursor_id();
-            debug_assert_eq!(_removed, Some(cursor_id));
           }
           _ => unreachable!(),
         }
@@ -883,10 +881,8 @@ impl Tree {
           return None;
         }
         match self.node_mut(old_cmdline_id).unwrap() {
-          TreeNode::CommandLine(cmdline) => {
+          TreeNode::CommandLine(_cmdline) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
-            let _removed = cmdline.clear_cursor_id();
-            debug_assert_eq!(_removed, Some(cursor_id));
           }
           _ => unreachable!(),
         }
@@ -899,12 +895,10 @@ impl Tree {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
         lotree.add_child(content_id, cursor_id).unwrap();
-        window.set_cursor_id(cursor_id);
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
         lotree.add_child(cmdline_input_id, cursor_id).unwrap();
-        cmdline.set_cursor_id(cursor_id);
       }
       _ => unreachable!(),
     }
