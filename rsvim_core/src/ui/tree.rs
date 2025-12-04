@@ -851,6 +851,9 @@ impl Tree {
         match self.node_mut(old_window_id).unwrap() {
           TreeNode::Window(_window) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
+            lotree
+              .compute_layout(old_parent_id, taffy::Size::MAX_CONTENT)
+              .unwrap();
           }
           _ => unreachable!(),
         }
@@ -867,6 +870,9 @@ impl Tree {
         match self.node_mut(old_cmdline_id).unwrap() {
           TreeNode::CommandLine(_cmdline) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
+            lotree
+              .compute_layout(old_parent_id, taffy::Size::MAX_CONTENT)
+              .unwrap();
           }
           _ => unreachable!(),
         }
@@ -879,10 +885,16 @@ impl Tree {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
         lotree.add_child(content_id, cursor_id).unwrap();
+        lotree
+          .compute_layout(content_id, taffy::Size::MAX_CONTENT)
+          .unwrap();
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
         lotree.add_child(cmdline_input_id, cursor_id).unwrap();
+        lotree
+          .compute_layout(cmdline_input_id, taffy::Size::MAX_CONTENT)
+          .unwrap();
       }
       _ => unreachable!(),
     }
