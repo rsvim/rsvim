@@ -8937,7 +8937,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         6,
@@ -8961,7 +8961,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec![(5, 0)].into_iter().collect();
       info!("actual:{:?}", actual);
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         5,
@@ -8984,7 +8984,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         4,
@@ -9012,7 +9012,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         3,
@@ -9040,7 +9040,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 2)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         2,
