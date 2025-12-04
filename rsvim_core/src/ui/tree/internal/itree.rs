@@ -188,6 +188,19 @@ impl Itree {
     Ok(())
   }
 
+  fn _actual_shape_impl(
+    &self,
+    id: TreeNodeId,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<U16Rect> {
+    let shape = self.shape(id)?;
+    let parent_actual_shape = self.actual_shape(parent_id)?;
+    Ok(shapes::convert_to_actual_shape(
+      &shape,
+      &parent_actual_shape,
+    ))
+  }
+
   /// Actual location/size in limited terminal device. The top-left location
   /// can never be negative.
   ///
@@ -198,15 +211,7 @@ impl Itree {
     self._internal_check();
 
     if id == self.cursor_id {
-      let shape = rect!(
-        self.cursor_location.x(),
-        self.cursor_location.y(),
-        self.cursor_location.x() + CURSOR_SIZE_LENGTH as isize,
-        self.cursor_location.y() + CURSOR_SIZE_LENGTH as isize
-      );
-      let parent_actual_shape = self.actual_shape(self.cursor_parent_id)?;
-      let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
-      return Ok(bounded_shape);
+      return self._actual_shape_impl(self.cursor_id, self.cursor_parent_id);
     }
 
     match self.parent(id) {
@@ -220,10 +225,7 @@ impl Itree {
           Some(cached) => Ok(cached),
           None => {
             // Non-root node truncated by its parent's shape.
-            let shape = self.shape(id)?;
-            let parent_actual_shape = self.actual_shape(parent_id)?;
-            let actual_shape =
-              shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+            let actual_shape = self._actual_shape_impl(id, parent_id)?;
             self
               .cached_actual_shapes
               .borrow_mut()
