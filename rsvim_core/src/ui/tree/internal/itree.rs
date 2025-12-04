@@ -293,6 +293,13 @@ impl Itree {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> TaffyResult<()> {
+    if child_id == self.cursor_id {
+      debug_assert_eq!(CURSOR_INVALID_ID, self.cursor_parent_id);
+      debug_assert!(self.nid2loid.contains_key(&parent_id));
+      self.cursor_parent_id = parent_id;
+      return Ok(());
+    }
+
     self._internal_check();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let child_loid = self.nid2loid.get(&child_id).unwrap();
@@ -311,8 +318,6 @@ impl Itree {
       self.cursor_parent_id = CURSOR_INVALID_ID;
       return Ok(self.cursor_id);
     }
-
-    debug_assert_ne!(child_id, self.cursor_id);
 
     self._internal_check();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
