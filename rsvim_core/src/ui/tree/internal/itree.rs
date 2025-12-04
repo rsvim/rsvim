@@ -150,30 +150,28 @@ impl Itree {
   /// such case, the root node logical shape does not need to be truncated.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
-    match self.parent(id) {
-      Some(parent_id) => {
-        // Non-root node truncated by its parent's shape.
-        let cached = self.cached_actual_shapes.borrow().get(&id).copied();
-        match cached {
-          Some(cached) => Ok(cached),
-          None => {
-            let shape = self.shape(id)?;
-            let parent_actual_shape = self.actual_shape(parent_id)?;
-            let actual_shape =
-              shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
-            self
-              .cached_actual_shapes
-              .borrow_mut()
-              .insert(id, actual_shape);
-            Ok(actual_shape)
-          }
+    let cached = self.cached_actual_shapes.borrow().get(&id).copied();
+    match cached {
+      Some(cached) => Ok(cached),
+      None => match self.parent(id) {
+        Some(parent_id) => {
+          // Non-root node truncated by its parent's shape.
+          let shape = self.shape(id)?;
+          let parent_actual_shape = self.actual_shape(parent_id)?;
+          let actual_shape =
+            shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+          self
+            .cached_actual_shapes
+            .borrow_mut()
+            .insert(id, actual_shape);
+          Ok(actual_shape)
         }
-      }
-      None => {
-        // Root node doesn't have a parent.
-        let shape = self.shape(id)?;
-        Ok(rect_as!(shape, u16))
-      }
+        None => {
+          // Root node doesn't have a parent.
+          let shape = self.shape(id)?;
+          Ok(rect_as!(shape, u16))
+        }
+      },
     }
   }
 
