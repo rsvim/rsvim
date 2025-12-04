@@ -1,6 +1,7 @@
 use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
+use crate::buf::opt::BufferOptionsBuilder;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
@@ -55,4 +56,20 @@ pub fn make_fsm_context(
   );
 
   (event, tree, bufs, buf, contents, data_access)
+}
+
+pub fn make_default_fsm_context(
+  terminal_size: U16Size,
+  window_local_opts: WindowOptions,
+  lines: Vec<&str>,
+) -> (
+  Event,
+  TreeArc,
+  BuffersManagerArc,
+  BufferArc,
+  TextContentsArc,
+  StateDataAccess,
+) {
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+  make_fsm_context(terminal_size, buf_opts, window_local_opts, lines)
 }
