@@ -25,6 +25,7 @@ use crate::tests::fsm::make_fsm_context;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::assert_viewport;
+use crate::tests::viewport::make_canvas_from_tree;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Tree;
@@ -56,14 +57,6 @@ pub fn curwin_viewport(tree: TreeArc) -> ViewportArc {
 pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   let tree = lock!(tree);
   tree.current_window().unwrap().cursor_viewport()
-}
-
-pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
-  let canvas = Canvas::new(terminal_size);
-  let canvas = Canvas::to_arc(canvas);
-  let tree = lock!(tree);
-  tree.draw(canvas.clone());
-  canvas
 }
 
 #[cfg(test)]
@@ -4746,7 +4739,7 @@ mod tests_cursor_move {
         "        1. When the line is s",
         "        2. When the line is t",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -4795,7 +4788,7 @@ mod tests_cursor_move {
         ">>>>>>>1. When the line is sm",
         ">>>>>>>2. When the line is to",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7693,7 +7686,7 @@ mod tests_goto_command_line_ex_mode {
       "          ",
       ":         ",
     ];
-    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
     let actual_canvas = lock!(actual_canvas);
     assert_canvas(&actual_canvas, &expect_canvas);
   }
@@ -7739,7 +7732,7 @@ mod tests_goto_command_line_ex_mode {
         "                                                            ",
         ":                                                           ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7772,7 +7765,7 @@ mod tests_goto_command_line_ex_mode {
         "                                                            ",
         ":Bye1                                                       ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7832,7 +7825,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7871,7 +7864,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7919,7 +7912,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -7958,7 +7951,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8006,7 +7999,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8045,7 +8038,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8092,7 +8085,7 @@ mod tests_goto_insert_mode {
         "                              ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8133,7 +8126,7 @@ mod tests_goto_insert_mode {
         "Bye,                          ",
         "                              ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -8191,7 +8184,7 @@ mod tests_goto_insert_mode {
         "                                                            ",
         "Test echo                                                   ",
       ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = make_canvas_from_tree(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }

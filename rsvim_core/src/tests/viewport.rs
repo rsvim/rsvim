@@ -3,13 +3,13 @@
 
 //! Viewport, window, editing related test utils.
 
-use crate::buf::text::Text;
 use crate::buf::BufferArc;
+use crate::buf::text::Text;
 use crate::coord::U16Size;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::{Tree, TreeArc};
 use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::{Tree, TreeArc};
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -48,7 +48,10 @@ pub fn make_canvas(
   (tree, canvas)
 }
 
-pub fn make_canvas_from_tree(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
+pub fn make_canvas_from_tree(
+  tree: TreeArc,
+  terminal_size: U16Size,
+) -> CanvasArc {
   let canvas = Canvas::new(terminal_size);
   let canvas = Canvas::to_arc(canvas);
   let tree = lock!(tree);
@@ -167,7 +170,7 @@ pub fn assert_viewport(
     assert!(actual.end_line_idx() <= actual.start_line_idx());
   } else {
     let (first_line_idx, _first_line_viewport) =
-        actual.lines().first().unwrap();
+      actual.lines().first().unwrap();
     let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
     assert_eq!(*first_line_idx, actual.start_line_idx());
     assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
