@@ -154,15 +154,16 @@ impl CommandLineExStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBlock);
 
-    // Command-line show message, hide input/indicator.
-    tree.cmdline_show_message().unwrap();
-
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+
+    // Save command-line input text contents.
     let cmdline_input_content =
       contents.command_line_input().rope().to_compact_string();
+    let cmdline_input_content = cmdline_input_content.trim();
 
+    // Clear command-line both message and input.
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cursor_ops::cursor_clear(
       &mut tree,
@@ -170,11 +171,13 @@ impl CommandLineExStateful {
       contents.command_line_input_mut(),
     );
 
-    let cmdline_input_content = cmdline_input_content.trim();
+    // Command-line reset indicator.
     tree
       .cmdline_indicator_mut()
       .unwrap()
       .set_symbol(IndicatorSymbol::Empty);
+    // Command-line show message, hide input/indicator.
+    tree.cmdline_show_message().unwrap();
 
     cmdline_input_content.to_compact_string()
   }
