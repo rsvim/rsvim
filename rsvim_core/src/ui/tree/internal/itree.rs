@@ -18,9 +18,6 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 
-pub const CURSOR_INVALID_ID: TreeNodeId = -1;
-pub const CURSOR_SIZE_LENGTH: u16 = 1;
-
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 100001, so be different from buffer ID.
@@ -37,12 +34,6 @@ pub struct Itree {
 
   // Cached shapes for each node.
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
-
-  // Cursor node is handled specially.
-  cursor_id: TreeNodeId,
-  cursor_parent_id: TreeNodeId,
-  cursor_location: IPos,
-  cursor_visible: bool,
 }
 
 rc_refcell_ptr!(Itree);
@@ -56,10 +47,6 @@ impl Itree {
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
-      cursor_id: CURSOR_INVALID_ID,
-      cursor_parent_id: CURSOR_INVALID_ID,
-      cursor_location: point!(0, 0),
-      cursor_visible: true,
     }
   }
 
@@ -117,26 +104,15 @@ impl Itree {
   }
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
-    debug_assert_ne!(id, self.cursor_id);
-
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     self.lo.layout(*loid)
   }
 
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
-    let shape = if id == self.cursor_id {
-      rect!(
-        self.cursor_location.x(),
-        self.cursor_location.y(),
-        self.cursor_location.x() + CURSOR_SIZE_LENGTH as isize,
-        self.cursor_location.y() + CURSOR_SIZE_LENGTH as isize
-      )
-    } else {
-      let layout = self.layout(id)?;
-      let shape = rect_from_layout!(layout);
-      rect_as!(shape, isize)
-    };
+    let layout = self.layout(id)?;
+    let shape = rect_from_layout!(layout);
+    let shape = rect_as!(shape, isize);
 
     match self.parent(id) {
       Some(parent_id) => {
@@ -156,31 +132,15 @@ impl Itree {
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    debug_assert_ne!(id, self.cursor_id);
-
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     self.lo.style(*loid)
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    debug_assert_ne!(id, self.cursor_id);
-
     self._internal_check();
     let loid = self.nid2loid.get(&id).unwrap();
     self.lo.set_style(*loid, style)
-  }
-
-  pub fn set_cursor_location(&mut self, location: IPos) -> TaffyResult<()> {
-    debug_assert_ne!(self.cursor_id, CURSOR_INVALID_ID);
-    self.cursor_location = location;
-    Ok(())
-  }
-
-  pub fn set_cursor_visible(&mut self, visible: bool) -> TaffyResult<()> {
-    debug_assert_ne!(self.cursor_id, CURSOR_INVALID_ID);
-    self.cursor_visible = visible;
-    Ok(())
   }
 
   /// Actual location/size in limited terminal device. The top-left location
@@ -236,11 +196,6 @@ impl Itree {
   /// Whether the node is visible, e.g. its style is not `display: none`.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self._internal_check();
-
-    if id == self.cursor_id {
-      return Ok(self.cursor_visible);
-    }
-
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
     Ok(style.display != taffy::Display::None)
@@ -256,15 +211,6 @@ impl Itree {
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
-
-    if id == self.cursor_id {
-      return if self.cursor_parent_id != CURSOR_INVALID_ID {
-        Some(self.cursor_parent_id)
-      } else {
-        None
-      };
-    }
-
     let loid = self.nid2loid.get(&id)?;
     let parent_loid = self.lo.parent(*loid)?;
     self.loid2nid.get(&parent_loid).copied()
@@ -272,11 +218,6 @@ impl Itree {
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
-
-    if id == self.cursor_id {
-      return Ok(vec![]);
-    }
-
     let loid = self.nid2loid.get(&id).unwrap();
     let children_loids = self.lo.children(*loid)?;
     Ok(
@@ -293,14 +234,6 @@ impl Itree {
     child_id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
-
-    if child_id == self.cursor_id {
-      debug_assert_eq!(CURSOR_INVALID_ID, self.cursor_parent_id);
-      debug_assert!(self.nid2loid.contains_key(&parent_id));
-      self.cursor_parent_id = parent_id;
-      return Ok(());
-    }
-
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let child_loid = self.nid2loid.get(&child_id).unwrap();
     self.lo.add_child(*parent_loid, *child_loid)
@@ -311,12 +244,6 @@ impl Itree {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
-    if child_id == self.cursor_id {
-      debug_assert_eq!(parent_id, self.cursor_parent_id);
-      self.cursor_parent_id = CURSOR_INVALID_ID;
-      return Ok(self.cursor_id);
-    }
-
     self._internal_check();
     let parent_loid = self.nid2loid.get(&parent_id).unwrap();
     let child_loid = self.nid2loid.get(&child_id).unwrap();
@@ -335,19 +262,6 @@ impl Itree {
     let id = self.new_leaf(style)?;
     self.add_child(parent_id, id)?;
     Ok(id)
-  }
-
-  pub fn new_cursor_with_parent(
-    &mut self,
-    location: IPos,
-    parent_id: TreeNodeId,
-  ) -> TaffyResult<TreeNodeId> {
-    self.cursor_id = next_node_id();
-    debug_assert_ne!(self.cursor_id, parent_id);
-    debug_assert!(self.nid2loid.contains_key(&parent_id));
-    self.cursor_parent_id = parent_id;
-    self.cursor_location = location;
-    Ok(self.cursor_id)
   }
 
   pub fn new_with_children(

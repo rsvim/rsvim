@@ -37,6 +37,7 @@ use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
 pub type TreeNodeId = i32;
@@ -547,9 +548,24 @@ impl Tree {
     hidden: bool,
     style: CursorStyle,
   ) -> TaffyResult<TreeNodeId> {
+    let cursor_style = Style {
+      position: taffy::Position::Absolute,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(0_u16),
+        top: taffy::LengthPercentageAuto::from_length(0_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      ..Default::default()
+    };
+
     let cursor_id = {
       let mut base = self.lotree.borrow_mut();
-      let cursor_id = base.new_cursor_with_parent(point!(0, 0), parent_id)?;
+      let cursor_id = base.new_with_parent(cursor_style, parent_id)?;
       base.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
     };
@@ -929,7 +945,14 @@ impl Tree {
       return None;
     }
 
-    lotree.set_cursor_location(point!(new_x, new_y)).unwrap();
+    let mut style = lotree.style(cursor_id).unwrap().clone();
+    style.inset = taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(new_x as u16),
+      top: taffy::LengthPercentageAuto::from_length(new_y as u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    };
+    lotree.set_style(cursor_id, style).unwrap();
     lotree
       .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
       .unwrap();
