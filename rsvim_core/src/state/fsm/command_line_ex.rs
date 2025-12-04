@@ -255,16 +255,7 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.cmdline_mut().unwrap();
-    let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
-    debug_assert!(
-      text
-        .rope()
-        .get_line(cmdline.input_cursor_viewport().line_idx())
-        .is_some()
-    );
-
+    let cmdline_id = tree.command_line_id().unwrap();
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
     StateMachine::CommandLineExMode(CommandLineExStateful::default())
