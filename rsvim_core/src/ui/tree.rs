@@ -37,7 +37,6 @@ use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
-use taffy::prelude::TaffyAuto;
 use taffy::prelude::TaffyMaxContent;
 
 pub type TreeNodeId = i32;
