@@ -68,13 +68,12 @@ mod tests_raw_cursor_move_y_by {
     test_log_init();
 
     let lines = vec![];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      size!(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -103,13 +102,12 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      size!(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -138,13 +136,12 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, _buf, contents, data_access) = make_fsm_context(
-      size!(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, _buf, contents, data_access) =
+      make_default_fsm_context(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -180,13 +177,12 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, _buf, contents, data_access) = make_fsm_context(
-      size!(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, _buf, contents, data_access) =
+      make_default_fsm_context(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -215,13 +211,12 @@ mod tests_raw_cursor_move_y_by {
 
     let terminal_size = size!(10, 10);
     let lines = vec![];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      terminal_size,
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -250,13 +245,12 @@ mod tests_raw_cursor_move_y_by {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, _buf, contents, data_access) = make_fsm_context(
-      size!(10, 10),
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(true).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, _buf, contents, data_access) =
+      make_default_fsm_context(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -292,13 +286,12 @@ mod tests_raw_cursor_move_x_by {
 
     let terminal_size = size!(10, 10);
     let lines = vec![];
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      terminal_size,
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -328,13 +321,12 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = size!(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      terminal_size,
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -364,13 +356,12 @@ mod tests_raw_cursor_move_x_by {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let terminal_size = size!(10, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      terminal_size,
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -401,13 +392,12 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = size!(10, 10);
 
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let (event, tree, bufs, buf, contents, data_access) = make_fsm_context(
-      terminal_size,
-      buf_opts,
-      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_default_fsm_context(
+        terminal_size,
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
