@@ -132,7 +132,7 @@ widget_dispatcher!(
 ///   higher priority to display and process the input events.
 pub struct Tree {
   // Internal tree.
-  lotree: ItreeRc,
+  lotree: ItreeArc,
 
   // Tree nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
@@ -202,7 +202,7 @@ impl Tree {
     })
   }
 
-  pub fn lotree(&self) -> ItreeRc {
+  pub fn lotree(&self) -> ItreeArc {
     self.lotree.clone()
   }
 
