@@ -22,6 +22,7 @@ use crate::tests::buf::make_buffers_manager;
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
 use crate::tests::tree::make_tree_with_buffers_cmdline;
+use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::assert_viewport;
 use crate::tests::viewport::make_canvas_from_tree;
 use crate::ui::canvas::Canvas;
@@ -146,32 +147,6 @@ pub fn make_tree_with_cmdline(
     window_local_opts,
     lines,
   )
-}
-
-pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
-  let actual = actual
-    .frame()
-    .raw_symbols()
-    .iter()
-    .map(|cs| cs.join(""))
-    .collect::<Vec<_>>();
-  info!("actual:{}", actual.len());
-  for a in actual.iter() {
-    info!("{:?}", a);
-  }
-  info!("expect:{}", expect.len());
-  for e in expect.iter() {
-    info!("{:?}", e);
-  }
-
-  assert_eq!(actual.len(), expect.len());
-  for i in 0..actual.len() {
-    let e = &expect[i];
-    let a = &actual[i];
-    info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
-    assert_eq!(e.len(), a.len());
-    assert_eq!(e, a);
-  }
 }
 
 #[cfg(test)]
