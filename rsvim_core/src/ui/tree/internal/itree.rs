@@ -325,7 +325,6 @@ impl Itree {
     debug_assert_eq!(removed_loid, *child_loid);
     let removed_id = *self.loid2nid.get(&removed_loid).unwrap();
     debug_assert_eq!(removed_id, child_id);
-    self._internal_check();
     Ok(removed_id)
   }
 
