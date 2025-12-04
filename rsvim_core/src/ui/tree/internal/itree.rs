@@ -124,31 +124,26 @@ impl Itree {
     self.lo.layout(*loid)
   }
 
-  fn _shape_impl(
-    &self,
-    shape: IRect,
-    parent_id: TreeNodeId,
-  ) -> TaffyResult<IRect> {
-    let parent_actual_shape = self.actual_shape(parent_id)?;
-    Ok(shapes::bound_shape(&shape, &parent_actual_shape))
-  }
-
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
-    if id == self.cursor_id {
-      let shape = rect!(
+    let shape = if id == self.cursor_id {
+      rect!(
         self.cursor_location.x(),
         self.cursor_location.y(),
         self.cursor_location.x() + CURSOR_SIZE_LENGTH as isize,
         self.cursor_location.y() + CURSOR_SIZE_LENGTH as isize
-      );
-      return self._shape_impl(shape, self.cursor_parent_id);
-    }
+      )
+    } else {
+      let layout = self.layout(id)?;
+      let shape = rect_from_layout!(layout);
+      rect_as!(shape, isize)
+    };
 
-    let layout = self.layout(id)?;
-    let shape = rect_from_layout!(layout);
-    let shape = rect_as!(shape, isize);
     match self.parent(id) {
-      Some(parent_id) => self._shape_impl(shape, parent_id),
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(parent_id)?;
+        let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
+        Ok(bounded_shape)
+      }
       None => {
         let min_x = num_traits::clamp_min(shape.min().x, 0);
         let min_y = num_traits::clamp_min(shape.min().y, 0);
@@ -188,19 +183,6 @@ impl Itree {
     Ok(())
   }
 
-  fn _actual_shape_impl(
-    &self,
-    id: TreeNodeId,
-    parent_id: TreeNodeId,
-  ) -> TaffyResult<U16Rect> {
-    let shape = self.shape(id)?;
-    let parent_actual_shape = self.actual_shape(parent_id)?;
-    Ok(shapes::convert_to_actual_shape(
-      &shape,
-      &parent_actual_shape,
-    ))
-  }
-
   /// Actual location/size in limited terminal device. The top-left location
   /// can never be negative.
   ///
@@ -209,10 +191,6 @@ impl Itree {
   /// such case, the root node logical shape does not need to be truncated.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
-
-    if id == self.cursor_id {
-      return self._actual_shape_impl(self.cursor_id, self.cursor_parent_id);
-    }
 
     match self.parent(id) {
       None => {
@@ -225,11 +203,18 @@ impl Itree {
           Some(cached) => Ok(cached),
           None => {
             // Non-root node truncated by its parent's shape.
-            let actual_shape = self._actual_shape_impl(id, parent_id)?;
-            self
-              .cached_actual_shapes
-              .borrow_mut()
-              .insert(id, actual_shape);
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
+            let actual_shape =
+              shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+
+            // Do not cache cursor_id actual_shape.
+            if id != self.cursor_id {
+              self
+                .cached_actual_shapes
+                .borrow_mut()
+                .insert(id, actual_shape);
+            }
             Ok(actual_shape)
           }
         }

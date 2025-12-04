@@ -919,9 +919,6 @@ impl Tree {
     }
 
     lotree.set_cursor_location(point!(new_x, new_y)).unwrap();
-    lotree
-      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
-      .unwrap();
     Some(lotree.actual_shape(cursor_id).unwrap())
   }
 
