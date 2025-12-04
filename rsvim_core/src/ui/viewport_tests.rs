@@ -9873,7 +9873,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         1,
@@ -9901,7 +9901,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -9952,7 +9952,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -9974,7 +9974,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect_end_fills: BTreeMap<usize, usize> =
         vec![(7, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         7,
