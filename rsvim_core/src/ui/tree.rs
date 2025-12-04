@@ -918,14 +918,7 @@ impl Tree {
       return None;
     }
 
-    let mut style = lotree.style(cursor_id).unwrap().clone();
-    style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_x as u16),
-      top: taffy::LengthPercentageAuto::from_length(new_y as u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
-    };
-    lotree.set_style(cursor_id, style).unwrap();
+    lotree.set_cursor_location(point!(new_x, new_y)).unwrap();
     lotree
       .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
       .unwrap();

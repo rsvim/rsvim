@@ -124,6 +124,15 @@ impl Itree {
     self.lo.layout(*loid)
   }
 
+  fn _shape_impl(
+    &self,
+    shape: IRect,
+    parent_id: TreeNodeId,
+  ) -> TaffyResult<IRect> {
+    let parent_actual_shape = self.actual_shape(parent_id)?;
+    Ok(shapes::bound_shape(&shape, &parent_actual_shape))
+  }
+
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     if id == self.cursor_id {
       let shape = rect!(
@@ -132,20 +141,14 @@ impl Itree {
         self.cursor_location.x() + CURSOR_SIZE_LENGTH as isize,
         self.cursor_location.y() + CURSOR_SIZE_LENGTH as isize
       );
-      let parent_actual_shape = self.actual_shape(self.cursor_parent_id)?;
-      let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
-      return Ok(bounded_shape);
+      return self._shape_impl(shape, self.cursor_parent_id);
     }
 
     let layout = self.layout(id)?;
     let shape = rect_from_layout!(layout);
     let shape = rect_as!(shape, isize);
     match self.parent(id) {
-      Some(parent_id) => {
-        let parent_actual_shape = self.actual_shape(parent_id)?;
-        let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
-        Ok(bounded_shape)
-      }
+      Some(parent_id) => self._shape_impl(shape, parent_id),
       None => {
         let min_x = num_traits::clamp_min(shape.min().x, 0);
         let min_y = num_traits::clamp_min(shape.min().y, 0);
@@ -193,6 +196,19 @@ impl Itree {
   /// such case, the root node logical shape does not need to be truncated.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
+
+    if id == self.cursor_id {
+      let shape = rect!(
+        self.cursor_location.x(),
+        self.cursor_location.y(),
+        self.cursor_location.x() + CURSOR_SIZE_LENGTH as isize,
+        self.cursor_location.y() + CURSOR_SIZE_LENGTH as isize
+      );
+      let parent_actual_shape = self.actual_shape(self.cursor_parent_id)?;
+      let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
+      return Ok(bounded_shape);
+    }
+
     match self.parent(id) {
       None => {
         let shape = self.shape(id)?;
