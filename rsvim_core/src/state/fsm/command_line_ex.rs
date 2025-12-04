@@ -165,11 +165,7 @@ impl CommandLineExStateful {
 
     // Clear command-line both message and input.
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
-    cursor_ops::cursor_clear(
-      &mut tree,
-      cmdline_id,
-      contents.command_line_input_mut(),
-    );
+    cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
     // Command-line reset indicator.
     tree
