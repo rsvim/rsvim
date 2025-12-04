@@ -149,8 +149,7 @@ impl CommandLineExStateful {
     tree.cmdline_show_message().unwrap();
 
     // Move cursor to previous position.
-    let current_window = tree.current_window().unwrap();
-    let cursor_viewport = current_window.cursor_viewport();
+    let cursor_viewport = tree.current_window().unwrap().cursor_viewport();
     tree.move_cursor_to(
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
