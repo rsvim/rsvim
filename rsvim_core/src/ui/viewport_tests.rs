@@ -11460,7 +11460,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11486,7 +11486,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11512,7 +11512,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11538,7 +11538,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11564,7 +11564,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11590,7 +11590,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11616,7 +11616,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
@@ -11642,7 +11642,7 @@ mod tests_search_anchor_horizontally_nowrap {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &actual,
         &expect,
         0,
