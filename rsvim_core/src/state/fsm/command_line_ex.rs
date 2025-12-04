@@ -132,7 +132,7 @@ impl CommandLineExStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Jump cursor from command-line to "current window".
+    // Jump cursor from command-line to "current_window".
     debug_assert!(tree.command_line_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
     let cmdline_id = tree.command_line_id().unwrap();
@@ -141,19 +141,21 @@ impl CommandLineExStateful {
     debug_assert!(_old_widget_id.is_some());
     debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
-    tree
-      .cursor_mut()
-      .unwrap()
-      .set_cursor_style(CursorStyle::SteadyBlock);
-    // Show message, hide input/indicator.
-    tree.cmdline_show_message().unwrap();
-
-    // Move cursor to previous position.
+    // Move cursor to previous position in "current_window".
     let cursor_viewport = tree.current_window().unwrap().cursor_viewport();
     tree.move_cursor_to(
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
     );
+
+    // Set cursor style to "SteadyBlock".
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
+
+    // Command-line show message, hide input/indicator.
+    tree.cmdline_show_message().unwrap();
 
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
