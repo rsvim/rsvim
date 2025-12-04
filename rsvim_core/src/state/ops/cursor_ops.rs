@@ -487,7 +487,7 @@ pub fn cursor_move(
     }
   };
 
-  // Then try cursor move.
+  // Then cursor move.
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
@@ -499,12 +499,11 @@ pub fn cursor_move(
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    if tree.cursor_id().is_some() {
-      tree.move_cursor_to(
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      );
-    }
+    debug_assert!(tree.cursor_id().is_some());
+    tree.move_cursor_to(
+      new_cursor_viewport.column_idx() as isize,
+      new_cursor_viewport.row_idx() as isize,
+    );
   }
 }
 
