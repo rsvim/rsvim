@@ -155,21 +155,24 @@ impl Itree {
         let shape = self.shape(id)?;
         Ok(rect_as!(shape, u16))
       }
-      Some(parent_id) => match self.cached_actual_shapes.borrow().get(&id) {
-        Some(cached) => Ok(*cached),
-        None => {
-          // Non-root node truncated by its parent's shape.
-          let shape = self.shape(id)?;
-          let parent_actual_shape = self.actual_shape(parent_id)?;
-          let actual_shape =
-            shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
-          self
-            .cached_actual_shapes
-            .borrow_mut()
-            .insert(id, actual_shape);
-          Ok(actual_shape)
+      Some(parent_id) => {
+        let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
+        match maybe_cached {
+          Some(cached) => Ok(cached),
+          None => {
+            // Non-root node truncated by its parent's shape.
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
+            let actual_shape =
+                shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+            self
+                .cached_actual_shapes
+                .borrow_mut()
+                .insert(id, actual_shape);
+            Ok(actual_shape)
+          }
         }
-      },
+      }
     }
   }
 
