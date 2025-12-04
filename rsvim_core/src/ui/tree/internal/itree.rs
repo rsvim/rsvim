@@ -207,14 +207,10 @@ impl Itree {
             let parent_actual_shape = self.actual_shape(parent_id)?;
             let actual_shape =
               shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
-
-            // Do not cache cursor_id actual_shape.
-            if id != self.cursor_id {
-              self
-                .cached_actual_shapes
-                .borrow_mut()
-                .insert(id, actual_shape);
-            }
+            self
+              .cached_actual_shapes
+              .borrow_mut()
+              .insert(id, actual_shape);
             Ok(actual_shape)
           }
         }
