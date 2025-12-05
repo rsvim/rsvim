@@ -88,6 +88,26 @@ impl Inodeable for InodeBase {
       .unwrap()
   }
 
+  fn attached(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .attached(self.id)
+      .unwrap()
+  }
+
+  fn detached(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .detached(self.id)
+      .unwrap()
+  }
+
   fn enabled(&self) -> bool {
     self
       .lotree
