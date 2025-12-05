@@ -23,6 +23,4 @@ _clippy_env:
   export RUSTFLAGS="-Dwarnings -Csymbol-mangling-version=v0"
 
 clippy: _clippy_env _sccache_env
-  @just _clippy_env
-  @just _sccache_env
   cargo clippy --workspace --all-targets
