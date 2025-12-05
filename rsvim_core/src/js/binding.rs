@@ -337,7 +337,7 @@ pub fn set_exception_code(
       let value = v8::String::new(scope, &format!("{:?}", e.kind())).unwrap();
       exception.set(scope, key.into(), value.into());
     }
-    _ => { /* do nothing */ }
+    _ => {}
   }
 }
 

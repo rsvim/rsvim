@@ -30,15 +30,19 @@ impl std::fmt::Display for IndicatorSymbol {
 
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
-pub struct Indicator {
+pub struct CommandLineIndicator {
   base: InodeBase,
   symbol: IndicatorSymbol,
 }
 
-impl Indicator {
-  pub fn new(shape: IRect, symbol: IndicatorSymbol) -> Self {
-    let base = InodeBase::new(shape);
-    Indicator { base, symbol }
+inode_impl!(CommandLineIndicator);
+
+impl CommandLineIndicator {
+  pub fn new(lotree: ItreeWk, id: TreeNodeId, symbol: IndicatorSymbol) -> Self {
+    CommandLineIndicator {
+      base: InodeBase::new(lotree, id),
+      symbol,
+    }
   }
 
   pub fn symbol(&self) -> IndicatorSymbol {
@@ -50,15 +54,15 @@ impl Indicator {
   }
 }
 
-inode_impl!(Indicator, base);
-
-impl Widgetable for Indicator {
+impl Widgetable for CommandLineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let upos: U16Pos = actual_shape.min().into();
-    let symbol = self.symbol;
-    let symbol = format!("{symbol}").to_compact_string();
-    let cell = Cell::with_symbol(symbol);
-    canvas.frame_mut().set_cell(upos, cell);
+    if self.enabled() {
+      let actual_shape = self.actual_shape();
+      let upos: U16Pos = actual_shape.min().into();
+      let symbol = self.symbol;
+      let symbol = format!("{symbol}").to_compact_string();
+      let cell = Cell::with_symbol(symbol);
+      canvas.frame_mut().set_cell(upos, cell);
+    }
   }
 }

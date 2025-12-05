@@ -10,43 +10,42 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use std::fmt::Debug;
 
+pub const BLINKING: bool = false;
+pub const HIDDEN: bool = false;
+pub const STYLE: CursorStyle = CursorStyle::SteadyBlock;
+
 flags_impl!(Flags, u8, BLINKING, HIDDEN);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
   // blinking=false
   // hidden=false
   flags: Flags,
-  style: CursorStyle,
+  cursor_style: CursorStyle,
 }
 
 impl Cursor {
   pub fn new(
-    shape: IRect,
+    lotree: ItreeWk,
+    id: TreeNodeId,
     blinking: bool,
     hidden: bool,
-    style: CursorStyle,
+    cursor_style: CursorStyle,
   ) -> Self {
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
-    Cursor {
-      base: InodeBase::new(shape),
+    Self {
+      base: InodeBase::new(lotree, id),
       flags,
-      style,
+      cursor_style,
     }
   }
 
-  pub fn default(shape: IRect) -> Self {
-    Cursor {
-      base: InodeBase::new(shape),
-      // blinking=false
-      // hidden=false
-      flags: Flags::empty(),
-      style: CursorStyle::SteadyBlock,
-    }
+  pub fn default(lotree: ItreeWk, id: TreeNodeId) -> Self {
+    Self::new(lotree, id, BLINKING, HIDDEN, STYLE)
   }
 
   pub fn blinking(&self) -> bool {
@@ -65,16 +64,16 @@ impl Cursor {
     self.flags.set(Flags::HIDDEN, value);
   }
 
-  pub fn style(&self) -> &CursorStyle {
-    &self.style
+  pub fn cursor_style(&self) -> &CursorStyle {
+    &self.cursor_style
   }
 
-  pub fn set_style(&mut self, value: &CursorStyle) {
-    self.style = *value;
+  pub fn set_cursor_style(&mut self, cursor_style: CursorStyle) {
+    self.cursor_style = cursor_style;
   }
 }
 
-inode_impl!(Cursor, base);
+inode_impl!(Cursor);
 
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
@@ -89,7 +88,7 @@ impl Widgetable for Cursor {
       pos,
       self.blinking(),
       self.hidden(),
-      self.style,
+      *self.cursor_style(),
     ));
   }
 }

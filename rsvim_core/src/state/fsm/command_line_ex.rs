@@ -13,7 +13,6 @@ use crate::state::ops::cmdline_ops;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -133,56 +132,48 @@ impl CommandLineExStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
+    // Jump cursor from command-line to "current_window".
     debug_assert!(tree.command_line_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
     let cmdline_id = tree.command_line_id().unwrap();
-    let cmdline = tree.command_line_mut().unwrap();
 
-    cmdline.show_message();
+    let _old_widget_id = tree.jump_cursor_to(current_window_id);
+    debug_assert!(_old_widget_id.is_some());
+    debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
-    debug_assert!(cmdline.cursor_id().is_some());
-
-    // Remove from current parent
-    let cursor = match cmdline.remove_cursor().unwrap() {
-      CommandLineNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBlock);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(cmdline.cursor_id().is_none());
-
-    // Insert to new parent
-    let current_window = tree.current_window_mut().unwrap();
-    let cursor_viewport = current_window.cursor_viewport();
-    trace!("before viewport:{:?}", current_window.viewport());
-    trace!("before cursor_viewport:{:?}", cursor_viewport);
-    let _current_window_id = current_window.id();
-    let _previous_cursor = current_window.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    current_window.move_cursor_to(
+    // Move cursor to previous position in "current_window".
+    let cursor_viewport = tree.current_window().unwrap().cursor_viewport();
+    tree.move_cursor_to(
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
     );
 
+    // Set cursor style to "SteadyBlock".
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
+
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+
+    // Save command-line input text contents.
     let cmdline_input_content =
       contents.command_line_input().rope().to_compact_string();
-
-    cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
-    cursor_ops::cursor_clear(
-      &mut tree,
-      cmdline_id,
-      contents.command_line_input_mut(),
-    );
-
     let cmdline_input_content = cmdline_input_content.trim();
+
+    // Clear command-line both message and input.
+    cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
+    cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
+
+    // Command-line reset indicator.
     tree
-      .command_line_mut()
+      .cmdline_indicator_mut()
       .unwrap()
-      .indicator_mut()
       .set_symbol(IndicatorSymbol::Empty);
+    // Command-line show message, hide input/indicator.
+    tree.cmdline_show_message().unwrap();
 
     cmdline_input_content.to_compact_string()
   }
@@ -264,16 +255,7 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.command_line_mut().unwrap();
-    let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
-    debug_assert!(
-      text
-        .rope()
-        .get_line(cmdline.input_cursor_viewport().line_idx())
-        .is_some()
-    );
-
+    let cmdline_id = tree.command_line_id().unwrap();
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
     StateMachine::CommandLineExMode(CommandLineExStateful::default())

@@ -93,11 +93,10 @@ impl ColumnIndex {
     // Check indexing.
     let mut last_width: Option<usize> = None;
     for (i, w) in self.char2width.iter().enumerate() {
-      match last_width {
-        Some(last_width1) => {
-          debug_assert!(*w >= last_width1);
-        }
-        None => { /* Skip */ }
+      if cfg!(debug_assertions)
+        && let Some(last_width1) = last_width
+      {
+        debug_assert!(*w >= last_width1);
       }
       last_width = Some(*w);
       debug_assert!(self.width2char.contains_key(w));
@@ -453,12 +452,9 @@ impl ColumnIndex {
         self.width2char.last_key_value().unwrap();
       if width <= *last_width {
         for w in (1..=width).rev() {
-          match self.width2char.get(&w) {
-            Some(c) => {
-              self.truncate_since_char(*c);
-              return;
-            }
-            None => { /* Skip */ }
+          if let Some(c) = self.width2char.get(&w) {
+            self.truncate_since_char(*c);
+            return;
           }
         }
       }

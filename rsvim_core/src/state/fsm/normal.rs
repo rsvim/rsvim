@@ -10,7 +10,6 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::indicator::IndicatorSymbol;
-use crate::ui::widget::window::WindowNode;
 use compact_str::CompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -94,7 +93,7 @@ impl Stateful for NormalStateful {
         self.goto_insert_mode(&data_access, insert_motion)
       }
       Operation::GotoCommandLineExMode => {
-        self.goto_command_line_ex_mode(&data_access)
+        self.goto_cmdline_ex_mode(&data_access)
       }
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
@@ -114,42 +113,40 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_command_line_ex_mode(
+  pub fn goto_cmdline_ex_mode(
     &self,
     data_access: &StateDataAccess,
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Remove cursor from current window
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
-    let cursor = match current_window.remove_cursor().unwrap() {
-      WindowNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBar);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(current_window.cursor_id().is_none());
+    // Jump cursor from current window to command-line.
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
+    let cmdline_id = tree.command_line_id().unwrap();
+    let _old_widget_id = tree.jump_cursor_to(cmdline_id);
+    debug_assert!(_old_widget_id.is_some());
+    debug_assert_eq!(_old_widget_id, tree.current_window_id());
 
-    // Insert to command-line
-    debug_assert!(tree.command_line_mut().is_some());
-    let cmdline = tree.command_line_mut().unwrap();
+    tree.move_cursor_to(0, 0);
 
-    cmdline.show_input();
+    // Command-line show input/indicator, hide message.
+    tree.cmdline_show_input().unwrap();
 
-    let _previous_cursor = cmdline.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    cmdline.move_cursor_to(0, 0);
-    cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
+    // Set command-line indicator.
+    tree
+      .cmdline_indicator_mut()
+      .unwrap()
+      .set_symbol(IndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_forward_mode(
+  fn _goto_cmdline_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
@@ -160,7 +157,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_backward_mode(
+  fn _goto_cmdline_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
@@ -219,9 +216,10 @@ impl NormalStateful {
       }
     };
 
-    let current_window = tree.current_window_mut().unwrap();
-    let cursor = current_window.cursor_mut().unwrap();
-    cursor.set_style(&CursorStyle::SteadyBar);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
 
     StateMachine::InsertMode(super::InsertStateful::default())
   }
@@ -301,16 +299,15 @@ impl NormalStateful {
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    tree.current_window_mut().unwrap().move_cursor_to(
+    tree.move_cursor_to(
       new_cursor_viewport.column_idx() as isize,
       new_cursor_viewport.row_idx() as isize,
     );
@@ -338,10 +335,9 @@ impl NormalStateful {
       viewport.start_line_idx(),
     );
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     cursor_ops::raw_viewport_scroll_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),
