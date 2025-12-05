@@ -482,7 +482,7 @@ if __name__ == "__main__":
     ]
 
     parsed_args = parser.parse_args()
-    logging.info(f"arguments: {parsed_args}")
+    logging.info(f"args:{parsed_args}")
 
     if parsed_args.no_cache:
         NO_CACHE = True
