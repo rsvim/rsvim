@@ -89,23 +89,11 @@ impl Inodeable for InodeBase {
   }
 
   fn attached(&self) -> bool {
-    self
-      .lotree
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .attached(self.id)
-      .unwrap()
+    self.lotree.upgrade().unwrap().borrow().attached(self.id)
   }
 
   fn detached(&self) -> bool {
-    self
-      .lotree
-      .upgrade()
-      .unwrap()
-      .borrow()
-      .detached(self.id)
-      .unwrap()
+    self.lotree.upgrade().unwrap().borrow().detached(self.id)
   }
 
   fn enabled(&self) -> bool {
@@ -153,8 +141,24 @@ macro_rules! inode_impl {
         self.base.visible()
       }
 
+      fn invisible(&self) -> bool {
+        self.base.invisible()
+      }
+
+      fn attached(&self) -> bool {
+        self.base.attached()
+      }
+
+      fn detached(&self) -> bool {
+        self.base.detached()
+      }
+
       fn enabled(&self) -> bool {
         self.base.enabled()
+      }
+
+      fn disabled(&self) -> bool {
+        self.base.disabled()
       }
     }
   };
@@ -200,6 +204,14 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.visible(),
+          )*
+        }
+      }
+
+      fn invisible(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.invisible(),
           )*
         }
       }
