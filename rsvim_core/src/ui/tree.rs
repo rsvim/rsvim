@@ -68,25 +68,9 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 /// higher priority to be displayed. For those widgets have the same z-index,
 /// the later inserted one will cover the previous inserted ones.
 ///
-/// The z-index only works for the children under the same parent. For a child widget, it always
-/// covers/overrides its parent display.
-/// To change the visibility priority between children and parent, you need to change the
-/// relationship between them.
+/// ### Visible/Enabled
 ///
-/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-/// still covers C, because it's a sibling of B.
-///
-/// ## Visible and enabled
-///
-/// A widget can be visible or invisible. When it's visible, it handles user's input events,
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
-///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
-///
+/// A widget can be visible or invisible, enabled or disabled.
 pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
