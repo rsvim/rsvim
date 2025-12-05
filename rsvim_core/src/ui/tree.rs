@@ -178,7 +178,7 @@ impl Tree {
       ..Default::default()
     };
     let root_id = {
-      let mut lotree = lock!(lotree);
+      let mut lotree = lotree.borrow_mut();
       let root_id = lotree.new_leaf(root_style)?;
       lotree.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       root_id
@@ -533,7 +533,7 @@ impl Tree {
       Rc::downgrade(&self.lotree()),
       content_id,
       buffer,
-      Rc::downgrade(&viewport),
+      Arc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
     self._insert(content_node);
@@ -851,7 +851,7 @@ impl Tree {
   ) -> Option<TreeNodeId> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
-    let mut lotree = lock!(lotree);
+    let mut lotree = lotree.borrow_mut();
     let old_parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&old_parent_id));
     debug_assert!(matches!(
