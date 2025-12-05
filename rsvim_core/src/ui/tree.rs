@@ -930,7 +930,7 @@ impl Tree {
   pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<U16Rect> {
     let cursor_id = self.cursor_id.unwrap();
     let lotree = self.lotree.clone();
-    let mut lotree = lock!(lotree);
+    let mut lotree = lotree.borrow_mut();
     let parent_id = lotree.parent(cursor_id).unwrap();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(matches!(
