@@ -58,7 +58,7 @@ def rust_backtrace():
 def miriflags():
     env(
         "MIRIFLAGS",
-        '"-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance"',
+        "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
     )
 
 
