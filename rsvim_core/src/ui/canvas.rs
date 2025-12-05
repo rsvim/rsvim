@@ -259,7 +259,7 @@ impl Canvas {
 
     let mut shaders = vec![];
 
-    if !frame.zero_sized() {
+    if !frame.is_zero_sized() {
       for row in 0..size.height() {
         let mut col = 0_u16;
         while col < size.width() {
@@ -301,7 +301,7 @@ impl Canvas {
 
     let mut shaders = vec![];
 
-    if !frame.zero_sized() {
+    if !frame.is_zero_sized() {
       for (row, dirty) in frame.dirty_rows().iter().enumerate() {
         if row < size.height() as usize && *dirty {
           let mut col = 0_u16;
