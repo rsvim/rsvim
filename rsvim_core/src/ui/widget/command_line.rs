@@ -55,7 +55,7 @@ impl CommandLine {
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let lotree = lotree.upgrade().unwrap();
-      let lotree = lock!(lotree);
+      let lotree = lotree.borrow();
       let input_actual_shape = lotree.actual_shape(input_id)?;
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
