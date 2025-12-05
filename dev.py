@@ -18,9 +18,8 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 MACOS = platform.system().startswith("Darwin")
 LINUX = not WINDOWS and not MACOS
 
-SCCACHE_FULLPATH = shutil.which("sccache")
-RECACHE_SCCACHE = False
-SKIP_SCCACHE = False
+SCCACHE = shutil.which("sccache")
+NO_CACHE = False
 
 RUSTFLAGS = []
 
@@ -43,18 +42,15 @@ def set_rustflags():
 
 
 def set_sccache():
-    if SCCACHE_FULLPATH is None:
+    if SCCACHE is None:
         logging.warning("'sccache' not found!")
         return
 
-    if SKIP_SCCACHE:
-        logging.warning("'sccache' is skipped!")
+    if NO_CACHE:
+        logging.warning("'sccache' is disabled!")
         return
 
-    if RECACHE_SCCACHE:
-        set_env("SCCACHE_RECACHE", "1")
-
-    set_env("RUSTC_WRAPPER", SCCACHE_FULLPATH)
+    set_env("RUSTC_WRAPPER", SCCACHE)
 
 
 class ICommand(Protocol):
@@ -465,16 +461,12 @@ class NpmCommand(ICommand):
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Rsvim development toolkit")
+    parser = argparse.ArgumentParser(description="Development toolkit")
     parser.add_argument(
-        "--recache",
+        "-n",
+        "--no-cache",
         action="store_true",
-        help="Rebuild all `sccache` caches",
-    )
-    parser.add_argument(
-        "--skip-cache",
-        action="store_true",
-        help="Build without `sccache`",
+        help="Disable sccache",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -492,10 +484,8 @@ if __name__ == "__main__":
     parsed_args = parser.parse_args()
     logging.info(f"Arguments: {parsed_args}")
 
-    if parsed_args.recache:
-        RECACHE_SCCACHE = True
     if parsed_args.skip_cache:
-        SKIP_SCCACHE = True
+        NO_CACHE = True
 
     for command in commands:
         sub = parsed_args.subcommand
