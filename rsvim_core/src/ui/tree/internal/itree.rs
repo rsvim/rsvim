@@ -209,6 +209,10 @@ impl Itree {
     Ok(!actual_shape.size().is_zero())
   }
 
+  pub fn invisible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    !self.visible(id)
+  }
+
   /// Whether the node is detached, e.g. it doesn't have a parent and it is not
   /// the root node. A root node is always attached even it has no parent.
   pub fn detached(&self, id: TreeNodeId) -> bool {
@@ -225,6 +229,10 @@ impl Itree {
     let visible = self.visible(id)?;
     let attached = self.attached(id);
     Ok(visible && attached)
+  }
+
+  pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self.enabled(id).map(|v| !v)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
