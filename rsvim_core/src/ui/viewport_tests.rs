@@ -107,14 +107,12 @@ fn search_viewport(
     start_line,
     start_column,
   );
-  let cursor_viewport = CursorViewport::to_arc(
-    CursorViewport::from_position(
-      &viewport,
-      buf.text(),
-      target_cursor_line,
-      target_cursor_char,
-    ),
-  );
+  let cursor_viewport = CursorViewport::to_arc(CursorViewport::from_position(
+    &viewport,
+    buf.text(),
+    target_cursor_line,
+    target_cursor_char,
+  ));
   tree.set_window_cursor_viewport(window_id, cursor_viewport);
   let viewport = Viewport::to_arc(viewport);
   tree.set_window_viewport(window_id, viewport.clone());

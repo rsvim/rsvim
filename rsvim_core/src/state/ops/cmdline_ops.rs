@@ -27,8 +27,7 @@ fn set_message(
   let new_message_viewport =
     Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
 
-  tree
-    .set_cmdline_message_viewport(new_message_viewport);
+  tree.set_cmdline_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_flush_pending_message(
@@ -80,8 +79,7 @@ pub fn cmdline_clear_message(
   let new_message_viewport =
     Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
 
-  tree
-    .set_cmdline_message_viewport(new_message_viewport);
+  tree.set_cmdline_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
@@ -99,8 +97,6 @@ pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
     CursorViewport::from_top_left(&new_input_viewport, input_text),
   );
 
-  tree
-      .set_cmdline_input_viewport(new_input_viewport);
-  tree
-      .set_cmdline_input_cursor_viewport(new_input_cursor_viewport);
+  tree.set_cmdline_input_viewport(new_input_viewport);
+  tree.set_cmdline_input_cursor_viewport(new_input_cursor_viewport);
 }

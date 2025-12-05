@@ -5,7 +5,6 @@ use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
-#[cfg(debug_assertions)]
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use itertools::Itertools;
@@ -44,7 +43,6 @@ pub struct Itree {
   root_nid: TreeNodeId,
 
   // Node names for debugging.
-  #[cfg(debug_assertions)]
   names: FoldMap<TreeNodeId, CompactString>,
 }
 
@@ -60,7 +58,6 @@ impl Itree {
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_nid: INVALID_ROOT_ID,
-      #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
   }
@@ -109,9 +106,7 @@ impl Itree {
     let nid = next_node_id();
     self.nid2loid.insert(nid, loid);
     self.loid2nid.insert(loid, nid);
-    if cfg!(debug_assertions) {
-      self.names.insert(nid, name.to_compact_string());
-    }
+    self.names.insert(nid, name.to_compact_string());
     self._internal_check();
     Ok(nid)
   }
@@ -330,9 +325,7 @@ impl Itree {
     let id = next_node_id();
     self.nid2loid.insert(id, loid);
     self.loid2nid.insert(loid, id);
-    if cfg!(debug_assertions) {
-      self.names.insert(id, name.to_compact_string());
-    }
+    self.names.insert(id, name.to_compact_string());
     self._internal_check();
     Ok(id)
   }
@@ -349,23 +342,10 @@ impl Debug for Itree {
       while let Some(id) = q.pop_front() {
         let layout = match self.layout(id) {
           Ok(layout) => {
-            if cfg!(debug_assertions) {
-              format!(
-                "{}({}):{:#?}\n",
-                self.names.get(&id).unwrap(),
-                id,
-                layout
-              )
-            } else {
-              format!("{}:{:#?}\n", id, layout)
-            }
+            format!("{}({}):{:#?}\n", self.names.get(&id).unwrap(), id, layout)
           }
           Err(e) => {
-            if cfg!(debug_assertions) {
-              format!("{}({}):{:?}\n", self.names.get(&id).unwrap(), id, e)
-            } else {
-              format!("{}:{:?}\n", id, e)
-            }
+            format!("{}({}):{:?}\n", self.names.get(&id).unwrap(), id, e)
           }
         };
         f.write_str(layout.as_str())?;
