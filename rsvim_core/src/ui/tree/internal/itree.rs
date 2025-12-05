@@ -60,6 +60,7 @@ impl Itree {
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_nid: INVALID_ROOT_ID,
+      #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
   }
@@ -348,10 +349,23 @@ impl Debug for Itree {
       while let Some(id) = q.pop_front() {
         let layout = match self.layout(id) {
           Ok(layout) => {
-            format!("{}({}):{:#?}\n", self.names.get(&id).unwrap(), id, layout)
+            if cfg!(debug_assertions) {
+              format!(
+                "{}({}):{:#?}\n",
+                self.names.get(&id).unwrap(),
+                id,
+                layout
+              )
+            } else {
+              format!("{}:{:#?}\n", id, layout)
+            }
           }
           Err(e) => {
-            format!("{}({}):{:?}\n", self.names.get(&id).unwrap(), id, e)
+            if cfg!(debug_assertions) {
+              format!("{}({}):{:?}\n", self.names.get(&id).unwrap(), id, e)
+            } else {
+              format!("{}:{:?}\n", id, e)
+            }
           }
         };
         f.write_str(layout.as_str())?;
