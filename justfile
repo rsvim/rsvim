@@ -60,5 +60,5 @@ list_tests: _sccache _rustflags
 test *name="--all": _sccache _rustflags _rust_backtrace _rsvim_log
   cargo nextest run --no-capture {{name}}
 
-miri job="num-cpus": _sccache _rustflags _miriflags _rust_backtrace
-  cargo +nightly miri nextest run -j {{job}} -F unicode_lines --no-default-features -p rsvim_core
+miri job="job=num-cpus": _sccache _rustflags _miriflags _rust_backtrace
+  cargo +nightly miri nextest run {{replace_regex(job, 'job=|j=', '-j ')}} -F unicode_lines --no-default-features -p rsvim_core
