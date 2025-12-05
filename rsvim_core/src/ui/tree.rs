@@ -132,7 +132,7 @@ widget_dispatcher!(
 ///   higher priority to display and process the input events.
 pub struct Tree {
   // Internal tree.
-  lotree: ItreeArc,
+  lotree: ItreeRc,
 
   // Tree nodes.
   nodes: FoldMap<TreeNodeId, TreeNode>,
@@ -184,7 +184,7 @@ impl Tree {
       root_id
     };
 
-    let root = Root::new(Arc::downgrade(&lotree), root_id);
+    let root = Root::new(Rc::downgrade(&lotree), root_id);
     let root_node = TreeNode::Root(root);
     let mut nodes = FoldMap::new();
     nodes.insert(root_id, root_node);
@@ -202,7 +202,7 @@ impl Tree {
     })
   }
 
-  pub fn lotree(&self) -> ItreeArc {
+  pub fn lotree(&self) -> ItreeRc {
     self.lotree.clone()
   }
 
@@ -213,12 +213,12 @@ impl Tree {
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    lock!(self.lotree).parent(id)
+    self.lotree.borrow().parent(id)
   }
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    lock!(self.lotree).children(id)
+    self.lotree.borrow().children(id)
   }
 
   /// Get the node struct by its `id`.
@@ -519,7 +519,7 @@ impl Tree {
     };
 
     let window = Window::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       window_id,
       window_opts,
       content_id,
@@ -530,10 +530,10 @@ impl Tree {
     self._insert(window_node);
 
     let content = WindowContent::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       content_id,
       buffer,
-      Arc::downgrade(&viewport),
+      Rc::downgrade(&viewport),
     );
     let content_node = TreeNode::WindowContent(content);
     self._insert(content_node);
@@ -573,7 +573,7 @@ impl Tree {
     };
 
     let cursor = Cursor::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       cursor_id,
       blinking,
       hidden,
@@ -645,7 +645,7 @@ impl Tree {
     };
 
     let cmdline = CommandLine::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       cmdline_id,
       indicator_id,
       input_id,
@@ -659,7 +659,7 @@ impl Tree {
     self._insert(cmdline_node);
 
     let indicator = CommandLineIndicator::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       indicator_id,
       indicator_symbol,
     );
@@ -667,19 +667,19 @@ impl Tree {
     self._insert(indicator_node);
 
     let input = CommandLineInput::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       input_id,
       text_contents.clone(),
-      Arc::downgrade(&input_viewport),
+      Rc::downgrade(&input_viewport),
     );
     let input_node = TreeNode::CommandLineInput(input);
     self._insert(input_node);
 
     let message = CommandLineMessage::new(
-      Arc::downgrade(&self.lotree()),
+      Rc::downgrade(&self.lotree()),
       message_id,
       text_contents,
-      Arc::downgrade(&message_viewport),
+      Rc::downgrade(&message_viewport),
     );
     let message_node = TreeNode::CommandLineMessage(message);
     self._insert(message_node);
@@ -721,7 +721,7 @@ impl Tree {
     debug_assert!(matches!(content_node, TreeNode::WindowContent(_)));
     match content_node {
       TreeNode::WindowContent(content) => {
-        content.set_viewport(Arc::downgrade(&viewport))
+        content.set_viewport(Rc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
@@ -756,7 +756,7 @@ impl Tree {
     debug_assert!(matches!(input_node, TreeNode::CommandLineInput(_)));
     match input_node {
       TreeNode::CommandLineInput(input) => {
-        input.set_viewport(Arc::downgrade(&viewport))
+        input.set_viewport(Rc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
@@ -790,7 +790,7 @@ impl Tree {
     debug_assert!(matches!(input_node, TreeNode::CommandLineMessage(_)));
     match input_node {
       TreeNode::CommandLineMessage(message) => {
-        message.set_viewport(Arc::downgrade(&viewport))
+        message.set_viewport(Rc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
