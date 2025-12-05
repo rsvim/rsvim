@@ -29,29 +29,21 @@ inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The UI widget tree.
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// This tree manages all UI components and rendering on the canvas, each
+/// widget is a node on the tree, everything inside is the node's children.
+/// While the terminal itself is the root widget node.
 ///
-/// # Terms
-///
-/// * Parent: The parent node.
-/// * Child: The child node.
-/// * Ancestor: Either the parent, or the parent of some ancestor of the node.
-/// * Descendant: Either the child, or the child of some descendant of the node.
-/// * Sibling: Other children nodes under the same parent.
-///
-/// # Guarantees
+/// The tree guarantees all the relationships between each nodes:
 ///
 /// ## Ownership
 ///
 /// Parent owns all its children.
 ///
 /// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
+/// * Coordinate system are relative to their parent's top-left corner, while
+///   the absolute coordinates are based on the terminal's top-left corner.
 /// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
 ///   the size of each node can be logically infinite on the imaginary canvas.
 /// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's

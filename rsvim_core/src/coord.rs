@@ -61,20 +61,15 @@ pub trait RectExt<T>
 where
   T: geo::CoordNum,
 {
-  fn top_left(&self) -> Coord<T>;
-  fn bottom_right(&self) -> Coord<T>;
+  fn size(&self) -> Coord<T>;
 }
 
 impl<T> RectExt<T> for Rect<T>
 where
   T: geo::CoordNum,
 {
-  fn top_left(&self) -> Coord<T> {
-    self.min()
-  }
-
-  fn bottom_right(&self) -> Coord<T> {
-    self.max()
+  fn size(&self) -> Size<T> {
+    Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
   }
 }
 
@@ -102,6 +97,10 @@ where
 
   pub fn height(&self) -> T {
     self.height
+  }
+
+  pub fn is_zero(&self) -> bool {
+    self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
   }
 }
 
