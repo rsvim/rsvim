@@ -819,7 +819,7 @@ impl Tree {
       lotree.add_child(cmdline_id, message_id)?;
     }
 
-    self.compute_layout(&mut lotree)
+    self.compute_layout(&mut lotree)?;
     Ok(())
   }
 
