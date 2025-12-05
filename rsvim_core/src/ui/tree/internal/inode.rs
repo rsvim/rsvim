@@ -42,23 +42,43 @@ impl Inodeable for InodeBase {
   }
 
   fn shape(&self) -> IRect {
-    let lotree = self.lotree.upgrade().unwrap();
-    lock!(lotree).shape(self.id()).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .shape(self.id())
+      .unwrap()
   }
 
   fn actual_shape(&self) -> U16Rect {
-    let lotree = self.lotree.upgrade().unwrap();
-    lock!(lotree).actual_shape(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .actual_shape(self.id)
+      .unwrap()
   }
 
   fn visible(&self) -> bool {
-    let lotree = self.lotree.upgrade().unwrap();
-    lock!(lotree).visible(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .visible(self.id)
+      .unwrap()
   }
 
   fn enabled(&self) -> bool {
-    let lotree = self.lotree.upgrade().unwrap();
-    lock!(lotree).enabled(self.id).unwrap()
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .enabled(self.id)
+      .unwrap()
   }
 }
 

@@ -973,7 +973,7 @@ impl Tree {
     let (new_x, new_y) = {
       let cursor_id = self.cursor_id.unwrap();
       let lotree = self.lotree.clone();
-      let lotree = lock!(lotree);
+      let lotree = lotree.borrow();
       let pos = lotree.actual_shape(cursor_id).unwrap().min();
       let new_x = num_traits::clamp((pos.x as isize) + x, 0, u16::MAX as isize);
       let new_y = num_traits::clamp((pos.y as isize) + y, 0, u16::MAX as isize);
