@@ -218,7 +218,7 @@ class BuildCommand(ICommand):
         self.build_parser = subparsers.add_parser(
             self._name,
             aliases=[self._alias],
-            help="Build with `sccache`, by default build `debug` profile",
+            help="cargo build",
         )
         self.build_parser.add_argument(
             "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
@@ -461,12 +461,12 @@ class NpmCommand(ICommand):
 if __name__ == "__main__":
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-    parser = argparse.ArgumentParser(description="Development toolkit")
+    parser = argparse.ArgumentParser(description="development toolkit")
     parser.add_argument(
         "-n",
         "--no-cache",
         action="store_true",
-        help="Disable sccache",
+        help="disable sccache",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -482,7 +482,7 @@ if __name__ == "__main__":
     ]
 
     parsed_args = parser.parse_args()
-    logging.info(f"Arguments: {parsed_args}")
+    logging.info(f"arguments: {parsed_args}")
 
     if parsed_args.no_cache:
         NO_CACHE = True
@@ -493,4 +493,4 @@ if __name__ == "__main__":
             command.run(parsed_args)
             exit(0)
 
-    logging.error("Missing arguments, use -h/--help for more details.")
+    logging.error("missing arguments, use -h/--help for more details.")
