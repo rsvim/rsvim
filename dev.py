@@ -220,21 +220,10 @@ class BuildCommand(ICommand):
             aliases=[self._alias],
             help="cargo build",
         )
-        self.build_parser.add_argument(
-            "-v", "--verbose", action="store_true", help="Build with '--verbose' option"
-        )
-        self.build_parser.add_argument(
-            "-F", "--features", action="append", help="Build with '--features' option"
-        )
-        self.build_parser.add_argument(
-            "-r", "--release", action="store_true", help="Build `release` profile"
-        )
-        self.build_parser.add_argument(
-            "-n",
-            "--nightly",
-            action="store_true",
-            help="Build `nightly` target",
-        )
+        self.build_parser.add_argument("-v", "--verbose", action="store_true")
+        self.build_parser.add_argument("-F", "--features", action="append")
+        self.build_parser.add_argument("-r", "--release", action="store_true")
+        self.build_parser.add_argument("-n", "--nightly", action="store_true")
 
     def name(self) -> str:
         return self._name
