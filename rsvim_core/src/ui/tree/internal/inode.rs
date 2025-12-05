@@ -2,18 +2,13 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::TreeNodeId;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 
-pub type TreeNodeId = i32;
-
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
-
-  fn depth(&self) -> usize;
-
-  fn set_depth(&mut self, depth: usize);
 
   fn zindex(&self) -> usize;
 
@@ -43,14 +38,6 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.id()
-      }
-
-      fn depth(&self) -> usize {
-        self.$base_name.depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self.$base_name.set_depth(depth);
       }
 
       fn zindex(&self) -> usize {
@@ -103,22 +90,6 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
-      }
-
-      fn depth(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .depth()
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_depth(depth);
       }
 
       fn zindex(&self) -> usize {
@@ -213,22 +184,6 @@ macro_rules! inode_enum_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.id(),
-          )*
-        }
-      }
-
-      fn depth(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.depth(),
-          )*
-        }
-      }
-
-      fn set_depth(&mut self, depth: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_depth(depth),
           )*
         }
       }
@@ -334,7 +289,6 @@ const FLAGS: Flags = Flags::all();
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
   id: TreeNodeId,
-  depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
   zindex: usize,
@@ -348,7 +302,6 @@ impl InodeBase {
     let actual_shape = rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
-      depth: 0,
       shape,
       actual_shape,
       zindex: 0,
@@ -358,14 +311,6 @@ impl InodeBase {
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn depth(&self) -> usize {
-    self.depth
-  }
-
-  pub fn set_depth(&mut self, depth: usize) {
-    self.depth = depth;
   }
 
   pub fn zindex(&self) -> usize {

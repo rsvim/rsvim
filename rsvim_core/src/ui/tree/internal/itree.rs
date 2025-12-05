@@ -1,8 +1,8 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::TreeNodeId;
 use crate::ui::tree::internal::shapes;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -377,8 +377,7 @@ where
   ///
   /// Below attributes will be update:
   ///
-  /// 1. [`depth`](Inode::depth()): The child depth should always be the parent's depth + 1.
-  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
+  /// 1. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
   ///    by parent's boundaries.
   fn update_descendant_attributes(
     &mut self,
@@ -387,52 +386,40 @@ where
   ) {
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
-    // Tuple of (child_id, parent_id, parent_depth, parent_actual_shape)
-    type ChildAndParent = (TreeNodeId, TreeNodeId, usize, U16Rect);
+    // Tuple of (child_id, parent_id, parent_actual_shape)
+    type ChildAndParent = (TreeNodeId, TreeNodeId, U16Rect);
 
     // trace!("before create que");
     let mut que: VecDeque<ChildAndParent> = VecDeque::new();
     let pnode = self.nodes.get_mut(&start_parent_id).unwrap();
     let pnode_id = pnode.id();
-    let pnode_depth = pnode.depth();
     let pnode_actual_shape = *pnode.actual_shape();
-    que.push_back((start_id, pnode_id, pnode_depth, pnode_actual_shape));
+    que.push_back((start_id, pnode_id, pnode_actual_shape));
     // trace!("after create que");
 
     // Iterate all descendants, and update their attributes.
     while let Some(child_and_parent) = que.pop_front() {
       let cnode_id = child_and_parent.0;
       let _pnode_id = child_and_parent.1;
-      let pnode_depth = child_and_parent.2;
-      let pnode_actual_shape = child_and_parent.3;
+      let pnode_actual_shape = child_and_parent.2;
 
       // trace!("before update cnode attr: {:?}", cnode);
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      let cnode_depth = pnode_depth + 1;
       let cnode_shape = *cnode_ref.shape();
       let cnode_actual_shape =
         shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
 
-      // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      trace!(
+        "update attr, cnode id/actual_shape:{:?}/{:?}, pnode id/actual_shape:{:?}/{:?}",
+        cnode_id, cnode_actual_shape, pnode_id, pnode_actual_shape
+      );
 
       // let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      cnode_ref.set_depth(cnode_depth);
       cnode_ref.set_actual_shape(&cnode_actual_shape);
-
-      // raw_nodes
-      //   .as_mut()
-      //   .get_mut(&cnode_id)
-      //   .unwrap()
-      //   .set_depth(cnode_depth);
-      // raw_nodes
-      //   .as_mut()
-      //   .get_mut(&cnode_id)
-      //   .unwrap()
-      //   .set_actual_shape(&cnode_actual_shape);
 
       for dnode_id in self.children_ids(cnode_id).iter() {
         if self.nodes.contains_key(dnode_id) {
-          que.push_back((*dnode_id, cnode_id, cnode_depth, cnode_actual_shape));
+          que.push_back((*dnode_id, cnode_id, cnode_actual_shape));
         }
       }
     }
@@ -447,8 +434,7 @@ where
   ///
   /// Below node attributes need to update:
   ///
-  /// 1. [`depth`](Inodeable::depth()): The child depth should be always the parent depth + 1.
-  /// 2. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
+  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
   /// # Returns
   ///
@@ -484,9 +470,7 @@ where
     // 1. Depth.
     // 2. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_depth = parent_node.depth();
     let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_depth(parent_depth + 1);
     child_node.set_actual_shape(&shapes::make_actual_shape(
       child_node.shape(),
       &parent_actual_shape,
