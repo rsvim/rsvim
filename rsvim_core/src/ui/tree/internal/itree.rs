@@ -325,7 +325,7 @@ impl Itree {
 impl Debug for Itree {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.root_nid == INVALID_ROOT_ID {
-      f.write_str("Itree:Empty");
+      f.write_str("Itree:Empty")
     } else {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root_nid);
@@ -334,15 +334,11 @@ impl Debug for Itree {
           Ok(layout) => format!("{}:{:?}", id, layout),
           Err(e) => format!("{}:{:?}", id, e),
         };
-        f.write_str(layout.as_str());
+        q.push_back(id);
+        f.write_str(layout.as_str())?;
       }
+      Ok(())
     }
-    f.debug_struct("CommandDefinition")
-      .field(NAME, &self.name)
-      .field(CALLBACK, &"Rc<v8::Global<v8::Function>>")
-      .field(ATTRIBUTES, &self.attributes)
-      .field(OPTIONS, &self.options)
-      .finish()
   }
 }
 
