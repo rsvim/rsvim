@@ -5,6 +5,9 @@ use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::shapes;
+#[cfg(debug_assertions)]
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -39,6 +42,10 @@ pub struct Itree {
 
   // Root ID
   root_nid: TreeNodeId,
+
+  // Node names for debugging.
+  #[cfg(debug_assertions)]
+  names: FoldMap<TreeNodeId, CompactString>,
 }
 
 rc_refcell_ptr!(Itree);
@@ -53,6 +60,7 @@ impl Itree {
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_nid: INVALID_ROOT_ID,
+      names: FoldMap::new(),
     }
   }
 
@@ -90,12 +98,19 @@ impl Itree {
     }
   }
 
-  pub fn new_leaf(&mut self, style: Style) -> TaffyResult<TreeNodeId> {
+  pub fn new_leaf(
+    &mut self,
+    style: Style,
+    name: &str,
+  ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let loid = self.lo.new_leaf(style)?;
     let nid = next_node_id();
     self.nid2loid.insert(nid, loid);
     self.loid2nid.insert(loid, nid);
+    if cfg!(debug_assertions) {
+      self.names.insert(nid, name.to_compact_string());
+    }
     self._internal_check();
     Ok(nid)
   }
@@ -292,8 +307,9 @@ impl Itree {
     &mut self,
     style: Style,
     parent_id: TreeNodeId,
+    _name: &str,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.new_leaf(style)?;
+    let id = self.new_leaf(style, _name)?;
     self.add_child(parent_id, id)?;
     Ok(id)
   }
@@ -302,6 +318,7 @@ impl Itree {
     &mut self,
     style: Style,
     children: &[TreeNodeId],
+    name: &str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let children_loids = children
@@ -312,6 +329,9 @@ impl Itree {
     let id = next_node_id();
     self.nid2loid.insert(id, loid);
     self.loid2nid.insert(loid, id);
+    if cfg!(debug_assertions) {
+      self.names.insert(id, name.to_compact_string());
+    }
     self._internal_check();
     Ok(id)
   }
@@ -327,8 +347,12 @@ impl Debug for Itree {
       q.push_back(self.root_nid);
       while let Some(id) = q.pop_front() {
         let layout = match self.layout(id) {
-          Ok(layout) => format!("{}:{:#?}\n", id, layout),
-          Err(e) => format!("{}:{:?}\n", id, e),
+          Ok(layout) => {
+            format!("{}({}):{:#?}\n", self.names.get(&id).unwrap(), id, layout)
+          }
+          Err(e) => {
+            format!("{}({}):{:?}\n", self.names.get(&id).unwrap(), id, e)
+          }
         };
         f.write_str(layout.as_str())?;
         if let Ok(children) = self.children(id) {
