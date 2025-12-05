@@ -205,7 +205,6 @@ impl Itree {
 
   /// Whether the node is visible, e.g. its style is not `display: none`.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
-    self._internal_check();
     let actual_shape = self.actual_shape(id)?;
     Ok(!actual_shape.size().is_zero())
   }
@@ -213,11 +212,11 @@ impl Itree {
   /// Whether the node is detached, e.g. it doesn't have a parent and it is not
   /// the root node. A root node is always attached even it has no parent.
   pub fn detached(&self, id: TreeNodeId) -> bool {
-    id != self.root_nid && self.parent(id).is_none()
+    !self.attached(id)
   }
 
   pub fn attached(&self, id: TreeNodeId) -> bool {
-    !self.detached(id)
+    id == self.root_nid || self.parent(id).is_some()
   }
 
   /// The node is visible and its size > 0, e.g. both height and width > 0.
