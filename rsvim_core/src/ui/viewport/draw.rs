@@ -14,15 +14,15 @@ pub fn draw(
   actual_shape: &U16Rect,
   canvas: &mut Canvas,
 ) {
-  let upos: U16Pos = actual_shape.min().into();
-  let height = actual_shape.height();
-  let width = actual_shape.width();
-
   // If size is zero, exit.
-  if height == 0 || width == 0 {
+  if actual_shape.size().is_zero() {
     trace!("Draw viewport, actual shape is zero");
     return;
   }
+
+  let upos: U16Pos = actual_shape.min().into();
+  let height = actual_shape.height();
+  let width = actual_shape.width();
 
   // If viewport has no lines.
   if viewport.end_line_idx() <= viewport.start_line_idx() {
