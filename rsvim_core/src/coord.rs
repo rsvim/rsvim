@@ -61,7 +61,7 @@ pub trait RectExt<T>
 where
   T: geo::CoordNum,
 {
-  fn size(&self) -> Coord<T>;
+  fn size(&self) -> Size<T>;
 }
 
 impl<T> RectExt<T> for Rect<T>
