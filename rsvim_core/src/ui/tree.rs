@@ -180,6 +180,7 @@ impl Tree {
     let root_id = {
       let mut lotree = lotree.borrow_mut();
       let root_id = lotree.new_leaf(root_style)?;
+      lotree.set_root_id(root_id);
       lotree.compute_layout(root_id, taffy::Size::MAX_CONTENT)?;
       root_id
     };
@@ -624,10 +625,10 @@ impl Tree {
       let mut lotree = lotree.borrow_mut();
       let indicator_id = lotree.new_leaf(indicator_style)?;
       let input_id = lotree.new_leaf(input_style)?;
-      let message_id = lotree.new_leaf(message_style)?;
       let cmdline_id = lotree.new_with_parent(cmdline_style, parent_id)?;
-      lotree.add_child(cmdline_id, message_id)?;
+      let message_id = lotree.new_with_parent(message_style, cmdline_id)?;
       self.compute_layout(&mut lotree)?;
+      trace!("lotree:{:?}", lotree.lo());
 
       // We don't allow zero-area widget.
       let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;

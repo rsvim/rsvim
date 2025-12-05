@@ -28,7 +28,7 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Itree {
   lo: TaffyTree,
   nid2loid: FoldMap<TreeNodeId, taffy::NodeId>,
@@ -54,6 +54,11 @@ impl Itree {
       cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_nid: INVALID_ROOT_ID,
     }
+  }
+
+  #[cfg(debug_assertions)]
+  pub fn lo(&self) -> &TaffyTree {
+    &self.lo
   }
 
   pub fn len(&self) -> usize {
@@ -314,6 +319,30 @@ impl Itree {
     self.loid2nid.insert(loid, id);
     self._internal_check();
     Ok(id)
+  }
+}
+
+impl Debug for Itree {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    if self.root_nid == INVALID_ROOT_ID {
+      f.write_str("Itree:Empty");
+    } else {
+      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      q.push_back(self.root_nid);
+      while let Some(id) = q.pop_front() {
+        let layout = match self.layout(id) {
+          Ok(layout) => format!("{}:{:?}", id, layout),
+          Err(e) => format!("{}:{:?}", id, e),
+        };
+        f.write_str(layout.as_str());
+      }
+    }
+    f.debug_struct("CommandDefinition")
+      .field(NAME, &self.name)
+      .field(CALLBACK, &"Rc<v8::Global<v8::Function>>")
+      .field(ATTRIBUTES, &self.attributes)
+      .field(OPTIONS, &self.options)
+      .finish()
   }
 }
 
