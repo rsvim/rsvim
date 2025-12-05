@@ -84,7 +84,7 @@ fn search_viewport(
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  let window = tree.window_mut(window_id).unwrap();
+  let window = tree.window(window_id).unwrap();
   let window_actual_shape = window.actual_shape();
   let old = window.viewport();
   let buf = lock!(buf);
@@ -107,14 +107,15 @@ fn search_viewport(
     start_line,
     start_column,
   );
-  window.set_cursor_viewport(CursorViewport::to_arc(
+  let cursor_viewport = CursorViewport::to_arc(
     CursorViewport::from_position(
       &viewport,
       buf.text(),
       target_cursor_line,
       target_cursor_char,
     ),
-  ));
+  );
+  tree.set_window_cursor_viewport(window_id, cursor_viewport);
   let viewport = Viewport::to_arc(viewport);
   tree.set_window_viewport(window_id, viewport.clone());
   viewport
