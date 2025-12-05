@@ -216,10 +216,34 @@ macro_rules! inode_dispatcher {
         }
       }
 
+      fn attached(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.attached(),
+          )*
+        }
+      }
+
+      fn detached(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.detached(),
+          )*
+        }
+      }
+
       fn enabled(&self) -> bool {
         match self {
           $(
             $enum::$variant(e) => e.enabled(),
+          )*
+        }
+      }
+
+      fn disabled(&self) -> bool {
+        match self {
+          $(
+            $enum::$variant(e) => e.disabled(),
           )*
         }
       }
