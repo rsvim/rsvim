@@ -167,7 +167,7 @@ arc_mutex_ptr!(Tree);
 impl Tree {
   /// Make UI tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let lotree = Itree::to_arc(Itree::new());
+    let lotree = Itree::to_rc(Itree::new());
 
     let root_style = Style {
       size: taffy::Size {
@@ -756,7 +756,7 @@ impl Tree {
     debug_assert!(matches!(input_node, TreeNode::CommandLineInput(_)));
     match input_node {
       TreeNode::CommandLineInput(input) => {
-        input.set_viewport(Rc::downgrade(&viewport))
+        input.set_viewport(Arc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
@@ -790,7 +790,7 @@ impl Tree {
     debug_assert!(matches!(input_node, TreeNode::CommandLineMessage(_)));
     match input_node {
       TreeNode::CommandLineMessage(message) => {
-        message.set_viewport(Rc::downgrade(&viewport))
+        message.set_viewport(Arc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
@@ -803,7 +803,7 @@ impl Tree {
     let message_id = self.cmdline().unwrap().message_id();
 
     let lotree = self.lotree.clone();
-    let mut lotree = lock!(lotree);
+    let mut lotree = lotree.borrow_mut();
     let mut input_style = lotree.style(input_id)?.clone();
     let mut indicator_style = lotree.style(indicator_id)?.clone();
     let mut message_style = lotree.style(message_id)?.clone();
