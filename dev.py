@@ -29,6 +29,38 @@ def set_env(name, value):
     os.environ[name] = value
 
 
+def run(cmd):
+    assert isinstance(cmd, list)
+    cmd = " ".join(cmd)
+    logging.info(cmd)
+    os.system(cmd)
+
+
+def env(name, value):
+    os.environ[name] = value
+    logging.info(f"Set {name}={value}")
+
+
+def sccache():
+    if SCCACHE is None:
+        logging.warning("'sccache' not found!")
+        return None
+    if NO_CACHE:
+        logging.warning("'sccache' is disabled!")
+        return None
+    return env("RUSTC_WRAPPER", f'"{SCCACHE}"')
+
+
+def rustflags(flags):
+    assert isinstance(flags, list)
+    if len(flags) == 0:
+        flags = ["-Dwarnings"]
+    if WINDOWS:
+        flags.append("-Csymbol-mangling-version=v0")
+    flags = " ".join(flags)
+    return env("RUSTFLAGS", f'"{flags}"')
+
+
 def append_rustflags(opt):
     global RUSTFLAGS
     RUSTFLAGS.append(opt)
@@ -53,7 +85,7 @@ def set_sccache():
     set_env("RUSTC_WRAPPER", SCCACHE)
 
 
-class ICommand(Protocol):
+class Cmd(Protocol):
     @abstractmethod
     def run(self, args) -> None:
         raise Exception("Not implemented!")
@@ -68,7 +100,7 @@ class ICommand(Protocol):
 
 
 # clippy/c
-class ClippyCommand(ICommand):
+class Clippy(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "clippy"
         self._alias = "c"
@@ -76,7 +108,7 @@ class ClippyCommand(ICommand):
         self.clippy_parser = subparsers.add_parser(
             self._name,
             aliases=[self._alias],
-            help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
+            help="cargo clippy",
         )
 
     def name(self) -> str:
@@ -86,22 +118,12 @@ class ClippyCommand(ICommand):
         return self._alias
 
     def run(self, args) -> None:
-        append_rustflags("-Dwarnings")
-        if WINDOWS:
-            append_rustflags("-Csymbol-mangling-version=v0")
-
-        set_rustflags()
-        set_sccache()
-
-        command = "cargo clippy --workspace --all-targets"
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+        cmd = [sccache(), rustflags([]), "cargo clippy --workspace --all-targets"]
+        run(cmd)
 
 
 # test/t
-class TestCommand(ICommand):
+class Test(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "test"
         self._alias = "t"
@@ -210,7 +232,7 @@ class TestCommand(ICommand):
 
 
 # build/b
-class BuildCommand(ICommand):
+class Build(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "build"
         self._alias = "b"
@@ -232,30 +254,20 @@ class BuildCommand(ICommand):
         return self._alias
 
     def run(self, args) -> None:
-        set_sccache()
-        set_rustflags()
-
+        cmd = [sccache(), rustflags([]), "cargo build"]
         if args.release:
-            command = "cargo build --release"
+            cmd.append("--release")
         elif args.nightly:
-            command = "cargo build --profile nightly"
-        else:
-            command = "cargo build"
-
+            cmd.extend(["--profile", "nightly"])
         if args.verbose:
-            command = f"{command} -vv"
-
+            cmd.append("-vv")
         if isinstance(args.features, list) and len(args.features) > 0:
-            features = ",".join(args.features)
-            command = f"{command} --features {features}"
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+            cmd.extend(["-F", ",".join(args.features)])
+        run(cmd)
 
 
 # fmt/f
-class FormatCommand(ICommand):
+class FormatCommand(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "fmt"
         self._alias = "f"
@@ -335,7 +347,7 @@ class FormatCommand(ICommand):
 
 
 # doc
-class DocumentCommand(ICommand):
+class DocumentCommand(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "doc"
 
@@ -370,7 +382,7 @@ class DocumentCommand(ICommand):
 
 
 # release/r
-class ReleaseCommand(ICommand):
+class ReleaseCommand(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "release"
         self._alias = "r"
@@ -416,7 +428,7 @@ class ReleaseCommand(ICommand):
 
 
 # npm
-class NpmCommand(ICommand):
+class NpmCommand(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "npm"
 
@@ -461,13 +473,13 @@ if __name__ == "__main__":
     subparsers = parser.add_subparsers(dest="subcommand")
 
     commands = [
-        BuildCommand(subparsers),
-        ClippyCommand(subparsers),
+        Build(subparsers),
+        Clippy(subparsers),
         DocumentCommand(subparsers),
         FormatCommand(subparsers),
         NpmCommand(subparsers),
         ReleaseCommand(subparsers),
-        TestCommand(subparsers),
+        Test(subparsers),
     ]
 
     parsed_args = parser.parse_args()
