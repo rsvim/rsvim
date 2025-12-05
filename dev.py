@@ -393,6 +393,7 @@ if __name__ == "__main__":
         Clippy(subparsers),
         Document(subparsers),
         Format(subparsers),
+        Miri(subparsers),
         Npm(subparsers),
         Release(subparsers),
         Test(subparsers),
