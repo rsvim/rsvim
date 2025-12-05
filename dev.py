@@ -37,11 +37,11 @@ def env(name, value):
 def sccache():
     if SCCACHE is None:
         logging.warning("'sccache' not found!")
-        return None
+        return
     if NO_CACHE:
         logging.warning("'sccache' is disabled!")
-        return None
-    return env("RUSTC_WRAPPER", f'"{SCCACHE}"')
+        return
+    env("RUSTC_WRAPPER", f'"{SCCACHE}"')
 
 
 def rustflags():
@@ -49,15 +49,15 @@ def rustflags():
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
     flags = " ".join(flags)
-    return env("RUSTFLAGS", f'"{flags}"')
+    env("RUSTFLAGS", f'"{flags}"')
 
 
 def rust_backtrace():
-    return env("RUST_BACKTRACE", "full")
+    env("RUST_BACKTRACE", "full")
 
 
 def miriflags():
-    return env(
+    env(
         "MIRIFLAGS",
         '"-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance"',
     )
@@ -66,9 +66,9 @@ def miriflags():
 def rsvim_log():
     var = os.getenv("RSVIM_LOG")
     if isinstance(var, str):
-        return env("RSVIM_LOG", var)
+        env("RSVIM_LOG", var)
     else:
-        return env("RSVIM_LOG", "trace")
+        env("RSVIM_LOG", "trace")
 
 
 class Cmd(Protocol):
@@ -104,7 +104,9 @@ class Clippy(Cmd):
         return self._alias
 
     def run(self, args) -> None:
-        cmd = [sccache(), rustflags(), "cargo clippy --workspace --all-targets"]
+        sccache()
+        rustflags()
+        cmd = ["cargo clippy --workspace --all-targets"]
         run(cmd)
 
 
@@ -137,11 +139,11 @@ class Test(Cmd):
             self.test(args.name)
 
     def test(self, name) -> None:
+        sccache()
+        rustflags()
+        rust_backtrace()
+        rsvim_log()
         cmd = [
-            sccache(),
-            rustflags(),
-            rust_backtrace(),
-            rsvim_log(),
             "cargo nextest run --no-capture",
         ]
         if len(name) == 0:
@@ -151,7 +153,9 @@ class Test(Cmd):
         run(cmd)
 
     def list(self) -> None:
-        cmd = [sccache(), rustflags(), "cargo nextest list"]
+        sccache()
+        rustflags()
+        cmd = ["cargo nextest list"]
         run(cmd)
 
 
@@ -174,14 +178,14 @@ class Miri(Cmd):
         return None
 
     def run(self, args) -> None:
+        rustflags()
+        rust_backtrace()
+        miriflags()
         if args.job is None:
             job = "num-cpus"
         else:
             job = str(args.job[0])
         cmd = [
-            rustflags(),
-            rust_backtrace(),
-            miriflags(),
             "cargo +nightly miri nextest run",
             "-j",
             job,
@@ -213,7 +217,9 @@ class Build(Cmd):
         return self._alias
 
     def run(self, args) -> None:
-        cmd = [sccache(), rustflags(), "cargo build"]
+        sccache()
+        rustflags()
+        cmd = ["cargo build"]
         if args.release:
             cmd.append("--release")
         elif args.nightly:
@@ -339,14 +345,11 @@ class Release(Cmd):
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
-        cmd = [
-            env("GIT_CLIFF_CONFIG", f"{cwd / 'cliff.toml'}"),
-            env("GIT_CLIFF_WORKDIR", f"{cwd}"),
-            env("GIT_CLIFF_REPOSITORY", f"{cwd}"),
-            env("GIT_CLIFF_OUTPUT", f"{cwd / 'CHANGELOG.md'}"),
-            "cargo release",
-            args.level,
-        ]
+        env("GIT_CLIFF_CONFIG", f"{cwd / 'cliff.toml'}")
+        env("GIT_CLIFF_WORKDIR", f"{cwd}")
+        env("GIT_CLIFF_REPOSITORY", f"{cwd}")
+        env("GIT_CLIFF_OUTPUT", f"{cwd / 'CHANGELOG.md'}")
+        cmd = ["cargo release", args.level]
         if args.execute:
             cmd.extend(["--execute", "--no-verify"])
         run(cmd)
