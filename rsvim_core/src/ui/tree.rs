@@ -911,7 +911,7 @@ impl Tree {
       _ => unreachable!(),
     }
 
-    self.compute_layout(&mut lotree)?;
+    self.compute_layout(&mut lotree).unwrap();
     Some(old_parent_id)
   }
 
