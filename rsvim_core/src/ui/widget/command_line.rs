@@ -56,13 +56,20 @@ impl CommandLine {
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let lotree = lotree.upgrade().unwrap();
       let lotree = lotree.borrow();
-      let input_actual_shape = lotree.actual_shape(input_id)?;
+
+      // When creating "command-line" widget, "input" and "indicator" node is not attached to parent
+      // yet, thus their actual_shape are all zero. So here we simply mock a shape for viewport
+      // calculation.
+      // Don't worry, when "command-line" switches to input, we will calculate the real shape for
+      // input/indicator widget.
+      let message_actual_shape = lotree.actual_shape(message_id)?;
+
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
         &options,
         text_contents.command_line_input(),
-        &input_actual_shape,
+        &message_actual_shape,
         0,
         0,
       );
@@ -71,7 +78,6 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = lotree.actual_shape(message_id)?;
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
