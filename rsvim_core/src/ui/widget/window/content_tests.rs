@@ -6,7 +6,6 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
-use crate::rect_from_size;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;

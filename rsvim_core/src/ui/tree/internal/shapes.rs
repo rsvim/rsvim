@@ -2,7 +2,6 @@
 
 #![allow(clippy::let_and_return)]
 
-use crate::point_as;
 use crate::prelude::*;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
