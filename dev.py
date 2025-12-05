@@ -40,7 +40,7 @@ def sccache():
     if NO_CACHE:
         logging.warning("'sccache' is disabled!")
         return
-    env("RUSTC_WRAPPER", f'"{SCCACHE}"')
+    env("RUSTC_WRAPPER", SCCACHE)
 
 
 def rustflags():
@@ -48,7 +48,7 @@ def rustflags():
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
     flags = " ".join(flags)
-    env("RUSTFLAGS", f'"{flags}"')
+    env("RUSTFLAGS", flags)
 
 
 def rust_backtrace():
