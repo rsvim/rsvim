@@ -5,7 +5,6 @@ use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::prelude::*;
-use crate::size_as;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
@@ -68,7 +67,7 @@ mod tests_nowrap {
     test_log_init();
 
     let terminal_size = size!(1, 1);
-    let terminal_shape = size_into_rect!(terminal_size, isize);
+    let terminal_shape = rect_from_size!(terminal_size, isize);
 
     let expect = vec![":"];
 

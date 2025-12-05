@@ -592,9 +592,7 @@ impl Viewport {
     target_cursor_char: usize,
   ) -> (usize, usize) {
     // If window is zero-sized.
-    let height = shape.height();
-    let width = shape.width();
-    if height == 0 || width == 0 {
+    if shape.size().is_zero() {
       return (0, 0);
     }
 

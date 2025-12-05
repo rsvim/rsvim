@@ -61,20 +61,15 @@ pub trait RectExt<T>
 where
   T: geo::CoordNum,
 {
-  fn top_left(&self) -> Coord<T>;
-  fn bottom_right(&self) -> Coord<T>;
+  fn size(&self) -> Size<T>;
 }
 
 impl<T> RectExt<T> for Rect<T>
 where
   T: geo::CoordNum,
 {
-  fn top_left(&self) -> Coord<T> {
-    self.min()
-  }
-
-  fn bottom_right(&self) -> Coord<T> {
-    self.max()
+  fn size(&self) -> Size<T> {
+    Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
   }
 }
 
@@ -87,6 +82,10 @@ where
   width: T,
   height: T,
 }
+
+pub type ISize = Size<isize>;
+pub type USize = Size<usize>;
+pub type U16Size = Size<u16>;
 
 impl<T> Size<T>
 where
@@ -103,11 +102,11 @@ where
   pub fn height(&self) -> T {
     self.height
   }
-}
 
-pub type ISize = Size<isize>;
-pub type USize = Size<usize>;
-pub type U16Size = Size<u16>;
+  pub fn is_zero(&self) -> bool {
+    self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
+  }
+}
 
 #[macro_export]
 macro_rules! point {
@@ -169,7 +168,7 @@ macro_rules! size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! size_into_rect {
+macro_rules! rect_from_size {
   ($s:ident,$ty:ty) => {
     $crate::coord::Rect::new(
       (0 as $ty, 0 as $ty),

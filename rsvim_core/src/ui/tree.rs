@@ -29,99 +29,48 @@ inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]
-/// The widget tree.
+/// The UI widget tree.
 ///
-/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
-/// node on the widget tree, everything inside is the node's children. While the terminal itself is
-/// the root widget node.
+/// This tree manages all UI components and rendering on the canvas, each
+/// widget is a node on the tree, everything inside is the node's children.
+/// While the terminal itself is the root widget node.
 ///
-/// # Terms
-///
-/// * Parent: The parent node.
-/// * Child: The child node.
-/// * Ancestor: Either the parent, or the parent of some ancestor of the node.
-/// * Descendant: Either the child, or the child of some descendant of the node.
-/// * Sibling: Other children nodes under the same parent.
-///
-/// # Guarantees
+/// The tree guarantees all the relationships between each nodes:
 ///
 /// ## Ownership
 ///
-/// Parent owns all its children.
-///
 /// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while the absolute
-///   coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// * There are two coordinate system: relative coordinate based on parent's
+///   top-left corner, absolute coordinate based on terminal's top-left corner.
+/// * Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries.
+/// * Visible/enabled attributes will affected all its descendant nodes.
 ///
 /// ## Priority
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// * Children have higher priority to display on TUI than their parent, as
+///   well as receiving keyboard/mouse events.
+/// * For all the children under the same parent, the one with higher z-index
+///   has a higher priority than others.
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
+/// ## Attributes
 ///
-/// # Attributes
+/// ### Shape (position and size)
 ///
-/// ## Shape (position and size)
+/// A shape is always a rectangle, it can be relative based on its parent or
+/// absolute (actual) based on terminal. We use relative shape for an easier
+/// code logic, use absolute shape when rendering it to terminal.
 ///
-/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-/// default relative to its parent top-left corner, and the size is by default logically
-/// infinite. While rendering to the terminal device, we need to calculate its absolute position
-/// and actual size.
+/// ### Z-index
 ///
-/// There're two kinds of positions:
-/// * Relative: Based on it's parent's position.
-/// * Absolute: Based on the terminal device.
+/// The z-index arranges the display priority of the content stack when
+/// multiple children overlap on each other, a widget with higher z-index has
+/// higher priority to be displayed. For those widgets have the same z-index,
+/// the later inserted one will cover the previous inserted ones.
 ///
-/// There're two kinds of sizes:
-/// * Logical: An infinite size on the imaginary canvas.
-/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///   bounded by the terminal device's actual shape.
+/// ### Visible/Enabled
 ///
-/// The shape boundary uses top-left open, bottom-right closed interval. For example the
-/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-/// The width and height of the shape is both `10`.
-///
-/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-/// position and actual size right after it's shape is been changed, and also caches the result.
-/// Thus we simply get the cached results when need.
-///
-/// ## Z-index
-///
-/// The z-index arranges the display priority of the content stack when multiple children
-/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-/// those widgets have the same z-index, the later inserted one will cover the previous inserted
-/// ones.
-///
-/// The z-index only works for the children under the same parent. For a child widget, it always
-/// covers/overrides its parent display.
-/// To change the visibility priority between children and parent, you need to change the
-/// relationship between them.
-///
-/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-/// still covers C, because it's a sibling of B.
-///
-/// ## Visible and enabled
-///
-/// A widget can be visible or invisible. When it's visible, it handles user's input events,
-/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
-/// so it doesn't handle or process any input events, the UI hides.
-///
-/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-/// doesn't handle or process any input events, the UI keeps still and never changes.
-///
+/// A widget can be visible or invisible, enabled or disabled.
 pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
@@ -160,7 +109,7 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
-    let shape = size_into_rect!(canvas_size, isize);
+    let shape = rect_from_size!(canvas_size, isize);
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
     Tree {

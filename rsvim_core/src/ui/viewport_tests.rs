@@ -50,7 +50,7 @@ pub fn make_window(
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
-  let window_shape = size_into_rect!(terminal_size, isize);
+  let window_shape = rect_from_size!(terminal_size, isize);
   Window::new(
     tree.global_local_options(),
     window_shape,
@@ -185,7 +185,7 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
-  let shape = size_into_rect!(terminal_size, isize);
+  let shape = rect_from_size!(terminal_size, isize);
   let window_content =
     Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);

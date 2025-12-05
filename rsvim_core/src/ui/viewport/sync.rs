@@ -58,9 +58,7 @@ pub fn sync(
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
-  let height = shape.height();
-  let width = shape.width();
-  if height == 0 || width == 0 {
+  if shape.size().is_zero() {
     return (ViewportLineRange::default(), LiteMap::new());
   }
 

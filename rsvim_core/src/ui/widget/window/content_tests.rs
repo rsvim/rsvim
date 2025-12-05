@@ -6,7 +6,6 @@ use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
 use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
-use crate::size_into_rect;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
@@ -33,7 +32,7 @@ pub fn make_viewport(
   start_column_idx: usize,
 ) -> ViewportArc {
   let buffer = lock!(buffer);
-  let actual_shape = size_into_rect!(terminal_size, u16);
+  let actual_shape = rect_from_size!(terminal_size, u16);
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),
@@ -52,7 +51,7 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
-  let shape = size_into_rect!(terminal_size, isize);
+  let shape = rect_from_size!(terminal_size, isize);
   let window_content =
     Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);
