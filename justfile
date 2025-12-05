@@ -11,7 +11,7 @@ alias t := test
 [windows]
 _sccache:
   @$env:RUSTC_WRAPPER="sccache.exe"
-  @echo "set RUSTC_WRAPPER='$env:RUSTC_WRAPPER'"
+  @echo "set RUSTC_WRAPPER=${env:RUSTC_WRAPPER}"
 
 [unix]
 _sccache:
@@ -20,7 +20,7 @@ _sccache:
 
 [windows]
 _sccache_nocache:
-  @echo "set RUSTC_WRAPPER='$env:RUSTC_WRAPPER'"
+  @echo "set RUSTC_WRAPPER=${env:RUSTC_WRAPPER}"
 
 [unix]
 _sccache_nocache:
@@ -29,7 +29,7 @@ _sccache_nocache:
 
 [windows]
 _rustflags:
-  @echo "set RUSTFLAGS='$env:RUSTFLAGS'"
+  @echo "set RUSTFLAGS=${env:RUSTFLAGS}"
 
 [unix]
 _rustflags:
@@ -37,7 +37,7 @@ _rustflags:
 
 [windows]
 _rust_backtrace:
-  @echo "set RUST_BACKTRACE='$env:RUST_BACKTRACE'"
+  @echo "set RUST_BACKTRACE=${env:RUST_BACKTRACE}"
 
 [unix]
 _rust_backtrace:
@@ -45,7 +45,7 @@ _rust_backtrace:
 
 [windows]
 _rsvim_log:
-  @echo "set RSVIM_LOG='$env:RSVIM_LOG'"
+  @echo "set RSVIM_LOG=${env:RSVIM_LOG}"
 
 [unix]
 _rsvim_log:
