@@ -15,9 +15,12 @@ fn new() {
 
   let mut tree = Itree::new();
   let nid1 = tree
-    .new_leaf(Style {
-      ..Default::default()
-    })
+    .new_leaf(
+      Style {
+        ..Default::default()
+      },
+      "nid1",
+    )
     .unwrap();
 
   assert_eq!(tree.len(), 1);
@@ -31,11 +34,14 @@ fn insert1() {
 
   let mut tree = Itree::new();
   let nid = (0..7)
-    .map(|_i| {
+    .map(|i| {
       tree
-        .new_leaf(Style {
-          ..Default::default()
-        })
+        .new_leaf(
+          Style {
+            ..Default::default()
+          },
+          format!("nid{}", i + 1).as_str(),
+        )
         .unwrap()
     })
     .collect_vec();
@@ -102,11 +108,14 @@ fn insert2() {
 
   let mut tree = Itree::new();
   let nid = (0..10)
-    .map(|_i| {
+    .map(|i| {
       tree
-        .new_leaf(Style {
-          ..Default::default()
-        })
+        .new_leaf(
+          Style {
+            ..Default::default()
+          },
+          format!("nid{}", i).as_str(),
+        )
         .unwrap()
     })
     .collect_vec();
@@ -191,165 +200,192 @@ fn shape1() {
 
   let mut tree = Itree::new();
   let nid1 = tree
-    .new_leaf(Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(20_u16),
-        height: taffy::Dimension::from_length(20_u16),
+    .new_leaf(
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(20_u16),
+          height: taffy::Dimension::from_length(20_u16),
+        },
+        ..Default::default()
       },
-      ..Default::default()
-    })
+      "nid1",
+    )
     .unwrap();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
 
   let nid2 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(0_u16),
-        top: taffy::LengthPercentageAuto::from_length(0_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(0_u16),
+          top: taffy::LengthPercentageAuto::from_length(0_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(15_u16),
+          height: taffy::Dimension::from_length(15_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(15_u16),
-        height: taffy::Dimension::from_length(15_u16),
-      },
-      ..Default::default()
-    })
+      "nid2",
+    )
     .unwrap();
   let s2 = rect!(0, 0, 15, 15);
   let us2 = rect!(0, 0, 15, 15);
 
   let nid3 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(10_u16),
-        top: taffy::LengthPercentageAuto::from_length(10_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(10_u16),
+          top: taffy::LengthPercentageAuto::from_length(10_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(8_u16),
+          height: taffy::Dimension::from_length(9_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(8_u16),
-        height: taffy::Dimension::from_length(9_u16),
-      },
-      ..Default::default()
-    })
+      "nid3",
+    )
     .unwrap();
   let s3 = rect!(10, 10, 18, 19);
   let us3 = rect!(10, 10, 18, 19);
 
   let nid4 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(3_u16),
-        top: taffy::LengthPercentageAuto::from_length(5_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(3_u16),
+          top: taffy::LengthPercentageAuto::from_length(5_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(17_u16),
+          height: taffy::Dimension::from_length(9_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(17_u16),
-        height: taffy::Dimension::from_length(9_u16),
-      },
-      ..Default::default()
-    })
+      "nid4",
+    )
     .unwrap();
   let s4 = rect!(3, 5, 15, 14);
   let us4 = rect!(3, 5, 15, 14);
 
   let nid5 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(-3_i16),
-        top: taffy::LengthPercentageAuto::from_length(-5_i16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(-3_i16),
+          top: taffy::LengthPercentageAuto::from_length(-5_i16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(13_u16),
+          height: taffy::Dimension::from_length(25_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(13_u16),
-        height: taffy::Dimension::from_length(25_u16),
-      },
-      ..Default::default()
-    })
+      "nid5",
+    )
     .unwrap();
   let s5 = rect!(0, 0, 10, 15);
   let us5 = rect!(0, 0, 10, 15);
 
   let nid6 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(3_u16),
-        top: taffy::LengthPercentageAuto::from_length(6_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(3_u16),
+          top: taffy::LengthPercentageAuto::from_length(6_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(3_u16),
+          height: taffy::Dimension::from_length(4_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(3_u16),
-        height: taffy::Dimension::from_length(4_u16),
-      },
-      ..Default::default()
-    })
+      "nid6",
+    )
     .unwrap();
   let s6 = rect!(3, 6, 6, 9);
   let us6 = rect!(13, 16, 16, 19);
 
   let nid7 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(3_u16),
-        top: taffy::LengthPercentageAuto::from_length(6_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(3_u16),
+          top: taffy::LengthPercentageAuto::from_length(6_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(3_u16),
+          height: taffy::Dimension::from_length(19_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(3_u16),
-        height: taffy::Dimension::from_length(19_u16),
-      },
-      ..Default::default()
-    })
+      "nid7",
+    )
     .unwrap();
   let s7 = rect!(3, 6, 6, 15);
   let us7 = rect!(3, 6, 6, 15);
 
   let nid8 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(-1_i16),
-        top: taffy::LengthPercentageAuto::from_length(-2_i16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(-1_i16),
+          top: taffy::LengthPercentageAuto::from_length(-2_i16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(3_u16),
+          height: taffy::Dimension::from_length(3_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(3_u16),
-        height: taffy::Dimension::from_length(3_u16),
-      },
-      ..Default::default()
-    })
+      "nid8",
+    )
     .unwrap();
   let s8 = rect!(0, 0, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
 
   let nid9 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(5_u16),
-        top: taffy::LengthPercentageAuto::from_length(6_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(5_u16),
+          top: taffy::LengthPercentageAuto::from_length(6_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(4_u16),
+          height: taffy::Dimension::from_length(2_u16),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(4_u16),
-        height: taffy::Dimension::from_length(2_u16),
-      },
-      ..Default::default()
-    })
+      "nid9",
+    )
     .unwrap();
   let s9 = rect!(3, 6, 3, 8);
   let us9 = rect!(6, 12, 6, 14);
@@ -407,95 +443,113 @@ fn shape2() {
 
   let mut tree = Itree::new();
   let nid1 = tree
-    .new_leaf(Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(20_u16),
-        height: taffy::Dimension::from_length(20_u16),
+    .new_leaf(
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(20_u16),
+          height: taffy::Dimension::from_length(20_u16),
+        },
+        ..Default::default()
       },
-      ..Default::default()
-    })
+      "nid1",
+    )
     .unwrap();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
 
   let nid2 = tree
-    .new_leaf(Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(0.99),
-        height: taffy::Dimension::from_percent(0.99),
+    .new_leaf(
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(0.99),
+          height: taffy::Dimension::from_percent(0.99),
+        },
+        ..Default::default()
       },
-      ..Default::default()
-    })
+      "nid2",
+    )
     .unwrap();
   let s2 = rect!(0, 0, 15, 19);
   let us2 = rect!(0, 0, 15, 19);
 
   let nid3 = tree
-    .new_leaf(Style {
-      min_size: taffy::Size {
-        width: taffy::Dimension::from_length(5_u16),
-        height: taffy::Dimension::from_length(5_u16),
+    .new_leaf(
+      Style {
+        min_size: taffy::Size {
+          width: taffy::Dimension::from_length(5_u16),
+          height: taffy::Dimension::from_length(5_u16),
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(0.01),
+          height: taffy::Dimension::from_percent(0.01),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(0.01),
-        height: taffy::Dimension::from_percent(0.01),
-      },
-      ..Default::default()
-    })
+      "nid3",
+    )
     .unwrap();
   let s3 = rect!(15, 0, 20, 5);
   let us3 = rect!(15, 0, 20, 5);
 
   let nid4 = tree
-    .new_leaf(Style {
-      min_size: taffy::Size {
-        width: taffy::Dimension::from_length(5_u16),
-        height: taffy::Dimension::from_length(5_u16),
+    .new_leaf(
+      Style {
+        min_size: taffy::Size {
+          width: taffy::Dimension::from_length(5_u16),
+          height: taffy::Dimension::from_length(5_u16),
+        },
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(0.01),
+          height: taffy::Dimension::from_percent(0.01),
+        },
+        ..Default::default()
       },
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(0.01),
-        height: taffy::Dimension::from_percent(0.01),
-      },
-      ..Default::default()
-    })
+      "nid4",
+    )
     .unwrap();
   let s4 = rect!(0, 0, 5, 5);
   let us4 = rect!(0, 0, 5, 5);
 
   let nid5 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(-3_i16),
-        top: taffy::LengthPercentageAuto::from_length(-5_i16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(-3_i16),
+          top: taffy::LengthPercentageAuto::from_length(-5_i16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        min_size: taffy::Size {
+          width: taffy::Dimension::from_length(18_u16),
+          height: taffy::Dimension::from_length(25_u16),
+        },
+        ..Default::default()
       },
-      min_size: taffy::Size {
-        width: taffy::Dimension::from_length(18_u16),
-        height: taffy::Dimension::from_length(25_u16),
-      },
-      ..Default::default()
-    })
+      "nid5",
+    )
     .unwrap();
   let s5 = rect!(0, 0, 5, 5);
   let us5 = rect!(0, 0, 5, 5);
 
   let nid6 = tree
-    .new_leaf(Style {
-      position: taffy::Position::Absolute,
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(8_i16),
-        top: taffy::LengthPercentageAuto::from_length(13_i16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
+    .new_leaf(
+      Style {
+        position: taffy::Position::Absolute,
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(8_i16),
+          top: taffy::LengthPercentageAuto::from_length(13_i16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        min_size: taffy::Size {
+          width: taffy::Dimension::from_length(10_u16),
+          height: taffy::Dimension::from_length(12_u16),
+        },
+        ..Default::default()
       },
-      min_size: taffy::Size {
-        width: taffy::Dimension::from_length(10_u16),
-        height: taffy::Dimension::from_length(12_u16),
-      },
-      ..Default::default()
-    })
+      "nid6",
+    )
     .unwrap();
   let s6 = rect!(5, 5, 5, 5);
   let us6 = rect!(5, 5, 5, 5);
