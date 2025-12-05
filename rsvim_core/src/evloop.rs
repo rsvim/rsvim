@@ -37,7 +37,6 @@ use std::sync::Arc;
 use std::time::Instant;
 use taffy::Style;
 use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyAuto;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
