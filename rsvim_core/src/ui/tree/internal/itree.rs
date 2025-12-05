@@ -36,7 +36,7 @@ pub struct Itree {
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 }
 
-arc_mutex_ptr!(Itree);
+rc_refcell_ptr!(Itree);
 
 impl Itree {
   pub fn new() -> Self {
