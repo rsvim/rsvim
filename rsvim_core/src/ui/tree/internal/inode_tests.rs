@@ -1,6 +1,7 @@
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
+use crate::ui::tree::TreeNodeId;
 // use crate::tests::log::init as test_log_init;
 use std::cell::RefCell;
 
@@ -40,7 +41,6 @@ fn new() {
   assert_eq!(n1.borrow().value, 3);
   assert_eq!(n2.borrow().value, 4);
 
-  assert_eq!(n1.borrow().depth(), 0);
   assert_eq!(n1.borrow().zindex(), 0);
   assert!(n1.borrow().enabled());
   assert!(n1.borrow().visible());

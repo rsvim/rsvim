@@ -17,6 +17,8 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
 pub use internal::*;
 
+pub type TreeNodeId = i32;
+
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
