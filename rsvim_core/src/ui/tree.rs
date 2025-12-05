@@ -795,29 +795,31 @@ impl Tree {
   }
 
   fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
-    let input_id = self.cmdline().unwrap().input_id();
+    let cmdline_id = self.command_line_id().unwrap();
     let indicator_id = self.cmdline().unwrap().indicator_id();
+    let input_id = self.cmdline().unwrap().input_id();
     let message_id = self.cmdline().unwrap().message_id();
 
     let lotree = self.lotree.clone();
     let mut lotree = lotree.borrow_mut();
-    let mut input_style = lotree.style(input_id)?.clone();
-    let mut indicator_style = lotree.style(indicator_id)?.clone();
-    let mut message_style = lotree.style(message_id)?.clone();
 
     if show_input {
-      input_style.display = taffy::Display::Flex;
-      indicator_style.display = taffy::Display::Flex;
-      message_style.display = taffy::Display::None;
+      debug_assert_eq!(lotree.parent(message_id), Some(cmdline_id));
+      debug_assert!(lotree.parent(indicator_id).is_none());
+      debug_assert!(lotree.parent(input_id).is_none());
+      lotree.remove_child(cmdline_id, message_id)?;
+      lotree.add_child(cmdline_id, indicator_id)?;
+      lotree.add_child(cmdline_id, input_id)?;
     } else {
-      input_style.display = taffy::Display::None;
-      indicator_style.display = taffy::Display::None;
-      message_style.display = taffy::Display::Flex;
+      debug_assert_eq!(lotree.parent(indicator_id), Some(cmdline_id));
+      debug_assert_eq!(lotree.parent(input_id), Some(cmdline_id));
+      debug_assert!(lotree.parent(message_id).is_none());
+      lotree.remove_child(cmdline_id, indicator_id)?;
+      lotree.remove_child(cmdline_id, input_id)?;
+      lotree.add_child(cmdline_id, message_id)?;
     }
 
-    lotree.set_style(input_id, input_style)?;
-    lotree.set_style(indicator_id, indicator_style)?;
-    lotree.set_style(message_id, message_style)?;
+    self.compute_layout(&mut lotree)
     Ok(())
   }
 
