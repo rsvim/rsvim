@@ -21,13 +21,6 @@ LINUX = not WINDOWS and not MACOS
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
 
-RUSTFLAGS = []
-
-
-def set_env(name, value):
-    logging.info(f"Set env: {name}={value}")
-    os.environ[name] = value
-
 
 def run(cmd):
     assert isinstance(cmd, list)
@@ -76,30 +69,6 @@ def rsvim_log():
         return env("RSVIM_LOG", var)
     else:
         return env("RSVIM_LOG", "trace")
-
-
-def append_rustflags(opt):
-    global RUSTFLAGS
-    RUSTFLAGS.append(opt)
-
-
-def set_rustflags():
-    global RUSTFLAGS
-    if len(RUSTFLAGS) > 0:
-        rustflags = " ".join([f for f in RUSTFLAGS])
-        set_env("RUSTFLAGS", rustflags)
-
-
-def set_sccache():
-    if SCCACHE is None:
-        logging.warning("'sccache' not found!")
-        return
-
-    if NO_CACHE:
-        logging.warning("'sccache' is disabled!")
-        return
-
-    set_env("RUSTC_WRAPPER", SCCACHE)
 
 
 class Cmd(Protocol):
