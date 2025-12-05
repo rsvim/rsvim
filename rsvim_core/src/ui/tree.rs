@@ -721,7 +721,7 @@ impl Tree {
     debug_assert!(matches!(content_node, TreeNode::WindowContent(_)));
     match content_node {
       TreeNode::WindowContent(content) => {
-        content.set_viewport(Rc::downgrade(&viewport))
+        content.set_viewport(Arc::downgrade(&viewport))
       }
       _ => unreachable!(),
     }
