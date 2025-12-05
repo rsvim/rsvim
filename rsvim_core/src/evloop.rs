@@ -33,12 +33,12 @@ use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
-use taffy::MaybeResolve;
 use std::sync::Arc;
 use std::time::Instant;
 use taffy::Style;
 use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -538,11 +538,10 @@ impl EventLoop {
     let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
 
-    let window_style_height = taffy::CompactLength::from_percent(1.0);
     let window_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from(taffy::LengthPercentageAuto::from_percent(1.0).resolve_to_option(|val|, calc_resolver))
+        height: taffy::Dimension::AUTO,
       },
       ..Default::default()
     };

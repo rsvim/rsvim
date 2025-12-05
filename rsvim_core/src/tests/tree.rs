@@ -34,8 +34,8 @@ pub fn make_tree_with_buffers(
   // Window
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::AUTO,
-      height: taffy::Dimension::AUTO,
+      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::Dimension::from_percent(1.0),
     },
     ..Default::default()
   };
@@ -78,14 +78,14 @@ pub fn make_tree_with_buffers_cmdline(
 
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::AUTO,
+      width: taffy::Dimension::from_percent(1.0),
       height: taffy::Dimension::AUTO,
     },
     ..Default::default()
   };
   let cmdline_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::AUTO,
+      width: taffy::Dimension::from_percent(1.0),
       height: taffy::Dimension::from_length(1_u16),
     },
     ..Default::default()
