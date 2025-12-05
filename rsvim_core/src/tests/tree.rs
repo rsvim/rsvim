@@ -111,7 +111,7 @@ pub fn make_tree_with_buffers_cmdline(
     cmdline_style,
     IndicatorSymbol::Empty,
     Arc::downgrade(&text_contents),
-  );
+  ).unwrap();
 
   tree_arc.clone()
 }

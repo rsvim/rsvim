@@ -636,10 +636,8 @@ impl Tree {
 
       // We don't allow zero-area widget.
       let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;
-      let input_actual_shape = lotree.actual_shape(input_id)?;
       let message_actual_shape = lotree.actual_shape(message_id)?;
       if cmdline_actual_shape.size().is_zero()
-        || input_actual_shape.size().is_zero()
         || message_actual_shape.size().is_zero()
       {
         return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
