@@ -113,8 +113,8 @@ pub fn make_window(
   tree.set_global_local_options(window_options);
   let window_style = Style {
     size: taffy::Size {
-      height: taffy::Dimension::from_percent(1.0),
-      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::Dimension::AUTO,
+      width: taffy::Dimension::AUTO,
     },
     ..Default::default()
   };

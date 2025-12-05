@@ -614,8 +614,8 @@ impl Tree {
     };
     let message_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
+        width: taffy::Dimension::AUTO,
+        height: taffy::Dimension::AUTO,
       },
       ..Default::default()
     };

@@ -15,6 +15,7 @@ use std::sync::Arc;
 use taffy::Style;
 use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -33,8 +34,8 @@ pub fn make_tree_with_buffers(
   // Window
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_percent(1.0),
-      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::AUTO,
+      height: taffy::Dimension::AUTO,
     },
     ..Default::default()
   };
@@ -77,14 +78,14 @@ pub fn make_tree_with_buffers_cmdline(
 
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_percent(1.0),
-      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::AUTO,
+      height: taffy::Dimension::AUTO,
     },
     ..Default::default()
   };
   let cmdline_style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::AUTO,
       height: taffy::Dimension::from_length(1_u16),
     },
     ..Default::default()
@@ -106,12 +107,14 @@ pub fn make_tree_with_buffers_cmdline(
     .unwrap();
   tree.set_current_window_id(Some(window_id));
 
-  let _cmdline_id = tree.add_new_cmdline(
-    tree_root_id,
-    cmdline_style,
-    IndicatorSymbol::Empty,
-    Arc::downgrade(&text_contents),
-  ).unwrap();
+  let _cmdline_id = tree
+    .add_new_cmdline(
+      tree_root_id,
+      cmdline_style,
+      IndicatorSymbol::Empty,
+      Arc::downgrade(&text_contents),
+    )
+    .unwrap();
 
   tree_arc.clone()
 }
