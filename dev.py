@@ -51,14 +51,31 @@ def sccache():
     return env("RUSTC_WRAPPER", f'"{SCCACHE}"')
 
 
-def rustflags(flags):
-    assert isinstance(flags, list)
-    if len(flags) == 0:
-        flags = ["-Dwarnings"]
+def rustflags():
+    flags = ["-Dwarnings"]
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
     flags = " ".join(flags)
     return env("RUSTFLAGS", f'"{flags}"')
+
+
+def rust_backtrace():
+    return env("RUST_BACKTRACE", "full")
+
+
+def miriflags():
+    return env(
+        "MIRIFLAGS",
+        '"-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance"',
+    )
+
+
+def rsvim_log():
+    var = os.getenv("RSVIM_LOG")
+    if isinstance(var, str):
+        return env("RSVIM_LOG", var)
+    else:
+        return env("RSVIM_LOG", "trace")
 
 
 def append_rustflags(opt):
@@ -118,7 +135,7 @@ class Clippy(Cmd):
         return self._alias
 
     def run(self, args) -> None:
-        cmd = [sccache(), rustflags([]), "cargo clippy --workspace --all-targets"]
+        cmd = [sccache(), rustflags(), "cargo clippy --workspace --all-targets"]
         run(cmd)
 
 
@@ -131,33 +148,12 @@ class Test(Cmd):
         self.test_parser = subparsers.add_parser(
             self._name,
             aliases=[self._alias],
-            help="Run `cargo test`, by default on all test cases",
+            help="cargo test",
         )
         self.test_parser.add_argument(
-            "-l",
-            "--list",
-            action="store_true",
-            dest="list_test",
-            help="Only list all test cases, instead of run them",
+            "-l", "--list", action="store_true", dest="list_test"
         )
-        self.test_parser.add_argument(
-            "name",
-            nargs="*",
-            default=[],
-            help="Only run these tests, by default is empty (e.g. run all test cases)",
-        )
-        self.test_parser.add_argument(
-            "--miri",
-            action="store_true",
-            help="Run `cargo +nightly miri test`",
-        )
-        self.test_parser.add_argument(
-            "-j",
-            "--job",
-            nargs=1,
-            metavar="N",
-            help="Run with N threads, by default 1",
-        )
+        self.test_parser.add_argument("name", nargs="*", default=[])
 
     def name(self) -> str:
         return self._name
@@ -168,67 +164,61 @@ class Test(Cmd):
     def run(self, args) -> None:
         if args.list_test:
             self.list()
-            return
-
-        if args.job is None:
-            jobs = ""
         else:
-            jobs = f" -j {args.job[0]}"
+            self.test(args.name)
 
-        if args.miri:
-            self.miri(jobs)
-        else:
-            self.test(args.name, jobs)
-
-    def test(self, name, jobs) -> None:
+    def test(self, name) -> None:
+        cmd = [
+            sccache(),
+            rustflags(),
+            rust_backtrace(),
+            rsvim_log(),
+            "cargo nextest run --no-capture",
+        ]
         if len(name) == 0:
-            name = "--all"
-            logging.info("Run 'cargo test' for all tests")
+            cmd.append("--all")
         else:
-            name = " ".join(list(dict.fromkeys(name)))
-            logging.info(f"Run 'cargo test' for tests: {name}")
-
-        if WINDOWS:
-            append_rustflags("-Csymbol-mangling-version=v0")
-        set_env("RUST_BACKTRACE", "full")
-
-        rsvim_log = os.getenv("RSVIM_LOG")
-        if isinstance(rsvim_log, str):
-            set_env("RSVIM_LOG", rsvim_log)
-        else:
-            set_env("RSVIM_LOG", "trace")
-        set_sccache()
-        set_rustflags()
-        command = f"cargo nextest run{jobs} --no-capture {name}"
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
-
-    def miri(self, jobs) -> None:
-        if WINDOWS:
-            append_rustflags("-Csymbol-mangling-version=v0")
-
-        set_env("RUST_BACKTRACE", "full")
-        set_env(
-            "MIRIFLAGS",
-            "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance",
-        )
-        command = f"cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p rsvim_core"
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+            cmd.extend(list(dict.fromkeys(name)))
+        run(cmd)
 
     def list(self) -> None:
-        set_sccache()
-        set_rustflags()
+        cmd = [sccache(), rustflags(), "cargo nextest list"]
+        run(cmd)
 
-        command = "cargo nextest list"
 
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+# miri
+class Miri(Cmd):
+    def __init__(self, subparsers) -> None:
+        self._name = "miri"
+
+        self.test_parser = subparsers.add_parser(
+            self._name,
+            help="cargo +nightly miri test",
+        )
+        self.test_parser.add_argument("name", nargs="*", default=[])
+        self.test_parser.add_argument("-j", "--job", nargs=1, metavar="N")
+
+    def name(self) -> str:
+        return self._name
+
+    def alias(self) -> Optional[str]:
+        return None
+
+    def run(self, args) -> None:
+        if args.job is None:
+            job = "num-cpus"
+        else:
+            job = str(args.job[0])
+        cmd = [
+            rustflags(),
+            rust_backtrace(),
+            miriflags(),
+            "cargo +nightly miri nextest run",
+            "-j",
+            job,
+            "-F unicode_lines --no-default-features -p rsvim_core",
+        ]
+        run(cmd)
 
 
 # build/b
@@ -254,7 +244,7 @@ class Build(Cmd):
         return self._alias
 
     def run(self, args) -> None:
-        cmd = [sccache(), rustflags([]), "cargo build"]
+        cmd = [sccache(), rustflags(), "cargo build"]
         if args.release:
             cmd.append("--release")
         elif args.nightly:
@@ -267,7 +257,7 @@ class Build(Cmd):
 
 
 # fmt/f
-class FormatCommand(Cmd):
+class Format(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "fmt"
         self._alias = "f"
@@ -275,18 +265,10 @@ class FormatCommand(Cmd):
         self.fmt_parser = subparsers.add_parser(
             self._name,
             aliases=[self._alias],
-            help="Run multiple code formattors/checkers/generators, by default run them all",
+            help="code formattors",
         )
-        self.fmt_parser.add_argument(
-            "--rust",
-            action="store_true",
-            help="Only run `cargo +nightly fmt`, by default is false",
-        )
-        self.fmt_parser.add_argument(
-            "--tsc",
-            action="store_true",
-            help="Only run `tsc`, by default is false",
-        )
+        self.fmt_parser.add_argument("-r", "--rust", action="store_true")
+        self.fmt_parser.add_argument("-t", "--tsc", action="store_true")
 
     def name(self) -> str:
         return self._name
@@ -309,41 +291,30 @@ class FormatCommand(Cmd):
             ]:
                 f()
 
-    def typos(self):
-        command = "typos"
-        logging.info(command)
-        os.system(command)
+    def others():
+        typos = ["typos"]
+        taplo = ["taplo fmt"]
+        prettier = ["prettier --write *.md ./runtime/*.ts"]
+        for cmd in [typos, taplo, prettier]:
+            run(cmd)
 
-    def rustfmt(self):
-        command = "cargo +nightly fmt"
-        logging.info(command)
-        os.system(command)
-
-    def taplo(self):
-        command = "taplo fmt"
-        logging.info(command)
-        os.system(command)
-
-    def prettier(self):
-        command = "prettier --write *.md ./runtime/*.ts"
-        logging.info(command)
-        os.system(command)
+    def rustfmt():
+        cmd = ["cargo +nightly fmt"]
+        run(cmd)
 
     def tsc(self):
-        command = "tsc"
-        logging.info(command)
-        os.system(command)
-        for filename in ["00__web.d.ts", "01__rsvim.d.ts"]:
-            src_file = f"types/{filename}"
-            dest_file = f".{filename}"
-            with open(src_file, "r") as src:
-                with open(dest_file, "w") as dest:
+        cmd = ["tsc"]
+        run(cmd)
+        for file in ["00__web.d.ts", "01__rsvim.d.ts"]:
+            src = f"types/{file}"
+            dest = f".{file}"
+            with open(src, "r") as src:
+                with open(dest, "w") as dest:
                     dest.write("// @ts-nocheck\n")
                     for line in src.readlines():
                         dest.write(line)
-            command = f"mv {dest_file} {src_file}"
-            logging.info(command)
-            os.system(command)
+            cmd = [f"mv {dest} {src}"]
+            run(cmd)
 
 
 # doc
@@ -476,7 +447,7 @@ if __name__ == "__main__":
         Build(subparsers),
         Clippy(subparsers),
         DocumentCommand(subparsers),
-        FormatCommand(subparsers),
+        Format(subparsers),
         NpmCommand(subparsers),
         ReleaseCommand(subparsers),
         Test(subparsers),
