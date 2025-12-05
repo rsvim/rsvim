@@ -68,7 +68,7 @@ mod tests_nowrap {
     test_log_init();
 
     let terminal_size = size!(1, 1);
-    let terminal_shape = size_into_rect!(terminal_size, isize);
+    let terminal_shape = rect_from_size!(terminal_size, isize);
 
     let expect = vec![":"];
 

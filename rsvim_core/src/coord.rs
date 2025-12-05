@@ -83,6 +83,10 @@ where
   height: T,
 }
 
+pub type ISize = Size<isize>;
+pub type USize = Size<usize>;
+pub type U16Size = Size<u16>;
+
 impl<T> Size<T>
 where
   T: geo::CoordNum,
@@ -103,10 +107,6 @@ where
     self.width == T::from(0).unwrap() || self.height == T::from(0).unwrap()
   }
 }
-
-pub type ISize = Size<isize>;
-pub type USize = Size<usize>;
-pub type U16Size = Size<u16>;
 
 #[macro_export]
 macro_rules! point {
@@ -168,7 +168,7 @@ macro_rules! size_as {
 /// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
-macro_rules! size_into_rect {
+macro_rules! rect_from_size {
   ($s:ident,$ty:ty) => {
     $crate::coord::Rect::new(
       (0 as $ty, 0 as $ty),

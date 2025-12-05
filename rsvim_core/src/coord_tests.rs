@@ -83,7 +83,7 @@ fn cast_geo_sizes() {
 #[test]
 fn cast_geo_size_into_rect() {
   let s1: ISize = size!(1, 2);
-  let actual = size_into_rect!(s1, u8);
+  let actual = rect_from_size!(s1, u8);
   assert_eq!(mem::size_of_val(&actual.min().x), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.min().y), mem::size_of_val(&1_u8));
   assert_eq!(mem::size_of_val(&actual.max().x), mem::size_of_val(&1_u8));
