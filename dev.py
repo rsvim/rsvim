@@ -282,23 +282,21 @@ class Format(Cmd):
         elif args.rust:
             self.rustfmt()
         else:
-            for f in [
-                self.typos,
+            for cmd in [
+                self.others,
                 self.rustfmt,
-                self.taplo,
-                self.prettier,
                 self.tsc,
             ]:
-                f()
+                cmd()
 
-    def others():
+    def others(self):
         typos = ["typos"]
         taplo = ["taplo fmt"]
         prettier = ["prettier --write *.md ./runtime/*.ts"]
         for cmd in [typos, taplo, prettier]:
             run(cmd)
 
-    def rustfmt():
+    def rustfmt(self):
         cmd = ["cargo +nightly fmt"]
         run(cmd)
 
