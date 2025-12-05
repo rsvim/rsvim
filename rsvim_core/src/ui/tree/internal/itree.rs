@@ -56,11 +56,6 @@ impl Itree {
     }
   }
 
-  #[cfg(debug_assertions)]
-  pub fn lo(&self) -> &TaffyTree {
-    &self.lo
-  }
-
   pub fn len(&self) -> usize {
     self._internal_check();
     self.nid2loid.len()
@@ -327,15 +322,20 @@ impl Debug for Itree {
     if self.root_nid == INVALID_ROOT_ID {
       f.write_str("Itree:Empty")
     } else {
+      f.write_str("Itree:\n")?;
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root_nid);
       while let Some(id) = q.pop_front() {
         let layout = match self.layout(id) {
-          Ok(layout) => format!("{}:{:?}", id, layout),
-          Err(e) => format!("{}:{:?}", id, e),
+          Ok(layout) => format!("{}:{:#?}\n", id, layout),
+          Err(e) => format!("{}:{:?}\n", id, e),
         };
-        q.push_back(id);
         f.write_str(layout.as_str())?;
+        if let Ok(children) = self.children(id) {
+          for c in children {
+            q.push_back(c);
+          }
+        }
       }
       Ok(())
     }

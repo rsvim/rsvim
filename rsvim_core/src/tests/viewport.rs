@@ -17,7 +17,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use log::info;
 use std::sync::Arc;
 use taffy::Style;
-use taffy::prelude::FromPercent;
+use taffy::prelude::{FromPercent, TaffyAuto};
 
 pub fn make_canvas(
   terminal_size: U16Size,
@@ -32,8 +32,8 @@ pub fn make_canvas(
       tree_root_id,
       Style {
         size: taffy::Size {
-          height: taffy::Dimension::from_percent(1.0),
-          width: taffy::Dimension::from_percent(1.0),
+          height: taffy::Dimension::AUTO,
+          width: taffy::Dimension::AUTO,
         },
         ..Default::default()
       },

@@ -499,8 +499,8 @@ impl Tree {
   ) -> TaffyResult<TreeNodeId> {
     let content_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
+        width: taffy::Dimension::AUTO,
+        height: taffy::Dimension::AUTO,
       },
       ..Default::default()
     };
@@ -601,14 +601,14 @@ impl Tree {
     let indicator_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::AUTO,
       },
       ..Default::default()
     };
     let input_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
+        width: taffy::Dimension::AUTO,
+        height: taffy::Dimension::AUTO,
       },
       ..Default::default()
     };
@@ -628,7 +628,7 @@ impl Tree {
       let cmdline_id = lotree.new_with_parent(cmdline_style, parent_id)?;
       let message_id = lotree.new_with_parent(message_style, cmdline_id)?;
       self.compute_layout(&mut lotree)?;
-      trace!("lotree:{:?}", lotree.lo());
+      trace!("lotree:{:?}", lotree);
 
       // We don't allow zero-area widget.
       let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;
