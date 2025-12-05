@@ -13,11 +13,18 @@ pub trait Inodeable: Sized + Clone + std::fmt::Debug {
 
   fn actual_shape(&self) -> U16Rect;
 
-  /// The node is visible, e.g. its style is not `display: none`.
+  /// Whether the node is visible, e.g. its actual_shape size is zero.
   fn visible(&self) -> bool;
+  fn invisible(&self) -> bool;
+
+  /// Whether the node is attached to a parent node.
+  /// NOTE: The root node is always been considered as attached as well.
+  fn attached(&self) -> bool;
+  fn detached(&self) -> bool;
 
   /// The node is visible and its size > 0, e.g. both height and width > 0.
   fn enabled(&self) -> bool;
+  fn disabled(&self) -> bool;
 }
 
 #[derive(Debug, Clone)]
@@ -71,6 +78,16 @@ impl Inodeable for InodeBase {
       .unwrap()
   }
 
+  fn invisible(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .invisible(self.id)
+      .unwrap()
+  }
+
   fn enabled(&self) -> bool {
     self
       .lotree
@@ -78,6 +95,16 @@ impl Inodeable for InodeBase {
       .unwrap()
       .borrow()
       .enabled(self.id)
+      .unwrap()
+  }
+
+  fn disabled(&self) -> bool {
+    self
+      .lotree
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .disabled(self.id)
       .unwrap()
   }
 }

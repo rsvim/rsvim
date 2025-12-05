@@ -119,6 +119,7 @@ impl Itree {
     self.lo.layout(*loid)
   }
 
+  #[inline]
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     let layout = self.layout(id)?;
     let shape = rect_from_layout!(layout);
@@ -153,6 +154,7 @@ impl Itree {
     self.lo.set_style(*loid, style)
   }
 
+  #[inline]
   /// Actual location/size in limited terminal device. The top-left location
   /// can never be negative.
   ///
@@ -203,26 +205,31 @@ impl Itree {
     }
   }
 
-  /// Whether the node is visible, e.g. its style is not `display: none`.
+  #[inline]
+  /// Whether the node is visible, e.g. its actual_shape size is zero.
   pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
     let actual_shape = self.actual_shape(id)?;
     Ok(!actual_shape.size().is_zero())
   }
 
+  #[inline]
   pub fn invisible(&self, id: TreeNodeId) -> TaffyResult<bool> {
-    !self.visible(id)
+    self.visible(id).map(|v| !v)
   }
 
+  #[inline]
   /// Whether the node is detached, e.g. it doesn't have a parent and it is not
   /// the root node. A root node is always attached even it has no parent.
   pub fn detached(&self, id: TreeNodeId) -> bool {
     !self.attached(id)
   }
 
+  #[inline]
   pub fn attached(&self, id: TreeNodeId) -> bool {
     id == self.root_nid || self.parent(id).is_some()
   }
 
+  #[inline]
   /// The node is visible and its size > 0, e.g. both height and width > 0.
   pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self._internal_check();
@@ -231,6 +238,7 @@ impl Itree {
     Ok(visible && attached)
   }
 
+  #[inline]
   pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self.enabled(id).map(|v| !v)
   }
