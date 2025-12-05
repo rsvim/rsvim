@@ -8,11 +8,11 @@ alias c := clippy
 
 [windows]
 _sccache_env:
-  if ( "{{skip-cache}}" -eq "0" ) { $env:RUSTC_WRAPPER="sccache.exe" }
+  @if ( "{{skip-cache}}" -eq "0" ) { $env:RUSTC_WRAPPER="sccache.exe" }
 
 [unix]
 _sccache_env:
-  if "{{skip-cache}}" != "0"; then export RUSTC_WRAPPER="{{which('sccache')}}"; fi
+  @if "{{skip-cache}}" != "0"; then export RUSTC_WRAPPER="{{which('sccache')}}"; fi
 
 [windows]
 _clippy_env:
