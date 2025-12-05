@@ -599,7 +599,7 @@ impl Tree {
     text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
     let indicator_style = Style {
-      size: taffy::Size {
+      min_size: taffy::Size {
         width: taffy::Dimension::from_length(1_u16),
         height: taffy::Dimension::from_percent(1.0),
       },
@@ -607,7 +607,7 @@ impl Tree {
     };
     let input_style = Style {
       size: taffy::Size {
-        width: taffy::Dimension::AUTO,
+        width: taffy::Dimension::from_percent(1.0),
         height: taffy::Dimension::from_percent(1.0),
       },
       ..Default::default()
