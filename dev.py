@@ -316,19 +316,13 @@ class Format(Cmd):
 
 
 # doc
-class DocumentCommand(Cmd):
+class Document(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "doc"
 
         self.doc_parser = subparsers.add_parser(
             self._name,
-            help="Start `cargo doc` on `http://localhost:3000/rsvim`",
-        )
-        self.doc_parser.add_argument(
-            "-w",
-            "--watch",
-            action="store_true",
-            help="Running cargo doc and watching file changes, by default is false",
+            help="cargo doc",
         )
 
     def name(self) -> str:
@@ -338,28 +332,20 @@ class DocumentCommand(Cmd):
         return None
 
     def run(self, args) -> None:
-        command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
-        if args.watch:
-            logging.info("Run 'cargo doc' and refresh it on file changes")
-            command = f"cargo watch -s '{command}'"
-        else:
-            logging.info("Run 'cargo doc' only once")
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+        cmd = [
+            "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
+        ]
+        run(cmd)
 
 
-# release/r
-class ReleaseCommand(Cmd):
+# release
+class Release(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "release"
-        self._alias = "r"
 
         self.release_parser = subparsers.add_parser(
             self._name,
-            aliases=[self._alias],
-            help="Run `cargo release` to publish crates",
+            help="cargo release",
         )
         self.release_parser.add_argument(
             "level",
@@ -377,39 +363,37 @@ class ReleaseCommand(Cmd):
         return self._name
 
     def alias(self) -> Optional[str]:
-        return self._alias
+        return None
 
     def run(self, args) -> None:
         cwd = pathlib.Path.cwd()
         git_root = cwd / ".git"
         assert git_root.is_dir(), "The $CWD/$PWD must be git repo root!"
 
-        command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {args.level}"
+        cmd = [
+            env("GIT_CLIFF_CONFIG", f"{cwd / 'cliff.toml'}"),
+            env("GIT_CLIFF_WORKDIR", f"{cwd}"),
+            env("GIT_CLIFF_REPOSITORY", f"{cwd}"),
+            env("GIT_CLIFF_OUTPUT", f"{cwd / 'CHANGELOG.md'}"),
+            "cargo release",
+            args.level,
+        ]
         if args.execute:
-            logging.info(f"Execute 'cargo release' with level: {args.level}")
-            command = f"{command} --execute --no-verify"
-        else:
-            logging.info(f"Dry run 'cargo release' with level: {args.level}")
-
-        command = command.strip()
-        logging.info(command)
-        os.system(command)
+            cmd.extend(["--execute", "--no-verify"])
+        run(cmd)
 
 
 # npm
-class NpmCommand(Cmd):
+class Npm(Cmd):
     def __init__(self, subparsers) -> None:
         self._name = "npm"
 
         self.npm_parser = subparsers.add_parser(
             self._name,
-            help="Run `npm` with multiple sub commands.",
+            help="npm version",
         )
         self.npm_parser.add_argument(
-            "-v",
-            "--version",
-            choices=["major", "minor", "patch"],
-            help="Run `npm version` with [LEVEL]",
+            "-v", "--version", choices=["major", "minor", "patch"]
         )
 
     def name(self) -> str:
@@ -423,9 +407,8 @@ class NpmCommand(Cmd):
             self.version(args.version)
 
     def version(self, level) -> None:
-        command = f"npm version {level} --no-git-tag-version"
-        logging.info(command)
-        os.system(command)
+        cmd = [f"npm version {level} --no-git-tag-version"]
+        run(cmd)
 
 
 if __name__ == "__main__":
@@ -444,10 +427,10 @@ if __name__ == "__main__":
     commands = [
         Build(subparsers),
         Clippy(subparsers),
-        DocumentCommand(subparsers),
+        Document(subparsers),
         Format(subparsers),
-        NpmCommand(subparsers),
-        ReleaseCommand(subparsers),
+        Npm(subparsers),
+        Release(subparsers),
         Test(subparsers),
     ]
 
