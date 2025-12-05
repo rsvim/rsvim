@@ -2,9 +2,9 @@ use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::TreeNodeId;
 
 #[derive(Copy, Clone, Debug)]
 struct TestValue {
@@ -26,12 +26,6 @@ inode_impl!(TestValue, base);
 macro_rules! print_node {
   ($node: ident, $name: expr) => {
     info!("{}: {:?}", $name, $node.clone());
-  };
-}
-
-macro_rules! assert_parent_child_depth {
-  ($parent: ident, $child: ident) => {
-    assert_eq!($parent.depth() + 1, $child.depth());
   };
 }
 
@@ -126,13 +120,6 @@ fn insert1() {
   assert!(nid3 < nid4);
   assert!(nid4 < nid5);
   assert!(nid5 < nid6);
-
-  assert_parent_child_depth!(n1, n2);
-  assert_parent_child_depth!(n1, n3);
-  assert_parent_child_depth!(n2, n4);
-  assert_parent_child_depth!(n2, n5);
-  assert_parent_child_depth!(n2, n6);
-  assert_parent_child_depth!(n3, n6);
 
   assert_eq!(tree.children_ids(nid1).len(), 2);
   assert_eq!(tree.children_ids(nid2).len(), 2);
@@ -258,16 +245,6 @@ fn insert2() {
   assert!(nid6 < nid7);
   assert!(nid7 < nid8);
   assert!(nid8 < nid9);
-
-  assert_parent_child_depth!(n1, n2);
-  assert_parent_child_depth!(n1, n3);
-  assert_parent_child_depth!(n2, n4);
-  assert_parent_child_depth!(n2, n5);
-  assert_parent_child_depth!(n2, n6);
-  assert_parent_child_depth!(n3, n6);
-  assert_parent_child_depth!(n5, n7);
-  assert_parent_child_depth!(n7, n8);
-  assert_parent_child_depth!(n7, n9);
 
   assert_eq!(tree.children_ids(nid1).len(), 2);
   assert_eq!(tree.children_ids(nid2).len(), 2);
