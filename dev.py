@@ -23,8 +23,7 @@ NO_CACHE = False
 
 
 def run(cmd):
-    assert isinstance(cmd, list)
-    cmd = " ".join(cmd)
+    assert isinstance(cmd, str)
     logging.info(cmd)
     os.system(cmd)
 
@@ -106,7 +105,7 @@ class Clippy(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        cmd = ["cargo clippy --workspace --all-targets"]
+        cmd = "cargo clippy --workspace --all-targets"
         run(cmd)
 
 
@@ -143,19 +142,18 @@ class Test(Cmd):
         rustflags()
         rust_backtrace()
         rsvim_log()
-        cmd = [
-            "cargo nextest run --no-capture",
-        ]
+        cmd = "cargo nextest run --no-capture"
         if len(name) == 0:
-            cmd.append("--all")
+            cmd = f"{cmd} --all"
         else:
-            cmd.extend(list(dict.fromkeys(name)))
+            name = " ".join(list(dict.fromkeys(name)))
+            cmd = f"{cmd} {name}"
         run(cmd)
 
     def list(self) -> None:
         sccache()
         rustflags()
-        cmd = ["cargo nextest list"]
+        cmd = "cargo nextest list"
         run(cmd)
 
 
@@ -182,15 +180,10 @@ class Miri(Cmd):
         rust_backtrace()
         miriflags()
         if args.job is None:
-            job = "num-cpus"
+            job = ""
         else:
-            job = str(args.job[0])
-        cmd = [
-            "cargo +nightly miri nextest run",
-            "-j",
-            job,
-            "-F unicode_lines --no-default-features -p rsvim_core",
-        ]
+            job = f" -j {args.job[0]}"
+        cmd = f"cargo +nightly miri nextest run{job} -F unicode_lines --no-default-features -p rsvim_core"
         run(cmd)
 
 
@@ -219,15 +212,16 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        cmd = ["cargo build"]
+        cmd = "cargo build"
         if args.release:
-            cmd.append("--release")
+            cmd = f"{cmd} --release"
         elif args.nightly:
-            cmd.extend(["--profile", "nightly"])
+            cmd = f"{cmd} --profile nightly"
         if args.verbose:
-            cmd.append("-vv")
+            cmd = f"{cmd} -vv"
         if isinstance(args.features, list) and len(args.features) > 0:
-            cmd.extend(["-F", ",".join(args.features)])
+            feat = ",".join(args.features)
+            cmd = f"{cmd} -F {feat}"
         run(cmd)
 
 
@@ -265,18 +259,18 @@ class Format(Cmd):
                 cmd()
 
     def others(self):
-        typos = ["typos"]
-        taplo = ["taplo fmt"]
-        prettier = ["prettier --write *.md ./runtime/*.ts"]
+        typos = "typos"
+        taplo = "taplo fmt"
+        prettier = "prettier --write *.md ./runtime/*.ts"
         for cmd in [typos, taplo, prettier]:
             run(cmd)
 
     def rustfmt(self):
-        cmd = ["cargo +nightly fmt"]
+        cmd = "cargo +nightly fmt"
         run(cmd)
 
     def tsc(self):
-        cmd = ["tsc"]
+        cmd = "tsc"
         run(cmd)
         for file in ["00__web.d.ts", "01__rsvim.d.ts"]:
             src = f"types/{file}"
@@ -286,7 +280,7 @@ class Format(Cmd):
                     dest.write("// @ts-nocheck\n")
                     for line in src.readlines():
                         dest.write(line)
-            cmd = [f"mv {dest} {src}"]
+            cmd = f"mv {dest} {src}"
             run(cmd)
 
 
@@ -307,9 +301,7 @@ class Document(Cmd):
         return None
 
     def run(self, args) -> None:
-        cmd = [
-            "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
-        ]
+        cmd = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
         run(cmd)
 
 
@@ -349,9 +341,9 @@ class Release(Cmd):
         env("GIT_CLIFF_WORKDIR", f"{cwd}")
         env("GIT_CLIFF_REPOSITORY", f"{cwd}")
         env("GIT_CLIFF_OUTPUT", f"{cwd / 'CHANGELOG.md'}")
-        cmd = ["cargo release", args.level]
+        cmd = f"cargo release {args.level}"
         if args.execute:
-            cmd.extend(["--execute", "--no-verify"])
+            cmd = f"{cmd} --execute --no-verify"
         run(cmd)
 
 
@@ -379,7 +371,7 @@ class Npm(Cmd):
             self.version(args.version)
 
     def version(self, level) -> None:
-        cmd = [f"npm version {level} --no-git-tag-version"]
+        cmd = f"npm version {level} --no-git-tag-version"
         run(cmd)
 
 
