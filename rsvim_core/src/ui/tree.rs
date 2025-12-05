@@ -42,12 +42,11 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 /// Parent owns all its children.
 ///
 /// * Children will be destroyed when their parent is.
-/// * Coordinate system are relative to their parent's top-left corner, while
-///   the absolute coordinates are based on the terminal's top-left corner.
-/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///   the size of each node can be logically infinite on the imaginary canvas.
-/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///   parent, unless they're explicitly been set.
+/// * There are two coordinate system: relative coordinate based on parent's
+///   top-left corner, absolute coordinate based on terminal's top-left corner.
+/// * Children are displayed inside their parent's geometric shape, clipped by
+///   boundaries.
+/// * Visible/enabled attributes will affected all its descendant nodes.
 ///
 /// ## Priority
 ///
