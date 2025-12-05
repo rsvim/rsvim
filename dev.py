@@ -273,14 +273,14 @@ class Format(Cmd):
         cmd = "tsc"
         run(cmd)
         for file in ["00__web.d.ts", "01__rsvim.d.ts"]:
-            src = f"types/{file}"
-            dest = f".{file}"
-            with open(src, "r") as src:
-                with open(dest, "w") as dest:
-                    dest.write("// @ts-nocheck\n")
-                    for line in src.readlines():
-                        dest.write(line)
-            cmd = f"mv {dest} {src}"
+            src_file = f"types/{file}"
+            dest_file = f".{file}"
+            with open(src_file, "r") as sfp:
+                with open(dest_file, "w") as dfp:
+                    dfp.write("// @ts-nocheck\n")
+                    for line in sfp.readlines():
+                        dfp.write(line)
+            cmd = f"mv {dest_file} {src_file}"
             run(cmd)
 
 
