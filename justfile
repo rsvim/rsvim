@@ -2,19 +2,32 @@ set unstable
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
 export RUSTFLAGS := if os() == "windows" { "-Dwarnings -Csymbol-mangling-version=v0" } else { "-Dwarnings" }
-export RUSTC_WRAPPER := "sccache"
 
 alias c := clippy
 
-
 [windows]
-clippy:
-  @echo "RUSTFLAGS='$env:RUSTFLAGS'"
-  @echo "RUSTC_WRAPPER='$env:RUSTC_WRAPPER'"
-  cargo clippy --workspace --all-targets
+_sccache:
+  @$env:RUSTC_WRAPPER="sccache.exe"
+  @echo "set RUSTC_WRAPPER='$env:RUSTC_WRAPPER'"
 
 [unix]
-clippy:
-  @echo "RUSTFLAGS='$RUSTFLAGS'"
-  @echo "RUSTC_WRAPPER='$RUSTC_WRAPPER'"
+_sccache:
+  @export RUSTC_WRAPPER={{which("sccache")}}
+  @echo "set RUSTC_WRAPPER='$RUSTC_WRAPPER'"
+
+[windows]
+_rustflags:
+  @echo "set RUSTFLAGS='$env:RUSTFLAGS'"
+
+[unix]
+_rustflags:
+  @echo "set RUSTFLAGS='$RUSTFLAGS'"
+
+_clippy: _sccache _rustflags
   cargo clippy --workspace --all-targets
+
+_clippy_nocache: _rustflags
+  cargo clippy --workspace --all-targets
+
+clippy nocache="":
+  if ("{{nocache}}" -eq "nc" -or "{{nocache}}" -eq "nocache") { just _clippy_nocache } else { just _clippy }
