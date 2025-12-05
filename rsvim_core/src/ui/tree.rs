@@ -39,8 +39,6 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 ///
 /// ## Ownership
 ///
-/// Parent owns all its children.
-///
 /// * Children will be destroyed when their parent is.
 /// * There are two coordinate system: relative coordinate based on parent's
 ///   top-left corner, absolute coordinate based on terminal's top-left corner.
@@ -50,49 +48,25 @@ widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 ///
 /// ## Priority
 ///
-/// Children have higher priority than their parent to both display and process input events.
+/// * Children have higher priority to display on TUI than their parent, as
+///   well as receiving keyboard/mouse events.
+/// * For all the children under the same parent, the one with higher z-index
+///   has a higher priority than others.
 ///
-/// * Children are always displayed on top of their parent, and has higher priority to process
-///   a user's input event when the event occurs within the shape of the child. The event will
-///   fallback to their parent if the child doesn't process it.
-/// * For children that shade each other, the one with higher z-index has higher priority to
-///   display and process the input events.
+/// ## Attributes
 ///
-/// # Attributes
+/// ### Shape (position and size)
 ///
-/// ## Shape (position and size)
+/// A shape is always a rectangle, it can be relative based on its parent or
+/// absolute (actual) based on terminal. We use relative shape for an easier
+/// code logic, use absolute shape when rendering it to terminal.
 ///
-/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-/// default relative to its parent top-left corner, and the size is by default logically
-/// infinite. While rendering to the terminal device, we need to calculate its absolute position
-/// and actual size.
+/// ### Z-index
 ///
-/// There're two kinds of positions:
-/// * Relative: Based on it's parent's position.
-/// * Absolute: Based on the terminal device.
-///
-/// There're two kinds of sizes:
-/// * Logical: An infinite size on the imaginary canvas.
-/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///   bounded by the terminal device's actual shape.
-///
-/// The shape boundary uses top-left open, bottom-right closed interval. For example the
-/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-/// The width and height of the shape is both `10`.
-///
-/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-/// position and actual size right after it's shape is been changed, and also caches the result.
-/// Thus we simply get the cached results when need.
-///
-/// ## Z-index
-///
-/// The z-index arranges the display priority of the content stack when multiple children
-/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-/// those widgets have the same z-index, the later inserted one will cover the previous inserted
-/// ones.
+/// The z-index arranges the display priority of the content stack when
+/// multiple children overlap on each other, a widget with higher z-index has
+/// higher priority to be displayed. For those widgets have the same z-index,
+/// the later inserted one will cover the previous inserted ones.
 ///
 /// The z-index only works for the children under the same parent. For a child widget, it always
 /// covers/overrides its parent display.
