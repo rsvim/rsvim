@@ -18,6 +18,8 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 
+pub const INVALID_ROOT_ID: TreeNodeId = -1;
+
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 100001, so be different from buffer ID.
@@ -34,6 +36,9 @@ pub struct Itree {
 
   // Cached shapes for each node.
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+
+  // Root ID
+  root_nid: TreeNodeId,
 }
 
 rc_refcell_ptr!(Itree);
@@ -47,6 +52,7 @@ impl Itree {
       nid2loid: FoldMap::new(),
       loid2nid: FoldMap::new(),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
+      root_nid: INVALID_ROOT_ID,
     }
   }
 
@@ -58,6 +64,10 @@ impl Itree {
   pub fn is_empty(&self) -> bool {
     self._internal_check();
     self.nid2loid.is_empty()
+  }
+
+  pub fn set_root_id(&mut self, root_id: TreeNodeId) {
+    self.root_nid = root_id;
   }
 
   #[cfg(not(test))]
@@ -199,6 +209,12 @@ impl Itree {
     let loid = self.nid2loid.get(&id).unwrap();
     let style = self.lo.style(*loid)?;
     Ok(style.display != taffy::Display::None)
+  }
+
+  /// Whether the node is detached, e.g. it doesn't have a parent and it is not
+  /// the root node. A root node is always attached even it has no parent.
+  pub fn detached(&self, id: TreeNodeId) -> bool {
+    id != self.root_nid && self.parent(id).is_none()
   }
 
   /// The node is visible and its size > 0, e.g. both height and width > 0.
