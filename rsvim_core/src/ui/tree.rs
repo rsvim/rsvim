@@ -464,6 +464,10 @@ impl Tree {
 // Widget }
 
 impl Tree {
+  fn compute_layout(&self, lotree: &mut Itree) -> TaffyResult<()> {
+    lotree.compute_layout(self.root_id(), taffy::Size::MAX_CONTENT)
+  }
+
   fn _insert(&mut self, child_node: TreeNode) {
     // guard
     match &child_node {
@@ -504,7 +508,7 @@ impl Tree {
       let mut lotree = lotree.borrow_mut();
       let window_id = lotree.new_with_parent(window_style, parent_id)?;
       let content_id = lotree.new_with_parent(content_style, window_id)?;
-      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      self.compute_layout(&mut lotree)?;
 
       // We don't allow zero-area widget.
       let window_actual_shape = lotree.actual_shape(window_id)?;
@@ -568,7 +572,7 @@ impl Tree {
       let lotree = self.lotree.clone();
       let mut lotree = lotree.borrow_mut();
       let cursor_id = lotree.new_with_parent(cursor_style, parent_id)?;
-      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      self.compute_layout(&mut lotree)?;
       cursor_id
     };
 
@@ -628,7 +632,7 @@ impl Tree {
         &[indicator_id, input_id, message_id],
       )?;
       lotree.add_child(parent_id, cmdline_id)?;
-      lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
+      self.compute_layout(&mut lotree)?;
 
       // We don't allow zero-area widget.
       let cmdline_actual_shape = lotree.actual_shape(cmdline_id)?;
@@ -871,9 +875,6 @@ impl Tree {
         match self.node_mut(old_window_id).unwrap() {
           TreeNode::Window(_window) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
-            lotree
-              .compute_layout(old_parent_id, taffy::Size::MAX_CONTENT)
-              .unwrap();
           }
           _ => unreachable!(),
         }
@@ -890,9 +891,6 @@ impl Tree {
         match self.node_mut(old_cmdline_id).unwrap() {
           TreeNode::CommandLine(_cmdline) => {
             lotree.remove_child(old_parent_id, cursor_id).unwrap();
-            lotree
-              .compute_layout(old_parent_id, taffy::Size::MAX_CONTENT)
-              .unwrap();
           }
           _ => unreachable!(),
         }
@@ -905,19 +903,15 @@ impl Tree {
       TreeNode::Window(window) => {
         let content_id = window.content_id();
         lotree.add_child(content_id, cursor_id).unwrap();
-        lotree
-          .compute_layout(content_id, taffy::Size::MAX_CONTENT)
-          .unwrap();
       }
       TreeNode::CommandLine(cmdline) => {
         let cmdline_input_id = cmdline.input_id();
         lotree.add_child(cmdline_input_id, cursor_id).unwrap();
-        lotree
-          .compute_layout(cmdline_input_id, taffy::Size::MAX_CONTENT)
-          .unwrap();
       }
       _ => unreachable!(),
     }
+
+    self.compute_layout(&mut lotree)?;
     Some(old_parent_id)
   }
 
@@ -957,9 +951,7 @@ impl Tree {
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
     lotree.set_style(cursor_id, style).unwrap();
-    lotree
-      .compute_layout(parent_id, taffy::Size::MAX_CONTENT)
-      .unwrap();
+    self.compute_layout(&mut lotree).unwrap();
     Some(lotree.actual_shape(cursor_id).unwrap())
   }
 
