@@ -651,9 +651,10 @@ impl Viewport {
     let mut last_line_idx: Option<usize> = None;
     let mut last_row_idx: Option<u16> = None;
     for (line_idx, line_viewport) in self.lines.iter() {
-      match last_line_idx {
-        Some(last_line_idx1) => debug_assert_eq!(last_line_idx1 + 1, *line_idx),
-        None => { /* Skip */ }
+      if cfg!(debug_assertions)
+        && let Some(last_line_idx1) = last_line_idx
+      {
+        debug_assert_eq!(last_line_idx1 + 1, *line_idx);
       }
       last_line_idx = Some(*line_idx);
       let mut last_row_viewport: Option<RowViewport> = None;
@@ -662,24 +663,19 @@ impl Viewport {
         //   "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
         //   line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
         // );
-        match last_row_idx {
-          Some(last_row_idx1) => debug_assert_eq!(last_row_idx1 + 1, *row_idx),
-          None => { /* Skip */ }
+        if cfg!(debug_assertions)
+          && let Some(last_row_idx1) = last_row_idx
+        {
+          debug_assert_eq!(last_row_idx1 + 1, *row_idx);
         }
         last_row_idx = Some(*row_idx);
-        match last_row_viewport {
-          Some(last_row_viewport1) => {
-            //trace!(
-            //  "last_row_viewport1.end_char_idx:{:?}, row_viewport.start_char_idx:{:?}",
-            //  last_row_viewport1.end_char_idx(),
-            //  row_viewport.start_char_idx()
-            //);
-            debug_assert_eq!(
-              last_row_viewport1.end_char_idx(),
-              row_viewport.start_char_idx()
-            )
-          }
-          None => { /* Skip */ }
+        if cfg!(debug_assertions)
+          && let Some(last_row_viewport1) = last_row_viewport
+        {
+          debug_assert_eq!(
+            last_row_viewport1.end_char_idx(),
+            row_viewport.start_char_idx()
+          );
         }
         last_row_viewport = Some(*row_viewport);
       }
