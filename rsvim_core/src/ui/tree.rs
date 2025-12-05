@@ -501,7 +501,7 @@ impl Tree {
     };
     let (window_id, content_id) = {
       let lotree = self.lotree.clone();
-      let mut lotree = lock!(lotree);
+      let mut lotree = lotree.borrow_mut();
       let window_id = lotree.new_with_parent(window_style, parent_id)?;
       let content_id = lotree.new_with_parent(content_style, window_id)?;
       lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
@@ -566,7 +566,7 @@ impl Tree {
 
     let cursor_id = {
       let lotree = self.lotree.clone();
-      let mut lotree = lock!(lotree);
+      let mut lotree = lotree.borrow_mut();
       let cursor_id = lotree.new_with_parent(cursor_style, parent_id)?;
       lotree.compute_layout(parent_id, taffy::Size::MAX_CONTENT)?;
       cursor_id
@@ -619,7 +619,7 @@ impl Tree {
 
     let (cmdline_id, indicator_id, input_id, message_id) = {
       let lotree = self.lotree.clone();
-      let mut lotree = lock!(lotree);
+      let mut lotree = lotree.borrow_mut();
       let indicator_id = lotree.new_leaf(indicator_style)?;
       let input_id = lotree.new_leaf(input_style)?;
       let message_id = lotree.new_leaf(message_style)?;
@@ -670,7 +670,7 @@ impl Tree {
       Rc::downgrade(&self.lotree()),
       input_id,
       text_contents.clone(),
-      Rc::downgrade(&input_viewport),
+      Arc::downgrade(&input_viewport),
     );
     let input_node = TreeNode::CommandLineInput(input);
     self._insert(input_node);
@@ -679,7 +679,7 @@ impl Tree {
       Rc::downgrade(&self.lotree()),
       message_id,
       text_contents,
-      Rc::downgrade(&message_viewport),
+      Arc::downgrade(&message_viewport),
     );
     let message_node = TreeNode::CommandLineMessage(message);
     self._insert(message_node);
