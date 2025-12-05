@@ -1,6 +1,7 @@
 set unstable
 set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
 
+export MIRIFLAGS := "-Zmiri-backtrace=full -Zmiri-disable-isolation -Zmiri-permissive-provenance"
 export RUSTC_WRAPPER := if os() == "windows" { "sccache.exe" } else { which("sccache") }
 export RUST_BACKTRACE := "full"
 export RUSTFLAGS := if os() == "windows" { "-Dwarnings -Csymbol-mangling-version=v0" } else { "-Dwarnings" }
@@ -27,6 +28,14 @@ _rustflags:
   @echo "set RUSTFLAGS='$RUSTFLAGS'"
 
 [windows]
+_miriflags:
+  @echo "set MIRIFLAGS=${env:MIRIFLAGS}"
+
+[unix]
+_miriflags:
+  @echo "set MIRIFLAGS='$MIRIFLAGS'"
+
+[windows]
 _rust_backtrace:
   @echo "set RUST_BACKTRACE=${env:RUST_BACKTRACE}"
 
@@ -50,3 +59,6 @@ list_tests: _sccache _rustflags
 
 test *name="--all": _sccache _rustflags _rust_backtrace _rsvim_log
   cargo nextest run --no-capture {{name}}
+
+miri job="num-cpus": _sccache _rustflags _miriflags _rust_backtrace
+  cargo +nightly miri nextest run -j {{job}} -F unicode_lines --no-default-features -p rsvim_core
