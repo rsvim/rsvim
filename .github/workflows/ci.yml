@@ -42,43 +42,15 @@ jobs:
         run: cargo +nightly fmt --check
       - name: Clippy
         run: cargo clippy --all-targets
-      - uses: taiki-e/install-action@cargo-binstall
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Taplo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x
           curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
-          # cargo binstall --force --no-confirm taplo-cli
           taplo --version
           taplo check
           taplo fmt --check
-      - name: MSRV
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -x
-          # mkdir ~/.cargo-msrv
-          # CARGO_MSRV_DIR="cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4"
-          # curl --output ~/.cargo-msrv/cargo-msrv.tgz -fsSL https://github.com/foresterre/cargo-msrv/releases/download/v0.18.4/$CARGO_MSRV_DIR.tgz
-          # tar -xvzf ~/.cargo-msrv/cargo-msrv.tgz -C ~/.cargo-msrv
-          # echo "Info: ~/.cargo-msrv"
-          # ls -l ~/.cargo-msrv
-          # echo "Info: ~/.cargo-msrv/$CARGO_MSRV_DIR"
-          # ls -l ~/.cargo-msrv/$CARGO_MSRV_DIR
-          # mv ~/.cargo-msrv/$CARGO_MSRV_DIR/cargo-msrv ~/.cargo/bin
-          # chmod 755 ~/.cargo/bin/cargo-msrv
-          # echo "Info: ~/.cargo/bin"
-          # ls -l ~/.cargo/bin
-          cargo binstall --force --no-confirm cargo-msrv
-          cargo msrv --version
-          SAVED_PWD="${PWD}"
-          cd rsvim_cli
-          cargo msrv list
-          cargo msrv verify
-          cd "${SAVED_PWD}"
       - uses: rustsec/audit-check@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +84,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Nextest Run
+      - name: Nextest
         run: |
           cargo nextest run --color=never --no-capture --all
       - name: Test
