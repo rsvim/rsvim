@@ -15,8 +15,13 @@ use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
+use crate::tests::fsm::make_fsm;
+use crate::tests::fsm::make_fsm_default_bufopts;
 use crate::tests::log::init as test_log_init;
 use crate::tests::tree::make_tree_with_buffers;
+use crate::tests::viewport::assert_canvas;
+use crate::tests::viewport::assert_viewport;
+use crate::tests::viewport::make_canvas;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::TreeArc;
 use crate::ui::tree::*;
@@ -41,63 +46,6 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
-pub fn make_tree_with_buffer_opts(
-  terminal_size: U16Size,
-  buffer_local_opts: BufferOptions,
-  window_local_opts: WindowOptions,
-  lines: Vec<&str>,
-) -> (
-  Event,
-  TreeArc,
-  BuffersManagerArc,
-  BufferArc,
-  TextContentsArc,
-  StateDataAccess,
-) {
-  use crate::tests::buf::make_buffer_from_lines;
-  use crate::tests::buf::make_buffers_manager;
-
-  let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
-  let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
-  let tree =
-    make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-  let contents = TextContents::to_arc(TextContents::new(terminal_size));
-
-  let key_event = KeyEvent::new_with_kind(
-    KeyCode::Char('a'),
-    KeyModifiers::empty(),
-    KeyEventKind::Press,
-  );
-  let event = Event::Key(key_event);
-  let (jsrt_forwarder_tx, _jsrt_forwarder_rx) = unbounded_channel();
-  let (master_tx, _master_rx) = unbounded_channel();
-  let data_access = StateDataAccess::new(
-    tree.clone(),
-    bufs.clone(),
-    contents.clone(),
-    master_tx,
-    jsrt_forwarder_tx,
-  );
-
-  (event, tree, bufs, buf, contents, data_access)
-}
-
-pub fn make_tree(
-  terminal_size: U16Size,
-  window_local_opts: WindowOptions,
-  lines: Vec<&str>,
-) -> (
-  Event,
-  TreeArc,
-  BuffersManagerArc,
-  BufferArc,
-  TextContentsArc,
-  StateDataAccess,
-) {
-  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-  make_tree_with_buffer_opts(terminal_size, buf_opts, window_local_opts, lines)
-}
-
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
   let tree = lock!(tree);
   tree.current_window().unwrap().viewport()
@@ -106,179 +54,6 @@ pub fn get_viewport(tree: TreeArc) -> ViewportArc {
 pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   let tree = lock!(tree);
   tree.current_window().unwrap().cursor_viewport()
-}
-
-#[allow(clippy::too_many_arguments)]
-pub fn assert_viewport(
-  buffer: BufferArc,
-  actual: &Viewport,
-  expect_rows: &Vec<&str>,
-  expect_start_line: usize,
-  expect_end_line: usize,
-  expect_start_fills: &BTreeMap<usize, usize>,
-  expect_end_fills: &BTreeMap<usize, usize>,
-) {
-  info!(
-    "actual start_line/end_line:{:?}/{:?}",
-    actual.start_line_idx(),
-    actual.end_line_idx()
-  );
-  info!(
-    "expect start_line/end_line:{:?}/{:?}",
-    expect_start_line, expect_end_line
-  );
-  for (k, v) in actual.lines().iter() {
-    info!("actual line[{:?}]: {:?}", k, v);
-  }
-  for (i, e) in expect_rows.iter().enumerate() {
-    info!("expect row[{}]:{:?}", i, e);
-  }
-  assert_eq!(expect_start_fills.len(), expect_end_fills.len());
-  for (k, start_v) in expect_start_fills.iter() {
-    let end_v = expect_end_fills.get(k).unwrap();
-    info!(
-      "expect start_fills/end_fills line[{}]:{:?}/{:?}",
-      k, start_v, end_v
-    );
-  }
-
-  assert_eq!(actual.start_line_idx(), expect_start_line);
-  assert_eq!(actual.end_line_idx(), expect_end_line);
-  if actual.lines().is_empty() {
-    assert!(actual.end_line_idx() <= actual.start_line_idx());
-  } else {
-    let (first_line_idx, _first_line_viewport) =
-      actual.lines().first().unwrap();
-    let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
-    assert_eq!(*first_line_idx, actual.start_line_idx());
-    assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
-  }
-  assert_eq!(
-    actual.end_line_idx() - actual.start_line_idx(),
-    actual.lines().len()
-  );
-  assert_eq!(
-    actual.end_line_idx() - actual.start_line_idx(),
-    expect_start_fills.len()
-  );
-  assert_eq!(
-    actual.end_line_idx() - actual.start_line_idx(),
-    expect_end_fills.len()
-  );
-
-  let buffer = lock!(buffer);
-  let buflines = buffer
-    .text()
-    .rope()
-    .get_lines_at(actual.start_line_idx())
-    .unwrap();
-  let total_lines = expect_end_line - expect_start_line;
-
-  for (l, line) in buflines.enumerate() {
-    if l >= total_lines {
-      break;
-    }
-    let actual_line_idx = l + expect_start_line;
-    let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
-
-    info!(
-      "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-      l, actual_line_idx, line_viewport
-    );
-    info!(
-      "start_filled_cols expect:{:?}, actual:{}",
-      expect_start_fills.get(&actual_line_idx),
-      line_viewport.start_filled_cols()
-    );
-    assert_eq!(
-      line_viewport.start_filled_cols(),
-      *expect_start_fills.get(&actual_line_idx).unwrap()
-    );
-    info!(
-      "end_filled_cols expect:{:?}, actual:{}",
-      expect_end_fills.get(&actual_line_idx),
-      line_viewport.end_filled_cols()
-    );
-    assert_eq!(
-      line_viewport.end_filled_cols(),
-      *expect_end_fills.get(&actual_line_idx).unwrap()
-    );
-
-    let rows = &line_viewport.rows();
-    for (r, row) in rows.iter() {
-      info!("row-index-{:?}, row:{:?}", r, row);
-
-      if r > rows.first().unwrap().0 {
-        let prev_r = r - 1;
-        let prev_row = rows.get(&prev_r).unwrap();
-        info!(
-          "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
-          r, r, row, prev_r, prev_row
-        );
-      }
-      if r < rows.last().unwrap().0 {
-        let next_r = r + 1;
-        let next_row = rows.get(&next_r).unwrap();
-        info!(
-          "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
-          r, r, row, next_r, next_row
-        );
-      }
-
-      let mut payload = String::new();
-      for c_idx in row.start_char_idx()..row.end_char_idx() {
-        let c = line.get_char(c_idx).unwrap();
-        payload.push(c);
-      }
-      info!(
-        "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect_rows[*r as usize]
-      );
-      assert_eq!(payload, expect_rows[*r as usize]);
-    }
-  }
-}
-
-pub fn make_canvas(
-  terminal_size: U16Size,
-  window_options: WindowOptions,
-  buffer: BufferArc,
-  viewport: ViewportArc,
-) -> Canvas {
-  let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(&window_options);
-  let shape = rect_from_size!(terminal_size, isize);
-  let window_content =
-    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
-  let mut canvas = Canvas::new(terminal_size);
-  window_content.draw(&mut canvas);
-  canvas
-}
-
-pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
-  let actual = actual
-    .frame()
-    .raw_symbols()
-    .iter()
-    .map(|cs| cs.join(""))
-    .collect::<Vec<_>>();
-  info!("actual:{}", actual.len());
-  for a in actual.iter() {
-    info!("{:?}", a);
-  }
-  info!("expect:{}", expect.len());
-  for e in expect.iter() {
-    info!("{:?}", e);
-  }
-
-  assert_eq!(actual.len(), expect.len());
-  for i in 0..actual.len() {
-    let e = &expect[i];
-    let a = &actual[i];
-    info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
-    assert_eq!(e.len(), a.len());
-    assert_eq!(e, a);
-  }
 }
 
 #[cfg(test)]
@@ -298,8 +73,119 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_tree(
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(
+        size!(10, 10),
+        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+        lines,
+      );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let stateful = InsertStateful::default();
+
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.char_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 158);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the ", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport(
+        lock!(buf).text(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn nowrap1_crlf_win() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple and small test lines.\r\n",
+      "But still it contains several things we want to test:\r\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
+    ];
+    let buf_opts = BufferOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
       size!(10, 10),
+      buf_opts,
       WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       lines,
     );
@@ -343,118 +229,7 @@ mod tests_cursor_move {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
-        &viewport,
-        &expect,
-        0,
-        8,
-        &expect_fills,
-        &expect_fills,
-      );
-    }
-
-    // Move-2
-    {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
-
-      let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 158);
-      assert_eq!(actual2.row_idx(), 3);
-      assert_eq!(actual2.column_idx(), 9);
-
-      let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the ", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
-      assert_viewport(
-        buf.clone(),
-        &viewport,
-        &expect,
-        0,
-        8,
-        &expect_fills,
-        &expect_fills,
-      );
-    }
-  }
-
-  #[test]
-  fn nowrap1_crlf_win() {
-    test_log_init();
-
-    let lines = vec![
-      "Hello, RSVIM!\r\n",
-      "This is a quite simple and small test lines.\r\n",
-      "But still it contains several things we want to test:\r\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
-    ];
-    let buf_opts = BufferOptionsBuilder::default()
-      .file_format(FileFormatOption::Dos)
-      .build()
-      .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
-
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
-    assert_eq!(prev_cursor_viewport.line_idx(), 0);
-    assert_eq!(prev_cursor_viewport.char_idx(), 0);
-
-    let stateful = InsertStateful::default();
-
-    // Move-1
-    {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
-
-      let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 3);
-      assert_eq!(actual1.char_idx(), 5);
-
-      let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
-      assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -490,7 +265,7 @@ mod tests_cursor_move {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -518,13 +293,12 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 10),
-        buf_opts,
-        WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      size!(10, 10),
+      buf_opts,
+      WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -565,7 +339,7 @@ mod tests_cursor_move {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -601,7 +375,7 @@ mod tests_cursor_move {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -631,15 +405,16 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_tree(
-      size!(10, 6),
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(
+        size!(10, 6),
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(false)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -671,7 +446,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -705,7 +480,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -739,7 +514,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -773,7 +548,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -807,7 +582,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -841,7 +616,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -875,17 +650,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      size!(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -917,7 +691,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -951,7 +725,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -985,7 +759,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1019,7 +793,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1053,7 +827,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1087,7 +861,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -1121,17 +895,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(false)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      size!(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1163,7 +936,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1197,7 +970,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1231,7 +1004,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1265,7 +1038,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1299,7 +1072,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1333,7 +1106,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -1363,15 +1136,16 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (event, tree, bufs, buf, contents, data_access) = make_tree(
-      size!(10, 6),
-      WindowOptionsBuilder::default()
-        .wrap(true)
-        .line_break(true)
-        .build()
-        .unwrap(),
-      lines,
-    );
+    let (event, tree, bufs, buf, contents, data_access) =
+      make_fsm_default_bufopts(
+        size!(10, 6),
+        WindowOptionsBuilder::default()
+          .wrap(true)
+          .line_break(true)
+          .build()
+          .unwrap(),
+        lines,
+      );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1403,7 +1177,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1437,7 +1211,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1471,7 +1245,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1505,7 +1279,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1539,7 +1313,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1573,7 +1347,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -1607,17 +1381,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      size!(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1649,7 +1422,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1683,7 +1456,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1717,7 +1490,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1751,7 +1524,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1785,7 +1558,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -1819,7 +1592,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -1853,17 +1626,16 @@ mod tests_cursor_move {
       .file_format(FileFormatOption::Mac)
       .build()
       .unwrap();
-    let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        size!(10, 6),
-        buf_opts,
-        WindowOptionsBuilder::default()
-          .wrap(true)
-          .line_break(true)
-          .build()
-          .unwrap(),
-        lines,
-      );
+    let (event, tree, bufs, buf, contents, data_access) = make_fsm(
+      size!(10, 6),
+      buf_opts,
+      WindowOptionsBuilder::default()
+        .wrap(true)
+        .line_break(true)
+        .build()
+        .unwrap(),
+      lines,
+    );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1895,7 +1667,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1929,7 +1701,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1963,7 +1735,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -1997,7 +1769,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -2031,7 +1803,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -2065,7 +1837,7 @@ mod tests_cursor_move {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -2098,7 +1870,7 @@ mod tests_insert_text {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2144,7 +1916,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2205,7 +1977,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2269,7 +2041,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2317,12 +2089,7 @@ mod tests_insert_text {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2368,7 +2135,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2429,7 +2196,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2493,7 +2260,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2541,12 +2308,7 @@ mod tests_insert_text {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2592,7 +2354,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2653,7 +2415,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2717,7 +2479,7 @@ mod tests_insert_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2760,7 +2522,7 @@ mod tests_insert_text {
       "  3. Is there any other cases?\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_option, lines);
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2794,7 +2556,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2849,7 +2611,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2892,7 +2654,7 @@ mod tests_insert_text {
       "  3. Is there any other cases?\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_option, lines);
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2924,7 +2686,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -2975,7 +2737,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3019,7 +2781,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3065,7 +2827,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -3109,7 +2871,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3157,7 +2919,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3199,7 +2961,7 @@ mod tests_insert_text {
       "  3. Is there any other cases?\r\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
+      make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3231,7 +2993,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3282,7 +3044,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3326,7 +3088,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3372,7 +3134,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -3421,7 +3183,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3469,7 +3231,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3511,7 +3273,7 @@ mod tests_insert_text {
       "  3. Is there any other cases?\r",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
+      make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3543,7 +3305,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3594,7 +3356,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3638,7 +3400,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3684,7 +3446,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -3728,7 +3490,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3776,7 +3538,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         8,
@@ -3807,7 +3569,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_option, lines);
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3836,7 +3598,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3867,7 +3629,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![""];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_option, lines);
+      make_fsm_default_bufopts(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3897,7 +3659,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -3932,7 +3694,7 @@ mod tests_insert_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(terminal_size, buf_opts, window_option, lines);
+      make_fsm(terminal_size, buf_opts, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3962,7 +3724,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4010,7 +3772,7 @@ mod tests_insert_text {
       "12th.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4045,7 +3807,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4091,7 +3853,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4140,7 +3902,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4187,7 +3949,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4233,7 +3995,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -4280,7 +4042,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4324,7 +4086,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4371,7 +4133,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4424,12 +4186,7 @@ mod tests_insert_text {
       "12th.\r\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4464,7 +4221,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4510,7 +4267,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4559,7 +4316,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4606,7 +4363,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4652,7 +4409,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -4699,7 +4456,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4743,7 +4500,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4790,7 +4547,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -4843,12 +4600,7 @@ mod tests_insert_text {
       "12th.\r",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -4883,7 +4635,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4929,7 +4681,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -4978,7 +4730,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5025,7 +4777,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5071,7 +4823,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -5118,7 +4870,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5162,7 +4914,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5209,7 +4961,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5244,7 +4996,7 @@ mod tests_insert_text {
       .unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5272,7 +5024,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5307,7 +5059,7 @@ mod tests_insert_text {
       .unwrap();
     let lines = vec![""];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5335,7 +5087,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5370,7 +5122,7 @@ mod tests_insert_text {
       .unwrap();
     let lines = vec![""];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5398,7 +5150,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5437,7 +5189,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5479,7 +5231,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5526,7 +5278,7 @@ mod tests_insert_text {
       "10th.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5559,7 +5311,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5603,7 +5355,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -5650,7 +5402,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -5697,7 +5449,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -5743,7 +5495,7 @@ mod tests_insert_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         4,
@@ -5790,7 +5542,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5834,7 +5586,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0), (8, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5881,7 +5633,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -5916,7 +5668,7 @@ mod tests_insert_text {
       .unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -5944,7 +5696,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -5979,7 +5731,7 @@ mod tests_insert_text {
       .unwrap();
     let lines = vec![""];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6007,7 +5759,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6040,7 +5792,7 @@ mod tests_insert_text {
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines.clone());
+      make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6085,7 +5837,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6122,7 +5874,7 @@ mod tests_insert_text {
     let lines =
       vec!["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n"];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines.clone());
+      make_fsm_default_bufopts(terminal_size, window_options, lines.clone());
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6167,7 +5919,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6212,7 +5964,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6260,7 +6012,7 @@ mod tests_insert_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6309,7 +6061,7 @@ mod tests_delete_text {
       "* The extra.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6352,7 +6104,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6413,7 +6165,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6474,7 +6226,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6535,7 +6287,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6587,7 +6339,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6639,7 +6391,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6691,7 +6443,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6743,7 +6495,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6795,7 +6547,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6849,7 +6601,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6903,7 +6655,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -6951,12 +6703,7 @@ mod tests_delete_text {
       "* The extra.\r\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -6999,7 +6746,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7060,7 +6807,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7121,7 +6868,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7182,7 +6929,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7234,7 +6981,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7286,7 +7033,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7338,7 +7085,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7390,7 +7137,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7442,7 +7189,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7496,7 +7243,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7550,7 +7297,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7598,12 +7345,7 @@ mod tests_delete_text {
       "* The extra.\r",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree_with_buffer_opts(
-        terminal_size,
-        buf_opts,
-        window_options,
-        lines,
-      );
+      make_fsm(terminal_size, buf_opts, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -7646,7 +7388,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7707,7 +7449,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7768,7 +7510,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7829,7 +7571,7 @@ mod tests_delete_text {
       .into_iter()
       .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7881,7 +7623,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7933,7 +7675,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -7985,7 +7727,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8037,7 +7779,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8089,7 +7831,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8143,7 +7885,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8197,7 +7939,7 @@ mod tests_delete_text {
           .into_iter()
           .collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8233,7 +7975,7 @@ mod tests_delete_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -8257,7 +7999,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8293,7 +8035,7 @@ mod tests_delete_text {
       WindowOptionsBuilder::default().wrap(false).build().unwrap();
     let lines = vec![];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -8317,7 +8059,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8364,7 +8106,7 @@ mod tests_delete_text {
       "* The extra.\n",
     ];
     let (event, tree, bufs, buf, contents, data_access) =
-      make_tree(terminal_size, window_options, lines);
+      make_fsm_default_bufopts(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -8399,7 +8141,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8452,7 +8194,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8505,7 +8247,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         0,
@@ -8558,7 +8300,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         3,
@@ -8611,7 +8353,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -8664,7 +8406,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -8717,7 +8459,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -8770,7 +8512,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         2,
@@ -8812,7 +8554,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -8856,7 +8598,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,
@@ -8900,7 +8642,7 @@ mod tests_delete_text {
       let expect_fills: BTreeMap<usize, usize> =
         vec![(5, 0), (6, 0)].into_iter().collect();
       assert_viewport(
-        buf.clone(),
+        lock!(buf).text(),
         &viewport,
         &expect,
         5,

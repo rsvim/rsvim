@@ -4,6 +4,8 @@
 
 pub mod buf;
 pub mod evloop;
+pub mod fsm;
 pub mod js;
 pub mod log;
 pub mod tree;
+pub mod viewport;
