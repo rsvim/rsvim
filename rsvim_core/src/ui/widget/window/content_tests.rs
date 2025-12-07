@@ -1,4 +1,4 @@
-// #![allow(unused_imports)]
+#![allow(unused_imports)]
 
 use super::content::*;
 use crate::buf::opt::BufferOptionsBuilder;
@@ -11,13 +11,6 @@ use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::make_canvas;
 use crate::tests::viewport::make_viewport;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use compact_str::ToCompactString;
-use ropey::Rope;
-use ropey::RopeBuilder;
-use std::fs::File;
-use std::io::BufReader;
-use std::io::BufWriter;
-use std::sync::Arc;
 
 #[cfg(test)]
 mod tests_nowrap {
