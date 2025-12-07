@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use crate::buf::BufferArc;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
@@ -11,8 +13,8 @@ use crate::ui::tree::Tree;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::WindowOptions;
-use crate::ui::widget::window::WindowOptionsBuilder;
+use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::ToCompactString;
 use ropey::Rope;
 use ropey::RopeBuilder;
