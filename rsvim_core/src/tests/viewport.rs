@@ -2,6 +2,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use crate::buf::BufferArc;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
@@ -90,9 +91,9 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 }
 
 pub fn assert_viewport(
-  buffer: BufferArc,
+  text: &Text,
   actual: &Viewport,
-  expect: &Vec<&str>,
+  expect_rows: &Vec<&str>,
   expect_start_line: usize,
   expect_end_line: usize,
   expect_start_fills: &BTreeMap<usize, usize>,
@@ -110,8 +111,8 @@ pub fn assert_viewport(
   for (k, v) in actual.lines().iter() {
     info!("actual line[{:?}]: {:?}", k, v);
   }
-  for (i, e) in expect.iter().enumerate() {
-    info!("expect line[{}]:{:?}", i, e);
+  for (i, e) in expect_rows.iter().enumerate() {
+    info!("expect row[{}]:{:?}", i, e);
   }
   assert_eq!(expect_start_fills.len(), expect_end_fills.len());
   for (k, start_v) in expect_start_fills.iter() {
@@ -137,9 +138,16 @@ pub fn assert_viewport(
     actual.end_line_idx() - actual.start_line_idx(),
     actual.lines().len()
   );
+  assert_eq!(
+    actual.end_line_idx() - actual.start_line_idx(),
+    expect_start_fills.len()
+  );
+  assert_eq!(
+    actual.end_line_idx() - actual.start_line_idx(),
+    expect_end_fills.len()
+  );
 
-  let buffer = lock!(buffer);
-  let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
+  let buflines = text.rope().lines_at(actual.start_line_idx());
   let total_lines = expect_end_line - expect_start_line;
 
   for (l, line) in buflines.enumerate() {
@@ -151,21 +159,21 @@ pub fn assert_viewport(
 
     info!(
       "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-      actual.start_line_idx() + l,
-      actual_line_idx,
-      line_viewport
+      l, actual_line_idx, line_viewport
     );
     info!(
-      "l-{:?},start_filled_cols (expect/actual):{:?}/{}, end_filled_cols (expect/actual):{:?}/{}",
-      actual.start_line_idx() + l,
+      "start_filled_cols expect:{:?}, actual:{}",
       expect_start_fills.get(&actual_line_idx),
-      line_viewport.start_filled_cols(),
-      expect_end_fills.get(&actual_line_idx),
-      line_viewport.end_filled_cols()
+      line_viewport.start_filled_cols()
     );
     assert_eq!(
       line_viewport.start_filled_cols(),
       *expect_start_fills.get(&actual_line_idx).unwrap()
+    );
+    info!(
+      "end_filled_cols expect:{:?}, actual:{}",
+      expect_end_fills.get(&actual_line_idx),
+      line_viewport.end_filled_cols()
     );
     assert_eq!(
       line_viewport.end_filled_cols(),
@@ -200,9 +208,9 @@ pub fn assert_viewport(
       }
       info!(
         "row-{:?}, payload actual:{:?}, expect:{:?}",
-        r, payload, expect[*r as usize]
+        r, payload, expect_rows[*r as usize]
       );
-      assert_eq!(payload, expect[*r as usize]);
+      assert_eq!(payload, expect_rows[*r as usize]);
     }
   }
 }
