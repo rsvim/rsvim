@@ -21,7 +21,7 @@ use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_buffers_manager;
 use crate::tests::fsm::make_fsm;
 use crate::tests::fsm::make_fsm_default_bufopts;
-use crate::tests::fsm::make_fsm_with_cmdline;
+use crate::tests::fsm::make_fsm_with_cmdline_default_bufopts;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::assert_viewport;
@@ -7642,7 +7642,7 @@ mod tests_goto_command_line_ex_mode {
 
     let terminal_size = size!(10, 10);
     let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_with_cmdline(
+      make_fsm_with_cmdline_default_bufopts(
         terminal_size,
         WindowOptionsBuilder::default().wrap(false).build().unwrap(),
         vec![],
@@ -7688,7 +7688,7 @@ mod tests_goto_command_line_ex_mode {
 
     let terminal_size = size!(60, 3);
     let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_with_cmdline(
+      make_fsm_with_cmdline_default_bufopts(
         terminal_size,
         WindowOptionsBuilder::default().wrap(false).build().unwrap(),
         vec!["Should go to insert mode with message command line\n"],
@@ -8129,7 +8129,7 @@ mod tests_goto_insert_mode {
 
     let terminal_size = size!(60, 3);
     let (event, tree, bufs, _buf, contents, data_access) =
-      make_fsm_with_cmdline(
+      make_fsm_with_cmdline_default_bufopts(
         terminal_size,
         WindowOptionsBuilder::default().wrap(false).build().unwrap(),
         vec!["Should go to insert mode with message command line\n"],

@@ -76,6 +76,7 @@ pub fn make_fsm_default_bufopts(
 
 pub fn make_fsm_with_cmdline(
   terminal_size: U16Size,
+  buffer_local_opts: BufferOptions,
   window_local_opts: WindowOptions,
   lines: Vec<&str>,
 ) -> (
@@ -86,9 +87,8 @@ pub fn make_fsm_with_cmdline(
   TextContentsArc,
   StateDataAccess,
 ) {
-  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-  let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
-  let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
+  let buf = make_buffer_from_lines(terminal_size, buffer_local_opts, lines);
+  let bufs = make_buffers_manager(buffer_local_opts, vec![buf.clone()]);
   let contents = TextContents::to_arc(TextContents::new(terminal_size));
   let tree = make_tree_with_buffers_cmdline(
     terminal_size,
@@ -114,4 +114,20 @@ pub fn make_fsm_with_cmdline(
   );
 
   (event, tree, bufs, buf, contents, data_access)
+}
+
+pub fn make_fsm_with_cmdline_default_bufopts(
+  terminal_size: U16Size,
+  window_local_opts: WindowOptions,
+  lines: Vec<&str>,
+) -> (
+  Event,
+  TreeArc,
+  BuffersManagerArc,
+  BufferArc,
+  TextContentsArc,
+  StateDataAccess,
+) {
+  let buf_opts = BufferOptionsBuilder::default().build().unwrap();
+  make_fsm_with_cmdline(terminal_size, buf_opts, window_local_opts, lines)
 }
