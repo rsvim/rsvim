@@ -9,6 +9,7 @@ use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
+use crate::tests::viewport::make_window;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
@@ -41,21 +42,6 @@ pub fn make_wrap_linebreak() -> WindowOptions {
     .line_break(true)
     .build()
     .unwrap()
-}
-
-pub fn make_window(
-  terminal_size: U16Size,
-  buffer: BufferArc,
-  window_options: &WindowOptions,
-) -> Window {
-  let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
 }
 
 #[allow(clippy::too_many_arguments)]
