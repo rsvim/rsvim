@@ -5,7 +5,9 @@ use crate::buf::BufferArc;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Tree;
+use crate::ui::tree::TreeArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -61,6 +63,14 @@ pub fn make_canvas(
     Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);
   content.draw(&mut canvas);
+  canvas
+}
+
+pub fn make_tree_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
+  let canvas = Canvas::new(terminal_size);
+  let canvas = Canvas::to_arc(canvas);
+  let tree = lock!(tree);
+  tree.draw(canvas.clone());
   canvas
 }
 
