@@ -7,9 +7,25 @@ use crate::ui::tree::Tree;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::Content;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+
+pub fn make_window(
+  terminal_size: U16Size,
+  buffer: BufferArc,
+  window_options: &WindowOptions,
+) -> Window {
+  let mut tree = Tree::new(terminal_size);
+  tree.set_global_local_options(window_options);
+  let window_shape = rect_from_size!(terminal_size, isize);
+  Window::new(
+    tree.global_local_options(),
+    window_shape,
+    Arc::downgrade(&buffer),
+  )
+}
 
 pub fn make_viewport(
   terminal_size: U16Size,

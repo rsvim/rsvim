@@ -9,6 +9,8 @@ use crate::prelude::*;
 use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
+use crate::tests::viewport::assert_canvas;
+use crate::tests::viewport::make_window;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::widget::Widgetable;
@@ -21,47 +23,6 @@ use std::io::BufReader;
 use std::io::BufWriter;
 use std::sync::Arc;
 use std::sync::Once;
-
-fn make_window_from_size(
-  terminal_size: U16Size,
-  buffer: BufferArc,
-  window_options: &WindowOptions,
-) -> Window {
-  let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
-}
-
-fn do_test_draw(actual: &Canvas, expect: &[&str]) {
-  let actual = actual
-    .frame()
-    .raw_symbols()
-    .iter()
-    .map(|cs| cs.join(""))
-    .collect::<Vec<_>>();
-  info!("actual:{}", actual.len());
-  for a in actual.iter() {
-    info!("{:?}", a);
-  }
-  info!("expect:{}", expect.len());
-  for e in expect.iter() {
-    info!("{:?}", e);
-  }
-
-  assert_eq!(actual.len(), expect.len());
-  for i in 0..actual.len() {
-    let e = &expect[i];
-    let a = &actual[i];
-    info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
-    assert_eq!(e.len(), a.len());
-    assert_eq!(e, a);
-  }
-}
 
 #[test]
 fn draw_after_init1() {
@@ -97,9 +58,8 @@ fn draw_after_init1() {
 
   let window_local_options =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let window =
-    make_window_from_size(terminal_size, buf.clone(), &window_local_options);
+  let window = make_window(terminal_size, buf.clone(), &window_local_options);
   let mut actual = Canvas::new(terminal_size);
   window.draw(&mut actual);
-  do_test_draw(&actual, &expect);
+  assert_canvas(&actual, &expect);
 }
