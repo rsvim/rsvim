@@ -4,12 +4,13 @@
 
 use crate::prelude::*;
 
-/// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
+/// Convert relative shape to absolute, based on its parent's actual shape.
 ///
 /// NOTE:
-/// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
-/// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
-///    automatically bounded inside of it's parent or the terminal's shape.
+/// 1. If the widget doesn't have a parent, use the terminal shape as its
+///    parent's shape.
+/// 2. If the relative shape is outside of it's parent or the terminal, it will
+///    be automatically bounded by it's parent.
 pub fn make_actual_shape(
   shape: &IRect,
   parent_actual_shape: &U16Rect,
