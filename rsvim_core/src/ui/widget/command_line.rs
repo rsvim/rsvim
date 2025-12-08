@@ -100,6 +100,8 @@ impl CommandLine {
     base.bounded_insert(root_id, indicator_node);
 
     let input_shape = rect!(1, 0, shape.size().width(), shape.size().height());
+    let message_size = shape.size();
+    let message_shape = rect_from_size!(message_size, isize);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
@@ -117,7 +119,7 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = rect_as!(shape, u16);
+      let message_actual_shape = rect_from_size!(message_size, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
@@ -144,13 +146,17 @@ impl CommandLine {
     base.bounded_insert(root_id, input_node);
 
     let message = Message::new(
-      shape,
+      message_shape,
       text_contents.clone(),
       Arc::downgrade(&message_viewport),
     );
     let message_id = message.id();
     let message_node = CommandLineNode::Message(message);
     base.bounded_insert(root_id, message_node);
+
+    trace!("parameter shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", shape, indicator_shape, input_shape, message_shape);
+    trace!("command_line shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", base.node(root_id).unwrap().shape(), base.node(indicator_id).unwrap().shape(), base.node(input_id).unwrap().shape(), base.node(message_id).unwrap().shape());
+    trace!("command_line actual_shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", base.node(root_id).unwrap().actual_shape(), base.node(indicator_id).unwrap().actual_shape(), base.node(input_id).unwrap().actual_shape(), base.node(message_id).unwrap().actual_shape());
 
     Self {
       base,
