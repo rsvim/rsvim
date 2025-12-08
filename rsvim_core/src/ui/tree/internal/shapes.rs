@@ -46,7 +46,7 @@ pub fn convert_relative_to_absolute(
   rect_as!(actual_shape, u16)
 }
 
-/// Bound (truncate) child shape (both position and size) by its parent actual shape.
+/// Truncate relative shape by its parent size.
 ///
 /// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
 pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
