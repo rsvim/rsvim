@@ -45,16 +45,8 @@ pub fn make_actual_shape(
   let actual_max_y =
     num_traits::clamp(actual_max.y(), actual_min_y, parent_actual_max.y());
 
-  let actual_width = actual_max_x - actual_min_x;
-  let actual_height = actual_max_y - actual_min_y;
-
-  let actual_shape = rect!(
-    actual_min_x,
-    actual_min_y,
-    actual_min_x + actual_width,
-    actual_min_y + actual_height
-  );
-
+  let actual_shape =
+    rect!(actual_min_x, actual_min_y, actual_max_x, actual_max_y);
   rect_as!(actual_shape, u16)
 }
 
@@ -137,6 +129,8 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 ///
 /// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
 pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+  let min_pos: IPos = shape.min().into();
+
   let bounded = bound_size(shape, parent_actual_shape);
   bound_position(&bounded, parent_actual_shape)
 }
