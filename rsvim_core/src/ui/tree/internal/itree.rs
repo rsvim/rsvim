@@ -407,7 +407,7 @@ where
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
       let cnode_shape = *cnode_ref.shape();
       let cnode_actual_shape =
-        shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
+        shapes::convert_relative_to_absolute(&cnode_shape, &pnode_actual_shape);
 
       trace!(
         "update attr, cnode id/actual_shape:{:?}/{:?}, pnode id/actual_shape:{:?}/{:?}",
@@ -471,7 +471,7 @@ where
     // 2. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_actual_shape(&shapes::make_actual_shape(
+    child_node.set_actual_shape(&shapes::convert_relative_to_absolute(
       child_node.shape(),
       &parent_actual_shape,
     ));

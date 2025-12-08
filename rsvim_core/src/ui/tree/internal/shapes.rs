@@ -11,7 +11,7 @@ use crate::prelude::*;
 ///    parent's shape.
 /// 2. If the relative shape is outside of it's parent or the terminal, it will
 ///    be automatically bounded by it's parent.
-pub fn make_actual_shape(
+pub fn convert_relative_to_absolute(
   shape: &IRect,
   parent_actual_shape: &U16Rect,
 ) -> U16Rect {
