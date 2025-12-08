@@ -119,7 +119,7 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = rect_from_size!(message_size, u16);
+      let message_actual_shape = rect_from_size!(cmdline_size, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
