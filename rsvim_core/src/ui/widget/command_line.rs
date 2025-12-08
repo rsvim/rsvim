@@ -91,12 +91,7 @@ impl CommandLine {
 
     let mut base = Itree::new(root_node);
 
-    let indicator_shape = rect!(
-      shape.min().x,
-      shape.min().y,
-      shape.min().x + 1,
-      shape.max().y
-    );
+    let indicator_shape = rect!(0, 0, 1, shape.size().height());
     let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
     let indicator_id = indicator.id();
     let mut indicator_node = CommandLineNode::Indicator(indicator);
@@ -104,12 +99,7 @@ impl CommandLine {
     indicator_node.set_visible(false);
     base.bounded_insert(root_id, indicator_node);
 
-    let input_shape = rect!(
-      shape.min().x + 1,
-      shape.min().y,
-      shape.max().x,
-      shape.max().y
-    );
+    let input_shape = rect!(1, 0, shape.size().width(), shape.size().height());
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
