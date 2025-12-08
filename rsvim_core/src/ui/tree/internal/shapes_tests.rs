@@ -4,7 +4,7 @@ use crate::prelude::*;
 use std::cmp::min;
 
 #[test]
-fn make_actual_shapes1() {
+fn convert1() {
   // test_log_init();
 
   let inputs: Vec<IRect> = vec![
@@ -30,7 +30,7 @@ fn make_actual_shapes1() {
 }
 
 #[test]
-fn make_actual_shapes2() {
+fn convert2() {
   // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
@@ -59,7 +59,7 @@ fn make_actual_shapes2() {
 }
 
 #[test]
-fn bound_shape1() {
+fn truncate1() {
   // test_log_init();
 
   let inputs: Vec<(IRect, U16Rect)> = vec![
@@ -77,7 +77,7 @@ fn bound_shape1() {
     rect!(0, 4, 6, 8),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = bound_shape(&p.0, &p.1);
+    let actual = truncate_shape(&p.0, &p.1);
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",

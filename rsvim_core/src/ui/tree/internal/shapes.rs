@@ -47,9 +47,7 @@ pub fn convert_relative_to_absolute(
 }
 
 /// Truncate relative shape by its parent size.
-///
-/// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
-pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+pub fn truncate_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let parent_size = parent_actual_shape.size();
   let min_x = num_traits::clamp(shape.min().x, 0, parent_size.width() as isize);
   let min_y =
