@@ -526,7 +526,7 @@ where
     let parent_actual_shape = parent_node.actual_shape();
 
     // Bound child shape
-    child_node.set_shape(&shapes::truncate_shape(
+    child_node.set_shape(&shapes::bound_shape(
       child_node.shape(),
       parent_actual_shape,
     ));
@@ -663,7 +663,7 @@ where
                 );
 
                 let final_shape =
-                  shapes::truncate_shape(&expected_shape, &parent_actual_shape);
+                  shapes::bound_shape(&expected_shape, &parent_actual_shape);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
@@ -761,7 +761,7 @@ where
               );
 
               let final_shape =
-                shapes::truncate_shape(&expected_shape, &parent_actual_shape);
+                shapes::bound_shape(&expected_shape, &parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
