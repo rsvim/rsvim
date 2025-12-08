@@ -101,7 +101,8 @@ impl CommandLine {
     base.bounded_insert(root_id, indicator_node);
 
     let input_shape = rect!(1, 0, cmdline_size.width(), cmdline_size.height());
-    let message_shape = rect_from_size!(cmdline_size, isize);
+    let message_shape = rect_from_size!(cmdline_size);
+    let message_shape = rect_as!(message_shape, isize);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let input_actual_shape = rect_as!(input_shape, u16);
@@ -119,7 +120,8 @@ impl CommandLine {
         text_contents.command_line_input(),
       );
 
-      let message_actual_shape = rect_from_size!(cmdline_size, u16);
+      let message_actual_shape = rect_from_size!(cmdline_size);
+      let message_actual_shape = rect_as!(message_actual_shape, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),

@@ -23,7 +23,8 @@ pub fn make_window(
 ) -> Window {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size, isize);
+  let window_shape = rect_from_size!(terminal_size);
+  let window_shape = rect_as!(window_shape, isize);
   Window::new(
     tree.global_local_options(),
     window_shape,
@@ -39,7 +40,8 @@ pub fn make_viewport(
   start_column_idx: usize,
 ) -> ViewportArc {
   let buffer = lock!(buffer);
-  let actual_shape = rect_from_size!(terminal_size, u16);
+  let actual_shape = rect_from_size!(terminal_size);
+  let actual_shape = rect_as!(actual_shape, u16);
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),
@@ -58,7 +60,8 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
   tree.set_global_local_options(&window_options);
-  let shape = rect_from_size!(terminal_size, isize);
+  let shape = rect_from_size!(terminal_size);
+  let shape = rect_as!(shape, isize);
   let content =
     Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
   let mut canvas = Canvas::new(terminal_size);
