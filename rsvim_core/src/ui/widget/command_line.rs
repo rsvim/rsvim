@@ -154,9 +154,24 @@ impl CommandLine {
     let message_node = CommandLineNode::Message(message);
     base.bounded_insert(root_id, message_node);
 
-    trace!("parameter shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", shape, indicator_shape, input_shape, message_shape);
-    trace!("command_line shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", base.node(root_id).unwrap().shape(), base.node(indicator_id).unwrap().shape(), base.node(input_id).unwrap().shape(), base.node(message_id).unwrap().shape());
-    trace!("command_line actual_shape, root:{:?},indicator:{:?},input:{:?},message:{:?}", base.node(root_id).unwrap().actual_shape(), base.node(indicator_id).unwrap().actual_shape(), base.node(input_id).unwrap().actual_shape(), base.node(message_id).unwrap().actual_shape());
+    trace!(
+      "parameter shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
+      shape, indicator_shape, input_shape, message_shape
+    );
+    trace!(
+      "command_line shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
+      base.node(root_id).unwrap().shape(),
+      base.node(indicator_id).unwrap().shape(),
+      base.node(input_id).unwrap().shape(),
+      base.node(message_id).unwrap().shape()
+    );
+    trace!(
+      "command_line actual_shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
+      base.node(root_id).unwrap().actual_shape(),
+      base.node(indicator_id).unwrap().actual_shape(),
+      base.node(input_id).unwrap().actual_shape(),
+      base.node(message_id).unwrap().actual_shape()
+    );
 
     Self {
       base,
