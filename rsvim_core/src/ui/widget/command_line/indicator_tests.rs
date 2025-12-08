@@ -42,7 +42,8 @@ mod tests_nowrap {
     test_log_init();
 
     let terminal_size = size!(1, 1);
-    let terminal_shape = rect_from_size!(terminal_size, isize);
+    let terminal_shape = rect_from_size!(terminal_size);
+    let terminal_shape = rect_as!(terminal_shape, isize);
 
     let expect = vec![":"];
 

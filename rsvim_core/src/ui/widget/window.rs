@@ -59,7 +59,9 @@ impl Window {
     let root = RootContainer::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);
-    let root_actual_shape = root.actual_shape();
+
+    let content_shape = rect_from_size!(shape);
+    let content_actual_shape = rect_as!(content_shape, u16);
 
     let mut base = Itree::new(root_node);
 
@@ -67,7 +69,7 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), root_actual_shape, 0, 0);
+        Viewport::view(opts, buffer.text(), &content_actual_shape, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
@@ -76,7 +78,7 @@ impl Window {
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let content =
-      Content::new(shape, buffer.clone(), Arc::downgrade(&viewport));
+      Content::new(content_shape, buffer.clone(), Arc::downgrade(&viewport));
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 

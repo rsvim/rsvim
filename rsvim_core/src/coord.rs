@@ -169,10 +169,7 @@ macro_rules! size_as {
 /// is `(width, height)` where width/height is from `Size<T>`.
 #[macro_export]
 macro_rules! rect_from_size {
-  ($s:ident,$ty:ty) => {
-    $crate::coord::Rect::new(
-      (0 as $ty, 0 as $ty),
-      ($s.width() as $ty, $s.height() as $ty),
-    ) as $crate::coord::Rect<$ty>
+  ($s:ident) => {
+    $crate::coord::Rect::new((0, 0), ($s.width(), $s.height()))
   };
 }

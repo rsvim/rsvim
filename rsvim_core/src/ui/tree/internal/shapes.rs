@@ -46,8 +46,21 @@ pub fn convert_relative_to_absolute(
   rect_as!(actual_shape, u16)
 }
 
-/// Bound (truncate) child size by its parent actual size.
-pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+/// Truncate relative shape by its parent size.
+pub fn truncate_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+  let parent_size = parent_actual_shape.size();
+  let min_x = num_traits::clamp(shape.min().x, 0, parent_size.width() as isize);
+  let min_y =
+    num_traits::clamp(shape.min().y, 0, parent_size.height() as isize);
+  let max_x =
+    num_traits::clamp(shape.max().x, min_x, parent_size.width() as isize);
+  let max_y =
+    num_traits::clamp(shape.max().y, min_y, parent_size.height() as isize);
+  rect!(min_x, min_y, max_x, max_y)
+}
+
+/// Bound child size by its parent actual size.
+pub fn _bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let top_left_pos: IPos = shape.min().into();
 
   // Truncate shape if size is larger than parent.
@@ -65,7 +78,7 @@ pub fn bound_size(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
 
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
-pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
+pub fn _bound_pos(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
 
@@ -121,10 +134,8 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   )
 }
 
-/// Bound (truncate) child shape (both position and size) by its parent actual shape.
-///
-/// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
+/// Bound child shape (both position and size) by its parent actual shape.
 pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let bounded = bound_size(shape, parent_actual_shape);
-  bound_position(&bounded, parent_actual_shape)
+  let bounded = _bound_size(shape, parent_actual_shape);
+  _bound_pos(&bounded, parent_actual_shape)
 }
