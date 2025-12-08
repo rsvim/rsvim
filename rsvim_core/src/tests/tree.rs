@@ -3,11 +3,11 @@
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
-use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
+use crate::ui::{canvas, tree::*};
 use std::sync::Arc;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
@@ -64,7 +64,13 @@ pub fn make_tree_with_buffers_cmdline(
   let tree_root_id = tree.root_id();
 
   // window
-  let window_shape = rect_from_size!(canvas_size, isize);
+  let window_shape = rect!(
+    0,
+    0,
+    canvas_size.width(),
+    canvas_size.height().saturating_sub(1)
+  );
+  let window_shape = rect_as!(window_shape, isize);
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
