@@ -40,30 +40,20 @@ pub fn make_actual_shape(
   );
 
   let actual_max: IPos = max_pos + parent_actual_min;
-  let actual_max_x = num_traits::clamp(
-    actual_max.x(),
-    parent_actual_min.x(),
-    parent_actual_max.x(),
-  );
-  let actual_max_y = num_traits::clamp(
-    actual_max.y(),
-    parent_actual_min.y(),
-    parent_actual_max.y(),
-  );
+  let actual_max_x =
+    num_traits::clamp(actual_max.x(), actual_min_x, parent_actual_max.x());
+  let actual_max_y =
+    num_traits::clamp(actual_max.y(), actual_min_y, parent_actual_max.y());
 
-  let actual_isize =
-    size!(actual_max_x - actual_min_x, actual_max_y - actual_min_y);
+  let actual_width = actual_max_x - actual_min_x;
+  let actual_height = actual_max_y - actual_min_y;
 
   let actual_shape = rect!(
     actual_min_x,
     actual_min_y,
-    actual_min_x + actual_isize.width(),
-    actual_min_y + actual_isize.height()
+    actual_min_x + actual_width,
+    actual_min_y + actual_height
   );
-  // trace!(
-  //   "actual_isize:{:?}, actual_shape:{:?}",
-  //   actual_isize, actual_shape
-  // );
 
   rect_as!(actual_shape, u16)
 }
