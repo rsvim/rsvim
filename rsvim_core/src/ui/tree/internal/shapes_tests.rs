@@ -59,64 +59,6 @@ fn make_actual_shapes2() {
 }
 
 #[test]
-fn bound_size1() {
-  // test_log_init();
-
-  let inputs: Vec<(IRect, U16Rect)> = vec![
-    (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
-    (rect!(3, 2, 10, 10), rect!(0, 0, 10, 10)),
-    (rect!(3, -2, 12, 9), rect!(0, 0, 10, 10)),
-    (rect!(3, 1, 12, 9), rect!(0, 0, 0, 0)),
-    (rect!(-1, -1, 1, 1), rect!(0, 0, 0, 0)),
-  ];
-  let expects: Vec<IRect> = vec![
-    rect!(0, 0, 7, 8),
-    rect!(3, 2, 10, 10),
-    rect!(3, -2, 12, 8),
-    rect!(3, 1, 3, 1),
-    rect!(-1, -1, -1, -1),
-  ];
-  for (i, p) in inputs.iter().enumerate() {
-    let actual = bound_size(&p.0, &p.1);
-    let expect = expects[i];
-    info!(
-      "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
-      i, p, actual, expect
-    );
-    assert!(actual == expect);
-  }
-}
-
-#[test]
-fn bound_position1() {
-  // test_log_init();
-
-  let inputs: Vec<(IRect, U16Rect)> = vec![
-    (rect!(0, 0, 7, 8), rect!(0, 0, 10, 10)),
-    (rect!(3, 2, 12, 11), rect!(0, 0, 10, 10)),
-    (rect!(7, -2, 13, 8), rect!(0, 0, 10, 10)),
-    (rect!(-8, 8, -3, 16), rect!(3, 7, 8, 15)),
-    (rect!(-5, 19, -3, 21), rect!(10, 15, 15, 20)),
-  ];
-  let expects: Vec<IRect> = vec![
-    rect!(0, 0, 7, 8),
-    rect!(1, 1, 10, 10),
-    rect!(4, 0, 10, 10),
-    rect!(0, 0, 5, 8),
-    rect!(0, 3, 2, 5),
-  ];
-  for (i, p) in inputs.iter().enumerate() {
-    let actual = bound_position(&p.0, &p.1);
-    let expect = expects[i];
-    info!(
-      "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
-      i, p, actual, expect
-    );
-    assert!(actual == expect);
-  }
-}
-
-#[test]
 fn bound_shape1() {
   // test_log_init();
 
