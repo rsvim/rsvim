@@ -133,7 +133,7 @@ pub fn bound_position(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
   )
 }
 
-/// Bound (truncate) child shape (both position and size) by its parent actual shape.
+/// Bound a child shape by its parent actual shape.
 ///
 /// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
 pub fn bound_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
