@@ -392,15 +392,14 @@ where
     }
   }
 
-  /// Insert a node to the tree, i.e. push it to the children vector of the parent.
+  /// Insert a node to the tree, i.e. push it to the children vector of the
+  /// parent.
   ///
-  /// This operation builds the connection between the parent and the inserted child.
-  ///
-  /// It also sorts the children vector after inserted by the z-index value,
-  /// and updates both the inserted child's attributes and all its descendants attributes.
+  /// This operation builds the connection between the parent and the inserted
+  /// child. Also updates both the inserted child's attributes and all its
+  /// descendants attributes.
   ///
   /// Below node attributes need to update:
-  ///
   /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
   /// # Returns
