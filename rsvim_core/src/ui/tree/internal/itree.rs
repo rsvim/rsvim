@@ -115,10 +115,11 @@ impl Relationships {
 
     // Binds connection from parent => child.
     //
-    // NOTE: It inserts child to the `children_ids` vector which belongs to the parent, and the
-    // children are sorted by their Z-index value from lower to higher (UI widget node with higher
-    // Z-index has a higher priority to show on the final TUI, but the order is reversed when
-    // rendering). For those children that share the same Z-index value, it inserts at the end of
+    // NOTE: It inserts child to the `children_ids` vector which belongs to the
+    // parent, and the children are sorted by their Z-index value from lower to
+    // higher (UI widget node with higher Z-index has a higher priority to show
+    // on the final TUI, but the order is reversed when rendering). For those
+    // children that share the same Z-index value, it inserts at the end of
     // those children.
     let higher_zindex_pos: Vec<usize> = self
       .children_ids
