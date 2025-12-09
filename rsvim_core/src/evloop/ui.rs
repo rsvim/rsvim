@@ -1,7 +1,7 @@
 //! UI utility.
 
-use crate::buf::BufferArc;
-use crate::content::TextContentsArc;
+use crate::buf::BufferWk;
+use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Inodeable;
@@ -10,13 +10,12 @@ use crate::ui::tree::TreeNode;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use std::sync::Arc;
 
 pub fn init_window(
   canvas_size: &U16Size,
   tree: &mut Tree,
-  buf: BufferArc,
-  text_contents: TextContentsArc,
+  buf: BufferWk,
+  text_contents: TextContentsWk,
   cursor_blinking: bool,
   cursor_hidden: bool,
   cursor_style: CursorStyle,
@@ -31,14 +30,8 @@ pub fn init_window(
     canvas_size.height().saturating_sub(1)
   );
   let window_shape = rect_as!(window_shape, isize);
-  let mut window = {
-    trace!("Bind first buffer to default window {:?}", lock!(buf).id());
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
-      Arc::downgrade(&buf),
-    )
-  };
+  let mut window =
+    { Window::new(tree.global_local_options(), window_shape, buf) };
   let window_id = window.id();
 
   // Initialize cursor inside the default window.
@@ -58,7 +51,7 @@ pub fn init_window(
     canvas_size.width() as isize,
     canvas_size.height() as isize
   );
-  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
+  let cmdline = CommandLine::new(cmdline_shape, text_contents);
 
   tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 }
