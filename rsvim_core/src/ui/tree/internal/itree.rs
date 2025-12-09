@@ -114,41 +114,11 @@ impl Relationships {
     self.parent_id.insert(child_id, parent_id);
 
     // Binds connection from parent => child.
-    //
-    // NOTE: It inserts child to the `children_ids` vector which belongs to the
-    // parent, and the children are sorted by their Z-index value from lower to
-    // higher (UI widget node with higher Z-index has a higher priority to show
-    // on the final TUI, but the order is reversed when rendering). For those
-    // children that share the same Z-index value, it inserts at the end of
-    // those children.
-    let higher_zindex_pos: Vec<usize> = self
+    self
       .children_ids
-      .get(&parent_id)
+      .get_mut(&parent_id)
       .unwrap()
-      .iter()
-      .enumerate()
-      .filter(|(_index, cid)| match nodes.get(cid) {
-        Some(cnode) => cnode.zindex() > child_zindex,
-        None => false,
-      })
-      .map(|(index, _cid)| index)
-      .collect();
-    match higher_zindex_pos.first() {
-      Some(insert_pos) => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .insert(*insert_pos, child_id);
-      }
-      None => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .push(child_id);
-      }
-    }
+      .push(child_id);
 
     self._internal_check();
   }
@@ -217,11 +187,11 @@ where
 }
 
 #[derive(Debug)]
-/// The pre-order iterator of the tree.
+/// Iterate all the tree nodes in pre-order.
 ///
-/// For each node, it first visits the node itself, then visits all its children.
-/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-/// This also follows the order when rendering the widget tree to terminal device.
+/// For each node, it first visits the node itself, then visits all its
+/// children. This also follows the order when rendering the widget tree to
+/// terminal device.
 pub struct ItreeIter<'a, T>
 where
   T: Inodeable,
