@@ -329,7 +329,6 @@ where
   /// Get the iterator.
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
-  /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
   }
