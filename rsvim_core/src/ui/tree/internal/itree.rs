@@ -99,7 +99,6 @@ impl Relationships {
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
-    child_zindex: usize,
     nodes: &FoldMap<TreeNodeId, T>,
   ) where
     T: Inodeable,
@@ -420,20 +419,19 @@ where
 
     // Child node.
     let child_id = child_node.id();
-    let child_zindex = child_node.zindex();
 
     debug_assert!(!self.relationships.borrow().contains_id(child_id));
 
-    // Update attributes for both the newly inserted child, and all its descendants (if the child
-    // itself is also a sub-tree in current relationship).
+    // Update attributes for both the newly inserted child, and all its
+    // descendants (if the child itself is also a sub-tree in current
+    // relationship).
     //
-    // NOTE: This is useful when we want to move some widgets and all its children nodes to another
-    // place. We don't need to remove all the nodes (which could be slow), but only need to move
-    // the root of the tree.
+    // NOTE: This is useful when we want to move some widgets and all its
+    // children nodes to another place. We don't need to remove all the nodes
+    // (which could be slow), but only need to move the root of the tree.
     //
     // The attributes to be updated:
-    // 1. Depth.
-    // 2. Actual shape.
+    // 1. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
     child_node.set_actual_shape(&shapes::convert_relative_to_absolute(
@@ -444,12 +442,10 @@ where
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
-    self.relationships.borrow_mut().add_child(
-      parent_id,
-      child_id,
-      child_zindex,
-      &self.nodes,
-    );
+    self
+      .relationships
+      .borrow_mut()
+      .add_child(parent_id, child_id, &self.nodes);
 
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {
