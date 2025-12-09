@@ -113,8 +113,8 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
-    let root_container = Panel::new(shape);
-    let root_node = TreeNode::Root(root_container);
+    let root = Panel::new(shape);
+    let root_node = TreeNode::Root(root);
     Tree {
       base: Itree::new(root_node),
       command_line_id: None,
