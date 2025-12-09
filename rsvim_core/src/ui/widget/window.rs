@@ -25,13 +25,13 @@ use crate::ui::widget::cursor::Cursor;
 use crate::widget_enum_dispatcher;
 use content::Content;
 use opt::*;
-use root::RootContainer;
+use root::Panel;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  RootContainer(RootContainer),
+  RootContainer(Panel),
   Content(Content),
   Cursor(Cursor),
 }
@@ -56,7 +56,7 @@ pub struct Window {
 
 impl Window {
   pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let root = RootContainer::new(shape);
+    let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::RootContainer(root);
 

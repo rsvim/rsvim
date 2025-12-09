@@ -8,7 +8,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::root::RootContainer;
+use crate::ui::widget::root::Panel;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
@@ -22,7 +22,7 @@ pub type TreeNodeId = i32;
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  RootContainer(RootContainer),
+  RootContainer(Panel),
   Window(Window),
   CommandLine(CommandLine),
 }
@@ -113,7 +113,7 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
-    let root_container = RootContainer::new(shape);
+    let root_container = Panel::new(shape);
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
