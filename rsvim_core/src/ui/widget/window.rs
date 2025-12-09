@@ -2,7 +2,6 @@
 
 pub mod content;
 pub mod opt;
-pub mod root;
 
 #[cfg(test)]
 mod content_tests;
@@ -22,10 +21,10 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::panel::Panel;
 use crate::widget_enum_dispatcher;
 use content::Content;
 use opt::*;
-use root::Panel;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]

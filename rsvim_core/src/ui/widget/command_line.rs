@@ -3,7 +3,6 @@
 pub mod indicator;
 pub mod input;
 pub mod message;
-pub mod root;
 
 #[cfg(test)]
 pub mod indicator_tests;
@@ -21,6 +20,7 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
@@ -28,7 +28,6 @@ use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
-use root::Panel;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
