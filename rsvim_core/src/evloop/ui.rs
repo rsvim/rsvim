@@ -11,7 +11,7 @@ use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
-pub fn init_window(
+pub fn init_default_window(
   canvas_size: &U16Size,
   tree: &mut Tree,
   buf: BufferWk,

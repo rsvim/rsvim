@@ -549,7 +549,7 @@ impl EventLoop {
     let buf = Arc::downgrade(&buf);
     let text_contents = Arc::downgrade(&self.contents);
 
-    ui::init_window(
+    ui::init_default_window(
       &canvas_size,
       &mut tree,
       buf,
