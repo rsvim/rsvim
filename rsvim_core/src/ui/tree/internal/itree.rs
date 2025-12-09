@@ -209,13 +209,10 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
+  // Maps parent and children edges. The parent edge weight is negative,
+  // children edges are positive. The edge weight of each child is increased
+  // with the order when they are inserted, i.e. the first child has the lowest
+  // edge weight, the last child has the highest edge weight.
   relationships: RefCell<Relationships>,
 }
 

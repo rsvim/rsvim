@@ -10,11 +10,7 @@ use std::sync::atomic::Ordering;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn zindex(&self) -> usize;
-
-  fn set_zindex(&mut self, zindex: usize);
-
-  fn shape(&self) -> &IRect;
+  fn shape(&self) -> &irect;
 
   fn set_shape(&mut self, shape: &IRect);
 
