@@ -5,7 +5,6 @@ use crate::content::TextContentsArc;
 use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::CURSOR_BLINKING;
 use crate::ui::widget::cursor::CURSOR_HIDDEN;
 use crate::ui::widget::cursor::CURSOR_STYLE;
