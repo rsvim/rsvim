@@ -10,7 +10,7 @@ use std::sync::atomic::Ordering;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn shape(&self) -> &irect;
+  fn shape(&self) -> &IRect;
 
   fn set_shape(&mut self, shape: &IRect);
 
@@ -34,14 +34,6 @@ macro_rules! inode_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.id()
-      }
-
-      fn zindex(&self) -> usize {
-        self.$base_name.zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
@@ -86,22 +78,6 @@ macro_rules! inode_itree_impl {
     impl Inodeable for $struct_name {
       fn id(&self) -> TreeNodeId {
         self.$base_name.root_id()
-      }
-
-      fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
@@ -184,21 +160,6 @@ macro_rules! inode_enum_dispatcher {
         }
       }
 
-      fn zindex(&self) -> usize {
-        match self {
-          $(
-            $enum::$variant(e) => e.zindex(),
-          )*
-        }
-      }
-
-      fn set_zindex(&mut self, zindex: usize) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_zindex(zindex),
-          )*
-        }
-      }
 
       fn shape(&self) -> &IRect {
         match self {
@@ -287,7 +248,6 @@ pub struct InodeBase {
   id: TreeNodeId,
   shape: IRect,
   actual_shape: U16Rect,
-  zindex: usize,
   // enabled
   // visible
   flags: Flags,
@@ -300,21 +260,12 @@ impl InodeBase {
       id: next_node_id(),
       shape,
       actual_shape,
-      zindex: 0,
       flags: FLAGS,
     }
   }
 
   pub fn id(&self) -> TreeNodeId {
     self.id
-  }
-
-  pub fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  pub fn set_zindex(&mut self, zindex: usize) {
-    self.zindex = zindex;
   }
 
   pub fn shape(&self) -> &IRect {
