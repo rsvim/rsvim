@@ -8,7 +8,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::root::Panel;
+use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
@@ -113,8 +113,8 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
-    let root_container = Panel::new(shape);
-    let root_node = TreeNode::Root(root_container);
+    let root = Panel::new(shape);
+    let root_node = TreeNode::Root(root);
     Tree {
       base: Itree::new(root_node),
       command_line_id: None,
