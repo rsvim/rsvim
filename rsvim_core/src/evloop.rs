@@ -1,5 +1,6 @@
 //! Event loop.
 
+pub mod ui;
 pub mod writer;
 
 use crate::buf::BuffersManager;
