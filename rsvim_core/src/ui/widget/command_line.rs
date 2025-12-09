@@ -3,7 +3,6 @@
 pub mod indicator;
 pub mod input;
 pub mod message;
-pub mod root;
 
 #[cfg(test)]
 pub mod indicator_tests;
@@ -21,6 +20,7 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_enum_dispatcher;
@@ -28,13 +28,12 @@ use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
-use root::RootContainer;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
-  RootContainer(RootContainer),
+  Root(Panel),
   Indicator(Indicator),
   Input(Input),
   Cursor(Cursor),
@@ -43,7 +42,7 @@ pub enum CommandLineNode {
 
 inode_enum_dispatcher!(
   CommandLineNode,
-  RootContainer,
+  Root,
   Indicator,
   Input,
   Cursor,
@@ -52,7 +51,7 @@ inode_enum_dispatcher!(
 
 widget_enum_dispatcher!(
   CommandLineNode,
-  RootContainer,
+  Root,
   Indicator,
   Input,
   Cursor,
@@ -86,9 +85,9 @@ impl CommandLine {
       .unwrap();
 
     let cmdline_size = shape.size();
-    let root = RootContainer::new(shape);
+    let root = Panel::new(shape);
     let root_id = root.id();
-    let root_node = CommandLineNode::RootContainer(root);
+    let root_node = CommandLineNode::Root(root);
 
     let mut base = Itree::new(root_node);
 

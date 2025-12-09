@@ -6,19 +6,20 @@ use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone, Copy)]
-/// Root container.
-pub struct RootContainer {
+/// Logical node that renders nothing but give a cerntain shape for its
+/// descendant nodes.
+pub struct Panel {
   base: InodeBase,
 }
 
-impl RootContainer {
+impl Panel {
   pub fn new(shape: IRect) -> Self {
-    RootContainer {
+    Panel {
       base: InodeBase::new(shape),
     }
   }
 }
 
-inode_impl!(RootContainer, base);
+inode_impl!(Panel, base);
 
-impl Widgetable for RootContainer {}
+impl Widgetable for Panel {}
