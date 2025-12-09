@@ -95,10 +95,7 @@ impl Relationships {
     self.children_ids.contains_key(&id)
   }
 
-  pub fn add_child<T>(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId)
-  where
-    T: Inodeable,
-  {
+  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
     debug_assert!(!self.contains_id(child_id));
     self._internal_check();
 
