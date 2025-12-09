@@ -400,7 +400,8 @@ where
   /// descendants attributes.
   ///
   /// Below node attributes need to update:
-  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
+  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape
+  ///    should be always be clipped by parent's boundaries.
   ///
   /// # Returns
   ///
