@@ -95,12 +95,8 @@ impl Relationships {
     self.children_ids.contains_key(&id)
   }
 
-  pub fn add_child<T>(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_id: TreeNodeId,
-    nodes: &FoldMap<TreeNodeId, T>,
-  ) where
+  pub fn add_child<T>(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId)
+  where
     T: Inodeable,
   {
     debug_assert!(!self.contains_id(child_id));
@@ -445,7 +441,7 @@ where
     self
       .relationships
       .borrow_mut()
-      .add_child(parent_id, child_id, &self.nodes);
+      .add_child(parent_id, child_id);
 
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {
