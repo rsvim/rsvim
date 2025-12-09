@@ -63,12 +63,11 @@ pub fn make_tree_with_buffers_cmdline(
   let tree_arc = Tree::to_arc(Tree::new(canvas_size));
   let buffers = lock!(buffers_manager);
   let (_, buf) = buffers.first_key_value().unwrap();
-  let buf = Arc::downgrade(&buf);
+  let buf = Arc::downgrade(buf);
   let text_contents = Arc::downgrade(&text_contents);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
-  let tree_root_id = tree.root_id();
 
   evloop_ui::init_default_window(
     &canvas_size,
