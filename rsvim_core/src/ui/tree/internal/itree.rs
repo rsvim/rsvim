@@ -404,12 +404,10 @@ where
   ///    should be always be clipped by parent's boundaries.
   ///
   /// # Returns
-  ///
   /// 1. `None` if the `child_node` doesn't exist.
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  ///
   /// If `parent_id` doesn't exist.
   pub fn insert(
     &mut self,
