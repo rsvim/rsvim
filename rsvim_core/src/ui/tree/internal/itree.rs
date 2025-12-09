@@ -44,16 +44,6 @@ impl Relationships {
     }
   }
 
-  #[allow(dead_code)]
-  pub fn is_empty(&self) -> bool {
-    self.children_ids.is_empty()
-  }
-
-  #[allow(dead_code)]
-  pub fn len(&self) -> usize {
-    self.children_ids.len()
-  }
-
   #[cfg(not(test))]
   fn _internal_check(&self) {}
 
