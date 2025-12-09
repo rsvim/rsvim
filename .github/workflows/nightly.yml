@@ -42,7 +42,8 @@ jobs:
     env:
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        ${{ matrix.os == 'windows-2022' && '-Csymbol-mangling-version=v0 -Ctarget-feature=+crt-static ' || '' }}
+        ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0 -Ctarget-feature=+crt-static ' || '' }}
+      BIN_EXT: ${{ contains(matrix.os, 'windows') && '.exe' || '' }}
     needs: prepare
     strategy:
       matrix:
@@ -76,34 +77,12 @@ jobs:
         run: |
           cargo build --profile nightly
       - name: Create Artifact
-        if: ${{ matrix.os != 'windows-2022' }}
         run: |
-          mv target/nightly/rsvim .
-          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim
-      - name: Create Artifact (Windows)
-        if: ${{ matrix.os == 'windows-2022' }}
-        run: |
-          mv target/nightly/rsvim.exe .
-          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim.exe
-          7z a rsvim-${{ matrix.target }}.zip rsvim.exe
+          mv target/nightly/rsvim${{ env.BIN_EXT }} .
+          tar -czvf rsvim-${{ matrix.target }}.tar.gz rsvim${{ env.BIN_EXT }}
+          7z a rsvim-${{ matrix.target }}.zip rsvim${{ env.BIN_EXT }}
       - name: Create New Release
         uses: ncipollo/release-action@v1
-        if: ${{ matrix.os != 'windows-2022' }}
-        with:
-          allowUpdates: true
-          prerelease: true
-          makeLatest: true
-          name: nightly
-          removeArtifacts: false
-          tag: nightly
-          commit: ${{ github.ref_name }}
-          body: ""
-          omitBody: true
-          artifacts: |
-            rsvim-${{ matrix.target }}.tar.gz
-      - name: Create New Release (Windows)
-        uses: ncipollo/release-action@v1
-        if: ${{ matrix.os == 'windows-2022' }}
         with:
           allowUpdates: true
           prerelease: true
