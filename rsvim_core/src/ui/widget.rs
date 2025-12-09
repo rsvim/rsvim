@@ -2,7 +2,7 @@
 
 pub mod command_line;
 pub mod cursor;
-pub mod root;
+pub mod panel;
 pub mod window;
 
 #[cfg(test)]
