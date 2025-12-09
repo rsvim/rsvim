@@ -85,7 +85,7 @@ impl CommandLine {
       .unwrap();
 
     let cmdline_size = shape.size();
-    let root = RootContainer::new(shape);
+    let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
 
