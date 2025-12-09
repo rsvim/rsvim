@@ -31,13 +31,13 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
-  RootContainer(Panel),
+  Root(Panel),
   Content(Content),
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, RootContainer, Content, Cursor);
+inode_enum_dispatcher!(WindowNode, Root, Content, Cursor);
+widget_enum_dispatcher!(WindowNode, Root, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -58,7 +58,7 @@ impl Window {
   pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
     let root = Panel::new(shape);
     let root_id = root.id();
-    let root_node = WindowNode::RootContainer(root);
+    let root_node = WindowNode::Root(root);
 
     let content_shape = rect_from_size!(shape);
     let content_actual_shape = rect_as!(content_shape, u16);

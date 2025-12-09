@@ -28,13 +28,13 @@ use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
 use message::Message;
-use root::RootContainer;
+use root::Panel;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
-  RootContainer(RootContainer),
+  Root(Panel),
   Indicator(Indicator),
   Input(Input),
   Cursor(Cursor),
@@ -43,7 +43,7 @@ pub enum CommandLineNode {
 
 inode_enum_dispatcher!(
   CommandLineNode,
-  RootContainer,
+  Root,
   Indicator,
   Input,
   Cursor,
@@ -52,7 +52,7 @@ inode_enum_dispatcher!(
 
 widget_enum_dispatcher!(
   CommandLineNode,
-  RootContainer,
+  Root,
   Indicator,
   Input,
   Cursor,
@@ -86,9 +86,9 @@ impl CommandLine {
       .unwrap();
 
     let cmdline_size = shape.size();
-    let root = RootContainer::new(shape);
+    let root = Panel::new(shape);
     let root_id = root.id();
-    let root_node = CommandLineNode::RootContainer(root);
+    let root_node = CommandLineNode::Root(root);
 
     let mut base = Itree::new(root_node);
 
