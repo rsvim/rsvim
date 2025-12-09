@@ -2,9 +2,12 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
+use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::cursor::CURSOR_BLINKING;
+use crate::ui::widget::cursor::CURSOR_HIDDEN;
+use crate::ui::widget::cursor::CURSOR_STYLE;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
@@ -59,48 +62,22 @@ pub fn make_tree_with_buffers_cmdline(
   // UI Tree
   let tree_arc = Tree::to_arc(Tree::new(canvas_size));
   let buffers = lock!(buffers_manager);
+  let (_, buf) = buffers.first_key_value().unwrap();
+  let buf = Arc::downgrade(buf);
+  let text_contents = Arc::downgrade(&text_contents);
 
   let mut tree = lock!(tree_arc);
   tree.set_global_local_options(&window_local_opts);
-  let tree_root_id = tree.root_id();
 
-  // window
-  let window_shape = rect!(
-    0,
-    0,
-    canvas_size.width(),
-    canvas_size.height().saturating_sub(1)
+  evloop_ui::init_default_window(
+    &canvas_size,
+    &mut tree,
+    buf,
+    text_contents,
+    CURSOR_BLINKING,
+    CURSOR_HIDDEN,
+    CURSOR_STYLE,
   );
-  let window_shape = rect_as!(window_shape, isize);
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
-      Arc::downgrade(buf),
-    )
-  };
-  let window_id = window.id();
-
-  // cursor
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
-  window.insert_cursor(cursor);
-
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
-  tree.set_current_window_id(Some(window_id));
-
-  // command-line
-  let cmdline_shape = rect!(
-    0,
-    canvas_size.height().saturating_sub(1) as isize,
-    canvas_size.width() as isize,
-    canvas_size.height() as isize
-  );
-  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
-  let _cmdline_id = cmdline.id();
-
-  tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
   tree_arc.clone()
 }

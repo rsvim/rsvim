@@ -1,5 +1,6 @@
 //! Event loop.
 
+pub mod ui;
 pub mod writer;
 
 use crate::buf::BuffersManager;
@@ -28,9 +29,6 @@ use crate::state::ops::cmdline_ops;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
 use crossterm::event::Event;
 use crossterm::event::EventStream;
 use futures::StreamExt;
@@ -528,53 +526,35 @@ impl EventLoop {
   /// Initialize windows.
   pub fn _init_windows(&mut self) -> IoResult<()> {
     // Initialize default window, with default buffer.
-    let (canvas_size, canvas_cursor) = {
+    let (canvas_size, cursor_blinking, cursor_hidden, cursor_style) = {
       let canvas = lock!(self.canvas);
       let canvas_size = canvas.size();
       let canvas_cursor = *canvas.frame().cursor();
-      (canvas_size, canvas_cursor)
-    };
-    let mut tree = lock!(self.tree);
-    let tree_root_id = tree.root_id();
-    let window_shape = rect_from_size!(canvas_size);
-    let window_shape = rect_as!(window_shape, isize);
-    let mut window = {
-      let buffers = lock!(self.buffers);
-      let (buf_id, buf) = buffers.first_key_value().unwrap();
-      trace!("Bind first buffer to default window {:?}", buf_id);
-      Window::new(
-        tree.global_local_options(),
-        window_shape,
-        Arc::downgrade(buf),
+      (
+        canvas_size,
+        canvas_cursor.blinking(),
+        canvas_cursor.hidden(),
+        canvas_cursor.style(),
       )
     };
-    let window_id = window.id();
+    let mut tree = lock!(self.tree);
+    let (_buf_id, buf) = {
+      let buffers = lock!(self.buffers);
+      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      (*buf_id, buf.clone())
+    };
+    let buf = Arc::downgrade(&buf);
+    let text_contents = Arc::downgrade(&self.contents);
 
-    // Initialize cursor inside the default window.
-    let cursor_shape = rect!(0, 0, 1, 1);
-    let cursor = Cursor::new(
-      cursor_shape,
-      canvas_cursor.blinking(),
-      canvas_cursor.hidden(),
-      canvas_cursor.style(),
+    ui::init_default_window(
+      &canvas_size,
+      &mut tree,
+      buf,
+      text_contents,
+      cursor_blinking,
+      cursor_hidden,
+      cursor_style,
     );
-    let _previous_inserted_cursor = window.insert_cursor(cursor);
-    debug_assert!(_previous_inserted_cursor.is_none());
-
-    tree.bounded_insert(tree_root_id, TreeNode::Window(window));
-    tree.set_current_window_id(Some(window_id));
-
-    // Initialize default command-line.
-    let cmdline_shape = rect!(
-      0,
-      canvas_size.height().saturating_sub(1) as isize,
-      canvas_size.width() as isize,
-      canvas_size.height() as isize
-    );
-    let cmdline =
-      CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-
-    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }
