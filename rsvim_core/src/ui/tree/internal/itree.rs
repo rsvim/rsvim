@@ -95,15 +95,7 @@ impl Relationships {
     self.children_ids.contains_key(&id)
   }
 
-  pub fn add_child<T>(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_id: TreeNodeId,
-    child_zindex: usize,
-    nodes: &FoldMap<TreeNodeId, T>,
-  ) where
-    T: Inodeable,
-  {
+  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
     debug_assert!(!self.contains_id(child_id));
     self._internal_check();
 
@@ -114,40 +106,11 @@ impl Relationships {
     self.parent_id.insert(child_id, parent_id);
 
     // Binds connection from parent => child.
-    //
-    // NOTE: It inserts child to the `children_ids` vector which belongs to the parent, and the
-    // children are sorted by their Z-index value from lower to higher (UI widget node with higher
-    // Z-index has a higher priority to show on the final TUI, but the order is reversed when
-    // rendering). For those children that share the same Z-index value, it inserts at the end of
-    // those children.
-    let higher_zindex_pos: Vec<usize> = self
+    self
       .children_ids
-      .get(&parent_id)
+      .get_mut(&parent_id)
       .unwrap()
-      .iter()
-      .enumerate()
-      .filter(|(_index, cid)| match nodes.get(cid) {
-        Some(cnode) => cnode.zindex() > child_zindex,
-        None => false,
-      })
-      .map(|(index, _cid)| index)
-      .collect();
-    match higher_zindex_pos.first() {
-      Some(insert_pos) => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .insert(*insert_pos, child_id);
-      }
-      None => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .push(child_id);
-      }
-    }
+      .push(child_id);
 
     self._internal_check();
   }
@@ -208,22 +171,19 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children edges. The parent edge weight is negative, children edges are
-  // positive. The edge weight of each child is increased with the order when they are inserted,
-  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
-  //
-  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
-  // from lower to higher, for those children share the same Z-index, the child how owns the lower
-  // edge weight will be rendered first.
+  // Maps parent and children edges. The parent edge weight is negative,
+  // children edges are positive. The edge weight of each child is increased
+  // with the order when they are inserted, i.e. the first child has the lowest
+  // edge weight, the last child has the highest edge weight.
   relationships: RefCell<Relationships>,
 }
 
 #[derive(Debug)]
-/// The pre-order iterator of the tree.
+/// Iterate all the tree nodes in pre-order.
 ///
-/// For each node, it first visits the node itself, then visits all its children.
-/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-/// This also follows the order when rendering the widget tree to terminal device.
+/// For each node, it first visits the node itself, then visits all its
+/// children. This also follows the order when rendering the widget tree to
+/// terminal device.
 pub struct ItreeIter<'a, T>
 where
   T: Inodeable,
@@ -361,7 +321,6 @@ where
   /// Get the iterator.
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
-  /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
   }
@@ -425,24 +384,21 @@ where
     }
   }
 
-  /// Insert a node to the tree, i.e. push it to the children vector of the parent.
+  /// Insert a node to the tree, with a parent node.
   ///
-  /// This operation builds the connection between the parent and the inserted child.
-  ///
-  /// It also sorts the children vector after inserted by the z-index value,
-  /// and updates both the inserted child's attributes and all its descendants attributes.
+  /// This operation builds the connection between the parent and the inserted
+  /// child. Also updates both the inserted child's attributes and all its
+  /// descendants attributes.
   ///
   /// Below node attributes need to update:
-  ///
-  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
+  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape
+  ///    should be always be clipped by parent's boundaries.
   ///
   /// # Returns
-  ///
   /// 1. `None` if the `child_node` doesn't exist.
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  ///
   /// If `parent_id` doesn't exist.
   pub fn insert(
     &mut self,
@@ -455,20 +411,19 @@ where
 
     // Child node.
     let child_id = child_node.id();
-    let child_zindex = child_node.zindex();
 
     debug_assert!(!self.relationships.borrow().contains_id(child_id));
 
-    // Update attributes for both the newly inserted child, and all its descendants (if the child
-    // itself is also a sub-tree in current relationship).
+    // Update attributes for both the newly inserted child, and all its
+    // descendants (if the child itself is also a sub-tree in current
+    // relationship).
     //
-    // NOTE: This is useful when we want to move some widgets and all its children nodes to another
-    // place. We don't need to remove all the nodes (which could be slow), but only need to move
-    // the root of the tree.
+    // NOTE: This is useful when we want to move some widgets and all its
+    // children nodes to another place. We don't need to remove all the nodes
+    // (which could be slow), but only need to move the root of the tree.
     //
     // The attributes to be updated:
-    // 1. Depth.
-    // 2. Actual shape.
+    // 1. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
     child_node.set_actual_shape(&shapes::convert_relative_to_absolute(
@@ -479,12 +434,10 @@ where
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
-    self.relationships.borrow_mut().add_child(
-      parent_id,
-      child_id,
-      child_zindex,
-      &self.nodes,
-    );
+    self
+      .relationships
+      .borrow_mut()
+      .add_child(parent_id, child_id);
 
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {

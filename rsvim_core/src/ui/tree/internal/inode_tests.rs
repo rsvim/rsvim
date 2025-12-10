@@ -41,7 +41,6 @@ fn new() {
   assert_eq!(n1.borrow().value, 3);
   assert_eq!(n2.borrow().value, 4);
 
-  assert_eq!(n1.borrow().zindex(), 0);
   assert!(n1.borrow().enabled());
   assert!(n1.borrow().visible());
 

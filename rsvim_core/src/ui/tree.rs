@@ -50,25 +50,16 @@ widget_enum_dispatcher!(TreeNode, Root, Window, CommandLine);
 ///
 /// ## Priority
 ///
-/// * Children have higher priority to display on TUI than their parent, as
-///   well as receiving keyboard/mouse events.
-/// * For all the children under the same parent, the one with higher z-index
-///   has a higher priority than others.
+/// Children have higher priority to display on TUI than their parent, as well
+/// as receiving keyboard/mouse events.
 ///
 /// ## Attributes
 ///
-/// ### Shape (position and size)
+/// ### Shape/Position/Size
 ///
 /// A shape is always a rectangle, it can be relative based on its parent or
 /// absolute (actual) based on terminal. We use relative shape for an easier
 /// code logic, use absolute shape when rendering it to terminal.
-///
-/// ### Z-index
-///
-/// The z-index arranges the display priority of the content stack when
-/// multiple children overlap on each other, a widget with higher z-index has
-/// higher priority to be displayed. For those widgets have the same z-index,
-/// the later inserted one will cover the previous inserted ones.
 ///
 /// ### Visible/Enabled
 ///
