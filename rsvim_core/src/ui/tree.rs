@@ -2,7 +2,7 @@
 
 pub mod internal;
 
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
@@ -14,7 +14,7 @@ use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 pub use internal::*;
 
 pub type TreeNodeId = i32;
@@ -27,8 +27,8 @@ pub enum TreeNode {
   CommandLine(CommandLine),
 }
 
-inode_enum_dispatcher!(TreeNode, Root, Window, CommandLine);
-widget_enum_dispatcher!(TreeNode, Root, Window, CommandLine);
+inode_dispatcher!(TreeNode, Root, Window, CommandLine);
+widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The UI widget tree.

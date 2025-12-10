@@ -9,7 +9,7 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -22,7 +22,7 @@ use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 use content::Content;
 use opt::*;
 use std::sync::Arc;
@@ -35,8 +35,8 @@ pub enum WindowNode {
   Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, Root, Content, Cursor);
-widget_enum_dispatcher!(WindowNode, Root, Content, Cursor);
+inode_dispatcher!(WindowNode, Root, Content, Cursor);
+widget_dispatcher!(WindowNode, Root, Content, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the

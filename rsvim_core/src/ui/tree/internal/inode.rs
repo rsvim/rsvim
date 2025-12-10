@@ -149,7 +149,7 @@ macro_rules! inode_itree_impl {
 
 /// Generate enum dispatcher for `Inode`.
 #[macro_export]
-macro_rules! inode_enum_dispatcher {
+macro_rules! inode_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodeable for $enum {
       fn id(&self) -> TreeNodeId {
