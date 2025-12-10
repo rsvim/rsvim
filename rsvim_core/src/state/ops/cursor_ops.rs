@@ -536,7 +536,7 @@ pub fn cursor_move(
     }
   };
 
-  // Then try cursor move.
+  // Then move cursor.
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
