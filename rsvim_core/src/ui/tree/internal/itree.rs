@@ -696,13 +696,13 @@ where
   ) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = self
+        let maybe_parent_actual_size: Option<U16Rect> = self
           .nodes
           .get(&parent_id)
-          .map(|parent_node| *parent_node.actual_shape());
+          .map(|parent_node| parent_node.actual_shape().size());
 
-        match maybe_parent_actual_shape {
-          Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
+        match maybe_parent_actual_size {
+          Some(parent_actual_size) => match self.nodes.get_mut(&id) {
             Some(node) => {
               let current_shape = *node.shape();
               let expected_top_left_pos: IPos = point!(x, y);
@@ -714,7 +714,7 @@ where
               );
 
               let final_shape =
-                shapes::bound_shape(&expected_shape, &parent_actual_shape);
+                shapes::bound_shape(&expected_shape, &parent_actual_size);
               let final_top_left_pos: IPos = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
