@@ -45,7 +45,7 @@ pub fn make_viewport(
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),
-    &actual_shape,
+    &actual_shape.size(),
     start_line_idx,
     start_column_idx,
   );
