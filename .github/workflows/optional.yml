@@ -48,6 +48,9 @@ jobs:
       - name: Install Rust
         run: |
           rustup component add rust-src clippy
+      - name: Sccache Stats
+        run: |
+          sccache --show-stats
       - name: Check out 'current' branch
         uses: actions/checkout@v6
         with:

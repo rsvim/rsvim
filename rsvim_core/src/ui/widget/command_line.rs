@@ -8,7 +8,7 @@ pub mod message;
 pub mod indicator_tests;
 
 use crate::content::TextContentsWk;
-use crate::inode_enum_dispatcher;
+use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -23,7 +23,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_enum_dispatcher;
+use crate::widget_dispatcher;
 use indicator::Indicator;
 use indicator::IndicatorSymbol;
 use input::Input;
@@ -40,23 +40,9 @@ pub enum CommandLineNode {
   Message(Message),
 }
 
-inode_enum_dispatcher!(
-  CommandLineNode,
-  Root,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
+inode_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
 
-widget_enum_dispatcher!(
-  CommandLineNode,
-  Root,
-  Indicator,
-  Input,
-  Cursor,
-  Message
-);
+widget_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
