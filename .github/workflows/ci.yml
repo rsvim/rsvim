@@ -77,7 +77,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
-          cache-directories: ${{ contains(matrix.os, 'windows') && format('{}\\AppData\\Local\\Mozilla\\sccache\\cache', env.HOME) || (contains(matrix.os, 'ubuntu') && format('{}/.cache/sccache', env.HOME) || format('{}/Library/Caches/Mozilla.sccache')) }}
+          cache-directories: ${{ contains(matrix.os, 'windows') && format('{0}\\AppData\\Local\\Mozilla\\sccache\\cache', env.HOME) || (contains(matrix.os, 'ubuntu') && format('{0}/.cache/sccache', env.HOME) || format('{0}/Library/Caches/Mozilla.sccache')) }}
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
@@ -115,7 +115,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
-          cache-directories: ${{ format('{}/.cache/sccache', env.HOME) }}
+          cache-directories: ${{ format('{0}/.cache/sccache', env.HOME) }}
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |

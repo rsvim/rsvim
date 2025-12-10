@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
-          cache-directories: ${{ format('{}/.cache/sccache', env.HOME) }}
+          cache-directories: ${{ format('{0}/.cache/sccache', env.HOME) }}
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
