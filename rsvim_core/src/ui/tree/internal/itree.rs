@@ -476,12 +476,12 @@ where
     debug_assert!(self.nodes.contains_key(&parent_id));
 
     let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_shape = parent_node.actual_shape();
+    let parent_actual_size = parent_node.actual_shape().size();
 
     // Bound child shape
     child_node.set_shape(&shapes::bound_shape(
       child_node.shape(),
-      parent_actual_shape,
+      &parent_actual_size,
     ));
 
     self.insert(parent_id, child_node)
@@ -593,13 +593,13 @@ where
   ) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = self
+        let maybe_parent_actual_size: Option<U16Size> = self
           .nodes
           .get(&parent_id)
-          .map(|parent_node| *parent_node.actual_shape());
+          .map(|parent_node| parent_node.actual_shape().size());
 
-        match maybe_parent_actual_shape {
-          Some(parent_actual_shape) => {
+        match maybe_parent_actual_size {
+          Some(parent_actual_size) => {
             match self.nodes.get_mut(&id) {
               Some(node) => {
                 let current_shape = *node.shape();
@@ -616,7 +616,7 @@ where
                 );
 
                 let final_shape =
-                  shapes::bound_shape(&expected_shape, &parent_actual_shape);
+                  shapes::bound_shape(&expected_shape, &parent_actual_size);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
