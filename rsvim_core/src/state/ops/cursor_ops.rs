@@ -516,7 +516,7 @@ pub fn cursor_move(
       search_direction,
       vnode.editable_options(),
       text,
-      vnode.editable_actual_shape(),
+      &vnode.editable_actual_shape().size(),
       target_cursor_line,
       target_cursor_char,
     );
