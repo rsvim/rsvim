@@ -76,6 +76,8 @@ jobs:
         -Dwarnings ${{ matrix.os == 'windows-2022' && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: "/sccache/"
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
@@ -112,6 +114,8 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: "/sccache/"
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |

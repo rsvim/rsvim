@@ -43,6 +43,8 @@ jobs:
       RUSTC_WRAPPER: "sccache"
     steps:
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: "/sccache/"
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
