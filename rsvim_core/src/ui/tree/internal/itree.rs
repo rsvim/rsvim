@@ -696,7 +696,7 @@ where
   ) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_size: Option<U16Rect> = self
+        let maybe_parent_actual_size: Option<U16Size> = self
           .nodes
           .get(&parent_id)
           .map(|parent_node| parent_node.actual_shape().size());
