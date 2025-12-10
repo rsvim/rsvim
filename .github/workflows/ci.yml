@@ -81,6 +81,9 @@ jobs:
       - name: Install Rust
         run: |
           rustup component add rust-src clippy llvm-tools
+      - name: Sccache Stats
+        run: |
+          sccache --show-stats
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
@@ -117,6 +120,9 @@ jobs:
           rustup update --no-self-update ${{ matrix.rust_version }}
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
+      - name: Sccache Stats
+        run: |
+          sccache --show-stats
       - uses: actions/checkout@v6
       - name: Build Release
         run: |
