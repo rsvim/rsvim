@@ -548,12 +548,10 @@ pub fn cursor_move(
     );
 
     debug_assert!(vnode.editable_cursor_id().is_some());
-    // if vnode.editable_cursor_id().is_some() {
     vnode.move_editable_cursor_to(
       new_cursor_viewport.column_idx() as isize,
       new_cursor_viewport.row_idx() as isize,
     );
-    // }
   }
 }
 
