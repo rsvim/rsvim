@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 env:
-  CARGO_INCREMENTAL: 0
+  # CARGO_INCREMENTAL: 0
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
@@ -71,7 +71,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
-      SCCACHE_GHA_ENABLED: "true"
+      # SCCACHE_GHA_ENABLED: "true"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ matrix.os == 'windows-2022' && '-Csymbol-mangling-version=v0' || '' }}
@@ -111,7 +111,7 @@ jobs:
         rust_version: [1.89.0, stable, beta]
     env:
       RUSTC_WRAPPER: "sccache"
-      SCCACHE_GHA_ENABLED: "true"
+      # SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
