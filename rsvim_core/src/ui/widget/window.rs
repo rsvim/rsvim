@@ -68,7 +68,7 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(opts, buffer.text(), &content_actual_shape, 0, 0);
+        Viewport::view(opts, buffer.text(), &content_actual_shape.size(), 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
