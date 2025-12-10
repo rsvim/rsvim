@@ -53,21 +53,21 @@ impl ViewportLineRange {
 pub fn sync(
   opts: &WindowOptions,
   text: &Text,
-  shape: &U16Rect,
+  size: &U16Size,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
-  if shape.size().is_zero() {
+  if size.is_zero() {
     return (ViewportLineRange::default(), LiteMap::new());
   }
 
   match (opts.wrap(), opts.line_break()) {
-    (false, _) => sync_nowrap(text, shape, start_line, start_column),
+    (false, _) => sync_nowrap(text, size, start_line, start_column),
     (true, false) => {
-      sync_wrap_nolinebreak(text, shape, start_line, start_column)
+      sync_wrap_nolinebreak(text, size, start_line, start_column)
     }
-    (true, true) => sync_wrap_linebreak(text, shape, start_line, start_column),
+    (true, true) => sync_wrap_linebreak(text, size, start_line, start_column),
   }
 }
 
@@ -755,7 +755,7 @@ mod nowrap_detail {
   // spellchecker:on
   fn to_left(
     text: &Text,
-    _window_actual_shape: &U16Rect,
+    _window_actual_size: &U16Size,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1293,7 +1293,7 @@ mod wrap_detail {
   fn to_left_2_1(
     _proc_fn: ProcessLineFn,
     text: &Text,
-    _window_actual_shape: &U16Rect,
+    _window_actual_size: &U16Size,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1468,7 +1468,7 @@ mod wrap_detail {
   fn to_left_2_2(
     _proc_fn: ProcessLineFn,
     text: &Text,
-    _window_actual_shape: &U16Rect,
+    _window_actual_size: &U16Size,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1693,7 +1693,7 @@ pub fn search_anchor_downward(
   viewport: &Viewport,
   opts: &WindowOptions,
   text: &Text,
-  shape: &U16Rect,
+  size: &U16Size,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -1714,7 +1714,7 @@ pub fn search_anchor_downward(
     (false, _) => search_anchor_downward_nowrap(
       viewport,
       text,
-      shape,
+      size,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1723,7 +1723,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_nolinebreak,
       viewport,
       text,
-      shape,
+      size,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1732,7 +1732,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_linebreak,
       viewport,
       text,
-      shape,
+      size,
       target_cursor_line,
       target_cursor_char,
     ),
