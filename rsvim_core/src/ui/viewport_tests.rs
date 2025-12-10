@@ -57,7 +57,7 @@ pub fn update_viewport(
   let viewport = Viewport::view(
     window.options(),
     buf.text(),
-    window.actual_shape(),
+    &window.actual_shape().size(),
     start_line,
     start_column,
   );
@@ -82,7 +82,7 @@ fn search_viewport(
     direction,
     &opts,
     buf.text(),
-    window.actual_shape(),
+    &window.actual_shape().size(),
     target_cursor_line,
     target_cursor_char,
   );
@@ -92,7 +92,7 @@ fn search_viewport(
   let viewport = Viewport::view(
     &opts,
     buf.text(),
-    window.actual_shape(),
+    &window.actual_shape().size(),
     start_line,
     start_column,
   );

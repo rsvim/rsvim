@@ -557,12 +557,12 @@ impl Viewport {
   pub fn view(
     opts: &WindowOptions,
     text: &Text,
-    shape: &U16Rect,
+    size: &U16Size,
     start_line: usize,
     start_column: usize,
   ) -> Self {
     let (line_idx_range, lines) =
-      sync::sync(opts, text, shape, start_line, start_column);
+      sync::sync(opts, text, size, start_line, start_column);
 
     debug_assert_eq!(line_idx_range.start_line_idx(), start_line);
 
@@ -587,12 +587,12 @@ impl Viewport {
     direction: ViewportSearchDirection,
     opts: &WindowOptions,
     text: &Text,
-    shape: &U16Rect,
+    size: &U16Size,
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> (usize, usize) {
     // If window is zero-sized.
-    if shape.size().is_zero() {
+    if size.is_zero() {
       return (0, 0);
     }
 
@@ -601,7 +601,7 @@ impl Viewport {
         self,
         opts,
         text,
-        shape,
+        size,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -609,7 +609,7 @@ impl Viewport {
         self,
         opts,
         text,
-        shape,
+        size,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -617,7 +617,7 @@ impl Viewport {
         self,
         opts,
         text,
-        shape,
+        size,
         target_cursor_line,
         target_cursor_char,
       ),
@@ -625,7 +625,7 @@ impl Viewport {
         self,
         opts,
         text,
-        shape,
+        size,
         target_cursor_line,
         target_cursor_char,
       ),
