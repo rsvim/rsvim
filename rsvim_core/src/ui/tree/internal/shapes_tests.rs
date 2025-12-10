@@ -77,7 +77,7 @@ fn bound_size1() {
     rect!(-1, -1, -1, -1),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = _bound_size(&p.0, &p.1);
+    let actual = _bound_size(&p.0, &p.1.size());
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
