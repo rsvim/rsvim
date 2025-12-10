@@ -25,8 +25,13 @@ fn set_message(
   let opts = *cmdline.options();
   let actual_shape = *cmdline.message().actual_shape();
 
-  let new_message_viewport =
-    Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
+  let new_message_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    message_text,
+    &actual_shape.size(),
+    0,
+    0,
+  ));
 
   cmdline.set_message_viewport(new_message_viewport);
 }
@@ -78,8 +83,13 @@ pub fn cmdline_clear_message(
   let opts = *cmdline.options();
   let actual_shape = *cmdline.message().actual_shape();
 
-  let new_message_viewport =
-    Viewport::to_arc(Viewport::view(&opts, message_text, &actual_shape, 0, 0));
+  let new_message_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    message_text,
+    &actual_shape.size(),
+    0,
+    0,
+  ));
 
   cmdline.set_message_viewport(new_message_viewport);
 }
@@ -95,7 +105,7 @@ pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
   let actual_shape = *cmdline.input().actual_shape();
 
   let new_input_viewport =
-    Viewport::view(&opts, input_text, &actual_shape, 0, 0);
+    Viewport::view(&opts, input_text, &actual_shape.size(), 0, 0);
   let new_input_cursor_viewport = CursorViewport::to_arc(
     CursorViewport::from_top_left(&new_input_viewport, input_text),
   );
