@@ -384,8 +384,7 @@ where
     }
   }
 
-  /// Insert a node to the tree, i.e. push it to the children vector of the
-  /// parent.
+  /// Insert a node to the tree, with a parent node.
   ///
   /// This operation builds the connection between the parent and the inserted
   /// child. Also updates both the inserted child's attributes and all its
