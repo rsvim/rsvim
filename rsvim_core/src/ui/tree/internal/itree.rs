@@ -8,27 +8,70 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::TaffyTree;
 
 const INVALID_ROOT_ID: TreeNodeId = -1;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
-  // Root id.
+  ta: TaffyTree,
+
+  // Maps TreeNodeId <=> taffy::NodeId
+  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
+  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
+
+  // Cached actual shapes
+  cached_actual_shapes: FoldMap<TreeNodeId, U16Rect>,
+
+  // Root id
   root_id: TreeNodeId,
 
-  // Maps node id => its parent node id.
-  parent_id: FoldMap<TreeNodeId, TreeNodeId>,
-
-  // Maps node id => all its children node ids.
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+  // For debugging
+  names: FoldMap<TreeNodeId, &'static str>,
 }
+
+rc_refcell_ptr!(Relationships);
 
 impl Relationships {
   pub fn new() -> Self {
     Self {
+      ta: TaffyTree::new(),
+      id2taid: FoldMap::new(),
+      taid2id: FoldMap::new(),
+      cached_actual_shapes: FoldMap::new(),
       root_id: INVALID_ROOT_ID,
-      parent_id: FoldMap::new(),
-      children_ids: FoldMap::new(),
+      names: FoldMap::new(),
+    }
+  }
+
+  #[allow(dead_code)]
+  pub fn is_empty(&self) -> bool {
+    self.id2taid.is_empty()
+  }
+
+  #[allow(dead_code)]
+  pub fn len(&self) -> usize {
+    self.id2taid.len()
+  }
+
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
+
+  #[cfg(test)]
+  fn _internal_check(&self) {
+    debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
+    debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
+
+    for (id, loid) in self.id2taid.iter() {
+      debug_assert!(self.taid2id.contains_key(loid));
+      debug_assert_eq!(*self.taid2id.get(loid).unwrap(), *id);
+      if let Some(parent_loid) = self.ta.parent(*loid) {
+        debug_assert!(self.taid2id.contains_key(&parent_loid));
+      }
+    }
+    for (loid, nid) in self.taid2id.iter() {
+      debug_assert!(self.id2taid.contains_key(nid));
+      debug_assert_eq!(*self.id2taid.get(nid).unwrap(), *loid);
     }
   }
 
@@ -40,48 +83,6 @@ impl Relationships {
     match self.children_ids.get(&id) {
       Some(children_ids) => children_ids.to_vec(),
       None => Vec::new(),
-    }
-  }
-
-  #[allow(dead_code)]
-  pub fn is_empty(&self) -> bool {
-    self.children_ids.is_empty()
-  }
-
-  #[allow(dead_code)]
-  pub fn len(&self) -> usize {
-    self.children_ids.len()
-  }
-
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
-  fn _internal_check(&self) {
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(self.root_id);
-
-    while let Some(id) = que.pop_front() {
-      let children_ids = self.children_ids(id);
-      for c in children_ids {
-        let p = self.parent_id.get(&c).cloned();
-        debug_assert!(p.is_some());
-        debug_assert_eq!(p.unwrap(), id);
-      }
-      match self.parent_id.get(&id).cloned() {
-        Some(parent) => {
-          debug_assert_eq!(
-            self
-              .children_ids(parent)
-              .iter()
-              .cloned()
-              .filter(|c| *c == id)
-              .count(),
-            1
-          );
-        }
-        None => debug_assert_eq!(id, self.root_id),
-      }
     }
   }
 
