@@ -109,8 +109,10 @@ impl Tree {
 
     let root = Panel::new(shape);
     let root_node = TreeNode::Root(root);
+    base.insert_root(root_node);
+
     Tree {
-      base: Itree::new(root_node),
+      base,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
