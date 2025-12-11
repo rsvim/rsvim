@@ -509,18 +509,13 @@ where
   ///    stops at its parent boundary.
   ///
   /// # Returns
-  ///
   /// 1. `None` if the `child_node` doesn't exist.
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  ///
-  /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
+  /// 1. If `parent_id` doesn't exist.
+  /// 2. If `child_id` already exist.
+  pub fn bounded_insert(&mut self, parent_id: TreeNodeId, mut child_node: T) {
     // Panics if `parent_id` not exists.
     debug_assert!(self.nodes.contains_key(&parent_id));
 
@@ -544,13 +539,11 @@ where
   /// thus once you insert it back in the same tree, its descendants are still connected with the removed node.
   ///
   /// # Returns
-  ///
   /// 1. `None` if node `id` doesn't exist.
   /// 2. The removed node on the node `id`.
   ///
   /// # Panics
-  ///
-  /// If the node `id` is the root node id since root node cannot be removed.
+  /// If the node `id` is root node and root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relationships.borrow().root_id());
