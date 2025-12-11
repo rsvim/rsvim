@@ -500,7 +500,8 @@ fn push1() {
    *       n2, n3, n4, n5
    * ```
    */
-  let mut tree = Itree::new(nodes[0]);
+  let mut tree = Itree::new();
+  tree.insert_root(nodes[0]);
   for node in nodes.iter().skip(1) {
     tree.insert(nodes_ids[0], *node);
   }
@@ -544,7 +545,8 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
   node_ids.push(root_id);
   value += 1;
 
-  let mut tree = Itree::new(root);
+  let mut tree = Itree::new();
+  tree.insert_root(root);
   for _ in 1..n {
     let node = TestValue::new(value, s);
     let node_id = node.id();
