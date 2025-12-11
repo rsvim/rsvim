@@ -5,6 +5,7 @@ use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::inode::next_node_id;
 use crate::ui::tree::internal::shapes;
+use compact_str::ToCompactString;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
