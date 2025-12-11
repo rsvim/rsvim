@@ -256,7 +256,6 @@ where
   }
 }
 
-// Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
@@ -352,7 +351,6 @@ where
     ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
   }
 }
-// Attributes }
 
 impl<T> Default for Itree<T>
 where
