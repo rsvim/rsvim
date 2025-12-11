@@ -77,7 +77,7 @@ fn bound_size1() {
     rect!(-1, -1, -1, -1),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = _bound_size(&p.0, &p.1);
+    let actual = _bound_size(&p.0, &p.1.size());
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
@@ -106,7 +106,7 @@ fn bound_pos1() {
     rect!(0, 3, 2, 5),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = _bound_pos(&p.0, &p.1);
+    let actual = _bound_pos(&p.0, &p.1.size());
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
@@ -135,7 +135,7 @@ fn bound1() {
     rect!(0, 4, 6, 8),
   ];
   for (i, p) in inputs.iter().enumerate() {
-    let actual = bound_shape(&p.0, &p.1);
+    let actual = bound_shape(&p.0, &p.1.size());
     let expect = expects[i];
     info!(
       "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",

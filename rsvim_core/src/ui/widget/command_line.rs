@@ -96,7 +96,7 @@ impl CommandLine {
       let input_viewport = Viewport::view(
         &options,
         text_contents.command_line_input(),
-        &input_actual_shape,
+        &input_actual_shape.size(),
         0,
         0,
       );
@@ -110,7 +110,7 @@ impl CommandLine {
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
-        &message_actual_shape,
+        &message_actual_shape.size(),
         0,
         0,
       );

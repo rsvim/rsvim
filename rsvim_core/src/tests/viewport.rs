@@ -42,10 +42,11 @@ pub fn make_viewport(
   let buffer = lock!(buffer);
   let actual_shape = rect_from_size!(terminal_size);
   let actual_shape = rect_as!(actual_shape, u16);
+  let actual_size = actual_shape.size();
   let viewport = Viewport::view(
     &window_options,
     buffer.text(),
-    &actual_shape,
+    &actual_size,
     start_line_idx,
     start_column_idx,
   );
