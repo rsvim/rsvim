@@ -104,10 +104,15 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
+
+    let mut base = Itree::new();
+
     let root = Panel::new(shape);
     let root_node = TreeNode::Root(root);
+    base.insert_root(root_node);
+
     Tree {
-      base: Itree::new(root_node),
+      base,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,

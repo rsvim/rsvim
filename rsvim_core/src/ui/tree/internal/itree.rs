@@ -9,6 +9,8 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 
+const INVALID_ROOT_ID: TreeNodeId = -1;
+
 #[derive(Debug, Clone)]
 pub struct Relationships {
   // Root id.
@@ -22,14 +24,11 @@ pub struct Relationships {
 }
 
 impl Relationships {
-  pub fn new(root_id: TreeNodeId) -> Self {
-    let mut children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>> = FoldMap::new();
-    children_ids.insert(root_id, Vec::new());
-
+  pub fn new() -> Self {
     Self {
-      root_id,
+      root_id: INVALID_ROOT_ID,
       parent_id: FoldMap::new(),
-      children_ids,
+      children_ids: FoldMap::new(),
     }
   }
 
@@ -95,27 +94,52 @@ impl Relationships {
     self.children_ids.contains_key(&id)
   }
 
-  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
+  fn _add_child_impl(
+    &mut self,
+    parent_id: Option<TreeNodeId>,
+    child_id: TreeNodeId,
+  ) {
     debug_assert!(!self.contains_id(child_id));
     self._internal_check();
 
-    // Initialize children_ids vector.
-    self.children_ids.insert(child_id, Vec::new());
+    if parent_id.is_none() && self.root_id == INVALID_ROOT_ID {
+      self.root_id = child_id;
+      self.children_ids.insert(child_id, Vec::new());
+    } else {
+      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
+      debug_assert!(parent_id.is_some());
 
-    // Binds connection from child => parent.
-    self.parent_id.insert(child_id, parent_id);
+      let parent_id = parent_id.unwrap();
+      // Initialize children_ids vector.
+      self.children_ids.insert(child_id, Vec::new());
 
-    // Binds connection from parent => child.
-    self
-      .children_ids
-      .get_mut(&parent_id)
-      .unwrap()
-      .push(child_id);
+      // Binds connection from child => parent.
+      self.parent_id.insert(child_id, parent_id);
+
+      // Binds connection from parent => child.
+      self
+        .children_ids
+        .get_mut(&parent_id)
+        .unwrap()
+        .push(child_id);
+    }
 
     self._internal_check();
   }
 
+  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
+    self._add_child_impl(Some(parent_id), child_id);
+  }
+
+  pub fn add_root(&mut self, child_id: TreeNodeId) {
+    self._add_child_impl(None, child_id);
+  }
+
   pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
+    // root node is not allowed to be removed.
+    debug_assert_ne!(child_id, self.root_id);
+    debug_assert_ne!(child_id, INVALID_ROOT_ID);
+
     self._internal_check();
 
     let result = match self.parent_id.remove(&child_id) {
@@ -160,6 +184,12 @@ impl Relationships {
 
     self._internal_check();
     result
+  }
+}
+
+impl Default for Relationships {
+  fn default() -> Self {
+    Self::new()
   }
 }
 
@@ -225,19 +255,14 @@ where
   }
 }
 
-// Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(root_node: T) -> Self {
-    let root_id = root_node.id();
-    let mut nodes = FoldMap::new();
-    nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
+  pub fn new() -> Self {
     Itree {
-      nodes,
-      relationships,
+      nodes: FoldMap::new(),
+      relationships: RefCell::new(Relationships::new()),
     }
   }
 
@@ -246,8 +271,6 @@ where
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert!(!self.nodes.is_empty());
-    debug_assert!(!self.relationships.borrow().is_empty());
     debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
 
     let root_id = self.relationships.borrow().root_id();
@@ -325,7 +348,15 @@ where
     ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
   }
 }
-// Attributes }
+
+impl<T> Default for Itree<T>
+where
+  T: Inodeable,
+{
+  fn default() -> Self {
+    Self::new()
+  }
+}
 
 // Insert/Remove {
 impl<T> Itree<T>
@@ -384,6 +415,38 @@ where
     }
   }
 
+  /// Insert root node, without a parent node.
+  pub fn insert_root(&mut self, mut child_node: T) {
+    self._internal_check();
+
+    // Child node.
+    let child_id = child_node.id();
+
+    debug_assert!(self.nodes.is_empty());
+    debug_assert!(self.relationships.borrow().is_empty());
+
+    // Update attributes for both the newly inserted child, and all its
+    // descendants (if the child itself is also a sub-tree in current
+    // relationship).
+    //
+    // NOTE: This is useful when we want to move some widgets and all its
+    // children nodes to another place. We don't need to remove all the nodes
+    // (which could be slow), but only need to move the root of the tree.
+    //
+    // The attributes to be updated:
+    // 1. Actual shape.
+    let shape = *child_node.shape();
+    let actual_shape = rect_as!(shape, u16);
+    child_node.set_actual_shape(&actual_shape);
+
+    // Insert node into collection.
+    self.nodes.insert(child_id, child_node);
+    // Create first edge for root node.
+    self.relationships.borrow_mut().add_root(child_id);
+
+    self._internal_check();
+  }
+
   /// Insert a node to the tree, with a parent node.
   ///
   /// This operation builds the connection between the parent and the inserted
@@ -399,7 +462,7 @@ where
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  /// If `parent_id` doesn't exist.
+  /// 1. If `parent_id` doesn't exist.
   pub fn insert(
     &mut self,
     parent_id: TreeNodeId,
@@ -460,13 +523,11 @@ where
   ///    stops at its parent boundary.
   ///
   /// # Returns
-  ///
   /// 1. `None` if the `child_node` doesn't exist.
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  ///
-  /// If `parent_id` doesn't exist.
+  /// 1. If `parent_id` doesn't exist.
   pub fn bounded_insert(
     &mut self,
     parent_id: TreeNodeId,
@@ -495,13 +556,11 @@ where
   /// thus once you insert it back in the same tree, its descendants are still connected with the removed node.
   ///
   /// # Returns
-  ///
   /// 1. `None` if node `id` doesn't exist.
   /// 2. The removed node on the node `id`.
   ///
   /// # Panics
-  ///
-  /// If the node `id` is the root node id since root node cannot be removed.
+  /// If the node `id` is root node and root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relationships.borrow().root_id());

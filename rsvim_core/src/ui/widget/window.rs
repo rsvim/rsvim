@@ -55,14 +55,15 @@ pub struct Window {
 
 impl Window {
   pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
+    let mut base = Itree::new();
+
     let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
+    base.insert_root(root_node);
 
     let content_shape = rect_from_size!(shape);
     let content_actual_shape = rect_as!(content_shape, u16);
-
-    let mut base = Itree::new(root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
