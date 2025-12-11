@@ -452,12 +452,9 @@ where
   /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
   /// # Panics
-  /// If `parent_id` doesn't exist.
-  pub fn insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
+  /// 1. If `parent_id` doesn't exist.
+  /// 2. If `child_id` already exist.
+  pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationships.borrow().contains_id(parent_id));
