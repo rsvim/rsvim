@@ -137,6 +137,10 @@ impl Relationships {
   }
 
   pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
+    // root node is not allowed to be removed.
+    debug_assert_ne!(child_id, self.root_id);
+    debug_assert_ne!(child_id, INVALID_ROOT_TREE_NODE_ID);
+
     self._internal_check();
 
     let result = match self.parent_id.remove(&child_id) {
