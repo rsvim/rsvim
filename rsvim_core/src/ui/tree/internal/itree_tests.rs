@@ -45,10 +45,11 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
+  let mut tree = Itree::new();
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
-  let tree = Itree::new(n1);
+  tree.insert_root(n1);
 
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.root_id(), nid1);
@@ -59,6 +60,8 @@ fn new() {
 #[test]
 fn insert1() {
   // test_log_init();
+
+  let mut tree = Itree::new();
 
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
@@ -94,7 +97,7 @@ fn insert1() {
    *     n4  n5    n6
    * ```
    */
-  let mut tree = Itree::new(n1);
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
@@ -157,6 +160,7 @@ fn insert1() {
 fn insert2() {
   // test_log_init();
 
+  let mut tree = Itree::new();
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
@@ -207,7 +211,7 @@ fn insert2() {
    *         n8   n9
    * ```
    */
-  let mut tree = Itree::new(n1);
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
@@ -298,6 +302,7 @@ fn insert2() {
 fn shape1() {
   // test_log_init();
 
+  let mut tree = Itree::new();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
@@ -357,7 +362,7 @@ fn shape1() {
    *         n8   n9
    * ```
    */
-  let mut tree = Itree::new(n1);
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
@@ -400,6 +405,7 @@ fn shape1() {
 fn shape2() {
   // test_log_init();
 
+  let mut tree = Itree::new();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
@@ -444,7 +450,7 @@ fn shape2() {
    *     n6
    * ```
    */
-  let mut tree = Itree::new(n1);
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
