@@ -227,7 +227,7 @@ impl Relationships {
 
   #[inline]
   pub fn attached(&self, id: TreeNodeId) -> bool {
-    id == self.root_nid || self.parent(id).is_some()
+    id == self.root_id || self.parent(id).is_some()
   }
 
   #[inline]
