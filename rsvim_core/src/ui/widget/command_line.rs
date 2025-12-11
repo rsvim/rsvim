@@ -70,12 +70,14 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let cmdline_size = shape.size();
+    let mut base = Itree::new();
+
     let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
+    base.insert_root(root_node);
 
-    let mut base = Itree::new(root_node);
+    let cmdline_size = shape.size();
 
     let indicator_shape = rect!(0, 0, 1, cmdline_size.height());
     let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
