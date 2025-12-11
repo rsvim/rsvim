@@ -304,7 +304,7 @@ impl Relationships {
     &mut self,
     style: Style,
     children: &[TreeNodeId],
-    name: &str,
+    name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let children_loids = children
@@ -315,7 +315,7 @@ impl Relationships {
     let id = next_node_id();
     self.id2taid.insert(id, loid);
     self.taid2id.insert(loid, id);
-    self.names.insert(id, name.to_compact_string());
+    self.names.insert(id, name);
     self._internal_check();
     Ok(id)
   }
