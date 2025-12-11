@@ -482,7 +482,7 @@ where
     ));
 
     // Insert node into collection.
-    let result = self.nodes.insert(child_id, child_node);
+    self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
     self
       .relationships
@@ -495,7 +495,6 @@ where
     }
 
     self._internal_check();
-    result
   }
 
   /// Insert a node to the tree.
