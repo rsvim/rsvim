@@ -90,16 +90,16 @@ jobs:
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Nextest
-        run: |
-          cargo nextest run --color=never --no-capture --all
+      # - name: Nextest
+      #   run: |
+      #     cargo nextest run --color=never --no-capture --all
       - name: Test
         run: |
           cargo test --color=never --workspace
       - name: Nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
-          cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info
+          cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
       - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
