@@ -255,14 +255,10 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn new(root_node: T) -> Self {
-    let root_id = root_node.id();
-    let mut nodes = FoldMap::new();
-    nodes.insert(root_id, root_node);
-    let relationships = RefCell::new(Relationships::new(root_id));
+  pub fn new() -> Self {
     Itree {
-      nodes,
-      relationships,
+      nodes: FoldMap::new(),
+      relationships: RefCell::new(Relationships::new()),
     }
   }
 
