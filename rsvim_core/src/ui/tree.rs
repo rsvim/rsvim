@@ -104,6 +104,9 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
+
+    let mut base = Itree::new();
+
     let root = Panel::new(shape);
     let root_node = TreeNode::Root(root);
     Tree {

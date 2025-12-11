@@ -405,6 +405,38 @@ where
     }
   }
 
+  /// Insert root node, without a parent node.
+  pub fn insert_root(&mut self, mut child_node: T) {
+    self._internal_check();
+
+    // Child node.
+    let child_id = child_node.id();
+
+    debug_assert!(self.nodes.is_empty());
+    debug_assert!(self.relationships.borrow().is_empty());
+
+    // Update attributes for both the newly inserted child, and all its
+    // descendants (if the child itself is also a sub-tree in current
+    // relationship).
+    //
+    // NOTE: This is useful when we want to move some widgets and all its
+    // children nodes to another place. We don't need to remove all the nodes
+    // (which could be slow), but only need to move the root of the tree.
+    //
+    // The attributes to be updated:
+    // 1. Actual shape.
+    let shape = *child_node.shape();
+    let actual_shape = rect_as!(shape, u16);
+    child_node.set_actual_shape(&actual_shape);
+
+    // Insert node into collection.
+    self.nodes.insert(child_id, child_node);
+    // Create first edge for root node.
+    self.relationships.borrow_mut().add_root(child_id);
+
+    self._internal_check();
+  }
+
   /// Insert a node to the tree, with a parent node.
   ///
   /// This operation builds the connection between the parent and the inserted
