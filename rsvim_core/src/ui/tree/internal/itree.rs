@@ -129,23 +129,11 @@ impl Relationships {
   }
 
   pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
-    debug_assert!(!self.contains_id(child_id));
-    self._internal_check();
+    self._add_child_impl(Some(parent_id), child_id);
+  }
 
-    // Initialize children_ids vector.
-    self.children_ids.insert(child_id, Vec::new());
-
-    // Binds connection from child => parent.
-    self.parent_id.insert(child_id, parent_id);
-
-    // Binds connection from parent => child.
-    self
-      .children_ids
-      .get_mut(&parent_id)
-      .unwrap()
-      .push(child_id);
-
-    self._internal_check();
+  pub fn add_root(&mut self, child_id: TreeNodeId) {
+    self._add_child_impl(None, child_id);
   }
 
   pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
