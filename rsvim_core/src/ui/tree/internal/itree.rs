@@ -8,6 +8,8 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::Style;
+use taffy::TaffyResult;
 use taffy::TaffyTree;
 
 const INVALID_ROOT_ID: TreeNodeId = -1;
@@ -75,116 +77,244 @@ impl Relationships {
     }
   }
 
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.parent_id.get(&id).cloned()
+  pub fn set_root_id(&mut self, root_id: TreeNodeId) {
+    debug_assert_ne!(root_id, INVALID_ROOT_ID);
+    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
+    self.root_id = root_id;
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    match self.children_ids.get(&id) {
-      Some(children_ids) => children_ids.to_vec(),
-      None => Vec::new(),
-    }
-  }
-
-  pub fn root_id(&self) -> TreeNodeId {
-    self.root_id
-  }
-
-  pub fn contains_id(&self, id: TreeNodeId) -> bool {
-    self._internal_check();
-    self.children_ids.contains_key(&id)
-  }
-
-  fn _add_child_impl(
+  pub fn new_leaf(
     &mut self,
-    parent_id: Option<TreeNodeId>,
-    child_id: TreeNodeId,
-  ) {
-    debug_assert!(!self.contains_id(child_id));
+    style: Style,
+    name: &str,
+  ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-
-    if parent_id.is_none() && self.root_id == INVALID_ROOT_ID {
-      self.root_id = child_id;
-      self.children_ids.insert(child_id, Vec::new());
-    } else {
-      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
-      debug_assert!(parent_id.is_some());
-
-      let parent_id = parent_id.unwrap();
-      // Initialize children_ids vector.
-      self.children_ids.insert(child_id, Vec::new());
-
-      // Binds connection from child => parent.
-      self.parent_id.insert(child_id, parent_id);
-
-      // Binds connection from parent => child.
-      self
-        .children_ids
-        .get_mut(&parent_id)
-        .unwrap()
-        .push(child_id);
-    }
-
+    let loid = self.lo.new_leaf(style)?;
+    let nid = next_node_id();
+    self.nid2loid.insert(nid, loid);
+    self.loid2nid.insert(loid, nid);
+    self.names.insert(nid, name.to_compact_string());
     self._internal_check();
+    Ok(nid)
   }
 
-  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
-    self._add_child_impl(Some(parent_id), child_id);
-  }
-
-  pub fn add_root(&mut self, child_id: TreeNodeId) {
-    self._add_child_impl(None, child_id);
-  }
-
-  pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
-    // root node is not allowed to be removed.
-    debug_assert_ne!(child_id, self.root_id);
-    debug_assert_ne!(child_id, INVALID_ROOT_ID);
-
+  pub fn compute_layout(
+    &mut self,
+    id: TreeNodeId,
+    available_size: taffy::Size<AvailableSpace>,
+  ) -> TaffyResult<()> {
     self._internal_check();
-
-    let result = match self.parent_id.remove(&child_id) {
-      Some(removed_parent) => {
-        match self.children_ids.get_mut(&removed_parent) {
-          Some(to_be_removed_children) => {
-            let to_be_removed_child = to_be_removed_children
-              .iter()
-              .enumerate()
-              .filter(|(_idx, c)| **c == child_id)
-              .map(|(idx, c)| (idx, *c))
-              .collect::<Vec<(usize, TreeNodeId)>>();
-            if !to_be_removed_child.is_empty() {
-              debug_assert_eq!(to_be_removed_child.len(), 1);
-              let to_be_removed = to_be_removed_child[0];
-              to_be_removed_children.remove(to_be_removed.0);
-
-              // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
-              // api.
-              let children_of_to_be_removed_exists =
-                self.children_ids.contains_key(&to_be_removed.1);
-              let children_of_to_be_removed_is_empty = self
-                .children_ids
-                .get(&to_be_removed.1)
-                .is_none_or(|children| children.is_empty());
-              if children_of_to_be_removed_exists
-                && children_of_to_be_removed_is_empty
-              {
-                self.children_ids.remove(&to_be_removed.1);
-              }
-
-              true
-            } else {
-              false
-            }
-          }
-          None => false,
-        }
-      }
-      None => false,
-    };
-
+    let loid = self.nid2loid.get(&id).unwrap();
+    let result = self.lo.compute_layout(*loid, available_size);
+    self.clear_cached_actual_shapes(id);
     self._internal_check();
     result
+  }
+
+  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.layout(*loid)
+  }
+
+  #[inline]
+  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
+    let layout = self.layout(id)?;
+    let shape = rect_from_layout!(layout);
+    let shape = rect_as!(shape, isize);
+
+    match self.parent(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(parent_id)?;
+        let bounded_shape = shapes::bound_shape(&shape, &parent_actual_shape);
+        Ok(bounded_shape)
+      }
+      None => {
+        let min_x = num_traits::clamp_min(shape.min().x, 0);
+        let min_y = num_traits::clamp_min(shape.min().y, 0);
+        let max_x = num_traits::clamp_min(shape.max().x, min_x);
+        let max_y = num_traits::clamp_min(shape.max().y, min_y);
+        let bounded_shape = rect!(min_x, min_y, max_x, max_y);
+        Ok(bounded_shape)
+      }
+    }
+  }
+
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.style(*loid)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    self.lo.set_style(*loid, style)
+  }
+
+  #[inline]
+  /// Actual location/size in limited terminal device. The top-left location
+  /// can never be negative.
+  ///
+  /// A node's shape is always truncated by its parent shape.
+  /// Unless the node itself is the root node and doesn't have a parent, in
+  /// such case, the root node logical shape does not need to be truncated.
+  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+    self._internal_check();
+
+    match self.parent(id) {
+      None => {
+        let shape = self.shape(id)?;
+        Ok(rect_as!(shape, u16))
+      }
+      Some(parent_id) => {
+        let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
+        match maybe_cached {
+          Some(cached) => Ok(cached),
+          None => {
+            // Non-root node truncated by its parent's shape.
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
+            let actual_shape =
+              shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+            self
+              .cached_actual_shapes
+              .borrow_mut()
+              .insert(id, actual_shape);
+            Ok(actual_shape)
+          }
+        }
+      }
+    }
+  }
+
+  /// Clear the cached actual_shapes since the provided id. All its
+  /// descendants actual_shape will be cleared as well.
+  fn clear_cached_actual_shapes(&mut self, id: TreeNodeId) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(id);
+    while let Some(parent_id) = q.pop_front() {
+      self.cached_actual_shapes.borrow_mut().remove(&parent_id);
+      if let Ok(children_ids) = self.children(parent_id) {
+        for child_id in children_ids.iter() {
+          q.push_back(*child_id);
+        }
+      }
+    }
+  }
+
+  #[inline]
+  /// Whether the node is visible, e.g. its actual_shape size is zero.
+  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    let actual_shape = self.actual_shape(id)?;
+    Ok(!actual_shape.size().is_zero())
+  }
+
+  #[inline]
+  pub fn invisible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self.visible(id).map(|v| !v)
+  }
+
+  #[inline]
+  /// Whether the node is detached, e.g. it doesn't have a parent and it is not
+  /// the root node. A root node is always attached even it has no parent.
+  pub fn detached(&self, id: TreeNodeId) -> bool {
+    !self.attached(id)
+  }
+
+  #[inline]
+  pub fn attached(&self, id: TreeNodeId) -> bool {
+    id == self.root_nid || self.parent(id).is_some()
+  }
+
+  #[inline]
+  /// The node is visible and its size > 0, e.g. both height and width > 0.
+  pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self._internal_check();
+    let visible = self.visible(id)?;
+    let attached = self.attached(id);
+    Ok(visible && attached)
+  }
+
+  #[inline]
+  pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self.enabled(id).map(|v| !v)
+  }
+
+  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id)?;
+    let parent_loid = self.lo.parent(*loid)?;
+    self.loid2nid.get(&parent_loid).copied()
+  }
+
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self._internal_check();
+    let loid = self.nid2loid.get(&id).unwrap();
+    let children_loids = self.lo.children(*loid)?;
+    Ok(
+      children_loids
+        .iter()
+        .map(|i| *self.loid2nid.get(i).unwrap())
+        .collect_vec(),
+    )
+  }
+
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    self._internal_check();
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let child_loid = self.nid2loid.get(&child_id).unwrap();
+    self.lo.add_child(*parent_loid, *child_loid)
+  }
+
+  pub fn remove_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
+    let child_loid = self.nid2loid.get(&child_id).unwrap();
+    let removed_loid = self.lo.remove_child(*parent_loid, *child_loid)?;
+    debug_assert_eq!(removed_loid, *child_loid);
+    let removed_id = *self.loid2nid.get(&removed_loid).unwrap();
+    debug_assert_eq!(removed_id, child_id);
+    Ok(removed_id)
+  }
+
+  pub fn new_with_parent(
+    &mut self,
+    style: Style,
+    parent_id: TreeNodeId,
+    _name: &str,
+  ) -> TaffyResult<TreeNodeId> {
+    let id = self.new_leaf(style, _name)?;
+    self.add_child(parent_id, id)?;
+    Ok(id)
+  }
+
+  pub fn new_with_children(
+    &mut self,
+    style: Style,
+    children: &[TreeNodeId],
+    name: &str,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let children_loids = children
+      .iter()
+      .map(|i| *self.nid2loid.get(i).unwrap())
+      .collect_vec();
+    let loid = self.lo.new_with_children(style, &children_loids)?;
+    let id = next_node_id();
+    self.nid2loid.insert(id, loid);
+    self.loid2nid.insert(loid, id);
+    self.names.insert(id, name.to_compact_string());
+    self._internal_check();
+    Ok(id)
   }
 }
 
