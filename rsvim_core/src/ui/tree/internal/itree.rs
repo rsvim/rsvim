@@ -9,7 +9,7 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 
-const INVALID_ROOT_TREE_NODE_ID: TreeNodeId = -1;
+const INVALID_ROOT_ID: TreeNodeId = -1;
 
 #[derive(Debug, Clone)]
 pub struct Relationships {
@@ -26,7 +26,7 @@ pub struct Relationships {
 impl Relationships {
   pub fn new() -> Self {
     Self {
-      root_id: INVALID_ROOT_TREE_NODE_ID,
+      root_id: INVALID_ROOT_ID,
       parent_id: FoldMap::new(),
       children_ids: FoldMap::new(),
     }
@@ -102,12 +102,12 @@ impl Relationships {
     debug_assert!(!self.contains_id(child_id));
     self._internal_check();
 
-    if parent_id.is_none() && self.root_id == INVALID_ROOT_TREE_NODE_ID {
+    if parent_id.is_none() && self.root_id == INVALID_ROOT_ID {
       self.root_id = child_id;
 
       self.children_ids.insert(child_id, Vec::new());
     } else {
-      debug_assert_ne!(self.root_id, INVALID_ROOT_TREE_NODE_ID);
+      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
       debug_assert!(parent_id.is_some());
 
       let parent_id = parent_id.unwrap();
@@ -139,7 +139,7 @@ impl Relationships {
   pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
     // root node is not allowed to be removed.
     debug_assert_ne!(child_id, self.root_id);
-    debug_assert_ne!(child_id, INVALID_ROOT_TREE_NODE_ID);
+    debug_assert_ne!(child_id, INVALID_ROOT_ID);
 
     self._internal_check();
 
