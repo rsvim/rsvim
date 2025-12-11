@@ -9,6 +9,8 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 
+const INVALID_ROOT_TREE_NODE_ID: TreeNodeId = -1;
+
 #[derive(Debug, Clone)]
 pub struct Relationships {
   // Root id.
@@ -22,14 +24,11 @@ pub struct Relationships {
 }
 
 impl Relationships {
-  pub fn new(root_id: TreeNodeId) -> Self {
-    let mut children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>> = FoldMap::new();
-    children_ids.insert(root_id, Vec::new());
-
+  pub fn new() -> Self {
     Self {
-      root_id,
+      root_id: INVALID_ROOT_TREE_NODE_ID,
       parent_id: FoldMap::new(),
-      children_ids,
+      children_ids: FoldMap::new(),
     }
   }
 
@@ -93,6 +92,40 @@ impl Relationships {
   pub fn contains_id(&self, id: TreeNodeId) -> bool {
     self._internal_check();
     self.children_ids.contains_key(&id)
+  }
+
+  fn _add_child_impl(
+    &mut self,
+    parent_id: Option<TreeNodeId>,
+    child_id: TreeNodeId,
+  ) {
+    debug_assert!(!self.contains_id(child_id));
+    self._internal_check();
+
+    if parent_id.is_none() && self.root_id == INVALID_ROOT_TREE_NODE_ID {
+      self.root_id = child_id;
+
+      self.children_ids.insert(child_id, Vec::new());
+    } else {
+      debug_assert_ne!(self.root_id, INVALID_ROOT_TREE_NODE_ID);
+      debug_assert!(parent_id.is_some());
+
+      let parent_id = parent_id.unwrap();
+      // Initialize children_ids vector.
+      self.children_ids.insert(child_id, Vec::new());
+
+      // Binds connection from child => parent.
+      self.parent_id.insert(child_id, parent_id);
+
+      // Binds connection from parent => child.
+      self
+        .children_ids
+        .get_mut(&parent_id)
+        .unwrap()
+        .push(child_id);
+    }
+
+    self._internal_check();
   }
 
   pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
