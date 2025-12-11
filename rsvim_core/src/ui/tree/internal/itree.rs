@@ -104,7 +104,6 @@ impl Relationships {
 
     if parent_id.is_none() && self.root_id == INVALID_ROOT_ID {
       self.root_id = child_id;
-
       self.children_ids.insert(child_id, Vec::new());
     } else {
       debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
