@@ -3,7 +3,9 @@
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::inode::next_node_id;
 use crate::ui::tree::internal::shapes;
+use compact_str::CompactStringExt;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -89,10 +91,10 @@ impl Relationships {
     name: &str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    let loid = self.lo.new_leaf(style)?;
+    let loid = self.ta.new_leaf(style)?;
     let nid = next_node_id();
-    self.nid2loid.insert(nid, loid);
-    self.loid2nid.insert(loid, nid);
+    self.id2taid.insert(nid, loid);
+    self.taid2id.insert(loid, nid);
     self.names.insert(nid, name.to_compact_string());
     self._internal_check();
     Ok(nid)
@@ -104,8 +106,8 @@ impl Relationships {
     available_size: taffy::Size<AvailableSpace>,
   ) -> TaffyResult<()> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id).unwrap();
-    let result = self.lo.compute_layout(*loid, available_size);
+    let loid = self.id2taid.get(&id).unwrap();
+    let result = self.ta.compute_layout(*loid, available_size);
     self.clear_cached_actual_shapes(id);
     self._internal_check();
     result
@@ -113,8 +115,8 @@ impl Relationships {
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.layout(*loid)
+    let loid = self.id2taid.get(&id).unwrap();
+    self.ta.layout(*loid)
   }
 
   #[inline]
@@ -142,14 +144,14 @@ impl Relationships {
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.style(*loid)
+    let loid = self.id2taid.get(&id).unwrap();
+    self.ta.style(*loid)
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id).unwrap();
-    self.lo.set_style(*loid, style)
+    let loid = self.id2taid.get(&id).unwrap();
+    self.ta.set_style(*loid, style)
   }
 
   #[inline]
@@ -243,19 +245,19 @@ impl Relationships {
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id)?;
-    let parent_loid = self.lo.parent(*loid)?;
-    self.loid2nid.get(&parent_loid).copied()
+    let loid = self.id2taid.get(&id)?;
+    let parent_loid = self.ta.parent(*loid)?;
+    self.taid2id.get(&parent_loid).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
-    let loid = self.nid2loid.get(&id).unwrap();
-    let children_loids = self.lo.children(*loid)?;
+    let loid = self.id2taid.get(&id).unwrap();
+    let children_loids = self.ta.children(*loid)?;
     Ok(
       children_loids
         .iter()
-        .map(|i| *self.loid2nid.get(i).unwrap())
+        .map(|i| *self.taid2id.get(i).unwrap())
         .collect_vec(),
     )
   }
@@ -266,9 +268,9 @@ impl Relationships {
     child_id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
-    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
-    let child_loid = self.nid2loid.get(&child_id).unwrap();
-    self.lo.add_child(*parent_loid, *child_loid)
+    let parent_loid = self.id2taid.get(&parent_id).unwrap();
+    let child_loid = self.id2taid.get(&child_id).unwrap();
+    self.ta.add_child(*parent_loid, *child_loid)
   }
 
   pub fn remove_child(
@@ -277,11 +279,11 @@ impl Relationships {
     child_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    let parent_loid = self.nid2loid.get(&parent_id).unwrap();
-    let child_loid = self.nid2loid.get(&child_id).unwrap();
-    let removed_loid = self.lo.remove_child(*parent_loid, *child_loid)?;
+    let parent_loid = self.id2taid.get(&parent_id).unwrap();
+    let child_loid = self.id2taid.get(&child_id).unwrap();
+    let removed_loid = self.ta.remove_child(*parent_loid, *child_loid)?;
     debug_assert_eq!(removed_loid, *child_loid);
-    let removed_id = *self.loid2nid.get(&removed_loid).unwrap();
+    let removed_id = *self.taid2id.get(&removed_loid).unwrap();
     debug_assert_eq!(removed_id, child_id);
     Ok(removed_id)
   }
@@ -306,12 +308,12 @@ impl Relationships {
     self._internal_check();
     let children_loids = children
       .iter()
-      .map(|i| *self.nid2loid.get(i).unwrap())
+      .map(|i| *self.id2taid.get(i).unwrap())
       .collect_vec();
-    let loid = self.lo.new_with_children(style, &children_loids)?;
+    let loid = self.ta.new_with_children(style, &children_loids)?;
     let id = next_node_id();
-    self.nid2loid.insert(id, loid);
-    self.loid2nid.insert(loid, id);
+    self.id2taid.insert(id, loid);
+    self.taid2id.insert(loid, id);
     self.names.insert(id, name.to_compact_string());
     self._internal_check();
     Ok(id)
