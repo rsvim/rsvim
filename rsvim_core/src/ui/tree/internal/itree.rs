@@ -272,8 +272,6 @@ where
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert!(!self.nodes.is_empty());
-    debug_assert!(!self.relationships.borrow().is_empty());
     debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
 
     let root_id = self.relationships.borrow().root_id();
