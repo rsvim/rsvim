@@ -453,8 +453,11 @@ where
   ///
   /// # Panics
   /// 1. If `parent_id` doesn't exist.
-  /// 2. If `child_id` already exist.
-  pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) {
+  pub fn insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    mut child_node: T,
+  ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationships.borrow().contains_id(parent_id));
@@ -482,7 +485,7 @@ where
     ));
 
     // Insert node into collection.
-    self.nodes.insert(child_id, child_node);
+    let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
     self
       .relationships
@@ -495,6 +498,7 @@ where
     }
 
     self._internal_check();
+    result
   }
 
   /// Insert a node to the tree.
@@ -514,8 +518,11 @@ where
   ///
   /// # Panics
   /// 1. If `parent_id` doesn't exist.
-  /// 2. If `child_id` already exist.
-  pub fn bounded_insert(&mut self, parent_id: TreeNodeId, mut child_node: T) {
+  pub fn bounded_insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    mut child_node: T,
+  ) -> Option<T> {
     // Panics if `parent_id` not exists.
     debug_assert!(self.nodes.contains_key(&parent_id));
 
