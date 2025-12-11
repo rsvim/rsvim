@@ -188,6 +188,12 @@ impl Relationships {
   }
 }
 
+impl Default for Relationships {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 #[derive(Debug, Clone)]
 pub struct Itree<T>
 where
@@ -347,6 +353,15 @@ where
   }
 }
 // Attributes }
+
+impl<T> Default for Itree<T>
+where
+  T: Inodeable,
+{
+  fn default() -> Self {
+    Self::new()
+  }
+}
 
 // Insert/Remove {
 impl<T> Itree<T>
