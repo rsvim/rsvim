@@ -652,7 +652,8 @@ fn get1() {
    *         n8   n9
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
@@ -731,7 +732,8 @@ fn get2() {
    *     n6
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid1, n3);
   tree.insert(nid2, n4);
@@ -786,7 +788,8 @@ fn move_by1() {
    *      n3
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid2, n3);
 
@@ -858,7 +861,8 @@ fn bounded_move_by1() {
    *      n3
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid2, n3);
 
@@ -930,7 +934,8 @@ fn move_to1() {
    *      n3
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid2, n3);
 
@@ -1002,7 +1007,8 @@ fn bounded_move_to1() {
    *      n3
    * ```
    */
-  let mut tree = Itree::new(n1);
+  let mut tree = Itree::new();
+  tree.insert_root(n1);
   tree.insert(nid1, n2);
   tree.insert(nid2, n3);
 
