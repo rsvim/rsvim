@@ -210,7 +210,7 @@ impl Relationships {
     shape: IRect,
     policy: RelationshipSetShapePolicy,
   ) -> TaffyResult<IRect> {
-    let adjusted_shape = match self.parent(id) {
+    let result = match self.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.actual_shape(parent_id)?;
         let result = match policy {
@@ -231,8 +231,8 @@ impl Relationships {
         shape
       }
     };
-    self.shapes.insert(id, adjusted_shape);
-    Ok(adjusted_shape)
+    self.shapes.insert(id, result);
+    Ok(result)
   }
 
   #[inline]
