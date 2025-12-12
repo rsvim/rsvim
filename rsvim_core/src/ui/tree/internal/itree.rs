@@ -141,6 +141,18 @@ impl Relationships {
     self.ta.layout(*taid)
   }
 
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    self.ta.style(*taid)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    self.ta.set_style(*taid, style)
+  }
+
   #[inline]
   pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
     let layout = self.layout(id)?;
@@ -163,18 +175,6 @@ impl Relationships {
         Ok(bounded_shape)
       }
     }
-  }
-
-  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    self.ta.style(*taid)
-  }
-
-  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    self.ta.set_style(*taid, style)
   }
 
   #[inline]
