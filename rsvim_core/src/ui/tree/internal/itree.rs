@@ -89,14 +89,14 @@ impl Relationships {
   pub fn new_leaf(
     &mut self,
     style: Style,
-    name: &str,
+    name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let loid = self.ta.new_leaf(style)?;
     let nid = next_node_id();
     self.id2taid.insert(nid, loid);
     self.taid2id.insert(loid, nid);
-    self.names.insert(nid, name.to_compact_string());
+    self.names.insert(nid, name);
     self._internal_check();
     Ok(nid)
   }
