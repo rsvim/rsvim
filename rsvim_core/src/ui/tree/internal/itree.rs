@@ -213,7 +213,7 @@ impl Relationships {
     let adjusted_shape = match self.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.actual_shape(parent_id)?;
-        let shape = match policy {
+        let result = match policy {
           RelationshipSetShapePolicy::TRUNCATE => {
             shapes::truncate_shape(&shape, &parent_actual_shape.size())
           }
@@ -221,7 +221,7 @@ impl Relationships {
             shapes::bound_shape(&shape, &parent_actual_shape.size())
           }
         };
-        shape
+        result
       }
       None => {
         debug_assert_eq!(shape.min().x, 0);
