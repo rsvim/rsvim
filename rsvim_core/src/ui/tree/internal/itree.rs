@@ -265,13 +265,13 @@ impl Relationships {
 
   #[inline]
   /// Whether the node is visible, e.g. its actual_shape size is zero.
-  pub fn visible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn visible(&self, id: TreeNodeId) -> Option<bool> {
     let actual_shape = self.actual_shape(id)?;
-    Ok(!actual_shape.size().is_zero())
+    Some(!actual_shape.size().is_zero())
   }
 
   #[inline]
-  pub fn invisible(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn invisible(&self, id: TreeNodeId) -> Option<bool> {
     self.visible(id).map(|v| !v)
   }
 
@@ -284,6 +284,7 @@ impl Relationships {
 
   #[inline]
   pub fn attached(&self, id: TreeNodeId) -> bool {
+    debug_assert_ne!(id, INVALID_ROOT_ID);
     id == self.root_id || self.parent(id).is_some()
   }
 
