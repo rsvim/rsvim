@@ -173,3 +173,16 @@ macro_rules! rect_from_size {
     $crate::coord::Rect::new((0, 0), ($s.width(), $s.height()))
   };
 }
+
+#[macro_export]
+macro_rules! rect_from_layout {
+  ($l:ident) => {
+    $crate::coord::Rect::new(
+      ($l.location.x as isize, $l.location.y as isize),
+      (
+        ($l.location.x + $l.size.width) as isize,
+        ($l.location.y + $l.size.height) as isize,
+      ),
+    )
+  };
+}
