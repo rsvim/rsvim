@@ -159,28 +159,8 @@ impl Relationships {
     self.ta.set_style(*taid, style)
   }
 
-  #[inline]
-  pub fn shape(&self, id: TreeNodeId) -> TaffyResult<IRect> {
-    let layout = self.layout(id)?;
-    let shape = rect_from_layout!(layout);
-    let shape = rect_as!(shape, isize);
-
-    match self.parent(id) {
-      Some(parent_id) => {
-        let parent_actual_shape = self.actual_shape(parent_id)?;
-        let bounded_shape =
-          shapes::truncate_shape(&shape, &parent_actual_shape.size());
-        Ok(bounded_shape)
-      }
-      None => {
-        let min_x = num_traits::clamp_min(shape.min().x, 0);
-        let min_y = num_traits::clamp_min(shape.min().y, 0);
-        let max_x = num_traits::clamp_min(shape.max().x, min_x);
-        let max_y = num_traits::clamp_min(shape.max().y, min_y);
-        let bounded_shape = rect!(min_x, min_y, max_x, max_y);
-        Ok(bounded_shape)
-      }
-    }
+  pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
+    self.shapes.get(&id)
   }
 
   #[inline]
