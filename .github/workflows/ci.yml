@@ -112,6 +112,7 @@ jobs:
           LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
           set -x
+          brew install lld
           which ld64.lld
           echo "$LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
