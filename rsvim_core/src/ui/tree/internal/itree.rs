@@ -290,15 +290,15 @@ impl Relationships {
 
   #[inline]
   /// The node is visible and its size > 0, e.g. both height and width > 0.
-  pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn enabled(&self, id: TreeNodeId) -> Option<bool> {
     self._internal_check();
     let visible = self.visible(id)?;
     let attached = self.attached(id);
-    Ok(visible && attached)
+    Some(visible && attached)
   }
 
   #[inline]
-  pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+  pub fn disabled(&self, id: TreeNodeId) -> Option<bool> {
     self.enabled(id).map(|v| !v)
   }
 
