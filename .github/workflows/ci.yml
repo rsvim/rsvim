@@ -85,7 +85,7 @@ jobs:
       RSVIM_LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', contains(matrix.os, 'ubuntu') && 'ld.lld' || 'ld64.lld') }}
+        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -103,17 +103,25 @@ jobs:
       - uses: KyleMayes/install-llvm-action@v2
         with:
           version: "20"
-      - name: Install Linker (Linux/Mac)
-        if: ${{ !contains(matrix.os, 'windows') }}
+      - name: Install Linker (Linux)
+        if: ${{ !contains(matrix.os, 'ubuntu') }}
         run: |
           echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
-      - name: Install Linker (Windows)
-        if: ${{ contains(matrix.os, 'windows') }}
+          echo "RSVIM_LLD=$(which ld.lld)" >> "$GITHUB_ENV"
+      - name: Install Linker (Mac)
+        if: ${{ !contains(matrix.os, 'macos') }}
         run: |
-          lld-link --version
+          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
+          echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
       - name: Test
+        env:
+          RUSTFLAGS: >-
+            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
         run: cargo test --color=never --workspace
       - name: Nextest with code coverage
+        env:
+          RUSTFLAGS: >-
+            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
