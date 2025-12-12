@@ -27,9 +27,9 @@ pub struct Relationships {
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 
   // Shapes
-  shapes: FoldMap<TreeNodeId, IRect>,
+  shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
   // Cached actual shapes
-  cached_actual_shapes: FoldMap<TreeNodeId, U16Rect>,
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 
   // Root id
   root_id: TreeNodeId,
