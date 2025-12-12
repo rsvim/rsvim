@@ -227,7 +227,7 @@ impl Relationships {
       Some(parent_id) => {
         let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
         match maybe_cached {
-          Some(cached) => Ok(cached),
+          Some(cached) => Some(cached),
           None => {
             // Non-root node truncated by its parent's shape.
             let shape = self.shape(id)?;
