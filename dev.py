@@ -16,10 +16,18 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
     "CYGWIN_NT"
 )
 MACOS = platform.system().startswith("Darwin")
-LINUX = not WINDOWS and not MACOS
+LINUX = platform.system().startswith("Linux")
+
+X86_64 = platform.machine().startswith("x86_64")
+AARCH64 = platform.machine().startswith("aarch64")
 
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
+
+RUST_LLD_LINKER = shutil.which("rust-lld")
+MOLD_LINKER = shutil.which("mold")
+WILD_LINKER = shutil.which("wild")
+NO_LINKER = False
 
 
 def run(cmd):
@@ -41,6 +49,24 @@ def sccache():
         logging.warning("'sccache' is disabled!")
         return
     env("RUSTC_WRAPPER", SCCACHE)
+
+def linker():
+    if NO_LINKER:
+        logging.warning("third-party linker is disabled!")
+        return
+
+    if MACOS and RUST_LLD_LINKER is not None:
+        if AARCH64:
+            env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", RUST_LLD_LINKER)
+        elif X86_64:
+            env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", RUST_LLD_LINKER)
+    elif LINUX:
+        linker = MOLD_LINKER if MOLD_LINKER is not None else WILD_LINKER
+        if linker is not None:
+            if AARCH64:
+                env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", linker)
+            elif X86_64:
+                env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", linker)
 
 
 def rustflags():
@@ -140,6 +166,7 @@ class Test(Cmd):
     def test(self, name) -> None:
         sccache()
         rustflags()
+        linker()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
@@ -153,6 +180,7 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
+        linker()
         cmd = "cargo nextest list"
         run(cmd)
 
@@ -212,6 +240,7 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
+        linker()
         cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
