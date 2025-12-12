@@ -26,7 +26,7 @@ SCCACHE = shutil.which("sccache")
 NO_CACHE = False
 
 CLANG = shutil.which("clang")
-LLD = shutil.which("lld")
+LLD = shutil.which("ld.lld") if LINUX else shutil.which("ld64.lld")
 MOLD = shutil.which("mold")
 NO_LINKER = False
 
