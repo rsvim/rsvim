@@ -51,7 +51,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
-          sudo apt install -y -q llvm clang mold
+          sudo apt install -y -q clang mold
           rustup component add rust-src clippy
       - name: Sccache Stats
         run: |
