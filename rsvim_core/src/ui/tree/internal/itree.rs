@@ -159,7 +159,7 @@ impl Relationships {
     self.ta.set_style(*taid, style)
   }
 
-  pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
+  pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
     self.shapes.get(&id)
   }
 
