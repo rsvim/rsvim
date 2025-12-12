@@ -69,16 +69,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - triple: AARCH64_UNKNOWN_LINUX_GNU
-            os: ubuntu-22.04-arm
-          - triple: X86_64_UNKNOWN_LINUX_GNU
-            os: ubuntu-22.04
-          - triple: AARCH64_APPLE_DARWIN
-            os: macos-15
-          - triple: X86_64_APPLE_DARWIN
-            os: macos-15-intel
-          - triple: X86_64_PC_WINDOWS_MSVC
-            os: windows-2022
+          - os: ubuntu-22.04-arm
+            triple: AARCH64_UNKNOWN_LINUX_GNU
+          - os: ubuntu-22.04
+            triple: X86_64_UNKNOWN_LINUX_GNU
+          - os: macos-15
+            triple: AARCH64_APPLE_DARWIN
+          - os: macos-15-intel
+            triple: X86_64_APPLE_DARWIN
+          - os: windows-2022
+            triple: X86_64_PC_WINDOWS_MSVC
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
