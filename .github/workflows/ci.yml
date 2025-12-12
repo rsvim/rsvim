@@ -101,6 +101,8 @@ jobs:
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
       - uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20"
       - name: Install Linker (Linux)
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
