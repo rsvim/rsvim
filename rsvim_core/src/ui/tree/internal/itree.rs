@@ -49,7 +49,8 @@ impl Relationships {
       ta: TaffyTree::new(),
       id2taid: FoldMap::new(),
       taid2id: FoldMap::new(),
-      cached_actual_shapes: FoldMap::new(),
+      shapes: RefCell::new(FoldMap::new()),
+      cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_id: INVALID_ROOT_ID,
       #[cfg(debug_assertions)]
       root_id_changes: 0,
