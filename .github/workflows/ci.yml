@@ -82,6 +82,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
+      RSVIM_LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -98,8 +99,6 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - name: Install Linker (Linux)
         if: ${{ contains(matrix.os, 'ubuntu') }}
-        env:
-          LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
           set -x
           sudo apt install -y -q llvm clang mold
@@ -107,8 +106,6 @@ jobs:
           echo "RSVIM_LLD=$(which mold)" >> "$GITHUB_ENV"
       - name: Install Linker (Mac)
         if: ${{ contains(matrix.os, 'macos') }}
-        env:
-          LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
           set -x
           brew install lld
@@ -117,7 +114,6 @@ jobs:
       - name: Test
         # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
         env:
-          ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}: "clang"
           RUSTFLAGS: >-
             -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
         run: cargo test --color=never --workspace
@@ -126,6 +122,7 @@ jobs:
           RUSTFLAGS: >-
             -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
         run: |
+          unset $RSVIM_LINKER
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
       - uses: codecov/codecov-action@v5
