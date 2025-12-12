@@ -68,21 +68,10 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        include:
-          - os: ubuntu-22.04-arm
-            triple: AARCH64_UNKNOWN_LINUX_GNU
-          - os: ubuntu-22.04
-            triple: X86_64_UNKNOWN_LINUX_GNU
-          - os: macos-15
-            triple: AARCH64_APPLE_DARWIN
-          - os: macos-15-intel
-            triple: X86_64_APPLE_DARWIN
-          - os: windows-2022
-            triple: X86_64_PC_WINDOWS_MSVC
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
-      RSVIM_LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
         -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
@@ -97,12 +86,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Install Linker (Linux)
-        if: ${{ contains(matrix.os, 'ubuntu') }}
-        run: |
-          sudo apt install -y -q clang mold
-          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
-          echo "RUSTFLAGS=-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold" >> "$GITHUB_ENV"
       - name: Test
         run: cargo test --color=never --workspace
       - name: Nextest with code coverage
@@ -118,9 +101,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        rust_version: [1.89.0, stable, beta]
     env:
       RUSTC_WRAPPER: "sccache"
       CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: "clang"
@@ -132,9 +112,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
-          rustup update --no-self-update ${{ matrix.rust_version }}
-          rustup default ${{ matrix.rust_version }}
-          rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
+          rustup component add rust-src clippy llvm-tools
       - name: Install Linker
         run: |
           sudo apt install -y -q clang mold
