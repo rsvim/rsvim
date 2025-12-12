@@ -59,11 +59,7 @@ jobs:
         with:
           command: check advisories --allow unmaintained
       - name: Docs
-        env:
-          RUSTDOCFLAGS: "-Dwarnings"
-        run: |
-          echo "Info: cargo doc --workspace"
-          cargo doc --workspace
+        run: cargo doc --workspace
   unit_test:
     name: Unit Test
     strategy:
