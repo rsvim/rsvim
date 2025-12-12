@@ -20,6 +20,7 @@ LINUX = platform.system().startswith("Linux")
 
 X86_64 = platform.machine().startswith("x86_64")
 AARCH64 = platform.machine().startswith("aarch64")
+ARM64 = platform.machine().startswith("arm64")
 
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
@@ -59,12 +60,12 @@ def linker():
     if MACOS:
         if X86_64:
             env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", RUST_LLD)
-        elif AARCH64:
+        elif AARCH64 or ARM64:
             env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", RUST_LLD)
     elif LINUX:
         if X86_64:
             env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
-        elif AARCH64:
+        elif AARCH64 or ARM64:
             env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
 
 
