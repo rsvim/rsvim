@@ -52,31 +52,44 @@ def sccache():
     env("RUSTC_WRAPPER", SCCACHE)
 
 
+def _linker():
+    # linker
+    if NO_LINKER:
+        logging.warning("lld/mold is disabled!")
+        return None
+
+    linker = MOLD if MOLD is not None else LLD
+    if linker is None or CLANG is None:
+        logging.warning("lld/mold not found!")
+        return None
+
+    enable_linker = (MACOS or LINUX) and (X86_64 or AARCH64 or ARM64)
+    if not enable_linker:
+        return None
+
+    triple = None
+    if MACOS:
+        if X86_64:
+            triple = "X86_64_APPLE_DARWIN"
+        elif AARCH64 or ARM64:
+            triple = "AARCH64_APPLE_DARWIN"
+    elif LINUX:
+        if X86_64:
+            triple = "X86_64_UNKNOWN_LINUX_GNU"
+        elif AARCH64 or ARM64:
+            triple = "AARCH64_UNKNOWN_LINUX_GNU"
+    assert triple is not None
+
+    env(f"CARGO_TARGET_{triple}_LINKER", "clang")
+    return f"-Clink-arg=-fuse-ld={linker}"
+
+
 def rustflags():
     flags = ["-Dwarnings"]
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
-
-    # linker
-    if NO_LINKER:
-        logging.warning("lld/mold is disabled!")
-        return
-    linker = MOLD if MOLD is not None else LLD
-    if linker is None or CLANG is None:
-        logging.warning("lld/mold not found!")
-        return
-    if MACOS:
-        if X86_64:
-            env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", "clang")
-        elif AARCH64 or ARM64:
-            env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", "clang")
-    elif LINUX:
-        if X86_64:
-            env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", "clang")
-        elif AARCH64 or ARM64:
-            env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", "clang")
-    linker_flags = f"-Clink-arg=-fuse-ld={linker}"
-    if (MACOS or LINUX) and (X86_64 or AARCH64 or ARM64):
+    linker_flags = _linker()
+    if linker_flags is not None:
         flags.append(linker_flags)
 
     flags = " ".join(flags)
