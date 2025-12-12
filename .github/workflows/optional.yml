@@ -42,22 +42,13 @@ jobs:
     if: ${{ github.event.pull_request }}
     env:
       RUSTC_WRAPPER: "sccache"
-      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: "clang"
-      RUSTFLAGS: "-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: clang mold
       - name: Install Rust
-        run: |
-          rustup component add rust-src clippy
-      - name: Sccache Stats
-        run: |
-          sccache --show-stats
+        run: rustup component add rust-src clippy
       - name: Check out 'current' branch
         uses: actions/checkout@v6
         with:

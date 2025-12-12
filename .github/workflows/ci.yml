@@ -103,22 +103,15 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       RUSTC_WRAPPER: "sccache"
-      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: "clang"
-      RUSTFLAGS: "-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: clang mold
       - name: Install Rust
-        run: |
-          rustup component add rust-src clippy llvm-tools
+        run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
       - name: Build Release
-        run: |
-          cargo build --release
+        run: cargo build --release
       - name: Build Nightly
         run: cargo build --profile nightly
