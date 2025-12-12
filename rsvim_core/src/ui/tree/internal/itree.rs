@@ -9,7 +9,6 @@ use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
-use std::intrinsics::sub_with_overflow;
 use std::iter::Iterator;
 use taffy::AvailableSpace;
 use taffy::Layout;
@@ -25,7 +24,7 @@ pub enum RelationshipSetShapePolicy {
 }
 
 #[derive(Debug, Clone)]
-pub struct Relationships {
+pub struct Relationship {
   ta: TaffyTree,
 
   // Maps TreeNodeId <=> taffy::NodeId
@@ -47,9 +46,9 @@ pub struct Relationships {
   names: FoldMap<TreeNodeId, &'static str>,
 }
 
-rc_refcell_ptr!(Relationships);
+rc_refcell_ptr!(Relationship);
 
-impl Relationships {
+impl Relationship {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
@@ -380,7 +379,7 @@ impl Relationships {
   }
 }
 
-impl Default for Relationships {
+impl Default for Relationship {
   fn default() -> Self {
     Self::new()
   }
@@ -398,7 +397,7 @@ where
   // children edges are positive. The edge weight of each child is increased
   // with the order when they are inserted, i.e. the first child has the lowest
   // edge weight, the last child has the highest edge weight.
-  relationships: RefCell<Relationships>,
+  relationship: RefCell<Relationship>,
 }
 
 #[derive(Debug)]
@@ -455,7 +454,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationships: RefCell::new(Relationships::new()),
+      relationship: RefCell::new(Relationship::new()),
     }
   }
 
@@ -464,28 +463,28 @@ where
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.relationship.borrow().len(), self.nodes.len());
 
-    let root_id = self.relationships.borrow().root_id();
+    let root_id = self.relationship.borrow().root_id();
     let mut que: VecDeque<TreeNodeId> = VecDeque::new();
     que.push_back(root_id);
 
     while let Some(id) = que.pop_front() {
-      let parent = self.relationships.borrow().parent_id(id);
+      let parent = self.relationship.borrow().parent_id(id);
       if id == root_id {
         debug_assert!(parent.is_none());
       } else {
         debug_assert!(parent.is_some());
         let parents_children =
-          self.relationships.borrow().children_ids(parent.unwrap());
+          self.relationship.borrow().children_ids(parent.unwrap());
         for c in parents_children {
-          let child_parent = self.relationships.borrow().parent_id(c);
+          let child_parent = self.relationship.borrow().parent_id(c);
           debug_assert!(child_parent.is_some());
           debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
         }
       }
 
-      let children_ids = self.relationships.borrow().children_ids(id);
+      let children_ids = self.relationship.borrow().children_ids(id);
       debug_assert_eq!(
         children_ids.len(),
         children_ids
@@ -495,7 +494,7 @@ where
           .len()
       );
       for c in children_ids {
-        let child_parent = self.relationships.borrow().parent_id(c);
+        let child_parent = self.relationship.borrow().parent_id(c);
         debug_assert!(child_parent.is_some());
         debug_assert_eq!(child_parent.unwrap(), id);
       }
@@ -511,7 +510,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relationships.borrow().root_id()
+    self.relationship.borrow().root_id()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
@@ -519,11 +518,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationships.borrow().parent_id(id)
+    self.relationship.borrow().parent_id(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
+    self.relationship.borrow().children_ids(id)
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -538,7 +537,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
+    ItreeIter::new(self, Some(self.relationship.borrow().root_id()))
   }
 }
 
@@ -616,7 +615,7 @@ where
     let child_id = child_node.id();
 
     debug_assert!(self.nodes.is_empty());
-    debug_assert!(self.relationships.borrow().is_empty());
+    debug_assert!(self.relationship.borrow().is_empty());
 
     // Update attributes for both the newly inserted child, and all its
     // descendants (if the child itself is also a sub-tree in current
@@ -635,7 +634,7 @@ where
     // Insert node into collection.
     self.nodes.insert(child_id, child_node);
     // Create first edge for root node.
-    self.relationships.borrow_mut().add_root(child_id);
+    self.relationship.borrow_mut().add_root(child_id);
 
     self._internal_check();
   }
@@ -663,12 +662,12 @@ where
   ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationships.borrow().contains_id(parent_id));
+    debug_assert!(self.relationship.borrow().contains_id(parent_id));
 
     // Child node.
     let child_id = child_node.id();
 
-    debug_assert!(!self.relationships.borrow().contains_id(child_id));
+    debug_assert!(!self.relationship.borrow().contains_id(child_id));
 
     // Update attributes for both the newly inserted child, and all its
     // descendants (if the child itself is also a sub-tree in current
@@ -691,7 +690,7 @@ where
     let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
     self
-      .relationships
+      .relationship
       .borrow_mut()
       .add_child(parent_id, child_id);
 
@@ -756,21 +755,21 @@ where
   /// If the node `id` is root node and root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.relationships.borrow().root_id());
+    debug_assert_ne!(id, self.relationship.borrow().root_id());
     self._internal_check();
 
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
-        debug_assert!(self.relationships.borrow().contains_id(id));
+        debug_assert!(self.relationship.borrow().contains_id(id));
         // Remove edges between `id` and its parent.
-        let relation_removed = self.relationships.borrow_mut().remove_child(id);
+        let relation_removed = self.relationship.borrow_mut().remove_child(id);
         debug_assert!(relation_removed);
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relationships.borrow().contains_id(id));
+        debug_assert!(!self.relationship.borrow().contains_id(id));
         None
       }
     };

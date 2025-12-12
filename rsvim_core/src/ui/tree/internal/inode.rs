@@ -2,6 +2,7 @@
 
 use crate::flags_impl;
 use crate::prelude::*;
+use crate::ui::tree::RelationshipsRc;
 use crate::ui::tree::TreeNodeId;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
@@ -9,6 +10,8 @@ use std::sync::atomic::Ordering;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
+
+  fn relationship(&self) -> RelationshipsRc;
 
   fn shape(&self) -> &IRect;
 
