@@ -135,6 +135,8 @@ jobs:
         rust_version: [1.89.0, stable, beta]
     env:
       RUSTC_WRAPPER: "sccache"
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: "clang"
+      RUSTFLAGS: "-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -145,6 +147,9 @@ jobs:
           rustup update --no-self-update ${{ matrix.rust_version }}
           rustup default ${{ matrix.rust_version }}
           rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
+      - name: Install Linker
+        run: |
+          sudo apt install -y -q llvm clang mold
       - name: Sccache Stats
         run: |
           sccache --show-stats
