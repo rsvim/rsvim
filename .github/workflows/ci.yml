@@ -104,7 +104,6 @@ jobs:
           set -x
           sudo apt install -y -q llvm clang mold
           which mold
-          echo "$LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which mold)" >> "$GITHUB_ENV"
       - name: Install Linker (Mac)
         if: ${{ contains(matrix.os, 'macos') }}
@@ -114,18 +113,18 @@ jobs:
           set -x
           brew install lld
           which ld64.lld
-          echo "$LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
       - name: Test
         # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
         env:
+          ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}: "clang"
           RUSTFLAGS: >-
             -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
         run: cargo test --color=never --workspace
       - name: Nextest with code coverage
         env:
           RUSTFLAGS: >-
-            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
+            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
