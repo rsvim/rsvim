@@ -414,6 +414,11 @@ if __name__ == "__main__":
         action="store_true",
         help="disable sccache",
     )
+    parser.add_argument(
+        "--no-linker",
+        action="store_true",
+        help="disable rust-lld",
+    )
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -433,6 +438,8 @@ if __name__ == "__main__":
 
     if parsed_args.no_cache:
         NO_CACHE = True
+    if parsed_args.no_linker:
+        NO_LINKER = True
 
     for command in commands:
         sub = parsed_args.subcommand
