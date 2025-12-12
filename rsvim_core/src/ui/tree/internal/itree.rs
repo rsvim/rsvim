@@ -95,7 +95,7 @@ impl Relationship {
     }
   }
 
-  fn _set_root_id_if_empty(&mut self, root_id: TreeNodeId) {
+  fn _set_root_id(&mut self, root_id: TreeNodeId) {
     if self.root_id == INVALID_ROOT_ID {
       self.root_id = root_id;
       if cfg!(debug_assertions) {
@@ -121,7 +121,7 @@ impl Relationship {
     let id = next_node_id();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
-    self._set_root_id_if_empty(id);
+    self._set_root_id(id);
     self._set_name(id, name);
     self._internal_check();
     Ok(id)
@@ -343,6 +343,12 @@ impl Relationship {
     debug_assert_eq!(removed_taid, *child_taid);
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
     debug_assert_eq!(removed_id, child_id);
+    if cfg!(debug_assertions) {
+      self.names.remove(&child_id);
+    }
+    if self.root_id == child_id {
+      self.root_id = INVALID_ROOT_ID;
+    }
     Ok(removed_id)
   }
 
@@ -372,7 +378,7 @@ impl Relationship {
     let id = next_node_id();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
-    self._set_root_id_if_empty(id);
+    self._set_root_id(id);
     self._set_name(id, name);
     self._internal_check();
     Ok(id)
