@@ -124,7 +124,6 @@ jobs:
           RUSTFLAGS: >-
             -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
         run: |
-          unset $RSVIM_LINKER
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
       - uses: codecov/codecov-action@v5
