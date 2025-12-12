@@ -42,7 +42,8 @@ jobs:
     if: ${{ github.event.pull_request }}
     env:
       RUSTC_WRAPPER: "sccache"
-      # SCCACHE_GHA_ENABLED: "true"
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: "clang"
+      RUSTFLAGS: "-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -50,6 +51,7 @@ jobs:
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
         run: |
+          sudo apt install -y -q llvm clang mold
           rustup component add rust-src clippy
       - name: Sccache Stats
         run: |
@@ -57,7 +59,7 @@ jobs:
       - name: Check out 'current' branch
         uses: actions/checkout@v6
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - name: Build 'current' branch
         run: |
           cargo build --release
