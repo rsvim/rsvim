@@ -216,12 +216,6 @@ impl Relationships {
   }
 
   #[inline]
-  /// Actual location/size in limited terminal device. The top-left location
-  /// can never be negative.
-  ///
-  /// A node's shape is always truncated by its parent shape.
-  /// Unless the node itself is the root node and doesn't have a parent, in
-  /// such case, the root node logical shape does not need to be truncated.
   pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
     self._internal_check();
 
