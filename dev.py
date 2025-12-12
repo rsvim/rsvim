@@ -16,10 +16,16 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
     "CYGWIN_NT"
 )
 MACOS = platform.system().startswith("Darwin")
-LINUX = not WINDOWS and not MACOS
+LINUX = platform.system().startswith("Linux")
+
+X86_64 = platform.machine().startswith("x86_64")
+AARCH64 = platform.machine().startswith("aarch64")
 
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
+
+RUST_LLD = shutil.which("rust-lld")
+NO_LINKER = False
 
 
 def run(cmd):
@@ -41,6 +47,25 @@ def sccache():
         logging.warning("'sccache' is disabled!")
         return
     env("RUSTC_WRAPPER", SCCACHE)
+
+
+def linker():
+    if NO_LINKER:
+        logging.warning("'rust-lld' is disabled!")
+        return
+    if RUST_LLD is None:
+        logging.warning("'rust-lld' not found!")
+        return
+    if MACOS:
+        if X86_64:
+            env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", RUST_LLD)
+        elif AARCH64:
+            env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", RUST_LLD)
+    elif LINUX:
+        if X86_64:
+            env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
+        elif AARCH64:
+            env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
 
 
 def rustflags():
@@ -140,6 +165,7 @@ class Test(Cmd):
     def test(self, name) -> None:
         sccache()
         rustflags()
+        linker()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
@@ -153,6 +179,7 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
+        linker()
         cmd = "cargo nextest list"
         run(cmd)
 
@@ -177,6 +204,7 @@ class Miri(Cmd):
 
     def run(self, args) -> None:
         rustflags()
+        linker()
         rust_backtrace()
         miriflags()
         if args.job is None:
@@ -212,6 +240,7 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
+        linker()
         cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
