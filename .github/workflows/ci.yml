@@ -82,7 +82,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
-      RSVIM_LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
+      ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}: "clang"
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
+      RUSTFLAGS: >-
+        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0 -Clink-arg=-fuse-ld=lld-link.exe' || (contains(matrix.os, 'ubuntu') && '-Clink-arg=-fuse-ld=ld.lld' || '-Clink-arg=-fuse-ld=ld64.lld') }}
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -97,32 +100,25 @@ jobs:
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
+      - uses: KyleMayes/install-llvm-action@v2
       - name: Install Linker (Linux)
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
           set -x
-          sudo apt install -y -q llvm clang mold
-          which mold
-          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
-          echo "RSVIM_LLD=$(which mold)" >> "$GITHUB_ENV"
+          sudo apt install -y -q llvm clang
+          which ld64.lld
       - name: Install Linker (Mac)
         if: ${{ contains(matrix.os, 'macos') }}
         run: |
           set -x
-          brew install lld
           which ld64.lld
-          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
-          echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
+      - name: Install Linker (Windows)
+        if: ${{ contains(matrix.os, 'windows') }}
+        run: |
+          lld-link --version
       - name: Test
-        # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
-        env:
-          RUSTFLAGS: >-
-            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', env.RSVIM_LLD) }}
         run: cargo test --color=never --workspace
       - name: Nextest with code coverage
-        env:
-          RUSTFLAGS: >-
-            -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --workspace --ignore-filename-regex '_tests.rs|tests' --lcov --output-path lcov.info --color=never --no-capture
