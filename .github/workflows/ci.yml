@@ -103,6 +103,7 @@ jobs:
           set -x
           sudo apt install -y -q llvm clang mold
           which mold
+          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which mold)" >> "$GITHUB_ENV"
       - name: Install Linker (Mac)
         if: ${{ contains(matrix.os, 'macos') }}
@@ -110,6 +111,7 @@ jobs:
           set -x
           brew install lld
           which ld64.lld
+          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
       - name: Test
         # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
