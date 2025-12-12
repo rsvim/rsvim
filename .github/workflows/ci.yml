@@ -98,17 +98,23 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - name: Install Linker (Linux)
         if: ${{ contains(matrix.os, 'ubuntu') }}
+        env:
+          LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
-          sudo apt install -y -q llvm clang lld
-      - name: Prepare Linker (Linux/Mac)
-        if: ${{ contains(matrix.os, 'ubuntu') || contains(matrix.os, 'macos') }}
+          set -x
+          sudo apt install -y -q llvm clang mold
+          which mold
+          echo "$LINKER=clang" >> "$GITHUB_ENV"
+          echo "RSVIM_LLD=$(which mold)" >> "$GITHUB_ENV"
+      - name: Install Linker (Mac)
+        if: ${{ contains(matrix.os, 'macos') }}
         env:
           LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
           set -x
           which lld
           echo "$LINKER=clang" >> "$GITHUB_ENV"
-          echo "RSVIM_LLD=$(which lld)" >> "$GITHUB_ENV"
+          echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
       - name: Test
         # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
         env:
