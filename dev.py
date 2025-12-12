@@ -53,7 +53,6 @@ def sccache():
 
 
 def _linker():
-    # linker
     if NO_LINKER:
         logging.warning("lld/mold is disabled!")
         return None
