@@ -16,10 +16,19 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
     "CYGWIN_NT"
 )
 MACOS = platform.system().startswith("Darwin")
-LINUX = not WINDOWS and not MACOS
+LINUX = platform.system().startswith("Linux")
+
+X86_64 = platform.machine().startswith("x86_64")
+AARCH64 = platform.machine().startswith("aarch64")
+ARM64 = platform.machine().startswith("arm64")
 
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
+
+CLANG = shutil.which("clang")
+LLD = shutil.which("ld.lld") if LINUX else shutil.which("ld64.lld")
+MOLD = shutil.which("mold")
+NO_LINKER = False
 
 
 def run(cmd):
@@ -43,10 +52,45 @@ def sccache():
     env("RUSTC_WRAPPER", SCCACHE)
 
 
+def _linker():
+    if NO_LINKER:
+        logging.warning("lld/mold is disabled!")
+        return None
+
+    linker = MOLD if MOLD is not None else LLD
+    if linker is None or CLANG is None:
+        logging.warning("lld/mold not found!")
+        return None
+
+    enable_linker = (MACOS or LINUX) and (X86_64 or AARCH64 or ARM64)
+    if not enable_linker:
+        return None
+
+    triple = None
+    if MACOS:
+        if X86_64:
+            triple = "X86_64_APPLE_DARWIN"
+        elif AARCH64 or ARM64:
+            triple = "AARCH64_APPLE_DARWIN"
+    elif LINUX:
+        if X86_64:
+            triple = "X86_64_UNKNOWN_LINUX_GNU"
+        elif AARCH64 or ARM64:
+            triple = "AARCH64_UNKNOWN_LINUX_GNU"
+    assert triple is not None
+
+    env(f"CARGO_TARGET_{triple}_LINKER", "clang")
+    return f"-Clink-arg=-fuse-ld={linker}"
+
+
 def rustflags():
     flags = ["-Dwarnings"]
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
+    linker_flags = _linker()
+    if linker_flags is not None:
+        flags.append(linker_flags)
+
     flags = " ".join(flags)
     env("RUSTFLAGS", flags)
 
@@ -385,6 +429,11 @@ if __name__ == "__main__":
         action="store_true",
         help="disable sccache",
     )
+    parser.add_argument(
+        "--no-linker",
+        action="store_true",
+        help="disable rust-lld",
+    )
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -404,6 +453,8 @@ if __name__ == "__main__":
 
     if parsed_args.no_cache:
         NO_CACHE = True
+    if parsed_args.no_linker:
+        NO_LINKER = True
 
     for command in commands:
         sub = parsed_args.subcommand

@@ -36,7 +36,7 @@ jobs:
           git diff --exit-code HEAD
       - name: Install Rust
         run: |
-          rustup component add rust-src clippy rustfmt
+          rustup component add clippy rustfmt
           rustup toolchain install nightly
           rustup component add --toolchain nightly rustfmt
       - name: Rustfmt
@@ -72,30 +72,40 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
-      # SCCACHE_GHA_ENABLED: "true"
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        -Dwarnings ${{ matrix.os == 'windows-2022' && '-Csymbol-mangling-version=v0' || '' }}
+        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
-        run: |
-          rustup component add rust-src clippy llvm-tools
-      - name: Sccache Stats
-        run: |
-          sccache --show-stats
+        run: rustup component add clippy
+      - uses: actions/checkout@v6
+      - name: Test
+        run: cargo test --color=never --workspace
+  test_coverage:
+    name: Test Coverage
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTC_WRAPPER: "sccache"
+      # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
+      RUSTFLAGS: >-
+        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || '' }}
+    steps:
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: ${{ env.SCCACHE_DIR }}
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Install Rust
+        run: rustup component add rust-src clippy llvm-tools
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      # - name: Nextest
-      #   run: |
-      #     cargo nextest run --color=never --no-capture --all
-      - name: Test
-        run: |
-          cargo test --color=never --workspace
       - name: Nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
@@ -109,28 +119,17 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        rust_version: [1.89.0, stable, beta]
     env:
       RUSTC_WRAPPER: "sccache"
-      # SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Install Rust
-        run: |
-          rustup update --no-self-update ${{ matrix.rust_version }}
-          rustup default ${{ matrix.rust_version }}
-          rustup component add --toolchain ${{ matrix.rust_version }} rust-src clippy
-      - name: Sccache Stats
-        run: |
-          sccache --show-stats
+        run: rustup component add clippy
       - uses: actions/checkout@v6
       - name: Build Release
-        run: |
-          cargo build --release
+        run: cargo build --release
       - name: Build Nightly
         run: cargo build --profile nightly

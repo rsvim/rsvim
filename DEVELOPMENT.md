@@ -5,10 +5,11 @@
 Please setup your development environment with:
 
 - Latest C++ toolchain:
-  - For Linux, install [GNU GCC](https://gcc.gnu.org/).
+  - For Linux, install [gcc](https://gcc.gnu.org/).
   - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, install [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Install [mise](https://github.com/jdx/mise), then run `mise i` and `npm i`.
+- (Optional) Install [llvm](https://llvm.org/) (clang, lld) and rust components `rustup component add rust-analyzer llvm-tools-preview`.
 
 ## Rust
 
