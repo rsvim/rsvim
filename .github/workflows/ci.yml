@@ -110,12 +110,12 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: clang mold
       - name: Install Rust
         run: |
           rustup component add rust-src clippy llvm-tools
-      - name: Install Linker
-        run: |
-          sudo apt install -y -q clang mold
       - uses: actions/checkout@v6
       - name: Build Release
         run: |

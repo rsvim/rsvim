@@ -49,9 +49,11 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: clang mold
       - name: Install Rust
         run: |
-          sudo apt install -y -q clang mold
           rustup component add rust-src clippy
       - name: Sccache Stats
         run: |
