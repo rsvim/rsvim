@@ -25,7 +25,9 @@ ARM64 = platform.machine().startswith("arm64")
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
 
-RUST_LLD = shutil.which("rust-lld")
+CLANG = shutil.which("clang")
+LLD = shutil.which("lld")
+MOLD = shutil.which("mold")
 NO_LINKER = False
 
 
@@ -50,29 +52,33 @@ def sccache():
     env("RUSTC_WRAPPER", SCCACHE)
 
 
-def linker():
-    if NO_LINKER:
-        logging.warning("'rust-lld' is disabled!")
-        return
-    if RUST_LLD is None:
-        logging.warning("'rust-lld' not found!")
-        return
-    if MACOS:
-        if X86_64:
-            env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", RUST_LLD)
-        elif AARCH64 or ARM64:
-            env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", RUST_LLD)
-    elif LINUX:
-        if X86_64:
-            env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
-        elif AARCH64 or ARM64:
-            env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", RUST_LLD)
-
-
 def rustflags():
     flags = ["-Dwarnings"]
     if WINDOWS:
         flags.append("-Csymbol-mangling-version=v0")
+
+    # linker
+    if NO_LINKER:
+        logging.warning("lld/mold is disabled!")
+        return
+    linker = MOLD if MOLD is not None else LLD
+    if linker is None or CLANG is None:
+        logging.warning("lld/mold not found!")
+        return
+    if MACOS:
+        if X86_64:
+            env("CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER", "clang")
+        elif AARCH64 or ARM64:
+            env("CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER", "clang")
+    elif LINUX:
+        if X86_64:
+            env("CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER", "clang")
+        elif AARCH64 or ARM64:
+            env("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER", "clang")
+    linker_flags = f"-Clink-arg=-fuse-ld={linker}"
+    if (MACOS or LINUX) and (X86_64 or AARCH64 or ARM64):
+        flags.append(linker_flags)
+
     flags = " ".join(flags)
     env("RUSTFLAGS", flags)
 
@@ -166,7 +172,6 @@ class Test(Cmd):
     def test(self, name) -> None:
         sccache()
         rustflags()
-        linker()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
@@ -180,7 +185,6 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
-        linker()
         cmd = "cargo nextest list"
         run(cmd)
 
@@ -205,7 +209,6 @@ class Miri(Cmd):
 
     def run(self, args) -> None:
         rustflags()
-        linker()
         rust_backtrace()
         miriflags()
         if args.job is None:
@@ -241,7 +244,6 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        linker()
         cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
