@@ -82,10 +82,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
-      ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}: "clang"
+      RSVIM_LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
       # Relate issue: https://github.com/denoland/rusty_v8/issues/1849
       RUSTFLAGS: >-
-        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0 -Clink-arg=-fuse-ld=lld-link.exe' || (contains(matrix.os, 'ubuntu') && '-Clink-arg=-fuse-ld=ld.lld' || '-Clink-arg=-fuse-ld=ld64.lld') }}
+        -Dwarnings ${{ contains(matrix.os, 'windows') && '-Csymbol-mangling-version=v0' || format('-Clink-arg=-fuse-ld={0}', contains(matrix.os, 'ubuntu') && 'ld.lld' || 'ld64.lld') }}
     steps:
       - uses: Swatinem/rust-cache@v2
         with:
@@ -103,16 +103,10 @@ jobs:
       - uses: KyleMayes/install-llvm-action@v2
         with:
           version: "20"
-      - name: Install Linker (Linux)
-        if: ${{ contains(matrix.os, 'ubuntu') }}
+      - name: Install Linker (Linux/Mac)
+        if: ${{ !contains(matrix.os, 'windows') }}
         run: |
-          set -x
-          which ld64.lld
-      - name: Install Linker (Mac)
-        if: ${{ contains(matrix.os, 'macos') }}
-        run: |
-          set -x
-          which ld64.lld
+          echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
       - name: Install Linker (Windows)
         if: ${{ contains(matrix.os, 'windows') }}
         run: |
