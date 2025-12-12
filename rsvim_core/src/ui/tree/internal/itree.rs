@@ -164,10 +164,10 @@ impl Relationships {
   }
 
   #[inline]
-  /// Set shape for a node, returns the "really set" shape.
+  /// Set shape for a node. Since a node is always bounded by its parent, thus
+  /// its real shape can be different with the "expecting" shape.
   ///
-  /// Since node is always bounded by its parent, thus the real shape can be
-  /// different from the arguments used in this method.
+  /// Returns the "real" shape after adjustment.
   ///
   /// There are two policies when calculating the "adjusted" shape:
   /// - Truncate: Just cut all the parts that are out of its parent. For
