@@ -11,6 +11,7 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 use taffy::AvailableSpace;
+use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
