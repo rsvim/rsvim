@@ -100,17 +100,16 @@ jobs:
       - uses: actions/checkout@v6
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - uses: KyleMayes/install-llvm-action@v2
-        with:
-          version: "20"
       - name: Install Linker (Linux)
         if: ${{ !contains(matrix.os, 'ubuntu') }}
         run: |
+          sudo apt install -y -q llvm clang lld
           echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which ld.lld)" >> "$GITHUB_ENV"
       - name: Install Linker (Mac)
         if: ${{ !contains(matrix.os, 'macos') }}
         run: |
+          brew install lld
           echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which ld64.lld)" >> "$GITHUB_ENV"
       - name: Test
