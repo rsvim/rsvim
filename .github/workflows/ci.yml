@@ -107,7 +107,6 @@ jobs:
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
           set -x
-          sudo apt install -y -q llvm clang
           which ld64.lld
       - name: Install Linker (Mac)
         if: ${{ contains(matrix.os, 'macos') }}
