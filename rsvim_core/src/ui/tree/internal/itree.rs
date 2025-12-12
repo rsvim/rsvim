@@ -247,6 +247,7 @@ impl Relationships {
     }
   }
 
+  #[inline]
   /// Clear the cached actual_shapes since the provided id. All its
   /// descendants actual_shape will be cleared as well.
   fn clear_cached_actual_shapes(&mut self, id: TreeNodeId) {
