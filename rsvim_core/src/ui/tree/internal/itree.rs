@@ -9,6 +9,7 @@ use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
+use std::intrinsics::sub_with_overflow;
 use std::iter::Iterator;
 use taffy::AvailableSpace;
 use taffy::Layout;
@@ -209,6 +210,29 @@ impl Relationships {
     shape: IRect,
     policy: RelationshipSetShapePolicy,
   ) -> TaffyResult<IRect> {
+    let adjusted_shape = match self.parent(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(parent_id)?;
+        let shape = match policy {
+          RelationshipSetShapePolicy::TRUNCATE => {
+            shapes::truncate_shape(&shape, &parent_actual_shape.size())
+          }
+          RelationshipSetShapePolicy::BOUND => {
+            shapes::bound_shape(&shape, &parent_actual_shape.size())
+          }
+        };
+        shape
+      }
+      None => {
+        debug_assert_eq!(shape.min().x, 0);
+        debug_assert_eq!(shape.min().y, 0);
+        debug_assert!(shape.max().x >= shape.min().x);
+        debug_assert!(shape.max().y >= shape.min().y);
+        shape
+      }
+    };
+    self.shapes.insert(id, adjusted_shape);
+    Ok(adjusted_shape)
   }
 
   #[inline]
