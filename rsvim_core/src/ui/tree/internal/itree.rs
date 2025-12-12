@@ -18,6 +18,11 @@ use taffy::TaffyTree;
 
 const INVALID_ROOT_ID: TreeNodeId = -1;
 
+pub enum RelationshipSetShapePolicy {
+  TRUNCATE,
+  BOUND,
+}
+
 #[derive(Debug, Clone)]
 pub struct Relationships {
   ta: TaffyTree,
@@ -27,7 +32,7 @@ pub struct Relationships {
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 
   // Shapes
-  shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
+  shapes: FoldMap<TreeNodeId, IRect>,
   // Cached actual shapes
   cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 
@@ -175,6 +180,35 @@ impl Relationships {
         Ok(bounded_shape)
       }
     }
+  }
+
+  #[inline]
+  /// Set shape for a node, returns the "really set" shape.
+  ///
+  /// Since node is always bounded by its parent, thus the real shape can be
+  /// different from the arguments used in this method.
+  ///
+  /// There are two policies when calculating the "adjusted" shape:
+  /// - Truncate: Just cut all the parts that are out of its parent. For
+  ///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
+  ///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
+  ///   left-top corner must be at least `(0, 0)`, and its bottom-right corner
+  ///   is at most `(7, 8)`.
+  /// - Bound: Keep as much as we can, first try to set at most the same size
+  ///   as its parent, then move inside its parent thus avoid cutting any parts
+  ///   that is out of its parent. For example a node shape is
+  ///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
+  ///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
+  ///   which doesn't need to be truncated, but its original height is 8 so
+  ///   need to be truncated into 6, it becomes `((-1, -2), (5, 4))`. Then move
+  ///   it into parent to avoid more truncating, so its becomes
+  ///   `((0, 0), (6, 6))`.
+  pub fn set_shape(
+    &mut self,
+    id: TreeNodeId,
+    shape: IRect,
+    policy: RelationshipSetShapePolicy,
+  ) -> TaffyResult<IRect> {
   }
 
   #[inline]
