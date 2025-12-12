@@ -131,7 +131,7 @@ impl Relationships {
       Some(parent_id) => {
         let parent_actual_shape = self.actual_shape(parent_id)?;
         let bounded_shape =
-          shapes::truncate_shape(&shape, &parent_actual_shape);
+          shapes::truncate_shape(&shape, &parent_actual_shape.size());
         Ok(bounded_shape)
       }
       None => {
