@@ -105,6 +105,7 @@ jobs:
         env:
           LINKER: ${{ format('CARGO_TARGET_{0}_LINKER', matrix.triple) }}
         run: |
+          set -x
           which lld
           echo "$LINKER=clang" >> "$GITHUB_ENV"
           echo "RSVIM_LLD=$(which lld)" >> "$GITHUB_ENV"
