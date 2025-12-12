@@ -216,13 +216,13 @@ impl Relationships {
   }
 
   #[inline]
-  pub fn actual_shape(&self, id: TreeNodeId) -> TaffyResult<U16Rect> {
+  pub fn actual_shape(&self, id: TreeNodeId) -> Option<U16Rect> {
     self._internal_check();
 
     match self.parent(id) {
       None => {
         let shape = self.shape(id)?;
-        Ok(rect_as!(shape, u16))
+        Some(rect_as!(shape, u16))
       }
       Some(parent_id) => {
         let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
@@ -232,13 +232,15 @@ impl Relationships {
             // Non-root node truncated by its parent's shape.
             let shape = self.shape(id)?;
             let parent_actual_shape = self.actual_shape(parent_id)?;
-            let actual_shape =
-              shapes::convert_to_actual_shape(&shape, &parent_actual_shape);
+            let actual_shape = shapes::convert_relative_to_absolute(
+              &shape,
+              &parent_actual_shape,
+            );
             self
               .cached_actual_shapes
               .borrow_mut()
               .insert(id, actual_shape);
-            Ok(actual_shape)
+            Some(actual_shape)
           }
         }
       }
