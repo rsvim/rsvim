@@ -102,7 +102,7 @@ jobs:
         run: |
           sudo apt install -y -q clang mold
           echo "$RSVIM_LINKER=clang" >> "$GITHUB_ENV"
-          echo "RUSTFLAGS='-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold'" >> "$GITHUB_ENV"
+          echo "RUSTFLAGS=-Dwarnings -Clink-arg=-fuse-ld=/usr/bin/mold" >> "$GITHUB_ENV"
       - name: Test
         run: cargo test --color=never --workspace
       - name: Nextest with code coverage
