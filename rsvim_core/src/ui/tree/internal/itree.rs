@@ -3,54 +3,75 @@
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::inode::next_node_id;
 use crate::ui::tree::internal::shapes;
+use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use taffy::AvailableSpace;
+use taffy::Layout;
+use taffy::Style;
+use taffy::TaffyResult;
+use taffy::TaffyTree;
 
 const INVALID_ROOT_ID: TreeNodeId = -1;
 
-#[derive(Debug, Clone)]
-pub struct Relationships {
-  // Root id.
-  root_id: TreeNodeId,
-
-  // Maps node id => its parent node id.
-  parent_id: FoldMap<TreeNodeId, TreeNodeId>,
-
-  // Maps node id => all its children node ids.
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+pub enum RelationshipSetShapePolicy {
+  TRUNCATE,
+  BOUND,
 }
 
-impl Relationships {
+#[derive(Debug, Clone)]
+pub struct Relationship {
+  ta: TaffyTree,
+
+  // Maps TreeNodeId <=> taffy::NodeId
+  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
+  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
+
+  // Shapes
+  shapes: FoldMap<TreeNodeId, IRect>,
+  // Cached actual shapes
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+
+  // Root id
+  root_id: TreeNodeId,
+
+  // For debugging
+  #[cfg(debug_assertions)]
+  root_id_changes: usize,
+  #[cfg(debug_assertions)]
+  names: FoldMap<TreeNodeId, &'static str>,
+}
+
+rc_refcell_ptr!(Relationship);
+
+impl Relationship {
   pub fn new() -> Self {
     Self {
+      ta: TaffyTree::new(),
+      id2taid: FoldMap::new(),
+      taid2id: FoldMap::new(),
+      shapes: RefCell::new(FoldMap::new()),
+      cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_id: INVALID_ROOT_ID,
-      parent_id: FoldMap::new(),
-      children_ids: FoldMap::new(),
-    }
-  }
-
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.parent_id.get(&id).cloned()
-  }
-
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    match self.children_ids.get(&id) {
-      Some(children_ids) => children_ids.to_vec(),
-      None => Vec::new(),
+      #[cfg(debug_assertions)]
+      root_id_changes: 0,
+      #[cfg(debug_assertions)]
+      names: FoldMap::new(),
     }
   }
 
   #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
-    self.children_ids.is_empty()
+    self.id2taid.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.children_ids.len()
+    self.id2taid.len()
   }
 
   #[cfg(not(test))]
@@ -58,136 +79,313 @@ impl Relationships {
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(self.root_id);
+    debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
+    debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
 
-    while let Some(id) = que.pop_front() {
-      let children_ids = self.children_ids(id);
-      for c in children_ids {
-        let p = self.parent_id.get(&c).cloned();
-        debug_assert!(p.is_some());
-        debug_assert_eq!(p.unwrap(), id);
+    for (id, taid) in self.id2taid.iter() {
+      debug_assert!(self.taid2id.contains_key(taid));
+      debug_assert_eq!(*self.taid2id.get(taid).unwrap(), *id);
+      if let Some(parent_taid) = self.ta.parent(*taid) {
+        debug_assert!(self.taid2id.contains_key(&parent_taid));
       }
-      match self.parent_id.get(&id).cloned() {
-        Some(parent) => {
-          debug_assert_eq!(
-            self
-              .children_ids(parent)
-              .iter()
-              .cloned()
-              .filter(|c| *c == id)
-              .count(),
-            1
-          );
-        }
-        None => debug_assert_eq!(id, self.root_id),
+    }
+    for (taid, nid) in self.taid2id.iter() {
+      debug_assert!(self.id2taid.contains_key(nid));
+      debug_assert_eq!(*self.id2taid.get(nid).unwrap(), *taid);
+    }
+  }
+
+  fn _set_root_id(&mut self, root_id: TreeNodeId) {
+    if self.root_id == INVALID_ROOT_ID {
+      self.root_id = root_id;
+      if cfg!(debug_assertions) {
+        self.root_id_changes += 1;
+        debug_assert!(self.root_id_changes <= 1);
       }
     }
   }
 
-  pub fn root_id(&self) -> TreeNodeId {
-    self.root_id
+  fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
+    if cfg!(debug_assertions) {
+      self.names.insert(id, name);
+    }
   }
 
-  pub fn contains_id(&self, id: TreeNodeId) -> bool {
-    self._internal_check();
-    self.children_ids.contains_key(&id)
-  }
-
-  fn _add_child_impl(
+  pub fn new_leaf(
     &mut self,
-    parent_id: Option<TreeNodeId>,
-    child_id: TreeNodeId,
-  ) {
-    debug_assert!(!self.contains_id(child_id));
+    style: Style,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-
-    if parent_id.is_none() && self.root_id == INVALID_ROOT_ID {
-      self.root_id = child_id;
-      self.children_ids.insert(child_id, Vec::new());
-    } else {
-      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
-      debug_assert!(parent_id.is_some());
-
-      let parent_id = parent_id.unwrap();
-      // Initialize children_ids vector.
-      self.children_ids.insert(child_id, Vec::new());
-
-      // Binds connection from child => parent.
-      self.parent_id.insert(child_id, parent_id);
-
-      // Binds connection from parent => child.
-      self
-        .children_ids
-        .get_mut(&parent_id)
-        .unwrap()
-        .push(child_id);
-    }
-
+    let taid = self.ta.new_leaf(style)?;
+    let id = next_node_id();
+    self.id2taid.insert(id, taid);
+    self.taid2id.insert(taid, id);
+    self._set_root_id(id);
+    self._set_name(id, name);
     self._internal_check();
+    Ok(id)
   }
 
-  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
-    self._add_child_impl(Some(parent_id), child_id);
-  }
-
-  pub fn add_root(&mut self, child_id: TreeNodeId) {
-    self._add_child_impl(None, child_id);
-  }
-
-  pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
-    // root node is not allowed to be removed.
-    debug_assert_ne!(child_id, self.root_id);
-    debug_assert_ne!(child_id, INVALID_ROOT_ID);
-
+  pub fn compute_layout(
+    &mut self,
+    id: TreeNodeId,
+    available_size: taffy::Size<AvailableSpace>,
+  ) -> TaffyResult<()> {
     self._internal_check();
-
-    let result = match self.parent_id.remove(&child_id) {
-      Some(removed_parent) => {
-        match self.children_ids.get_mut(&removed_parent) {
-          Some(to_be_removed_children) => {
-            let to_be_removed_child = to_be_removed_children
-              .iter()
-              .enumerate()
-              .filter(|(_idx, c)| **c == child_id)
-              .map(|(idx, c)| (idx, *c))
-              .collect::<Vec<(usize, TreeNodeId)>>();
-            if !to_be_removed_child.is_empty() {
-              debug_assert_eq!(to_be_removed_child.len(), 1);
-              let to_be_removed = to_be_removed_child[0];
-              to_be_removed_children.remove(to_be_removed.0);
-
-              // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
-              // api.
-              let children_of_to_be_removed_exists =
-                self.children_ids.contains_key(&to_be_removed.1);
-              let children_of_to_be_removed_is_empty = self
-                .children_ids
-                .get(&to_be_removed.1)
-                .is_none_or(|children| children.is_empty());
-              if children_of_to_be_removed_exists
-                && children_of_to_be_removed_is_empty
-              {
-                self.children_ids.remove(&to_be_removed.1);
-              }
-
-              true
-            } else {
-              false
-            }
-          }
-          None => false,
-        }
-      }
-      None => false,
-    };
-
+    let taid = self.id2taid.get(&id).unwrap();
+    let result = self.ta.compute_layout(*taid, available_size);
+    self.clear_cached_actual_shapes(id);
     self._internal_check();
     result
   }
+
+  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    self.ta.layout(*taid)
+  }
+
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    self.ta.style(*taid)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    self.ta.set_style(*taid, style)
+  }
+
+  pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
+    self.shapes.get(&id)
+  }
+
+  #[inline]
+  /// Set shape for a node. Since a node is always bounded by its parent, thus
+  /// its real shape can be different with the "expecting" shape.
+  ///
+  /// Returns the "real" shape after adjustment.
+  ///
+  /// There are two policies when calculating the "adjusted" shape:
+  /// - Truncate: Just cut all the parts that are out of its parent. For
+  ///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
+  ///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
+  ///   left-top corner must be at least `(0, 0)`, and its bottom-right corner
+  ///   is at most `(7, 8)`.
+  /// - Bound: Keep as much as we can, first try to set at most the same size
+  ///   as its parent, then move inside its parent thus avoid cutting any parts
+  ///   that is out of its parent. For example a node shape is
+  ///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
+  ///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
+  ///   which doesn't need to be truncated, but its original height is 8 so
+  ///   need to be truncated into 6, it becomes `((-1, -2), (5, 4))`. Then move
+  ///   it into parent to avoid more truncating, so its becomes
+  ///   `((0, 0), (6, 6))`.
+  pub fn set_shape(
+    &mut self,
+    id: TreeNodeId,
+    shape: IRect,
+    policy: RelationshipSetShapePolicy,
+  ) -> TaffyResult<IRect> {
+    let result = match self.parent(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(parent_id)?;
+        let result = match policy {
+          RelationshipSetShapePolicy::TRUNCATE => {
+            shapes::truncate_shape(&shape, &parent_actual_shape.size())
+          }
+          RelationshipSetShapePolicy::BOUND => {
+            shapes::bound_shape(&shape, &parent_actual_shape.size())
+          }
+        };
+        result
+      }
+      None => {
+        debug_assert_eq!(shape.min().x, 0);
+        debug_assert_eq!(shape.min().y, 0);
+        debug_assert!(shape.max().x >= shape.min().x);
+        debug_assert!(shape.max().y >= shape.min().y);
+        shape
+      }
+    };
+    self.shapes.insert(id, result);
+    Ok(result)
+  }
+
+  #[inline]
+  pub fn actual_shape(&self, id: TreeNodeId) -> Option<U16Rect> {
+    self._internal_check();
+
+    match self.parent(id) {
+      None => {
+        let shape = self.shape(id)?;
+        Some(rect_as!(shape, u16))
+      }
+      Some(parent_id) => {
+        let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
+        match maybe_cached {
+          Some(cached) => Some(cached),
+          None => {
+            // Non-root node truncated by its parent's shape.
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
+            let actual_shape = shapes::convert_relative_to_absolute(
+              &shape,
+              &parent_actual_shape,
+            );
+            self
+              .cached_actual_shapes
+              .borrow_mut()
+              .insert(id, actual_shape);
+            Some(actual_shape)
+          }
+        }
+      }
+    }
+  }
+
+  #[inline]
+  /// Clear the cached actual_shapes since the provided id. All its
+  /// descendants actual_shape will be cleared as well.
+  fn clear_cached_actual_shapes(&mut self, id: TreeNodeId) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(id);
+    while let Some(parent_id) = q.pop_front() {
+      self.cached_actual_shapes.borrow_mut().remove(&parent_id);
+      if let Ok(children_ids) = self.children(parent_id) {
+        for child_id in children_ids.iter() {
+          q.push_back(*child_id);
+        }
+      }
+    }
+  }
+
+  #[inline]
+  /// Whether the node is visible, e.g. its actual_shape size is zero.
+  pub fn visible(&self, id: TreeNodeId) -> Option<bool> {
+    let actual_shape = self.actual_shape(id)?;
+    Some(!actual_shape.size().is_zero())
+  }
+
+  #[inline]
+  pub fn invisible(&self, id: TreeNodeId) -> Option<bool> {
+    self.visible(id).map(|v| !v)
+  }
+
+  #[inline]
+  /// Whether the node is detached, e.g. it doesn't have a parent and it is not
+  /// the root node. A root node is always attached even it has no parent.
+  pub fn detached(&self, id: TreeNodeId) -> bool {
+    !self.attached(id)
+  }
+
+  #[inline]
+  pub fn attached(&self, id: TreeNodeId) -> bool {
+    debug_assert_ne!(id, INVALID_ROOT_ID);
+    id == self.root_id || self.parent(id).is_some()
+  }
+
+  #[inline]
+  /// The node is visible and its size > 0, e.g. both height and width > 0.
+  pub fn enabled(&self, id: TreeNodeId) -> Option<bool> {
+    self._internal_check();
+    let visible = self.visible(id)?;
+    let attached = self.attached(id);
+    Some(visible && attached)
+  }
+
+  #[inline]
+  pub fn disabled(&self, id: TreeNodeId) -> Option<bool> {
+    self.enabled(id).map(|v| !v)
+  }
+
+  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id)?;
+    let parent_taid = self.ta.parent(*taid)?;
+    self.taid2id.get(&parent_taid).copied()
+  }
+
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    let children_taids = self.ta.children(*taid)?;
+    Ok(
+      children_taids
+        .iter()
+        .map(|i| *self.taid2id.get(i).unwrap())
+        .collect_vec(),
+    )
+  }
+
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    self._internal_check();
+    let parent_taid = self.id2taid.get(&parent_id).unwrap();
+    let child_taid = self.id2taid.get(&child_id).unwrap();
+    self.ta.add_child(*parent_taid, *child_taid)
+  }
+
+  pub fn remove_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let parent_taid = self.id2taid.get(&parent_id).unwrap();
+    let child_taid = self.id2taid.get(&child_id).unwrap();
+    let removed_taid = self.ta.remove_child(*parent_taid, *child_taid)?;
+    debug_assert_eq!(removed_taid, *child_taid);
+    let removed_id = *self.taid2id.get(&removed_taid).unwrap();
+    debug_assert_eq!(removed_id, child_id);
+    if cfg!(debug_assertions) {
+      self.names.remove(&child_id);
+    }
+    if self.root_id == child_id {
+      self.root_id = INVALID_ROOT_ID;
+    }
+    Ok(removed_id)
+  }
+
+  pub fn new_with_parent(
+    &mut self,
+    style: Style,
+    parent_id: TreeNodeId,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
+    let id = self.new_leaf(style, name)?;
+    self.add_child(parent_id, id)?;
+    Ok(id)
+  }
+
+  pub fn new_with_children(
+    &mut self,
+    style: Style,
+    children: &[TreeNodeId],
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let children_taids = children
+      .iter()
+      .map(|i| *self.id2taid.get(i).unwrap())
+      .collect_vec();
+    let taid = self.ta.new_with_children(style, &children_taids)?;
+    let id = next_node_id();
+    self.id2taid.insert(id, taid);
+    self.taid2id.insert(taid, id);
+    self._set_root_id(id);
+    self._set_name(id, name);
+    self._internal_check();
+    Ok(id)
+  }
 }
 
-impl Default for Relationships {
+impl Default for Relationship {
   fn default() -> Self {
     Self::new()
   }
@@ -205,7 +403,7 @@ where
   // children edges are positive. The edge weight of each child is increased
   // with the order when they are inserted, i.e. the first child has the lowest
   // edge weight, the last child has the highest edge weight.
-  relationships: RefCell<Relationships>,
+  relationship: RefCell<Relationship>,
 }
 
 #[derive(Debug)]
@@ -262,7 +460,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationships: RefCell::new(Relationships::new()),
+      relationship: RefCell::new(Relationship::new()),
     }
   }
 
@@ -271,28 +469,28 @@ where
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.relationship.borrow().len(), self.nodes.len());
 
-    let root_id = self.relationships.borrow().root_id();
+    let root_id = self.relationship.borrow().root_id();
     let mut que: VecDeque<TreeNodeId> = VecDeque::new();
     que.push_back(root_id);
 
     while let Some(id) = que.pop_front() {
-      let parent = self.relationships.borrow().parent_id(id);
+      let parent = self.relationship.borrow().parent_id(id);
       if id == root_id {
         debug_assert!(parent.is_none());
       } else {
         debug_assert!(parent.is_some());
         let parents_children =
-          self.relationships.borrow().children_ids(parent.unwrap());
+          self.relationship.borrow().children_ids(parent.unwrap());
         for c in parents_children {
-          let child_parent = self.relationships.borrow().parent_id(c);
+          let child_parent = self.relationship.borrow().parent_id(c);
           debug_assert!(child_parent.is_some());
           debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
         }
       }
 
-      let children_ids = self.relationships.borrow().children_ids(id);
+      let children_ids = self.relationship.borrow().children_ids(id);
       debug_assert_eq!(
         children_ids.len(),
         children_ids
@@ -302,7 +500,7 @@ where
           .len()
       );
       for c in children_ids {
-        let child_parent = self.relationships.borrow().parent_id(c);
+        let child_parent = self.relationship.borrow().parent_id(c);
         debug_assert!(child_parent.is_some());
         debug_assert_eq!(child_parent.unwrap(), id);
       }
@@ -318,7 +516,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relationships.borrow().root_id()
+    self.relationship.borrow().root_id()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
@@ -326,11 +524,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationships.borrow().parent_id(id)
+    self.relationship.borrow().parent_id(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationships.borrow().children_ids(id)
+    self.relationship.borrow().children_ids(id)
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -345,7 +543,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
+    ItreeIter::new(self, Some(self.relationship.borrow().root_id()))
   }
 }
 
@@ -423,7 +621,7 @@ where
     let child_id = child_node.id();
 
     debug_assert!(self.nodes.is_empty());
-    debug_assert!(self.relationships.borrow().is_empty());
+    debug_assert!(self.relationship.borrow().is_empty());
 
     // Update attributes for both the newly inserted child, and all its
     // descendants (if the child itself is also a sub-tree in current
@@ -442,7 +640,7 @@ where
     // Insert node into collection.
     self.nodes.insert(child_id, child_node);
     // Create first edge for root node.
-    self.relationships.borrow_mut().add_root(child_id);
+    self.relationship.borrow_mut().add_root(child_id);
 
     self._internal_check();
   }
@@ -470,12 +668,12 @@ where
   ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationships.borrow().contains_id(parent_id));
+    debug_assert!(self.relationship.borrow().contains_id(parent_id));
 
     // Child node.
     let child_id = child_node.id();
 
-    debug_assert!(!self.relationships.borrow().contains_id(child_id));
+    debug_assert!(!self.relationship.borrow().contains_id(child_id));
 
     // Update attributes for both the newly inserted child, and all its
     // descendants (if the child itself is also a sub-tree in current
@@ -498,7 +696,7 @@ where
     let result = self.nodes.insert(child_id, child_node);
     // Create edge between child and its parent.
     self
-      .relationships
+      .relationship
       .borrow_mut()
       .add_child(parent_id, child_id);
 
@@ -563,21 +761,21 @@ where
   /// If the node `id` is root node and root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.relationships.borrow().root_id());
+    debug_assert_ne!(id, self.relationship.borrow().root_id());
     self._internal_check();
 
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
-        debug_assert!(self.relationships.borrow().contains_id(id));
+        debug_assert!(self.relationship.borrow().contains_id(id));
         // Remove edges between `id` and its parent.
-        let relation_removed = self.relationships.borrow_mut().remove_child(id);
+        let relation_removed = self.relationship.borrow_mut().remove_child(id);
         debug_assert!(relation_removed);
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relationships.borrow().contains_id(id));
+        debug_assert!(!self.relationship.borrow().contains_id(id));
         None
       }
     };
