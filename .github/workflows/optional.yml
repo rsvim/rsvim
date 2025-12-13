@@ -47,6 +47,7 @@ jobs:
         with:
           cache-directories: ${{ env.SCCACHE_DIR }}
       - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: rustup component add rust-src clippy
       - name: Check out 'current' branch
