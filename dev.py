@@ -28,6 +28,7 @@ NO_CACHE = False
 CLANG = shutil.which("clang")
 LLD = shutil.which("ld.lld") if LINUX else shutil.which("ld64.lld")
 MOLD = shutil.which("mold")
+WILD = shutil.which("wild")
 NO_LINKER = False
 
 
@@ -57,7 +58,12 @@ def _linker():
         logging.warning("lld/mold is disabled!")
         return None
 
-    linker = MOLD if MOLD is not None else LLD
+    if WILD is not None:
+        linker =  WILD
+    elif MOLD is not None:
+        linker = MOLD
+    elif LLD is not None:
+        linker = LLD
     if linker is None or CLANG is None:
         logging.warning("lld/mold not found!")
         return None
