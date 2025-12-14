@@ -69,7 +69,7 @@ def _linker():
         logging.warning("lld/mold not found!")
         return None
 
-    enable_linker = (MACOS or LINUX) and (X86_64 or AARCH64 or ARM64)
+    enable_linker = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
     if not enable_linker:
         return None
 
@@ -84,10 +84,19 @@ def _linker():
             triple = "X86_64_UNKNOWN_LINUX_GNU"
         elif AARCH64 or ARM64:
             triple = "AARCH64_UNKNOWN_LINUX_GNU"
+    elif WINDOWS:
+        if X86_64:
+            triple = "X86_64_PC_WINDOWS_MSVC"
+        elif AARCH64 or ARM64:
+            triple = "AARCH64_PC_WINDOWS_MSVC"
     assert triple is not None
 
-    env(f"CARGO_TARGET_{triple}_LINKER", "clang")
-    return f"-Clink-arg=-fuse-ld={linker}"
+    if not WINDOWS:
+        env(f"CARGO_TARGET_{triple}_LINKER", "rust-lld.exe")
+        return None
+    else:
+        env(f"CARGO_TARGET_{triple}_LINKER", "clang")
+        return f"-Clink-arg=-fuse-ld={linker}"
 
 
 def rustflags():
