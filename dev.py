@@ -91,7 +91,7 @@ def _linker():
             triple = "AARCH64_PC_WINDOWS_MSVC"
     assert triple is not None
 
-    if not WINDOWS:
+    if WINDOWS:
         env(f"CARGO_TARGET_{triple}_LINKER", "rust-lld.exe")
         return None
     else:
