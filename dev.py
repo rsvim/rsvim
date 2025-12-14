@@ -102,6 +102,16 @@ def rustflags():
     env("RUSTFLAGS", flags)
 
 
+def rustdocflags():
+    flags = ["-Dwarnings"]
+    linker_flags = _linker()
+    if linker_flags is not None:
+        flags.append(linker_flags)
+
+    flags = " ".join(flags)
+    env("RUSTDOCFLAGS", flags)
+
+
 def rust_backtrace():
     env("RUST_BACKTRACE", "full")
 
@@ -156,6 +166,7 @@ class Clippy(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
+        rustdocflags()
         cmd = "cargo clippy --workspace --all-targets"
         run(cmd)
 
@@ -191,6 +202,7 @@ class Test(Cmd):
     def test(self, name) -> None:
         sccache()
         rustflags()
+        rustdocflags()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
@@ -204,6 +216,7 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
+        rustdocflags()
         cmd = "cargo nextest list"
         run(cmd)
 
@@ -228,6 +241,7 @@ class Miri(Cmd):
 
     def run(self, args) -> None:
         rustflags()
+        rustdocflags()
         rust_backtrace()
         miriflags()
         if args.job is None:
@@ -263,6 +277,7 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
+        rustdocflags()
         cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
@@ -352,6 +367,8 @@ class Document(Cmd):
         return None
 
     def run(self, args) -> None:
+        rustflags()
+        rustdocflags()
         cmd = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
         run(cmd)
 
