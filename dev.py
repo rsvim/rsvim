@@ -18,7 +18,9 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 MACOS = platform.system().startswith("Darwin")
 LINUX = platform.system().startswith("Linux")
 
-X86_64 = platform.machine().startswith("x86_64")
+X86_64 = platform.machine().startswith("x86_64") or platform.machine().startswith(
+    "AMD64"
+)
 AARCH64 = platform.machine().startswith("aarch64")
 ARM64 = platform.machine().startswith("arm64")
 
@@ -55,7 +57,7 @@ def sccache():
 
 def _linker():
     if NO_LINKER:
-        logging.warning("lld/mold is disabled!")
+        logging.warning("third-party linker is disabled!")
         return None
 
     linker = None
@@ -65,12 +67,13 @@ def _linker():
         linker = MOLD
     elif LLD is not None:
         linker = LLD
-    if linker is None or CLANG is None:
-        logging.warning("lld/mold not found!")
+    if linker is None or (not WINDOWS and CLANG is None):
+        logging.warning("third-party linker not found!")
         return None
 
     enable_linker = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
     if not enable_linker:
+        logging.warning("third-party linker is disabled!")
         return None
 
     triple = None
@@ -175,7 +178,6 @@ class Clippy(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        rustdocflags()
         cmd = "cargo clippy --workspace --all-targets"
         run(cmd)
 
@@ -211,7 +213,6 @@ class Test(Cmd):
     def test(self, name) -> None:
         sccache()
         rustflags()
-        rustdocflags()
         rust_backtrace()
         rsvim_log()
         cmd = "cargo nextest run --no-capture"
@@ -225,7 +226,6 @@ class Test(Cmd):
     def list(self) -> None:
         sccache()
         rustflags()
-        rustdocflags()
         cmd = "cargo nextest list"
         run(cmd)
 
@@ -250,7 +250,6 @@ class Miri(Cmd):
 
     def run(self, args) -> None:
         rustflags()
-        rustdocflags()
         rust_backtrace()
         miriflags()
         if args.job is None:
@@ -286,7 +285,6 @@ class Build(Cmd):
     def run(self, args) -> None:
         sccache()
         rustflags()
-        rustdocflags()
         cmd = "cargo build"
         if args.release:
             cmd = f"{cmd} --release"
@@ -376,7 +374,6 @@ class Document(Cmd):
         return None
 
     def run(self, args) -> None:
-        rustflags()
         rustdocflags()
         cmd = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim_core --no-open"
         run(cmd)
