@@ -56,7 +56,8 @@ def sccache():
 
 
 def _linker():
-    if NO_LINKER:
+    linker_enabled = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
+    if NO_LINKER or (not linker_enabled):
         logging.warning("third-party linker is disabled!")
         return None
 
@@ -71,11 +72,6 @@ def _linker():
         if linker is None or CLANG is None:
             logging.warning("third-party linker not found!")
             return None
-
-    enable_linker = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
-    if not enable_linker:
-        logging.warning("third-party linker is disabled!")
-        return None
 
     triple = None
     if MACOS:
