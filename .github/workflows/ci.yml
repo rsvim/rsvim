@@ -34,15 +34,6 @@ jobs:
           echo "./dev.py fmt --tsc"
           python3 ./dev.py fmt --tsc
           git diff --exit-code HEAD
-      - name: Install Rust
-        run: |
-          rustup component add clippy rustfmt
-          rustup toolchain install nightly
-          rustup component add --toolchain nightly rustfmt
-      - name: Rustfmt
-        run: cargo +nightly fmt --check
-      - name: Clippy
-        run: cargo clippy --all-targets
       - name: Taplo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,13 +49,39 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories --allow unmaintained
+      - uses: davidlattimore/wild-action@latest
+      - name: Install Rust
+        run: |
+          rustup component add clippy
+          rustup toolchain install nightly
+          rustup component add --toolchain nightly rustfmt
+      - name: Rustfmt
+        run: cargo +nightly fmt --check
       - name: Docs
         run: cargo doc --workspace
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: davidlattimore/wild-action@latest
+      - name: Install Rust
+        run: |
+          rustup component add clippy
+      - name: Clippy
+        run: cargo clippy --all-targets
   unit_test:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+          ]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
@@ -87,7 +104,14 @@ jobs:
     name: Test Coverage
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-15, macos-15-intel, windows-2022]
+        os:
+          [
+            ubuntu-22.04,
+            ubuntu-22.04-arm,
+            macos-15,
+            macos-15-intel,
+            windows-2022,
+          ]
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
