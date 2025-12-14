@@ -58,8 +58,9 @@ def _linker():
         logging.warning("lld/mold is disabled!")
         return None
 
+    linker = None
     if WILD is not None:
-        linker =  WILD
+        linker = WILD
     elif MOLD is not None:
         linker = MOLD
     elif LLD is not None:
