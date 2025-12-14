@@ -49,6 +49,16 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories --allow unmaintained
+      - uses: davidlattimore/wild-action@latest
+      - name: Install Rust
+        run: |
+          rustup component add clippy
+          rustup toolchain install nightly
+          rustup component add --toolchain nightly rustfmt
+      - name: Rustfmt
+        run: cargo +nightly fmt --check
+      - name: Docs
+        run: cargo doc --workspace
   clippy:
     name: Clippy
     runs-on: ubuntu-22.04
@@ -57,15 +67,9 @@ jobs:
       - uses: davidlattimore/wild-action@latest
       - name: Install Rust
         run: |
-          rustup component add clippy rustfmt
-          rustup toolchain install nightly
-          rustup component add --toolchain nightly rustfmt
-      - name: Rustfmt
-        run: cargo +nightly fmt --check
+          rustup component add clippy
       - name: Clippy
         run: cargo clippy --all-targets
-      - name: Docs
-        run: cargo doc --workspace
   unit_test:
     name: Unit Test
     strategy:
