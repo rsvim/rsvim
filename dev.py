@@ -61,15 +61,16 @@ def _linker():
         return None
 
     linker = None
-    if WILD is not None:
-        linker = WILD
-    elif MOLD is not None:
-        linker = MOLD
-    elif LLD is not None:
-        linker = LLD
-    if linker is None or (not WINDOWS and CLANG is None):
-        logging.warning("third-party linker not found!")
-        return None
+    if not WINDOWS:
+        if WILD is not None:
+            linker = WILD
+        elif MOLD is not None:
+            linker = MOLD
+        elif LLD is not None:
+            linker = LLD
+        if linker is None or CLANG is None:
+            logging.warning("third-party linker not found!")
+            return None
 
     enable_linker = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
     if not enable_linker:
