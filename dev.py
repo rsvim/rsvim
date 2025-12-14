@@ -18,17 +18,13 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 MACOS = platform.system().startswith("Darwin")
 LINUX = platform.system().startswith("Linux")
 
-X86_64 = platform.machine().startswith("x86_64") or platform.machine().startswith(
-    "AMD64"
-)
-AARCH64 = platform.machine().startswith("aarch64")
-ARM64 = platform.machine().startswith("arm64")
+X86 = platform.machine().startswith("x86_64") or platform.machine().startswith("AMD64")
+ARM = platform.machine().startswith("aarch64") or platform.machine().startswith("arm64")
 
 SCCACHE = shutil.which("sccache")
 NO_CACHE = False
 
 CLANG = shutil.which("clang")
-LLD = shutil.which("ld.lld") if LINUX else shutil.which("ld64.lld")
 MOLD = shutil.which("mold")
 WILD = shutil.which("wild")
 NO_LINKER = False
@@ -56,47 +52,19 @@ def sccache():
 
 
 def _linker():
-    linker_enabled = (MACOS or LINUX or WINDOWS) and (X86_64 or AARCH64 or ARM64)
+    linker_enabled = LINUX and (X86 or ARM)
     if NO_LINKER or (not linker_enabled):
-        logging.warning("third-party linker is disabled!")
+        logging.warning("mold/wild is disabled!")
         return None
 
-    linker = None
-    if not WINDOWS:
-        if WILD is not None:
-            linker = WILD
-        elif MOLD is not None:
-            linker = MOLD
-        elif LLD is not None:
-            linker = LLD
-        if linker is None or CLANG is None:
-            logging.warning("third-party linker not found!")
-            return None
-
-    triple = None
-    if MACOS:
-        if X86_64:
-            triple = "X86_64_APPLE_DARWIN"
-        elif AARCH64 or ARM64:
-            triple = "AARCH64_APPLE_DARWIN"
-    elif LINUX:
-        if X86_64:
-            triple = "X86_64_UNKNOWN_LINUX_GNU"
-        elif AARCH64 or ARM64:
-            triple = "AARCH64_UNKNOWN_LINUX_GNU"
-    elif WINDOWS:
-        if X86_64:
-            triple = "X86_64_PC_WINDOWS_MSVC"
-        elif AARCH64 or ARM64:
-            triple = "AARCH64_PC_WINDOWS_MSVC"
-    assert triple is not None
-
-    if WINDOWS:
-        env(f"CARGO_TARGET_{triple}_LINKER", "rust-lld.exe")
+    linker = WILD if WILD is not None else MOLD
+    if linker is None or CLANG is None:
+        logging.warning("mold/wild not found!")
         return None
-    else:
-        env(f"CARGO_TARGET_{triple}_LINKER", "clang")
-        return f"-Clink-arg=-fuse-ld={linker}"
+
+    triple = "X86_64_UNKNOWN_LINUX_GNU" if X86 else "AARCH64_UNKNOWN_LINUX_GNU"
+    env(f"CARGO_TARGET_{triple}_LINKER", "clang")
+    return f"-Clink-arg=-fuse-ld={linker}"
 
 
 def rustflags():
