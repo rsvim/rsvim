@@ -49,8 +49,8 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories --allow unmaintained
-  lint:
-    name: Lint
+  clippy:
+    name: Clippy
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
