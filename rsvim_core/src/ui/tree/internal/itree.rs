@@ -644,22 +644,15 @@ where
     debug_assert!(self.nodes.is_empty());
 
     let root_id = root_node.id();
-
-    // Insert node into collection.
+    debug_assert!(self.relationship.borrow().contains(root_id));
     self.nodes.insert(root_id, root_node);
 
     self._internal_check();
   }
 
   /// Insert a node to the tree, with a parent node.
-  ///
   /// This operation builds the connection between the parent and the inserted
-  /// child. Also updates both the inserted child's attributes and all its
-  /// descendants attributes.
-  ///
-  /// Below node attributes need to update:
-  /// 1. [`actual_shape`](Inodeable::actual_shape()): The child actual shape
-  ///    should be always be clipped by parent's boundaries.
+  /// child.
   ///
   /// # Returns
   /// 1. `None` if the `child_node` doesn't exist.
@@ -667,49 +660,20 @@ where
   ///
   /// # Panics
   /// 1. If `parent_id` doesn't exist.
-  pub fn insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
+  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: T) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationship.borrow().contains(parent_id));
 
-    // Child node.
     let child_id = child_node.id();
-
-    debug_assert!(!self.relationship.borrow().contains(child_id));
-
-    // Update attributes for both the newly inserted child, and all its
-    // descendants (if the child itself is also a sub-tree in current
-    // relationship).
-    //
-    // NOTE: This is useful when we want to move some widgets and all its
-    // children nodes to another place. We don't need to remove all the nodes
-    // (which could be slow), but only need to move the root of the tree.
-    //
-    // The attributes to be updated:
-    // 1. Actual shape.
-    let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_actual_shape(&convert_relative_to_absolute(
-      child_node.shape(),
-      &parent_actual_shape,
-    ));
-
-    // Insert node into collection.
+    debug_assert!(self.relationship.borrow().contains(child_id));
     let result = self.nodes.insert(child_id, child_node);
-    // Create edge between child and its parent.
+
+    // Add child to parent, e.g. create edge between child/parent node.
     self
       .relationship
       .borrow_mut()
       .add_child(parent_id, child_id);
-
-    // Update all the descendants attributes under the `child_id` node.
-    for dnode_id in self.children_ids(child_id).iter() {
-      self.update_descendant_attributes(*dnode_id, child_id);
-    }
 
     self._internal_check();
     result
