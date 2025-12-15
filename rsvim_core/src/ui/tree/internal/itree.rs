@@ -1,7 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
-use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::inode::next_node_id;
