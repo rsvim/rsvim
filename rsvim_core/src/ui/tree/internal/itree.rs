@@ -1,6 +1,7 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::prelude::*;
+use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::inode::next_node_id;
@@ -105,9 +106,28 @@ impl Relationship {
     }
   }
 
+  fn _unset_root_id(&mut self, id: TreeNodeId) {
+    debug_assert_ne!(id, INVALID_ROOT_ID);
+    if id == self.root_id {
+      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
+      self.root_id = INVALID_ROOT_ID;
+      if cfg!(debug_assertions) {
+        self.root_id_changes += 1;
+        debug_assert!(self.root_id_changes <= 1);
+      }
+    }
+  }
+
   fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
     if cfg!(debug_assertions) {
       self.names.insert(id, name);
+    }
+  }
+
+  fn _unset_name(&mut self, id: TreeNodeId) {
+    if cfg!(debug_assertions) {
+      debug_assert!(self.names.contains_key(&id));
+      self.names.remove(&id);
     }
   }
 
@@ -343,12 +363,8 @@ impl Relationship {
     debug_assert_eq!(removed_taid, *child_taid);
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
     debug_assert_eq!(removed_id, child_id);
-    if cfg!(debug_assertions) {
-      self.names.remove(&child_id);
-    }
-    if self.root_id == child_id {
-      self.root_id = INVALID_ROOT_ID;
-    }
+    self._unset_name(child_id);
+    self._unset_root_id(child_id);
     Ok(removed_id)
   }
 
