@@ -96,6 +96,10 @@ impl Relationship {
     }
   }
 
+  fn root_id(&self) -> TreeNodeId {
+    self.root_id
+  }
+
   fn _set_root_id(&mut self, root_id: TreeNodeId) {
     if self.root_id == INVALID_ROOT_ID {
       self.root_id = root_id;
@@ -490,33 +494,36 @@ where
     que.push_back(root_id);
 
     while let Some(id) = que.pop_front() {
-      let parent = self.relationship.borrow().parent_id(id);
+      let parent = self.relationship.borrow().parent(id);
       if id == root_id {
         debug_assert!(parent.is_none());
       } else {
         debug_assert!(parent.is_some());
-        let parents_children =
-          self.relationship.borrow().children_ids(parent.unwrap());
-        for c in parents_children {
-          let child_parent = self.relationship.borrow().parent_id(c);
-          debug_assert!(child_parent.is_some());
-          debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
+        if let Ok(children) =
+          self.relationship.borrow().children(parent.unwrap())
+        {
+          for c in children {
+            let child_parent = self.relationship.borrow().parent(c);
+            debug_assert!(child_parent.is_some());
+            debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
+          }
         }
       }
 
-      let children_ids = self.relationship.borrow().children_ids(id);
-      debug_assert_eq!(
-        children_ids.len(),
-        children_ids
-          .iter()
-          .cloned()
-          .collect::<FoldSet<TreeNodeId>>()
-          .len()
-      );
-      for c in children_ids {
-        let child_parent = self.relationship.borrow().parent_id(c);
-        debug_assert!(child_parent.is_some());
-        debug_assert_eq!(child_parent.unwrap(), id);
+      if let Ok(children) = self.relationship.borrow().children(id) {
+        debug_assert_eq!(
+          children.len(),
+          children
+            .iter()
+            .cloned()
+            .collect::<FoldSet<TreeNodeId>>()
+            .len()
+        );
+        for c in children {
+          let child_parent = self.relationship.borrow().parent(c);
+          debug_assert!(child_parent.is_some());
+          debug_assert_eq!(child_parent.unwrap(), id);
+        }
       }
     }
   }
