@@ -10,6 +10,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::rc::Rc;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
@@ -416,7 +417,7 @@ where
   // children edges are positive. The edge weight of each child is increased
   // with the order when they are inserted, i.e. the first child has the lowest
   // edge weight, the last child has the highest edge weight.
-  relationship: RefCell<Relationship>,
+  relationship: RelationshipRc,
 }
 
 #[derive(Debug)]
@@ -473,7 +474,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: RefCell::new(Relationship::new()),
+      relationship: Rc::new(RefCell::new(Relationship::new())),
     }
   }
 
