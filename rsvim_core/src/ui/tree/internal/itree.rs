@@ -230,7 +230,7 @@ impl Relationship {
       }
     };
     self.shapes.borrow_mut().insert(id, result);
-    Ok(result)
+    Some(result)
   }
 
   #[inline]
