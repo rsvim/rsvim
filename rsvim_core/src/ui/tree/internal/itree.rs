@@ -323,6 +323,10 @@ impl Relationship {
     self.enabled(id).map(|v| !v)
   }
 
+  pub fn contains(&self, id: TreeNodeId) -> bool {
+    self.id2taid.contains_key(&id)
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
@@ -689,12 +693,12 @@ where
   ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationship.borrow().contains_id(parent_id));
+    debug_assert!(self.relationship.borrow().contains(parent_id));
 
     // Child node.
     let child_id = child_node.id();
 
-    debug_assert!(!self.relationship.borrow().contains_id(child_id));
+    debug_assert!(!self.relationship.borrow().contains(child_id));
 
     // Update attributes for both the newly inserted child, and all its
     // descendants (if the child itself is also a sub-tree in current
