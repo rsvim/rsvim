@@ -4,7 +4,7 @@ use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::inode::next_node_id;
-use crate::ui::tree::internal::shapes;
+use crate::ui::tree::internal::shapes::*;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -213,10 +213,10 @@ impl Relationship {
         let parent_actual_shape = self.actual_shape(parent_id)?;
         let result = match policy {
           RelationshipSetShapePolicy::TRUNCATE => {
-            shapes::truncate_shape(&shape, &parent_actual_shape.size())
+            truncate_shape(&shape, &parent_actual_shape.size())
           }
           RelationshipSetShapePolicy::BOUND => {
-            shapes::bound_shape(&shape, &parent_actual_shape.size())
+            bound_shape(&shape, &parent_actual_shape.size())
           }
         };
         result
@@ -229,7 +229,7 @@ impl Relationship {
         shape
       }
     };
-    self.shapes.insert(id, result);
+    self.shapes.borrow_mut().insert(id, result);
     Ok(result)
   }
 
@@ -250,10 +250,8 @@ impl Relationship {
             // Non-root node truncated by its parent's shape.
             let shape = self.shape(id)?;
             let parent_actual_shape = self.actual_shape(parent_id)?;
-            let actual_shape = shapes::convert_relative_to_absolute(
-              &shape,
-              &parent_actual_shape,
-            );
+            let actual_shape =
+              convert_relative_to_absolute(&shape, &parent_actual_shape);
             self
               .cached_actual_shapes
               .borrow_mut()
@@ -610,7 +608,7 @@ where
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
       let cnode_shape = *cnode_ref.shape();
       let cnode_actual_shape =
-        shapes::convert_relative_to_absolute(&cnode_shape, &pnode_actual_shape);
+        convert_relative_to_absolute(&cnode_shape, &pnode_actual_shape);
 
       trace!(
         "update attr, cnode id/actual_shape:{:?}/{:?}, pnode id/actual_shape:{:?}/{:?}",
@@ -702,7 +700,7 @@ where
     // 1. Actual shape.
     let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = *parent_node.actual_shape();
-    child_node.set_actual_shape(&shapes::convert_relative_to_absolute(
+    child_node.set_actual_shape(&convert_relative_to_absolute(
       child_node.shape(),
       &parent_actual_shape,
     ));
@@ -753,10 +751,7 @@ where
     let parent_actual_size = parent_node.actual_shape().size();
 
     // Bound child shape
-    child_node.set_shape(&shapes::bound_shape(
-      child_node.shape(),
-      &parent_actual_size,
-    ));
+    child_node.set_shape(&bound_shape(child_node.shape(), &parent_actual_size));
 
     self.insert(parent_id, child_node)
   }
@@ -888,7 +883,7 @@ where
                 );
 
                 let final_shape =
-                  shapes::bound_shape(&expected_shape, &parent_actual_size);
+                  bound_shape(&expected_shape, &parent_actual_size);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
@@ -986,7 +981,7 @@ where
               );
 
               let final_shape =
-                shapes::bound_shape(&expected_shape, &parent_actual_size);
+                bound_shape(&expected_shape, &parent_actual_size);
               let final_top_left_pos: IPos = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
