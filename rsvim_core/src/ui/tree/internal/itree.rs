@@ -545,11 +545,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationship.borrow().parent_id(id)
+    self.relationship.borrow().parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationship.borrow().children_ids(id)
+    self.relationship.borrow().children(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
