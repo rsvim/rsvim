@@ -177,8 +177,8 @@ impl Relationship {
     self.ta.set_style(*taid, style)
   }
 
-  pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
-    self.shapes.get(&id)
+  pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
+    self.shapes.borrow().get(&id).copied()
   }
 
   #[inline]
