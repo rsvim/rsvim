@@ -207,7 +207,7 @@ impl Relationship {
     id: TreeNodeId,
     shape: IRect,
     policy: RelationshipSetShapePolicy,
-  ) -> TaffyResult<IRect> {
+  ) -> Option<IRect> {
     let result = match self.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.actual_shape(parent_id)?;
@@ -222,11 +222,11 @@ impl Relationship {
         result
       }
       None => {
-        debug_assert_eq!(shape.min().x, 0);
-        debug_assert_eq!(shape.min().y, 0);
-        debug_assert!(shape.max().x >= shape.min().x);
-        debug_assert!(shape.max().y >= shape.min().y);
-        shape
+        let min_x = num_traits::clamp_min(shape.min().x, 0);
+        let min_y = num_traits::clamp_min(shape.min().y, 0);
+        let max_x = num_traits::clamp_min(shape.max().x, min_x);
+        let max_y = num_traits::clamp_min(shape.max().y, min_y);
+        rect!(min_x, min_y, max_x, max_y)
       }
     };
     self.shapes.borrow_mut().insert(id, result);
