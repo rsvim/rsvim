@@ -25,31 +25,25 @@ pub enum RelationshipSetShapePolicy {
 }
 
 #[derive(Debug, Clone)]
-pub struct Relationship {
+pub struct UnindexedRelationship {
   ta: TaffyTree,
 
-  // Maps TreeNodeId <=> taffy::NodeId
-  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
-  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
-
   // Shapes
-  shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
+  shapes: RefCell<FoldMap<taffy::NodeId, IRect>>,
   // Cached actual shapes
-  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
+  cached_actual_shapes: RefCell<FoldMap<taffy::NodeId, U16Rect>>,
 
   // Root id
-  root_id: TreeNodeId,
+  root_id: taffy::NodeId,
 
   // For debugging
   #[cfg(debug_assertions)]
   root_changes: usize,
   #[cfg(debug_assertions)]
-  names: FoldMap<TreeNodeId, &'static str>,
+  names: FoldMap<taffy::NodeId, &'static str>,
 }
 
-rc_refcell_ptr!(Relationship);
-
-impl Relationship {
+impl UnindexedRelationship {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
@@ -407,10 +401,22 @@ impl Relationship {
   }
 }
 
-impl Default for Relationship {
+impl Default for UnindexedRelationship {
   fn default() -> Self {
     Self::new()
   }
+}
+
+#[derive(Debug, Clone)]
+pub struct Relationship {
+  // Maps TreeNodeId <==> taffy::NodeId.
+  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
+  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
+
+  // Maps z-index to internal relationship.
+  indexes: BTreeMap<usize, UnindexedRelationship>,
+
+  root_id: TreeNodeId,
 }
 
 #[derive(Debug, Clone)]
@@ -482,7 +488,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: Rc::new(RefCell::new(Relationship::new())),
+      relationship: Rc::new(RefCell::new(UnindexedRelationship::new())),
     }
   }
 
