@@ -42,7 +42,7 @@ pub struct Relationship {
 
   // For debugging
   #[cfg(debug_assertions)]
-  root_id_changes: usize,
+  root_changes: usize,
   #[cfg(debug_assertions)]
   names: FoldMap<TreeNodeId, &'static str>,
 }
@@ -59,7 +59,7 @@ impl Relationship {
       cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_id: INVALID_ROOT_ID,
       #[cfg(debug_assertions)]
-      root_id_changes: 0,
+      root_changes: 0,
       #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
@@ -104,8 +104,8 @@ impl Relationship {
     if self.root_id == INVALID_ROOT_ID {
       self.root_id = root_id;
       if cfg!(debug_assertions) {
-        self.root_id_changes += 1;
-        debug_assert!(self.root_id_changes <= 1);
+        self.root_changes += 1;
+        debug_assert!(self.root_changes <= 1);
       }
     }
   }
@@ -116,8 +116,8 @@ impl Relationship {
       debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
       self.root_id = INVALID_ROOT_ID;
       if cfg!(debug_assertions) {
-        self.root_id_changes += 1;
-        debug_assert!(self.root_id_changes <= 1);
+        self.root_changes += 1;
+        debug_assert!(self.root_changes <= 1);
       }
     }
   }
