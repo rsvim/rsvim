@@ -295,6 +295,7 @@ pub struct InodeBase {
   id: TreeNodeId,
   shape: IRect,
   actual_shape: U16Rect,
+  zindex: usize,
   // enabled
   // visible
   flags: Flags,
@@ -307,6 +308,7 @@ impl InodeBase {
       id: next_node_id(),
       shape,
       actual_shape,
+      zindex: 0,
       flags: FLAGS,
     }
   }
@@ -329,6 +331,14 @@ impl InodeBase {
 
   pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
     self.actual_shape = *actual_shape;
+  }
+
+  pub fn zindex(&self) -> usize {
+    self.zindex
+  }
+
+  pub fn set_zindex(&mut self, zindex: usize) {
+    self.zindex = zindex;
   }
 
   pub fn enabled(&self) -> bool {
