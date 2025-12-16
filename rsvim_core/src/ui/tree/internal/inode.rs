@@ -21,6 +21,10 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect);
 
+  fn zindex(&self) -> usize;
+
+  fn set_zindex(&mut self, zindex: usize) -> usize;
+
   fn enabled(&self) -> bool;
 
   fn set_enabled(&mut self, enabled: bool);
@@ -53,6 +57,14 @@ macro_rules! inode_impl {
 
       fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
         self.$base_name.set_actual_shape(actual_shape)
+      }
+
+      fn zindex(&self) -> usize {
+        self.$base_name.zindex()
+      }
+
+      fn set_zindex(&mut self, zindex: usize) {
+        self.$base_name.set_zindex(zindex);
       }
 
       fn enabled(&self) -> bool {
@@ -113,6 +125,22 @@ macro_rules! inode_itree_impl {
           .node_mut(self.$base_name.root_id())
           .unwrap()
           .set_actual_shape(actual_shape);
+      }
+
+      fn zindex(&self) -> usize {
+        self
+          .$base_name
+          .node(self.$base_name.root_id())
+          .unwrap()
+          .zindex()
+      }
+
+      fn set_zindex(&mut self, zindex: usize) {
+        self
+          .$base_name
+          .node_mut(self.$base_name.root_id())
+          .unwrap()
+          .set_zindex(zindex);
       }
 
       fn enabled(&self) -> bool {
@@ -192,6 +220,22 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.set_actual_shape(actual_shape),
+          )*
+        }
+      }
+
+      fn zindex(&self) -> usize {
+        match self {
+          $(
+            $enum::$variant(e) => e.zindex(),
+          )*
+        }
+      }
+
+      fn set_zindex(&mut self, zindex: usize) {
+        match self {
+          $(
+            $enum::$variant(e) => e.set_zindex(zindex),
           )*
         }
       }
