@@ -25,8 +25,12 @@ pub enum RelationshipSetShapePolicy {
 }
 
 #[derive(Debug, Clone)]
-pub struct UnindexedRelationship {
+pub struct Relationship {
   ta: TaffyTree,
+
+  // Maps TreeNodeId <==> taffy::NodeId.
+  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
+  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 
   // Shapes
   shapes: RefCell<FoldMap<taffy::NodeId, IRect>>,
@@ -43,7 +47,9 @@ pub struct UnindexedRelationship {
   names: FoldMap<taffy::NodeId, &'static str>,
 }
 
-impl UnindexedRelationship {
+rc_refcell_ptr!(Relationship);
+
+impl Relationship {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
@@ -401,22 +407,10 @@ impl UnindexedRelationship {
   }
 }
 
-impl Default for UnindexedRelationship {
+impl Default for Relationship {
   fn default() -> Self {
     Self::new()
   }
-}
-
-#[derive(Debug, Clone)]
-pub struct Relationship {
-  // Maps TreeNodeId <==> taffy::NodeId.
-  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
-  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
-
-  // Maps z-index to internal relationship.
-  indexes: BTreeMap<usize, UnindexedRelationship>,
-
-  root_id: TreeNodeId,
 }
 
 #[derive(Debug, Clone)]
@@ -488,7 +482,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: Rc::new(RefCell::new(UnindexedRelationship::new())),
+      relationship: Rc::new(RefCell::new(Relationship::new())),
     }
   }
 
