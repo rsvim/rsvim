@@ -321,15 +321,11 @@ impl Ta {
   }
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    self.wrapper.layout(*taid)
+    self.wrapper.layout(id)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    self.wrapper.style(*taid)
+    self.wrapper.style(id)
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
