@@ -445,7 +445,7 @@ impl Ta {
   }
 
   pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.id2taid.contains_key(&id)
+    self.wrapper.contains_key(&id)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
