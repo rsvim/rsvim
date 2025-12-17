@@ -38,7 +38,7 @@ pub struct Relationship {
   cached_actual_shapes: RefCell<FoldMap<taffy::NodeId, U16Rect>>,
 
   // Root id
-  root_id: taffy::NodeId,
+  root_id: TreeNodeId,
 
   // For debugging
   #[cfg(debug_assertions)]
