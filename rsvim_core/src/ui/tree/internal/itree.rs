@@ -449,10 +449,7 @@ impl Ta {
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id)?;
-    let parent_taid = self.wrapper.__parent(*taid)?;
-    self.taid2id.get(&parent_taid).copied()
+    self.parent_ids.get(&id).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
