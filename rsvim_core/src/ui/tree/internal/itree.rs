@@ -315,33 +315,6 @@ impl Relationship {
     self.visible(id).map(|v| !v)
   }
 
-  #[inline]
-  /// Whether the node is detached, e.g. it doesn't have a parent and it is not
-  /// the root node. A root node is always attached even it has no parent.
-  pub fn detached(&self, id: TreeNodeId) -> bool {
-    !self.attached(id)
-  }
-
-  #[inline]
-  pub fn attached(&self, id: TreeNodeId) -> bool {
-    debug_assert_ne!(id, INVALID_ROOT_ID);
-    id == self.root_id || self.parent(id).is_some()
-  }
-
-  #[inline]
-  /// The node is visible and its size > 0, e.g. both height and width > 0.
-  pub fn enabled(&self, id: TreeNodeId) -> Option<bool> {
-    self._internal_check();
-    let visible = self.visible(id)?;
-    let attached = self.attached(id);
-    Some(visible && attached)
-  }
-
-  #[inline]
-  pub fn disabled(&self, id: TreeNodeId) -> Option<bool> {
-    self.enabled(id).map(|v| !v)
-  }
-
   pub fn contains(&self, id: TreeNodeId) -> bool {
     self.id2taid.contains_key(&id)
   }
