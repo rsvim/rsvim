@@ -74,6 +74,8 @@ impl Relationship {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
+      parent_ids: FoldMap::new(),
+      children_ids: FoldMap::new(),
       id2taid: FoldMap::new(),
       taid2id: FoldMap::new(),
       visibles: FoldMap::new(),
