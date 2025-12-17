@@ -192,7 +192,7 @@ impl Ta {
 
 #[derive(Debug, Clone)]
 pub struct Relationship {
-  ta: TaffyTree,
+  ta: Ta,
 
   // Maps parent and children IDs.
   //
@@ -212,10 +212,6 @@ pub struct Relationship {
   // to make sure the layout calculation is correct.
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, TreeNodeId>,
-
-  // Maps TreeNodeId <==> taffy::NodeId.
-  id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
-  taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 
   // Attributes
   visibles: FoldMap<TreeNodeId, bool>,
@@ -239,11 +235,9 @@ rc_refcell_ptr!(Relationship);
 impl Relationship {
   pub fn new() -> Self {
     Self {
-      ta: TaffyTree::new(),
+      ta: Ta::new(),
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
-      id2taid: FoldMap::new(),
-      taid2id: FoldMap::new(),
       visibles: FoldMap::new(),
       shapes: RefCell::new(FoldMap::new()),
       cached_actual_shapes: RefCell::new(FoldMap::new()),
@@ -257,33 +251,12 @@ impl Relationship {
 
   #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
-    self.id2taid.is_empty()
+    self.ta.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.id2taid.len()
-  }
-
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
-  fn _internal_check(&self) {
-    debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
-    debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
-
-    for (id, taid) in self.id2taid.iter() {
-      debug_assert!(self.taid2id.contains_key(taid));
-      debug_assert_eq!(*self.taid2id.get(taid).unwrap(), *id);
-      if let Some(parent_taid) = self.ta.parent(*taid) {
-        debug_assert!(self.taid2id.contains_key(&parent_taid));
-      }
-    }
-    for (taid, nid) in self.taid2id.iter() {
-      debug_assert!(self.id2taid.contains_key(nid));
-      debug_assert_eq!(*self.id2taid.get(nid).unwrap(), *taid);
-    }
+    self.ta.len()
   }
 
   fn root_id(&self) -> TreeNodeId {
@@ -330,14 +303,9 @@ impl Relationship {
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    let taid = self.ta.new_leaf(style)?;
-    let id = next_node_id();
-    self.id2taid.insert(id, taid);
-    self.taid2id.insert(taid, id);
+    let id = self.ta.new_leaf(style)?;
     self._set_root_id(id);
     self._set_name(id, name);
-    self._internal_check();
     Ok(id)
   }
 
