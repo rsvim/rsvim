@@ -40,6 +40,10 @@ pub struct Relationship {
   // These issues will force us to maintain parent/child relationship by
   // ourself, instead of directly relying on TaffyTree's internal parent/child
   // relationship.
+  // For each time, we can only calculate layout for those visible nodes or the
+  // nodes that are in same Z-index. For other hidden nodes or the nodes with
+  // different Z-index, we need to manually remove them from the parent, thus
+  // to make sure the layout calculation is correct.
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, TreeNodeId>,
 
