@@ -315,11 +315,8 @@ impl Ta {
     id: TreeNodeId,
     available_size: taffy::Size<AvailableSpace>,
   ) -> TaffyResult<()> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    let result = self.wrapper.compute_layout(*taid, available_size);
+    let result = self.wrapper.compute_layout(id, available_size);
     self.clear_cached_actual_shapes(id);
-    self._internal_check();
     result
   }
 
