@@ -41,7 +41,7 @@ pub struct Relationship {
   // ourself, instead of directly relying on TaffyTree's internal parent/child
   // relationship.
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+  children_ids: FoldMap<TreeNodeId, BTreeMap<usize, TreeNodeId>>,
 
   // Maps TreeNodeId <==> taffy::NodeId.
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
