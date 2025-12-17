@@ -117,14 +117,14 @@ impl TaffyWrapper {
     self.id2taid.contains_key(&id)
   }
 
-  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn __parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
     let parent_taid = self.ta.parent(*taid)?;
     self.taid2id.get(&parent_taid).copied()
   }
 
-  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn __children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     let children_taids = self.ta.children(*taid)?;
@@ -329,9 +329,7 @@ impl Ta {
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    self.wrapper.set_style(*taid, style)
+    self.wrapper.set_style(id, style)
   }
 
   pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
@@ -392,8 +390,6 @@ impl Ta {
 
   #[inline]
   pub fn actual_shape(&self, id: TreeNodeId) -> Option<U16Rect> {
-    self._internal_check();
-
     match self.parent(id) {
       None => {
         let shape = self.shape(id)?;
@@ -455,14 +451,14 @@ impl Ta {
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
-    let parent_taid = self.wrapper.parent(*taid)?;
+    let parent_taid = self.wrapper.__parent(*taid)?;
     self.taid2id.get(&parent_taid).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    let children_taids = self.wrapper.children(*taid)?;
+    let children_taids = self.wrapper.__children(*taid)?;
     Ok(
       children_taids
         .iter()
