@@ -51,10 +51,12 @@ pub struct Relationship {
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 
-  // Shapes
-  shapes: RefCell<FoldMap<taffy::NodeId, IRect>>,
+  // Attributes
+  visibles: FoldMap<TreeNodeId, bool>,
+  shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
+
   // Cached actual shapes
-  cached_actual_shapes: RefCell<FoldMap<taffy::NodeId, U16Rect>>,
+  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
 
   // Root id
   root_id: TreeNodeId,
@@ -63,7 +65,7 @@ pub struct Relationship {
   #[cfg(debug_assertions)]
   root_changes: usize,
   #[cfg(debug_assertions)]
-  names: FoldMap<taffy::NodeId, &'static str>,
+  names: FoldMap<TreeNodeId, &'static str>,
 }
 
 rc_refcell_ptr!(Relationship);
