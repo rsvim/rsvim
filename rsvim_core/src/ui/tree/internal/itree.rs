@@ -260,6 +260,27 @@ impl Ta {
     self.wrapper.len()
   }
 
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
+
+  #[cfg(test)]
+  fn _internal_check(&self) {
+    debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
+    debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
+
+    for (id, taid) in self.id2taid.iter() {
+      debug_assert!(self.taid2id.contains_key(taid));
+      debug_assert_eq!(*self.taid2id.get(taid).unwrap(), *id);
+      if let Some(parent_taid) = self.ta.parent(*taid) {
+        debug_assert!(self.taid2id.contains_key(&parent_taid));
+      }
+    }
+    for (taid, nid) in self.taid2id.iter() {
+      debug_assert!(self.id2taid.contains_key(nid));
+      debug_assert_eq!(*self.id2taid.get(nid).unwrap(), *taid);
+    }
+  }
+
   fn root_id(&self) -> TreeNodeId {
     self.root_id
   }
@@ -453,15 +474,7 @@ impl Ta {
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    let children_taids = self.wrapper.__children(*taid)?;
-    Ok(
-      children_taids
-        .iter()
-        .map(|i| *self.taid2id.get(i).unwrap())
-        .collect_vec(),
-    )
+    self.children_ids.get(&id).cloned()
   }
 
   pub fn add_child(
