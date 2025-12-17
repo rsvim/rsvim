@@ -28,6 +28,21 @@ pub enum RelationshipSetShapePolicy {
 pub struct Relationship {
   ta: TaffyTree,
 
+  // Maps parent and children IDs.
+  //
+  // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
+  // has several limitations when calculating the layout:
+  // 1. It doesn't support hidden/invisble, i.e. when specifying `{display:
+  //    None}` for some children nodes, but TaffyTree still calculates these
+  //    non-display nodes.
+  // 2. It doesn't support Z-index, i.e. we will have to manually remove/insert
+  //    some children nodes on TaffyTree for different Z-index.
+  // These issues will force us to maintain parent/child relationship by
+  // ourself, instead of directly relying on TaffyTree's internal parent/child
+  // relationship.
+  parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
+  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+
   // Maps TreeNodeId <==> taffy::NodeId.
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
