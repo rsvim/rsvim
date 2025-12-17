@@ -25,7 +25,7 @@ pub enum RelationshipSetShapePolicy {
 }
 
 #[derive(Debug, Clone)]
-struct Ta {
+struct TaffyWrapper {
   ta: TaffyTree,
 
   // Maps TreeNodeId <==> taffy::NodeId.
@@ -33,7 +33,7 @@ struct Ta {
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 }
 
-impl Ta {
+impl TaffyWrapper {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
@@ -192,8 +192,8 @@ impl Ta {
 }
 
 #[derive(Debug, Clone)]
-pub struct Relationship {
-  ta: Ta,
+pub struct Ta {
+  wrapper: TaffyWrapper,
 
   // Maps parent and children IDs.
   //
@@ -231,12 +231,12 @@ pub struct Relationship {
   names: FoldMap<TreeNodeId, &'static str>,
 }
 
-rc_refcell_ptr!(Relationship);
+rc_refcell_ptr!(Ta);
 
-impl Relationship {
+impl Ta {
   pub fn new() -> Self {
     Self {
-      ta: Ta::new(),
+      wrapper: TaffyWrapper::new(),
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
       visibles: FoldMap::new(),
@@ -252,12 +252,12 @@ impl Relationship {
 
   #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
-    self.ta.is_empty()
+    self.wrapper.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.ta.len()
+    self.wrapper.len()
   }
 
   fn root_id(&self) -> TreeNodeId {
@@ -304,7 +304,7 @@ impl Relationship {
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.ta.new_leaf(style)?;
+    let id = self.wrapper.new_leaf(style)?;
     self._set_root_id(id);
     self._set_name(id, name);
     Ok(id)
@@ -317,7 +317,7 @@ impl Relationship {
   ) -> TaffyResult<()> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    let result = self.ta.compute_layout(*taid, available_size);
+    let result = self.wrapper.compute_layout(*taid, available_size);
     self.clear_cached_actual_shapes(id);
     self._internal_check();
     result
@@ -326,19 +326,19 @@ impl Relationship {
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    self.ta.layout(*taid)
+    self.wrapper.layout(*taid)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    self.ta.style(*taid)
+    self.wrapper.style(*taid)
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    self.ta.set_style(*taid, style)
+    self.wrapper.set_style(*taid, style)
   }
 
   pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
@@ -462,14 +462,14 @@ impl Relationship {
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
-    let parent_taid = self.ta.parent(*taid)?;
+    let parent_taid = self.wrapper.parent(*taid)?;
     self.taid2id.get(&parent_taid).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
-    let children_taids = self.ta.children(*taid)?;
+    let children_taids = self.wrapper.children(*taid)?;
     Ok(
       children_taids
         .iter()
@@ -486,7 +486,7 @@ impl Relationship {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let child_taid = self.id2taid.get(&child_id).unwrap();
-    self.ta.add_child(*parent_taid, *child_taid)
+    self.wrapper.add_child(*parent_taid, *child_taid)
   }
 
   pub fn remove_child(
@@ -497,7 +497,7 @@ impl Relationship {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let child_taid = self.id2taid.get(&child_id).unwrap();
-    let removed_taid = self.ta.remove_child(*parent_taid, *child_taid)?;
+    let removed_taid = self.wrapper.remove_child(*parent_taid, *child_taid)?;
     debug_assert_eq!(removed_taid, *child_taid);
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
     debug_assert_eq!(removed_id, child_id);
@@ -528,7 +528,7 @@ impl Relationship {
       .iter()
       .map(|i| *self.id2taid.get(i).unwrap())
       .collect_vec();
-    let taid = self.ta.new_with_children(style, &children_taids)?;
+    let taid = self.wrapper.new_with_children(style, &children_taids)?;
     let id = next_node_id();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
@@ -539,7 +539,7 @@ impl Relationship {
   }
 }
 
-impl Default for Relationship {
+impl Default for Ta {
   fn default() -> Self {
     Self::new()
   }
@@ -614,7 +614,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: Rc::new(RefCell::new(Relationship::new())),
+      relationship: Rc::new(RefCell::new(Ta::new())),
     }
   }
 
