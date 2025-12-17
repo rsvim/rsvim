@@ -175,7 +175,6 @@ impl Ta {
     &mut self,
     style: Style,
     children: &[TreeNodeId],
-    name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let children_taids = children
