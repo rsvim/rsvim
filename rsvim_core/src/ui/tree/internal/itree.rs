@@ -165,9 +165,8 @@ impl Ta {
     &mut self,
     style: Style,
     parent_id: TreeNodeId,
-    name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.new_leaf(style, name)?;
+    let id = self.new_leaf(style)?;
     self.add_child(parent_id, id)?;
     Ok(id)
   }
@@ -187,8 +186,6 @@ impl Ta {
     let id = next_node_id();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
-    self._set_root_id(id);
-    self._set_name(id, name);
     self._internal_check();
     Ok(id)
   }
