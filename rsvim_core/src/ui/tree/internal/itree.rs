@@ -24,6 +24,7 @@ pub enum RelationshipSetShapePolicy {
   BOUND,
 }
 
+#[derive(Debug, Clone)]
 struct Ta {
   ta: TaffyTree,
 
