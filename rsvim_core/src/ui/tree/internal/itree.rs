@@ -527,13 +527,11 @@ where
     }
   }
 
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert_eq!(self.ta.borrow().len(), self.nodes.len());
-    debug_assert_eq!(self.relation.borrow().len(), self.nodes.len());
+    if cfg!(debug_assertions) {
+      debug_assert_eq!(self.ta.borrow().len(), self.nodes.len());
+      debug_assert_eq!(self.relation.borrow().len(), self.nodes.len());
+    }
   }
 
   pub fn len(&self) -> usize {
