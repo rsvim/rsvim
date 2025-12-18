@@ -25,7 +25,7 @@ pub enum RelationshipSetShapePolicy {
 }
 
 #[derive(Debug, Clone)]
-struct TaffyWrapper {
+struct Ta {
   ta: TaffyTree,
 
   // Maps TreeNodeId <==> taffy::NodeId.
@@ -33,7 +33,7 @@ struct TaffyWrapper {
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 }
 
-impl TaffyWrapper {
+impl Ta {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
@@ -192,8 +192,8 @@ impl TaffyWrapper {
 }
 
 #[derive(Debug, Clone)]
-pub struct Ta {
-  wrapper: TaffyWrapper,
+pub struct Relation {
+  ta: Ta,
 
   // Maps parent and children IDs.
   //
@@ -214,50 +214,30 @@ pub struct Ta {
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, TreeNodeId>,
 
-  // Attributes
-  visibles: FoldMap<TreeNodeId, bool>,
-  shapes: RefCell<FoldMap<TreeNodeId, IRect>>,
-
-  // Cached actual shapes
-  cached_actual_shapes: RefCell<FoldMap<TreeNodeId, U16Rect>>,
-
-  // Root id
+  // Root ID
   root_id: TreeNodeId,
-
-  // For debugging
-  #[cfg(debug_assertions)]
-  root_changes: usize,
-  #[cfg(debug_assertions)]
-  names: FoldMap<TreeNodeId, &'static str>,
 }
 
-rc_refcell_ptr!(Ta);
+rc_refcell_ptr!(Relation);
 
-impl Ta {
+impl Relation {
   pub fn new() -> Self {
     Self {
-      wrapper: TaffyWrapper::new(),
+      ta: Ta::new(),
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
-      visibles: FoldMap::new(),
-      shapes: RefCell::new(FoldMap::new()),
-      cached_actual_shapes: RefCell::new(FoldMap::new()),
       root_id: INVALID_ROOT_ID,
-      #[cfg(debug_assertions)]
-      root_changes: 0,
-      #[cfg(debug_assertions)]
-      names: FoldMap::new(),
     }
   }
 
   #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
-    self.wrapper.is_empty()
+    self.ta.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.wrapper.len()
+    self.ta.len()
   }
 
   #[cfg(not(test))]
@@ -325,7 +305,7 @@ impl Ta {
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.wrapper.new_leaf(style)?;
+    let id = self.ta.new_leaf(style)?;
     self._set_root_id(id);
     self._set_name(id, name);
     Ok(id)
@@ -336,21 +316,21 @@ impl Ta {
     id: TreeNodeId,
     available_size: taffy::Size<AvailableSpace>,
   ) -> TaffyResult<()> {
-    let result = self.wrapper.compute_layout(id, available_size);
+    let result = self.ta.compute_layout(id, available_size);
     self.clear_cached_actual_shapes(id);
     result
   }
 
   pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
-    self.wrapper.layout(id)
+    self.ta.layout(id)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    self.wrapper.style(id)
+    self.ta.style(id)
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self.wrapper.set_style(id, style)
+    self.ta.set_style(id, style)
   }
 
   pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
@@ -466,7 +446,7 @@ impl Ta {
   }
 
   pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.wrapper.contains_key(&id)
+    self.ta.contains_key(&id)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
@@ -485,7 +465,7 @@ impl Ta {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let child_taid = self.id2taid.get(&child_id).unwrap();
-    self.wrapper.add_child(*parent_taid, *child_taid)
+    self.ta.add_child(*parent_taid, *child_taid)
   }
 
   pub fn remove_child(
@@ -496,7 +476,7 @@ impl Ta {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let child_taid = self.id2taid.get(&child_id).unwrap();
-    let removed_taid = self.wrapper.remove_child(*parent_taid, *child_taid)?;
+    let removed_taid = self.ta.remove_child(*parent_taid, *child_taid)?;
     debug_assert_eq!(removed_taid, *child_taid);
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
     debug_assert_eq!(removed_id, child_id);
@@ -527,7 +507,7 @@ impl Ta {
       .iter()
       .map(|i| *self.id2taid.get(i).unwrap())
       .collect_vec();
-    let taid = self.wrapper.new_with_children(style, &children_taids)?;
+    let taid = self.ta.new_with_children(style, &children_taids)?;
     let id = next_node_id();
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
@@ -538,7 +518,7 @@ impl Ta {
   }
 }
 
-impl Default for Ta {
+impl Default for Relation {
   fn default() -> Self {
     Self::new()
   }
@@ -613,7 +593,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: Rc::new(RefCell::new(Ta::new())),
+      relationship: Rc::new(RefCell::new(Relation::new())),
     }
   }
 
