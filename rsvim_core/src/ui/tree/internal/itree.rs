@@ -329,18 +329,6 @@ impl Relation {
     }
   }
 
-  pub fn new_leaf(
-    &mut self,
-    style: Style,
-    name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    let id = self.ta.new_leaf(style)?;
-    self._set_root_id(id);
-    self._set_name(id, name);
-    Ok(id)
-  }
-
   pub fn compute_layout(
     &mut self,
     id: TreeNodeId,
@@ -486,12 +474,34 @@ impl Relation {
     self.children_ids.get(&id).cloned()
   }
 
+  pub fn new_leaf(
+    &mut self,
+    style: Style,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let id = self.ta.new_leaf(style)?;
+    self.children_ids.insert(id, vec![]);
+    self._set_root_id(id);
+    self._set_name(id, name);
+    Ok(id)
+  }
+
   pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
+    debug_assert!(self.children_ids.contains_key(&parent_id));
+    debug_assert!(self.children_ids.contains_key(&child_id));
+    debug_assert!(!self.parent_ids.contains_key(&child_id));
+    self
+      .children_ids
+      .get_mut(&parent_id)
+      .unwrap()
+      .push(child_id);
+    self.parent_ids.insert(child_id, parent_id);
     self.ta.add_child(parent_id, child_id)
   }
 
