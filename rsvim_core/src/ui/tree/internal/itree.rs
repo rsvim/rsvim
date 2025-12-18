@@ -431,6 +431,10 @@ impl Relation {
   //   self.visible(id).map(|v| !v)
   // }
 
+  pub fn contains(&self, id: TreeNodeId) -> bool {
+    self.children_ids.contains_key(&id)
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.parent_ids.get(&id).copied()
   }
