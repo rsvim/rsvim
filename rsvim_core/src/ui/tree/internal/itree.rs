@@ -193,8 +193,6 @@ impl Ta {
 
 #[derive(Debug, Clone)]
 pub struct Relation {
-  ta: Ta,
-
   // Maps parent and children IDs.
   //
   // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
@@ -227,7 +225,6 @@ rc_refcell_ptr!(Relation);
 impl Relation {
   pub fn new() -> Self {
     Self {
-      ta: Ta::new(),
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
       root_id: INVALID_ROOT_ID,
@@ -238,12 +235,12 @@ impl Relation {
 
   #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
-    self.ta.is_empty()
+    self.children_ids.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.ta.len()
+    self.children_ids.len()
   }
 
   #[cfg(not(test))]
@@ -289,28 +286,6 @@ impl Relation {
     self.root_id
   }
 
-  fn _set_root_id(&mut self, root_id: TreeNodeId) {
-    if self.root_id == INVALID_ROOT_ID {
-      self.root_id = root_id;
-      if cfg!(debug_assertions) {
-        self.root_changes += 1;
-        debug_assert!(self.root_changes <= 1);
-      }
-    }
-  }
-
-  fn _unset_root_id(&mut self, id: TreeNodeId) {
-    debug_assert_ne!(id, INVALID_ROOT_ID);
-    if id == self.root_id {
-      debug_assert_ne!(self.root_id, INVALID_ROOT_ID);
-      self.root_id = INVALID_ROOT_ID;
-      if cfg!(debug_assertions) {
-        self.root_changes += 1;
-        debug_assert!(self.root_changes <= 1);
-      }
-    }
-  }
-
   fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
     if cfg!(debug_assertions) {
       self.names.insert(id, name);
@@ -324,26 +299,26 @@ impl Relation {
     }
   }
 
-  pub fn compute_layout(
-    &mut self,
-    id: TreeNodeId,
-    available_size: taffy::Size<AvailableSpace>,
-  ) -> TaffyResult<()> {
-    self._internal_check();
-    self.ta.compute_layout(id, available_size)
-  }
-
-  pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
-    self.ta.layout(id)
-  }
-
-  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    self.ta.style(id)
-  }
-
-  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self.ta.set_style(id, style)
-  }
+  // pub fn compute_layout(
+  //   &mut self,
+  //   id: TreeNodeId,
+  //   available_size: taffy::Size<AvailableSpace>,
+  // ) -> TaffyResult<()> {
+  //   self._internal_check();
+  //   self.ta.compute_layout(id, available_size)
+  // }
+  //
+  // pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
+  //   self.ta.layout(id)
+  // }
+  //
+  // pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+  //   self.ta.style(id)
+  // }
+  //
+  // pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+  //   self.ta.set_style(id, style)
+  // }
 
   // pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
   //   self.shapes.borrow().get(&id).copied()
@@ -457,10 +432,6 @@ impl Relation {
   //   self.visible(id).map(|v| !v)
   // }
 
-  pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.children_ids.contains_key(&id)
-  }
-
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.parent_ids.get(&id).copied()
   }
@@ -469,43 +440,20 @@ impl Relation {
     self.children_ids.get(&id).cloned()
   }
 
-  pub fn new_leaf(
-    &mut self,
-    style: Style,
-    name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    let id = self.ta.new_leaf(style)?;
-    self.children_ids.insert(id, vec![]);
-    self._set_root_id(id);
-    self._set_name(id, name);
-    Ok(id)
-  }
-
-  pub fn add_child(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_id: TreeNodeId,
-  ) -> TaffyResult<()> {
+  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
     self._internal_check();
     debug_assert!(self.children_ids.contains_key(&parent_id));
     debug_assert!(self.children_ids.contains_key(&child_id));
     debug_assert!(!self.parent_ids.contains_key(&child_id));
-    let result = self.ta.add_child(parent_id, child_id)?;
     self
       .children_ids
       .get_mut(&parent_id)
       .unwrap()
       .push(child_id);
     self.parent_ids.insert(child_id, parent_id);
-    Ok(result)
   }
 
-  pub fn remove_child(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_id: TreeNodeId,
-  ) -> TaffyResult<TreeNodeId> {
+  pub fn remove_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
     self._internal_check();
     debug_assert!(self.children_ids.contains_key(&parent_id));
     debug_assert!(
@@ -538,6 +486,15 @@ impl Relation {
       .remove(child_pos);
     self.parent_ids.remove(&child_id);
     Ok(removed_id)
+  }
+
+  pub fn new_root(&mut self, root_id: TreeNodeId, name: &'static str) {
+    self._internal_check();
+    debug_assert!(self.children_ids.is_empty());
+    debug_assert!(self.parent_ids.is_empty());
+    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
+    self.children_ids.insert(root_id, vec![]);
+    self._set_name(root_id, name);
   }
 
   pub fn new_with_parent(
