@@ -526,17 +526,9 @@ impl Relation {
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    let children_taids = children
-      .iter()
-      .map(|i| *self.id2taid.get(i).unwrap())
-      .collect_vec();
-    let taid = self.ta.new_with_children(style, &children_taids)?;
-    let id = next_node_id();
-    self.id2taid.insert(id, taid);
-    self.taid2id.insert(taid, id);
+    let id = self.ta.new_with_children(style, &children)?;
     self._set_root_id(id);
     self._set_name(id, name);
-    self._internal_check();
     Ok(id)
   }
 }
