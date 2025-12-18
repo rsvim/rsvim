@@ -512,10 +512,35 @@ impl Relation {
     child_id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
+    debug_assert!(self.children_ids.contains_key(&parent_id));
+    debug_assert!(
+      self
+        .children_ids
+        .get(&parent_id)
+        .unwrap()
+        .iter()
+        .any(|i| *i == child_id)
+    );
+    debug_assert!(self.children_ids.contains_key(&child_id));
+    debug_assert!(self.parent_ids.contains_key(&child_id));
+    debug_assert_eq!(*self.parent_ids.get(&child_id).unwrap(), parent_id);
     let removed_id = self.ta.remove_child(parent_id, child_id)?;
     debug_assert_eq!(removed_id, child_id);
     self._unset_name(removed_id);
     self._unset_root_id(removed_id);
+    let child_pos = self
+      .children_ids
+      .get(&parent_id)
+      .unwrap()
+      .iter()
+      .find_position(|i| **i == child_id)
+      .unwrap()
+      .0;
+    self
+      .children_ids
+      .get_mut(&parent_id)
+      .unwrap()
+      .remove(child_pos);
     Ok(removed_id)
   }
 
