@@ -117,14 +117,14 @@ impl TaffyWrapper {
     self.id2taid.contains_key(&id)
   }
 
-  pub fn __parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+  pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let taid = self.id2taid.get(&id)?;
     let parent_taid = self.ta.parent(*taid)?;
     self.taid2id.get(&parent_taid).copied()
   }
 
-  pub fn __children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
     let taid = self.id2taid.get(&id).unwrap();
     let children_taids = self.ta.children(*taid)?;
