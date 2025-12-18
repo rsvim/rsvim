@@ -256,6 +256,17 @@ impl Relation {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root_id);
       while let Some(id) = q.pop_front() {
+        if let Some(parent_id) = self.parent_ids.get(&id) {
+          debug_assert!(self.children_ids.contains_key(&parent_id));
+          debug_assert!(
+            self
+              .children_ids
+              .get(&parent_id)
+              .unwrap()
+              .iter()
+              .any(|i| *i == id)
+          );
+        }
         if let Some(children_ids) = self.children_ids.get(&id) {
           for c in children_ids {
             debug_assert!(self.parent_ids.contains_key(c));
