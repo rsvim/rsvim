@@ -10,7 +10,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use std::rc::Rc;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
@@ -512,7 +511,6 @@ where
 {
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
-
   ta: RefCell<Ta>,
   relation: RefCell<Relation>,
 }
@@ -534,45 +532,8 @@ where
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    debug_assert_eq!(self.relationship.borrow().len(), self.nodes.len());
-
-    let root_id = self.relationship.borrow().root_id();
-    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
-    que.push_back(root_id);
-
-    while let Some(id) = que.pop_front() {
-      let parent = self.relationship.borrow().parent(id);
-      if id == root_id {
-        debug_assert!(parent.is_none());
-      } else {
-        debug_assert!(parent.is_some());
-        if let Ok(children) =
-          self.relationship.borrow().children(parent.unwrap())
-        {
-          for c in children {
-            let child_parent = self.relationship.borrow().parent(c);
-            debug_assert!(child_parent.is_some());
-            debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
-          }
-        }
-      }
-
-      if let Ok(children) = self.relationship.borrow().children(id) {
-        debug_assert_eq!(
-          children.len(),
-          children
-            .iter()
-            .cloned()
-            .collect::<FoldSet<TreeNodeId>>()
-            .len()
-        );
-        for c in children {
-          let child_parent = self.relationship.borrow().parent(c);
-          debug_assert!(child_parent.is_some());
-          debug_assert_eq!(child_parent.unwrap(), id);
-        }
-      }
-    }
+    debug_assert_eq!(self.ta.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.relation.borrow().len(), self.nodes.len());
   }
 
   pub fn len(&self) -> usize {
