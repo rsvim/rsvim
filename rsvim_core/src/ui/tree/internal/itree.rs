@@ -564,6 +564,10 @@ impl Relation {
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let id = self.ta.new_with_children(style, &children)?;
+    self.children_ids.insert(id, Vec::from(children));
+    for c in children {
+      self.parent_ids.insert(*c, id);
+    }
     self._set_root_id(id);
     self._set_name(id, name);
     Ok(id)
