@@ -212,7 +212,7 @@ pub struct Relation {
   // different Z-index, we need to manually remove them from the parent, thus
   // to make sure the layout calculation is correct.
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
-  children_ids: FoldMap<TreeNodeId, TreeNodeId>,
+  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 
   root_id: TreeNodeId,
 }
@@ -255,6 +255,23 @@ impl Relation {
             *self.parent_ids.get(&id).unwrap()
           );
         }
+        if let Some(actual_parent_id) = self.parent_ids.get(&id)
+          && let Some(expect_parent_id) = self.ta.parent(id)
+        {
+          debug_assert_eq!(*actual_parent_id, expect_parent_id);
+        }
+        if let Ok(expect_children_ids) = self.ta.children(id) {
+          for c in expect_children_ids {
+            debug_assert!(self.children_ids.get(&id).is_some());
+            let actual_children_ids = self.children_ids.get(&id).unwrap();
+            debug_assert!(actual_children_ids.iter().any(|i| *i == c));
+          }
+        }
+        if let Some(actual_children_ids) = self.children_ids.get(&id)
+          && let Ok(expect_children_ids) = self.ta.children(id)
+        {
+          debug_assert!(actual_children_ids.len() >= expect_children_ids.len());
+        }
 
         if let Ok(children_ids) = self.children(id) {
           for child_id in children_ids.iter() {
@@ -262,20 +279,6 @@ impl Relation {
           }
         }
       }
-    }
-    debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
-    debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
-
-    for (id, taid) in self.id2taid.iter() {
-      debug_assert!(self.taid2id.contains_key(taid));
-      debug_assert_eq!(*self.taid2id.get(taid).unwrap(), *id);
-      if let Some(parent_taid) = self.ta.parent(*taid) {
-        debug_assert!(self.taid2id.contains_key(&parent_taid));
-      }
-    }
-    for (taid, nid) in self.taid2id.iter() {
-      debug_assert!(self.id2taid.contains_key(nid));
-      debug_assert_eq!(*self.id2taid.get(nid).unwrap(), *taid);
     }
   }
 
