@@ -496,13 +496,14 @@ impl Relation {
     debug_assert!(self.children_ids.contains_key(&parent_id));
     debug_assert!(self.children_ids.contains_key(&child_id));
     debug_assert!(!self.parent_ids.contains_key(&child_id));
+    let result = self.ta.add_child(parent_id, child_id)?;
     self
       .children_ids
       .get_mut(&parent_id)
       .unwrap()
       .push(child_id);
     self.parent_ids.insert(child_id, parent_id);
-    self.ta.add_child(parent_id, child_id)
+    Ok(result)
   }
 
   pub fn remove_child(
