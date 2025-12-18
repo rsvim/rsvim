@@ -541,6 +541,7 @@ impl Relation {
       .get_mut(&parent_id)
       .unwrap()
       .remove(child_pos);
+    self.parent_ids.remove(&child_id);
     Ok(removed_id)
   }
 
