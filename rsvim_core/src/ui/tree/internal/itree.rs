@@ -541,7 +541,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relationship.borrow().root_id()
+    self.relation.borrow().root_id()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
@@ -549,11 +549,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relationship.borrow().parent(id)
+    self.relation.borrow().parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relationship.borrow().children(id).unwrap_or_default()
+    self.relation.borrow().children(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -568,7 +568,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relationship.borrow().root_id()))
+    ItreeIter::new(self, Some(self.relation.borrow().root_id()))
   }
 }
 
@@ -644,7 +644,7 @@ where
     debug_assert!(self.nodes.is_empty());
 
     let root_id = root_node.id();
-    debug_assert!(self.relationship.borrow().contains(root_id));
+    debug_assert!(self.relation.borrow().contains(root_id));
     self.nodes.insert(root_id, root_node);
 
     self._internal_check();
@@ -663,17 +663,14 @@ where
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: T) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationship.borrow().contains(parent_id));
+    debug_assert!(self.relation.borrow().contains(parent_id));
 
     let child_id = child_node.id();
-    debug_assert!(self.relationship.borrow().contains(child_id));
+    debug_assert!(self.relation.borrow().contains(child_id));
     let result = self.nodes.insert(child_id, child_node);
 
     // Add child to parent, e.g. create edge between child/parent node.
-    self
-      .relationship
-      .borrow_mut()
-      .add_child(parent_id, child_id);
+    self.relation.borrow_mut().add_child(parent_id, child_id);
 
     self._internal_check();
     result
@@ -728,21 +725,21 @@ where
   /// If the node `id` is root node and root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.relationship.borrow().root_id());
+    debug_assert_ne!(id, self.relation.borrow().root_id());
     self._internal_check();
 
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
-        debug_assert!(self.relationship.borrow().contains_id(id));
+        debug_assert!(self.relation.borrow().contains_id(id));
         // Remove edges between `id` and its parent.
-        let relation_removed = self.relationship.borrow_mut().remove_child(id);
+        let relation_removed = self.relation.borrow_mut().remove_child(id);
         debug_assert!(relation_removed);
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relationship.borrow().contains_id(id));
+        debug_assert!(!self.relation.borrow().contains_id(id));
         None
       }
     };
