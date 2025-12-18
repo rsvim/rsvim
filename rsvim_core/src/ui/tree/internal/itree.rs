@@ -497,37 +497,6 @@ impl Relation {
       .remove(child_pos);
     self.parent_ids.remove(&child_id);
   }
-
-  pub fn new_with_parent(
-    &mut self,
-    parent_id: TreeNodeId,
-    name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    debug_assert!(self.children_ids.contains_key(&parent_id));
-    debug_assert!(self.parent_ids.is_empty());
-    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
-    let id = self.new_leaf(style, name)?;
-    self.add_child(parent_id, id)?;
-    Ok(id)
-  }
-
-  pub fn new_with_children(
-    &mut self,
-    style: Style,
-    children: &[TreeNodeId],
-    name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    let id = self.ta.new_with_children(style, &children)?;
-    self.children_ids.insert(id, Vec::from(children));
-    for c in children {
-      self.parent_ids.insert(*c, id);
-    }
-    self._set_root_id(id);
-    self._set_name(id, name);
-    Ok(id)
-  }
 }
 
 impl Default for Relation {
