@@ -215,6 +215,11 @@ pub struct Relation {
   children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 
   root_id: TreeNodeId,
+
+  #[cfg(debug_assertions)]
+  root_changes: usize,
+  #[cfg(debug_assertions)]
+  names: FoldMap<TreeNodeId, &'static str>,
 }
 
 rc_refcell_ptr!(Relation);
@@ -226,6 +231,8 @@ impl Relation {
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
       root_id: INVALID_ROOT_ID,
+      root_changes: 0,
+      names: FoldMap::new(),
     }
   }
 
