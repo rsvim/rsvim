@@ -214,7 +214,6 @@ pub struct Relation {
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, TreeNodeId>,
 
-  // Root ID
   root_id: TreeNodeId,
 }
 
@@ -245,6 +244,25 @@ impl Relation {
 
   #[cfg(test)]
   fn _internal_check(&self) {
+    if self.root_id != INVALID_ROOT_ID {
+      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      q.push_back(self.root_id);
+      while let Some(id) = q.pop_front() {
+        if let Some(expect_parent_id) = self.ta.parent(id) {
+          debug_assert!(self.parent_ids.get(&id).is_some());
+          debug_assert_eq!(
+            expect_parent_id,
+            *self.parent_ids.get(&id).unwrap()
+          );
+        }
+
+        if let Ok(children_ids) = self.children(id) {
+          for child_id in children_ids.iter() {
+            q.push_back(*child_id);
+          }
+        }
+      }
+    }
     debug_assert_eq!(self.ta.total_node_count(), self.id2taid.len());
     debug_assert_eq!(self.ta.total_node_count(), self.taid2id.len());
 
