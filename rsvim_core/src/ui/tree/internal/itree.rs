@@ -289,7 +289,8 @@ impl Relation {
     }
   }
 
-  fn root_id(&self) -> TreeNodeId {
+  /// The first created node will be the root node.
+  pub fn root_id(&self) -> TreeNodeId {
     self.root_id
   }
 
