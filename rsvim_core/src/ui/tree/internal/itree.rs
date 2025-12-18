@@ -513,78 +513,8 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children IDs.
-  //
-  // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
-  // has several limitations when calculating the layout:
-  // 1. It doesn't support hidden/invisble, i.e. when specifying `{display:
-  //    None}` for some children nodes, but TaffyTree still calculates these
-  //    non-display nodes.
-  // 2. It doesn't support Z-index, i.e. we will have to manually remove/insert
-  //    some children nodes on TaffyTree for different Z-index.
-  // These issues will force us to maintain parent/child relationship by
-  // ourself, instead of directly relying on TaffyTree's internal parent/child
-  // relationship.
-  // For each time, we can only calculate layout for those visible nodes or the
-  // nodes that are in same Z-index. For other hidden nodes or the nodes with
-  // different Z-index, we need to manually remove them from the parent, thus
-  // to make sure the layout calculation is correct.
-  parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
-
-  root_id: TreeNodeId,
-
-  #[cfg(debug_assertions)]
-  root_changes: usize,
-  #[cfg(debug_assertions)]
-  names: FoldMap<TreeNodeId, &'static str>,
-}
-
-#[derive(Debug)]
-/// Iterate all the tree nodes in pre-order.
-///
-/// For each node, it first visits the node itself, then visits all its
-/// children. This also follows the order when rendering the widget tree to
-/// terminal device.
-pub struct ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  tree: &'a Itree<T>,
-  que: VecDeque<TreeNodeId>,
-}
-
-impl<'a, T> Iterator for ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a T;
-
-  fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
-        }
-      }
-      self.tree.node(id)
-    } else {
-      None
-    }
-  }
-}
-
-impl<'a, T> ItreeIter<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
-    let mut que = VecDeque::new();
-    if let Some(id) = start_node_id {
-      que.push_back(id);
-    }
-    Self { tree, que }
-  }
+  ta: RefCell<Ta>,
+  relation: RefCell<Relation>,
 }
 
 impl<T> Itree<T>
@@ -594,7 +524,8 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      relationship: Rc::new(RefCell::new(Relation::new())),
+      ta: RefCell::new(Ta::new()),
+      relation: RefCell::new(Relation::new()),
     }
   }
 
@@ -1065,3 +996,50 @@ where
   }
 }
 // Movement }
+
+#[derive(Debug)]
+/// Iterate all the tree nodes in pre-order.
+///
+/// For each node, it first visits the node itself, then visits all its
+/// children. This also follows the order when rendering the widget tree to
+/// terminal device.
+pub struct ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  tree: &'a Itree<T>,
+  que: VecDeque<TreeNodeId>,
+}
+
+impl<'a, T> Iterator for ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  type Item = &'a T;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(id) = self.que.pop_front() {
+      for child_id in self.tree.children_ids(id) {
+        if self.tree.node(child_id).is_some() {
+          self.que.push_back(child_id);
+        }
+      }
+      self.tree.node(id)
+    } else {
+      None
+    }
+  }
+}
+
+impl<'a, T> ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+    let mut que = VecDeque::new();
+    if let Some(id) = start_node_id {
+      que.push_back(id);
+    }
+    Self { tree, que }
+  }
+}
