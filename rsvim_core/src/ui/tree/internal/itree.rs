@@ -65,6 +65,11 @@ impl Ta {
       if let Some(parent_taid) = self.ta.parent(*taid) {
         debug_assert!(self.taid2id.contains_key(&parent_taid));
       }
+      if let Ok(children_taids) = self.ta.children(*taid) {
+        for child_taid in children_taids {
+          debug_assert!(self.taid2id.contains_key(&child_taid));
+        }
+      }
     }
     for (taid, nid) in self.taid2id.iter() {
       debug_assert!(self.id2taid.contains_key(nid));
