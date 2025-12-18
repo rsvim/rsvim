@@ -440,10 +440,24 @@ impl Relation {
     self.children_ids.get(&id).cloned()
   }
 
+  /// Add the first node, which is the root node.
+  pub fn add_root(&mut self, root_id: TreeNodeId, name: &'static str) {
+    self._internal_check();
+    debug_assert!(self.children_ids.is_empty());
+    debug_assert!(self.parent_ids.is_empty());
+    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
+    self.children_ids.insert(root_id, vec![]);
+    self._set_name(root_id, name);
+  }
+
+  /// Add the a new node, which is the child node of a parent node.
+  ///
+  /// NOTE: The parent ID must already exists, the child node ID must not
+  /// exist.
   pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
     self._internal_check();
     debug_assert!(self.children_ids.contains_key(&parent_id));
-    debug_assert!(self.children_ids.contains_key(&child_id));
+    debug_assert!(!self.children_ids.contains_key(&child_id));
     debug_assert!(!self.parent_ids.contains_key(&child_id));
     self
       .children_ids
@@ -467,10 +481,7 @@ impl Relation {
     debug_assert!(self.children_ids.contains_key(&child_id));
     debug_assert!(self.parent_ids.contains_key(&child_id));
     debug_assert_eq!(*self.parent_ids.get(&child_id).unwrap(), parent_id);
-    let removed_id = self.ta.remove_child(parent_id, child_id)?;
-    debug_assert_eq!(removed_id, child_id);
-    self._unset_name(removed_id);
-    self._unset_root_id(removed_id);
+
     let child_pos = self
       .children_ids
       .get(&parent_id)
@@ -485,24 +496,17 @@ impl Relation {
       .unwrap()
       .remove(child_pos);
     self.parent_ids.remove(&child_id);
-    Ok(removed_id)
-  }
-
-  pub fn new_root(&mut self, root_id: TreeNodeId, name: &'static str) {
-    self._internal_check();
-    debug_assert!(self.children_ids.is_empty());
-    debug_assert!(self.parent_ids.is_empty());
-    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
-    self.children_ids.insert(root_id, vec![]);
-    self._set_name(root_id, name);
   }
 
   pub fn new_with_parent(
     &mut self,
-    style: Style,
     parent_id: TreeNodeId,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    debug_assert!(self.children_ids.contains_key(&parent_id));
+    debug_assert!(self.parent_ids.is_empty());
+    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
     let id = self.new_leaf(style, name)?;
     self.add_child(parent_id, id)?;
     Ok(id)
