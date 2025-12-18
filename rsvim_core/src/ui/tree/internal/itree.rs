@@ -473,14 +473,14 @@ impl Relation {
   // }
 
   pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.ta.contains_key(&id)
+    self.children_ids.contains_key(&id)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.parent_ids.get(&id).copied()
   }
 
-  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+  pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
     self.children_ids.get(&id).cloned()
   }
 
