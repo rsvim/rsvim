@@ -252,40 +252,24 @@ impl Relation {
   #[cfg(test)]
   fn _internal_check(&self) {
     if self.root_id != INVALID_ROOT_ID {
+      debug_assert!(!self.children_ids.is_empty());
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root_id);
       while let Some(id) = q.pop_front() {
-        if let Some(expect_parent_id) = self.ta.parent(id) {
-          debug_assert!(self.parent_ids.get(&id).is_some());
-          debug_assert_eq!(
-            expect_parent_id,
-            *self.parent_ids.get(&id).unwrap()
-          );
-        }
-        if let Some(actual_parent_id) = self.parent_ids.get(&id)
-          && let Some(expect_parent_id) = self.ta.parent(id)
-        {
-          debug_assert_eq!(*actual_parent_id, expect_parent_id);
-        }
-        if let Ok(expect_children_ids) = self.ta.children(id) {
-          for c in expect_children_ids {
-            debug_assert!(self.children_ids.get(&id).is_some());
-            let actual_children_ids = self.children_ids.get(&id).unwrap();
-            debug_assert!(actual_children_ids.iter().any(|i| *i == c));
-          }
-        }
-        if let Some(actual_children_ids) = self.children_ids.get(&id)
-          && let Ok(expect_children_ids) = self.ta.children(id)
-        {
-          debug_assert!(actual_children_ids.len() >= expect_children_ids.len());
-        }
-
         if let Some(children_ids) = self.children_ids.get(&id) {
-          for child_id in children_ids.iter() {
-            q.push_back(*child_id);
+          for c in children_ids {
+            debug_assert!(self.parent_ids.contains_key(c));
+            debug_assert_eq!(*self.parent_ids.get(c).unwrap(), id);
+          }
+
+          for c in children_ids.iter() {
+            q.push_back(*c);
           }
         }
       }
+    } else {
+      debug_assert!(self.children_ids.is_empty());
+      debug_assert!(self.parent_ids.is_empty());
     }
   }
 
@@ -588,11 +572,31 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
 
-  // Maps parent and children edges. The parent edge weight is negative,
-  // children edges are positive. The edge weight of each child is increased
-  // with the order when they are inserted, i.e. the first child has the lowest
-  // edge weight, the last child has the highest edge weight.
-  relationship: RelationshipRc,
+  // Maps parent and children IDs.
+  //
+  // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
+  // has several limitations when calculating the layout:
+  // 1. It doesn't support hidden/invisble, i.e. when specifying `{display:
+  //    None}` for some children nodes, but TaffyTree still calculates these
+  //    non-display nodes.
+  // 2. It doesn't support Z-index, i.e. we will have to manually remove/insert
+  //    some children nodes on TaffyTree for different Z-index.
+  // These issues will force us to maintain parent/child relationship by
+  // ourself, instead of directly relying on TaffyTree's internal parent/child
+  // relationship.
+  // For each time, we can only calculate layout for those visible nodes or the
+  // nodes that are in same Z-index. For other hidden nodes or the nodes with
+  // different Z-index, we need to manually remove them from the parent, thus
+  // to make sure the layout calculation is correct.
+  parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
+  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+
+  root_id: TreeNodeId,
+
+  #[cfg(debug_assertions)]
+  root_changes: usize,
+  #[cfg(debug_assertions)]
+  names: FoldMap<TreeNodeId, &'static str>,
 }
 
 #[derive(Debug)]
