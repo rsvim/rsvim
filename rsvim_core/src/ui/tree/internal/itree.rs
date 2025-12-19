@@ -827,7 +827,7 @@ where
   /// Returns the root node ID.
   pub fn add_root<F>(
     &mut self,
-    shape: IRect,
+    actual_shape: U16Rect,
     style: Style,
     constructor: F,
     name: &'static str,
@@ -845,8 +845,6 @@ where
     let (id, shape) = {
       let mut ta = self.ta.borrow_mut();
       let id = ta.new_leaf(style)?;
-      let shape = Self::clamp_shape(&shape);
-      let actual_shape = rect_as!(shape, u16);
       ta.compute_layout(
         id,
         taffy::Size {
@@ -859,14 +857,14 @@ where
         },
       )?;
       let layout = ta.layout(id)?;
-      (id, rect_from_layout!(layout))
+      let shape = rect_from_layout!(layout);
+      let shape = Self::clamp_shape(&shape);
+      (id, shape)
     };
 
     self.relation.add_root(id, name);
     self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
 
-    let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
-    let actual_shape = self.calculate_actual_shape(id, &shape);
     let mut node = constructor(id, shape, actual_shape);
     node.set_zindex(DEFAULT_ZINDEX);
     node.set_enabled(DEFAULT_ENABLED);
