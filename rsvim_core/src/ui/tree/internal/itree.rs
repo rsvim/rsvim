@@ -872,8 +872,8 @@ where
     let mut node = constructor(id, shape, actual_shape);
     node.set_zindex(DEFAULT_ZINDEX);
     node.set_enabled(DEFAULT_ENABLED);
-    node.set_shape(&shape);
-    node.set_actual_shape(&actual_shape);
+    node.set_shape(shape);
+    node.set_actual_shape(actual_shape);
     let result = self.nodes.insert(id, node);
     Ok(result)
   }
