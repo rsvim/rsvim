@@ -809,8 +809,6 @@ where
     &mut self,
     shape: IRect,
     style: Style,
-    _zindex: usize,
-    _enabled: bool,
     constructor: F,
     name: &'static str,
   ) -> TaffyResult<Option<T>>
@@ -844,6 +842,7 @@ where
     style: Style,
     zindex: usize,
     enabled: bool,
+    policy: SetShapePolicy,
     constructor: F,
     name: &'static str,
   ) -> Option<T>
