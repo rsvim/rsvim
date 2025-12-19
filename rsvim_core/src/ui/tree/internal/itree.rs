@@ -586,7 +586,7 @@ where
 /// ## Truncate
 /// Directly cut off the excess parts that are out of its parent.
 ///
-/// For example now we have a parent `P` and a child `C`:
+/// For example:
 /// ```
 /// (-6,-3)    (4,-3)
 ///    +---------+
@@ -602,14 +602,43 @@ where
 ///       (0,6)         (13,6)
 /// ```
 ///
-/// C shape is `((-6, -3), (4, 2))`, its parent P size is `(13, 6)`. C's
-/// truncated shape is `((0, 0), (4, 2))`.
+/// The shape of child C is `((-6, -3), (4, 2))`, its parent P size is
+/// `(13, 6)`. C's truncated shape is `((0, 0), (4, 2))`.
 ///
 /// ## Bound
 ///
-/// - Bound: Keep as much as we can, first try to set at most the same size
-///   as its parent, then move inside its parent thus avoid cutting any parts
-///   that is out of its parent. For example a node shape is
+/// Keep as much as we can: first try to set the child size to be close to the
+/// size of its parent, then move it inside its parent to avoid been cut off.
+///
+/// For example a node shape is
+/// ```
+/// Original:
+///
+/// (-6,-3)    (4,-3)
+///    +---------+
+///    |C        |
+///    |  (0,0)  |      (13,0)
+///    |     +---+--------+
+///    |     |   |       P|
+///    +-----+---+        |
+///  (-6,2)  | (4,2)      |
+///          |            |
+///          |            |
+///          +------------+
+///       (0,6)         (13,6)
+///
+/// Bounded:
+///
+///       (0,0)     (10,0)
+///          +---+-----+--+ <-- (13,0)
+///          |C        | P|
+///          |         |  |
+///          |         |  |
+///          |   (10,5)|  |
+///     (0,5)|---------+  |
+///          +------------+
+///       (0,6)         (13,6)
+/// ```
 ///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
 ///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
 ///   which doesn't need to be truncated, but its original height is 8 so
