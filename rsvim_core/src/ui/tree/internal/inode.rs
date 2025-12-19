@@ -20,11 +20,11 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn zindex(&self) -> usize;
 
-  fn set_zindex(&mut self, zindex: usize) -> usize;
+  fn set_zindex(&mut self, value: usize);
 
   fn enabled(&self) -> bool;
 
-  fn set_enabled(&mut self, enabled: bool);
+  fn set_enabled(&mut self, value: bool);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -56,16 +56,16 @@ macro_rules! inode_impl {
         self.$base_name.zindex()
       }
 
-      fn set_zindex(&mut self, zindex: usize) {
-        self.$base_name.set_zindex(zindex);
+      fn set_zindex(&mut self, value: usize) {
+        self.$base_name.set_zindex(value);
       }
 
       fn enabled(&self) -> bool {
         self.$base_name.enabled()
       }
 
-      fn set_enabled(&mut self, enabled: bool) {
-        self.$base_name.set_enabled(enabled);
+      fn set_enabled(&mut self, value: bool) {
+        self.$base_name.set_enabled(value);
       }
     }
   };
@@ -120,12 +120,12 @@ macro_rules! inode_itree_impl {
           .zindex()
       }
 
-      fn set_zindex(&mut self, zindex: usize) {
+      fn set_zindex(&mut self, value: usize) {
         self
           .$base_name
           .node_mut(self.$base_name.root_id())
           .unwrap()
-          .set_zindex(zindex);
+          .set_zindex(value);
       }
 
       fn enabled(&self) -> bool {
@@ -136,12 +136,12 @@ macro_rules! inode_itree_impl {
           .enabled()
       }
 
-      fn set_enabled(&mut self, enabled: bool) {
+      fn set_enabled(&mut self, value: bool) {
         self
           .$base_name
           .node_mut(self.$base_name.root_id())
           .unwrap()
-          .set_enabled(enabled);
+          .set_enabled(value);
       }
     }
   };
@@ -201,10 +201,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_zindex(&mut self, zindex: usize) {
+      fn set_zindex(&mut self, value: usize) {
         match self {
           $(
-            $enum::$variant(e) => e.set_zindex(zindex),
+            $enum::$variant(e) => e.set_zindex(value),
           )*
         }
       }
@@ -217,10 +217,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_enabled(&mut self, enabled: bool) {
+      fn set_enabled(&mut self, value: bool) {
         match self {
           $(
-            $enum::$variant(e) => e.set_enabled(enabled),
+            $enum::$variant(e) => e.set_enabled(value),
           )*
         }
       }
@@ -239,6 +239,7 @@ pub fn next_node_id() -> TreeNodeId {
 
 flags_impl!(Flags, u8, ENABLED);
 
+pub const DEFAULT_ZINDEX: usize = 0;
 // enabled=true
 const FLAGS: Flags = Flags::all();
 
@@ -260,7 +261,7 @@ impl InodeBase {
       id: next_node_id(),
       shape,
       actual_shape,
-      zindex: 0,
+      zindex: DEFAULT_ZINDEX,
       flags: FLAGS,
     }
   }

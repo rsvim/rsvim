@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::inode::DEFAULT_ZINDEX;
 use crate::ui::tree::internal::inode::next_node_id;
 use crate::ui::tree::internal::shapes::*;
 use itertools::Itertools;
@@ -16,7 +17,7 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 
-const INVALID_ROOT_ID: TreeNodeId = -1;
+pub const INVALID_ROOT_ID: TreeNodeId = -1;
 
 #[derive(Debug, Clone)]
 struct Ta {
@@ -773,7 +774,11 @@ where
     name: &'static str,
   ) -> TaffyResult<Option<T>>
   where
-    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
   {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
@@ -781,7 +786,13 @@ where
 
     let id = self.ta.borrow_mut().new_leaf(style)?;
     self.relation.borrow_mut().add_root(id, name);
-    let node = constructor(id, shape);
+
+    let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
+    let actual_shape = self.calculate_actual_shape(id, &shape);
+
+    let mut node = constructor(id, shape, actual_shape);
+    node.set_zindex(DEFAULT_ZINDEX);
+    node.set_enabled(true);
     let result = self.nodes.insert(id, node);
     Ok(result)
   }
