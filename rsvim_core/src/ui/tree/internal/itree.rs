@@ -910,7 +910,7 @@ where
         // re-insert all the children nodes that are in the same layer of
         // current `zindex`.
         let children_zindex = self.relation.children_zindex(parent_id);
-        if children_zindex.map(|z| z != zindex).unwrap_or(true) {
+        if children_zindex.is_none() || children_zindex.unwrap() != zindex {
           // Clear all children nodes under this parent.
           ta.set_children(parent_id, &[]);
 
