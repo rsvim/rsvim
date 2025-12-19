@@ -927,7 +927,7 @@ where
       for ta_child in ta_children_ids {
         // We don't have to update `id` again because we had just done it.
         if ta_child != id {
-          self._update_shapes_impl(ta_child);
+          self._update_shapes_impl(ta_child)?;
         }
       }
     }
