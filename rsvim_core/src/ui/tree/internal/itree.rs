@@ -966,7 +966,7 @@ where
     )
   }
 
-  /// Remove a child node, returns the removed node.
+  /// Remove a child node. Returns the removed node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relation.root_id());
