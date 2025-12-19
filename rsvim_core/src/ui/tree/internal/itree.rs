@@ -720,49 +720,24 @@ where
     }
   }
 
-  pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
-    self.shapes.borrow().get(&id).copied()
-  }
-
   #[inline]
-  /// Set shape for a node. Since a node is always bounded by its parent, thus
-  /// its real shape can be different with the "expecting" shape.
-  ///
-  /// Returns the "real" shape after adjustment.
-  ///
-  /// There are two policies when calculating the "adjusted" shape:
-  /// - Truncate: Just cut all the parts that are out of its parent. For
-  ///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
-  ///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
-  ///   left-top corner must be at least `(0, 0)`, and its bottom-right corner
-  ///   is at most `(7, 8)`.
-  /// - Bound: Keep as much as we can, first try to set at most the same size
-  ///   as its parent, then move inside its parent thus avoid cutting any parts
-  ///   that is out of its parent. For example a node shape is
-  ///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
-  ///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
-  ///   which doesn't need to be truncated, but its original height is 8 so
-  ///   need to be truncated into 6, it becomes `((-1, -2), (5, 4))`. Then move
-  ///   it into parent to avoid more truncating, so its becomes
-  ///   `((0, 0), (6, 6))`.
-  pub fn set_shape(
-    &mut self,
+  fn calculate_shape(
+    &self,
     id: TreeNodeId,
     shape: IRect,
     policy: SetShapePolicy,
   ) -> Option<IRect> {
-    let result = match self.parent(id) {
+    match self.parent_id(id) {
       Some(parent_id) => {
-        let parent_actual_shape = self.actual_shape(parent_id)?;
-        let result = match policy {
+        let parent_actual_shape = self.node(parent_id)?.actual_shape();
+        match policy {
           SetShapePolicy::TRUNCATE => {
             truncate_shape(&shape, &parent_actual_shape.size())
           }
           SetShapePolicy::BOUND => {
             bound_shape(&shape, &parent_actual_shape.size())
           }
-        };
-        result
+        }
       }
       None => {
         let min_x = num_traits::clamp_min(shape.min().x, 0);
@@ -771,9 +746,7 @@ where
         let max_y = num_traits::clamp_min(shape.max().y, min_y);
         rect!(min_x, min_y, max_x, max_y)
       }
-    };
-    self.shapes.borrow_mut().insert(id, result);
-    Some(result)
+    }
   }
 
   #[inline]
