@@ -919,6 +919,7 @@ where
           // Clear all children nodes under this parent.
           ta.set_children(parent_id, &[]);
 
+          // Re-inesrt all children nodes equals to the `zindex` to this parent.
           for child in self.children_ids(parent_id) {
             debug_assert!(self.node(child).is_some());
             let child_zindex = self.node(child).unwrap().zindex();
