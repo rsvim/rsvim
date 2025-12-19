@@ -720,7 +720,6 @@ where
     }
   }
 
-  #[inline]
   fn calculate_shape(
     &self,
     id: TreeNodeId,
@@ -749,30 +748,18 @@ where
     }
   }
 
-  #[inline]
-  pub fn actual_shape(&self, id: TreeNodeId) -> Option<U16Rect> {
-    match self.parent(id) {
-      None => {
-        let shape = self.shape(id)?;
-        Some(rect_as!(shape, u16))
-      }
+  pub fn calculate_actual_shape(
+    &self,
+    id: TreeNodeId,
+    shape: IRect,
+  ) -> U16Rect {
+    match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
-        match maybe_cached {
-          Some(cached) => Some(cached),
-          None => {
-            // Non-root node truncated by its parent's shape.
-            let shape = self.shape(id)?;
-            let parent_actual_shape = self.actual_shape(parent_id)?;
-            let actual_shape =
-              convert_relative_to_absolute(&shape, &parent_actual_shape);
-            self
-              .cached_actual_shapes
-              .borrow_mut()
-              .insert(id, actual_shape);
-            Some(actual_shape)
-          }
-        }
+        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+        convert_relative_to_absolute(&shape, &parent_actual_shape)
+      }
+      None => {
+        rect_as!(shape, u16)
       }
     }
   }
