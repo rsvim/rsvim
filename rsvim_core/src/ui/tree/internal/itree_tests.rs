@@ -49,7 +49,7 @@ fn new() {
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
-  tree.insert_root(n1);
+  tree.add_root(n1);
 
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.root_id(), nid1);
@@ -97,12 +97,12 @@ fn insert1() {
    *     n4  n5    n6
    * ```
    */
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid2, n5);
+  tree.add_child(nid3, n6);
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
@@ -211,15 +211,15 @@ fn insert2() {
    *         n8   n9
    * ```
    */
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
-  tree.insert(nid5, n7);
-  tree.insert(nid7, n8);
-  tree.insert(nid7, n9);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid2, n5);
+  tree.add_child(nid3, n6);
+  tree.add_child(nid5, n7);
+  tree.add_child(nid7, n8);
+  tree.add_child(nid7, n9);
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
@@ -362,15 +362,15 @@ fn shape1() {
    *         n8   n9
    * ```
    */
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
-  tree.insert(nid5, n7);
-  tree.insert(nid7, n8);
-  tree.insert(nid7, n9);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid2, n5);
+  tree.add_child(nid3, n6);
+  tree.add_child(nid5, n7);
+  tree.add_child(nid7, n8);
+  tree.add_child(nid7, n9);
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
@@ -450,12 +450,12 @@ fn shape2() {
    *     n6
    * ```
    */
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid4, n5);
-  tree.insert(nid5, n6);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid4, n5);
+  tree.add_child(nid5, n6);
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
@@ -501,9 +501,9 @@ fn push1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(nodes[0]);
+  tree.add_root(nodes[0]);
   for node in nodes.iter().skip(1) {
-    tree.insert(nodes_ids[0], *node);
+    tree.add_child(nodes_ids[0], *node);
   }
 
   assert!(tree.root_id() == nodes_ids[0]);
@@ -546,12 +546,12 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
   value += 1;
 
   let mut tree = Itree::new();
-  tree.insert_root(root);
+  tree.add_root(root);
   for _ in 1..n {
     let node = TestValue::new(value, s);
     let node_id = node.id();
     value += 1;
-    tree.insert(root_id, node);
+    tree.add_child(root_id, node);
     node_ids.push(node_id);
   }
 
@@ -653,15 +653,15 @@ fn get1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid2, n5);
-  tree.insert(nid3, n6);
-  tree.insert(nid5, n7);
-  tree.insert(nid7, n8);
-  tree.insert(nid7, n9);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid2, n5);
+  tree.add_child(nid3, n6);
+  tree.add_child(nid5, n7);
+  tree.add_child(nid7, n8);
+  tree.add_child(nid7, n9);
 
   assert!(nid1 == tree.root_id());
   let n1 = tree.node(nid1).unwrap();
@@ -733,12 +733,12 @@ fn get2() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid1, n3);
-  tree.insert(nid2, n4);
-  tree.insert(nid4, n5);
-  tree.insert(nid5, n6);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid1, n3);
+  tree.add_child(nid2, n4);
+  tree.add_child(nid4, n5);
+  tree.add_child(nid5, n6);
 
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
@@ -789,9 +789,9 @@ fn move_by1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid2, n3);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid2, n3);
 
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
@@ -862,9 +862,9 @@ fn bounded_move_by1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid2, n3);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid2, n3);
 
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
@@ -935,9 +935,9 @@ fn move_to1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid2, n3);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid2, n3);
 
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();
@@ -1008,9 +1008,9 @@ fn bounded_move_to1() {
    * ```
    */
   let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid2, n3);
+  tree.add_root(n1);
+  tree.add_child(nid1, n2);
+  tree.add_child(nid2, n3);
 
   let n1 = tree.node(nid1).unwrap();
   let n2 = tree.node(nid2).unwrap();

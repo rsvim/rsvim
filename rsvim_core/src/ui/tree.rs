@@ -109,7 +109,7 @@ impl Tree {
 
     let root = Panel::new(shape);
     let root_node = TreeNode::Root(root);
-    base.insert_root(root_node);
+    base.add_root(root_node);
 
     Tree {
       base,
@@ -331,7 +331,7 @@ impl Tree {
     child_node: TreeNode,
   ) -> Option<TreeNode> {
     self.insert_guard(&child_node);
-    self.base.insert(parent_id, child_node)
+    self.base.add_child(parent_id, child_node)
   }
 
   /// See [`Itree::bounded_insert`].

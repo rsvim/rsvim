@@ -60,7 +60,7 @@ impl Window {
     let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = WindowNode::Root(root);
-    base.insert_root(root_node);
+    base.add_root(root_node);
 
     let content_shape = rect_from_size!(shape);
     let content_actual_shape = rect_as!(content_shape, u16);

@@ -661,7 +661,7 @@ where
   }
 
   /// Insert root node, without a parent node.
-  pub fn insert_root(&mut self, root_node: T) {
+  pub fn add_root(&mut self, root_node: T) {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
 
@@ -682,7 +682,11 @@ where
   ///
   /// # Panics
   /// 1. If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: T) -> Option<T> {
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_node: T,
+  ) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relation.borrow().contains(parent_id));
@@ -729,7 +733,7 @@ where
     // Bound child shape
     child_node.set_shape(&bound_shape(child_node.shape(), &parent_actual_size));
 
-    self.insert(parent_id, child_node)
+    self.add_child(parent_id, child_node)
   }
 
   /// Remove a node by its ID.
@@ -745,7 +749,7 @@ where
   ///
   /// # Panics
   /// If the node `id` is root node and root node cannot be removed.
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
+  pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relation.borrow().root_id());
     self._internal_check();
