@@ -632,6 +632,7 @@ where
   }
 }
 
+#[derive(Debug)]
 /// When insert a node into a tree under a parent node, we will need to adjust
 /// its logical shape and calculate its actual shape. This is because TaffyTree
 /// can calculate larger layout result, which doesn't fit into terminal actual
@@ -726,25 +727,17 @@ where
   T: Inodeable,
 {
   #[inline]
-  fn _update_shapes_impl(&mut self, start_id: TreeNodeId) {
+  fn _update_shapes_impl(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(start_id);
 
     // Iterate all descendants, and update their shape/actual_shape.
     while let Some(id) = q.pop_front() {
+      let ta = self.ta.borrow();
       let layout = ta.layout(id)?;
-      let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      let cnode_shape = *cnode_ref.shape();
-      let cnode_actual_shape =
-        convert_relative_to_absolute(&cnode_shape, &pnode_actual_shape);
-
-      trace!(
-        "update attr, cnode id/actual_shape:{:?}/{:?}, pnode id/actual_shape:{:?}/{:?}",
-        cnode_id, cnode_actual_shape, pnode_id, pnode_actual_shape
-      );
-
-      // let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
-      cnode_ref.set_actual_shape(&cnode_actual_shape);
+      let shape = rect_from_layout!(layout);
+      let shape = self.calculate_shape(id, &shape, policy);
+      let actual_shape = self.calculate_actual_shape(id, &shape);
 
       for dnode_id in self.children_ids(cnode_id).iter() {
         if self.nodes.contains_key(dnode_id) {
@@ -752,6 +745,8 @@ where
         }
       }
     }
+
+    Ok(())
   }
 
   fn clamp_shape(shape: &IRect) -> IRect {
