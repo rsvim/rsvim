@@ -661,12 +661,17 @@ where
   }
 
   /// Insert root node, without a parent node.
-  pub fn add_root<F>(&mut self, 
+  pub fn add_root<F>(
+    &mut self,
     shape: IRect,
     style: Style,
+    zindex: usize,
+    enabled: bool,
     constructor: F,
-    name: &'static str) -> TaffyResult<Option<T>>
-    where F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T
+    name: &'static str,
+  ) -> TaffyResult<Option<T>>
+  where
+    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
   {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
@@ -693,10 +698,13 @@ where
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
+    zindex: usize,
+    enabled: bool,
     constructor: F,
+    name: &'static str,
   ) -> Option<T>
   where
-    F: FnOnce(||) -> T,
+    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
   {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
