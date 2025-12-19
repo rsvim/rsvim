@@ -819,7 +819,11 @@ where
     name: &'static str,
   ) -> Option<T>
   where
-    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
   {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
@@ -842,7 +846,11 @@ where
     name: &'static str,
   ) -> Option<T>
   where
-    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
   {
     self.add_child(
       parent_id,
