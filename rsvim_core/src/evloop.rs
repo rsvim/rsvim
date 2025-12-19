@@ -16,7 +16,6 @@ use crate::js::binding::global_rsvim::fs::read::async_fs_read;
 use crate::js::binding::global_rsvim::fs::write::async_fs_write;
 use crate::js::command::CommandsManager;
 use crate::js::command::CommandsManagerArc;
-use crate::js::encdec::encode_bytes;
 use crate::js::module::async_load_import;
 use crate::msg;
 use crate::msg::JsMessage;
@@ -685,7 +684,7 @@ impl EventLoop {
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
-                  Ok(source) => Some(Ok(encode_bytes(source))),
+                  Ok(source) => Some(bincode::serialize(source)),
                   Err(e) => Some(Err(e)),
                 },
               }))
@@ -708,7 +707,7 @@ impl EventLoop {
               .send(JsMessage::FsOpenResp(msg::FsOpenResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(fd) => Some(Ok(encode_bytes(fd))),
+                  Ok(fd) => Some(bincode::serialize(fd)),
                   Err(e) => Some(Err(e)),
                 },
               }))
@@ -737,7 +736,7 @@ impl EventLoop {
               .send(JsMessage::FsWriteResp(msg::FsWriteResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(n) => Some(Ok(encode_bytes(n))),
+                  Ok(n) => Some(bincode::serialize(n)),
                   Err(e) => Some(Err(e)),
                 },
               }))
