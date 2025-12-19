@@ -12,11 +12,11 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn shape(&self) -> &IRect;
 
-  fn set_shape(&mut self, shape: &IRect);
+  fn set_shape(&mut self, shape: IRect);
 
   fn actual_shape(&self) -> &U16Rect;
 
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect);
+  fn set_actual_shape(&mut self, actual_shape: U16Rect);
 
   fn zindex(&self) -> usize;
 
@@ -40,7 +40,7 @@ macro_rules! inode_impl {
         self.$base_name.shape()
       }
 
-      fn set_shape(&mut self, shape: &IRect) {
+      fn set_shape(&mut self, shape: IRect) {
         self.$base_name.set_shape(shape);
       }
 
@@ -48,7 +48,7 @@ macro_rules! inode_impl {
         self.$base_name.actual_shape()
       }
 
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+      fn set_actual_shape(&mut self, actual_shape: U16Rect) {
         self.$base_name.set_actual_shape(actual_shape)
       }
 
@@ -88,7 +88,7 @@ macro_rules! inode_itree_impl {
           .shape()
       }
 
-      fn set_shape(&mut self, shape: &IRect) {
+      fn set_shape(&mut self, shape: IRect) {
         self
           .$base_name
           .node_mut(self.$base_name.root_id())
@@ -104,7 +104,7 @@ macro_rules! inode_itree_impl {
           .actual_shape()
       }
 
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+      fn set_actual_shape(&mut self, actual_shape: U16Rect) {
         self
           .$base_name
           .node_mut(self.$base_name.root_id())
@@ -169,7 +169,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_shape(&mut self, shape: &IRect) {
+      fn set_shape(&mut self, shape: IRect) {
         match self {
           $(
             $enum::$variant(e) => e.set_shape(shape),
@@ -185,7 +185,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+      fn set_actual_shape(&mut self, actual_shape: U16Rect) {
         match self {
           $(
             $enum::$variant(e) => e.set_actual_shape(actual_shape),
@@ -276,16 +276,16 @@ impl InodeBase {
     &self.shape
   }
 
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
+  pub fn set_shape(&mut self, shape: IRect) {
+    self.shape = shape;
   }
 
   pub fn actual_shape(&self) -> &U16Rect {
     &self.actual_shape
   }
 
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
+  pub fn set_actual_shape(&mut self, actual_shape: U16Rect) {
+    self.actual_shape = actual_shape;
   }
 
   pub fn zindex(&self) -> usize {
