@@ -952,7 +952,7 @@ where
     style: Style,
     constructor: F,
     name: &'static str,
-  ) -> Option<T>
+  ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
       /* id */ TreeNodeId,
