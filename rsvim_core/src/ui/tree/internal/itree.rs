@@ -12,12 +12,12 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use swc_common::util::map;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
+use taffy::prelude::FromLength;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 
@@ -777,6 +777,14 @@ where
     }
   }
 
+  fn clamp_shape(shape: &IRect) -> IRect {
+    let min_x = num_traits::clamp_min(shape.min().x, 0);
+    let min_y = num_traits::clamp_min(shape.min().y, 0);
+    let max_x = num_traits::clamp_min(shape.max().x, min_x);
+    let max_y = num_traits::clamp_min(shape.max().y, min_y);
+    rect!(min_x, min_y, max_x, max_y)
+  }
+
   fn calculate_shape(
     &self,
     id: TreeNodeId,
@@ -795,13 +803,7 @@ where
           }
         }
       }
-      None => {
-        let min_x = num_traits::clamp_min(shape.min().x, 0);
-        let min_y = num_traits::clamp_min(shape.min().y, 0);
-        let max_x = num_traits::clamp_min(shape.max().x, min_x);
-        let max_y = num_traits::clamp_min(shape.max().y, min_y);
-        rect!(min_x, min_y, max_x, max_y)
-      }
+      None => Self::clamp_shape(shape),
     }
   }
 
@@ -839,7 +841,25 @@ where
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
 
-    let id = self.ta.borrow_mut().new_leaf(style)?;
+    let (id, shape) = {
+      let id = self.ta.borrow_mut().new_leaf(style)?;
+      let shape = Self::clamp_shape(&shape);
+      let actual_shape = rect_as!(shape, u16);
+      self.ta.borrow_mut().compute_layout(
+        id,
+        taffy::Size {
+          width: taffy::AvailableSpace::from_length(
+            actual_shape.size().width(),
+          ),
+          height: taffy::AvailableSpace::from_length(
+            actual_shape.size().height(),
+          ),
+        },
+      )?;
+      let layout = self.ta.borrow().layout(id)?;
+      (id, rect_from_layout!(layout))
+    };
+
     {
       let mut relation = self.relation.borrow_mut();
       relation.add_root(id, name);
@@ -848,7 +868,6 @@ where
 
     let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
     let actual_shape = self.calculate_actual_shape(id, &shape);
-
     let mut node = constructor(id, shape, actual_shape);
     node.set_zindex(DEFAULT_ZINDEX);
     node.set_enabled(DEFAULT_ENABLED);
