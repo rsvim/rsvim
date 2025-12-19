@@ -289,6 +289,16 @@ impl Relation {
     self.root_id
   }
 
+  fn _set_root(&mut self, id: TreeNodeId) {
+    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
+    debug_assert_eq!(self.root_changes, 0);
+    self.root_id = id;
+    if cfg!(debug_assertions) {
+      self.root_changes += 1;
+      debug_assert!(self.root_changes <= 1);
+    }
+  }
+
   fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
     if cfg!(debug_assertions) {
       self.names.insert(id, name);
@@ -454,7 +464,7 @@ impl Relation {
     debug_assert!(self.parent_ids.is_empty());
     debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
     self.children_ids.insert(id, vec![]);
-    self.root_id = id;
+    self._set_root(id);
     self._set_name(id, name);
   }
 
