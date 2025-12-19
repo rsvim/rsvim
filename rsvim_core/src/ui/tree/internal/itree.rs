@@ -638,6 +638,102 @@ where
     }
   }
 
+  pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
+    self.shapes.borrow().get(&id).copied()
+  }
+
+  #[inline]
+  /// Set shape for a node. Since a node is always bounded by its parent, thus
+  /// its real shape can be different with the "expecting" shape.
+  ///
+  /// Returns the "real" shape after adjustment.
+  ///
+  /// There are two policies when calculating the "adjusted" shape:
+  /// - Truncate: Just cut all the parts that are out of its parent. For
+  ///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
+  ///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
+  ///   left-top corner must be at least `(0, 0)`, and its bottom-right corner
+  ///   is at most `(7, 8)`.
+  /// - Bound: Keep as much as we can, first try to set at most the same size
+  ///   as its parent, then move inside its parent thus avoid cutting any parts
+  ///   that is out of its parent. For example a node shape is
+  ///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
+  ///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
+  ///   which doesn't need to be truncated, but its original height is 8 so
+  ///   need to be truncated into 6, it becomes `((-1, -2), (5, 4))`. Then move
+  ///   it into parent to avoid more truncating, so its becomes
+  ///   `((0, 0), (6, 6))`.
+  pub fn set_shape(
+    &mut self,
+    id: TreeNodeId,
+    shape: IRect,
+    policy: RelationshipSetShapePolicy,
+  ) -> Option<IRect> {
+    let result = match self.parent(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.actual_shape(parent_id)?;
+        let result = match policy {
+          RelationshipSetShapePolicy::TRUNCATE => {
+            truncate_shape(&shape, &parent_actual_shape.size())
+          }
+          RelationshipSetShapePolicy::BOUND => {
+            bound_shape(&shape, &parent_actual_shape.size())
+          }
+        };
+        result
+      }
+      None => {
+        let min_x = num_traits::clamp_min(shape.min().x, 0);
+        let min_y = num_traits::clamp_min(shape.min().y, 0);
+        let max_x = num_traits::clamp_min(shape.max().x, min_x);
+        let max_y = num_traits::clamp_min(shape.max().y, min_y);
+        rect!(min_x, min_y, max_x, max_y)
+      }
+    };
+    self.shapes.borrow_mut().insert(id, result);
+    Some(result)
+  }
+
+  #[inline]
+  pub fn actual_shape(&self, id: TreeNodeId) -> Option<U16Rect> {
+    match self.parent(id) {
+      None => {
+        let shape = self.shape(id)?;
+        Some(rect_as!(shape, u16))
+      }
+      Some(parent_id) => {
+        let maybe_cached = self.cached_actual_shapes.borrow().get(&id).copied();
+        match maybe_cached {
+          Some(cached) => Some(cached),
+          None => {
+            // Non-root node truncated by its parent's shape.
+            let shape = self.shape(id)?;
+            let parent_actual_shape = self.actual_shape(parent_id)?;
+            let actual_shape =
+              convert_relative_to_absolute(&shape, &parent_actual_shape);
+            self
+              .cached_actual_shapes
+              .borrow_mut()
+              .insert(id, actual_shape);
+            Some(actual_shape)
+          }
+        }
+      }
+    }
+  }
+
+  #[inline]
+  /// Whether the node is visible, e.g. its actual_shape size is zero.
+  pub fn visible(&self, id: TreeNodeId) -> Option<bool> {
+    let actual_shape = self.actual_shape(id)?;
+    Some(!actual_shape.size().is_zero())
+  }
+
+  #[inline]
+  pub fn invisible(&self, id: TreeNodeId) -> Option<bool> {
+    self.visible(id).map(|v| !v)
+  }
+
   /// Insert root node, without a parent node.
   pub fn add_root<F>(
     &mut self,

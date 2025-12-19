@@ -28,10 +28,6 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn enabled(&self) -> bool;
 
   fn set_enabled(&mut self, enabled: bool);
-
-  fn visible(&self) -> bool;
-
-  fn set_visible(&mut self, visible: bool);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -73,14 +69,6 @@ macro_rules! inode_impl {
 
       fn set_enabled(&mut self, enabled: bool) {
         self.$base_name.set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base_name.visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self.$base_name.set_visible(visible);
       }
     }
   };
@@ -157,22 +145,6 @@ macro_rules! inode_itree_impl {
           .node_mut(self.$base_name.root_id())
           .unwrap()
           .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_visible(visible);
       }
     }
   };
@@ -256,21 +228,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
-          )*
-        }
-      }
     }
   }
 }
@@ -283,10 +240,9 @@ pub fn next_node_id() -> TreeNodeId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-flags_impl!(Flags, u8, ENABLED, VISIBLE);
+flags_impl!(Flags, u8, ENABLED);
 
 // enabled=true
-// visible=true
 const FLAGS: Flags = Flags::all();
 
 #[derive(Debug, Clone, Copy)]
@@ -297,7 +253,6 @@ pub struct InodeBase {
   actual_shape: U16Rect,
   zindex: usize,
   // enabled
-  // visible
   flags: Flags,
 }
 
@@ -347,13 +302,5 @@ impl InodeBase {
 
   pub fn set_enabled(&mut self, value: bool) {
     self.flags.set(Flags::ENABLED, value);
-  }
-
-  pub fn visible(&self) -> bool {
-    self.flags.contains(Flags::VISIBLE)
-  }
-
-  pub fn set_visible(&mut self, value: bool) {
-    self.flags.set(Flags::VISIBLE, value);
   }
 }
