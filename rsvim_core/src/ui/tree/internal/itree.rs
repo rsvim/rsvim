@@ -493,7 +493,6 @@ impl Relation {
     &mut self,
     parent_id: TreeNodeId,
     id: TreeNodeId,
-    zindex: usize,
     name: &'static str,
   ) {
     self._internal_check();
