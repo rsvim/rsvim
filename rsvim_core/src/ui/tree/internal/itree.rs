@@ -246,8 +246,6 @@ pub struct Relation {
   names: FoldMap<TreeNodeId, &'static str>,
 }
 
-rc_refcell_ptr!(Relation);
-
 impl Relation {
   pub fn new() -> Self {
     Self {
@@ -564,8 +562,8 @@ where
 {
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
+  relation: Relation,
   ta: RefCell<Ta>,
-  relation: RefCell<Relation>,
 }
 
 impl<T> Itree<T>
@@ -576,13 +574,13 @@ where
     Itree {
       nodes: FoldMap::new(),
       ta: RefCell::new(Ta::new()),
-      relation: RefCell::new(Relation::new()),
+      relation: Relation::new(),
     }
   }
 
   fn _internal_check(&self) {
+    debug_assert_eq!(self.relation.len(), self.nodes.len());
     debug_assert_eq!(self.ta.borrow().len(), self.nodes.len());
-    debug_assert_eq!(self.relation.borrow().len(), self.nodes.len());
   }
 
   pub fn len(&self) -> usize {
@@ -594,7 +592,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relation.borrow().root_id()
+    self.relation.root_id()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
@@ -602,11 +600,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relation.borrow().parent(id)
+    self.relation.parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relation.borrow().children(id).unwrap_or_default()
+    self.relation.children(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -621,7 +619,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relation.borrow().root_id()))
+    ItreeIter::new(self, Some(self.relation.root_id()))
   }
 }
 
@@ -862,11 +860,8 @@ where
       (id, rect_from_layout!(layout))
     };
 
-    {
-      let mut relation = self.relation.borrow_mut();
-      relation.add_root(id, name);
-      relation.set_children_zindex(id, DEFAULT_ZINDEX);
-    }
+    self.relation.add_root(id, name);
+    self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
 
     let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
     let actual_shape = self.calculate_actual_shape(id, &shape);
@@ -914,7 +909,7 @@ where
         // Detect whether TaffyTree currently is on the Z-index layer, clear and
         // re-insert all the children nodes that are in the same layer of
         // current `zindex`.
-        let children_zindex = self.relation.borrow().children_zindex(parent_id);
+        let children_zindex = self.relation.children_zindex(parent_id);
         if children_zindex.map(|z| z != zindex).unwrap_or(true) {
           // Clear all children nodes under this parent.
           ta.set_children(parent_id, &[]);
@@ -927,17 +922,11 @@ where
               ta.add_child(parent_id, child);
             }
           }
-          self
-            .relation
-            .borrow_mut()
-            .set_children_zindex(parent_id, zindex);
+          self.relation.set_children_zindex(parent_id, zindex);
         }
 
         let id = ta.new_with_parent(style, parent_id)?;
-        ta.compute_layout(
-          self.relation.borrow().root_id(),
-          taffy::Size::MAX_CONTENT,
-        )?;
+        ta.compute_layout(self.relation.root_id(), taffy::Size::MAX_CONTENT)?;
         let layout = ta.layout(id)?;
         (id, rect_from_layout!(layout))
       } else {
@@ -946,12 +935,12 @@ where
       }
     };
 
-    self.relation.borrow_mut().add_child(parent_id, id, name);
+    self.relation.add_child(parent_id, id, name);
 
     let result = self.nodes.insert(child_id, child_node);
 
     // Add child to parent, e.g. create edge between child/parent node.
-    self.relation.borrow_mut().add_child(parent_id, child_id);
+    self.relation.add_child(parent_id, child_id);
     result
   }
 
@@ -1029,21 +1018,21 @@ where
   /// If the node `id` is root node and root node cannot be removed.
   pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.relation.borrow().root_id());
+    debug_assert_ne!(id, self.relation.root_id());
     self._internal_check();
 
     // Remove child node from collection.
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
-        debug_assert!(self.relation.borrow().contains_id(id));
+        debug_assert!(self.relation.contains_id(id));
         // Remove edges between `id` and its parent.
-        let relation_removed = self.relation.borrow_mut().remove_child(id);
+        let relation_removed = self.relation.remove_child(id);
         debug_assert!(relation_removed);
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relation.borrow().contains_id(id));
+        debug_assert!(!self.relation.contains_id(id));
         None
       }
     };
