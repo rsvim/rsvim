@@ -164,7 +164,11 @@ impl Ta {
     Ok(removed_id)
   }
 
-  pub fn set_children(&mut self, parent_id: TreeNodeId, children: &[TreeNodeId]) -> TaffyResult<()> {
+  pub fn set_children(
+    &mut self,
+    parent_id: TreeNodeId,
+    children: &[TreeNodeId],
+  ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let children_taids = children
@@ -883,25 +887,21 @@ where
     debug_assert!(self.nodes.contains_key(&parent_id));
 
     if enabled {
+      // Detect whether TaffyTree currently is on the Z-index layer, clear and
+      // re-insert all the children nodes that are in the same layer of
+      // current `zindex`.
       let children_zindex =
         self.relation.borrow().children_zindex(parent_id).unwrap();
       let mut ta = self.ta.borrow_mut();
       if children_zindex != zindex {
-        self.ta
-        if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
-          for ta_child in ta_children_ids {
-            debug_assert!(
-              self.relation.borrow().contains_edge(parent_id, ta_child)
-            );
-            debug_assert!(self.node(ta_child).is_some());
-            ta.remove_child(parent_id, ta_child)?;
-          }
-        }
+        // Clear all children nodes under this parent.
+        ta.set_children(parent_id, &[]);
+
         for child in self.children_ids(parent_id) {
           debug_assert!(self.node(child).is_some());
           let child_zindex = self.node(child).unwrap().zindex();
           if child_zindex == zindex {
-            ta.add_child(parent_id, child, zindex);
+            ta.add_child(parent_id, child);
           }
         }
         self
@@ -909,7 +909,14 @@ where
           .borrow_mut()
           .set_children_zindex(parent_id, zindex);
       } else {
+        self
+          .relation
+          .borrow_mut()
+          .set_children_zindex(parent_id, zindex);
       }
+
+      let id = self.ta.borrow_mut().new_with_parent(style, parent_id)?;
+      self.relation.borrow_mut().add_child(parent_id, id, name);
     } else {
     }
     let child_id = child_node.id();
