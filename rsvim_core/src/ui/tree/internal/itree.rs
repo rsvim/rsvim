@@ -842,10 +842,11 @@ where
     debug_assert!(self.nodes.is_empty());
 
     let (id, shape) = {
-      let id = self.ta.borrow_mut().new_leaf(style)?;
+      let mut ta = self.ta.borrow_mut();
+      let id = ta.new_leaf(style)?;
       let shape = Self::clamp_shape(&shape);
       let actual_shape = rect_as!(shape, u16);
-      self.ta.borrow_mut().compute_layout(
+      ta.compute_layout(
         id,
         taffy::Size {
           width: taffy::AvailableSpace::from_length(
@@ -856,7 +857,7 @@ where
           ),
         },
       )?;
-      let layout = self.ta.borrow().layout(id)?;
+      let layout = ta.layout(id)?;
       (id, rect_from_layout!(layout))
     };
 
