@@ -26,7 +26,6 @@ pub enum RelationshipSetShapePolicy {
 #[derive(Debug, Clone)]
 struct Ta {
   ta: TaffyTree,
-
   // Maps TreeNodeId <==> taffy::NodeId.
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
