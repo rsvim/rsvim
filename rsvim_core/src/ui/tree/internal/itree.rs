@@ -576,6 +576,11 @@ where
   }
 }
 
+/// When insert a node into a tree under a parent node, we will need to adjust
+/// its logical shape and calculate its actual shape. This is because TaffyTree
+/// can calculate larger layout result, which doesn't fit into terminal actual
+/// shape.
+///
 /// Set shape for a node. Since a node is always bounded by its parent, thus
 /// its real shape can be different with the "expecting" shape.
 ///
