@@ -822,7 +822,7 @@ where
     }
   }
 
-  /// Insert root node, without a parent node.
+  /// Add root node, which is the first node in the tree.
   pub fn add_root<F>(
     &mut self,
     shape: IRect,
