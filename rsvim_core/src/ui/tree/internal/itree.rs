@@ -915,6 +915,22 @@ where
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
     self.nodes.insert(id, node);
+
+    // After this new child node is created, it may also affected the other
+    // children nodes under the same parent with the same Z-index, because the
+    // layout is been changed.
+    // Thus we have to update both shape and actual_shape for all the children
+    // nodes under the parent, except this newly created child node because we
+    // just had done it.
+    if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
+      for ta_child in ta_children_ids {
+        // We don't have to update `id` again because we had just done it.
+        if ta_child != id {
+          self._update_shapes_impl(ta_child);
+        }
+      }
+    }
+
     Ok(id)
   }
 
