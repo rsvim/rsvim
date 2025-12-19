@@ -910,7 +910,7 @@ where
 
     let (id, shape) = {
       let mut ta = self.ta.borrow_mut();
-      let id = if enabled {
+      if enabled {
         // Detect whether TaffyTree currently is on the Z-index layer, clear and
         // re-insert all the children nodes that are in the same layer of
         // current `zindex`.
@@ -933,18 +933,17 @@ where
             .set_children_zindex(parent_id, zindex);
         }
 
-        ta.new_with_parent(style, parent_id)?
+        let id = ta.new_with_parent(style, parent_id)?;
+        ta.compute_layout(
+          self.relation.borrow().root_id(),
+          taffy::Size::MAX_CONTENT,
+        )?;
+        let layout = ta.layout(id)?;
+        (id, rect_from_layout!(layout))
       } else {
-        ta.new_leaf(style)?
-      };
-
-      ta.compute_layout(
-        self.relation.borrow().root_id(),
-        taffy::Size::MAX_CONTENT,
-      )?;
-      let layout = ta.layout(id)?;
-
-      (id, rect_from_layout!(layout))
+        // Where the child node is disabled, we simply mock a shape for it.
+        (ta.new_leaf(style)?, *self.node(parent_id).unwrap().shape())
+      }
     };
 
     self.relation.borrow_mut().add_child(parent_id, id, name);
