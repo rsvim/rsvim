@@ -582,11 +582,31 @@ where
 /// shape. We have to bound/truncate a node shape by its parent.
 ///
 /// There are two policies when adjusting a shape:
-/// - Truncate: Just cut all the parts that are out of its parent. For
-///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
-///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
-///   left-top corner must be at least `(0, 0)`, and its bottom-right corner
-///   is at most `(7, 8)`.
+///
+/// ## Truncate
+/// Directly cut off the excess parts that are out of its parent.
+///
+/// For example now we have a parent `P` and a child `C`:
+/// ```
+/// (-6,-3)    (4,-3)
+///    +---------+
+///    |C        |
+///    |  (0,0)  |      (13,0)
+///    |     +---+--------+
+///    |     |   |       P|
+///    +-----+---+        |
+///  (-6,2)  | (4,2)      |
+///          |            |
+///          |            |
+///          +------------+
+///       (0,6)         (13,6)
+/// ```
+///
+/// C shape is `((-6, -3), (4, 2))`, its parent P size is `(13, 6)`. C's
+/// truncated shape is `((0, 0), (4, 2))`.
+///
+/// ## Bound
+///
 /// - Bound: Keep as much as we can, first try to set at most the same size
 ///   as its parent, then move inside its parent thus avoid cutting any parts
 ///   that is out of its parent. For example a node shape is
