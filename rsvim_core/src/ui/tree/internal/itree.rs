@@ -723,7 +723,7 @@ where
   fn calculate_shape(
     &self,
     id: TreeNodeId,
-    shape: IRect,
+    shape: &IRect,
     policy: SetShapePolicy,
   ) -> IRect {
     match self.parent_id(id) {
@@ -751,7 +751,7 @@ where
   pub fn calculate_actual_shape(
     &self,
     id: TreeNodeId,
-    shape: IRect,
+    shape: &IRect,
   ) -> U16Rect {
     match self.parent_id(id) {
       Some(parent_id) => {
