@@ -733,7 +733,7 @@ where
 
     // Iterate all descendants, and update their shape/actual_shape.
     while let Some(id) = q.pop_front() {
-      let layout = self.ta.borrow().layout(id)?;
+      let layout = self.ta.borrow().layout(id)?.clone();
       let policy = self.node(id).unwrap().truncate_policy();
       let shape = rect_from_layout!(layout);
       let shape = self.calculate_shape(id, &shape, policy);
