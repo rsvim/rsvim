@@ -834,6 +834,27 @@ where
     result
   }
 
+  pub fn add_child_with_defaults<F>(
+    &mut self,
+    parent_id: TreeNodeId,
+    style: Style,
+    constructor: F,
+    name: &'static str,
+  ) -> Option<T>
+  where
+    F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T,
+  {
+    self.add_child(
+      parent_id,
+      style,
+      DEFAULT_ZINDEX,
+      DEFAULT_ENABLED,
+      SetShapePolicy::TRUNCATE,
+      constructor,
+      name,
+    )
+  }
+
   /// Insert a node to the tree.
   ///
   /// It works similar to [`insert`](Itree::insert) method, except it limits the inserted node
