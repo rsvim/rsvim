@@ -579,14 +579,9 @@ where
 /// When insert a node into a tree under a parent node, we will need to adjust
 /// its logical shape and calculate its actual shape. This is because TaffyTree
 /// can calculate larger layout result, which doesn't fit into terminal actual
-/// shape.
+/// shape. We have to bound/truncate a node shape by its parent.
 ///
-/// Set shape for a node. Since a node is always bounded by its parent, thus
-/// its real shape can be different with the "expecting" shape.
-///
-/// Returns the "real" shape after adjustment.
-///
-/// There are two policies when calculating the "adjusted" shape:
+/// There are two policies when adjusting a shape:
 /// - Truncate: Just cut all the parts that are out of its parent. For
 ///   example a node shape is `((-5, -10), (5, 9))`, and its parent size is
 ///   `(7, 8)`. This node's truncated shape is `((0, 0), (5, 8))`: its
