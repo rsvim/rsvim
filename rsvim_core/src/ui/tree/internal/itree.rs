@@ -236,7 +236,6 @@ impl Relation {
     }
   }
 
-  #[allow(dead_code)]
   pub fn is_empty(&self) -> bool {
     self.children_ids.is_empty()
   }
@@ -311,27 +310,6 @@ impl Relation {
       self.names.remove(&id);
     }
   }
-
-  // pub fn compute_layout(
-  //   &mut self,
-  //   id: TreeNodeId,
-  //   available_size: taffy::Size<AvailableSpace>,
-  // ) -> TaffyResult<()> {
-  //   self._internal_check();
-  //   self.ta.compute_layout(id, available_size)
-  // }
-  //
-  // pub fn layout(&self, id: TreeNodeId) -> TaffyResult<&Layout> {
-  //   self.ta.layout(id)
-  // }
-  //
-  // pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-  //   self.ta.style(id)
-  // }
-  //
-  // pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-  //   self.ta.set_style(id, style)
-  // }
 
   // pub fn shape(&self, id: TreeNodeId) -> Option<IRect> {
   //   self.shapes.borrow().get(&id).copied()
@@ -665,8 +643,8 @@ where
     &mut self,
     shape: IRect,
     style: Style,
-    zindex: usize,
-    enabled: bool,
+    _zindex: usize,
+    _enabled: bool,
     constructor: F,
     name: &'static str,
   ) -> TaffyResult<Option<T>>
@@ -675,13 +653,13 @@ where
   {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
+    debug_assert!(!self.relation.borrow().is_empty());
 
     let id = self.ta.borrow_mut().new_leaf(style)?;
     self.relation.borrow_mut().add_root(id, name);
-    let node = constructor(id);
-    debug_assert!(self.relation.borrow().contains(root_id));
-    let result = self.nodes.insert(root_id, node);
-    result
+    let node = constructor(id, shape);
+    let result = self.nodes.insert(id, node);
+    Ok(result)
   }
 
   /// Insert a node to the tree, with a parent node.
