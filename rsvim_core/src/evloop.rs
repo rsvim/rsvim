@@ -736,7 +736,7 @@ impl EventLoop {
               .send(JsMessage::FsWriteResp(msg::FsWriteResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(n) => Some(bincode::serialize(n)),
+                  Ok(n) => Some(Ok(bincode::serialize(&n).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
