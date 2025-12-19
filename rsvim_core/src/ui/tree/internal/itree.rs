@@ -987,13 +987,13 @@ where
     debug_assert_ne!(id, self.relation.root_id());
 
     match self.nodes.remove(&id) {
-      Some(removed) => {
-        // Remove node/edge relationship.
-        debug_assert!(self.relation.contains_id(id));
-        // Remove edges between `id` and its parent.
-        let relation_removed = self.relation.remove_child(id);
-        debug_assert!(relation_removed);
-        Some(removed)
+      Some(removed_node) => {
+        debug_assert!(self.relation.contains(id));
+        debug_assert!(self.parent_id(id).is_some());
+        let parent_id = self.parent_id(id).unwrap();
+        self.relation.remove_child(parent_id, id);
+
+        Some(removed_node)
       }
       None => {
         debug_assert!(!self.relation.contains(id));
