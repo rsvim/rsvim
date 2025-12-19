@@ -930,14 +930,23 @@ where
         let layout = ta.layout(id)?;
         (id, rect_from_layout!(layout))
       } else {
-        // Where the child node is disabled, we simply mock a shape for it.
+        // Where the child node is disabled, we simply mock it with parent's
+        // shape.
         (ta.new_leaf(style)?, *self.node(parent_id).unwrap().shape())
       }
     };
 
     self.relation.add_child(parent_id, id, name);
+    self.relation.set_children_zindex(parent_id, zindex);
 
-    let result = self.nodes.insert(child_id, child_node);
+    let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
+    let actual_shape = self.calculate_actual_shape(id, &shape);
+    let mut node = constructor(id, shape, actual_shape);
+    node.set_zindex(DEFAULT_ZINDEX);
+    node.set_enabled(DEFAULT_ENABLED);
+    node.set_shape(shape);
+    node.set_actual_shape(actual_shape);
+    Ok(self.nodes.insert(id, node))
 
     // Add child to parent, e.g. create edge between child/parent node.
     self.relation.add_child(parent_id, child_id);
