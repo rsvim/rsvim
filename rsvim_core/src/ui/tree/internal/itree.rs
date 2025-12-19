@@ -141,7 +141,6 @@ impl Ta {
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
-    child_zindex: usize,
   ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
@@ -163,6 +162,16 @@ impl Ta {
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
     debug_assert_eq!(removed_id, child_id);
     Ok(removed_id)
+  }
+
+  pub fn set_children(&mut self, parent_id: TreeNodeId, children: &[TreeNodeId]) -> TaffyResult<()> {
+    self._internal_check();
+    let parent_taid = self.id2taid.get(&parent_id).unwrap();
+    let children_taids = children
+      .iter()
+      .map(|i| *self.id2taid.get(i).unwrap())
+      .collect_vec();
+    self.ta.set_children(*parent_taid, &children_taids)
   }
 
   pub fn new_with_parent(
@@ -878,6 +887,7 @@ where
         self.relation.borrow().children_zindex(parent_id).unwrap();
       let mut ta = self.ta.borrow_mut();
       if children_zindex != zindex {
+        self.ta
         if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
           for ta_child in ta_children_ids {
             debug_assert!(
