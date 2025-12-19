@@ -493,6 +493,7 @@ impl Relation {
     &mut self,
     parent_id: TreeNodeId,
     id: TreeNodeId,
+    zindex: usize,
     name: &'static str,
   ) {
     self._internal_check();
@@ -876,17 +877,29 @@ where
     if enabled {
       let children_zindex =
         self.relation.borrow().children_zindex(parent_id).unwrap();
+      let mut ta = self.ta.borrow_mut();
       if children_zindex != zindex {
-        let mut ta = self.ta.borrow_mut();
         if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
           for ta_child in ta_children_ids {
             debug_assert!(
               self.relation.borrow().contains_edge(parent_id, ta_child)
             );
             debug_assert!(self.node(ta_child).is_some());
-            let ta_zindex = self.node(ta_child).unwrap().zindex();
+            ta.remove_child(parent_id, ta_child)?;
           }
         }
+        for child in self.children_ids(parent_id) {
+          debug_assert!(self.node(child).is_some());
+          let child_zindex = self.node(child).unwrap().zindex();
+          if child_zindex == zindex {
+            ta.add_child(parent_id, child, zindex);
+          }
+        }
+        self
+          .relation
+          .borrow_mut()
+          .set_children_zindex(parent_id, zindex);
+      } else {
       }
     } else {
     }
