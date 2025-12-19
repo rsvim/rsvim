@@ -945,10 +945,12 @@ where
     Ok(id)
   }
 
-  /// Same with [`add_child`](Itree::add_child) method, with below default
-  /// parameters:
+  /// Same with [`add_child`](Itree::add_child) method, with default values for
+  /// below parameters:
   ///
-  /// - zindex: [DEFAULT_ZINDEX](DEFAULT_ZINDEX)
+  /// - zindex: 0
+  /// - enabled: true
+  /// - policy: Truncate
   pub fn add_child_with_defaults<F>(
     &mut self,
     parent_id: TreeNodeId,
