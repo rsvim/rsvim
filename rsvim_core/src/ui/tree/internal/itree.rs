@@ -140,11 +140,13 @@ impl Ta {
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
+    child_zindex: usize,
   ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let child_taid = self.id2taid.get(&child_id).unwrap();
-    self.ta.add_child(*parent_taid, *child_taid)
+    let result = self.ta.add_child(*parent_taid, *child_taid)?;
+    Ok(result)
   }
 
   pub fn remove_child(
@@ -212,6 +214,15 @@ pub struct Relation {
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 
+  // Maps A parent ==> their children's Z-index value in the
+  // TaffyTree.
+  // NOTE: When a parent has multiple children that have different Z-index
+  // values, TaffyTree cannot calculate correct layout for different Z-index
+  // children. When calculating a layout for all children nodes with `A` 
+  // Z-index value, we will have to remove all other children nodes that are
+  // not `A` Z-index value.
+  children_zindexes: FoldMap<TreeNodeId, usize>,
+
   root_id: TreeNodeId,
 
   #[cfg(debug_assertions)]
@@ -227,6 +238,7 @@ impl Relation {
     Self {
       parent_ids: FoldMap::new(),
       children_ids: FoldMap::new(),
+      children_zindexes: FoldMap::new(),
       root_id: INVALID_ROOT_ID,
       root_changes: 0,
       names: FoldMap::new(),
@@ -430,6 +442,18 @@ impl Relation {
 
   pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
     self.children_ids.get(&id).cloned()
+  }
+
+
+  pub fn children_zindex(&self, id: TreeNodeId) -> Option<usize> {
+    self._internal_check();
+    self.children_zindexes.get(&id).copied()
+  }
+
+
+  pub fn set_children_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+    self._internal_check();
+    self.children_zindexes.insert(id, value)
   }
 
   /// Add the first node, which is the root node.
@@ -817,7 +841,7 @@ where
     policy: SetShapePolicy,
     constructor: F,
     name: &'static str,
-  ) -> Option<T>
+  ) -> TaffyResult<Option<T>>
   where
     F: FnOnce(
       /* id */ TreeNodeId,
@@ -829,6 +853,20 @@ where
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relation.borrow().contains(parent_id));
 
+    if enabled {
+      if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
+        for ta_child in ta_children_ids {
+          debug_assert_eq!(self.parent_id(ta_child), Some(parent_id));
+          debug_assert!(
+            self.children_ids(parent_id).iter().any(|i| *i == ta_child)
+          );
+          debug_assert!(self.node(ta_child).is_some());
+          let ta_zindex = self.node(ta_child).unwrap().zindex();
+          if ta_zindex
+        }
+      }
+    } else {
+    }
     let child_id = child_node.id();
     debug_assert!(self.relation.borrow().contains(child_id));
     let result = self.nodes.insert(child_id, child_node);
