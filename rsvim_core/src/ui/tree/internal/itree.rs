@@ -479,6 +479,7 @@ impl Relation {
 
   pub fn remove_child(&mut self, parent_id: TreeNodeId, id: TreeNodeId) {
     self._internal_check();
+    debug_assert_ne!(id, self.root_id);
     debug_assert!(self.children_ids.contains_key(&parent_id));
     debug_assert!(
       self
