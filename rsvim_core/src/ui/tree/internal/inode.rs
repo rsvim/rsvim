@@ -11,8 +11,6 @@ use std::sync::atomic::Ordering;
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn relationship(&self) -> RelationshipsRc;
-
   fn shape(&self) -> &IRect;
 
   fn set_shape(&mut self, shape: &IRect);
