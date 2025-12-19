@@ -933,7 +933,6 @@ where
     };
 
     self.relation.add_child(parent_id, id, name);
-    self.relation.set_children_zindex(parent_id, zindex);
 
     let shape = self.calculate_shape(id, &shape, policy);
     let actual_shape = self.calculate_actual_shape(id, &shape);
