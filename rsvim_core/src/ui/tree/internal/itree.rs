@@ -218,7 +218,7 @@ pub struct Relation {
   // TaffyTree.
   // NOTE: When a parent has multiple children that have different Z-index
   // values, TaffyTree cannot calculate correct layout for different Z-index
-  // children. When calculating a layout for all children nodes with `A` 
+  // children. When calculating a layout for all children nodes with `A`
   // Z-index value, we will have to remove all other children nodes that are
   // not `A` Z-index value.
   children_zindexes: FoldMap<TreeNodeId, usize>,
@@ -274,6 +274,7 @@ impl Relation {
               .iter()
               .any(|i| *i == id)
           );
+          debug_assert!(self.children_zindexes.contains_key(&parent_id));
         }
         if let Some(children_ids) = self.children_ids.get(&id) {
           for c in children_ids {
@@ -289,6 +290,7 @@ impl Relation {
     } else {
       debug_assert!(self.children_ids.is_empty());
       debug_assert!(self.parent_ids.is_empty());
+      debug_assert!(self.children_zindexes.is_empty());
     }
   }
 
@@ -436,6 +438,21 @@ impl Relation {
     self.children_ids.contains_key(&id)
   }
 
+  pub fn contains_relation(
+    &self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> bool {
+    self.parent_ids.get(&child_id).copied() == Some(parent_id)
+      && self
+        .children_ids
+        .get(&parent_id)
+        .cloned()
+        .unwrap_or_default()
+        .iter()
+        .any(|c| *c == child_id)
+  }
+
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.parent_ids.get(&id).copied()
   }
@@ -449,8 +466,11 @@ impl Relation {
     self.children_zindexes.get(&id).copied()
   }
 
-
-  pub fn set_children_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+  pub fn set_children_zindex(
+    &mut self,
+    id: TreeNodeId,
+    value: usize,
+  ) -> Option<usize> {
     self._internal_check();
     self.children_zindexes.insert(id, value)
   }
@@ -810,7 +830,10 @@ where
 
     let id = self.ta.borrow_mut().new_leaf(style)?;
     self.relation.borrow_mut().add_root(id, name);
-    self.relation.borrow_mut().set_children_zindex(id, DEFAULT_ZINDEX);
+    self
+      .relation
+      .borrow_mut()
+      .set_children_zindex(id, DEFAULT_ZINDEX);
 
     let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
     let actual_shape = self.calculate_actual_shape(id, &shape);
@@ -854,15 +877,19 @@ where
     debug_assert!(self.relation.borrow().contains(parent_id));
 
     if enabled {
-      if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
-        for ta_child in ta_children_ids {
-          debug_assert_eq!(self.parent_id(ta_child), Some(parent_id));
-          debug_assert!(
-            self.children_ids(parent_id).iter().any(|i| *i == ta_child)
-          );
-          debug_assert!(self.node(ta_child).is_some());
-          let ta_zindex = self.node(ta_child).unwrap().zindex();
-          if ta_zindex
+      let children_zindex =
+        self.relation.borrow().children_zindex(parent_id).unwrap();
+      if children_zindex != zindex {
+        let mut ta = self.ta.borrow_mut();
+        if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
+          for ta_child in ta_children_ids {
+            debug_assert_eq!(self.parent_id(ta_child), Some(parent_id));
+            debug_assert!(
+              self.children_ids(parent_id).iter().any(|i| *i == ta_child)
+            );
+            debug_assert!(self.node(ta_child).is_some());
+            let ta_zindex = self.node(ta_child).unwrap().zindex();
+          }
         }
       }
     } else {
