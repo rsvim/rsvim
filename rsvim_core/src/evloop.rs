@@ -684,7 +684,7 @@ impl EventLoop {
               .send(JsMessage::LoadImportResp(msg::LoadImportResp {
                 task_id: req.task_id,
                 maybe_source: match maybe_source {
-                  Ok(source) => Some(bincode::serialize(&source)),
+                  Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
