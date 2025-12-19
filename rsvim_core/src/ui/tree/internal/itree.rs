@@ -876,16 +876,9 @@ where
     Ok(id)
   }
 
-  /// Insert a node to the tree, with a parent node.
-  /// This operation builds the connection between the parent and the inserted
-  /// child.
+  /// Add a child node to the tree, under a parent node.
   ///
-  /// # Returns
-  /// 1. `None` if the `child_node` doesn't exist.
-  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
-  ///
-  /// # Panics
-  /// 1. If `parent_id` doesn't exist.
+  /// Returns the child node ID.
   pub fn add_child<F>(
     &mut self,
     parent_id: TreeNodeId,
