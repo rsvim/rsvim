@@ -822,7 +822,7 @@ where
     }
   }
 
-  /// Add root node, which is the first node in the tree.
+  /// Create a root node, which is the first node in the tree.
   ///
   /// Returns the root node ID.
   pub fn add_root<F>(
@@ -876,7 +876,7 @@ where
     Ok(id)
   }
 
-  /// Add a child node to the tree, under a parent node.
+  /// Create a new child node in the tree, and insert it under a parent node.
   ///
   /// Returns the child node ID.
   pub fn add_child<F>(
@@ -938,14 +938,18 @@ where
     let shape = self.calculate_shape(id, &shape, policy);
     let actual_shape = self.calculate_actual_shape(id, &shape);
     let mut node = constructor(id, shape, actual_shape);
-    node.set_zindex(DEFAULT_ZINDEX);
-    node.set_enabled(DEFAULT_ENABLED);
+    node.set_zindex(zindex);
+    node.set_enabled(enabled);
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
     self.nodes.insert(id, node);
     Ok(id)
   }
 
+  /// Same with [`add_child`](Itree::add_child) method, with below default
+  /// parameters:
+  ///
+  /// - zindex: [DEFAULT_ZINDEX](DEFAULT_ZINDEX)
   pub fn add_child_with_defaults<F>(
     &mut self,
     parent_id: TreeNodeId,
@@ -971,53 +975,9 @@ where
     )
   }
 
-  /// Insert a node to the tree.
+  /// Remove a child node.
   ///
-  /// It works similar to [`insert`](Itree::insert) method, except it limits the inserted node
-  /// boundary based the parent's actual shape. This affects two aspects:
-  ///
-  /// 1. For size, if the inserted `child_node` is larger than the parent actual shape. The size
-  ///    will be truncated to fit its parent. The bottom-right part will be removed, while the
-  ///    top-left part will be keeped.
-  /// 2. For position, if the inserted `child_node` hits the boundary of its parent. It simply
-  ///    stops at its parent boundary.
-  ///
-  /// # Returns
-  /// 1. `None` if the `child_node` doesn't exist.
-  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
-  ///
-  /// # Panics
-  /// 1. If `parent_id` doesn't exist.
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    mut child_node: T,
-  ) -> Option<T> {
-    // Panics if `parent_id` not exists.
-    debug_assert!(self.nodes.contains_key(&parent_id));
-
-    let parent_node = self.nodes.get(&parent_id).unwrap();
-    let parent_actual_size = parent_node.actual_shape().size();
-
-    // Bound child shape
-    child_node.set_shape(&bound_shape(child_node.shape(), &parent_actual_size));
-
-    self.add_child(parent_id, child_node)
-  }
-
-  /// Remove a node by its ID.
-  ///
-  /// This operation breaks the connection between the removed node and its parent.
-  ///
-  /// But the relationships between the removed node and its descendants still remains in the tree,
-  /// thus once you insert it back in the same tree, its descendants are still connected with the removed node.
-  ///
-  /// # Returns
-  /// 1. `None` if node `id` doesn't exist.
-  /// 2. The removed node on the node `id`.
-  ///
-  /// # Panics
-  /// If the node `id` is root node and root node cannot be removed.
+  /// Returns the removed node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relation.root_id());
