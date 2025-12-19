@@ -726,8 +726,10 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  #[inline]
-  fn _update_shapes_impl(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
+  fn _update_node_shapes_impl(
+    &mut self,
+    start_id: TreeNodeId,
+  ) -> TaffyResult<()> {
     let mut q: VecDeque<TreeNodeId> = VecDeque::new();
     q.push_back(start_id);
 
@@ -748,6 +750,24 @@ where
       }
     }
 
+    Ok(())
+  }
+
+  fn _update_node_shapes_except(
+    &mut self,
+    parent_id: TreeNodeId,
+    except_id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    let ta_children_ids = self.ta.borrow().children(parent_id);
+    if let Ok(ta_children_ids) = ta_children_ids {
+      for ta_child in ta_children_ids {
+        // We don't have to update `except_id` again because we had just done
+        // it.
+        if ta_child != except_id {
+          self._update_node_shapes_impl(ta_child)?;
+        }
+      }
+    }
     Ok(())
   }
 
@@ -920,15 +940,7 @@ where
     // Thus we have to update both shape and actual_shape for all the children
     // nodes under the parent, except this newly created child node because we
     // just had done it.
-    let ta_children_ids = self.ta.borrow().children(parent_id);
-    if let Ok(ta_children_ids) = ta_children_ids {
-      for ta_child in ta_children_ids {
-        // We don't have to update `id` again because we had just done it.
-        if ta_child != id {
-          self._update_shapes_impl(ta_child)?;
-        }
-      }
-    }
+    self._update_node_shapes_except(parent_id, id)?;
 
     Ok(id)
   }
@@ -974,8 +986,7 @@ where
     self._internal_check();
     debug_assert_ne!(id, self.relation.root_id());
 
-    // Remove child node from collection.
-    let result = match self.nodes.remove(&id) {
+    match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
         debug_assert!(self.relation.contains_id(id));
@@ -985,13 +996,10 @@ where
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relation.contains_id(id));
+        debug_assert!(!self.relation.contains(id));
         None
       }
-    };
-
-    self._internal_check();
-    result
+    }
   }
 }
 // Insert/Remove }
@@ -1132,7 +1140,7 @@ where
         node.set_shape(&next_shape);
 
         // Update all the descendants attributes under the `id` node.
-        self._update_shapes_impl(id, self.parent_id(id).unwrap());
+        self._update_node_shapes_impl(id, self.parent_id(id).unwrap());
 
         Some(next_shape)
       }
