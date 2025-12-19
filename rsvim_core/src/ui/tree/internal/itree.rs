@@ -448,13 +448,14 @@ impl Relation {
   }
 
   /// Add the first node, which is the root node.
-  pub fn add_root(&mut self, root_id: TreeNodeId, name: &'static str) {
+  pub fn add_root(&mut self, id: TreeNodeId, name: &'static str) {
     self._internal_check();
     debug_assert!(self.children_ids.is_empty());
     debug_assert!(self.parent_ids.is_empty());
     debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
-    self.children_ids.insert(root_id, vec![]);
-    self._set_name(root_id, name);
+    self.children_ids.insert(id, vec![]);
+    self.root_id = id;
+    self._set_name(id, name);
   }
 
   /// Add the a new node ID, which is the child node of a parent node.
