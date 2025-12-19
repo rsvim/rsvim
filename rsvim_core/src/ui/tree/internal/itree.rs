@@ -798,7 +798,6 @@ where
   }
 
   /// Create a root node, which is the first node in the tree.
-  ///
   /// Returns the root node ID.
   pub fn add_root<F>(
     &mut self,
@@ -850,7 +849,6 @@ where
   }
 
   /// Create a new child node in the tree, and insert it under a parent node.
-  ///
   /// Returns the child node ID.
   pub fn add_child<F>(
     &mut self,
@@ -969,9 +967,7 @@ where
     )
   }
 
-  /// Remove a child node.
-  ///
-  /// Returns the removed node.
+  /// Remove a child node, returns the removed node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relation.root_id());
