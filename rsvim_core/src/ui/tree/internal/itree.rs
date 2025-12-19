@@ -917,8 +917,6 @@ where
 
     self.relation.borrow_mut().add_child(parent_id, id, name);
 
-    let child_id = child_node.id();
-    debug_assert!(self.relation.borrow().contains(child_id));
     let result = self.nodes.insert(child_id, child_node);
 
     // Add child to parent, e.g. create edge between child/parent node.
