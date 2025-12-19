@@ -707,7 +707,7 @@ impl EventLoop {
               .send(JsMessage::FsOpenResp(msg::FsOpenResp {
                 task_id: req.task_id,
                 maybe_result: match maybe_result {
-                  Ok(fd) => Some(bincode::serialize(fd)),
+                  Ok(fd) => Some(Ok(bincode::serialize(&fd).unwrap())),
                   Err(e) => Some(Err(e)),
                 },
               }))
