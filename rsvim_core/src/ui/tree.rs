@@ -359,7 +359,7 @@ impl Tree {
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     self.remove_guard(id);
-    self.base.remove(id)
+    self.base.remove_child(id)
   }
 }
 // Insert/Remove }

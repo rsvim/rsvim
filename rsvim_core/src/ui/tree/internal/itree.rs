@@ -661,15 +661,22 @@ where
   }
 
   /// Insert root node, without a parent node.
-  pub fn add_root(&mut self, root_node: T) {
+  pub fn add_root<F>(&mut self, 
+    shape: IRect,
+    style: Style,
+    constructor: F,
+    name: &'static str) -> TaffyResult<Option<T>>
+    where F: FnOnce(/* id */ TreeNodeId, /* shape */ IRect) -> T
+  {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
 
-    let root_id = root_node.id();
+    let id = self.ta.borrow_mut().new_leaf(style)?;
+    self.relation.borrow_mut().add_root(id, name);
+    let node = constructor(id);
     debug_assert!(self.relation.borrow().contains(root_id));
-    self.nodes.insert(root_id, root_node);
-
-    self._internal_check();
+    let result = self.nodes.insert(root_id, node);
+    result
   }
 
   /// Insert a node to the tree, with a parent node.
@@ -682,11 +689,15 @@ where
   ///
   /// # Panics
   /// 1. If `parent_id` doesn't exist.
-  pub fn add_child(
+  pub fn add_child<F>(
     &mut self,
     parent_id: TreeNodeId,
-    child_node: T,
-  ) -> Option<T> {
+    style: Style,
+    constructor: F,
+  ) -> Option<T>
+  where
+    F: FnOnce(||) -> T,
+  {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relation.borrow().contains(parent_id));
@@ -697,8 +708,6 @@ where
 
     // Add child to parent, e.g. create edge between child/parent node.
     self.relation.borrow_mut().add_child(parent_id, child_id);
-
-    self._internal_check();
     result
   }
 

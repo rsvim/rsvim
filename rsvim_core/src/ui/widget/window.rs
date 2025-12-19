@@ -310,7 +310,7 @@ impl Window {
           self.content_id
         );
         self.cursor_id = None;
-        let cursor_node = self.base.remove(cursor_id);
+        let cursor_node = self.base.remove_child(cursor_id);
         debug_assert!(cursor_node.is_some());
         debug_assert!(matches!(
           cursor_node.as_ref().unwrap(),
