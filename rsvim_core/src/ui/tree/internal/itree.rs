@@ -18,6 +18,7 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 
@@ -907,33 +908,42 @@ where
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
 
-    let id = if enabled {
-      // Detect whether TaffyTree currently is on the Z-index layer, clear and
-      // re-insert all the children nodes that are in the same layer of
-      // current `zindex`.
-      let children_zindex = self.relation.borrow().children_zindex(parent_id);
-      if children_zindex.map(|z| z != zindex).unwrap_or(true) {
-        let mut ta = self.ta.borrow_mut();
+    let (id, shape) = {
+      let mut ta = self.ta.borrow_mut();
+      let id = if enabled {
+        // Detect whether TaffyTree currently is on the Z-index layer, clear and
+        // re-insert all the children nodes that are in the same layer of
+        // current `zindex`.
+        let children_zindex = self.relation.borrow().children_zindex(parent_id);
+        if children_zindex.map(|z| z != zindex).unwrap_or(true) {
+          // Clear all children nodes under this parent.
+          ta.set_children(parent_id, &[]);
 
-        // Clear all children nodes under this parent.
-        ta.set_children(parent_id, &[]);
-
-        for child in self.children_ids(parent_id) {
-          debug_assert!(self.node(child).is_some());
-          let child_zindex = self.node(child).unwrap().zindex();
-          if child_zindex == zindex {
-            ta.add_child(parent_id, child);
+          for child in self.children_ids(parent_id) {
+            debug_assert!(self.node(child).is_some());
+            let child_zindex = self.node(child).unwrap().zindex();
+            if child_zindex == zindex {
+              ta.add_child(parent_id, child);
+            }
           }
+          self
+            .relation
+            .borrow_mut()
+            .set_children_zindex(parent_id, zindex);
         }
-        self
-          .relation
-          .borrow_mut()
-          .set_children_zindex(parent_id, zindex);
-      }
 
-      self.ta.borrow_mut().new_with_parent(style, parent_id)?
-    } else {
-      self.ta.borrow_mut().new_leaf(style)?
+        ta.new_with_parent(style, parent_id)?
+      } else {
+        ta.new_leaf(style)?
+      };
+
+      ta.compute_layout(
+        self.relation.borrow().root_id(),
+        taffy::Size::MAX_CONTENT,
+      )?;
+      let layout = ta.layout(id)?;
+
+      (id, rect_from_layout!(layout))
     };
 
     self.relation.borrow_mut().add_child(parent_id, id, name);
