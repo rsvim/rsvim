@@ -733,15 +733,17 @@ where
 
     // Iterate all descendants, and update their shape/actual_shape.
     while let Some(id) = q.pop_front() {
-      let ta = self.ta.borrow();
-      let layout = ta.layout(id)?;
+      let layout = self.ta.borrow().layout(id)?;
+      let policy = self.node(id).unwrap().truncate_policy();
       let shape = rect_from_layout!(layout);
       let shape = self.calculate_shape(id, &shape, policy);
       let actual_shape = self.calculate_actual_shape(id, &shape);
+      self.node_mut(id).unwrap().set_shape(shape);
+      self.node_mut(id).unwrap().set_actual_shape(actual_shape);
 
-      for dnode_id in self.children_ids(cnode_id).iter() {
-        if self.nodes.contains_key(dnode_id) {
-          q.push_back((*dnode_id, cnode_id, cnode_actual_shape));
+      if let Ok(ta_children_ids) = self.ta.borrow().children(id) {
+        for ta_child in ta_children_ids {
+          q.push_back(ta_child);
         }
       }
     }
