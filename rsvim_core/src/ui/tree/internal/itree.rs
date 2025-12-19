@@ -444,7 +444,6 @@ impl Relation {
     self.children_ids.get(&id).cloned()
   }
 
-
   pub fn children_zindex(&self, id: TreeNodeId) -> Option<usize> {
     self._internal_check();
     self.children_zindexes.get(&id).copied()
@@ -811,6 +810,7 @@ where
 
     let id = self.ta.borrow_mut().new_leaf(style)?;
     self.relation.borrow_mut().add_root(id, name);
+    self.relation.borrow_mut().set_children_zindex(id, DEFAULT_ZINDEX);
 
     let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
     let actual_shape = self.calculate_actual_shape(id, &shape);
