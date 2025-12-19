@@ -639,12 +639,11 @@ where
 ///          +------------+
 ///       (0,6)         (13,6)
 /// ```
-///   `((-1, -2), (5, 6))`, and its parent size is `(6, 6)`. This node's
-///   bounded shape is `((0, 0), (6, 6))`: First its original width is 6
-///   which doesn't need to be truncated, but its original height is 8 so
-///   need to be truncated into 6, it becomes `((-1, -2), (5, 4))`. Then move
-///   it into parent to avoid more truncating, so its becomes
-///   `((0, 0), (6, 6))`.
+///
+/// The original C and P in the example is still the same, but C's size is
+/// smaller than P, thus in 1st step we don't need to cut off. Then we can try
+/// to move C inside P (with minimal movement), so the bounded shape of C
+/// becomes `((0, 0), (10, 5))`.
 pub enum SetShapePolicy {
   TRUNCATE,
   BOUND,
