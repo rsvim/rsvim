@@ -457,21 +457,23 @@ impl Relation {
     self._set_name(root_id, name);
   }
 
-  /// Add the a new node, which is the child node of a parent node.
+  /// Add the a new node ID, which is the child node of a parent node.
   ///
   /// NOTE: The parent ID must already exists, the child node ID must not
   /// exist.
-  pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    id: TreeNodeId,
+    name: &'static str,
+  ) {
     self._internal_check();
     debug_assert!(self.children_ids.contains_key(&parent_id));
-    debug_assert!(!self.children_ids.contains_key(&child_id));
-    debug_assert!(!self.parent_ids.contains_key(&child_id));
-    self
-      .children_ids
-      .get_mut(&parent_id)
-      .unwrap()
-      .push(child_id);
-    self.parent_ids.insert(child_id, parent_id);
+    debug_assert!(!self.children_ids.contains_key(&id));
+    debug_assert!(!self.parent_ids.contains_key(&id));
+    self.children_ids.get_mut(&parent_id).unwrap().push(id);
+    self.parent_ids.insert(id, parent_id);
+    self._set_name(id, name);
   }
 
   pub fn remove_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
