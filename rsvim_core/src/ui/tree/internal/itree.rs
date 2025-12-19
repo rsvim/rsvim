@@ -935,7 +935,6 @@ where
 
   /// Same with [`add_child`](Itree::add_child) method, with default values for
   /// below parameters:
-  ///
   /// - zindex: 0
   /// - enabled: true
   /// - policy: Truncate
