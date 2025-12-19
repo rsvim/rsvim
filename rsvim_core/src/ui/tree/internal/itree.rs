@@ -951,6 +951,8 @@ where
   /// - zindex: 0
   /// - enabled: true
   /// - policy: Truncate
+  ///
+  /// NOTE: For cursor widget node, you should always use Bound policy.
   pub fn add_child_with_defaults<F>(
     &mut self,
     parent_id: TreeNodeId,
