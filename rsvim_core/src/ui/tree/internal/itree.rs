@@ -123,6 +123,8 @@ impl Relationships {
         .unwrap()
         .push(child_id);
     }
+
+    self._internal_check();
   }
 
   pub fn add_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
