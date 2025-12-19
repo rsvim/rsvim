@@ -922,7 +922,8 @@ where
     // Thus we have to update both shape and actual_shape for all the children
     // nodes under the parent, except this newly created child node because we
     // just had done it.
-    if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
+    let ta_children_ids = self.ta.borrow().children(parent_id);
+    if let Ok(ta_children_ids) = ta_children_ids {
       for ta_child in ta_children_ids {
         // We don't have to update `id` again because we had just done it.
         if ta_child != id {
