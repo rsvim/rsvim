@@ -823,6 +823,8 @@ where
   }
 
   /// Add root node, which is the first node in the tree.
+  ///
+  /// Returns the root node ID.
   pub fn add_root<F>(
     &mut self,
     shape: IRect,
