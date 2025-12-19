@@ -12,6 +12,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use swc_common::util::map;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
@@ -438,7 +439,7 @@ impl Relation {
     self.children_ids.contains_key(&id)
   }
 
-  pub fn contains_relation(
+  pub fn contains_edge(
     &self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
@@ -447,10 +448,8 @@ impl Relation {
       && self
         .children_ids
         .get(&parent_id)
-        .cloned()
-        .unwrap_or_default()
-        .iter()
-        .any(|c| *c == child_id)
+        .map(|children| children.iter().any(|c| *c == child_id))
+        .unwrap_or(false)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
@@ -826,7 +825,6 @@ where
   {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
-    debug_assert!(!self.relation.borrow().is_empty());
 
     let id = self.ta.borrow_mut().new_leaf(style)?;
     self.relation.borrow_mut().add_root(id, name);
@@ -874,7 +872,6 @@ where
   {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relation.borrow().contains(parent_id));
 
     if enabled {
       let children_zindex =
@@ -883,9 +880,8 @@ where
         let mut ta = self.ta.borrow_mut();
         if let Ok(ta_children_ids) = self.ta.borrow().children(parent_id) {
           for ta_child in ta_children_ids {
-            debug_assert_eq!(self.parent_id(ta_child), Some(parent_id));
             debug_assert!(
-              self.children_ids(parent_id).iter().any(|i| *i == ta_child)
+              self.relation.borrow().contains_edge(parent_id, ta_child)
             );
             debug_assert!(self.node(ta_child).is_some());
             let ta_zindex = self.node(ta_child).unwrap().zindex();
