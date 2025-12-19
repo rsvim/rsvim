@@ -726,8 +726,8 @@ where
     id: TreeNodeId,
     shape: IRect,
     policy: SetShapePolicy,
-  ) -> IRect {
-    match self.parent_id(id) {
+  ) -> Option<IRect> {
+    let result = match self.parent_id(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.node(parent_id)?.actual_shape();
         match policy {
@@ -746,7 +746,8 @@ where
         let max_y = num_traits::clamp_min(shape.max().y, min_y);
         rect!(min_x, min_y, max_x, max_y)
       }
-    }
+    };
+    Some(result)
   }
 
   #[inline]
