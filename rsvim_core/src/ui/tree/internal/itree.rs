@@ -893,7 +893,7 @@ where
     policy: SetShapePolicy,
     constructor: F,
     name: &'static str,
-  ) -> TaffyResult<Option<T>>
+  ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
       /* id */ TreeNodeId,
