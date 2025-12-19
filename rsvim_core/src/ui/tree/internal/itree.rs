@@ -829,7 +829,7 @@ where
     style: Style,
     constructor: F,
     name: &'static str,
-  ) -> TaffyResult<Option<T>>
+  ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
       /* id */ TreeNodeId,
@@ -870,7 +870,8 @@ where
     node.set_enabled(DEFAULT_ENABLED);
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
-    Ok(self.nodes.insert(id, node))
+    self.nodes.insert(id, node);
+    Ok(id)
   }
 
   /// Insert a node to the tree, with a parent node.
@@ -939,18 +940,15 @@ where
     self.relation.add_child(parent_id, id, name);
     self.relation.set_children_zindex(parent_id, zindex);
 
-    let shape = self.calculate_shape(id, &shape, SetShapePolicy::TRUNCATE);
+    let shape = self.calculate_shape(id, &shape, policy);
     let actual_shape = self.calculate_actual_shape(id, &shape);
     let mut node = constructor(id, shape, actual_shape);
     node.set_zindex(DEFAULT_ZINDEX);
     node.set_enabled(DEFAULT_ENABLED);
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
-    Ok(self.nodes.insert(id, node))
-
-    // Add child to parent, e.g. create edge between child/parent node.
-    self.relation.add_child(parent_id, child_id);
-    result
+    self.nodes.insert(id, node);
+    Ok(id)
   }
 
   pub fn add_child_with_defaults<F>(
