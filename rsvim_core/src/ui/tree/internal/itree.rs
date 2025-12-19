@@ -726,7 +726,7 @@ where
     id: TreeNodeId,
     shape: IRect,
     policy: SetShapePolicy,
-  ) -> Option<IRect> {
+  ) -> IRect {
     match self.parent_id(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.node(parent_id)?.actual_shape();
