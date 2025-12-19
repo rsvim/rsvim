@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::internal::inode::DEFAULT_ENABLED;
 use crate::ui::tree::internal::inode::DEFAULT_ZINDEX;
 use crate::ui::tree::internal::inode::next_node_id;
 use crate::ui::tree::internal::shapes::*;
@@ -792,7 +793,7 @@ where
 
     let mut node = constructor(id, shape, actual_shape);
     node.set_zindex(DEFAULT_ZINDEX);
-    node.set_enabled(true);
+    node.set_enabled(DEFAULT_ENABLED);
     let result = self.nodes.insert(id, node);
     Ok(result)
   }

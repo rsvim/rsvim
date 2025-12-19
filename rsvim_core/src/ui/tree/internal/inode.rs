@@ -240,6 +240,8 @@ pub fn next_node_id() -> TreeNodeId {
 flags_impl!(Flags, u8, ENABLED);
 
 pub const DEFAULT_ZINDEX: usize = 0;
+pub const DEFAULT_ENABLED: bool = true;
+
 // enabled=true
 const FLAGS: Flags = Flags::all();
 
