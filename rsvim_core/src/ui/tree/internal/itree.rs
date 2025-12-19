@@ -886,14 +886,14 @@ where
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
 
-    if enabled {
+    let id = if enabled {
       // Detect whether TaffyTree currently is on the Z-index layer, clear and
       // re-insert all the children nodes that are in the same layer of
       // current `zindex`.
-      let children_zindex =
-        self.relation.borrow().children_zindex(parent_id).unwrap();
-      let mut ta = self.ta.borrow_mut();
-      if children_zindex != zindex {
+      let children_zindex = self.relation.borrow().children_zindex(parent_id);
+      if children_zindex.map(|z| z != zindex).unwrap_or(true) {
+        let mut ta = self.ta.borrow_mut();
+
         // Clear all children nodes under this parent.
         ta.set_children(parent_id, &[]);
 
@@ -908,17 +908,15 @@ where
           .relation
           .borrow_mut()
           .set_children_zindex(parent_id, zindex);
-      } else {
-        self
-          .relation
-          .borrow_mut()
-          .set_children_zindex(parent_id, zindex);
       }
 
-      let id = self.ta.borrow_mut().new_with_parent(style, parent_id)?;
-      self.relation.borrow_mut().add_child(parent_id, id, name);
+      self.ta.borrow_mut().new_with_parent(style, parent_id)?
     } else {
-    }
+      self.ta.borrow_mut().new_leaf(style)?
+    };
+
+    self.relation.borrow_mut().add_child(parent_id, id, name);
+
     let child_id = child_node.id();
     debug_assert!(self.relation.borrow().contains(child_id));
     let result = self.nodes.insert(child_id, child_node);
