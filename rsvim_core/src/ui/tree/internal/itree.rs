@@ -476,7 +476,7 @@ impl Relation {
     self._set_name(id, name);
   }
 
-  pub fn remove_child(&mut self, parent_id: TreeNodeId, child_id: TreeNodeId) {
+  pub fn remove_child(&mut self, parent_id: TreeNodeId, id: TreeNodeId) {
     self._internal_check();
     debug_assert!(self.children_ids.contains_key(&parent_id));
     debug_assert!(
@@ -485,18 +485,18 @@ impl Relation {
         .get(&parent_id)
         .unwrap()
         .iter()
-        .any(|i| *i == child_id)
+        .any(|i| *i == id)
     );
-    debug_assert!(self.children_ids.contains_key(&child_id));
-    debug_assert!(self.parent_ids.contains_key(&child_id));
-    debug_assert_eq!(*self.parent_ids.get(&child_id).unwrap(), parent_id);
+    debug_assert!(self.children_ids.contains_key(&id));
+    debug_assert!(self.parent_ids.contains_key(&id));
+    debug_assert_eq!(*self.parent_ids.get(&id).unwrap(), parent_id);
 
     let child_pos = self
       .children_ids
       .get(&parent_id)
       .unwrap()
       .iter()
-      .find_position(|i| **i == child_id)
+      .find_position(|i| **i == id)
       .unwrap()
       .0;
     self
@@ -504,7 +504,7 @@ impl Relation {
       .get_mut(&parent_id)
       .unwrap()
       .remove(child_pos);
-    self.parent_ids.remove(&child_id);
+    self.parent_ids.remove(&id);
   }
 }
 
