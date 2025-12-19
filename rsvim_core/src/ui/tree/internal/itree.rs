@@ -635,14 +635,13 @@ where
 /// When insert a node into a tree under a parent node, we will need to adjust
 /// its logical shape and calculate its actual shape. This is because TaffyTree
 /// can calculate larger layout result, which doesn't fit into terminal actual
-/// shape. We have to bound/truncate a node shape by its parent.
+/// shape. We have to truncate a node shape by its parent.
 ///
-/// There are two policies when adjusting a shape:
+/// There are two policies when truncating a shape:
 ///
-/// ## Truncate
-/// Directly cut off the excess parts that are out of its parent.
+/// ## Neglect
+/// Directly cut off the excess parts that are outside, for example:
 ///
-/// For example:
 /// ```
 /// Original:
 ///
@@ -675,12 +674,14 @@ where
 /// The shape of child C is `((-6, -3), (4, 2))`, its parent P size is
 /// `(13, 6)`. C's truncated shape is `((0, 0), (4, 2))`.
 ///
-/// ## Bound
+/// ## Preserve
 ///
-/// Keep as much as we can: first try to set the child size to be close to the
-/// size of its parent, then move it inside its parent to avoid been cut off.
+/// Preserve child shape as much as we can:
+/// 1. Try to set the child size to be close to the size of its parent.
+/// 2. Move it inside its parent to avoid been cut off, but if there's
+///    still some parts outside, cut them off then.
+/// For example:
 ///
-/// For example a node shape is
 /// ```
 /// Original:
 ///
@@ -697,7 +698,7 @@ where
 ///          +------------+
 ///       (0,6)         (13,6)
 ///
-/// Bounded:
+/// Truncated:
 ///
 ///       (0,0)     (10,0)
 ///          +---+-----+--+ <-- (13,0)
@@ -714,9 +715,9 @@ where
 /// smaller than P, thus in 1st step we don't need to cut off. Then we can try
 /// to move C inside P (with minimal movement), so the bounded shape of C
 /// becomes `((0, 0), (10, 5))`.
-pub enum SetShapePolicy {
-  TRUNCATE,
-  BOUND,
+pub enum TruncatePolicy {
+  NEGLECT,
+  PRESERVE,
 }
 
 // Insert/Remove {
@@ -724,37 +725,14 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Update the `start_id` node attributes, and all the descendants attributes of this node.
-  ///
-  /// Below attributes will be update:
-  ///
-  /// 1. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
-  ///    by parent's boundaries.
-  fn update_descendant_attributes(
-    &mut self,
-    start_id: TreeNodeId,
-    start_parent_id: TreeNodeId,
-  ) {
-    // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
+  #[inline]
+  fn _update_shapes_impl(&mut self, start_id: TreeNodeId) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(start_id);
 
-    // Tuple of (child_id, parent_id, parent_actual_shape)
-    type ChildAndParent = (TreeNodeId, TreeNodeId, U16Rect);
-
-    // trace!("before create que");
-    let mut que: VecDeque<ChildAndParent> = VecDeque::new();
-    let pnode = self.nodes.get_mut(&start_parent_id).unwrap();
-    let pnode_id = pnode.id();
-    let pnode_actual_shape = *pnode.actual_shape();
-    que.push_back((start_id, pnode_id, pnode_actual_shape));
-    // trace!("after create que");
-
-    // Iterate all descendants, and update their attributes.
-    while let Some(child_and_parent) = que.pop_front() {
-      let cnode_id = child_and_parent.0;
-      let _pnode_id = child_and_parent.1;
-      let pnode_actual_shape = child_and_parent.2;
-
-      // trace!("before update cnode attr: {:?}", cnode);
+    // Iterate all descendants, and update their shape/actual_shape.
+    while let Some(id) = q.pop_front() {
+      let layout = ta.layout(id)?;
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
       let cnode_shape = *cnode_ref.shape();
       let cnode_actual_shape =
@@ -770,7 +748,7 @@ where
 
       for dnode_id in self.children_ids(cnode_id).iter() {
         if self.nodes.contains_key(dnode_id) {
-          que.push_back((*dnode_id, cnode_id, cnode_actual_shape));
+          q.push_back((*dnode_id, cnode_id, cnode_actual_shape));
         }
       }
     }
@@ -788,16 +766,16 @@ where
     &self,
     id: TreeNodeId,
     shape: &IRect,
-    policy: SetShapePolicy,
+    policy: TruncatePolicy,
   ) -> IRect {
     match self.parent_id(id) {
       Some(parent_id) => {
         let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
         match policy {
-          SetShapePolicy::TRUNCATE => {
+          TruncatePolicy::NEGLECT => {
             truncate_shape(&shape, &parent_actual_shape.size())
           }
-          SetShapePolicy::BOUND => {
+          TruncatePolicy::PRESERVE => {
             bound_shape(&shape, &parent_actual_shape.size())
           }
         }
@@ -883,7 +861,7 @@ where
     style: Style,
     zindex: usize,
     enabled: bool,
-    policy: SetShapePolicy,
+    policy: TruncatePolicy,
     constructor: F,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId>
@@ -971,7 +949,7 @@ where
       style,
       DEFAULT_ZINDEX,
       DEFAULT_ENABLED,
-      SetShapePolicy::TRUNCATE,
+      TruncatePolicy::NEGLECT,
       constructor,
       name,
     )
@@ -1143,7 +1121,7 @@ where
         node.set_shape(&next_shape);
 
         // Update all the descendants attributes under the `id` node.
-        self.update_descendant_attributes(id, self.parent_id(id).unwrap());
+        self._update_shapes_impl(id, self.parent_id(id).unwrap());
 
         Some(next_shape)
       }
