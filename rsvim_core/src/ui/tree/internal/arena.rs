@@ -196,6 +196,8 @@ impl TaTree {
   }
 }
 
+pub const INVALID_ROOT_ID: TreeNodeId = -1;
+
 #[derive(Debug, Clone)]
 // Maintains all nodes relationship of the tree.
 //
