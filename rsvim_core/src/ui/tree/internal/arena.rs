@@ -297,7 +297,7 @@ pub struct Attributes {
 }
 
 #[derive(Debug, Clone)]
-// Maintains all nodes relationship of the tree.
+// Maintains all nodes relationship of the tree, and all common attributes.
 //
 // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
 // has several limitations when we calculate the layout:
@@ -330,7 +330,6 @@ impl Relation {
     Self {
       parent: FoldMap::new(),
       children: FoldMap::new(),
-      children_zindexes: FoldMap::new(),
       root: INVALID_ROOT_ID,
       root_changes: 0,
       names: FoldMap::new(),
@@ -614,4 +613,10 @@ impl Default for Relation {
   fn default() -> Self {
     Self::new()
   }
+}
+
+#[derive(Debug, Clone)]
+pub struct Arena {
+  ta: Ta,
+  relation: Relation,
 }
