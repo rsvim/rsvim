@@ -124,7 +124,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-
       fn actual_shape(&self) -> &U16Rect {
         match self {
           $(
