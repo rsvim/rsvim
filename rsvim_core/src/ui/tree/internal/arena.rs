@@ -197,33 +197,26 @@ impl TaTree {
 }
 
 #[derive(Debug, Clone)]
+// Maintains all nodes relationship of the tree.
+//
+// NOTE: TaffyTree itself can also maintain parent/child relationship, but it
+// has several limitations when we calculate the layout:
+// 1. It doesn't support hidden/invisble, i.e. when specifying `{display:
+//    None}` for some children nodes, but TaffyTree still calculates these
+//    non-display nodes.
+// 2. It doesn't support Z-index, i.e. we will have to manually remove/insert
+//    some children nodes on TaffyTree for different Z-index.
+// These issues will force us to maintain parent/child relationship by
+// ourself, instead of directly relying on TaffyTree's internal parent/child
+// relationship.
+// For each time, we can only calculate layout for those visible nodes or the
+// nodes that are in same Z-index. For other hidden nodes or the nodes with
+// different Z-index, we need to manually remove them from the parent, thus
+// to make sure the layout calculation is correct.
 pub struct Relation {
-  // Maps parent and children IDs.
-  //
-  // NOTE: TaffyTree itself can also maintain parent/child relationship, but it
-  // has several limitations when calculating the layout:
-  // 1. It doesn't support hidden/invisble, i.e. when specifying `{display:
-  //    None}` for some children nodes, but TaffyTree still calculates these
-  //    non-display nodes.
-  // 2. It doesn't support Z-index, i.e. we will have to manually remove/insert
-  //    some children nodes on TaffyTree for different Z-index.
-  // These issues will force us to maintain parent/child relationship by
-  // ourself, instead of directly relying on TaffyTree's internal parent/child
-  // relationship.
-  // For each time, we can only calculate layout for those visible nodes or the
-  // nodes that are in same Z-index. For other hidden nodes or the nodes with
-  // different Z-index, we need to manually remove them from the parent, thus
-  // to make sure the layout calculation is correct.
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 
-  // Maps A parent ==> their children's Z-index value in the
-  // TaffyTree.
-  // NOTE: When a parent has multiple children that have different Z-index
-  // values, TaffyTree cannot calculate correct layout for different Z-index
-  // children. When calculating a layout for all children nodes with `A`
-  // Z-index value, we will have to remove all other children nodes that are
-  // not `A` Z-index value.
   children_zindexes: FoldMap<TreeNodeId, usize>,
 
   root_id: TreeNodeId,

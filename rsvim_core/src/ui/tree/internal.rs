@@ -1,9 +1,9 @@
 //! Internal tree structure.
 
+pub mod arena;
 pub mod inode;
 pub mod itree;
 pub mod shapes;
-pub mod tatree;
 
 #[cfg(test)]
 mod inode_tests;
