@@ -387,7 +387,7 @@ impl Relation {
   }
 
   /// The first created node will be the root node.
-  pub fn root_id(&self) -> TreeNodeId {
+  pub fn root(&self) -> TreeNodeId {
     self.root
   }
 
@@ -549,20 +549,6 @@ impl Relation {
 
   pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
     self.children.get(&id).cloned()
-  }
-
-  pub fn children_zindex(&self, id: TreeNodeId) -> Option<usize> {
-    self._internal_check();
-    self.children_zindexes.get(&id).copied()
-  }
-
-  pub fn set_children_zindex(
-    &mut self,
-    id: TreeNodeId,
-    value: usize,
-  ) -> Option<usize> {
-    self._internal_check();
-    self.children_zindexes.insert(id, value)
   }
 
   /// Add the first node, which is the root node.
