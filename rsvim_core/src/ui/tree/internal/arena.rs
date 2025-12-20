@@ -2,16 +2,29 @@
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::inode::next_node_id;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::sync::atomic::AtomicI32;
+use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
 use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
+
+pub const INVALID_ROOT_ID: TreeNodeId = -1;
+pub const DEFAULT_ZINDEX: usize = 0;
+pub const DEFAULT_ENABLED: bool = true;
+
+/// Next unique UI widget ID.
+///
+/// NOTE: Start from 100001, so be different from buffer ID.
+pub fn next_node_id() -> TreeNodeId {
+  static VALUE: AtomicI32 = AtomicI32::new(100001);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
 
 #[derive(Debug, Clone)]
 pub struct Ta {
@@ -196,8 +209,6 @@ impl Ta {
     Ok(id)
   }
 }
-
-pub const INVALID_ROOT_ID: TreeNodeId = -1;
 
 #[derive(Debug, Copy, PartialEq, Eq)]
 /// When insert a node into a tree under a parent node, we will need to adjust
