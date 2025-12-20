@@ -6,7 +6,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::inode::DEFAULT_ENABLED;
 use crate::ui::tree::internal::inode::DEFAULT_ZINDEX;
 use crate::ui::tree::internal::shapes::*;
-use crate::ui::tree::internal::tatree::Ta;
+use crate::ui::tree::internal::tatree::TaTree;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -374,7 +374,7 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: FoldMap<TreeNodeId, T>,
   relation: Relation,
-  ta: RefCell<Ta>,
+  ta: RefCell<TaTree>,
 }
 
 impl<T> Itree<T>
@@ -384,7 +384,7 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      ta: RefCell::new(Ta::new()),
+      ta: RefCell::new(TaTree::new()),
       relation: Relation::new(),
     }
   }
