@@ -11,11 +11,9 @@ use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
-use taffy::prelude::FromLength;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
-struct Ta {
+pub struct Ta {
   ta: TaffyTree,
   // Maps TreeNodeId <==> taffy::NodeId.
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,

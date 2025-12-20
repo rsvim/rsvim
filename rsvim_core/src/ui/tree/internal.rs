@@ -3,7 +3,7 @@
 pub mod inode;
 pub mod itree;
 pub mod shapes;
-pub mod ta;
+pub mod tatree;
 
 #[cfg(test)]
 mod inode_tests;
