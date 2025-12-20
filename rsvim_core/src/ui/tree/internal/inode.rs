@@ -3,7 +3,7 @@
 use crate::flags_impl;
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::TruncatePolicy;
+use crate::ui::tree::internal::arena::TruncatePolicy;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
@@ -13,23 +13,13 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn shape(&self) -> &IRect;
 
-  fn set_shape(&mut self, shape: IRect);
-
   fn actual_shape(&self) -> &U16Rect;
-
-  fn set_actual_shape(&mut self, actual_shape: U16Rect);
 
   fn zindex(&self) -> usize;
 
-  fn set_zindex(&mut self, value: usize);
-
   fn enabled(&self) -> bool;
 
-  fn set_enabled(&mut self, value: bool);
-
   fn truncate_policy(&self) -> TruncatePolicy;
-
-  fn set_truncate_policy(&mut self, value: TruncatePolicy) -> TruncatePolicy;
 }
 
 /// Generate getter/setter for `Inode`.
@@ -45,43 +35,20 @@ macro_rules! inode_impl {
         self.$base_name.shape()
       }
 
-      fn set_shape(&mut self, shape: IRect) {
-        self.$base_name.set_shape(shape);
-      }
-
       fn actual_shape(&self) -> &U16Rect {
         self.$base_name.actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: U16Rect) {
-        self.$base_name.set_actual_shape(actual_shape)
       }
 
       fn zindex(&self) -> usize {
         self.$base_name.zindex()
       }
 
-      fn set_zindex(&mut self, value: usize) {
-        self.$base_name.set_zindex(value);
-      }
-
       fn enabled(&self) -> bool {
         self.$base_name.enabled()
       }
 
-      fn set_enabled(&mut self, value: bool) {
-        self.$base_name.set_enabled(value);
-      }
-
       fn truncate_policy(&self) -> TruncatePolicy {
         self.$base_name.truncate_policy()
-      }
-
-      fn set_truncate_policy(
-        &mut self,
-        value: TruncatePolicy,
-      ) -> TruncatePolicy {
-        self.$base_name.set_truncate_policy(value)
       }
     }
   };
@@ -104,28 +71,12 @@ macro_rules! inode_itree_impl {
           .shape()
       }
 
-      fn set_shape(&mut self, shape: IRect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_shape(shape);
-      }
-
       fn actual_shape(&self) -> &U16Rect {
         self
           .$base_name
           .node(self.$base_name.root_id())
           .unwrap()
           .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: U16Rect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
       }
 
       fn zindex(&self) -> usize {
@@ -136,14 +87,6 @@ macro_rules! inode_itree_impl {
           .zindex()
       }
 
-      fn set_zindex(&mut self, value: usize) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_zindex(value);
-      }
-
       fn enabled(&self) -> bool {
         self
           .$base_name
@@ -152,31 +95,12 @@ macro_rules! inode_itree_impl {
           .enabled()
       }
 
-      fn set_enabled(&mut self, value: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_enabled(value);
-      }
-
       fn truncate_policy(&self) -> TruncatePolicy {
         self
           .$base_name
           .node_mut(self.$base_name.root_id())
           .unwrap()
           .truncate_policy()
-      }
-
-      fn set_truncate_policy(
-        &mut self,
-        value: TruncatePolicy,
-      ) -> TruncatePolicy {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_truncate_policy(value)
       }
     }
   };
