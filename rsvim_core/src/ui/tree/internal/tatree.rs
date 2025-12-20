@@ -13,14 +13,14 @@ use taffy::TaffyResult;
 use taffy::TaffyTree;
 
 #[derive(Debug, Clone)]
-pub struct Ta {
+pub struct TaTree {
   ta: TaffyTree,
   // Maps TreeNodeId <==> taffy::NodeId.
   id2taid: FoldMap<TreeNodeId, taffy::NodeId>,
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 }
 
-impl Ta {
+impl TaTree {
   pub fn new() -> Self {
     Self {
       ta: TaffyTree::new(),
