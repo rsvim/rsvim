@@ -198,7 +198,7 @@ impl Ta {
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, PartialEq, Eq)]
 /// When insert a node into a tree under a parent node, we will need to adjust
 /// its logical shape and calculate its actual shape. This is because TaffyTree
 /// can calculate larger layout result, which doesn't fit into terminal actual
@@ -287,7 +287,7 @@ pub enum TruncatePolicy {
   PRESERVE,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, PartialEq, Eq)]
 /// Common attribute of a node.
 pub struct Attribute {
   pub shape: IRect,
