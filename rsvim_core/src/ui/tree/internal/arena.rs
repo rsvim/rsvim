@@ -316,15 +316,10 @@ pub struct Attributes {
 // different Z-index, we need to manually remove them from the parent, thus
 // to make sure the layout calculation is correct.
 pub struct Relation {
-  parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
-  children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
-
-  // Maps parent node ID ===> the Z-index of all its current children attached
-  // in the TaffyTree.
-  children_zindexes: FoldMap<TreeNodeId, usize>,
+  parent: FoldMap<TreeNodeId, TreeNodeId>,
+  children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
   attributes: FoldMap<TreeNodeId, Attributes>,
-
-  root_id: TreeNodeId,
+  root: TreeNodeId,
 
   #[cfg(debug_assertions)]
   root_changes: usize,
@@ -335,22 +330,22 @@ pub struct Relation {
 impl Relation {
   pub fn new() -> Self {
     Self {
-      parent_ids: FoldMap::new(),
-      children_ids: FoldMap::new(),
+      parent: FoldMap::new(),
+      children: FoldMap::new(),
       children_zindexes: FoldMap::new(),
-      root_id: INVALID_ROOT_ID,
+      root: INVALID_ROOT_ID,
       root_changes: 0,
       names: FoldMap::new(),
     }
   }
 
   pub fn is_empty(&self) -> bool {
-    self.children_ids.is_empty()
+    self.children.is_empty()
   }
 
   #[allow(dead_code)]
   pub fn len(&self) -> usize {
-    self.children_ids.len()
+    self.children.len()
   }
 
   #[cfg(not(test))]
@@ -358,16 +353,16 @@ impl Relation {
 
   #[cfg(test)]
   fn _internal_check(&self) {
-    if self.root_id != INVALID_ROOT_ID {
-      debug_assert!(!self.children_ids.is_empty());
+    if self.root != INVALID_ROOT_ID {
+      debug_assert!(!self.children.is_empty());
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-      q.push_back(self.root_id);
+      q.push_back(self.root);
       while let Some(id) = q.pop_front() {
-        if let Some(parent_id) = self.parent_ids.get(&id) {
-          debug_assert!(self.children_ids.contains_key(&parent_id));
+        if let Some(parent_id) = self.parent.get(&id) {
+          debug_assert!(self.children.contains_key(&parent_id));
           debug_assert!(
             self
-              .children_ids
+              .children
               .get(&parent_id)
               .unwrap()
               .iter()
@@ -375,10 +370,10 @@ impl Relation {
           );
           debug_assert!(self.children_zindexes.contains_key(&parent_id));
         }
-        if let Some(children_ids) = self.children_ids.get(&id) {
+        if let Some(children_ids) = self.children.get(&id) {
           for c in children_ids {
-            debug_assert!(self.parent_ids.contains_key(c));
-            debug_assert_eq!(*self.parent_ids.get(c).unwrap(), id);
+            debug_assert!(self.parent.contains_key(c));
+            debug_assert_eq!(*self.parent.get(c).unwrap(), id);
           }
 
           for c in children_ids.iter() {
@@ -387,21 +382,21 @@ impl Relation {
         }
       }
     } else {
-      debug_assert!(self.children_ids.is_empty());
-      debug_assert!(self.parent_ids.is_empty());
+      debug_assert!(self.children.is_empty());
+      debug_assert!(self.parent.is_empty());
       debug_assert!(self.children_zindexes.is_empty());
     }
   }
 
   /// The first created node will be the root node.
   pub fn root_id(&self) -> TreeNodeId {
-    self.root_id
+    self.root
   }
 
   fn _set_root(&mut self, id: TreeNodeId) {
-    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
+    debug_assert_eq!(self.root, INVALID_ROOT_ID);
     debug_assert_eq!(self.root_changes, 0);
-    self.root_id = id;
+    self.root = id;
     if cfg!(debug_assertions) {
       self.root_changes += 1;
       debug_assert!(self.root_changes <= 1);
@@ -534,7 +529,7 @@ impl Relation {
   // }
 
   pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.children_ids.contains_key(&id)
+    self.children.contains_key(&id)
   }
 
   pub fn contains_edge(
@@ -542,20 +537,20 @@ impl Relation {
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
   ) -> bool {
-    self.parent_ids.get(&child_id).copied() == Some(parent_id)
+    self.parent.get(&child_id).copied() == Some(parent_id)
       && self
-        .children_ids
+        .children
         .get(&parent_id)
         .map(|children| children.iter().any(|c| *c == child_id))
         .unwrap_or(false)
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.parent_ids.get(&id).copied()
+    self.parent.get(&id).copied()
   }
 
   pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
-    self.children_ids.get(&id).cloned()
+    self.children.get(&id).cloned()
   }
 
   pub fn children_zindex(&self, id: TreeNodeId) -> Option<usize> {
@@ -575,10 +570,10 @@ impl Relation {
   /// Add the first node, which is the root node.
   pub fn add_root(&mut self, id: TreeNodeId, name: &'static str) {
     self._internal_check();
-    debug_assert!(self.children_ids.is_empty());
-    debug_assert!(self.parent_ids.is_empty());
-    debug_assert_eq!(self.root_id, INVALID_ROOT_ID);
-    self.children_ids.insert(id, vec![]);
+    debug_assert!(self.children.is_empty());
+    debug_assert!(self.parent.is_empty());
+    debug_assert_eq!(self.root, INVALID_ROOT_ID);
+    self.children.insert(id, vec![]);
     self._set_root(id);
     self._set_name(id, name);
   }
@@ -594,44 +589,40 @@ impl Relation {
     name: &'static str,
   ) {
     self._internal_check();
-    debug_assert!(self.children_ids.contains_key(&parent_id));
-    debug_assert!(!self.children_ids.contains_key(&id));
-    debug_assert!(!self.parent_ids.contains_key(&id));
-    self.children_ids.get_mut(&parent_id).unwrap().push(id);
-    self.parent_ids.insert(id, parent_id);
+    debug_assert!(self.children.contains_key(&parent_id));
+    debug_assert!(!self.children.contains_key(&id));
+    debug_assert!(!self.parent.contains_key(&id));
+    self.children.get_mut(&parent_id).unwrap().push(id);
+    self.parent.insert(id, parent_id);
     self._set_name(id, name);
   }
 
   pub fn remove_child(&mut self, parent_id: TreeNodeId, id: TreeNodeId) {
     self._internal_check();
-    debug_assert_ne!(id, self.root_id);
-    debug_assert!(self.children_ids.contains_key(&parent_id));
+    debug_assert_ne!(id, self.root);
+    debug_assert!(self.children.contains_key(&parent_id));
     debug_assert!(
       self
-        .children_ids
+        .children
         .get(&parent_id)
         .unwrap()
         .iter()
         .any(|i| *i == id)
     );
-    debug_assert!(self.children_ids.contains_key(&id));
-    debug_assert!(self.parent_ids.contains_key(&id));
-    debug_assert_eq!(*self.parent_ids.get(&id).unwrap(), parent_id);
+    debug_assert!(self.children.contains_key(&id));
+    debug_assert!(self.parent.contains_key(&id));
+    debug_assert_eq!(*self.parent.get(&id).unwrap(), parent_id);
 
     let child_pos = self
-      .children_ids
+      .children
       .get(&parent_id)
       .unwrap()
       .iter()
       .find_position(|i| **i == id)
       .unwrap()
       .0;
-    self
-      .children_ids
-      .get_mut(&parent_id)
-      .unwrap()
-      .remove(child_pos);
-    self.parent_ids.remove(&id);
+    self.children.get_mut(&parent_id).unwrap().remove(child_pos);
+    self.parent.remove(&id);
   }
 }
 
