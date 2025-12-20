@@ -319,7 +319,10 @@ pub struct Relation {
   parent_ids: FoldMap<TreeNodeId, TreeNodeId>,
   children_ids: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
 
+  // Maps parent node ID ===> the Z-index of all its current children attached
+  // in the TaffyTree.
   children_zindexes: FoldMap<TreeNodeId, usize>,
+  attributes: FoldMap<TreeNodeId, Attributes>,
 
   root_id: TreeNodeId,
 
