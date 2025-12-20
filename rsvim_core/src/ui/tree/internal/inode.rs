@@ -116,7 +116,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-
       fn shape(&self) -> &IRect {
         match self {
           $(
@@ -134,7 +133,6 @@ macro_rules! inode_dispatcher {
         }
       }
 
-
       fn zindex(&self) -> usize {
         match self {
           $(
@@ -147,14 +145,6 @@ macro_rules! inode_dispatcher {
         match self {
           $(
             $enum::$variant(e) => e.enabled(),
-          )*
-        }
-      }
-
-      fn set_enabled(&mut self, value: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_enabled(value),
           )*
         }
       }
