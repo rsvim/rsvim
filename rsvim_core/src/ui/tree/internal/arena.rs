@@ -288,7 +288,8 @@ pub enum TruncatePolicy {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Attributes {
+/// Common attribute of a node.
+pub struct Attribute {
   pub shape: IRect,
   pub actual_shape: U16Rect,
   pub zindex: usize,
@@ -316,7 +317,7 @@ pub struct Attributes {
 pub struct Relation {
   parent: FoldMap<TreeNodeId, TreeNodeId>,
   children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
-  attributes: FoldMap<TreeNodeId, Attributes>,
+  attributes: FoldMap<TreeNodeId, Attribute>,
   root: TreeNodeId,
 
   #[cfg(debug_assertions)]
@@ -330,8 +331,11 @@ impl Relation {
     Self {
       parent: FoldMap::new(),
       children: FoldMap::new(),
+      attributes: FoldMap::new(),
       root: INVALID_ROOT_ID,
+      #[cfg(debug_assertions)]
       root_changes: 0,
+      #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
   }
@@ -548,6 +552,10 @@ impl Relation {
 
   pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
     self.children.get(&id).cloned()
+  }
+
+  pub fn attribute(&self, id: TreeNodeId) -> Option<Attribute> {
+    self.attributes.get(&id).copied()
   }
 
   /// Add the first node, which is the root node.
