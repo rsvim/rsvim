@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::inode::next_node_id;
 use itertools::Itertools;
+use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
 use taffy::AvailableSpace;
@@ -624,7 +625,9 @@ impl Default for Relation {
 }
 
 #[derive(Debug, Clone)]
-pub struct Arena {
+pub struct ItreeArena {
   ta: Ta,
   relation: Relation,
 }
+
+rc_refcell_ptr!(ItreeArena);
