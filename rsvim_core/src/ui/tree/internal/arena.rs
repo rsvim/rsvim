@@ -1,9 +1,7 @@
-//! Internal tree arena (I don't know how to name it).
+//! Internal tree arena (ok I don't know how to name it).
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::inode::DEFAULT_ENABLED;
-use crate::ui::tree::internal::inode::DEFAULT_ZINDEX;
 use crate::ui::tree::internal::inode::next_node_id;
 use itertools::Itertools;
 use std::fmt::Debug;
