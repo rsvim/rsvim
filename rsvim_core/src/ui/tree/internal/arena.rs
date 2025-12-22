@@ -218,7 +218,7 @@ impl Ta {
 ///
 /// There are two policies when truncating a shape:
 ///
-/// ## Neglect
+/// ## Brutal
 /// Directly cut off the excess parts that are outside, for example:
 ///
 /// ```
@@ -253,9 +253,9 @@ impl Ta {
 /// The shape of child C is `((-6, -3), (4, 2))`, its parent P size is
 /// `(13, 6)`. C's truncated shape is `((0, 0), (4, 2))`.
 ///
-/// ## Preserve
+/// ## Reserved
 ///
-/// Preserve child shape as much as we can:
+/// Reserve child shape as much as we can:
 /// 1. Try to set the child size to be close to the size of its parent.
 /// 2. Move it inside its parent to avoid been cut off, but if there's
 ///    still some parts outside, cut them off then.
@@ -295,8 +295,8 @@ impl Ta {
 /// to move C inside P (with minimal movement), so the bounded shape of C
 /// becomes `((0, 0), (10, 5))`.
 pub enum TruncatePolicy {
-  NEGLECT,
-  PRESERVE,
+  BRUTAL,
+  RESERVED,
 }
 
 #[derive(Debug, Copy, PartialEq, Eq)]
