@@ -847,36 +847,11 @@ impl TreeArena {
     Ok(id)
   }
 
-  /// Same with [`add_child`](ItreeArena::add_child) method, with default
-  /// values for below parameters:
-  ///
-  /// - zindex: 0
-  /// - enabled: true
-  /// - policy: Truncate
-  ///
-  /// NOTE: For cursor widget node, you should always use the RESERVED policy
-  /// to ensure it is inside its parent and avoid been cut off.
-  pub fn add_child_with_defaults(
-    &mut self,
-    parent_id: TreeNodeId,
-    style: Style,
-    name: &'static str,
-  ) -> TaffyResult<TreeNodeId> {
-    self.add_child(
-      parent_id,
-      style,
-      DEFAULT_ZINDEX,
-      DEFAULT_ENABLED,
-      TruncatePolicy::BRUTAL,
-      name,
-    )
-  }
-
   /// Remove a child node.
   /// Returns the removed node.
   ///
   /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) {
+  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<()> {
     self._internal_check();
     debug_assert_ne!(id, self.relation.root());
     debug_assert!(self.relation.contains(id));
@@ -885,5 +860,13 @@ impl TreeArena {
     self.ta.remove_child(parent_id, id);
     self.relation.remove_child(parent_id, id);
     self.relation.remove_attribute(id);
+
+    // After this child node is removed, it may also affected the other
+    // children nodes under the same parent with the same Z-index, because the
+    // layout is been changed.
+    // Thus we have to update both shape and actual_shape for all the children
+    // nodes under the parent, except this newly created child node because we
+    // just had done it.
+    self._update_shapes_for(parent_id)?;
   }
 }
