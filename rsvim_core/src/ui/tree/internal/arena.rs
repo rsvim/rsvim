@@ -554,11 +554,12 @@ impl TreeArena {
             debug_assert!(self.relation.contains(ta_child));
             debug_assert!(self.relation.attribute(ta_child).is_some());
             if ta_zindex.is_none() {
-              ta_zindex = self.relation.attribute(ta_child).unwrap().zindex;
+              ta_zindex =
+                Some(self.relation.attribute(ta_child).unwrap().zindex);
             } else {
               debug_assert_eq!(
                 ta_zindex,
-                self.relation.attribute(ta_child).unwrap().zindex
+                Some(self.relation.attribute(ta_child).unwrap().zindex)
               );
             }
             q.push_back(ta_child);
