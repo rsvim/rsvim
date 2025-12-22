@@ -691,6 +691,8 @@ impl ItreArena {
     Ok(())
   }
 
+  /// Calculate (or we should say: adjust) the shape of a node, by its expected
+  /// shape and the policy it follows.
   fn calculate_shape(
     &self,
     id: TreeNodeId,
@@ -713,6 +715,8 @@ impl ItreArena {
     }
   }
 
+  /// Calculate the actual_shape of a node, by its adjusted shape and its
+  /// parent's actual_shape.
   pub fn calculate_actual_shape(
     &self,
     id: TreeNodeId,
@@ -726,6 +730,191 @@ impl ItreArena {
       None => {
         let shape = shapes::clamp_shape(shape);
         rect_as!(shape, u16)
+      }
+    }
+  }
+
+  /// Create a root node, which is the first node in the tree.
+  /// Returns the root node ID.
+  pub fn add_root<F>(
+    &mut self,
+    actual_shape: U16Rect,
+    style: Style,
+    constructor: F,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId>
+  where
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
+  {
+    self._internal_check();
+    debug_assert!(self.nodes.is_empty());
+
+    let (id, shape) = {
+      let mut ta = self.ta.borrow_mut();
+      let id = ta.new_leaf(style)?;
+      ta.compute_layout(
+        id,
+        taffy::Size {
+          width: taffy::AvailableSpace::from_length(
+            actual_shape.size().width(),
+          ),
+          height: taffy::AvailableSpace::from_length(
+            actual_shape.size().height(),
+          ),
+        },
+      )?;
+      let layout = ta.layout(id)?;
+      let shape = rect_from_layout!(layout);
+      let shape = Self::clamp_shape(&shape);
+      (id, shape)
+    };
+
+    self.relation.add_root(id, name);
+    self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
+
+    let mut node = constructor(id, shape, actual_shape);
+    node.set_zindex(DEFAULT_ZINDEX);
+    node.set_enabled(DEFAULT_ENABLED);
+    node.set_shape(shape);
+    node.set_actual_shape(actual_shape);
+    self.nodes.insert(id, node);
+    Ok(id)
+  }
+
+  /// Create a new child node in the tree, and insert it under a parent node.
+  /// Returns the child node ID.
+  pub fn add_child<F>(
+    &mut self,
+    parent_id: TreeNodeId,
+    style: Style,
+    zindex: usize,
+    enabled: bool,
+    policy: TruncatePolicy,
+    constructor: F,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId>
+  where
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
+  {
+    self._internal_check();
+    debug_assert!(self.nodes.contains_key(&parent_id));
+
+    let (id, shape) = {
+      let mut ta = self.ta.borrow_mut();
+      if enabled {
+        // Detect whether TaffyTree currently is on the Z-index layer, clear and
+        // re-insert all the children nodes that are in the same layer of
+        // current `zindex`.
+        let children_zindex = self.relation.children_zindex(parent_id);
+        if children_zindex.is_none() || children_zindex.unwrap() != zindex {
+          // Clear all children nodes under this parent.
+          ta.set_children(parent_id, &[]);
+
+          // Re-inesrt all children nodes equals to the `zindex` to this parent.
+          for child in self.children_ids(parent_id) {
+            debug_assert!(self.node(child).is_some());
+            let child_zindex = self.node(child).unwrap().zindex();
+            if child_zindex == zindex {
+              ta.add_child(parent_id, child);
+            }
+          }
+          self.relation.set_children_zindex(parent_id, zindex);
+        }
+
+        let id = ta.new_with_parent(style, parent_id)?;
+        ta.compute_layout(self.relation.root_id(), taffy::Size::MAX_CONTENT)?;
+        let layout = ta.layout(id)?;
+        (id, rect_from_layout!(layout))
+      } else {
+        // Where the child node is disabled, we simply mock it with parent's
+        // shape.
+        (ta.new_leaf(style)?, *self.node(parent_id).unwrap().shape())
+      }
+    };
+
+    self.relation.add_child(parent_id, id, name);
+
+    let shape = self.calculate_shape(id, &shape, policy);
+    let actual_shape = self.calculate_actual_shape(id, &shape);
+    let mut node = constructor(id, shape, actual_shape);
+    node.set_zindex(zindex);
+    node.set_enabled(enabled);
+    node.set_shape(shape);
+    node.set_actual_shape(actual_shape);
+    self.nodes.insert(id, node);
+
+    // After this new child node is created, it may also affected the other
+    // children nodes under the same parent with the same Z-index, because the
+    // layout is been changed.
+    // Thus we have to update both shape and actual_shape for all the children
+    // nodes under the parent, except this newly created child node because we
+    // just had done it.
+    self._update_node_shapes_except(parent_id, id)?;
+
+    Ok(id)
+  }
+
+  /// Same with [`add_child`](Itree::add_child) method, with default values for
+  /// below parameters:
+  /// - zindex: 0
+  /// - enabled: true
+  /// - policy: Truncate
+  ///
+  /// NOTE: For cursor widget node, you should always use the bound policy to
+  /// ensure it is inside its parent and avoid been cut off.
+  pub fn add_child_with_defaults<F>(
+    &mut self,
+    parent_id: TreeNodeId,
+    style: Style,
+    constructor: F,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId>
+  where
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
+  {
+    self.add_child(
+      parent_id,
+      style,
+      DEFAULT_ZINDEX,
+      DEFAULT_ENABLED,
+      TruncatePolicy::NEGLECT,
+      constructor,
+      name,
+    )
+  }
+
+  /// Remove a child node.
+  /// Returns the removed node.
+  ///
+  /// NOTE: Never remove the root node.
+  pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
+    self._internal_check();
+    debug_assert_ne!(id, self.relation.root_id());
+
+    match self.nodes.remove(&id) {
+      Some(removed_node) => {
+        debug_assert!(self.relation.contains(id));
+        debug_assert!(self.parent_id(id).is_some());
+        let parent_id = self.parent_id(id).unwrap();
+        self.relation.remove_child(parent_id, id);
+
+        Some(removed_node)
+      }
+      None => {
+        debug_assert!(!self.relation.contains(id));
+        None
       }
     }
   }
