@@ -805,8 +805,8 @@ impl TreeArena {
   /// - enabled: true
   /// - policy: Truncate
   ///
-  /// NOTE: For cursor widget node, you should always use the bound policy to
-  /// ensure it is inside its parent and avoid been cut off.
+  /// NOTE: For cursor widget node, you should always use the RESERVED policy
+  /// to ensure it is inside its parent and avoid been cut off.
   pub fn add_child_with_defaults(
     &mut self,
     parent_id: TreeNodeId,
