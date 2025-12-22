@@ -739,20 +739,21 @@ impl TreeArena {
           DEFAULT_ZINDEX
         };
 
-        let children_zindex = self.relation.children_zindex(parent_id);
-        if children_zindex.is_none() || children_zindex.unwrap() != zindex {
+        if !has_ta_children || ta_children_zindex != zindex {
           // Clear all children nodes under this parent.
-          ta.set_children(parent_id, &[]);
+          self.ta.set_children(parent_id, &[]);
 
           // Re-inesrt all children nodes equals to the `zindex` to this parent.
-          for child in self.children(parent_id) {
-            debug_assert!(self.relation.contains(child));
-            let child_zindex = self.attribute(child).unwrap().zindex;
-            if child_zindex == zindex {
-              ta.add_child(parent_id, child);
+          if let Some(children) = self.relation.children(parent_id) {
+            for child in children {
+              debug_assert!(self.relation.contains(child));
+              let child_zindex = self.attribute(child).unwrap().zindex;
+              if child_zindex == zindex {
+                ta.add_child(parent_id, child);
+              }
             }
+            self.relation.set_children_zindex(parent_id, zindex);
           }
-          self.relation.set_children_zindex(parent_id, zindex);
         }
 
         let id = ta.new_with_parent(style, parent_id)?;
