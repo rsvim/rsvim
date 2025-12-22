@@ -642,7 +642,7 @@ impl ItreArena {
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    debug_assert!(self.nodes.is_empty());
+    debug_assert!(self.relation.is_empty());
 
     let (id, shape) = {
       let mut ta = self.ta.borrow_mut();
@@ -690,7 +690,7 @@ impl ItreArena {
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    debug_assert!(self.nodes.contains_key(&parent_id));
+    debug_assert!(self.relation.contains(&parent_id));
 
     let (id, shape) = {
       let mut ta = self.ta.borrow_mut();
@@ -705,8 +705,8 @@ impl ItreArena {
 
           // Re-inesrt all children nodes equals to the `zindex` to this parent.
           for child in self.children(parent_id) {
-            debug_assert!(self.node(child).is_some());
-            let child_zindex = self.node(child).unwrap().zindex();
+            debug_assert!(self.relation.contains(child));
+            let child_zindex = self.attribute(child).unwrap().zindex;
             if child_zindex == zindex {
               ta.add_child(parent_id, child);
             }
