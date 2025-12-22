@@ -830,9 +830,8 @@ impl TreeArena {
   pub fn remove_child(&mut self, id: TreeNodeId) {
     self._internal_check();
     debug_assert_ne!(id, self.relation.root());
-
     debug_assert!(self.relation.contains(id));
-    debug_assert!(self.parent(id).is_some());
+    debug_assert!(self.relation.parent(id).is_some());
     let parent_id = self.parent(id).unwrap();
     self.relation.remove_child(parent_id, id);
   }
