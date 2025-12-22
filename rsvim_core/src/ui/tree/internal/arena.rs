@@ -746,7 +746,7 @@ impl ItreArena {
     Ok(id)
   }
 
-  /// Same with [`add_child`](Itree::add_child) method, with default values for
+  /// Same with [`add_child`](ItreeArena::add_child) method, with default values for
   /// below parameters:
   /// - zindex: 0
   /// - enabled: true
@@ -754,27 +754,18 @@ impl ItreArena {
   ///
   /// NOTE: For cursor widget node, you should always use the bound policy to
   /// ensure it is inside its parent and avoid been cut off.
-  pub fn add_child_with_defaults<F>(
+  pub fn add_child_with_defaults(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
-    constructor: F,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId>
-  where
-    F: FnOnce(
-      /* id */ TreeNodeId,
-      /* shape */ IRect,
-      /* actual_shape */ U16Rect,
-    ) -> T,
-  {
+  ) -> TaffyResult<TreeNodeId> {
     self.add_child(
       parent_id,
       style,
       DEFAULT_ZINDEX,
       DEFAULT_ENABLED,
-      TruncatePolicy::NEGLECT,
-      constructor,
+      TruncatePolicy::BRUTAL,
       name,
     )
   }
