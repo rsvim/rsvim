@@ -541,7 +541,7 @@ pub struct TreeArena {
 
 rc_refcell_ptr!(TreeArena);
 
-impl ItreArena {
+impl TreeArena {
   #[cfg(not(test))]
   fn _internal_check(&self) {}
 
@@ -575,6 +575,7 @@ impl ItreArena {
         }
       }
     } else {
+    }
   }
 
   /// Update shape/actual_shape for a node and all its children and
