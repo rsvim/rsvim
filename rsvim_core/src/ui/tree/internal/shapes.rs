@@ -145,3 +145,12 @@ pub fn bound_shape(shape: &IRect, parent_actual_size: &U16Size) -> IRect {
   let bounded = _bound_size(shape, parent_actual_size);
   _bound_pos(&bounded, parent_actual_size)
 }
+
+/// Clamp shape to make it at least non-negative.
+pub fn clamp_shape(shape: &IRect) -> IRect {
+  let min_x = num_traits::clamp_min(shape.min().x, 0);
+  let min_y = num_traits::clamp_min(shape.min().y, 0);
+  let max_x = num_traits::clamp_min(shape.max().x, min_x);
+  let max_y = num_traits::clamp_min(shape.max().y, min_y);
+  rect!(min_x, min_y, max_x, max_y)
+}

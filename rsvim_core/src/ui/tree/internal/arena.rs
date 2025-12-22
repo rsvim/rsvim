@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -688,5 +689,44 @@ impl ItreArena {
       }
     }
     Ok(())
+  }
+
+  fn calculate_shape(
+    &self,
+    id: TreeNodeId,
+    shape: &IRect,
+    policy: TruncatePolicy,
+  ) -> IRect {
+    match self.parent_id(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+        match policy {
+          TruncatePolicy::BRUTAL => {
+            shapes::truncate_shape(&shape, &parent_actual_shape.size())
+          }
+          TruncatePolicy::RESERVED => {
+            shapes::bound_shape(&shape, &parent_actual_shape.size())
+          }
+        }
+      }
+      None => Self::clamp_shape(shape),
+    }
+  }
+
+  pub fn calculate_actual_shape(
+    &self,
+    id: TreeNodeId,
+    shape: &IRect,
+  ) -> U16Rect {
+    match self.parent_id(id) {
+      Some(parent_id) => {
+        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+        shapes::convert_relative_to_absolute(&shape, &parent_actual_shape)
+      }
+      None => {
+        let shape = shapes::clamp_shape(shape);
+        rect_as!(shape, u16)
+      }
+    }
   }
 }
