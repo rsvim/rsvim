@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
@@ -384,7 +385,6 @@ impl Relation {
               .iter()
               .any(|i| *i == id)
           );
-          debug_assert!(self.children_zindexes.contains_key(&parent_id));
         }
         if let Some(children_ids) = self.children.get(&id) {
           for c in children_ids {
@@ -400,7 +400,6 @@ impl Relation {
     } else {
       debug_assert!(self.children.is_empty());
       debug_assert!(self.parent.is_empty());
-      debug_assert!(self.children_zindexes.is_empty());
     }
   }
 
@@ -459,6 +458,14 @@ impl Relation {
 
   pub fn attribute(&self, id: TreeNodeId) -> Option<Attribute> {
     self.attributes.get(&id).copied()
+  }
+
+  pub fn set_attribute(
+    &mut self,
+    id: TreeNodeId,
+    attribute: Attribute,
+  ) -> Option<Attribute> {
+    self.attributes.insert(id, attribute)
   }
 
   /// Add the first node, which is the root node.
@@ -626,7 +633,7 @@ impl ItreArena {
 
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
-  pub fn add_root<F>(
+  pub fn add_root<F, T>(
     &mut self,
     actual_shape: U16Rect,
     style: Style,
@@ -639,6 +646,7 @@ impl ItreArena {
       /* shape */ IRect,
       /* actual_shape */ U16Rect,
     ) -> T,
+    T: Inodeable,
   {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
@@ -666,7 +674,7 @@ impl ItreArena {
     self.relation.add_root(id, name);
     self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
 
-    let mut node = constructor(id, shape, actual_shape);
+    self.relation.attributes.insert();
     node.set_zindex(DEFAULT_ZINDEX);
     node.set_enabled(DEFAULT_ENABLED);
     node.set_shape(shape);
