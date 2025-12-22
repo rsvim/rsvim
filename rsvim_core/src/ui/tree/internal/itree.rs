@@ -191,7 +191,7 @@ where
       style,
       DEFAULT_ZINDEX,
       DEFAULT_ENABLED,
-      TruncatePolicy::NEGLECT,
+      TruncatePolicy::BRUTAL,
       constructor,
       name,
     )
