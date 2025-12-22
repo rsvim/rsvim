@@ -552,29 +552,23 @@ impl TreeArena {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.relation.root());
       while let Some(id) = q.pop_front() {
-        if let Some(parent_id) = self.relation.parent(id) {
-          debug_assert!(self.ta.children(&parent_id));
-          debug_assert!(
-            self
-              .children
-              .get(&parent_id)
-              .unwrap()
-              .iter()
-              .any(|i| *i == id)
-          );
-        }
-        if let Some(children_ids) = self.children.get(&id) {
-          for c in children_ids {
-            debug_assert!(self.parent.contains_key(c));
-            debug_assert_eq!(*self.parent.get(c).unwrap(), id);
-          }
-
-          for c in children_ids.iter() {
-            q.push_back(*c);
+        if let Ok(ta_children_ids) = self.ta.children(id) {
+          let mut ta_zindex: Option<usize> = None;
+          for ta_child in ta_children_ids {
+            debug_assert!(self.relation.contains(ta_child));
+            debug_assert!(self.relation.attribute(ta_child).is_some());
+            if ta_zindex.is_none() {
+              ta_zindex = self.relation.attribute(ta_child).unwrap().zindex;
+            } else {
+              debug_assert_eq!(
+                ta_zindex,
+                self.relation.attribute(ta_child).unwrap().zindex
+              );
+            }
+            q.push_back(ta_child);
           }
         }
       }
-    } else {
     }
   }
 
