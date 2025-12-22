@@ -570,6 +570,10 @@ impl TreeArena {
     self.relation.len()
   }
 
+  pub fn contains(&self, id: TreeNodeId) -> bool {
+    self.relation.contains(id)
+  }
+
   pub fn root(&self) -> TreeNodeId {
     self.relation.root()
   }

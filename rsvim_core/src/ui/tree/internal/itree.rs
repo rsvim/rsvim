@@ -203,7 +203,7 @@ where
 
     match self.nodes.remove(&id) {
       Some(removed_node) => {
-        debug_assert!(self.relation.contains(id));
+        debug_assert!(self.arena.borrow().contains(id));
         debug_assert!(self.parent_id(id).is_some());
         let parent_id = self.parent_id(id).unwrap();
         self.relation.remove_child(parent_id, id);
