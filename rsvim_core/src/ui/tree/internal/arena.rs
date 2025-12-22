@@ -783,6 +783,7 @@ impl ItreArena {
     node.set_enabled(DEFAULT_ENABLED);
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
+    node.set_truncate_policy(TruncatePolicy::BRUTAL);
     self.nodes.insert(id, node);
     Ok(id)
   }
@@ -851,6 +852,7 @@ impl ItreArena {
     node.set_enabled(enabled);
     node.set_shape(shape);
     node.set_actual_shape(actual_shape);
+    node.set_truncate_policy(policy);
     self.nodes.insert(id, node);
 
     // After this new child node is created, it may also affected the other
