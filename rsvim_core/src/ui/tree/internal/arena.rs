@@ -2,7 +2,6 @@
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
@@ -554,6 +553,13 @@ pub struct TreeArena {
 rc_refcell_ptr!(TreeArena);
 
 impl TreeArena {
+  pub fn new() -> Self {
+    Self {
+      ta: Ta::new(),
+      relation: Relation::new(),
+    }
+  }
+
   fn _internal_check(&self) {
     if cfg!(test) && self.relation.len() > 0 {
       debug_assert_ne!(self.relation.root(), INVALID_ROOT_ID);
