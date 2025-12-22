@@ -456,8 +456,8 @@ impl Relation {
     self.children.get(&id).cloned()
   }
 
-  pub fn attribute(&self, id: TreeNodeId) -> Option<Attribute> {
-    self.attributes.get(&id).copied()
+  pub fn attribute(&self, id: TreeNodeId) -> Option<&Attribute> {
+    self.attributes.get(&id)
   }
 
   pub fn set_attribute(
@@ -582,7 +582,7 @@ impl TreeArena {
       let shape = rect_from_layout!(layout);
       let shape = self._adjust_shape(id, &shape, policy);
       let actual_shape = self._calculate_actual_shape(id, &shape);
-      let mut attr = self.relation.attribute(id).unwrap();
+      let mut attr = *self.relation.attribute(id).unwrap();
       attr.shape = shape;
       attr.actual_shape = actual_shape;
       self.relation.set_attribute(id, attr);
@@ -625,10 +625,10 @@ impl TreeArena {
     shape: &IRect,
     policy: TruncatePolicy,
   ) -> IRect {
-    match self.parent(id) {
+    match self.relation.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape =
-          self.attribute(parent_id).unwrap().actual_shape;
+          self.relation.attribute(parent_id).unwrap().actual_shape;
         match policy {
           TruncatePolicy::BRUTAL => {
             shapes::truncate_shape(&shape, &parent_actual_shape.size())
@@ -649,10 +649,10 @@ impl TreeArena {
     id: TreeNodeId,
     shape: &IRect,
   ) -> U16Rect {
-    match self.parent(id) {
+    match self.relation.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape =
-          self.attribute(parent_id).unwrap().actual_shape;
+          self.relation.attribute(parent_id).unwrap().actual_shape;
         shapes::convert_relative_to_absolute(&shape, &parent_actual_shape)
       }
       None => {
@@ -758,13 +758,16 @@ impl TreeArena {
     let actual_shape = self._calculate_actual_shape(id, &shape);
 
     self.relation.add_child(parent_id, id, name);
-    self.relation.set_attribute(Attribute {
-      shape,
-      actual_shape,
-      zindex,
-      enabled,
-      truncate_policy,
-    });
+    self.relation.set_attribute(
+      id,
+      Attribute {
+        shape,
+        actual_shape,
+        zindex,
+        enabled,
+        truncate_policy,
+      },
+    );
 
     // After this new child node is created, it may also affected the other
     // children nodes under the same parent with the same Z-index, because the
