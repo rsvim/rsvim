@@ -164,7 +164,7 @@ where
   /// below parameters:
   /// - zindex: 0
   /// - enabled: true
-  /// - policy: Truncate
+  /// - policy: BRUTAL
   ///
   /// NOTE: For cursor widget node, you should always use the bound policy to
   /// ensure it is inside its parent and avoid been cut off.
