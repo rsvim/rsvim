@@ -867,6 +867,6 @@ impl TreeArena {
     // Thus we have to update both shape and actual_shape for all the children
     // nodes under the parent, except this newly created child node because we
     // just had done it.
-    self._update_shapes_for(parent_id)?;
+    self._update_shapes_for(parent_id)
   }
 }
