@@ -755,14 +755,19 @@ impl TreeArena {
           }
         }
 
-        let id = ta.new_with_parent(style, parent_id)?;
-        ta.compute_layout(self.relation.root_id(), taffy::Size::MAX_CONTENT)?;
-        let layout = ta.layout(id)?;
+        let id = self.ta.new_with_parent(style, parent_id)?;
+        self
+          .ta
+          .compute_layout(self.relation.root(), taffy::Size::MAX_CONTENT)?;
+        let layout = self.ta.layout(id)?;
         (id, rect_from_layout!(layout))
       } else {
         // Where the child node is disabled, we simply mock it with parent's
         // shape.
-        (ta.new_leaf(style)?, *self.node(parent_id).unwrap().shape())
+        (
+          self.ta.new_leaf(style)?,
+          self.relation.attribute(parent_id).unwrap().shape,
+        )
       }
     };
 
