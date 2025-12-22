@@ -39,8 +39,7 @@ where
   }
 
   fn _internal_check(&self) {
-    debug_assert_eq!(self.relation.len(), self.nodes.len());
-    debug_assert_eq!(self.ta.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.arena.borrow().len(), self.nodes.len());
   }
 
   pub fn len(&self) -> usize {
