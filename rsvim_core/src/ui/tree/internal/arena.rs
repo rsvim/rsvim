@@ -596,9 +596,10 @@ impl ItreArena {
     shape: &IRect,
     policy: TruncatePolicy,
   ) -> IRect {
-    match self.parent_id(id) {
+    match self.parent(id) {
       Some(parent_id) => {
-        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+        let parent_actual_shape =
+          self.attribute(parent_id).unwrap().actual_shape;
         match policy {
           TruncatePolicy::BRUTAL => {
             shapes::truncate_shape(&shape, &parent_actual_shape.size())
@@ -619,9 +620,10 @@ impl ItreArena {
     id: TreeNodeId,
     shape: &IRect,
   ) -> U16Rect {
-    match self.parent_id(id) {
+    match self.parent(id) {
       Some(parent_id) => {
-        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+        let parent_actual_shape =
+          self.attribute(parent_id).unwrap().actual_shape;
         shapes::convert_relative_to_absolute(&shape, &parent_actual_shape)
       }
       None => {
@@ -775,23 +777,13 @@ impl ItreArena {
   /// Returns the removed node.
   ///
   /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
+  pub fn remove_child(&mut self, id: TreeNodeId) {
     self._internal_check();
-    debug_assert_ne!(id, self.relation.root_id());
+    debug_assert_ne!(id, self.relation.root());
 
-    match self.nodes.remove(&id) {
-      Some(removed_node) => {
-        debug_assert!(self.relation.contains(id));
-        debug_assert!(self.parent_id(id).is_some());
-        let parent_id = self.parent_id(id).unwrap();
-        self.relation.remove_child(parent_id, id);
-
-        Some(removed_node)
-      }
-      None => {
-        debug_assert!(!self.relation.contains(id));
-        None
-      }
-    }
+    debug_assert!(self.relation.contains(id));
+    debug_assert!(self.parent(id).is_some());
+    let parent_id = self.parent(id).unwrap();
+    self.relation.remove_child(parent_id, id);
   }
 }
