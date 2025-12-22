@@ -122,7 +122,7 @@ where
       (id, attr.shape, attr.actual_shape)
     };
 
-    let mut node = constructor(id, shape, actual_shape);
+    let node = constructor(id, shape, actual_shape);
     self.nodes.insert(id, node);
 
     Ok(id)
@@ -150,57 +150,16 @@ where
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
 
-    let (id, shape) = {
-      let mut ta = self.ta.borrow_mut();
-      if enabled {
-        // Detect whether TaffyTree currently is on the Z-index layer, clear and
-        // re-insert all the children nodes that are in the same layer of
-        // current `zindex`.
-        let children_zindex = self.relation.children_zindex(parent_id);
-        if children_zindex.is_none() || children_zindex.unwrap() != zindex {
-          // Clear all children nodes under this parent.
-          ta.set_children(parent_id, &[]);
-
-          // Re-inesrt all children nodes equals to the `zindex` to this parent.
-          for child in self.children_ids(parent_id) {
-            debug_assert!(self.node(child).is_some());
-            let child_zindex = self.node(child).unwrap().zindex();
-            if child_zindex == zindex {
-              ta.add_child(parent_id, child);
-            }
-          }
-          self.relation.set_children_zindex(parent_id, zindex);
-        }
-
-        let id = ta.new_with_parent(style, parent_id)?;
-        ta.compute_layout(self.relation.root_id(), taffy::Size::MAX_CONTENT)?;
-        let layout = ta.layout(id)?;
-        (id, rect_from_layout!(layout))
-      } else {
-        // Where the child node is disabled, we simply mock it with parent's
-        // shape.
-        (ta.new_leaf(style)?, *self.node(parent_id).unwrap().shape())
-      }
+    let (id, shape, actual_shape) = {
+      let mut arena = self.arena.borrow_mut();
+      let id =
+        arena.add_child(parent_id, style, zindex, enabled, policy, name)?;
+      let attr = arena.attribute(id).unwrap();
+      (id, attr.shape, attr.actual_shape)
     };
 
-    self.relation.add_child(parent_id, id, name);
-
-    let shape = self.calculate_shape(id, &shape, policy);
-    let actual_shape = self.calculate_actual_shape(id, &shape);
-    let mut node = constructor(id, shape, actual_shape);
-    node.set_zindex(zindex);
-    node.set_enabled(enabled);
-    node.set_shape(shape);
-    node.set_actual_shape(actual_shape);
+    let node = constructor(id, shape, actual_shape);
     self.nodes.insert(id, node);
-
-    // After this new child node is created, it may also affected the other
-    // children nodes under the same parent with the same Z-index, because the
-    // layout is been changed.
-    // Thus we have to update both shape and actual_shape for all the children
-    // nodes under the parent, except this newly created child node because we
-    // just had done it.
-    self._update_node_shapes_except(parent_id, id)?;
 
     Ok(id)
   }
