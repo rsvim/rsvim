@@ -597,12 +597,17 @@ impl TreeArena {
   pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
     self.ta.set_style(id, style)?;
     let parent_id = self.relation.parent(id).unwrap();
-    let enabled = self.relation.attribute(id).unwrap().enabled;
+    let attr = self.relation.attribute(id).unwrap();
+    let enabled = attr.enabled;
+    let zindex = attr.zindex;
     if enabled {
       // If this node is enabled, changing its style will affect other sibling
-      // nodes under the same parent, with the same Z-index.
+      // nodes with the same Z-index.
+      self._refresh_ta_children_by_zindex(parent_id, zindex)?;
+      self._update_shapes_for(parent_id)
+    } else {
+      Ok(())
     }
-    Ok(())
   }
 }
 
@@ -831,7 +836,7 @@ impl TreeArena {
 
     let (id, shape) = {
       if enabled {
-        self._refresh_ta_children_by_zindex(parent_id, zindex);
+        self._refresh_ta_children_by_zindex(parent_id, zindex)?;
         let id = self.ta.new_with_parent(style, parent_id)?;
         self
           .ta
@@ -894,7 +899,7 @@ impl TreeArena {
     // After this node is removed, if it is enabled, it can affect other
     // sibling nodes with the same Z-index.
     if enabled {
-      self._refresh_ta_children_by_zindex(parent_id, zindex);
+      self._refresh_ta_children_by_zindex(parent_id, zindex)?;
       self._update_shapes_for(parent_id)
     } else {
       Ok(())
