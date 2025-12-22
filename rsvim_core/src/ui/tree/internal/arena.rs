@@ -542,6 +542,41 @@ pub struct ItreeArena {
 rc_refcell_ptr!(ItreeArena);
 
 impl ItreArena {
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
+
+  #[cfg(test)]
+  fn _internal_check(&self) {
+    if self.relation.len() > 0 {
+      debug_assert_ne!(self.relation.root(), INVALID_ROOT_ID);
+      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      q.push_back(self.relation.root());
+      while let Some(id) = q.pop_front() {
+        if let Some(parent_id) = self.relation.parent(id) {
+          debug_assert!(self.children.contains_key(&parent_id));
+          debug_assert!(
+            self
+              .children
+              .get(&parent_id)
+              .unwrap()
+              .iter()
+              .any(|i| *i == id)
+          );
+        }
+        if let Some(children_ids) = self.children.get(&id) {
+          for c in children_ids {
+            debug_assert!(self.parent.contains_key(c));
+            debug_assert_eq!(*self.parent.get(c).unwrap(), id);
+          }
+
+          for c in children_ids.iter() {
+            q.push_back(*c);
+          }
+        }
+      }
+    } else {
+  }
+
   /// Update shape/actual_shape for a node and all its children and
   /// descendants.
   fn _update_shapes_for(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
