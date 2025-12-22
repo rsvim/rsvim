@@ -727,6 +727,7 @@ impl TreeArena {
         // current `zindex`.
         let ta_children_ids = self.ta.children(parent_id);
         let has_ta_children = ta_children_ids
+          .as_ref()
           .map(|children| !children.is_empty())
           .unwrap_or(false);
         let ta_children_zindex = if has_ta_children {
