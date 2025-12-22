@@ -604,7 +604,7 @@ impl TreeArena {
     parent_id: TreeNodeId,
     except_child_id: TreeNodeId,
   ) -> TaffyResult<()> {
-    let ta_children_ids = self.ta.borrow().children(parent_id);
+    let ta_children_ids = self.ta.children(parent_id);
     if let Ok(ta_children_ids) = ta_children_ids {
       for ta_child in ta_children_ids {
         // We don't have to update `except_id` again because we had just done
