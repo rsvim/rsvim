@@ -703,16 +703,12 @@ impl TreeArena {
     };
 
     self.relation.add_root(id, name);
-    self.relation.set_attribute(
-      id,
-      Attribute {
-        shape,
-        actual_shape,
-        zindex: DEFAULT_ZINDEX,
-        enabled: DEFAULT_ENABLED,
-        truncate_policy: TruncatePolicy::BRUTAL,
-      },
-    );
+    let attr = self.relation.attribute_mut(id).unwrap();
+    attr.shape = shape;
+    attr.actual_shape = actual_shape;
+    attr.zindex = DEFAULT_ZINDEX;
+    attr.enabled = DEFAULT_ENABLED;
+    attr.truncate_policy = TruncatePolicy::BRUTAL;
     Ok(id)
   }
 
