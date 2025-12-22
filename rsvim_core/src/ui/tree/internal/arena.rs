@@ -560,7 +560,20 @@ impl TreeArena {
     }
   }
 
+  pub fn is_empty(&self) -> bool {
+    self._internal_check();
+    self.relation.is_empty()
+  }
+
+  pub fn len(&self) -> usize {
+    self._internal_check();
+    self.relation.len()
+  }
+
   fn _internal_check(&self) {
+    debug_assert_eq!(self.relation.is_empty(), self.ta.is_empty());
+    debug_assert_eq!(self.relation.len(), self.ta.len());
+
     if cfg!(test) && self.relation.len() > 0 {
       debug_assert_ne!(self.relation.root(), INVALID_ROOT_ID);
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
