@@ -313,6 +313,18 @@ pub struct Attribute {
   pub truncate_policy: TruncatePolicy,
 }
 
+impl Default for Attribute {
+  fn default() -> Self {
+    Self {
+      shape: rect!(0, 0, 0, 0),
+      actual_shape: rect!(0, 0, 0, 0),
+      zindex: DEFAULT_ZINDEX,
+      enabled: DEFAULT_ENABLED,
+      truncate_policy: TruncatePolicy::BRUTAL,
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 // Maintains all nodes relationship of the tree, and all common attributes.
 //
@@ -460,12 +472,8 @@ impl Relation {
     self.attributes.get(&id)
   }
 
-  pub fn set_attribute(
-    &mut self,
-    id: TreeNodeId,
-    attribute: Attribute,
-  ) -> Option<Attribute> {
-    self.attributes.insert(id, attribute)
+  pub fn attribute_mut(&mut self, id: TreeNodeId) -> Option<&mut Attribute> {
+    self.attributes.get_mut(&id)
   }
 
   /// Add the first node, which is the root node.
@@ -475,6 +483,7 @@ impl Relation {
     debug_assert!(self.parent.is_empty());
     debug_assert_eq!(self.root, INVALID_ROOT_ID);
     self.children.insert(id, vec![]);
+    self.attributes.insert(id, Attribute::default());
     self._set_root(id);
     self._set_name(id, name);
   }
@@ -495,6 +504,7 @@ impl Relation {
     debug_assert!(!self.parent.contains_key(&id));
     self.children.get_mut(&parent_id).unwrap().push(id);
     self.parent.insert(id, parent_id);
+    self.attributes.insert(id, Attribute::default());
     self._set_name(id, name);
   }
 
@@ -524,6 +534,7 @@ impl Relation {
       .0;
     self.children.get_mut(&parent_id).unwrap().remove(child_pos);
     self.parent.remove(&id);
+    self.attributes.remove(&id);
   }
 }
 
@@ -582,10 +593,9 @@ impl TreeArena {
       let shape = rect_from_layout!(layout);
       let shape = self._adjust_shape(id, &shape, policy);
       let actual_shape = self._calculate_actual_shape(id, &shape);
-      let mut attr = *self.relation.attribute(id).unwrap();
+      let attr = self.relation.attribute_mut(id).unwrap();
       attr.shape = shape;
       attr.actual_shape = actual_shape;
-      self.relation.set_attribute(id, attr);
 
       if let Ok(ta_children_ids) = self.ta.children(id) {
         for ta_child in ta_children_ids {
@@ -832,7 +842,7 @@ impl TreeArena {
     debug_assert_ne!(id, self.relation.root());
     debug_assert!(self.relation.contains(id));
     debug_assert!(self.relation.parent(id).is_some());
-    let parent_id = self.parent(id).unwrap();
+    let parent_id = self.relation.parent(id).unwrap();
     self.relation.remove_child(parent_id, id);
   }
 }
