@@ -197,22 +197,20 @@ where
   /// Returns the removed node.
   ///
   /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
+  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<Option<T>> {
     self._internal_check();
     debug_assert_ne!(id, self.arena.borrow().root());
 
     match self.nodes.remove(&id) {
       Some(removed_node) => {
         debug_assert!(self.arena.borrow().contains(id));
-        debug_assert!(self.parent_id(id).is_some());
-        let parent_id = self.parent_id(id).unwrap();
-        self.relation.remove_child(parent_id, id);
-
-        Some(removed_node)
+        debug_assert_ne!(self.root_id(), id);
+        self.arena.borrow_mut().remove_child(id)?;
+        Ok(Some(removed_node))
       }
       None => {
-        debug_assert!(!self.relation.contains(id));
-        None
+        debug_assert!(!self.arena.borrow().contains(id));
+        Ok(None)
       }
     }
   }
