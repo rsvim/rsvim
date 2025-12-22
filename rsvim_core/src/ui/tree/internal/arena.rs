@@ -894,7 +894,9 @@ impl TreeArena {
     // sibling nodes under the same parent.
     if enabled {
       self._refresh_ta_children_by_zindex(parent_id, zindex);
+      self._update_shapes_for(parent_id)
+    } else {
+      Ok(())
     }
-    self._update_shapes_for(parent_id)
   }
 }
