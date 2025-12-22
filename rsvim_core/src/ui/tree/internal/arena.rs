@@ -747,12 +747,11 @@ impl TreeArena {
           if let Some(children) = self.relation.children(parent_id) {
             for child in children {
               debug_assert!(self.relation.contains(child));
-              let child_zindex = self.attribute(child).unwrap().zindex;
+              let child_zindex = self.relation.attribute(child).unwrap().zindex;
               if child_zindex == zindex {
-                ta.add_child(parent_id, child);
+                self.ta.add_child(parent_id, child);
               }
             }
-            self.relation.set_children_zindex(parent_id, zindex);
           }
         }
 
