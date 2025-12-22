@@ -642,3 +642,51 @@ pub struct ItreeArena {
 }
 
 rc_refcell_ptr!(ItreeArena);
+
+impl ItreArena {
+  /// Update shape/actual_shape for a node and all its children and
+  /// descendants.
+  fn _update_shapes_for(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(start_id);
+
+    // Iterate all descendants, and update their shape/actual_shape.
+    while let Some(id) = q.pop_front() {
+      let layout = self.ta.borrow().layout(id)?.clone();
+      let policy = self.node(id).unwrap().truncate_policy();
+      let shape = rect_from_layout!(layout);
+      let shape = self.calculate_shape(id, &shape, policy);
+      let actual_shape = self.calculate_actual_shape(id, &shape);
+      self.node_mut(id).unwrap().set_shape(shape);
+      self.node_mut(id).unwrap().set_actual_shape(actual_shape);
+
+      if let Ok(ta_children_ids) = self.ta.borrow().children(id) {
+        for ta_child in ta_children_ids {
+          q.push_back(ta_child);
+        }
+      }
+    }
+
+    Ok(())
+  }
+
+  /// Update shape/actual_shape for all children and their descendants under a
+  /// parent, except 1 child.
+  fn _update_shapes_for_children_except(
+    &mut self,
+    parent_id: TreeNodeId,
+    except_child_id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    let ta_children_ids = self.ta.borrow().children(parent_id);
+    if let Ok(ta_children_ids) = ta_children_ids {
+      for ta_child in ta_children_ids {
+        // We don't have to update `except_id` again because we had just done
+        // it.
+        if ta_child != except_child_id {
+          self._update_shapes_for(ta_child)?;
+        }
+      }
+    }
+    Ok(())
+  }
+}
