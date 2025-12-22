@@ -633,21 +633,12 @@ impl ItreArena {
 
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
-  pub fn add_root<F, T>(
+  pub fn add_root(
     &mut self,
     actual_shape: U16Rect,
     style: Style,
-    constructor: F,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId>
-  where
-    F: FnOnce(
-      /* id */ TreeNodeId,
-      /* shape */ IRect,
-      /* actual_shape */ U16Rect,
-    ) -> T,
-    T: Inodeable,
-  {
+  ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
 
@@ -667,7 +658,7 @@ impl ItreArena {
       )?;
       let layout = ta.layout(id)?;
       let shape = rect_from_layout!(layout);
-      let shape = Self::clamp_shape(&shape);
+      let shape = shapes::clamp_shape(&shape);
       (id, shape)
     };
 
@@ -687,23 +678,15 @@ impl ItreArena {
 
   /// Create a new child node in the tree, and insert it under a parent node.
   /// Returns the child node ID.
-  pub fn add_child<F>(
+  pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
     zindex: usize,
     enabled: bool,
-    policy: TruncatePolicy,
-    constructor: F,
+    truncate_policy: TruncatePolicy,
     name: &'static str,
-  ) -> TaffyResult<TreeNodeId>
-  where
-    F: FnOnce(
-      /* id */ TreeNodeId,
-      /* shape */ IRect,
-      /* actual_shape */ U16Rect,
-    ) -> T,
-  {
+  ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
 
@@ -740,17 +723,17 @@ impl ItreArena {
       }
     };
 
-    self.relation.add_child(parent_id, id, name);
+    let shape = self._adjust_shape(id, &shape, truncate_policy);
+    let actual_shape = self._calculate_actual_shape(id, &shape);
 
-    let shape = self.calculate_shape(id, &shape, policy);
-    let actual_shape = self.calculate_actual_shape(id, &shape);
-    let mut node = constructor(id, shape, actual_shape);
-    node.set_zindex(zindex);
-    node.set_enabled(enabled);
-    node.set_shape(shape);
-    node.set_actual_shape(actual_shape);
-    node.set_truncate_policy(policy);
-    self.nodes.insert(id, node);
+    self.relation.add_child(parent_id, id, name);
+    self.relation.set_attribute(Attribute {
+      shape,
+      actual_shape,
+      zindex,
+      enabled,
+      truncate_policy,
+    });
 
     // After this new child node is created, it may also affected the other
     // children nodes under the same parent with the same Z-index, because the
