@@ -674,9 +674,8 @@ impl TreeArena {
     debug_assert!(self.relation.is_empty());
 
     let (id, shape) = {
-      let mut ta = self.ta.borrow_mut();
-      let id = ta.new_leaf(style)?;
-      ta.compute_layout(
+      let id = self.ta.new_leaf(style)?;
+      self.ta.compute_layout(
         id,
         taffy::Size {
           width: taffy::AvailableSpace::from_length(
@@ -687,7 +686,7 @@ impl TreeArena {
           ),
         },
       )?;
-      let layout = ta.layout(id)?;
+      let layout = self.ta.layout(id)?;
       let shape = rect_from_layout!(layout);
       let shape = shapes::clamp_shape(&shape);
       (id, shape)
@@ -719,14 +718,27 @@ impl TreeArena {
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    debug_assert!(self.relation.contains(&parent_id));
+    debug_assert!(self.relation.contains(parent_id));
 
     let (id, shape) = {
-      let mut ta = self.ta.borrow_mut();
       if enabled {
         // Detect whether TaffyTree currently is on the Z-index layer, clear and
         // re-insert all the children nodes that are in the same layer of
         // current `zindex`.
+        let ta_children_ids = self.ta.children(parent_id);
+        let has_ta_children = ta_children_ids
+          .map(|children| !children.is_empty())
+          .unwrap_or(false);
+        let ta_children_zindex = if has_ta_children {
+          self
+            .relation
+            .attribute(ta_children_ids.unwrap()[0])
+            .unwrap()
+            .zindex
+        } else {
+          DEFAULT_ZINDEX
+        };
+
         let children_zindex = self.relation.children_zindex(parent_id);
         if children_zindex.is_none() || children_zindex.unwrap() != zindex {
           // Clear all children nodes under this parent.
