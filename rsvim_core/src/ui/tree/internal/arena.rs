@@ -581,9 +581,9 @@ impl ItreArena {
     Ok(())
   }
 
-  /// Calculate (or we should say: adjust) the shape of a node, by its expected
-  /// shape and the policy it follows.
-  fn calculate_shape(
+  /// Adjust the shape of a node, by its expected shape and the policy it
+  /// follows.
+  fn _adjust_shape(
     &self,
     id: TreeNodeId,
     shape: &IRect,
@@ -607,7 +607,7 @@ impl ItreArena {
 
   /// Calculate the actual_shape of a node, by its adjusted shape and its
   /// parent's actual_shape.
-  pub fn calculate_actual_shape(
+  pub fn _calculate_actual_shape(
     &self,
     id: TreeNodeId,
     shape: &IRect,
