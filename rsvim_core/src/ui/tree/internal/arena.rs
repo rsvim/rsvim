@@ -589,6 +589,21 @@ impl TreeArena {
   pub fn attribute(&self, id: TreeNodeId) -> Option<&Attribute> {
     self.relation.attribute(id)
   }
+
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self.ta.style(id)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self.ta.set_style(id, style)?;
+    let parent_id = self.relation.parent(id).unwrap();
+    let enabled = self.relation.attribute(id).unwrap().enabled;
+    if enabled {
+      // If this node is enabled, changing its style will affect other sibling
+      // nodes under the same parent, with the same Z-index.
+    }
+    Ok(())
+  }
 }
 
 impl TreeArena {
@@ -715,6 +730,46 @@ impl TreeArena {
     }
   }
 
+  // Detect whether TaffyTree currently is on the Z-index layer, clear and
+  // re-insert all the children nodes that are in the same layer of
+  // current `zindex`.
+  pub fn _refresh_ta_children_by_zindex(
+    &mut self,
+    parent_id: TreeNodeId,
+    target_zindex: usize,
+  ) {
+    let children_ids = self.ta.children(parent_id);
+    let has_children = children_ids
+      .as_ref()
+      .map(|children| !children.is_empty())
+      .unwrap_or(false);
+    let children_zindex = if has_children {
+      self
+        .relation
+        .attribute(children_ids.unwrap()[0])
+        .unwrap()
+        .zindex
+    } else {
+      DEFAULT_ZINDEX
+    };
+
+    if !has_children || children_zindex != target_zindex {
+      // Clear all children nodes under this parent.
+      self.ta.set_children(parent_id, &[]);
+
+      // Re-inesrt all children nodes equals to the `zindex` to this parent.
+      if let Some(children) = self.relation.children(parent_id) {
+        for c in children {
+          debug_assert!(self.relation.contains(c));
+          let zindex = self.relation.attribute(c).unwrap().zindex;
+          if zindex == target_zindex {
+            self.ta.add_child(parent_id, c);
+          }
+        }
+      }
+    }
+  }
+
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
   pub fn add_root(
@@ -775,40 +830,7 @@ impl TreeArena {
 
     let (id, shape) = {
       if enabled {
-        // Detect whether TaffyTree currently is on the Z-index layer, clear and
-        // re-insert all the children nodes that are in the same layer of
-        // current `zindex`.
-        let ta_children_ids = self.ta.children(parent_id);
-        let has_ta_children = ta_children_ids
-          .as_ref()
-          .map(|children| !children.is_empty())
-          .unwrap_or(false);
-        let ta_children_zindex = if has_ta_children {
-          self
-            .relation
-            .attribute(ta_children_ids.unwrap()[0])
-            .unwrap()
-            .zindex
-        } else {
-          DEFAULT_ZINDEX
-        };
-
-        if !has_ta_children || ta_children_zindex != zindex {
-          // Clear all children nodes under this parent.
-          self.ta.set_children(parent_id, &[]);
-
-          // Re-inesrt all children nodes equals to the `zindex` to this parent.
-          if let Some(children) = self.relation.children(parent_id) {
-            for child in children {
-              debug_assert!(self.relation.contains(child));
-              let child_zindex = self.relation.attribute(child).unwrap().zindex;
-              if child_zindex == zindex {
-                self.ta.add_child(parent_id, child);
-              }
-            }
-          }
-        }
-
+        self._refresh_ta_children_by_zindex(parent_id, zindex);
         let id = self.ta.new_with_parent(style, parent_id)?;
         self
           .ta
@@ -861,16 +883,18 @@ impl TreeArena {
     debug_assert!(self.relation.contains(id));
     debug_assert!(self.relation.parent(id).is_some());
     let parent_id = self.relation.parent(id).unwrap();
+    let attr = self.attribute(id).unwrap();
+    let enabled = attr.enabled;
+    let zindex = attr.zindex;
     self.ta.remove_child(parent_id, id);
     self.relation.remove_child(parent_id, id);
     self.relation.remove_attribute(id);
 
-    // After this child node is removed, it may also affected the other
-    // children nodes under the same parent with the same Z-index, because the
-    // layout is been changed.
-    // Thus we have to update both shape and actual_shape for all the children
-    // nodes under the parent, except this newly created child node because we
-    // just had done it.
+    // After this node is removed, if it is enabled, it can affect other
+    // sibling nodes under the same parent.
+    if enabled {
+      self._refresh_ta_children_by_zindex(parent_id, zindex);
+    }
     self._update_shapes_for(parent_id)
   }
 }
