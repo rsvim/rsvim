@@ -534,12 +534,12 @@ impl Default for Relation {
 }
 
 #[derive(Debug, Clone)]
-pub struct ItreeArena {
+pub struct TreeArena {
   ta: Ta,
   relation: Relation,
 }
 
-rc_refcell_ptr!(ItreeArena);
+rc_refcell_ptr!(TreeArena);
 
 impl ItreArena {
   #[cfg(not(test))]
@@ -553,7 +553,7 @@ impl ItreArena {
       q.push_back(self.relation.root());
       while let Some(id) = q.pop_front() {
         if let Some(parent_id) = self.relation.parent(id) {
-          debug_assert!(self.children.contains_key(&parent_id));
+          debug_assert!(self.ta.children(&parent_id));
           debug_assert!(
             self
               .children
