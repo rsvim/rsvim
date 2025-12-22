@@ -542,12 +542,8 @@ pub struct TreeArena {
 rc_refcell_ptr!(TreeArena);
 
 impl TreeArena {
-  #[cfg(not(test))]
-  fn _internal_check(&self) {}
-
-  #[cfg(test)]
   fn _internal_check(&self) {
-    if self.relation.len() > 0 {
+    if cfg!(test) && self.relation.len() > 0 {
       debug_assert_ne!(self.relation.root(), INVALID_ROOT_ID);
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.relation.root());
