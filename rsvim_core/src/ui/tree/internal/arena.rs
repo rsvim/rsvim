@@ -861,7 +861,7 @@ impl ItreArena {
     // Thus we have to update both shape and actual_shape for all the children
     // nodes under the parent, except this newly created child node because we
     // just had done it.
-    self._update_node_shapes_except(parent_id, id)?;
+    self._update_shapes_for_children_except(parent_id, id)?;
 
     Ok(id)
   }
