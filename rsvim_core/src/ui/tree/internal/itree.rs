@@ -51,7 +51,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.arena.borrow().root_id()
+    self.arena.borrow().root()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
@@ -59,11 +59,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.arena.borrow().parent_id(id)
+    self.arena.borrow().parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.arena.borrow().children_ids(id).unwrap_or_default()
+    self.arena.borrow().children(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -78,7 +78,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.arena.borrow().root_id()))
+    ItreeIter::new(self, Some(self.arena.borrow().root()))
   }
 }
 
@@ -115,35 +115,16 @@ where
     self._internal_check();
     debug_assert!(self.nodes.is_empty());
 
-    let (id, shape) = {
-      let mut ta = self.ta.borrow_mut();
-      let id = ta.new_leaf(style)?;
-      ta.compute_layout(
-        id,
-        taffy::Size {
-          width: taffy::AvailableSpace::from_length(
-            actual_shape.size().width(),
-          ),
-          height: taffy::AvailableSpace::from_length(
-            actual_shape.size().height(),
-          ),
-        },
-      )?;
-      let layout = ta.layout(id)?;
-      let shape = rect_from_layout!(layout);
-      let shape = Self::clamp_shape(&shape);
-      (id, shape)
+    let (id, shape, actual_shape) = {
+      let mut arena = self.arena.borrow_mut();
+      let id = arena.add_root(actual_shape, style, name)?;
+      let attr = arena.attribute(id).unwrap();
+      (id, attr.shape, attr.actual_shape)
     };
 
-    self.relation.add_root(id, name);
-    self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
-
     let mut node = constructor(id, shape, actual_shape);
-    node.set_zindex(DEFAULT_ZINDEX);
-    node.set_enabled(DEFAULT_ENABLED);
-    node.set_shape(shape);
-    node.set_actual_shape(actual_shape);
     self.nodes.insert(id, node);
+
     Ok(id)
   }
 
