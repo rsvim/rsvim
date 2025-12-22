@@ -609,7 +609,7 @@ impl ItreArena {
           }
         }
       }
-      None => Self::clamp_shape(shape),
+      None => shapes::clamp_shape(shape),
     }
   }
 
