@@ -577,15 +577,17 @@ impl TreeArena {
 
     // Iterate all descendants, and update their shape/actual_shape.
     while let Some(id) = q.pop_front() {
-      let layout = self.ta.borrow().layout(id)?.clone();
-      let policy = self.node(id).unwrap().truncate_policy();
+      let layout = self.ta.layout(id)?.clone();
+      let policy = self.relation.attribute(id).unwrap().truncate_policy;
       let shape = rect_from_layout!(layout);
-      let shape = self.calculate_shape(id, &shape, policy);
-      let actual_shape = self.calculate_actual_shape(id, &shape);
-      self.node_mut(id).unwrap().set_shape(shape);
-      self.node_mut(id).unwrap().set_actual_shape(actual_shape);
+      let shape = self._adjust_shape(id, &shape, policy);
+      let actual_shape = self._calculate_actual_shape(id, &shape);
+      let mut attr = self.relation.attribute(id).unwrap();
+      attr.shape = shape;
+      attr.actual_shape = actual_shape;
+      self.relation.set_attribute(id, attr);
 
-      if let Ok(ta_children_ids) = self.ta.borrow().children(id) {
+      if let Ok(ta_children_ids) = self.ta.children(id) {
         for ta_child in ta_children_ids {
           q.push_back(ta_child);
         }
