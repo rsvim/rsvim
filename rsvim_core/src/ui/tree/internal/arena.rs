@@ -845,6 +845,7 @@ impl TreeArena {
     debug_assert!(self.relation.contains(id));
     debug_assert!(self.relation.parent(id).is_some());
     let parent_id = self.relation.parent(id).unwrap();
+    self.ta.remove_child(parent_id, id);
     self.relation.remove_child(parent_id, id);
     self.relation.remove_attribute(id);
   }
