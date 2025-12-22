@@ -78,7 +78,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.relation.root_id()))
+    ItreeIter::new(self, Some(self.arena.borrow().root_id()))
   }
 }
 
@@ -96,97 +96,6 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  fn _update_node_shapes_impl(
-    &mut self,
-    start_id: TreeNodeId,
-  ) -> TaffyResult<()> {
-    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-    q.push_back(start_id);
-
-    // Iterate all descendants, and update their shape/actual_shape.
-    while let Some(id) = q.pop_front() {
-      let layout = self.ta.borrow().layout(id)?.clone();
-      let policy = self.node(id).unwrap().truncate_policy();
-      let shape = rect_from_layout!(layout);
-      let shape = self.calculate_shape(id, &shape, policy);
-      let actual_shape = self.calculate_actual_shape(id, &shape);
-      self.node_mut(id).unwrap().set_shape(shape);
-      self.node_mut(id).unwrap().set_actual_shape(actual_shape);
-
-      if let Ok(ta_children_ids) = self.ta.borrow().children(id) {
-        for ta_child in ta_children_ids {
-          q.push_back(ta_child);
-        }
-      }
-    }
-
-    Ok(())
-  }
-
-  fn _update_node_shapes_except(
-    &mut self,
-    parent_id: TreeNodeId,
-    except_id: TreeNodeId,
-  ) -> TaffyResult<()> {
-    let ta_children_ids = self.ta.borrow().children(parent_id);
-    if let Ok(ta_children_ids) = ta_children_ids {
-      for ta_child in ta_children_ids {
-        // We don't have to update `except_id` again because we had just done
-        // it.
-        if ta_child != except_id {
-          self._update_node_shapes_impl(ta_child)?;
-        }
-      }
-    }
-    Ok(())
-  }
-
-  fn clamp_shape(shape: &IRect) -> IRect {
-    let min_x = num_traits::clamp_min(shape.min().x, 0);
-    let min_y = num_traits::clamp_min(shape.min().y, 0);
-    let max_x = num_traits::clamp_min(shape.max().x, min_x);
-    let max_y = num_traits::clamp_min(shape.max().y, min_y);
-    rect!(min_x, min_y, max_x, max_y)
-  }
-
-  fn calculate_shape(
-    &self,
-    id: TreeNodeId,
-    shape: &IRect,
-    policy: TruncatePolicy,
-  ) -> IRect {
-    match self.parent_id(id) {
-      Some(parent_id) => {
-        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
-        match policy {
-          TruncatePolicy::NEGLECT => {
-            truncate_shape(&shape, &parent_actual_shape.size())
-          }
-          TruncatePolicy::PRESERVE => {
-            bound_shape(&shape, &parent_actual_shape.size())
-          }
-        }
-      }
-      None => Self::clamp_shape(shape),
-    }
-  }
-
-  pub fn calculate_actual_shape(
-    &self,
-    id: TreeNodeId,
-    shape: &IRect,
-  ) -> U16Rect {
-    match self.parent_id(id) {
-      Some(parent_id) => {
-        let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
-        convert_relative_to_absolute(&shape, &parent_actual_shape)
-      }
-      None => {
-        rect_as!(shape, u16)
-      }
-    }
-  }
-
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
   pub fn add_root<F>(
