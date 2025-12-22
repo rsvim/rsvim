@@ -737,7 +737,7 @@ impl TreeArena {
     &mut self,
     parent_id: TreeNodeId,
     target_zindex: usize,
-  ) {
+  ) -> TaffyResult<()> {
     let children_ids = self.ta.children(parent_id);
     let has_children = children_ids
       .as_ref()
@@ -755,7 +755,7 @@ impl TreeArena {
 
     if !has_children || children_zindex != target_zindex {
       // Clear all children nodes under this parent.
-      self.ta.set_children(parent_id, &[]);
+      self.ta.set_children(parent_id, &[])?;
 
       // Re-inesrt all children nodes equals to the `zindex` to this parent.
       if let Some(children) = self.relation.children(parent_id) {
@@ -763,11 +763,12 @@ impl TreeArena {
           debug_assert!(self.relation.contains(c));
           let zindex = self.relation.attribute(c).unwrap().zindex;
           if zindex == target_zindex {
-            self.ta.add_child(parent_id, c);
+            self.ta.add_child(parent_id, c)?;
           }
         }
       }
     }
+    Ok(())
   }
 
   /// Create a root node, which is the first node in the tree.
@@ -891,7 +892,7 @@ impl TreeArena {
     self.relation.remove_attribute(id);
 
     // After this node is removed, if it is enabled, it can affect other
-    // sibling nodes under the same parent.
+    // sibling nodes with the same Z-index.
     if enabled {
       self._refresh_ta_children_by_zindex(parent_id, zindex);
       self._update_shapes_for(parent_id)
