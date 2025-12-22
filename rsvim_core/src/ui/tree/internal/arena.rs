@@ -472,8 +472,8 @@ impl Relation {
     self.attributes.get(&id)
   }
 
-  pub fn attribute_mut(&mut self, id: TreeNodeId) -> Option<&mut Attribute> {
-    self.attributes.get_mut(&id)
+  pub fn set_attribute(&mut self, id: TreeNodeId, attribute: Attribute) {
+    self.attributes.insert(id, attribute);
   }
 
   /// Add the first node, which is the root node.
@@ -593,9 +593,10 @@ impl TreeArena {
       let shape = rect_from_layout!(layout);
       let shape = self._adjust_shape(id, &shape, policy);
       let actual_shape = self._calculate_actual_shape(id, &shape);
-      let attr = self.relation.attribute_mut(id).unwrap();
+      let mut attr = *self.relation.attribute(id).unwrap();
       attr.shape = shape;
       attr.actual_shape = actual_shape;
+      self.relation.set_attribute(id, attr);
 
       if let Ok(ta_children_ids) = self.ta.children(id) {
         for ta_child in ta_children_ids {
@@ -703,12 +704,16 @@ impl TreeArena {
     };
 
     self.relation.add_root(id, name);
-    let attr = self.relation.attribute_mut(id).unwrap();
-    attr.shape = shape;
-    attr.actual_shape = actual_shape;
-    attr.zindex = DEFAULT_ZINDEX;
-    attr.enabled = DEFAULT_ENABLED;
-    attr.truncate_policy = TruncatePolicy::BRUTAL;
+    self.relation.set_attribute(
+      id,
+      Attribute {
+        shape,
+        actual_shape,
+        zindex: DEFAULT_ZINDEX,
+        enabled: DEFAULT_ENABLED,
+        truncate_policy: TruncatePolicy::BRUTAL,
+      },
+    );
     Ok(id)
   }
 
