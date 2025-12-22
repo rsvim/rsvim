@@ -476,6 +476,10 @@ impl Relation {
     self.attributes.insert(id, attribute);
   }
 
+  pub fn remove_attribute(&mut self, id: TreeNodeId) {
+    self.attributes.remove(&id)
+  }
+
   /// Add the first node, which is the root node.
   pub fn add_root(&mut self, id: TreeNodeId, name: &'static str) {
     self._internal_check();
@@ -483,7 +487,6 @@ impl Relation {
     debug_assert!(self.parent.is_empty());
     debug_assert_eq!(self.root, INVALID_ROOT_ID);
     self.children.insert(id, vec![]);
-    self.attributes.insert(id, Attribute::default());
     self._set_root(id);
     self._set_name(id, name);
   }
@@ -504,7 +507,6 @@ impl Relation {
     debug_assert!(!self.parent.contains_key(&id));
     self.children.get_mut(&parent_id).unwrap().push(id);
     self.parent.insert(id, parent_id);
-    self.attributes.insert(id, Attribute::default());
     self._set_name(id, name);
   }
 
@@ -534,7 +536,6 @@ impl Relation {
       .0;
     self.children.get_mut(&parent_id).unwrap().remove(child_pos);
     self.parent.remove(&id);
-    self.attributes.remove(&id);
   }
 }
 
@@ -845,5 +846,6 @@ impl TreeArena {
     debug_assert!(self.relation.parent(id).is_some());
     let parent_id = self.relation.parent(id).unwrap();
     self.relation.remove_child(parent_id, id);
+    self.relation.remove_attribute(id);
   }
 }
