@@ -214,7 +214,7 @@ impl Ta {
   }
 }
 
-#[derive(Debug, Copy, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// When insert a node into a tree under a parent node, we will need to adjust
 /// its logical shape and calculate its actual shape. This is because TaffyTree
 /// can calculate larger layout result, which doesn't fit into terminal actual
@@ -303,7 +303,7 @@ pub enum TruncatePolicy {
   RESERVED,
 }
 
-#[derive(Debug, Copy, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Common attribute of a node.
 pub struct Attribute {
   pub shape: IRect,
@@ -672,15 +672,16 @@ impl ItreArena {
     };
 
     self.relation.add_root(id, name);
-    self.relation.set_children_zindex(id, DEFAULT_ZINDEX);
-
-    self.relation.attributes.insert();
-    node.set_zindex(DEFAULT_ZINDEX);
-    node.set_enabled(DEFAULT_ENABLED);
-    node.set_shape(shape);
-    node.set_actual_shape(actual_shape);
-    node.set_truncate_policy(TruncatePolicy::BRUTAL);
-    self.nodes.insert(id, node);
+    self.relation.set_attribute(
+      id,
+      Attribute {
+        shape,
+        actual_shape,
+        zindex: DEFAULT_ZINDEX,
+        enabled: DEFAULT_ENABLED,
+        truncate_policy: TruncatePolicy::BRUTAL,
+      },
+    );
     Ok(id)
   }
 
