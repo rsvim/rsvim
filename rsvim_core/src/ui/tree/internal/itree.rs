@@ -47,7 +47,7 @@ where
   }
 
   pub fn is_empty(&self) -> bool {
-    self.nodes.len() <= 1
+    self.nodes.is_empty()
   }
 
   pub fn root_id(&self) -> TreeNodeId {
@@ -59,11 +59,11 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relation.parent(id)
+    self.arena.borrow().parent_id(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.relation.children(id).unwrap_or_default()
+    self.arena.borrow().children_ids(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {

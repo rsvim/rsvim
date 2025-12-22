@@ -574,6 +574,14 @@ impl TreeArena {
     self.relation.root()
   }
 
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self.relation.parent(id)
+  }
+
+  pub fn children_ids(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
+    self.relation.children(id)
+  }
+
   fn _internal_check(&self) {
     debug_assert_eq!(self.relation.is_empty(), self.ta.is_empty());
     debug_assert_eq!(self.relation.len(), self.ta.len());
