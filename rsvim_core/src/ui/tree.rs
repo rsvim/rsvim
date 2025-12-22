@@ -136,11 +136,6 @@ impl Tree {
     self.base.root_id()
   }
 
-  /// All node IDs collection.
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.base.node_ids()
-  }
-
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.base.parent_id(id)

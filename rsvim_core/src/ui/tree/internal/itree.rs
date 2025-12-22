@@ -54,10 +54,6 @@ where
     self.arena.borrow().root()
   }
 
-  pub fn node_ids(&self) -> Vec<TreeNodeId> {
-    self.nodes.keys().copied().collect()
-  }
-
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.arena.borrow().parent(id)
   }
@@ -203,7 +199,7 @@ where
   /// NOTE: Never remove the root node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> Option<T> {
     self._internal_check();
-    debug_assert_ne!(id, self.relation.root_id());
+    debug_assert_ne!(id, self.arena.borrow().root());
 
     match self.nodes.remove(&id) {
       Some(removed_node) => {
