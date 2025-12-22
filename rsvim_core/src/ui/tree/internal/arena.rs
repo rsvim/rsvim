@@ -570,6 +570,10 @@ impl TreeArena {
     self.relation.len()
   }
 
+  pub fn root_id(&self) -> TreeNodeId {
+    self.relation.root()
+  }
+
   fn _internal_check(&self) {
     debug_assert_eq!(self.relation.is_empty(), self.ta.is_empty());
     debug_assert_eq!(self.relation.len(), self.ta.len());

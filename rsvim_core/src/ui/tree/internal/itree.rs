@@ -51,7 +51,7 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.relation.root_id()
+    self.arena.borrow().root_id()
   }
 
   pub fn node_ids(&self) -> Vec<TreeNodeId> {
