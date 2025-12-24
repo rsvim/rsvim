@@ -783,6 +783,21 @@ impl TreeContext {
     self._internal_check();
     debug_assert!(self.relation.is_empty());
 
+    let id = self.ta.new_leaf(style)?;
+    self.relation.add_root(id, name);
+    let shape = rect_as!(actual_shape, isize);
+    let shape = shapes::clamp_shape(&shape);
+    self.relation.set_attribute(
+      id,
+      Attribute {
+        shape,
+        actual_shape,
+        zindex: DEFAULT_ZINDEX,
+        enabled: DEFAULT_ENABLED,
+        truncate_policy: TruncatePolicy::BRUTAL,
+      },
+    );
+
     let (id, shape) = {
       let id = self.ta.new_leaf(style)?;
       self.ta.compute_layout(
