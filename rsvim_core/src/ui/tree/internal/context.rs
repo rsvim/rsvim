@@ -332,12 +332,7 @@ pub struct Attribute {
 pub struct Relation {
   parent: FoldMap<TreeNodeId, TreeNodeId>,
   children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
-
   attributes: FoldMap<TreeNodeId, Attribute>,
-
-  // Last changed attributes, this is for detecting common widget changes such
-  // as layout, zindex, etc.
-  last_attributes: FoldMap<TreeNodeId, bool>,
 
   root: TreeNodeId,
 
@@ -353,7 +348,6 @@ impl Relation {
       parent: FoldMap::new(),
       children: FoldMap::new(),
       attributes: FoldMap::new(),
-      last_attributes: FoldMap::new(),
       root: INVALID_ROOT_ID,
       #[cfg(debug_assertions)]
       root_changes: 0,
@@ -730,6 +724,13 @@ impl TreeContext {
     }
   }
 
+  // Compute layout and update attribute of all nodes, after any changes
+  // happened, such as:
+  // - A node changed its style.
+  // - A new node is added.
+  // - A node is removed.
+  fn _compute_layout(&mut self) {}
+
   // Detect whether TaffyTree currently is on the Z-index layer, clear and
   // re-insert all the children nodes that are in the same layer of
   // current `zindex`.
@@ -810,7 +811,6 @@ impl TreeContext {
         zindex: DEFAULT_ZINDEX,
         enabled: DEFAULT_ENABLED,
         truncate_policy: TruncatePolicy::BRUTAL,
-        layout_changed: false,
       },
     );
     Ok(id)
@@ -834,9 +834,18 @@ impl TreeContext {
       if enabled {
         self._refresh_ta_children_by_zindex(parent_id, zindex)?;
         let id = self.ta.new_with_parent(style, parent_id)?;
-        self
-          .ta
-          .compute_layout(self.relation.root(), taffy::Size::MAX_CONTENT)?;
+
+        self.ta.compute_layout(
+          self.relation.root(),
+          taffy::Size {
+            width: taffy::AvailableSpace::from_length(
+              actual_shape.size().width(),
+            ),
+            height: taffy::AvailableSpace::from_length(
+              actual_shape.size().height(),
+            ),
+          },
+        )?;
         let layout = self.ta.layout(id)?;
         (id, rect_from_layout!(layout))
       } else {
