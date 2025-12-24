@@ -471,7 +471,7 @@ impl Relation {
   }
 
   pub fn remove_attribute(&mut self, id: TreeNodeId) {
-    self.attributes.remove(&id)
+    self.attributes.remove(&id);
   }
 
   /// Add the first node, which is the root node.
