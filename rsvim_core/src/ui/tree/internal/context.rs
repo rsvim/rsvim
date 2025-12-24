@@ -312,18 +312,6 @@ pub struct Attribute {
   pub truncate_policy: TruncatePolicy,
 }
 
-impl Default for Attribute {
-  fn default() -> Self {
-    Self {
-      shape: rect!(0, 0, 0, 0),
-      actual_shape: rect!(0, 0, 0, 0),
-      zindex: DEFAULT_ZINDEX,
-      enabled: DEFAULT_ENABLED,
-      truncate_policy: TruncatePolicy::BRUTAL,
-    }
-  }
-}
-
 #[derive(Debug, Clone)]
 // Maintains all nodes relationship of the tree, and all common attributes.
 //
@@ -345,6 +333,7 @@ pub struct Relation {
   parent: FoldMap<TreeNodeId, TreeNodeId>,
   children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
   attributes: FoldMap<TreeNodeId, Attribute>,
+  last_attributes: FoldMap<TreeNodeId, bool>,
   root: TreeNodeId,
 
   #[cfg(debug_assertions)]
@@ -815,6 +804,7 @@ impl TreeContext {
         zindex: DEFAULT_ZINDEX,
         enabled: DEFAULT_ENABLED,
         truncate_policy: TruncatePolicy::BRUTAL,
+        layout_changed: false,
       },
     );
     Ok(id)
