@@ -545,14 +545,14 @@ impl Default for Relation {
 }
 
 #[derive(Debug, Clone)]
-pub struct TreeArena {
+pub struct TreeContext {
   ta: Ta,
   relation: Relation,
 }
 
-rc_refcell_ptr!(TreeArena);
+rc_refcell_ptr!(TreeContext);
 
-impl TreeArena {
+impl TreeContext {
   pub fn new() -> Self {
     Self {
       ta: Ta::new(),
@@ -611,7 +611,7 @@ impl TreeArena {
   }
 }
 
-impl TreeArena {
+impl TreeContext {
   fn _internal_check(&self) {
     debug_assert_eq!(self.relation.is_empty(), self.ta.is_empty());
     debug_assert_eq!(self.relation.len(), self.ta.len());
