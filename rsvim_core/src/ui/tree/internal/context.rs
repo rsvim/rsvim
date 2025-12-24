@@ -15,7 +15,6 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
-use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub const DEFAULT_ZINDEX: usize = 0;
@@ -729,7 +728,14 @@ impl TreeContext {
   // - A node changed its style.
   // - A new node is added.
   // - A node is removed.
-  fn _compute_layout(&mut self) {}
+  fn _compute_layout(&mut self) {
+    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+    q.push_back(self.root());
+    while let Some(id) = q.pop_front() {
+      debug_assert!(self.relation.attribute(id).is_some());
+      if !self.relation.attribute(id).unwrap().enabled {}
+    }
+  }
 
   // Detect whether TaffyTree currently is on the Z-index layer, clear and
   // re-insert all the children nodes that are in the same layer of
@@ -783,21 +789,6 @@ impl TreeContext {
     self._internal_check();
     debug_assert!(self.relation.is_empty());
 
-    let id = self.ta.new_leaf(style)?;
-    self.relation.add_root(id, name);
-    let shape = rect_as!(actual_shape, isize);
-    let shape = shapes::clamp_shape(&shape);
-    self.relation.set_attribute(
-      id,
-      Attribute {
-        shape,
-        actual_shape,
-        zindex: DEFAULT_ZINDEX,
-        enabled: DEFAULT_ENABLED,
-        truncate_policy: TruncatePolicy::BRUTAL,
-      },
-    );
-
     let (id, shape) = {
       let id = self.ta.new_leaf(style)?;
       self.ta.compute_layout(
@@ -813,7 +804,7 @@ impl TreeContext {
       )?;
       let layout = self.ta.layout(id)?;
       let shape = rect_from_layout!(layout);
-      let shape = shapes::clamp_shape(&shape);
+      debug_assert_eq!(rect_as!(shape, u16), actual_shape);
       (id, shape)
     };
 
