@@ -332,10 +332,13 @@ pub struct Attribute {
 pub struct Relation {
   parent: FoldMap<TreeNodeId, TreeNodeId>,
   children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
+
   attributes: FoldMap<TreeNodeId, Attribute>,
+
   // Last changed attributes, this is for detecting common widget changes such
   // as layout, zindex, etc.
   last_attributes: FoldMap<TreeNodeId, bool>,
+
   root: TreeNodeId,
 
   #[cfg(debug_assertions)]
@@ -350,6 +353,7 @@ impl Relation {
       parent: FoldMap::new(),
       children: FoldMap::new(),
       attributes: FoldMap::new(),
+      last_attributes: FoldMap::new(),
       root: INVALID_ROOT_ID,
       #[cfg(debug_assertions)]
       root_changes: 0,
