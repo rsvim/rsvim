@@ -1,4 +1,4 @@
-//! Internal tree arena (ok I don't know how to name it).
+//! Internal tree context.
 
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
