@@ -312,7 +312,7 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  fn insert_guard(&mut self, node: &TreeNode) {
+  fn _insert_guard(&mut self, node: &TreeNode) {
     match node {
       TreeNode::Cursor(c) => {
         self.cursor_id = Some(c.id());
@@ -333,7 +333,7 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_guard(&child_node);
+    self._insert_guard(&child_node);
     self.base.add_child(parent_id, child_node)
   }
 
@@ -343,7 +343,7 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_guard(&child_node);
+    self._insert_guard(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 

@@ -134,7 +134,7 @@ impl CommandLineExStateful {
     let mut tree = lock!(tree);
 
     debug_assert!(tree.cmdline_id().is_some());
-    let cmdline = tree.command_line_mut().unwrap();
+    let cmdline = tree.cmdline_mut().unwrap();
 
     // Show message, hide input/indicator.
     cmdline.show_message();
@@ -175,7 +175,7 @@ impl CommandLineExStateful {
 
     let cmdline_input_content = cmdline_input_content.trim();
     tree
-      .command_line_mut()
+      .cmdline_mut()
       .unwrap()
       .indicator_mut()
       .set_symbol(CmdlineIndicatorSymbol::Empty);
@@ -260,7 +260,7 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.command_line_mut().unwrap();
+    let cmdline = tree.cmdline_mut().unwrap();
     let cmdline_id = cmdline.id();
     debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
     debug_assert!(
