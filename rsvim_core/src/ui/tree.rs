@@ -48,14 +48,15 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 /// * Children will be destroyed when their parent is.
 /// * There are two location coordinates: relative location based on parent's
 ///   location (top-left corner), absolute location based on terminal.
-/// * Children are displayed inside their parent's geometric shape, clipped by
-///   boundaries.
-/// * Visible/enabled attributes will affected all its descendant nodes.
+/// * Children must be displayed inside their parent's geometric shape,
+///   truncated by their parent boundaries.
+/// * Z-index/enabled attributes will affected all its descendant nodes.
 ///
-/// ## Priority
+/// ## Rendering Order
 ///
-/// Children have higher priority to display on TUI than their parent, as well
-/// as receiving keyboard/mouse events.
+/// - Children have higher priority to render on terminal than parent.
+/// - For all the children under the same parent, nodes with higher Z-index
+///   have higher priority than the ones with lower Z-index.
 ///
 /// ## Attributes
 ///
