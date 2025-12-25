@@ -33,7 +33,7 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 #[derive(Debug, Clone)]
 /// The UI/widget tree.
 ///
-/// This tree manages all UI components and rendering on the canvas, each
+/// This tree manages all UI components and renders them on the canvas, each
 /// widget is a node on the tree, everything inside is the node's children.
 /// While the terminal itself is the root widget node.
 ///
