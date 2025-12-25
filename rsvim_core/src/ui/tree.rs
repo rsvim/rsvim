@@ -22,6 +22,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
 use taffy::Style;
+use taffy::prelude::FromLength;
 
 pub type TreeNodeId = i32;
 
@@ -150,7 +151,14 @@ impl Tree {
   pub fn new(canvas_size: U16Size) -> Self {
     let mut base = Itree::new();
 
-    let style = Style {};
+    let style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(canvas_size.width()),
+        height: taffy::Dimension::from_length(canvas_size.height()),
+      },
+      flex_direction: taffy::FlexDirection::Column,
+      ..Default::default()
+    };
 
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);

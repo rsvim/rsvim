@@ -166,6 +166,12 @@ pub struct InodeBase {
   ctx: TreeContextRc,
 }
 
+impl InodeBase {
+  pub fn new(id: TreeNodeId, ctx: TreeContextRc) -> Self {
+    Self { id, ctx }
+  }
+}
+
 impl Inodeable for InodeBase {
   fn id(&self) -> TreeNodeId {
     self.id
