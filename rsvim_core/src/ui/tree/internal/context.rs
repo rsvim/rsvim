@@ -342,12 +342,10 @@ impl TreeContext {
   }
 
   pub fn is_empty(&self) -> bool {
-    self._internal_check();
     self.ta.is_empty()
   }
 
   pub fn len(&self) -> usize {
-    self._internal_check();
     self.ta.len()
   }
 
