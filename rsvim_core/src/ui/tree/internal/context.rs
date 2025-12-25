@@ -616,6 +616,14 @@ impl TreeContext {
     self.properties.get(&id)
   }
 
+  pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self.ta.style(id).map(|s| s.display == taffy::Display::None)
+  }
+
+  pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
+    self.disabled(id).map(|v| !v)
+  }
+
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self.ta.style(id)
   }
@@ -629,7 +637,6 @@ impl TreeContext {
     if enabled {
       // If this node is enabled, changing its style will affect other sibling
       // nodes with the same Z-index.
-      self._refresh_ta_children_by_zindex(parent_id, zindex)?;
       self._update_shapes_for(parent_id)
     } else {
       Ok(())
@@ -745,47 +752,6 @@ impl TreeContext {
     }
   }
 
-  // Detect whether TaffyTree currently is on the Z-index layer, clear and
-  // re-insert all the children nodes that are in the same layer of
-  // current `zindex`.
-  pub fn _refresh_ta_children_by_zindex(
-    &mut self,
-    parent_id: TreeNodeId,
-    target_zindex: usize,
-  ) -> TaffyResult<()> {
-    let children_ids = self.ta.children(parent_id);
-    let has_children = children_ids
-      .as_ref()
-      .map(|children| !children.is_empty())
-      .unwrap_or(false);
-    let children_zindex = if has_children {
-      self
-        .relation
-        .attribute(children_ids.unwrap()[0])
-        .unwrap()
-        .zindex
-    } else {
-      DEFAULT_ZINDEX
-    };
-
-    if !has_children || children_zindex != target_zindex {
-      // Clear all children nodes under this parent.
-      self.ta.set_children(parent_id, &[])?;
-
-      // Re-inesrt all children nodes equals to the `zindex` to this parent.
-      if let Some(children) = self.relation.children(parent_id) {
-        for c in children {
-          debug_assert!(self.relation.contains(c));
-          let zindex = self.relation.attribute(c).unwrap().zindex;
-          if zindex == target_zindex {
-            self.ta.add_child(parent_id, c)?;
-          }
-        }
-      }
-    }
-    Ok(())
-  }
-
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
   pub fn add_root(
@@ -840,7 +806,6 @@ impl TreeContext {
 
     let (id, shape) = {
       if enabled {
-        self._refresh_ta_children_by_zindex(parent_id, zindex)?;
         let id = self.ta.new_with_parent(style, parent_id)?;
 
         self.ta.compute_layout(
@@ -912,7 +877,6 @@ impl TreeContext {
     // After this node is removed, if it is enabled, it can affect other
     // sibling nodes with the same Z-index.
     if enabled {
-      self._refresh_ta_children_by_zindex(parent_id, zindex)?;
       self._update_shapes_for(parent_id)
     } else {
       Ok(())
