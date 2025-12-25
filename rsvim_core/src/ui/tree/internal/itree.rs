@@ -444,6 +444,8 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
+      // Visit all children nodes under a parent node following Z-index value,
+      // from higher to lower.
       let children_ids_sorted_by_zindex = {
         let ctx = self.tree.context.borrow();
         self
