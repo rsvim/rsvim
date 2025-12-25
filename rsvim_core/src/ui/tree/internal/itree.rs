@@ -74,9 +74,7 @@ where
     self.nodes.get_mut(&id)
   }
 
-  /// Get the iterator.
-  ///
-  /// By default, it iterates in pre-order iterator which starts from the root.
+  /// Iterates all nodes in pre-order that starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.context.borrow().root()))
   }
