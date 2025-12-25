@@ -3,6 +3,7 @@
 pub mod internal;
 
 use crate::buf::BufferWk;
+use crate::content::TextContentsWk;
 use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -12,6 +13,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicator;
+use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use crate::ui::widget::cmdline::input::CmdlineInput;
 use crate::ui::widget::cmdline::message::CmdlineMessage;
 use crate::ui::widget::cursor::Cursor;
@@ -489,8 +491,8 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
-    opts: WindowOptions,
-    buffer: BufferWk,
+    indicator_symbol: CmdlineIndicatorSymbol,
+    text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
   }
 
