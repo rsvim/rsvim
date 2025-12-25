@@ -271,7 +271,7 @@ impl Tree {
 
   /// Mutable cursor widget.
   /// It panics if cursor doesn't exist.
-  pub fn cursor_mut(&self) -> &mut Cursor {
+  pub fn cursor_mut(&mut self) -> &mut Cursor {
     let cursor_id = self.cursor_id.unwrap();
     let n = self.node_mut(cursor_id).unwrap();
     debug_assert!(matches!(n, TreeNode::Cursor(_)));
