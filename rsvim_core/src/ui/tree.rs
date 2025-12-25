@@ -421,7 +421,7 @@ impl Tree {
       parent_id,
       style,
       "Window",
-      |id, context, shape, actual_shape| {
+      |id, context, _shape, actual_shape| {
         let window = Window::new(
           id,
           context,
