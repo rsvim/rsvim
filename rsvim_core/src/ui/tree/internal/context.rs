@@ -14,7 +14,6 @@ use taffy::Layout;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
-use taffy::prelude::FromLength;
 use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
@@ -834,10 +833,10 @@ impl TreeContext {
   ///
   /// NOTE: Never remove the root node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<()> {
-    self._internal_check();
-    debug_assert_ne!(id, self.relation.root());
-    debug_assert!(self.relation.contains(id));
-    debug_assert!(self.relation.parent(id).is_some());
+    debug_assert_ne!(id, self.root);
+    debug_assert!(self.ta.contains(id));
+    debug_assert!(self.ta.parent(id).is_some());
+
     let parent_id = self.relation.parent(id).unwrap();
     let attr = self.property(id).unwrap();
     let enabled = attr.enabled;
