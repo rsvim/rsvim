@@ -201,6 +201,11 @@ impl Tree {
     self.base.node_mut(id)
   }
 
+  /// Get cursor ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
   /// Get command-line ID.
   pub fn cmdline_id(&self) -> Option<TreeNodeId> {
     self.cmdline_id
@@ -358,7 +363,7 @@ impl Tree {
   }
 
   /// See [`Itree::insert`].
-  pub fn insert(
+  pub fn add_window(
     &mut self,
     parent_id: TreeNodeId,
     child_node: TreeNode,
