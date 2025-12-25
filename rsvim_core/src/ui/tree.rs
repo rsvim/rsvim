@@ -111,7 +111,7 @@ pub struct Tree {
   base: Itree<TreeNode>,
 
   // Command-line node ID.
-  command_line_id: Option<TreeNodeId>,
+  cmdline_id: Option<TreeNodeId>,
 
   // Window ID collection.
   window_ids: BTreeSet<TreeNodeId>,
@@ -155,7 +155,7 @@ impl Tree {
 
     Tree {
       base,
-      command_line_id: None,
+      cmdline_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
@@ -200,7 +200,7 @@ impl Tree {
 
   /// Get command-line ID.
   pub fn cmdline_id(&self) -> Option<TreeNodeId> {
-    self.command_line_id
+    self.cmdline_id
   }
 
   /// Get current window ID.
@@ -236,6 +236,7 @@ impl Tree {
 // Widget {
 impl Tree {
   /// Window widget.
+  /// It panics if window doesn't exist.
   pub fn window(&self, id: TreeNodeId) -> &Window {
     let n = self.node(id).unwrap();
     debug_assert!(matches!(n, TreeNode::Window(_)));
@@ -249,6 +250,7 @@ impl Tree {
   }
 
   /// Mutable window widget.
+  /// It panics if window doesn't exist.
   pub fn window_mut(&mut self, id: TreeNodeId) -> &mut Window {
     let n = self.node_mut(id).unwrap();
     debug_assert!(matches!(n, TreeNode::Window(_)));
@@ -261,51 +263,45 @@ impl Tree {
     }
   }
 
-  // Current window widget.
+  /// Current window widget.
+  /// It panics if current window doesn't exist.
   pub fn current_window(&self) -> &Window {
     self.window(self.current_window_id.unwrap())
   }
 
-  // Mutable current window widget.
+  /// Mutable current window widget.
+  /// It panics if current window doesn't exist.
   pub fn current_window_mut(&mut self) -> &mut Window {
     self.window_mut(self.current_window_id.unwrap())
   }
 
-  // Command-line widget.
-  pub fn cmdline(&self) -> Option<&Cmdline> {
-    match self.command_line_id {
-      Some(cmdline_id) => {
-        debug_assert!(self.node(cmdline_id).is_some());
-        let cmdline_node = self.node(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::Cmdline(_)));
-        match cmdline_node {
-          TreeNode::Cmdline(w) => {
-            debug_assert_eq!(w.id(), cmdline_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+  /// Command-line widget.
+  /// It panics if command-line doesn't exist.
+  pub fn cmdline(&self) -> &Cmdline {
+    let cmdline_id = self.cmdline_id.unwrap();
+    let n = self.node(cmdline_id).unwrap();
+    debug_assert!(matches!(n, TreeNode::Cmdline(_)));
+    match n {
+      TreeNode::Cmdline(c) => {
+        debug_assert_eq!(c.id(), cmdline_id);
+        c
       }
-      None => None,
+      _ => unreachable!(),
     }
   }
 
   // Mutable command-line widget.
-  pub fn command_line_mut(&mut self) -> Option<&mut Cmdline> {
-    match self.command_line_id {
-      Some(cmdline_id) => {
-        debug_assert!(self.node_mut(cmdline_id).is_some());
-        let cmdline_node = self.node_mut(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::Cmdline(_)));
-        match cmdline_node {
-          TreeNode::Cmdline(w) => {
-            debug_assert_eq!(w.id(), cmdline_id);
-            Some(w)
-          }
-          _ => unreachable!(),
-        }
+  /// It panics if command-line doesn't exist.
+  pub fn cmdline_mut(&mut self) -> &mut Cmdline {
+    let cmdline_id = self.cmdline_id.unwrap();
+    let n = self.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(n, TreeNode::Cmdline(_)));
+    match n {
+      TreeNode::Cmdline(c) => {
+        debug_assert_eq!(c.id(), cmdline_id);
+        c
       }
-      None => None,
+      _ => unreachable!(),
     }
   }
 }
@@ -317,7 +313,7 @@ impl Tree {
     match node {
       TreeNode::Cmdline(command_line) => {
         // When insert command-line widget, update `command_line_id`.
-        self.command_line_id = Some(command_line.id());
+        self.cmdline_id = Some(command_line.id());
       }
       TreeNode::Window(window) => {
         // When insert window widget, update `window_ids`.
@@ -348,8 +344,8 @@ impl Tree {
   }
 
   fn remove_guard(&mut self, id: TreeNodeId) {
-    if self.command_line_id == Some(id) {
-      self.command_line_id = None;
+    if self.cmdline_id == Some(id) {
+      self.cmdline_id = None;
     }
     self.window_ids.remove(&id);
     if self.current_window_id == Some(id)
