@@ -294,7 +294,7 @@ where
         let final_pos: IPos = final_shape.min().into();
         let final_x = final_pos.x() - pos.x();
         let final_y = final_pos.y() - pos.y();
-        Some(Self::move_by(ctx, id, final_x, final_y))
+        Some(Self::move_by(&ctx, id, final_x, final_y))
       }
       None => None,
     }
