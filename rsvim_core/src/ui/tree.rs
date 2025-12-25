@@ -393,7 +393,7 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  fn _insert_guard(&mut self, node: &TreeNode) {
+  fn _insert_node(&mut self, id: TreeNodeId, node: TreeNode) {
     match node {
       TreeNode::Cursor(c) => {
         self.cursor_id = Some(c.id());
@@ -406,6 +406,7 @@ impl Tree {
       }
       _ => {}
     }
+    self.nodes.insert(id, node);
   }
 
   /// Create a window widget.
@@ -456,7 +457,7 @@ impl Tree {
     );
     let viewport = window.viewport();
     let window = TreeNode::Window(window);
-    self.nodes.insert(id, window);
+    self._insert_node(id, window);
 
     // window content node
     let content = WindowContent::new(
@@ -466,7 +467,7 @@ impl Tree {
       Arc::downgrade(&viewport),
     );
     let content = TreeNode::WindowContent(content);
-    self.nodes.insert(content_id, content);
+    self._insert_node(content_id, content);
 
     Ok(id)
   }
@@ -523,7 +524,7 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self._insert_guard(&child_node);
+    self._insert_node(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 
