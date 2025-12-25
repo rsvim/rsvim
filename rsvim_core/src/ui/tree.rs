@@ -484,30 +484,35 @@ impl Tree {
     hidden: bool,
     style: CursorStyle,
   ) -> TaffyResult<TreeNodeId> {
-    let cursor_style = Style {
-      position: taffy::Position::Absolute,
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_length(1_u16),
-      },
-      inset: taffy::Rect {
-        left: taffy::LengthPercentageAuto::from_length(0_u16),
-        top: taffy::LengthPercentageAuto::from_length(0_u16),
-        right: taffy::LengthPercentageAuto::AUTO,
-        bottom: taffy::LengthPercentageAuto::AUTO,
-      },
-      ..Default::default()
+    let id = {
+      let mut context = self.context.borrow_mut();
+
+      let cursor_style = Style {
+        position: taffy::Position::Absolute,
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(1_u16),
+          height: taffy::Dimension::from_length(1_u16),
+        },
+        inset: taffy::Rect {
+          left: taffy::LengthPercentageAuto::from_length(0_u16),
+          top: taffy::LengthPercentageAuto::from_length(0_u16),
+          right: taffy::LengthPercentageAuto::AUTO,
+          bottom: taffy::LengthPercentageAuto::AUTO,
+        },
+        ..Default::default()
+      };
+      context.new_with_parent(
+        parent_id,
+        cursor_style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "Cursor",
+      )?
     };
 
-    let id = self.base.new_with_parent_default(
-      parent_id,
-      cursor_style,
-      "Cursor",
-      |id, context, _shape, _actual_shape| {
-        let cursor = Cursor::new(id, context, blinking, hidden, style);
-        TreeNode::Cursor(cursor)
-      },
-    )?;
+    let cursor = Cursor::new(id, self.context(), blinking, hidden, style);
+    let cursor = TreeNode::Cursor(cursor);
+    self._insert_node(id, cursor);
 
     Ok(id)
   }
