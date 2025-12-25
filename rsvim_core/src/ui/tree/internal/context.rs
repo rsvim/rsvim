@@ -46,10 +46,12 @@ impl Ta {
   }
 
   pub fn is_empty(&self) -> bool {
+    self._internal_check();
     self.id2taid.is_empty()
   }
 
   pub fn len(&self) -> usize {
+    self._internal_check();
     self.id2taid.len()
   }
 
@@ -302,8 +304,8 @@ pub enum TruncatePolicy {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-/// Common attribute of a node.
-pub struct Attribute {
+/// Common property of a node.
+pub struct Property {
   pub shape: IRect,
   pub actual_shape: U16Rect,
   pub zindex: usize,
@@ -330,7 +332,7 @@ pub struct Attribute {
 pub struct Relation {
   parent: FoldMap<TreeNodeId, TreeNodeId>,
   children: FoldMap<TreeNodeId, Vec<TreeNodeId>>,
-  attributes: FoldMap<TreeNodeId, Attribute>,
+  attributes: FoldMap<TreeNodeId, Property>,
 
   root: TreeNodeId,
 
@@ -454,11 +456,11 @@ impl Relation {
     self.children.get(&id).cloned()
   }
 
-  pub fn attribute(&self, id: TreeNodeId) -> Option<&Attribute> {
+  pub fn attribute(&self, id: TreeNodeId) -> Option<&Property> {
     self.attributes.get(&id)
   }
 
-  pub fn set_attribute(&mut self, id: TreeNodeId, attribute: Attribute) {
+  pub fn set_attribute(&mut self, id: TreeNodeId, attribute: Property) {
     self.attributes.insert(id, attribute);
   }
 
@@ -534,7 +536,14 @@ impl Default for Relation {
 #[derive(Debug, Clone)]
 pub struct TreeContext {
   ta: Ta,
-  relation: Relation,
+  properties: FoldMap<TreeNodeId, Property>,
+  root: TreeNodeId,
+
+  // For debugging
+  #[cfg(debug_assertions)]
+  root_changes: usize,
+  #[cfg(debug_assertions)]
+  names: FoldMap<TreeNodeId, &'static str>,
 }
 
 rc_refcell_ptr!(TreeContext);
@@ -543,26 +552,55 @@ impl TreeContext {
   pub fn new() -> Self {
     Self {
       ta: Ta::new(),
-      relation: Relation::new(),
+      properties: FoldMap::new(),
+      root: INVALID_ROOT_ID,
+      #[cfg(debug_assertions)]
+      root_changes: 0,
+      #[cfg(debug_assertions)]
+      names: FoldMap::new(),
     }
   }
 
   pub fn is_empty(&self) -> bool {
     self._internal_check();
-    self.relation.is_empty()
+    self.ta.is_empty()
   }
 
   pub fn len(&self) -> usize {
     self._internal_check();
-    self.relation.len()
+    self.ta.len()
   }
 
   pub fn contains(&self, id: TreeNodeId) -> bool {
-    self.relation.contains(id)
+    self.ta.contains(id)
   }
 
+  fn _set_root(&mut self, id: TreeNodeId) {
+    debug_assert_eq!(self.root, INVALID_ROOT_ID);
+    debug_assert_eq!(self.root_changes, 0);
+    self.root = id;
+    if cfg!(debug_assertions) {
+      self.root_changes += 1;
+      debug_assert!(self.root_changes <= 1);
+    }
+  }
+
+  fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
+    if cfg!(debug_assertions) {
+      self.names.insert(id, name);
+    }
+  }
+
+  fn _unset_name(&mut self, id: TreeNodeId) {
+    if cfg!(debug_assertions) {
+      debug_assert!(self.names.contains_key(&id));
+      self.names.remove(&id);
+    }
+  }
+
+  /// The first created node will be the root node.
   pub fn root(&self) -> TreeNodeId {
-    self.relation.root()
+    self.root
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
@@ -573,7 +611,7 @@ impl TreeContext {
     self.relation.children(id)
   }
 
-  pub fn attribute(&self, id: TreeNodeId) -> Option<&Attribute> {
+  pub fn attribute(&self, id: TreeNodeId) -> Option<&Property> {
     self.relation.attribute(id)
   }
 
@@ -810,7 +848,7 @@ impl TreeContext {
     self.relation.add_root(id, name);
     self.relation.set_attribute(
       id,
-      Attribute {
+      Property {
         shape,
         actual_shape,
         zindex: DEFAULT_ZINDEX,
@@ -869,7 +907,7 @@ impl TreeContext {
     self.relation.add_child(parent_id, id, name);
     self.relation.set_attribute(
       id,
-      Attribute {
+      Property {
         shape,
         actual_shape,
         zindex,
