@@ -307,7 +307,6 @@ pub struct Attribute {
   pub shape: IRect,
   pub actual_shape: U16Rect,
   pub zindex: usize,
-  pub enabled: bool,
   pub truncate_policy: TruncatePolicy,
 }
 
