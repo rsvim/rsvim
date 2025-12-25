@@ -612,8 +612,8 @@ impl TreeContext {
     self.ta.children(id)
   }
 
-  pub fn attribute(&self, id: TreeNodeId) -> Option<&Property> {
-    self.relation.attribute(id)
+  pub fn property(&self, id: TreeNodeId) -> Option<&Property> {
+    self.properties.get(&id)
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
@@ -638,36 +638,6 @@ impl TreeContext {
 }
 
 impl TreeContext {
-  fn _internal_check(&self) {
-    debug_assert_eq!(self.relation.is_empty(), self.ta.is_empty());
-    debug_assert_eq!(self.relation.len(), self.ta.len());
-
-    if cfg!(test) && self.relation.len() > 0 {
-      debug_assert_ne!(self.relation.root(), INVALID_ROOT_ID);
-      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-      q.push_back(self.relation.root());
-      while let Some(id) = q.pop_front() {
-        if let Ok(ta_children_ids) = self.ta.children(id) {
-          let mut ta_zindex: Option<usize> = None;
-          for ta_child in ta_children_ids {
-            debug_assert!(self.relation.contains(ta_child));
-            debug_assert!(self.relation.attribute(ta_child).is_some());
-            if ta_zindex.is_none() {
-              ta_zindex =
-                Some(self.relation.attribute(ta_child).unwrap().zindex);
-            } else {
-              debug_assert_eq!(
-                ta_zindex,
-                Some(self.relation.attribute(ta_child).unwrap().zindex)
-              );
-            }
-            q.push_back(ta_child);
-          }
-        }
-      }
-    }
-  }
-
   /// Update shape/actual_shape for a node and all its children and
   /// descendants.
   fn _update_shapes_for(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
@@ -824,8 +794,7 @@ impl TreeContext {
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    debug_assert!(self.relation.is_empty());
+    debug_assert!(self.ta.is_empty());
 
     let (id, shape) = {
       let id = self.ta.new_leaf(style)?;
@@ -846,14 +815,14 @@ impl TreeContext {
       (id, shape)
     };
 
-    self.relation.add_root(id, name);
-    self.relation.set_attribute(
+    self._set_root(id);
+    self._set_name(id, name);
+    self.properties.insert(
       id,
       Property {
         shape,
         actual_shape,
         zindex: DEFAULT_ZINDEX,
-        enabled: DEFAULT_ENABLED,
         truncate_policy: TruncatePolicy::BRUTAL,
       },
     );
@@ -938,7 +907,7 @@ impl TreeContext {
     debug_assert!(self.relation.contains(id));
     debug_assert!(self.relation.parent(id).is_some());
     let parent_id = self.relation.parent(id).unwrap();
-    let attr = self.attribute(id).unwrap();
+    let attr = self.property(id).unwrap();
     let enabled = attr.enabled;
     let zindex = attr.zindex;
     self.ta.remove_child(parent_id, id);
