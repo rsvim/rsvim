@@ -790,30 +790,27 @@ impl TreeContext {
   /// Returns the root node ID.
   pub fn add_root(
     &mut self,
-    actual_shape: U16Rect,
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     debug_assert!(self.ta.is_empty());
 
-    let (id, shape) = {
-      let id = self.ta.new_leaf(style)?;
-      self.ta.compute_layout(
-        id,
-        taffy::Size {
-          width: taffy::AvailableSpace::from_length(
-            actual_shape.size().width(),
-          ),
-          height: taffy::AvailableSpace::from_length(
-            actual_shape.size().height(),
-          ),
-        },
-      )?;
-      let layout = self.ta.layout(id)?;
-      let shape = rect_from_layout!(layout);
-      debug_assert_eq!(rect_as!(shape, u16), actual_shape);
-      (id, shape)
-    };
+    let height = style.size.height.value();
+    let width = style.size.width.value();
+
+    let id = self.ta.new_leaf(style)?;
+    self.ta.compute_layout(
+      id,
+      taffy::Size {
+        width: taffy::AvailableSpace::from_length(width),
+        height: taffy::AvailableSpace::from_length(height),
+      },
+    )?;
+    let layout = self.ta.layout(id)?;
+    let shape = rect_from_layout!(layout);
+    debug_assert_eq!(shape.size().height(), height as isize);
+    debug_assert_eq!(shape.size().width(), width as isize);
+    let actual_shape = rect_as!(shape, u16);
 
     self._set_root(id);
     self._set_name(id, name);
@@ -836,12 +833,10 @@ impl TreeContext {
     parent_id: TreeNodeId,
     style: Style,
     zindex: usize,
-    enabled: bool,
     truncate_policy: TruncatePolicy,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    self._internal_check();
-    debug_assert!(self.relation.contains(parent_id));
+    debug_assert!(self.ta.contains(parent_id));
 
     let (id, shape) = {
       if enabled {
