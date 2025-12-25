@@ -452,6 +452,7 @@ where
           .iter()
           .sorted_by_key(|i| ctx.zindex(**i).unwrap())
           .rev()
+          .copied()
           .collect_vec()
       };
       for child_id in children_ids_sorted_by_zindex {
