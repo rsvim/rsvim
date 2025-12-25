@@ -796,11 +796,11 @@ impl TreeContext {
     debug_assert_eq!(width, self.shapes.get(&id).unwrap().width());
     debug_assert_eq!(
       height,
-      self.actual_shapes.get(id).unwrap().height() as isize
+      self.actual_shapes.get(&id).unwrap().height() as isize
     );
     debug_assert_eq!(
       width,
-      self.actual_shapes.get(id).unwrap().width() as isize
+      self.actual_shapes.get(&id).unwrap().width() as isize
     );
 
     Ok(id)
@@ -820,39 +820,11 @@ impl TreeContext {
 
     let id = self.ta.new_with_parent(style, parent_id)?;
 
-    self.ta.compute_layout(
-      self.relation.root(),
-      taffy::Size {
-        width: taffy::AvailableSpace::from_length(actual_shape.size().width()),
-        height: taffy::AvailableSpace::from_length(
-          actual_shape.size().height(),
-        ),
-      },
-    )?;
-    let layout = self.ta.layout(id)?;
+    self._set_name(id, name);
+    self.zindexes.insert(id, zindex);
+    self.truncate_policies.insert(id, truncate_policy);
 
-    let shape = self._truncate_shape(id, &shape, truncate_policy);
-    let actual_shape = self._calculate_actual_shape(id, &shape);
-
-    self.relation.add_child(parent_id, id, name);
-    self.relation.set_attribute(
-      id,
-      Property {
-        shape,
-        actual_shape,
-        zindex,
-        enabled,
-        truncate_policy,
-      },
-    );
-
-    // After this new child node is created, it may also affected the other
-    // children nodes under the same parent with the same Z-index, because the
-    // layout is been changed.
-    // Thus we have to update both shape and actual_shape for all the children
-    // nodes under the parent, except this newly created child node because we
-    // just had done it.
-    self._update_shapes_for_children_except(parent_id, id)?;
+    self._update_shapes()?;
 
     Ok(id)
   }
