@@ -3,7 +3,11 @@
 use crate::prelude::*;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::internal::arena::*;
+use crate::ui::tree::internal::context::DEFAULT_TRUNCATE_POLICY;
+use crate::ui::tree::internal::context::DEFAULT_ZINDEX;
+use crate::ui::tree::internal::context::TreeContext;
+use crate::ui::tree::internal::context::TreeContextRc;
+use crate::ui::tree::internal::context::TruncatePolicy;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -24,7 +28,7 @@ where
   nodes: FoldMap<TreeNodeId, T>,
 
   // The reference of all common tree node relationships & attributes.
-  arena: TreeArenaRc,
+  context: TreeContextRc,
 }
 
 impl<T> Itree<T>
@@ -34,12 +38,12 @@ where
   pub fn new() -> Self {
     Itree {
       nodes: FoldMap::new(),
-      arena: Rc::new(RefCell::new(TreeArena::new())),
+      context: TreeContext::to_rc(TreeContext::new()),
     }
   }
 
   fn _internal_check(&self) {
-    debug_assert_eq!(self.arena.borrow().len(), self.nodes.len());
+    debug_assert_eq!(self.context.borrow().len(), self.nodes.len());
   }
 
   pub fn len(&self) -> usize {
@@ -51,15 +55,15 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self.arena.borrow().root()
+    self.context.borrow().root()
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.arena.borrow().parent(id)
+    self.context.borrow().parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.arena.borrow().children(id).unwrap_or_default()
+    self.context.borrow().children(id).unwrap_or_default()
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -74,7 +78,7 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.arena.borrow().root()))
+    ItreeIter::new(self, Some(self.context.borrow().root()))
   }
 }
 
@@ -96,10 +100,9 @@ where
   /// Returns the root node ID.
   pub fn add_root<F>(
     &mut self,
-    actual_shape: U16Rect,
     style: Style,
-    constructor: F,
     name: &'static str,
+    constructor: F,
   ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
@@ -112,10 +115,11 @@ where
     debug_assert!(self.nodes.is_empty());
 
     let (id, shape, actual_shape) = {
-      let mut arena = self.arena.borrow_mut();
-      let id = arena.add_root(actual_shape, style, name)?;
-      let attr = arena.attribute(id).unwrap();
-      (id, attr.shape, attr.actual_shape)
+      let mut ctx = self.context.borrow_mut();
+      let id = ctx.add_root(style, name)?;
+      let shape = ctx.shape(id).copied().unwrap();
+      let actual_shape = ctx.actual_shape(id).copied().unwrap();
+      (id, shape, actual_shape)
     };
 
     let node = constructor(id, shape, actual_shape);
@@ -131,10 +135,9 @@ where
     parent_id: TreeNodeId,
     style: Style,
     zindex: usize,
-    enabled: bool,
     policy: TruncatePolicy,
-    constructor: F,
     name: &'static str,
+    constructor: F,
   ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
@@ -147,11 +150,11 @@ where
     debug_assert!(self.nodes.contains_key(&parent_id));
 
     let (id, shape, actual_shape) = {
-      let mut arena = self.arena.borrow_mut();
-      let id =
-        arena.add_child(parent_id, style, zindex, enabled, policy, name)?;
-      let attr = arena.attribute(id).unwrap();
-      (id, attr.shape, attr.actual_shape)
+      let mut ctx = self.context.borrow_mut();
+      let id = ctx.add_child(parent_id, style, zindex, policy, name)?;
+      let shape = ctx.shape(id).copied().unwrap();
+      let actual_shape = ctx.actual_shape(id).copied().unwrap();
+      (id, shape, actual_shape)
     };
 
     let node = constructor(id, shape, actual_shape);
@@ -162,8 +165,8 @@ where
 
   /// Same with [`add_child`](Itree::add_child) method, with default values for
   /// below parameters:
+  ///
   /// - zindex: 0
-  /// - enabled: true
   /// - policy: BRUTAL
   ///
   /// NOTE: For cursor widget node, you should always use the bound policy to
@@ -172,8 +175,8 @@ where
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
-    constructor: F,
     name: &'static str,
+    constructor: F,
   ) -> TaffyResult<TreeNodeId>
   where
     F: FnOnce(
@@ -186,10 +189,9 @@ where
       parent_id,
       style,
       DEFAULT_ZINDEX,
-      DEFAULT_ENABLED,
-      TruncatePolicy::BRUTAL,
-      constructor,
+      DEFAULT_TRUNCATE_POLICY,
       name,
+      constructor,
     )
   }
 
@@ -199,17 +201,17 @@ where
   /// NOTE: Never remove the root node.
   pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<Option<T>> {
     self._internal_check();
-    debug_assert_ne!(id, self.arena.borrow().root());
+    debug_assert_ne!(id, self.context.borrow().root());
 
     match self.nodes.remove(&id) {
       Some(removed_node) => {
-        debug_assert!(self.arena.borrow().contains(id));
+        debug_assert!(self.context.borrow().contains(id));
         debug_assert_ne!(self.root_id(), id);
-        self.arena.borrow_mut().remove_child(id)?;
+        self.context.borrow_mut().remove_child(id)?;
         Ok(Some(removed_node))
       }
       None => {
-        debug_assert!(!self.arena.borrow().contains(id));
+        debug_assert!(!self.context.borrow().contains(id));
         Ok(None)
       }
     }
