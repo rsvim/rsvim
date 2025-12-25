@@ -80,20 +80,20 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
+  // Command-line node ID.
   command_line_id: Option<TreeNodeId>,
 
-  // All [`Window`](crate::ui::widget::Window) node IDs.
+  // Window ID collection.
   window_ids: BTreeSet<TreeNodeId>,
 
-  // The *current* window node ID.
+  // *Current* window ID.
   //
-  // The **current** window means user is focused on the window widget, i.e. it contains the
-  // cursor, since the cursor is like the mouse on the screen.
+  // *Current* window means it contains the cursor, e.g. user is focusing on
+  // it, because the cursor in vim editor is like a mouse on the screen.
   //
-  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
-  // widget. But we still keeps the **current window**, this field is actually the **previous**
-  // current window.
+  // But when user starts typing commands in the command-line, cursor actually
+  // moves to command-line widget. But we still saves the *current* window, now
+  // it is more like a *previous* window.
   current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
