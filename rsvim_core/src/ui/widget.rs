@@ -1,6 +1,6 @@
 //! Basic atom of all UI components.
 
-pub mod command_line;
+pub mod cmdline;
 pub mod cursor;
 pub mod panel;
 pub mod window;
