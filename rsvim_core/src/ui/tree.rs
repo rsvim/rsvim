@@ -9,6 +9,7 @@ use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::viewport::Viewport;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicator;
@@ -385,6 +386,15 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
+    // Create a mock viewport to help create window content.
+    let mocked_viewport = {
+      let mocked_size = size!(1, 1);
+      let buffer = buffer.upgrade().unwrap();
+      let buffer = lock!(buffer);
+      let viewport = Viewport::view(&opts, buffer.text(), &mocked_size, 0, 0);
+      Viewport::to_arc(viewport)
+    };
+
     // window content widget
     let content_style = Style {
       size: taffy::Size {
@@ -393,13 +403,16 @@ impl Tree {
       },
       ..Default::default()
     };
-    let content_id = self.base.new_with_parent_default(
-      id,
+    let content_id = self.base.new_leaf_default(
       content_style,
       "WindowContent",
       |id, context, shape, actual_shape| {
-        let content =
-          WindowContent::new(id, context, buffer, Arc::downgrade(&viewport));
+        let content = WindowContent::new(
+          id,
+          context,
+          buffer,
+          Arc::downgrade(&mocked_viewport),
+        );
         TreeNode::WindowContent(content)
       },
     )?;
@@ -409,57 +422,29 @@ impl Tree {
       style,
       "Window",
       |id, context, shape, actual_shape| {
-        let window =
-          Window::new(id, context, opts, actual_shape.size(), buffer.clone());
+        let window = Window::new(
+          id,
+          context,
+          opts,
+          actual_shape.size(),
+          buffer.clone(),
+          content_id,
+        );
         TreeNode::Window(window)
       },
     )?;
+
+    // Insert window content (leaf) to window, as its child.
+    self.base.add_child(id, content_id)?;
+
+    // Insert the correct viewport back to window content.
     let viewport = self.window(id).viewport();
+    match self.node_mut(content_id).unwrap() {
+      TreeNode::WindowContent(c) => c.set_viewport(Arc::downgrade(&viewport)),
+      _ => unreachable!(),
+    }
 
-    self.window_mut(id).__post_initialize_content_id(content_id);
-
-    let (window_id, content_id) = {
-      let lotree = self.base;
-      let mut lotree = lotree.borrow_mut();
-      let window_id =
-        lotree.new_with_parent(window_style, parent_id, "Window")?;
-      let content_id =
-        lotree.new_with_parent(content_style, window_id, "WindowContent")?;
-      self.compute_layout(&mut lotree)?;
-
-      // We don't allow zero-area widget.
-      let window_actual_shape = lotree.actual_shape(window_id)?;
-      let content_actual_shape = lotree.actual_shape(content_id)?;
-      if window_actual_shape.size().is_zero()
-        || content_actual_shape.size().is_zero()
-      {
-        return Err(TaffyError::InvalidInputNode(taffy::NodeId::from(0_u64)));
-      }
-
-      (window_id, content_id)
-    };
-
-    let window = Window::new(
-      Rc::downgrade(&self.lotree()),
-      window_id,
-      window_opts,
-      content_id,
-      buffer.clone(),
-    )?;
-    let viewport = window.viewport();
-    let window_node = TreeNode::Window(window);
-    self._insert(window_node);
-
-    let content = WindowContent::new(
-      Rc::downgrade(&self.lotree()),
-      content_id,
-      buffer,
-      Arc::downgrade(&viewport),
-    );
-    let content_node = TreeNode::WindowContent(content);
-    self._insert(content_node);
-
-    Ok(window_id)
+    Ok(id)
   }
 
   /// See [`Itree::bounded_insert`].

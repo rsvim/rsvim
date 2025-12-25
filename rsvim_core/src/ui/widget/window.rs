@@ -44,8 +44,9 @@ impl Window {
     options: WindowOptions,
     size: U16Size,
     buffer: BufferWk,
+    content_id: TreeNodeId,
   ) -> Self {
-    let mut base = InodeBase::new(id, ctx);
+    let base = InodeBase::new(id, ctx);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
@@ -61,8 +62,8 @@ impl Window {
 
     Window {
       base,
-      options: *options,
-      content_id: INVALID_ROOT_ID,
+      options,
+      content_id,
       buffer,
       viewport,
       cursor_viewport,
