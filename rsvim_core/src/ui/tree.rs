@@ -223,7 +223,7 @@ impl Tree {
             TreeNode::Window(_)
           ));
         }
-        None => { /* */ }
+        None => {}
       }
     }
     let old = self.current_window_id;
