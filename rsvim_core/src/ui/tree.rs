@@ -217,9 +217,9 @@ impl Tree {
     if cfg!(debug_assertions) {
       match window_id {
         Some(window_id) => {
-          debug_assert!(self.node_mut(window_id).is_some());
+          debug_assert!(self.node(window_id).is_some());
           debug_assert!(matches!(
-            self.node_mut(window_id).unwrap(),
+            self.node(window_id).unwrap(),
             TreeNode::Window(_)
           ));
         }
