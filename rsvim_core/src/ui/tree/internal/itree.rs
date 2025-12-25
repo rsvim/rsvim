@@ -226,13 +226,12 @@ where
 // Insert/Remove }
 
 // Movement {
-
 impl<T> Itree<T>
 where
   T: Inodeable,
 {
   // Raw relative motion.
-  fn move_by(
+  fn move_position_by(
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
@@ -240,11 +239,11 @@ where
   ) -> IRect {
     let shape = context.shape(id).unwrap();
     let pos: IPos = shape.min().into();
-    Self::move_to(context, id, pos.x() + x, pos.y() + y)
+    Self::move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
   // Raw absolute motion.
-  fn move_to(
+  fn move_position_to(
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
@@ -273,7 +272,7 @@ where
   /// [TruncatePolicy](TruncatePolicy). If it hits the boundary of its parent
   /// widget, it will simply stop moving to avoid its size been truncated by
   /// its parent.
-  pub fn reserved_move_by(
+  pub fn reserved_move_position_by(
     &self,
     id: TreeNodeId,
     x: isize,
@@ -296,12 +295,12 @@ where
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    Some(Self::move_by(&ctx, id, final_x, final_y))
+    Some(Self::move_position_by(&ctx, id, final_x, final_y))
   }
 
   /// Similar to `reserved_move_by`, but moves with absolute position instead
   /// of relative one.
-  pub fn reserved_move_to(
+  pub fn reserved_move_position_to(
     &self,
     id: TreeNodeId,
     x: isize,
@@ -323,7 +322,12 @@ where
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
 
-    Some(Self::move_to(&ctx, id, final_pos.x(), final_pos.y()))
+    Some(Self::move_position_to(
+      &ctx,
+      id,
+      final_pos.x(),
+      final_pos.y(),
+    ))
   }
 }
 // Movement }
