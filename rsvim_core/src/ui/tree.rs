@@ -226,17 +226,20 @@ impl Tree {
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self.base.children_ids(id)
+    self._internal_check();
+    self.context.borrow().children(id).unwrap_or_default()
   }
 
   /// Get the node struct by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self.base.node(id)
+    self._internal_check();
+    self.nodes.get(&id)
   }
 
   /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self.base.node_mut(id)
+    self._internal_check();
+    self.nodes.get_mut(&id)
   }
 
   /// Get cursor ID.
