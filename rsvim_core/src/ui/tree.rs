@@ -161,7 +161,7 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let mut base = Itree::new();
+    let mut context = TreeContext::new();
 
     let style = Style {
       size: taffy::Size {
@@ -172,13 +172,17 @@ impl Tree {
       ..Default::default()
     };
 
-    base.new_root(style, "Panel", |id, context, _shape, _actual_shape| {
-      let root = Panel::new(id, context);
-      TreeNode::Root(root)
-    })?;
+    context.new_root(
+      style,
+      "Panel",
+      |id, context, _shape, _actual_shape| {
+        let root = Panel::new(id, context);
+        TreeNode::Root(root)
+      },
+    )?;
 
     Ok(Tree {
-      base,
+      context: TreeContext::to_rc(context),
       cursor_id: None,
       cmdline_id: None,
       window_ids: BTreeSet::new(),
@@ -188,24 +192,36 @@ impl Tree {
     })
   }
 
+  fn _internal_check(&self) {
+    debug_assert_eq!(self.context.borrow().len(), self.nodes.len());
+  }
+
   /// Nodes count, include the root node.
   pub fn len(&self) -> usize {
-    self.base.len()
+    self._internal_check();
+    self.nodes.len()
   }
 
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
-    self.base.is_empty()
+    self._internal_check();
+    self.nodes.is_empty()
+  }
+
+  pub fn context(&self) -> TreeContextRc {
+    self.context.clone()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self.base.root_id()
+    self._internal_check();
+    self.context.borrow().root()
   }
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.base.parent_id(id)
+    self._internal_check();
+    self.context.borrow().parent(id)
   }
 
   /// Get the children IDs by a node `id`.
