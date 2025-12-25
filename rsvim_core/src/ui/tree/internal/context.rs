@@ -38,8 +38,10 @@ pub struct Ta {
 
 impl Ta {
   pub fn new() -> Self {
+    let mut ta = TaffyTree::new();
+    ta.disable_rounding();
     Self {
-      ta: TaffyTree::new(),
+      ta,
       id2taid: FoldMap::new(),
       taid2id: FoldMap::new(),
     }
