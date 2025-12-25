@@ -583,17 +583,23 @@ impl TreeContext {
     Ok(id)
   }
 
-  /// Remove a child node.
+  /// Move a child node from its parent to a new parent.
   ///
-  /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<TreeNodeId> {
+  /// NOTE: Never move the root node.
+  pub fn move_child(
+    &mut self,
+    new_parent_id: TreeNodeId,
+    id: TreeNodeId,
+  ) -> TaffyResult<()> {
     debug_assert_ne!(id, self.root);
     debug_assert!(self.ta.contains(id));
+    debug_assert!(self.ta.contains(new_parent_id));
     debug_assert!(self.ta.parent(id).is_some());
 
     let parent_id = self.ta.parent(id).unwrap();
-    let removed_id = self.ta.remove_child(parent_id, id)?;
-    debug_assert_eq!(removed_id, id);
+    let _removed_id = self.ta.remove_child(parent_id, id)?;
+    debug_assert_eq!(_removed_id, id);
+    self.ta.add_child(new_parent_id, id)?;
 
     // Even we removed this child, we just remove its edge (e.g. parent-child
     // relationship) inside TaffyTree, but we don't really purge its properties
@@ -601,6 +607,6 @@ impl TreeContext {
 
     self._update_shapes()?;
 
-    Ok(id)
+    Ok(())
   }
 }

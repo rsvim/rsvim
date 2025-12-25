@@ -212,21 +212,11 @@ where
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
     debug_assert!(self.context.borrow().contains(id));
+    debug_assert!(self.context().borrow().parent(id).is_some());
     let mut ctx = self.context.borrow_mut();
 
-    let old_parent_id = ctx.parent(id).unwrap();
-
-    match self.nodes.remove(&id) {
-      Some(removed_node) => {
-        debug_assert_ne!(self.root_id(), id);
-        self.context.borrow_mut().remove_child(id)?;
-        Ok(Some(removed_node))
-      }
-      None => {
-        debug_assert!(!self.context.borrow().contains(id));
-        Ok(None)
-      }
-    }
+    ctx.move_child(new_parent_id, id)?;
+    Ok(())
   }
 }
 // Insert/Remove }
