@@ -568,7 +568,7 @@ impl TreeContext {
     Ok(id)
   }
 
-  /// Create a new child node in the tree, and insert it under a parent node.
+  /// Create a new child node, and insert it under a parent node.
   /// Returns the child node ID.
   pub fn add_child(
     &mut self,
@@ -587,6 +587,28 @@ impl TreeContext {
     self.truncate_policies.insert(id, truncate_policy);
 
     self._update_shapes()?;
+
+    Ok(id)
+  }
+
+  /// Create a new leaf node, without a parent node.
+  /// Returns the leaf node ID.
+  pub fn add_leaf(
+    &mut self,
+    style: Style,
+    zindex: usize,
+    truncate_policy: TruncatePolicy,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
+    let id = self.ta.new_leaf(style)?;
+
+    self._set_name(id, name);
+    self.zindexes.insert(id, zindex);
+    self.truncate_policies.insert(id, truncate_policy);
+
+    // We don't need to calculate the layout, because this newly created leaf
+    // node is not inserted to any parent node, thus it will not affect the
+    // layout of whole UI tree.
 
     Ok(id)
   }
