@@ -110,6 +110,7 @@ where
   where
     F: FnOnce(
       /* id */ TreeNodeId,
+      /* context */ TreeContextRc,
       /* shape */ IRect,
       /* actual_shape */ U16Rect,
     ) -> T,
@@ -125,7 +126,7 @@ where
       (id, shape, actual_shape)
     };
 
-    let node = constructor(id, shape, actual_shape);
+    let node = constructor(id, self.context(), shape, actual_shape);
     self.nodes.insert(id, node);
 
     Ok(id)
@@ -145,6 +146,7 @@ where
   where
     F: FnOnce(
       /* id */ TreeNodeId,
+      /* context */ TreeContextRc,
       /* shape */ IRect,
       /* actual_shape */ U16Rect,
     ) -> T,
@@ -160,7 +162,7 @@ where
       (id, shape, actual_shape)
     };
 
-    let node = constructor(id, shape, actual_shape);
+    let node = constructor(id, self.context(), shape, actual_shape);
     self.nodes.insert(id, node);
 
     Ok(id)
@@ -184,6 +186,7 @@ where
   where
     F: FnOnce(
       /* id */ TreeNodeId,
+      /* context */ TreeContextRc,
       /* shape */ IRect,
       /* actual_shape */ U16Rect,
     ) -> T,
