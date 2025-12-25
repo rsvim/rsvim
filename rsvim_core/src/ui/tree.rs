@@ -415,7 +415,7 @@ impl Tree {
         TreeNode::WindowContent(content)
       },
     )?;
-    self.window_mut(id)._set_content_id(content_id);
+    self.window_mut(id)._post_initialize_content_id(content_id);
 
     let (window_id, content_id) = {
       let lotree = self.base;

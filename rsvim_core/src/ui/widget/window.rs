@@ -69,7 +69,8 @@ impl Window {
     }
   }
 
-  pub fn _set_content_id(&mut self, value: TreeNodeId) {
+  /// This is only for setting window content id after constructor.
+  pub fn __post_initialize_content_id(&mut self, value: TreeNodeId) {
     self.content_id = value;
   }
 }
