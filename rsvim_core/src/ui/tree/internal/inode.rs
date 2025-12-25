@@ -1,16 +1,17 @@
 //! The node structure of the internal tree.
 
 use crate::prelude::*;
+use crate::ui::tree::TreeContextRc;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::arena::TruncatePolicy;
+use crate::ui::tree::TruncatePolicy;
 use std::fmt::Debug;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn shape(&self) -> &IRect;
+  fn shape(&self) -> IRect;
 
-  fn actual_shape(&self) -> &U16Rect;
+  fn actual_shape(&self) -> U16Rect;
 
   fn zindex(&self) -> usize;
 
@@ -28,11 +29,11 @@ macro_rules! inode_impl {
         self.$base_name.id()
       }
 
-      fn shape(&self) -> &IRect {
+      fn shape(&self) -> IRect {
         self.$base_name.shape()
       }
 
-      fn actual_shape(&self) -> &U16Rect {
+      fn actual_shape(&self) -> U16Rect {
         self.$base_name.actual_shape()
       }
 
@@ -60,7 +61,7 @@ macro_rules! inode_itree_impl {
         self.$base_name.root_id()
       }
 
-      fn shape(&self) -> &IRect {
+      fn shape(&self) -> IRect {
         self
           .$base_name
           .node(self.$base_name.root_id())
@@ -68,7 +69,7 @@ macro_rules! inode_itree_impl {
           .shape()
       }
 
-      fn actual_shape(&self) -> &U16Rect {
+      fn actual_shape(&self) -> U16Rect {
         self
           .$base_name
           .node(self.$base_name.root_id())
@@ -116,7 +117,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn shape(&self) -> &IRect {
+      fn shape(&self) -> IRect {
         match self {
           $(
             $enum::$variant(e) => e.shape(),
@@ -124,7 +125,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn actual_shape(&self) -> &U16Rect {
+      fn actual_shape(&self) -> U16Rect {
         match self {
           $(
             $enum::$variant(e) => e.actual_shape(),
@@ -156,5 +157,37 @@ macro_rules! inode_dispatcher {
         }
       }
     }
+  }
+}
+
+#[derive(Debug, Clone)]
+pub struct InodeBase {
+  id: TreeNodeId,
+  ctx: TreeContextRc,
+}
+
+impl Inodeable for InodeBase {
+  fn id(&self) -> TreeNodeId {
+    self.id
+  }
+
+  fn shape(&self) -> IRect {
+    self.ctx.borrow().shape(self.id).copied().unwrap()
+  }
+
+  fn actual_shape(&self) -> U16Rect {
+    self.ctx.borrow().actual_shape(self.id).copied().unwrap()
+  }
+
+  fn zindex(&self) -> usize {
+    self.ctx.borrow().zindex(self.id).unwrap()
+  }
+
+  fn enabled(&self) -> bool {
+    self.ctx.borrow().enabled(self.id).unwrap()
+  }
+
+  fn truncate_policy(&self) -> TruncatePolicy {
+    self.ctx.borrow().truncate_policy(self.id).unwrap()
   }
 }
