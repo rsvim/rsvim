@@ -599,10 +599,9 @@ impl TreeContext {
   }
 
   /// Remove a child node.
-  /// Returns the removed node.
   ///
   /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<()> {
+  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<TreeNodeId> {
     debug_assert_ne!(id, self.root);
     debug_assert!(self.ta.contains(id));
     debug_assert!(self.ta.parent(id).is_some());
@@ -617,6 +616,6 @@ impl TreeContext {
 
     self._update_shapes()?;
 
-    Ok(())
+    Ok(id)
   }
 }
