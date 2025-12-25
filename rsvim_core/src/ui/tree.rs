@@ -2,13 +2,12 @@
 
 pub mod internal;
 
-use std::sync::Arc;
-
 use crate::buf::BufferWk;
 use crate::inode_dispatcher;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::canvas::CursorStyle;
 use crate::ui::viewport::Viewport;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cmdline::Cmdline;
@@ -25,10 +24,12 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
+use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 
 pub type TreeNodeId = i32;
 
@@ -378,7 +379,7 @@ impl Tree {
     }
   }
 
-  /// See [`Itree::insert`].
+  /// Create a window widget.
   pub fn add_window(
     &mut self,
     parent_id: TreeNodeId,
@@ -445,6 +446,52 @@ impl Tree {
     }
 
     Ok(id)
+  }
+
+  /// Create a cursor widget.
+  pub fn add_cursor(
+    &mut self,
+    parent_id: TreeNodeId,
+    blinking: bool,
+    hidden: bool,
+    style: CursorStyle,
+  ) -> TaffyResult<TreeNodeId> {
+    let cursor_style = Style {
+      position: taffy::Position::Absolute,
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      inset: taffy::Rect {
+        left: taffy::LengthPercentageAuto::from_length(0_u16),
+        top: taffy::LengthPercentageAuto::from_length(0_u16),
+        right: taffy::LengthPercentageAuto::AUTO,
+        bottom: taffy::LengthPercentageAuto::AUTO,
+      },
+      ..Default::default()
+    };
+
+    let id = self.base.new_with_parent_default(
+      parent_id,
+      cursor_style,
+      "Cursor",
+      |id, context, _shape, _actual_shape| {
+        let cursor = Cursor::new(id, context, blinking, hidden, style);
+        TreeNode::Cursor(cursor)
+      },
+    )?;
+
+    Ok(id)
+  }
+
+  /// Create a command-line widget.
+  pub fn add_cmdline(
+    &mut self,
+    parent_id: TreeNodeId,
+    style: Style,
+    opts: WindowOptions,
+    buffer: BufferWk,
+  ) -> TaffyResult<TreeNodeId> {
   }
 
   /// See [`Itree::bounded_insert`].

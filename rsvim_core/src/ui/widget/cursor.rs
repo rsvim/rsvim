@@ -28,7 +28,8 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    shape: IRect,
+    id: TreeNodeId,
+    ctx: TreeContextRc,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
@@ -37,7 +38,7 @@ impl Cursor {
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
     Cursor {
-      base: InodeBase::new(shape),
+      base: InodeBase::new(id, ctx),
       flags,
       style,
     }
