@@ -161,10 +161,7 @@ impl Tree {
       ..Default::default()
     };
 
-    let shape = rect_from_size!(canvas_size);
-    let shape = rect_as!(shape, isize);
-
-    let id = base.add_root(style, "Panel", |id, shape, actual_shape| {
+    base.add_root(style, "Panel", |id, _shape, _actual_shape| {
       let root = Panel::new(id, base.context());
       TreeNode::Root(root)
     })?;
