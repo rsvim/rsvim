@@ -279,7 +279,6 @@ where
     let ctx = self.context.borrow();
     match ctx.parent(id) {
       Some(parent_id) => {
-        let parent_actual_shape = ctx.actual_shape(parent_id)?;
         let shape = ctx.shape(id)?;
         let pos: IPos = shape.min().into();
         let new_pos = point!(pos.x() + x, pos.y() + y);
@@ -289,6 +288,7 @@ where
           new_pos.x() + shape.width(),
           new_pos.y() + shape.height()
         );
+        let parent_actual_shape = ctx.actual_shape(parent_id)?;
         let final_shape =
           shapes::bound_shape(&new_shape, &parent_actual_shape.size());
         let final_pos: IPos = final_shape.min().into();
@@ -300,95 +300,32 @@ where
     }
   }
 
-  /// Move node to position `(x, y)`, the `(x, y)` is the new position.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
-  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_to(
-    &mut self,
-    id: TreeNodeId,
-    x: isize,
-    y: isize,
-  ) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
-      Some(node) => {
-        let current_shape = *node.shape();
-        let next_top_left_pos: IPos = point!(x, y);
-        let next_shape = rect!(
-          next_top_left_pos.x(),
-          next_top_left_pos.y(),
-          next_top_left_pos.x() + current_shape.width(),
-          next_top_left_pos.y() + current_shape.height()
-        );
-        node.set_shape(&next_shape);
-
-        // Update all the descendants attributes under the `id` node.
-        self._update_node_shapes_impl(id, self.parent_id(id).unwrap());
-
-        Some(next_shape)
-      }
-      None => None,
-    }
-  }
-
-  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
-  ///
-  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
-  /// its parent, it simply stops moving.
-  ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
-  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
-  ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
+  /// Similar to `reserved_move_by`, but moves with absolute position instead
+  /// of relative one.
   pub fn bounded_move_to(
-    &mut self,
+    &self,
     id: TreeNodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    match self.parent_id(id) {
+    let ctx = self.context.borrow();
+    match ctx.parent(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_size: Option<U16Size> = self
-          .nodes
-          .get(&parent_id)
-          .map(|parent_node| parent_node.actual_shape().size());
+        let shape = ctx.shape(id).unwrap();
+        let new_pos: IPos = point!(x, y);
+        let new_shape = rect!(
+          new_pos.x(),
+          new_pos.y(),
+          new_pos.x() + shape.width(),
+          new_pos.y() + shape.height()
+        );
 
-        match maybe_parent_actual_size {
-          Some(parent_actual_size) => match self.nodes.get_mut(&id) {
-            Some(node) => {
-              let current_shape = *node.shape();
-              let expected_top_left_pos: IPos = point!(x, y);
-              let expected_shape = rect!(
-                expected_top_left_pos.x(),
-                expected_top_left_pos.y(),
-                expected_top_left_pos.x() + current_shape.width(),
-                expected_top_left_pos.y() + current_shape.height()
-              );
+        let parent_actual_shape = ctx.actual_shape(parent_id)?;
+        let final_shape =
+          shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+        let final_pos: IPos = final_shape.min().into();
 
-              let final_shape =
-                bound_shape(&expected_shape, &parent_actual_size);
-              let final_top_left_pos: IPos = final_shape.min().into();
-
-              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
-            }
-            None => None,
-          },
-          None => None,
-        }
+        Some(Self::move_to(&ctx, id, final_pos.x(), final_pos.y()))
       }
       None => None,
     }
