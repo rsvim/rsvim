@@ -25,6 +25,8 @@ use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
+use internal::context::DEFAULT_TRUNCATE_POLICY;
+use internal::context::DEFAULT_ZINDEX;
 pub use internal::*;
 use itertools::Itertools;
 use std::collections::VecDeque;
@@ -414,16 +416,18 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    // Create a mock viewport to help create window content.
-    let mocked_viewport = {
-      let mocked_size = size!(1, 1);
-      let buffer = buffer.upgrade().unwrap();
-      let buffer = lock!(buffer);
-      let viewport = Viewport::view(&opts, buffer.text(), &mocked_size, 0, 0);
-      Viewport::to_arc(viewport)
-    };
+    let mut context = self.context.borrow_mut();
 
-    // window content widget
+    // window
+    let id = context.new_with_parent(
+      parent_id,
+      style,
+      DEFAULT_ZINDEX,
+      DEFAULT_TRUNCATE_POLICY,
+      "Window",
+    )?;
+
+    // window content
     let content_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::from_percent(1.0),
@@ -431,46 +435,38 @@ impl Tree {
       },
       ..Default::default()
     };
-    let content_id = self.base.new_leaf_default(
+    let content_id = context.new_with_parent(
+      id,
       content_style,
+      DEFAULT_ZINDEX,
+      DEFAULT_TRUNCATE_POLICY,
       "WindowContent",
-      |id, context, _shape, _actual_shape| {
-        let content = WindowContent::new(
-          id,
-          context,
-          buffer.clone(),
-          Arc::downgrade(&mocked_viewport),
-        );
-        TreeNode::WindowContent(content)
-      },
     )?;
+    let content_actual_shape =
+      context.actual_shape(content_id).copied().unwrap();
 
-    let id = self.base.new_with_parent_default(
-      parent_id,
-      style,
-      "Window",
-      |id, context, _shape, actual_shape| {
-        let window = Window::new(
-          id,
-          context,
-          opts,
-          actual_shape.size(),
-          buffer.clone(),
-          content_id,
-        );
-        TreeNode::Window(window)
-      },
-    )?;
+    // window node
+    let window = Window::new(
+      id,
+      self.context(),
+      opts,
+      buffer.clone(),
+      content_id,
+      content_actual_shape.size(),
+    );
+    let viewport = window.viewport();
+    let window = TreeNode::Window(window);
+    self.nodes.insert(id, window);
 
-    // Insert window content (leaf) to window, as its child.
-    self.base.add_child(id, content_id)?;
-
-    // Insert the correct viewport back to window content.
-    let viewport = self.window(id).viewport();
-    match self.node_mut(content_id).unwrap() {
-      TreeNode::WindowContent(c) => c.set_viewport(Arc::downgrade(&viewport)),
-      _ => unreachable!(),
-    }
+    // window content node
+    let content = WindowContent::new(
+      content_id,
+      self.context(),
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    );
+    let content = TreeNode::WindowContent(content);
+    self.nodes.insert(content_id, content);
 
     Ok(id)
   }

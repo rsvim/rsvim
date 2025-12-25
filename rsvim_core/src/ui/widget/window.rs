@@ -41,16 +41,17 @@ impl Window {
     id: TreeNodeId,
     ctx: TreeContextRc,
     options: WindowOptions,
-    size: U16Size,
     buffer: BufferWk,
     content_id: TreeNodeId,
+    content_size: U16Size,
   ) -> Self {
     let base = InodeBase::new(id, ctx);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(&options, buffer.text(), &size, 0, 0);
+      let viewport =
+        Viewport::view(&options, buffer.text(), &content_size, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (
