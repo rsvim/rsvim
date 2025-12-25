@@ -22,6 +22,7 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
 use taffy::Style;
+use taffy::TaffyResult;
 use taffy::prelude::FromLength;
 
 pub type TreeNodeId = i32;
