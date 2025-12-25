@@ -236,57 +236,43 @@ impl Tree {
 // Widget {
 impl Tree {
   /// Window widget.
-  pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
-    match self.node(window_id) {
-      Some(window_node) => {
-        debug_assert!(matches!(window_node, TreeNode::Window(_)));
-        match window_node {
-          TreeNode::Window(w) => {
-            debug_assert_eq!(w.id(), window_id);
-            Some(w)
-          }
-          _ => unreachable!(), // Other variants not allowed.
-        }
+  pub fn window(&self, id: TreeNodeId) -> &Window {
+    let n = self.node(id).unwrap();
+    debug_assert!(matches!(n, TreeNode::Window(_)));
+    match n {
+      TreeNode::Window(w) => {
+        debug_assert_eq!(w.id(), id);
+        w
       }
-      None => None,
+      _ => unreachable!(),
     }
   }
 
   /// Mutable window widget.
-  pub fn window_mut(&mut self, window_id: TreeNodeId) -> Option<&mut Window> {
-    match self.node_mut(window_id) {
-      Some(window_node) => {
-        debug_assert!(matches!(window_node, TreeNode::Window(_)));
-        match window_node {
-          TreeNode::Window(w) => {
-            debug_assert_eq!(w.id(), window_id);
-            Some(w)
-          }
-          _ => unreachable!(), // Other variants not allowed.
-        }
+  pub fn window_mut(&mut self, id: TreeNodeId) -> &mut Window {
+    let n = self.node_mut(id).unwrap();
+    debug_assert!(matches!(n, TreeNode::Window(_)));
+    match n {
+      TreeNode::Window(w) => {
+        debug_assert_eq!(w.id(), id);
+        w
       }
-      None => None,
+      _ => unreachable!(),
     }
   }
 
   // Current window widget.
-  pub fn current_window(&self) -> Option<&Window> {
-    match self.current_window_id {
-      Some(current_window_id) => self.window(current_window_id),
-      None => None,
-    }
+  pub fn current_window(&self) -> &Window {
+    self.window(self.current_window_id.unwrap())
   }
 
   // Mutable current window widget.
-  pub fn current_window_mut(&mut self) -> Option<&mut Window> {
-    match self.current_window_id {
-      Some(current_window_id) => self.window_mut(current_window_id),
-      None => None,
-    }
+  pub fn current_window_mut(&mut self) -> &mut Window {
+    self.window_mut(self.current_window_id.unwrap())
   }
 
   // Command-line widget.
-  pub fn command_line(&self) -> Option<&Cmdline> {
+  pub fn cmdline(&self) -> Option<&Cmdline> {
     match self.command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node(cmdline_id).is_some());
