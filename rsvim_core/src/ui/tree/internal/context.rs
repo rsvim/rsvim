@@ -605,11 +605,11 @@ impl TreeContext {
   }
 
   pub fn parent(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self.relation.parent(id)
+    self.ta.parent(id)
   }
 
-  pub fn children(&self, id: TreeNodeId) -> Option<Vec<TreeNodeId>> {
-    self.relation.children(id)
+  pub fn children(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
+    self.ta.children(id)
   }
 
   pub fn attribute(&self, id: TreeNodeId) -> Option<&Property> {
