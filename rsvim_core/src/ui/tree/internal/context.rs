@@ -535,7 +535,7 @@ impl TreeContext {
 
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
-  pub fn add_root(
+  pub fn new_root(
     &mut self,
     style: Style,
     name: &'static str,
@@ -570,7 +570,7 @@ impl TreeContext {
 
   /// Create a new child node, and insert it under a parent node.
   /// Returns the child node ID.
-  pub fn add_child(
+  pub fn new_with_parent(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
@@ -593,7 +593,7 @@ impl TreeContext {
 
   /// Create a new leaf node, without a parent node.
   /// Returns the leaf node ID.
-  pub fn add_leaf(
+  pub fn new_leaf(
     &mut self,
     style: Style,
     zindex: usize,
@@ -611,6 +611,16 @@ impl TreeContext {
     // layout of whole UI tree.
 
     Ok(id)
+  }
+
+  /// Insert an already created child node to a parent node.
+  pub fn add_child(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    self.ta.add_child(parent_id, child_id)?;
+    self._update_shapes()
   }
 
   /// Move a child node from its parent to a new parent.

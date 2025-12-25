@@ -103,9 +103,9 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Create a root node, which is the first node in the tree.
+  /// Create a root node, the first node in the tree.
   /// Returns the root node ID.
-  pub fn add_root<F>(
+  pub fn new_root<F>(
     &mut self,
     style: Style,
     name: &'static str,
@@ -124,7 +124,7 @@ where
 
     let (id, shape, actual_shape) = {
       let mut ctx = self.context.borrow_mut();
-      let id = ctx.add_root(style, name)?;
+      let id = ctx.new_root(style, name)?;
       let shape = ctx.shape(id).copied().unwrap();
       let actual_shape = ctx.actual_shape(id).copied().unwrap();
       (id, shape, actual_shape)
@@ -136,9 +136,9 @@ where
     Ok(id)
   }
 
-  /// Create a new child node in the tree, and insert it under a parent node.
+  /// Create a new child node, and insert it under a parent node.
   /// Returns the child node ID.
-  pub fn add_child<F>(
+  pub fn new_with_parent<F>(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
@@ -160,7 +160,7 @@ where
 
     let (id, shape, actual_shape) = {
       let mut ctx = self.context.borrow_mut();
-      let id = ctx.add_child(parent_id, style, zindex, policy, name)?;
+      let id = ctx.new_with_parent(parent_id, style, zindex, policy, name)?;
       let shape = ctx.shape(id).copied().unwrap();
       let actual_shape = ctx.actual_shape(id).copied().unwrap();
       (id, shape, actual_shape)
@@ -172,15 +172,14 @@ where
     Ok(id)
   }
 
-  /// Same with [`add_child`](Itree::add_child) method, with default values for
-  /// below parameters:
+  /// Same with `new_with_parent` method, with below default parameters:
   ///
   /// - zindex: 0
   /// - policy: BRUTAL
   ///
   /// NOTE: For cursor widget node, you should always use the bound policy to
   /// ensure it is inside its parent and avoid been cut off.
-  pub fn add_child_with_defaults<F>(
+  pub fn new_with_parent_default<F>(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
@@ -195,7 +194,7 @@ where
       /* actual_shape */ U16Rect,
     ) -> T,
   {
-    self.add_child(
+    self.new_with_parent(
       parent_id,
       style,
       DEFAULT_ZINDEX,
@@ -203,6 +202,41 @@ where
       name,
       constructor,
     )
+  }
+
+  /// Create a new leaf node, without inserting to any parent node.
+  /// Returns the leaf node ID.
+  pub fn new_leaf<F>(
+    &mut self,
+    style: Style,
+    zindex: usize,
+    policy: TruncatePolicy,
+    name: &'static str,
+    constructor: F,
+  ) -> TaffyResult<TreeNodeId>
+  where
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* context */ TreeContextRc,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
+  {
+    self._internal_check();
+    debug_assert!(self.nodes.contains_key(&parent_id));
+
+    let (id, shape, actual_shape) = {
+      let mut ctx = self.context.borrow_mut();
+      let id = ctx.new_with_parent(parent_id, style, zindex, policy, name)?;
+      let shape = ctx.shape(id).copied().unwrap();
+      let actual_shape = ctx.actual_shape(id).copied().unwrap();
+      (id, shape, actual_shape)
+    };
+
+    let node = constructor(id, self.context(), shape, actual_shape);
+    self.nodes.insert(id, node);
+
+    Ok(id)
   }
 
   /// Move a child node from its parent to a new parent.

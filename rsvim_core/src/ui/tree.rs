@@ -165,7 +165,7 @@ impl Tree {
       ..Default::default()
     };
 
-    base.add_root(style, "Panel", |id, context, _shape, _actual_shape| {
+    base.new_root(style, "Panel", |id, context, _shape, _actual_shape| {
       let root = Panel::new(id, context);
       TreeNode::Root(root)
     })?;
@@ -385,7 +385,7 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.base.add_child_with_defaults(
+    let id = self.base.new_with_parent_default(
       parent_id,
       style,
       "Window",
@@ -405,7 +405,7 @@ impl Tree {
       },
       ..Default::default()
     };
-    let content_id = self.base.add_child_with_defaults(
+    let content_id = self.base.new_with_parent_default(
       id,
       content_style,
       "WindowContent",

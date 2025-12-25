@@ -75,7 +75,7 @@ impl Cmdline {
     let root = Panel::new(shape);
     let root_id = root.id();
     let root_node = CommandLineNode::Root(root);
-    base.add_root(root_node);
+    base.new_root(root_node);
 
     let cmdline_size = shape.size();
 
