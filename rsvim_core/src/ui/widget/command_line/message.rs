@@ -11,20 +11,20 @@ use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone)]
 /// Commandline message.
-pub struct Message {
+pub struct CmdlineMessage {
   base: InodeBase,
   text_contents: TextContentsWk,
   viewport: ViewportWk,
 }
 
-impl Message {
+impl CmdlineMessage {
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
     let base = InodeBase::new(shape);
-    Message {
+    CmdlineMessage {
       base,
       text_contents,
       viewport,
@@ -36,9 +36,9 @@ impl Message {
   }
 }
 
-inode_impl!(Message, base);
+inode_impl!(CmdlineMessage, base);
 
-impl Widgetable for Message {
+impl Widgetable for CmdlineMessage {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let contents = self.text_contents.upgrade().unwrap();

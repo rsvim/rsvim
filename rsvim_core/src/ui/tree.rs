@@ -10,6 +10,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::command_line::indicator::CmdlineIndicator;
 use crate::ui::widget::command_line::input::CmdlineInput;
+use crate::ui::widget::command_line::message::CmdlineMessage;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::Window;
@@ -33,6 +34,7 @@ pub enum TreeNode {
   CommandLine(CommandLine),
   CmdlineIndicator(CmdlineIndicator),
   CmdlineInput(CmdlineInput),
+  CmdlineMessage(CmdlineMessage),
 }
 
 inode_dispatcher!(TreeNode, Root, Window, CommandLine);
