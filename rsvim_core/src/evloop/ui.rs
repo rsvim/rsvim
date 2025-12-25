@@ -7,7 +7,7 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::command_line::Cmdline;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 

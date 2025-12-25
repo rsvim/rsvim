@@ -35,7 +35,7 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
-use crate::ui::widget::command_line::Cmdline;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::CompactString;
@@ -7657,7 +7657,7 @@ mod tests_goto_command_line_ex_mode {
 
     let tree = data_access.tree.clone();
     let actual_cursor = lock!(tree.clone())
-      .command_line()
+      .cmdline()
       .unwrap()
       .input_cursor_viewport();
     assert_eq!(actual_cursor.line_idx(), 0);
@@ -7743,7 +7743,7 @@ mod tests_goto_command_line_ex_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);

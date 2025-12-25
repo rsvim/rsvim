@@ -7,10 +7,10 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::command_line::Cmdline;
-use crate::ui::widget::command_line::indicator::CmdlineIndicator;
-use crate::ui::widget::command_line::input::CmdlineInput;
-use crate::ui::widget::command_line::message::CmdlineMessage;
+use crate::ui::widget::cmdline::Cmdline;
+use crate::ui::widget::cmdline::indicator::CmdlineIndicator;
+use crate::ui::widget::cmdline::input::CmdlineInput;
+use crate::ui::widget::cmdline::message::CmdlineMessage;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::Window;
@@ -21,6 +21,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
+use taffy::Style;
 
 pub type TreeNodeId = i32;
 
@@ -147,10 +148,12 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> Self {
+    let mut base = Itree::new();
+
+    let style = Style {};
+
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
-
-    let mut base = Itree::new();
 
     let root = Panel::new(shape);
     let root_node = TreeNode::Root(root);

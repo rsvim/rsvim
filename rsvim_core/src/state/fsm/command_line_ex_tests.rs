@@ -37,7 +37,7 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
-use crate::ui::widget::command_line::Cmdline;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::CompactString;
@@ -85,7 +85,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -94,7 +94,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -131,7 +131,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -140,7 +140,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let cmdline_eol =
         lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
@@ -175,7 +175,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -184,7 +184,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -241,7 +241,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -250,7 +250,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -287,7 +287,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -296,7 +296,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let cmdline_eol =
         lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
@@ -331,7 +331,7 @@ mod tests_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -340,7 +340,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -402,7 +402,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -411,7 +411,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -450,7 +450,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
-        .command_line()
+        .cmdline()
         .unwrap()
         .input_cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
@@ -459,7 +459,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport =
-        lock!(tree.clone()).command_line().unwrap().input_viewport();
+        lock!(tree.clone()).cmdline().unwrap().input_viewport();
       let cmdline_eol =
         lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye6 Bye7{cmdline_eol}");
