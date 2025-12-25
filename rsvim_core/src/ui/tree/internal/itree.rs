@@ -203,7 +203,7 @@ where
 
   /// Move a child node from its parent to a new parent.
   ///
-  /// NOTE: Never remove the root node.
+  /// NOTE: Never move the root node.
   pub fn move_child(
     &mut self,
     id: TreeNodeId,
