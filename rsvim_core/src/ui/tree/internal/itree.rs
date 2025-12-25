@@ -205,6 +205,7 @@ where
   }
 
   /// Create a new leaf node, without inserting to any parent node.
+  /// You will need to add it to a parent node later.
   /// Returns the leaf node ID.
   pub fn new_leaf<F>(
     &mut self,
@@ -223,7 +224,6 @@ where
     ) -> T,
   {
     self._internal_check();
-    debug_assert!(self.nodes.contains_key(&parent_id));
 
     let (id, shape, actual_shape) = {
       let mut ctx = self.context.borrow_mut();
@@ -239,19 +239,32 @@ where
     Ok(id)
   }
 
+  /// Add an already created leaf node to a parent node.
+  pub fn add_child(
+    &mut self,
+    new_parent_id: TreeNodeId,
+    id: TreeNodeId,
+  ) -> TaffyResult<()> {
+    self._internal_check();
+    debug_assert_ne!(id, self.context.borrow().root());
+    debug_assert!(self.context.borrow().contains(id));
+    debug_assert!(self.context().borrow().parent(id).is_none());
+    self.context.borrow_mut().remove_child(new_parent_id, id)
+  }
+
   /// Move a child node from its parent to a new parent.
   ///
   /// NOTE: Never move the root node.
   pub fn move_child(
     &mut self,
-    id: TreeNodeId,
     new_parent_id: TreeNodeId,
+    id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
     debug_assert!(self.context.borrow().contains(id));
     debug_assert!(self.context().borrow().parent(id).is_some());
-    self.context.borrow_mut().move_child(new_parent_id, id)
+    self.context.borrow_mut().remove_child(new_parent_id, id)
   }
 }
 // Insert/Remove }
