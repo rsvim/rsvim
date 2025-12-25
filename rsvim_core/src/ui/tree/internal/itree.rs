@@ -227,12 +227,11 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances.
-  ///
-  /// * The node moves left when `x < 0`.
-  /// * The node moves right when `x > 0`.
-  /// * The node moves up when `y < 0`.
-  /// * The node moves down when `y > 0`.
+  /// Calculates cursor shape by its relative movement:
+  /// - It moves to left when `x < 0`.
+  /// - It moves to right when `x > 0`.
+  /// - It moves to up when `y < 0`.
+  /// - It moves to down when `y > 0`.
   ///
   /// NOTE:
   /// 1. The position is relatively based on the node parent.
@@ -243,7 +242,7 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_by(
+  pub fn cursor_move_by(
     &mut self,
     id: TreeNodeId,
     x: isize,
