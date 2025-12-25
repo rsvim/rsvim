@@ -172,8 +172,7 @@ where
     Ok(id)
   }
 
-  /// Same with `new_with_parent` method, with below default parameters:
-  ///
+  /// Same with `new_with_parent`, with below default parameters:
   /// - zindex: 0
   /// - policy: BRUTAL
   ///
@@ -237,6 +236,30 @@ where
     self.nodes.insert(id, node);
 
     Ok(id)
+  }
+
+  /// Same with `new_leaf` with default parameters.
+  pub fn new_leaf_default<F>(
+    &mut self,
+    style: Style,
+    name: &'static str,
+    constructor: F,
+  ) -> TaffyResult<TreeNodeId>
+  where
+    F: FnOnce(
+      /* id */ TreeNodeId,
+      /* context */ TreeContextRc,
+      /* shape */ IRect,
+      /* actual_shape */ U16Rect,
+    ) -> T,
+  {
+    self.new_leaf(
+      style,
+      DEFAULT_ZINDEX,
+      DEFAULT_TRUNCATE_POLICY,
+      name,
+      constructor,
+    )
   }
 
   /// Add an already created leaf node to a parent node.

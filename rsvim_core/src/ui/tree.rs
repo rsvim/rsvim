@@ -385,18 +385,6 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.base.new_with_parent_default(
-      parent_id,
-      style,
-      "Window",
-      |id, context, shape, actual_shape| {
-        let window =
-          Window::new(id, context, opts, actual_shape.size(), buffer.clone());
-        TreeNode::Window(window)
-      },
-    )?;
-    let viewport = self.window(id).viewport();
-
     // window content widget
     let content_style = Style {
       size: taffy::Size {
@@ -415,6 +403,19 @@ impl Tree {
         TreeNode::WindowContent(content)
       },
     )?;
+
+    let id = self.base.new_with_parent_default(
+      parent_id,
+      style,
+      "Window",
+      |id, context, shape, actual_shape| {
+        let window =
+          Window::new(id, context, opts, actual_shape.size(), buffer.clone());
+        TreeNode::Window(window)
+      },
+    )?;
+    let viewport = self.window(id).viewport();
+
     self.window_mut(id).__post_initialize_content_id(content_id);
 
     let (window_id, content_id) = {
