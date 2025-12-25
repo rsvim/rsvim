@@ -577,6 +577,7 @@ impl TreeContext {
 
   fn _set_root(&mut self, id: TreeNodeId) {
     debug_assert_eq!(self.root, INVALID_ROOT_ID);
+    debug_assert_ne!(id, INVALID_ROOT_ID);
     debug_assert_eq!(self.root_changes, 0);
     self.root = id;
     if cfg!(debug_assertions) {
