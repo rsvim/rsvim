@@ -227,7 +227,7 @@ where
 
     let (id, shape, actual_shape) = {
       let mut ctx = self.context.borrow_mut();
-      let id = ctx.new_with_parent(parent_id, style, zindex, policy, name)?;
+      let id = ctx.new_leaf(style, zindex, policy, name)?;
       let shape = ctx.shape(id).copied().unwrap();
       let actual_shape = ctx.actual_shape(id).copied().unwrap();
       (id, shape, actual_shape)
@@ -242,29 +242,29 @@ where
   /// Add an already created leaf node to a parent node.
   pub fn add_child(
     &mut self,
-    new_parent_id: TreeNodeId,
+    parent_id: TreeNodeId,
     id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
     debug_assert!(self.context.borrow().contains(id));
     debug_assert!(self.context().borrow().parent(id).is_none());
-    self.context.borrow_mut().remove_child(new_parent_id, id)
+    self.context.borrow_mut().add_child(parent_id, id)
   }
 
-  /// Move a child node from its parent to a new parent.
+  /// Remove a child node from its parent to a new parent.
   ///
-  /// NOTE: Never move the root node.
-  pub fn move_child(
+  /// NOTE: Never remove the root node.
+  pub fn remove_child(
     &mut self,
-    new_parent_id: TreeNodeId,
+    parent_id: TreeNodeId,
     id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
     debug_assert!(self.context.borrow().contains(id));
     debug_assert!(self.context().borrow().parent(id).is_some());
-    self.context.borrow_mut().remove_child(new_parent_id, id)
+    self.context.borrow_mut().remove_child(parent_id, id)
   }
 }
 // Insert/Remove }

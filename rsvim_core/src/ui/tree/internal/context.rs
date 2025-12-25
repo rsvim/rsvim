@@ -533,8 +533,6 @@ impl TreeContext {
     }
   }
 
-  /// Create a root node, which is the first node in the tree.
-  /// Returns the root node ID.
   pub fn new_root(
     &mut self,
     style: Style,
@@ -568,8 +566,6 @@ impl TreeContext {
     Ok(id)
   }
 
-  /// Create a new child node, and insert it under a parent node.
-  /// Returns the child node ID.
   pub fn new_with_parent(
     &mut self,
     parent_id: TreeNodeId,
@@ -591,8 +587,6 @@ impl TreeContext {
     Ok(id)
   }
 
-  /// Create a new leaf node, without a parent node.
-  /// Returns the leaf node ID.
   pub fn new_leaf(
     &mut self,
     style: Style,
@@ -605,15 +599,17 @@ impl TreeContext {
     self._set_name(id, name);
     self.zindexes.insert(id, zindex);
     self.truncate_policies.insert(id, truncate_policy);
+    // Mock shape value
+    self.shapes.insert(id, rect!(0, 0, 0, 0));
+    self.actual_shapes.insert(id, rect!(0, 0, 0, 0));
 
-    // We don't need to calculate the layout, because this newly created leaf
-    // node is not inserted to any parent node, thus it will not affect the
-    // layout of whole UI tree.
+    // We don't need to calculate & update the whole layout, because this newly
+    // created leaf node is not inserted to any parent node, thus it will not
+    // affect the UI tree.
 
     Ok(id)
   }
 
-  /// Insert a child (leaf) node to a parent node.
   pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
@@ -628,9 +624,6 @@ impl TreeContext {
     self._update_shapes()
   }
 
-  /// Remove a child node from its parent.
-  ///
-  /// NOTE: Never move the root node.
   pub fn remove_child(
     &mut self,
     new_parent_id: TreeNodeId,
