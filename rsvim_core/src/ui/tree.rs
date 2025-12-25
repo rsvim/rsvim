@@ -417,34 +417,38 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
-    let mut context = self.context.borrow_mut();
+    let (id, content_id, content_actual_shape) = {
+      let mut context = self.context.borrow_mut();
 
-    // window
-    let id = context.new_with_parent(
-      parent_id,
-      style,
-      DEFAULT_ZINDEX,
-      DEFAULT_TRUNCATE_POLICY,
-      "Window",
-    )?;
+      // window
+      let id = context.new_with_parent(
+        parent_id,
+        style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "Window",
+      )?;
 
-    // window content
-    let content_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
-      },
-      ..Default::default()
+      // window content
+      let content_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(1.0),
+          height: taffy::Dimension::from_percent(1.0),
+        },
+        ..Default::default()
+      };
+      let content_id = context.new_with_parent(
+        id,
+        content_style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "WindowContent",
+      )?;
+      let content_actual_shape =
+        context.actual_shape(content_id).copied().unwrap();
+
+      (id, content_id, content_actual_shape)
     };
-    let content_id = context.new_with_parent(
-      id,
-      content_style,
-      DEFAULT_ZINDEX,
-      DEFAULT_TRUNCATE_POLICY,
-      "WindowContent",
-    )?;
-    let content_actual_shape =
-      context.actual_shape(content_id).copied().unwrap();
 
     // window node
     let window = Window::new(
