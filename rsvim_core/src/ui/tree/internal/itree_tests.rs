@@ -1046,7 +1046,7 @@ fn bounded_move_to1() {
   for (i, m) in moves.iter().enumerate() {
     let x = m.0;
     let y = m.1;
-    tree.bounded_move_to(nid3, x, y);
+    tree.reserved_move_to(nid3, x, y);
     let actual = *tree.node(nid3).unwrap().shape();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);

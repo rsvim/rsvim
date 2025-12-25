@@ -380,7 +380,7 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.bounded_move_to(id, x, y)
+    self.base.reserved_move_to(id, x, y)
   }
 }
 // Movement }

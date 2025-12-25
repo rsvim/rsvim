@@ -535,7 +535,7 @@ impl CommandLine {
   /// It panics if cursor not exist.
   pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
     let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_to(cursor_id, x, y)
+    self.base.reserved_move_to(cursor_id, x, y)
   }
 }
 // Cursor }
