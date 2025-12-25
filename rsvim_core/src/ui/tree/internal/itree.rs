@@ -74,6 +74,10 @@ where
     self.nodes.get_mut(&id)
   }
 
+  pub fn context(&self) -> TreeContextRc {
+    self.context.clone()
+  }
+
   /// Iterates all nodes in pre-order that starts from the root.
   pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.context.borrow().root()))
@@ -440,7 +444,17 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
-      for child_id in self.tree.children_ids(id) {
+      let children_ids_sorted_by_zindex = {
+        let ctx = self.tree.context.borrow();
+        self
+          .tree
+          .children_ids(id)
+          .iter()
+          .sorted_by_key(|i| ctx.zindex(**i).unwrap())
+          .rev()
+          .collect_vec()
+      };
+      for child_id in children_ids_sorted_by_zindex {
         if self.tree.node(child_id).is_some() {
           self.que.push_back(child_id);
         }

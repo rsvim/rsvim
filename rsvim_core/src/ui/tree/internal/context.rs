@@ -394,8 +394,8 @@ impl TreeContext {
     self.ta.style(id)
   }
 
-  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self.ta.set_style(id, style)?;
+  pub fn set_style(&mut self, id: TreeNodeId, value: Style) -> TaffyResult<()> {
+    self.ta.set_style(id, value)?;
     self._update_shapes()?;
     Ok(())
   }
