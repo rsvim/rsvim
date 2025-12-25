@@ -227,22 +227,19 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Calculates cursor shape by its relative movement:
+  /// Calculates a widget shape by relative motion on its parent:
   /// - It moves to left when `x < 0`.
   /// - It moves to right when `x > 0`.
   /// - It moves to up when `y < 0`.
   /// - It moves to down when `y > 0`.
   ///
-  /// NOTE:
-  /// 1. The position is relatively based on the node parent.
-  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
-  ///    [`insert`](Itree::insert) method.
+  /// Returns the new shape after movement if successfully.
   ///
-  /// # Returns
-  ///
-  /// 1. The new shape after movement if successfully.
-  /// 2. `None` if the node `id` doesn't exist.
-  pub fn cursor_move_by(
+  /// NOTE: This motion uses the `RESERVED` policy just like
+  /// [TruncatePolicy](TruncatePolicy). If it hits the boundary of its parent
+  /// widget, it will simply stop moving to avoid its size been truncated by
+  /// its parent.
+  pub fn reserved_move_by(
     &mut self,
     id: TreeNodeId,
     x: isize,
