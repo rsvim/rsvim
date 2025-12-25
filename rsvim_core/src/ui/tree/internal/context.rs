@@ -607,20 +607,16 @@ impl TreeContext {
     debug_assert!(self.ta.contains(id));
     debug_assert!(self.ta.parent(id).is_some());
 
-    let parent_id = self.relation.parent(id).unwrap();
-    let attr = self.property(id).unwrap();
-    let enabled = attr.enabled;
-    let zindex = attr.zindex;
-    self.ta.remove_child(parent_id, id);
-    self.relation.remove_child(parent_id, id);
-    self.relation.remove_attribute(id);
+    let parent_id = self.ta.parent(id).unwrap();
+    let removed_id = self.ta.remove_child(parent_id, id)?;
+    debug_assert_eq!(removed_id, id);
 
-    // After this node is removed, if it is enabled, it can affect other
-    // sibling nodes with the same Z-index.
-    if enabled {
-      self._update_shapes(parent_id)
-    } else {
-      Ok(())
-    }
+    // Even we removed this child, we just remove its edge (e.g. parent-child
+    // relationship) inside TaffyTree, but we don't really purge its properties
+    // such as zindex, truncate_policy, etc.
+
+    self._update_shapes()?;
+
+    Ok(())
   }
 }
