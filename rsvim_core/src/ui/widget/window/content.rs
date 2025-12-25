@@ -22,8 +22,13 @@ pub struct WindowContent {
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
-    let base = InodeBase::new(shape);
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextRc,
+    buffer: BufferWk,
+    viewport: ViewportWk,
+  ) -> Self {
+    let base = InodeBase::new(id, ctx);
     WindowContent {
       base,
       buffer,
@@ -45,6 +50,6 @@ impl Widgetable for WindowContent {
     let buffer = lock!(buffer);
     let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(buffer.text(), actual_shape, canvas);
+    viewport.draw(buffer.text(), &actual_shape, canvas);
   }
 }

@@ -21,8 +21,6 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::panel::Panel;
-use crate::widget_dispatcher;
 use content::WindowContent;
 use opt::*;
 use std::sync::Arc;
