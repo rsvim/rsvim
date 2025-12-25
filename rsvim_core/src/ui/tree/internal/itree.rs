@@ -298,7 +298,7 @@ where
 
   /// Similar to `reserved_move_by`, but moves with absolute position instead
   /// of relative one.
-  pub fn bounded_move_to(
+  pub fn reserved_move_to(
     &self,
     id: TreeNodeId,
     x: isize,
