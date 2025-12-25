@@ -212,10 +212,10 @@ impl Tree {
   /// NOTE: It must be a valid window node.
   pub fn set_current_window_id(
     &mut self,
-    window_id: Option<TreeNodeId>,
+    id: Option<TreeNodeId>,
   ) -> Option<TreeNodeId> {
     if cfg!(debug_assertions) {
-      match window_id {
+      match id {
         Some(window_id) => {
           debug_assert!(self.node(window_id).is_some());
           debug_assert!(matches!(
@@ -227,7 +227,7 @@ impl Tree {
       }
     }
     let old = self.current_window_id;
-    self.current_window_id = window_id;
+    self.current_window_id = id;
     old
   }
 
