@@ -31,7 +31,7 @@ inode_dispatcher!(TreeNode, Root, Window, CommandLine);
 widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 
 #[derive(Debug, Clone)]
-/// The UI widget tree.
+/// The UI/widget tree.
 ///
 /// This tree manages all UI components and rendering on the canvas, each
 /// widget is a node on the tree, everything inside is the node's children.
