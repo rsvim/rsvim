@@ -536,7 +536,14 @@ impl Default for Relation {
 #[derive(Debug, Clone)]
 pub struct TreeContext {
   ta: Ta,
-  properties: FoldMap<TreeNodeId, Property>,
+
+  // Properties
+  shapes: FoldMap<TreeNodeId, IRect>,
+  actual_shapes: FoldMap<TreeNodeId, U16Rect>,
+  zindexes: FoldMap<TreeNodeId, usize>,
+  truncate_policies: FoldMap<TreeNodeId, TruncatePolicy>,
+
+  // Root
   root: TreeNodeId,
 
   // For debugging
@@ -552,7 +559,10 @@ impl TreeContext {
   pub fn new() -> Self {
     Self {
       ta: Ta::new(),
-      properties: FoldMap::new(),
+      shapes: FoldMap::new(),
+      actual_shapes: FoldMap::new(),
+      zindexes: FoldMap::new(),
+      truncate_policies: FoldMap::new(),
       root: INVALID_ROOT_ID,
       #[cfg(debug_assertions)]
       root_changes: 0,
@@ -612,8 +622,46 @@ impl TreeContext {
     self.ta.children(id)
   }
 
-  pub fn property(&self, id: TreeNodeId) -> Option<&Property> {
-    self.properties.get(&id)
+  pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
+    self.shapes.get(&id)
+  }
+
+  pub fn actual_shape(&self, id: TreeNodeId) -> Option<&U16Rect> {
+    self.actual_shapes.get(&id)
+  }
+
+  pub fn zindex(&self, id: TreeNodeId) -> Option<usize> {
+    self.zindexes.get(&id).copied()
+  }
+
+  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+    match self.zindexes.get_mut(&id) {
+      Some(v) => {
+        let result = *v;
+        *v = value;
+        Some(result)
+      }
+      None => None,
+    }
+  }
+
+  pub fn truncate_policy(&self, id: TreeNodeId) -> Option<TruncatePolicy> {
+    self.truncate_policies.get(&id).copied()
+  }
+
+  pub fn set_truncate_policy(
+    &mut self,
+    id: TreeNodeId,
+    value: TruncatePolicy,
+  ) -> Option<TruncatePolicy> {
+    match self.truncate_policies.get_mut(&id) {
+      Some(v) => {
+        let result = *v;
+        *v = value;
+        Some(result)
+      }
+      None => None,
+    }
   }
 
   pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
@@ -622,17 +670,6 @@ impl TreeContext {
 
   pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self.disabled(id).map(|v| !v)
-  }
-
-  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
-    match self.properties.get_mut(&id) {
-      Some(p) => {
-        let result = p.zindex;
-        p.zindex = value;
-        Some(result)
-      }
-      None => None,
-    }
   }
 
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
