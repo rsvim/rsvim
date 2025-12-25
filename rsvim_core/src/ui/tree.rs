@@ -105,7 +105,7 @@ pub struct Tree {
 
 arc_mutex_ptr!(Tree);
 
-// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 // Node {
