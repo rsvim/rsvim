@@ -624,6 +624,17 @@ impl TreeContext {
     self.disabled(id).map(|v| !v)
   }
 
+  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+    match self.properties.get_mut(&id) {
+      Some(p) => {
+        let result = p.index;
+        p.zindex = value;
+        Some(result)
+      }
+      None => None,
+    }
+  }
+
   pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
     self.ta.style(id)
   }
