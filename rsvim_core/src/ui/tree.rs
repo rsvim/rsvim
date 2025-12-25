@@ -151,6 +151,7 @@ impl Tree {
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let mut base = Itree::new();
+    let context = base.context();
 
     let style = Style {
       size: taffy::Size {
@@ -162,7 +163,7 @@ impl Tree {
     };
 
     base.add_root(style, "Panel", |id, _shape, _actual_shape| {
-      let root = Panel::new(id, base.context());
+      let root = Panel::new(id, context);
       TreeNode::Root(root)
     })?;
 
