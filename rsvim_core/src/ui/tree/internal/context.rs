@@ -392,6 +392,16 @@ impl TreeContext {
     self.ta.children(id)
   }
 
+  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
+    self.ta.style(id)
+  }
+
+  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
+    self.ta.set_style(id, style)?;
+    self._update_shapes()?;
+    Ok(())
+  }
+
   pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
     self.shapes.get(&id)
   }
@@ -404,15 +414,14 @@ impl TreeContext {
     self.zindexes.get(&id).copied()
   }
 
-  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
-    match self.zindexes.get_mut(&id) {
-      Some(v) => {
-        let result = *v;
-        *v = value;
-        Some(result)
-      }
-      None => None,
-    }
+  pub fn set_zindex(
+    &mut self,
+    id: TreeNodeId,
+    value: usize,
+  ) -> TaffyResult<usize> {
+    let old = self.zindexes.insert(id, value).unwrap();
+    self._update_shapes()?;
+    Ok(old)
   }
 
   pub fn truncate_policy(&self, id: TreeNodeId) -> Option<TruncatePolicy> {
@@ -423,15 +432,10 @@ impl TreeContext {
     &mut self,
     id: TreeNodeId,
     value: TruncatePolicy,
-  ) -> Option<TruncatePolicy> {
-    match self.truncate_policies.get_mut(&id) {
-      Some(v) => {
-        let result = *v;
-        *v = value;
-        Some(result)
-      }
-      None => None,
-    }
+  ) -> TaffyResult<TruncatePolicy> {
+    let old = self.truncate_policies.insert(id, value).unwrap();
+    self._update_shapes()?;
+    Ok(old)
   }
 
   pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
@@ -440,25 +444,6 @@ impl TreeContext {
 
   pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
     self.disabled(id).map(|v| !v)
-  }
-
-  pub fn style(&self, id: TreeNodeId) -> TaffyResult<&Style> {
-    self.ta.style(id)
-  }
-
-  pub fn set_style(&mut self, id: TreeNodeId, style: Style) -> TaffyResult<()> {
-    self.ta.set_style(id, style)?;
-    let parent_id = self.relation.parent(id).unwrap();
-    let attr = self.relation.attribute(id).unwrap();
-    let enabled = attr.enabled;
-    let zindex = attr.zindex;
-    if enabled {
-      // If this node is enabled, changing its style will affect other sibling
-      // nodes with the same Z-index.
-      self._update_shapes(parent_id)
-    } else {
-      Ok(())
-    }
   }
 }
 
