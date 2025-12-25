@@ -205,7 +205,11 @@ where
   /// Returns the removed node.
   ///
   /// NOTE: Never remove the root node.
-  pub fn remove_child(&mut self, id: TreeNodeId) -> TaffyResult<Option<T>> {
+  pub fn move_child(
+    &mut self,
+    id: TreeNodeId,
+    new_parent_id: TreeNodeId,
+  ) -> TaffyResult<Option<T>> {
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
 
