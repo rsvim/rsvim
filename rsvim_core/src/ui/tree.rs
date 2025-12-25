@@ -406,7 +406,7 @@ impl Tree {
     let content_id = self.base.new_leaf_default(
       content_style,
       "WindowContent",
-      |id, context, shape, actual_shape| {
+      |id, context, _shape, _actual_shape| {
         let content = WindowContent::new(
           id,
           context,
