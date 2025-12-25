@@ -54,6 +54,9 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 ///
 /// ## Rendering Order
 ///
+/// A node with higher rendering priority will be rendered after those with
+/// lower rendering priority:
+///
 /// - Children have higher priority to render on terminal than parent.
 /// - For all the children under the same parent, nodes with higher Z-index
 ///   have higher priority than the ones with lower Z-index.
