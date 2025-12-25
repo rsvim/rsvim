@@ -50,7 +50,7 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 ///   position (top-left corner), absolute position based on terminal.
 /// * Children must be displayed inside their parent's geometric shape,
 ///   truncated by their parent boundaries.
-/// * Z-index/enabled attributes will affected all its descendant nodes.
+/// * If a node is disabled, then all its descendant nodes are disabled.
 ///
 /// ## Rendering Order
 ///
@@ -64,15 +64,18 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 ///
 /// ## Attributes
 ///
-/// ### Shape/Position/Size
+/// ### Position/size/shape
 ///
-/// A shape is always a rectangle, it can be relative based on its parent or
-/// absolute (actual) based on terminal. We use relative shape for an easier
-/// code logic, use absolute shape when rendering it to terminal.
+/// A node's shape is always a rectangle, it's position can be either relative
+/// based on its parent or absolute based on terminal. Relative position is
+/// easier for processing user logic, while absolute position is easier for
+/// rendering the UI widget on the terminal.
 ///
-/// ### Visible/Enabled
+/// ### Z-index/enabled
 ///
-/// A widget can be visible or invisible, enabled or disabled.
+/// By default a node Z-index is 0, and it is enabled. You can raise rendering
+/// priority by set a bigger value to its Z-index, or mark it as disabled to
+/// not render it.
 pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
