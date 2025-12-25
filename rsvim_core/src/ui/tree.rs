@@ -214,14 +214,11 @@ impl Tree {
     &mut self,
     id: Option<TreeNodeId>,
   ) -> Option<TreeNodeId> {
-    if cfg!(debug_assertions) {
-      match id {
-        Some(id) => {
-          debug_assert!(self.node(id).is_some());
-          debug_assert!(matches!(self.node(id).unwrap(), TreeNode::Window(_)));
-        }
-        None => {}
-      }
+    if cfg!(debug_assertions)
+      && let Some(id) = id
+    {
+      debug_assert!(self.node(id).is_some());
+      debug_assert!(matches!(self.node(id).unwrap(), TreeNode::Window(_)));
     }
     let old = self.current_window_id;
     self.current_window_id = id;
