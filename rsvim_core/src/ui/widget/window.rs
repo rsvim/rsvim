@@ -28,25 +28,11 @@ use opt::*;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  Root(Panel),
-  Content(WindowContent),
-  Cursor(Cursor),
-}
-
-inode_dispatcher!(WindowNode, Root, Content, Cursor);
-widget_dispatcher!(WindowNode, Root, Content, Cursor);
-
-#[derive(Debug, Clone)]
-/// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
-/// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
-  cursor_id: Option<TreeNodeId>,
 
   buffer: BufferWk,
   viewport: ViewportArc,
@@ -54,44 +40,31 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(opts: &WindowOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let mut base = Itree::new();
-
-    let root = Panel::new(shape);
-    let root_id = root.id();
-    let root_node = WindowNode::Root(root);
-    base.add_root(root_node);
-
-    let content_shape = rect_from_size!(shape);
-    let content_actual_shape = rect_as!(content_shape, u16);
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextRc,
+    options: WindowOptions,
+    size: U16Size,
+    buffer: BufferWk,
+  ) -> Self {
+    let mut base = InodeBase::new(id, ctx);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport =
-        Viewport::view(opts, buffer.text(), &content_actual_shape.size(), 0, 0);
+      let viewport = Viewport::view(&options, buffer.text(), &size, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
-      (viewport, cursor_viewport)
+      (
+        Viewport::to_arc(viewport),
+        CursorViewport::to_arc(cursor_viewport),
+      )
     };
-    let viewport = Viewport::to_arc(viewport);
-    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
-
-    let content = WindowContent::new(
-      content_shape,
-      buffer.clone(),
-      Arc::downgrade(&viewport),
-    );
-    let content_id = content.id();
-    let content_node = WindowNode::Content(content);
-
-    base.bounded_insert(root_id, content_node);
 
     Window {
       base,
-      options: *opts,
-      content_id,
-      cursor_id: None,
+      options: *options,
+      content_id: INVALID_ROOT_ID,
       buffer,
       viewport,
       cursor_viewport,
