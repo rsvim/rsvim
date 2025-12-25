@@ -26,6 +26,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
+use std::collections::VecDeque;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
@@ -617,3 +618,59 @@ impl Tree {
   }
 }
 // Draw }
+
+// TreeIter {
+#[derive(Debug)]
+/// Iterate all the tree nodes in level-order.
+///
+/// For each node, it first visits the node itself, then visits all its
+/// children. This is also the order of rendering the whole UI tree to the
+/// terminal.
+pub struct TreeIter<'a> {
+  tree: &'a Tree,
+  que: VecDeque<TreeNodeId>,
+}
+
+impl<'a> Iterator for TreeIter<'a> {
+  type Item = &'a TreeNode;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(id) = self.que.pop_front() {
+      // Visit all children nodes under a parent node by following Z-index,
+      // from higher to lower.
+      let children_ids_sorted_by_zindex = {
+        let ctx = self.tree.context.borrow();
+        self
+          .tree
+          .children_ids(id)
+          .iter()
+          .sorted_by_key(|i| ctx.zindex(**i).unwrap())
+          .rev()
+          .copied()
+          .collect_vec()
+      };
+      for child_id in children_ids_sorted_by_zindex {
+        if self.tree.node(child_id).is_some() {
+          self.que.push_back(child_id);
+        }
+      }
+      self.tree.node(id)
+    } else {
+      None
+    }
+  }
+}
+
+impl<'a, T> TreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  pub fn new(tree: &'a Tree, start_id: Option<TreeNodeId>) -> Self {
+    let mut que = VecDeque::new();
+    if let Some(id) = start_id {
+      que.push_back(id);
+    }
+    Self { tree, que }
+  }
+}
+// TreeIter }
