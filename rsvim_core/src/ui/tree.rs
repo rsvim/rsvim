@@ -26,6 +26,7 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
+use itertools::Itertools;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use taffy::Style;
@@ -153,9 +154,6 @@ pub struct Tree {
 
 arc_mutex_ptr!(Tree);
 
-// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-// pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
-
 // Node {
 impl Tree {
   /// Make a widget tree.
@@ -241,6 +239,10 @@ impl Tree {
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self._internal_check();
     self.nodes.get_mut(&id)
+  }
+
+  pub fn iter(&self) -> TreeIter<'_> {
+    TreeIter::new(self, Some(self.context.borrow().root()))
   }
 
   /// Get cursor ID.
@@ -639,10 +641,10 @@ impl<'a> Iterator for TreeIter<'a> {
       // Visit all children nodes under a parent node by following Z-index,
       // from higher to lower.
       let children_ids_sorted_by_zindex = {
-        let ctx = self.tree.context.borrow();
-        self
-          .tree
-          .children_ids(id)
+        let ctx = self.tree.context().borrow();
+        ctx
+          .children(id)
+          .unwrap_or_default()
           .iter()
           .sorted_by_key(|i| ctx.zindex(**i).unwrap())
           .rev()
@@ -661,10 +663,7 @@ impl<'a> Iterator for TreeIter<'a> {
   }
 }
 
-impl<'a, T> TreeIter<'a, T>
-where
-  T: Inodeable,
-{
+impl<'a> TreeIter<'a> {
   pub fn new(tree: &'a Tree, start_id: Option<TreeNodeId>) -> Self {
     let mut que = VecDeque::new();
     if let Some(id) = start_id {
