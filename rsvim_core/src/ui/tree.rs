@@ -410,7 +410,7 @@ impl Tree {
         let content = WindowContent::new(
           id,
           context,
-          buffer,
+          buffer.clone(),
           Arc::downgrade(&mocked_viewport),
         );
         TreeNode::WindowContent(content)
