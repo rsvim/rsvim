@@ -216,12 +216,9 @@ impl Tree {
   ) -> Option<TreeNodeId> {
     if cfg!(debug_assertions) {
       match id {
-        Some(window_id) => {
-          debug_assert!(self.node(window_id).is_some());
-          debug_assert!(matches!(
-            self.node(window_id).unwrap(),
-            TreeNode::Window(_)
-          ));
+        Some(id) => {
+          debug_assert!(self.node(id).is_some());
+          debug_assert!(matches!(self.node(id).unwrap(), TreeNode::Window(_)));
         }
         None => {}
       }
