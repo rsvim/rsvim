@@ -12,7 +12,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::Window;
-use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
 
@@ -63,8 +63,11 @@ pub fn make_canvas(
   tree.set_global_local_options(&window_options);
   let shape = rect_from_size!(terminal_size);
   let shape = rect_as!(shape, isize);
-  let content =
-    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+  let content = WindowContent::new(
+    shape,
+    Arc::downgrade(&buffer),
+    Arc::downgrade(&viewport),
+  );
   let mut canvas = Canvas::new(terminal_size);
   content.draw(&mut canvas);
   canvas

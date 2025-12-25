@@ -18,7 +18,7 @@ use crate::ui::canvas::Cell;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::Window;
-use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::ToCompactString;

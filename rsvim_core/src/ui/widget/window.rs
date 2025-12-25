@@ -23,7 +23,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
 use crate::widget_dispatcher;
-use content::Content;
+use content::WindowContent;
 use opt::*;
 use std::sync::Arc;
 
@@ -31,7 +31,7 @@ use std::sync::Arc;
 /// The value holder for each window widget.
 pub enum WindowNode {
   Root(Panel),
-  Content(Content),
+  Content(WindowContent),
   Cursor(Cursor),
 }
 
@@ -77,8 +77,11 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
-    let content =
-      Content::new(content_shape, buffer.clone(), Arc::downgrade(&viewport));
+    let content = WindowContent::new(
+      content_shape,
+      buffer.clone(),
+      Arc::downgrade(&viewport),
+    );
     let content_id = content.id();
     let content_node = WindowNode::Content(content);
 
@@ -206,7 +209,7 @@ impl EditableWidgetable for Window {
 // Sub-Widgets {
 impl Window {
   /// Window content widget.
-  pub fn content(&self) -> &Content {
+  pub fn content(&self) -> &WindowContent {
     debug_assert!(self.base.node(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.content_id).unwrap(),
@@ -222,7 +225,7 @@ impl Window {
   }
 
   /// Mutable window content widget.
-  pub fn content_mut(&mut self) -> &mut Content {
+  pub fn content_mut(&mut self) -> &mut WindowContent {
     debug_assert!(self.base.node_mut(self.content_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.content_id).unwrap(),

@@ -14,7 +14,7 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineNode;
-use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::command_line::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
@@ -178,7 +178,7 @@ impl CommandLineExStateful {
       .command_line_mut()
       .unwrap()
       .indicator_mut()
-      .set_symbol(IndicatorSymbol::Empty);
+      .set_symbol(CmdlineIndicatorSymbol::Empty);
 
     cmdline_input_content.to_compact_string()
   }

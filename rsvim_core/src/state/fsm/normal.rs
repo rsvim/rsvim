@@ -9,7 +9,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::command_line::indicator::CmdlineIndicatorSymbol;
 use crate::ui::widget::window::WindowNode;
 use compact_str::CompactString;
 use crossterm::event::Event;
@@ -142,7 +142,9 @@ impl NormalStateful {
     let _previous_cursor = cmdline.insert_cursor(cursor);
     debug_assert!(_previous_cursor.is_none());
     cmdline.move_cursor_to(0, 0);
-    cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
+    cmdline
+      .indicator_mut()
+      .set_symbol(CmdlineIndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }

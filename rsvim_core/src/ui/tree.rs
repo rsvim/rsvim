@@ -8,8 +8,12 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::indicator::CmdlineIndicator;
+use crate::ui::widget::command_line::input::CmdlineInput;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::Window;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowGlobalOptions;
 use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
@@ -23,8 +27,12 @@ pub type TreeNodeId = i32;
 /// The value holder for each widget.
 pub enum TreeNode {
   Root(Panel),
+  Cursor(Cursor),
   Window(Window),
+  WindowContent(WindowContent),
   CommandLine(CommandLine),
+  CmdlineIndicator(CmdlineIndicator),
+  CmdlineInput(CmdlineInput),
 }
 
 inode_dispatcher!(TreeNode, Root, Window, CommandLine);

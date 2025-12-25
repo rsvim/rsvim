@@ -24,9 +24,9 @@ use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
-use indicator::Indicator;
-use indicator::IndicatorSymbol;
-use input::Input;
+use indicator::CmdlineIndicator;
+use indicator::CmdlineIndicatorSymbol;
+use input::CmdlineInput;
 use message::Message;
 use std::sync::Arc;
 
@@ -34,8 +34,8 @@ use std::sync::Arc;
 /// The value holder for each window widget.
 pub enum CommandLineNode {
   Root(Panel),
-  Indicator(Indicator),
-  Input(Input),
+  Indicator(CmdlineIndicator),
+  Input(CmdlineInput),
   Cursor(Cursor),
   Message(Message),
 }
@@ -80,7 +80,8 @@ impl CommandLine {
     let cmdline_size = shape.size();
 
     let indicator_shape = rect!(0, 0, 1, cmdline_size.height());
-    let indicator = Indicator::new(indicator_shape, IndicatorSymbol::Empty);
+    let indicator =
+      CmdlineIndicator::new(indicator_shape, CmdlineIndicatorSymbol::Empty);
     let indicator_id = indicator.id();
     let mut indicator_node = CommandLineNode::Indicator(indicator);
     // Indicator by default is invisible
@@ -123,7 +124,7 @@ impl CommandLine {
     let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
     let message_viewport = Viewport::to_arc(message_viewport);
 
-    let input = Input::new(
+    let input = CmdlineInput::new(
       input_shape,
       text_contents.clone(),
       Arc::downgrade(&input_viewport),
@@ -327,7 +328,7 @@ impl CommandLine {
 // Widgets {
 impl CommandLine {
   /// Command-line input widget.
-  pub fn input(&self) -> &Input {
+  pub fn input(&self) -> &CmdlineInput {
     debug_assert!(self.base.node(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.input_id).unwrap(),
@@ -344,7 +345,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line input widget.
-  pub fn input_mut(&mut self) -> &mut Input {
+  pub fn input_mut(&mut self) -> &mut CmdlineInput {
     debug_assert!(self.base.node_mut(self.input_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.input_id).unwrap(),
@@ -395,7 +396,7 @@ impl CommandLine {
   }
 
   /// Command-line indicator widget.
-  pub fn indicator(&self) -> &Indicator {
+  pub fn indicator(&self) -> &CmdlineIndicator {
     debug_assert!(self.base.node(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node(self.indicator_id).unwrap(),
@@ -412,7 +413,7 @@ impl CommandLine {
   }
 
   /// Mutable command-line indicator widget.
-  pub fn indicator_mut(&mut self) -> &mut Indicator {
+  pub fn indicator_mut(&mut self) -> &mut CmdlineIndicator {
     debug_assert!(self.base.node_mut(self.indicator_id).is_some());
     debug_assert!(matches!(
       self.base.node_mut(self.indicator_id).unwrap(),

@@ -10,49 +10,49 @@ use compact_str::ToCompactString;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
-pub enum IndicatorSymbol {
+pub enum CmdlineIndicatorSymbol {
   Empty,
   Ex,
   SearchForward,
   SearchBackward,
 }
 
-impl std::fmt::Display for IndicatorSymbol {
+impl std::fmt::Display for CmdlineIndicatorSymbol {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match *self {
-      IndicatorSymbol::Empty => write!(f, " "),
-      IndicatorSymbol::Ex => write!(f, ":"),
-      IndicatorSymbol::SearchForward => write!(f, "/"),
-      IndicatorSymbol::SearchBackward => write!(f, "?"),
+      CmdlineIndicatorSymbol::Empty => write!(f, " "),
+      CmdlineIndicatorSymbol::Ex => write!(f, ":"),
+      CmdlineIndicatorSymbol::SearchForward => write!(f, "/"),
+      CmdlineIndicatorSymbol::SearchBackward => write!(f, "?"),
     }
   }
 }
 
 #[derive(Debug, Clone)]
 /// Command-line indicator, i.e. the first char ':', '/', '?' in the commandline.
-pub struct Indicator {
+pub struct CmdlineIndicator {
   base: InodeBase,
-  symbol: IndicatorSymbol,
+  symbol: CmdlineIndicatorSymbol,
 }
 
-impl Indicator {
-  pub fn new(shape: IRect, symbol: IndicatorSymbol) -> Self {
+impl CmdlineIndicator {
+  pub fn new(shape: IRect, symbol: CmdlineIndicatorSymbol) -> Self {
     let base = InodeBase::new(shape);
-    Indicator { base, symbol }
+    CmdlineIndicator { base, symbol }
   }
 
-  pub fn symbol(&self) -> IndicatorSymbol {
+  pub fn symbol(&self) -> CmdlineIndicatorSymbol {
     self.symbol
   }
 
-  pub fn set_symbol(&mut self, symbol: IndicatorSymbol) {
+  pub fn set_symbol(&mut self, symbol: CmdlineIndicatorSymbol) {
     self.symbol = symbol;
   }
 }
 
-inode_impl!(Indicator, base);
+inode_impl!(CmdlineIndicator, base);
 
-impl Widgetable for Indicator {
+impl Widgetable for CmdlineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let upos: U16Pos = actual_shape.min().into();
