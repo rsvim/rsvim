@@ -46,8 +46,8 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 /// A parent node owns its children, more specifically:
 ///
 /// * Children will be destroyed when their parent is.
-/// * There are two location coordinates: relative location based on parent's
-///   location (top-left corner), absolute location based on terminal.
+/// * There are two position coordinates: relative position based on parent's
+///   position (top-left corner), absolute position based on terminal.
 /// * Children must be displayed inside their parent's geometric shape,
 ///   truncated by their parent boundaries.
 /// * Z-index/enabled attributes will affected all its descendant nodes.
