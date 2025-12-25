@@ -218,6 +218,7 @@ impl Tree {
       && let Some(id) = id
     {
       debug_assert!(self.node(id).is_some());
+      debug_assert!(self.window_ids.contains(&id));
       debug_assert!(matches!(self.node(id).unwrap(), TreeNode::Window(_)));
     }
     let old = self.current_window_id;
