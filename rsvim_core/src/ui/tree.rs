@@ -57,6 +57,7 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 /// - Children have higher priority to render on terminal than parent.
 /// - For all the children under the same parent, nodes with higher Z-index
 ///   have higher priority than the ones with lower Z-index.
+/// - Disabled nodes (i.e. `display: None`) are not rendered.
 ///
 /// ## Attributes
 ///
