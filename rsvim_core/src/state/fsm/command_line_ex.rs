@@ -133,7 +133,7 @@ impl CommandLineExStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.command_line_id().is_some());
+    debug_assert!(tree.cmdline_id().is_some());
     let cmdline = tree.command_line_mut().unwrap();
 
     // Show message, hide input/indicator.
@@ -201,8 +201,8 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.cmdline_id().is_some());
+    let cmdline_id = tree.cmdline_id().unwrap();
     let contents = data_access.contents.clone();
     let contents = lock!(contents);
 
@@ -226,8 +226,8 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.cmdline_id().is_some());
+    let cmdline_id = tree.cmdline_id().unwrap();
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
 

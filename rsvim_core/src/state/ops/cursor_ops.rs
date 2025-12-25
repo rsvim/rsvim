@@ -234,7 +234,7 @@ pub fn editable_tree_node_mut(
   debug_assert!(tree.node_mut(id).is_some());
   match tree.node_mut(id).unwrap() {
     TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
+    TreeNode::Cmdline(cmdline) => cmdline,
     _ => unreachable!(),
   }
 }
@@ -576,7 +576,7 @@ pub fn cursor_insert(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.input_cursor_viewport(),
+    TreeNode::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
     _ => unreachable!(),
   };
 
@@ -631,7 +631,7 @@ pub fn cursor_delete(
   let node = tree.node_mut(id).unwrap();
   let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::CommandLine(cmdline) => cmdline.input_cursor_viewport(),
+    TreeNode::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
     _ => unreachable!(),
   };
 

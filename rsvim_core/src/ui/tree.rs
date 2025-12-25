@@ -135,7 +135,7 @@ pub struct Tree {
 
 arc_mutex_ptr!(Tree);
 
-pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 // Node {
@@ -198,33 +198,18 @@ impl Tree {
     self.base.node_mut(id)
   }
 
-  // /// See [`Itree::iter`].
-  // pub fn iter(&self) -> TreeIter {
-  //   self.base.iter()
-  // }
-  //
-  // /// See [`Itree::iter_mut`].
-  // pub fn iter_mut(&mut self) -> TreeIterMut {
-  //   self.base.iter_mut()
-  // }
-
   /// Get command-line node ID.
-  pub fn command_line_id(&self) -> Option<TreeNodeId> {
+  pub fn cmdline_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
   }
 
   /// Get current window node ID.
-  /// NOTE: A window is called the current window because it has cursor inside it. But when user is
-  /// in command-line mode, the cursor widget is actually inside the command-line widget, not in
-  /// window. Mean while the **current** window is actually the **previous current** window.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
     self.current_window_id
   }
 
   /// Set current window node ID.
-  ///
-  /// NOTE: When the node ID is not `None`, it must be a valid tree node, existing in current tree,
-  /// and it must be a window widget.
+  /// NOTE: It must be a valid window node.
   pub fn set_current_window_id(
     &mut self,
     window_id: Option<TreeNodeId>,

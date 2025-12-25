@@ -53,5 +53,5 @@ pub fn init_default_window(
   );
   let cmdline = Cmdline::new(cmdline_shape, text_contents);
 
-  tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+  tree.bounded_insert(tree_root_id, TreeNode::Cmdline(cmdline));
 }
