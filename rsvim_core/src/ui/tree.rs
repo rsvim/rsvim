@@ -148,7 +148,7 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> Self {
+  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
     let mut base = Itree::new();
 
     let style = Style {
@@ -163,18 +163,20 @@ impl Tree {
     let shape = rect_from_size!(canvas_size);
     let shape = rect_as!(shape, isize);
 
-    let root = Panel::new(shape);
-    let root_node = TreeNode::Root(root);
-    base.add_root(root_node);
+    let id = base.add_root(style, "Panel", |id, shape, actual_shape| {
+      let root = Panel::new(id, base.context());
+      TreeNode::Root(root)
+    })?;
 
-    Tree {
+    Ok(Tree {
       base,
+      cursor_id: None,
       cmdline_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowOptionsBuilder::default().build().unwrap(),
-    }
+    })
   }
 
   /// Nodes count, include the root node.
