@@ -710,12 +710,10 @@ impl TreeContext {
         let layout = self.ta.layout(id)?.clone();
         let policy = self.truncate_policies.get(&id).copied().unwrap();
         let shape = rect_from_layout!(layout);
-        let shape = self._adjust_shape(id, &shape, policy);
+        let shape = self._truncate_shape(id, &shape, policy);
         let actual_shape = self._calculate_actual_shape(id, &shape);
-        let mut attr = *self.relation.attribute(id).unwrap();
-        attr.shape = shape;
-        attr.actual_shape = actual_shape;
-        self.relation.set_attribute(id, attr);
+        self.shapes.insert(id, shape);
+        self.actual_shapes.insert(id, actual_shape);
 
         if let Ok(ta_children_ids) = self.ta.children(id) {
           for ta_child in ta_children_ids {
@@ -728,9 +726,9 @@ impl TreeContext {
     Ok(())
   }
 
-  /// Adjust the shape of a node, by its expected shape and the policy it
+  /// Truncate the shape of a node, by its expected shape and the policy it
   /// follows.
-  fn _adjust_shape(
+  fn _truncate_shape(
     &self,
     id: TreeNodeId,
     shape: &IRect,
@@ -852,7 +850,7 @@ impl TreeContext {
     )?;
     let layout = self.ta.layout(id)?;
 
-    let shape = self._adjust_shape(id, &shape, truncate_policy);
+    let shape = self._truncate_shape(id, &shape, truncate_policy);
     let actual_shape = self._calculate_actual_shape(id, &shape);
 
     self.relation.add_child(parent_id, id, name);
