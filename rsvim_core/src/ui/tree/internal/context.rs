@@ -627,7 +627,7 @@ impl TreeContext {
   pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
     match self.properties.get_mut(&id) {
       Some(p) => {
-        let result = p.index;
+        let result = p.zindex;
         p.zindex = value;
         Some(result)
       }
