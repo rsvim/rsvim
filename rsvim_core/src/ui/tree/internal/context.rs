@@ -19,7 +19,7 @@ use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub const DEFAULT_ZINDEX: usize = 0;
-pub const DEFAULT_ENABLED: bool = true;
+pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 
 /// Next unique UI widget ID.
 ///
@@ -771,20 +771,6 @@ impl TreeContext {
     }
   }
 
-  // Compute layout and update attribute of all nodes, after any changes
-  // happened, such as:
-  // - A node changed its style.
-  // - A new node is added.
-  // - A node is removed.
-  fn _compute_layout(&mut self) {
-    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-    q.push_back(self.root());
-    while let Some(id) = q.pop_front() {
-      debug_assert!(self.relation.attribute(id).is_some());
-      if !self.relation.attribute(id).unwrap().enabled {}
-    }
-  }
-
   /// Create a root node, which is the first node in the tree.
   /// Returns the root node ID.
   pub fn add_root(
@@ -794,34 +780,23 @@ impl TreeContext {
   ) -> TaffyResult<TreeNodeId> {
     debug_assert!(self.ta.is_empty());
 
-    let height = style.size.height.value();
-    let width = style.size.width.value();
+    let height = style.size.height.value() as isize;
+    let width = style.size.width.value() as isize;
 
     let id = self.ta.new_leaf(style)?;
-    self.ta.compute_layout(
-      id,
-      taffy::Size {
-        width: taffy::AvailableSpace::from_length(width),
-        height: taffy::AvailableSpace::from_length(height),
-      },
-    )?;
-    let layout = self.ta.layout(id)?;
-    let shape = rect_from_layout!(layout);
-    debug_assert_eq!(shape.size().height(), height as isize);
-    debug_assert_eq!(shape.size().width(), width as isize);
-    let actual_shape = rect_as!(shape, u16);
 
     self._set_root(id);
     self._set_name(id, name);
-    self.properties.insert(
-      id,
-      Property {
-        shape,
-        actual_shape,
-        zindex: DEFAULT_ZINDEX,
-        truncate_policy: TruncatePolicy::BRUTAL,
-      },
-    );
+    self.zindexes.insert(id, DEFAULT_ZINDEX);
+    self.truncate_policies.insert(id, DEFAULT_TRUNCATE_POLICY);
+
+    self._update_shapes()?;
+
+    debug_assert_eq!(height, self.shapes.get(id).unwrap().height());
+    debug_assert_eq!(width, self.shapes.get(id).unwrap().width());
+    debug_assert_eq!(height, self.actual_shapes.get(id).unwrap().height());
+    debug_assert_eq!(width, self.actual_shapes.get(id).unwrap().width());
+
     Ok(id)
   }
 
