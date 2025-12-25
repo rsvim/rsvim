@@ -10,15 +10,11 @@ use crate::ui::tree::internal::context::TreeContextRc;
 use crate::ui::tree::internal::context::TruncatePolicy;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
-use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
-use std::rc::Rc;
 use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::FromLength;
-use taffy::prelude::TaffyMaxContent;
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>

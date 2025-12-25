@@ -9,7 +9,6 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_dispatcher;
 use crate::inode_itree_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
