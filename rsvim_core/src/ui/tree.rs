@@ -383,6 +383,30 @@ impl Tree {
     opts: WindowOptions,
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
+    let id = self.base.add_child_with_defaults(
+      parent_id,
+      style,
+      "Window",
+      |id, context, shape, actual_shape| {
+        let window =
+          Window::new(id, context, opts, actual_shape.size(), buffer);
+        TreeNode::Window(window)
+      },
+    )?;
+    let actual_shape = self
+      .base
+      .context()
+      .borrow()
+      .actual_shape(id)
+      .copied()
+      .unwrap();
+    if actual_shape.size().is_zero() {
+      let raw_taffy_id =
+        self.base.context().borrow().raw_taffy_node_id(id).unwrap();
+      return Err(taffy::TaffyError::InvalidInputNode(raw_taffy_id));
+    }
+
+    // window content widget
     let content_style = Style {
       size: taffy::Size {
         width: taffy::Dimension::from_percent(1.0),
@@ -390,11 +414,10 @@ impl Tree {
       },
       ..Default::default()
     };
-
-    let window_id = self.base.add_child_with_defaults(
-      parent_id,
-      style,
-      "Window",
+    let content_id = self.base.add_child_with_defaults(
+      id,
+      content_style,
+      "WindowContent",
       |id, context, shape, actual_shape| {},
     )?;
 

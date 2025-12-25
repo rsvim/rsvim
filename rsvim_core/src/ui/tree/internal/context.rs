@@ -47,6 +47,10 @@ impl Ta {
     }
   }
 
+  pub fn raw_taffy_node_id(&self, id: TreeNodeId) -> Option<taffy::NodeId> {
+    self.id2taid.get(&id).copied()
+  }
+
   pub fn is_empty(&self) -> bool {
     self._internal_check();
     self.id2taid.is_empty()
@@ -341,6 +345,10 @@ impl TreeContext {
       #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
+  }
+
+  pub fn raw_taffy_node_id(&self, id: TreeNodeId) -> Option<taffy::NodeId> {
+    self.ta.raw_taffy_node_id(id)
   }
 
   pub fn is_empty(&self) -> bool {

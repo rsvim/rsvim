@@ -67,6 +67,10 @@ where
     self.context.borrow().children(id).unwrap_or_default()
   }
 
+  pub fn raw_taffy_node_id(&self, id: TreeNodeId) -> Option<taffy::NodeId> {
+    self.context().borrow().raw_taffy_node_id(id)
+  }
+
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
     self.nodes.get(&id)
   }
