@@ -2,6 +2,8 @@
 
 pub mod internal;
 
+use std::sync::Arc;
+
 use crate::buf::BufferWk;
 use crate::inode_dispatcher;
 use crate::prelude::*;
@@ -389,10 +391,11 @@ impl Tree {
       "Window",
       |id, context, shape, actual_shape| {
         let window =
-          Window::new(id, context, opts, actual_shape.size(), buffer);
+          Window::new(id, context, opts, actual_shape.size(), buffer.clone());
         TreeNode::Window(window)
       },
     )?;
+    let viewport = self.window(id).viewport();
 
     // window content widget
     let content_style = Style {
@@ -406,8 +409,13 @@ impl Tree {
       id,
       content_style,
       "WindowContent",
-      |id, context, shape, actual_shape| {},
+      |id, context, shape, actual_shape| {
+        let content =
+          WindowContent::new(id, context, buffer, Arc::downgrade(&viewport));
+        TreeNode::WindowContent(content)
+      },
     )?;
+    self.window_mut(id)._set_content_id(content_id);
 
     let (window_id, content_id) = {
       let lotree = self.base;

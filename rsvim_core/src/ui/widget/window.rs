@@ -68,6 +68,10 @@ impl Window {
       cursor_viewport,
     }
   }
+
+  pub fn _set_content_id(&mut self, value: TreeNodeId) {
+    self.content_id = value;
+  }
 }
 
 inode_itree_impl!(Window, base);
