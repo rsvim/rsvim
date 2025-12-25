@@ -198,17 +198,17 @@ impl Tree {
     self.base.node_mut(id)
   }
 
-  /// Get command-line node ID.
+  /// Get command-line ID.
   pub fn cmdline_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
   }
 
-  /// Get current window node ID.
+  /// Get current window ID.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
     self.current_window_id
   }
 
-  /// Set current window node ID.
+  /// Set current window ID.
   /// NOTE: It must be a valid window node.
   pub fn set_current_window_id(
     &mut self,
@@ -231,7 +231,7 @@ impl Tree {
     old
   }
 
-  /// Get all the window widget IDs.
+  /// Get all window IDs.
   pub fn window_ids(&self) -> &BTreeSet<TreeNodeId> {
     &self.window_ids
   }
