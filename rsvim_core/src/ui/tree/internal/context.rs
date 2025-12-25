@@ -15,6 +15,7 @@ use taffy::Style;
 use taffy::TaffyResult;
 use taffy::TaffyTree;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub const DEFAULT_ZINDEX: usize = 0;
@@ -685,7 +686,7 @@ impl TreeContext {
     if enabled {
       // If this node is enabled, changing its style will affect other sibling
       // nodes with the same Z-index.
-      self._update_shapes_for(parent_id)
+      self._update_shapes(parent_id)
     } else {
       Ok(())
     }
@@ -695,49 +696,35 @@ impl TreeContext {
 impl TreeContext {
   /// Update shape/actual_shape for a node and all its children and
   /// descendants.
-  fn _update_shapes_for(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
-    let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-    q.push_back(start_id);
+  fn _update_shapes(&mut self) -> TaffyResult<()> {
+    if self.root != INVALID_ROOT_ID {
+      self
+        .ta
+        .compute_layout(self.root, taffy::Size::MAX_CONTENT)?;
 
-    // Iterate all descendants, and update their shape/actual_shape.
-    while let Some(id) = q.pop_front() {
-      let layout = self.ta.layout(id)?.clone();
-      let policy = self.relation.attribute(id).unwrap().truncate_policy;
-      let shape = rect_from_layout!(layout);
-      let shape = self._adjust_shape(id, &shape, policy);
-      let actual_shape = self._calculate_actual_shape(id, &shape);
-      let mut attr = *self.relation.attribute(id).unwrap();
-      attr.shape = shape;
-      attr.actual_shape = actual_shape;
-      self.relation.set_attribute(id, attr);
+      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      q.push_back(self.root);
 
-      if let Ok(ta_children_ids) = self.ta.children(id) {
-        for ta_child in ta_children_ids {
-          q.push_back(ta_child);
+      // Iterate all descendants, and update their shape/actual_shape.
+      while let Some(id) = q.pop_front() {
+        let layout = self.ta.layout(id)?.clone();
+        let policy = self.truncate_policies.get(&id).copied().unwrap();
+        let shape = rect_from_layout!(layout);
+        let shape = self._adjust_shape(id, &shape, policy);
+        let actual_shape = self._calculate_actual_shape(id, &shape);
+        let mut attr = *self.relation.attribute(id).unwrap();
+        attr.shape = shape;
+        attr.actual_shape = actual_shape;
+        self.relation.set_attribute(id, attr);
+
+        if let Ok(ta_children_ids) = self.ta.children(id) {
+          for ta_child in ta_children_ids {
+            q.push_back(ta_child);
+          }
         }
       }
     }
 
-    Ok(())
-  }
-
-  /// Update shape/actual_shape for all children and their descendants under a
-  /// parent, except 1 child.
-  fn _update_shapes_for_children_except(
-    &mut self,
-    parent_id: TreeNodeId,
-    except_child_id: TreeNodeId,
-  ) -> TaffyResult<()> {
-    let ta_children_ids = self.ta.children(parent_id);
-    if let Ok(ta_children_ids) = ta_children_ids {
-      for ta_child in ta_children_ids {
-        // We don't have to update `except_id` again because we had just done
-        // it.
-        if ta_child != except_child_id {
-          self._update_shapes_for(ta_child)?;
-        }
-      }
-    }
     Ok(())
   }
 
@@ -749,10 +736,10 @@ impl TreeContext {
     shape: &IRect,
     policy: TruncatePolicy,
   ) -> IRect {
-    match self.relation.parent(id) {
+    match self.ta.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape =
-          self.relation.attribute(parent_id).unwrap().actual_shape;
+          self.actual_shapes.get(&parent_id).copied().unwrap();
         match policy {
           TruncatePolicy::BRUTAL => {
             shapes::truncate_shape(&shape, &parent_actual_shape.size())
@@ -773,10 +760,10 @@ impl TreeContext {
     id: TreeNodeId,
     shape: &IRect,
   ) -> U16Rect {
-    match self.relation.parent(id) {
+    match self.ta.parent(id) {
       Some(parent_id) => {
         let parent_actual_shape =
-          self.relation.attribute(parent_id).unwrap().actual_shape;
+          self.actual_shapes.get(&parent_id).copied().unwrap();
         shapes::convert_relative_to_absolute(&shape, &parent_actual_shape)
       }
       None => {
@@ -852,32 +839,18 @@ impl TreeContext {
   ) -> TaffyResult<TreeNodeId> {
     debug_assert!(self.ta.contains(parent_id));
 
-    let (id, shape) = {
-      if enabled {
-        let id = self.ta.new_with_parent(style, parent_id)?;
+    let id = self.ta.new_with_parent(style, parent_id)?;
 
-        self.ta.compute_layout(
-          self.relation.root(),
-          taffy::Size {
-            width: taffy::AvailableSpace::from_length(
-              actual_shape.size().width(),
-            ),
-            height: taffy::AvailableSpace::from_length(
-              actual_shape.size().height(),
-            ),
-          },
-        )?;
-        let layout = self.ta.layout(id)?;
-        (id, rect_from_layout!(layout))
-      } else {
-        // Where the child node is disabled, we simply mock it with parent's
-        // shape.
-        (
-          self.ta.new_leaf(style)?,
-          self.relation.attribute(parent_id).unwrap().shape,
-        )
-      }
-    };
+    self.ta.compute_layout(
+      self.relation.root(),
+      taffy::Size {
+        width: taffy::AvailableSpace::from_length(actual_shape.size().width()),
+        height: taffy::AvailableSpace::from_length(
+          actual_shape.size().height(),
+        ),
+      },
+    )?;
+    let layout = self.ta.layout(id)?;
 
     let shape = self._adjust_shape(id, &shape, truncate_policy);
     let actual_shape = self._calculate_actual_shape(id, &shape);
@@ -925,7 +898,7 @@ impl TreeContext {
     // After this node is removed, if it is enabled, it can affect other
     // sibling nodes with the same Z-index.
     if enabled {
-      self._update_shapes_for(parent_id)
+      self._update_shapes(parent_id)
     } else {
       Ok(())
     }
