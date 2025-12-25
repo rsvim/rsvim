@@ -171,17 +171,21 @@ impl Tree {
       ..Default::default()
     };
 
-    context.new_root(
-      style,
-      "Panel",
-      |id, context, _shape, _actual_shape| {
-        let root = Panel::new(id, context);
-        TreeNode::Root(root)
-      },
-    )?;
+    let id = context.new_root(style, "Panel")?;
+    let shape = context.shape(id).copied().unwrap();
+    let actual_shape = context.actual_shape(id).copied().unwrap();
+
+    let context = TreeContext::to_rc(context);
+
+    let root = Panel::new(id, context.clone());
+    let root = TreeNode::Root(root);
+
+    let mut nodes = FoldMap::new();
+    nodes.insert(id, root);
 
     Ok(Tree {
-      context: TreeContext::to_rc(context),
+      context,
+      nodes,
       cursor_id: None,
       cmdline_id: None,
       window_ids: BTreeSet::new(),
