@@ -792,10 +792,16 @@ impl TreeContext {
 
     self._update_shapes()?;
 
-    debug_assert_eq!(height, self.shapes.get(id).unwrap().height());
-    debug_assert_eq!(width, self.shapes.get(id).unwrap().width());
-    debug_assert_eq!(height, self.actual_shapes.get(id).unwrap().height());
-    debug_assert_eq!(width, self.actual_shapes.get(id).unwrap().width());
+    debug_assert_eq!(height, self.shapes.get(&id).unwrap().height());
+    debug_assert_eq!(width, self.shapes.get(&id).unwrap().width());
+    debug_assert_eq!(
+      height,
+      self.actual_shapes.get(id).unwrap().height() as isize
+    );
+    debug_assert_eq!(
+      width,
+      self.actual_shapes.get(id).unwrap().width() as isize
+    );
 
     Ok(id)
   }
