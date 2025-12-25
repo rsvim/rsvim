@@ -201,21 +201,23 @@ where
     )
   }
 
-  /// Remove a child node.
-  /// Returns the removed node.
+  /// Move a child node from its parent to a new parent.
   ///
   /// NOTE: Never remove the root node.
   pub fn move_child(
     &mut self,
     id: TreeNodeId,
     new_parent_id: TreeNodeId,
-  ) -> TaffyResult<Option<T>> {
+  ) -> TaffyResult<()> {
     self._internal_check();
     debug_assert_ne!(id, self.context.borrow().root());
+    debug_assert!(self.context.borrow().contains(id));
+    let mut ctx = self.context.borrow_mut();
+
+    let old_parent_id = ctx.parent(id).unwrap();
 
     match self.nodes.remove(&id) {
       Some(removed_node) => {
-        debug_assert!(self.context.borrow().contains(id));
         debug_assert_ne!(self.root_id(), id);
         self.context.borrow_mut().remove_child(id)?;
         Ok(Some(removed_node))
