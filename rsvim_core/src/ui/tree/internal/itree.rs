@@ -213,10 +213,7 @@ where
     debug_assert_ne!(id, self.context.borrow().root());
     debug_assert!(self.context.borrow().contains(id));
     debug_assert!(self.context().borrow().parent(id).is_some());
-    let mut ctx = self.context.borrow_mut();
-
-    ctx.move_child(new_parent_id, id)?;
-    Ok(())
+    self.context.borrow_mut().move_child(new_parent_id, id)
   }
 }
 // Insert/Remove }

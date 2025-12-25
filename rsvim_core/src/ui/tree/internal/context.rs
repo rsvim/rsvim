@@ -605,8 +605,6 @@ impl TreeContext {
     // relationship) inside TaffyTree, but we don't really purge its properties
     // such as zindex, truncate_policy, etc.
 
-    self._update_shapes()?;
-
-    Ok(())
+    self._update_shapes()
   }
 }
