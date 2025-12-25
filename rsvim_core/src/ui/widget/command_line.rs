@@ -46,7 +46,7 @@ widget_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
-pub struct CommandLine {
+pub struct Cmdline {
   base: Itree<CommandLineNode>,
   options: WindowOptions,
 
@@ -60,7 +60,7 @@ pub struct CommandLine {
   message_viewport: ViewportArc,
 }
 
-impl CommandLine {
+impl Cmdline {
   pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
     // Force cmdline window options.
     let options = WindowOptionsBuilder::default()
@@ -177,9 +177,9 @@ impl CommandLine {
   }
 }
 
-inode_itree_impl!(CommandLine, base);
+inode_itree_impl!(Cmdline, base);
 
-impl Widgetable for CommandLine {
+impl Widgetable for Cmdline {
   fn draw(&self, canvas: &mut Canvas) {
     for node in self.base.iter() {
       // trace!("Draw window:{:?}", node);
@@ -191,7 +191,7 @@ impl Widgetable for CommandLine {
   }
 }
 
-impl CommandLine {
+impl Cmdline {
   /// Get window local options.
   pub fn options(&self) -> &WindowOptions {
     &self.options
@@ -224,7 +224,7 @@ impl CommandLine {
 }
 
 // Viewport {
-impl CommandLine {
+impl Cmdline {
   /// Get input viewport.
   pub fn input_viewport(&self) -> ViewportArc {
     self.input_viewport.clone()
@@ -271,7 +271,7 @@ impl CommandLine {
 // Viewport }
 
 // Editable Viewport {
-impl EditableWidgetable for CommandLine {
+impl EditableWidgetable for Cmdline {
   fn editable_viewport(&self) -> ViewportArc {
     self.input_viewport()
   }
@@ -310,7 +310,7 @@ impl EditableWidgetable for CommandLine {
 // Editable Viewport }
 
 // Show/Hide switch {
-impl CommandLine {
+impl Cmdline {
   pub fn show_message(&mut self) {
     self.indicator_mut().set_visible(false);
     self.input_mut().set_visible(false);
@@ -326,7 +326,7 @@ impl CommandLine {
 // Show/Hide switch }
 
 // Widgets {
-impl CommandLine {
+impl Cmdline {
   /// Command-line input widget.
   pub fn input(&self) -> &CmdlineInput {
     debug_assert!(self.base.node(self.input_id).is_some());
@@ -476,7 +476,7 @@ impl CommandLine {
 // Attributes }
 
 // Cursor {
-impl CommandLine {
+impl Cmdline {
   /// Enable/insert cursor widget in commandline, i.e. when user start command-line mode, the
   /// cursor moves to the command-line widget and allow receive user ex command or search patterns.
   ///

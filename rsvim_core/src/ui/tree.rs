@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::Cmdline;
 use crate::ui::widget::command_line::indicator::CmdlineIndicator;
 use crate::ui::widget::command_line::input::CmdlineInput;
 use crate::ui::widget::command_line::message::CmdlineMessage;
@@ -31,14 +31,34 @@ pub enum TreeNode {
   Cursor(Cursor),
   Window(Window),
   WindowContent(WindowContent),
-  CommandLine(CommandLine),
+  Cmdline(Cmdline),
   CmdlineIndicator(CmdlineIndicator),
   CmdlineInput(CmdlineInput),
   CmdlineMessage(CmdlineMessage),
 }
 
-inode_dispatcher!(TreeNode, Root, Window, CommandLine);
-widget_dispatcher!(TreeNode, Root, Window, CommandLine);
+inode_dispatcher!(
+  TreeNode,
+  Root,
+  Cursor,
+  Window,
+  WindowContent,
+  Cmdline,
+  CmdlineIndicator,
+  CmdlineInput,
+  CmdlineMessage
+);
+widget_dispatcher!(
+  TreeNode,
+  Root,
+  Cursor,
+  Window,
+  WindowContent,
+  Cmdline,
+  CmdlineIndicator,
+  CmdlineInput,
+  CmdlineMessage
+);
 
 #[derive(Debug, Clone)]
 /// The UI/widget tree.
@@ -286,14 +306,14 @@ impl Tree {
   }
 
   // Command-line widget.
-  pub fn command_line(&self) -> Option<&CommandLine> {
+  pub fn command_line(&self) -> Option<&Cmdline> {
     match self.command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node(cmdline_id).is_some());
         let cmdline_node = self.node(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        debug_assert!(matches!(cmdline_node, TreeNode::Cmdline(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => {
+          TreeNode::Cmdline(w) => {
             debug_assert_eq!(w.id(), cmdline_id);
             Some(w)
           }
@@ -305,14 +325,14 @@ impl Tree {
   }
 
   // Mutable command-line widget.
-  pub fn command_line_mut(&mut self) -> Option<&mut CommandLine> {
+  pub fn command_line_mut(&mut self) -> Option<&mut Cmdline> {
     match self.command_line_id {
       Some(cmdline_id) => {
         debug_assert!(self.node_mut(cmdline_id).is_some());
         let cmdline_node = self.node_mut(cmdline_id).unwrap();
-        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        debug_assert!(matches!(cmdline_node, TreeNode::Cmdline(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => {
+          TreeNode::Cmdline(w) => {
             debug_assert_eq!(w.id(), cmdline_id);
             Some(w)
           }
@@ -329,7 +349,7 @@ impl Tree {
 impl Tree {
   fn insert_guard(&mut self, node: &TreeNode) {
     match node {
-      TreeNode::CommandLine(command_line) => {
+      TreeNode::Cmdline(command_line) => {
         // When insert command-line widget, update `command_line_id`.
         self.command_line_id = Some(command_line.id());
       }

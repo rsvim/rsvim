@@ -7,7 +7,7 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
@@ -51,7 +51,7 @@ pub fn init_default_window(
     canvas_size.width() as isize,
     canvas_size.height() as isize
   );
-  let cmdline = CommandLine::new(cmdline_shape, text_contents);
+  let cmdline = Cmdline::new(cmdline_shape, text_contents);
 
   tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 }
