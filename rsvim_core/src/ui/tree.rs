@@ -311,13 +311,13 @@ impl Tree {
 impl Tree {
   fn insert_guard(&mut self, node: &TreeNode) {
     match node {
-      TreeNode::Cmdline(command_line) => {
+      TreeNode::Cmdline(c) => {
         // When insert command-line widget, update `command_line_id`.
-        self.cmdline_id = Some(command_line.id());
+        self.cmdline_id = Some(c.id());
       }
-      TreeNode::Window(window) => {
+      TreeNode::Window(w) => {
         // When insert window widget, update `window_ids`.
-        self.window_ids.insert(window.id());
+        self.window_ids.insert(w.id());
       }
       _ => {}
     }
