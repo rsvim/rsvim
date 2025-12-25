@@ -37,13 +37,17 @@ widget_dispatcher!(TreeNode, Root, Window, CommandLine);
 /// widget is a node on the tree, everything inside is the node's children.
 /// While the terminal itself is the root widget node.
 ///
-/// The tree guarantees all the relationships between each nodes:
+/// > An element in UI tree can be called node, widget, component or whatever.
+///
+/// The tree guarantees several constraints on all nodes:
 ///
 /// ## Ownership
 ///
+/// A parent node owns its children, more specifically:
+///
 /// * Children will be destroyed when their parent is.
-/// * There are two coordinate system: relative coordinate based on parent's
-///   top-left corner, absolute coordinate based on terminal's top-left corner.
+/// * There are two location coordinates: relative location based on parent's
+///   location (top-left corner), absolute location based on terminal.
 /// * Children are displayed inside their parent's geometric shape, clipped by
 ///   boundaries.
 /// * Visible/enabled attributes will affected all its descendant nodes.
