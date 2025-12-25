@@ -277,27 +277,23 @@ where
     y: isize,
   ) -> Option<IRect> {
     let ctx = self.context.borrow();
-    match ctx.parent(id) {
-      Some(parent_id) => {
-        let shape = ctx.shape(id)?;
-        let pos: IPos = shape.min().into();
-        let new_pos = point!(pos.x() + x, pos.y() + y);
-        let new_shape = rect!(
-          new_pos.x(),
-          new_pos.y(),
-          new_pos.x() + shape.width(),
-          new_pos.y() + shape.height()
-        );
-        let parent_actual_shape = ctx.actual_shape(parent_id)?;
-        let final_shape =
-          shapes::bound_shape(&new_shape, &parent_actual_shape.size());
-        let final_pos: IPos = final_shape.min().into();
-        let final_x = final_pos.x() - pos.x();
-        let final_y = final_pos.y() - pos.y();
-        Some(Self::move_by(&ctx, id, final_x, final_y))
-      }
-      None => None,
-    }
+    let parent_id = ctx.parent(id)?;
+    let shape = ctx.shape(id)?;
+    let pos: IPos = shape.min().into();
+    let new_pos = point!(pos.x() + x, pos.y() + y);
+    let new_shape = rect!(
+      new_pos.x(),
+      new_pos.y(),
+      new_pos.x() + shape.width(),
+      new_pos.y() + shape.height()
+    );
+    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let final_shape =
+      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_pos: IPos = final_shape.min().into();
+    let final_x = final_pos.x() - pos.x();
+    let final_y = final_pos.y() - pos.y();
+    Some(Self::move_by(&ctx, id, final_x, final_y))
   }
 
   /// Similar to `reserved_move_by`, but moves with absolute position instead
@@ -309,26 +305,22 @@ where
     y: isize,
   ) -> Option<IRect> {
     let ctx = self.context.borrow();
-    match ctx.parent(id) {
-      Some(parent_id) => {
-        let shape = ctx.shape(id).unwrap();
-        let new_pos: IPos = point!(x, y);
-        let new_shape = rect!(
-          new_pos.x(),
-          new_pos.y(),
-          new_pos.x() + shape.width(),
-          new_pos.y() + shape.height()
-        );
+    let parent_id = ctx.parent(id)?;
+    let shape = ctx.shape(id).unwrap();
+    let new_pos: IPos = point!(x, y);
+    let new_shape = rect!(
+      new_pos.x(),
+      new_pos.y(),
+      new_pos.x() + shape.width(),
+      new_pos.y() + shape.height()
+    );
 
-        let parent_actual_shape = ctx.actual_shape(parent_id)?;
-        let final_shape =
-          shapes::bound_shape(&new_shape, &parent_actual_shape.size());
-        let final_pos: IPos = final_shape.min().into();
+    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let final_shape =
+      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_pos: IPos = final_shape.min().into();
 
-        Some(Self::move_to(&ctx, id, final_pos.x(), final_pos.y()))
-      }
-      None => None,
-    }
+    Some(Self::move_to(&ctx, id, final_pos.x(), final_pos.y()))
   }
 }
 // Movement }
