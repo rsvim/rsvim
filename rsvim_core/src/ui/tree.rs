@@ -172,11 +172,7 @@ impl Tree {
     };
 
     let id = context.new_root(style, "Panel")?;
-    let shape = context.shape(id).copied().unwrap();
-    let actual_shape = context.actual_shape(id).copied().unwrap();
-
     let context = TreeContext::to_rc(context);
-
     let root = Panel::new(id, context.clone());
     let root = TreeNode::Root(root);
 
