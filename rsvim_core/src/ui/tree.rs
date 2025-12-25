@@ -110,6 +110,9 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
+  // Cursor node ID.
+  cursor_id: Option<TreeNodeId>,
+
   // Command-line node ID.
   cmdline_id: Option<TreeNodeId>,
 
@@ -311,12 +314,13 @@ impl Tree {
 impl Tree {
   fn insert_guard(&mut self, node: &TreeNode) {
     match node {
+      TreeNode::Cursor(c) => {
+        self.cursor_id = Some(c.id());
+      }
       TreeNode::Cmdline(c) => {
-        // When insert command-line widget, update `command_line_id`.
         self.cmdline_id = Some(c.id());
       }
       TreeNode::Window(w) => {
-        // When insert window widget, update `window_ids`.
         self.window_ids.insert(w.id());
       }
       _ => {}
