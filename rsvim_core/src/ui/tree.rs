@@ -393,18 +393,6 @@ impl Tree {
         TreeNode::Window(window)
       },
     )?;
-    let actual_shape = self
-      .base
-      .context()
-      .borrow()
-      .actual_shape(id)
-      .copied()
-      .unwrap();
-    if actual_shape.size().is_zero() {
-      let raw_taffy_id =
-        self.base.context().borrow().raw_taffy_node_id(id).unwrap();
-      return Err(taffy::TaffyError::InvalidInputNode(raw_taffy_id));
-    }
 
     // window content widget
     let content_style = Style {
