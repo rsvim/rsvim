@@ -39,7 +39,6 @@ pub struct Cmdline {
   input_panel_id: TreeNodeId,
   indicator_id: TreeNodeId,
   input_id: TreeNodeId,
-  cursor_id: Option<TreeNodeId>,
   message_id: TreeNodeId,
 
   input_viewport: ViewportArc,
@@ -101,10 +100,12 @@ impl Cmdline {
     Self {
       base,
       options,
+
+      input_panel_id,
       indicator_id,
       input_id,
       message_id,
-      cursor_id: None,
+
       input_viewport,
       input_cursor_viewport,
       message_viewport,
