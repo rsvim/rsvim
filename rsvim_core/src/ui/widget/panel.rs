@@ -13,7 +13,7 @@ pub struct Panel {
 }
 
 impl Panel {
-  pub fn new(id: TreeNodeId, ctx: TreeContextRc) -> Self {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
     Panel {
       base: InodeBase::new(id, ctx),
     }

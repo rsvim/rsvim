@@ -608,6 +608,7 @@ impl Tree {
     let cmdline = TreeNode::Cmdline(cmdline);
     self._insert_node(id, cmdline);
 
+    let input_panel = CmdlineIndicator
     let indicator = CmdlineIndicator::new(
       indicator_id,
       Rc::downgrade(&self.context()),
