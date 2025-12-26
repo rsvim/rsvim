@@ -39,7 +39,7 @@ pub struct Window {
 impl Window {
   pub fn new(
     id: TreeNodeId,
-    ctx: TreeContextRc,
+    ctx: TreeContextWk,
     options: WindowOptions,
     buffer: BufferWk,
     content_id: TreeNodeId,
