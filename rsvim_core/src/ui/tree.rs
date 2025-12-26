@@ -410,7 +410,7 @@ impl Tree {
   }
 
   /// Create a window widget.
-  pub fn add_window(
+  pub fn new_window_with_parent(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
@@ -477,7 +477,7 @@ impl Tree {
   }
 
   /// Create a cursor widget.
-  pub fn add_cursor(
+  pub fn new_cursor_with_parent(
     &mut self,
     parent_id: TreeNodeId,
     blinking: bool,
@@ -518,13 +518,34 @@ impl Tree {
   }
 
   /// Create a command-line widget.
-  pub fn add_cmdline(
+  pub fn new_cmdline_with_parent(
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
     indicator_symbol: CmdlineIndicatorSymbol,
     text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
+    let indicator_style = Style {
+      min_size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_percent(1.0),
+      },
+      ..Default::default()
+    };
+    let input_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
+      },
+      ..Default::default()
+    };
+    let message_style = Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_percent(1.0),
+        height: taffy::Dimension::from_percent(1.0),
+      },
+      ..Default::default()
+    };
   }
 
   /// See [`Itree::bounded_insert`].

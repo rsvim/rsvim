@@ -406,7 +406,7 @@ impl TreeContext {
 
   pub fn set_style(&mut self, id: TreeNodeId, value: Style) -> TaffyResult<()> {
     self.ta.set_style(id, value)?;
-    self._update_shapes()?;
+    self.compute_layout()?;
     Ok(())
   }
 
@@ -422,14 +422,8 @@ impl TreeContext {
     self.zindexes.get(&id).copied()
   }
 
-  pub fn set_zindex(
-    &mut self,
-    id: TreeNodeId,
-    value: usize,
-  ) -> TaffyResult<usize> {
-    let old = self.zindexes.insert(id, value).unwrap();
-    self._update_shapes()?;
-    Ok(old)
+  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
+    self.zindexes.insert(id, value)
   }
 
   pub fn truncate_policy(&self, id: TreeNodeId) -> Option<TruncatePolicy> {
@@ -440,10 +434,8 @@ impl TreeContext {
     &mut self,
     id: TreeNodeId,
     value: TruncatePolicy,
-  ) -> TaffyResult<TruncatePolicy> {
-    let old = self.truncate_policies.insert(id, value).unwrap();
-    self._update_shapes()?;
-    Ok(old)
+  ) -> Option<TruncatePolicy> {
+    self.truncate_policies.insert(id, value)
   }
 
   pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
@@ -456,9 +448,9 @@ impl TreeContext {
 }
 
 impl TreeContext {
-  /// Update shape/actual_shape for a node and all its children and
-  /// descendants.
-  fn _update_shapes(&mut self) -> TaffyResult<()> {
+  /// Calculate layout for the whole UI tree, and update shape/actual_shape for
+  /// all nodes inside this tree.
+  pub fn compute_layout(&mut self) -> TaffyResult<()> {
     if self.root != INVALID_ROOT_ID {
       self
         .ta
@@ -533,6 +525,8 @@ impl TreeContext {
     }
   }
 
+  pub fn compute_layout(&mut self) -> TaffyResult<()> {}
+
   pub fn new_root(
     &mut self,
     style: Style,
@@ -550,7 +544,7 @@ impl TreeContext {
     self.zindexes.insert(id, DEFAULT_ZINDEX);
     self.truncate_policies.insert(id, DEFAULT_TRUNCATE_POLICY);
 
-    self._update_shapes()?;
+    self.compute_layout()?;
 
     debug_assert_eq!(height, self.shapes.get(&id).unwrap().height());
     debug_assert_eq!(width, self.shapes.get(&id).unwrap().width());
@@ -582,7 +576,7 @@ impl TreeContext {
     self.zindexes.insert(id, zindex);
     self.truncate_policies.insert(id, truncate_policy);
 
-    self._update_shapes()?;
+    self.compute_layout()?;
 
     Ok(id)
   }
@@ -621,7 +615,7 @@ impl TreeContext {
     debug_assert!(self.ta.parent(id).is_none());
 
     self.ta.add_child(parent_id, id)?;
-    self._update_shapes()
+    self.compute_layout()
   }
 
   pub fn remove_child(
@@ -642,6 +636,6 @@ impl TreeContext {
     // relationship) inside TaffyTree, but we don't really purge its properties
     // such as zindex, truncate_policy, etc.
 
-    self._update_shapes()
+    self.compute_layout()
   }
 }
