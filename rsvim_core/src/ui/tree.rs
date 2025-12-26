@@ -391,22 +391,57 @@ impl Tree {
     }
   }
 
-  // Show message widget, hide indicator/input widgets.
-  pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
+  fn cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let cmdline = self.cmdline();
     let input_panel_id = cmdline.input_panel_id();
     let message_id = cmdline.message_id();
 
     let mut context = self.context.borrow_mut();
     let mut input_panel_style = context.style(input_panel_id)?.clone();
-    input_panel_style.display = taffy::Display::None;
-    context.set_style(input_panel_id, input_panel_style)?;
     let mut message_style = context.style(message_id)?.clone();
-    message_style.display = taffy::Display::Grid;
+
+    debug_assert_eq!(
+      input_panel_style.display,
+      if show_input {
+        taffy::Display::None
+      } else {
+        taffy::Display::Grid
+      }
+    );
+    debug_assert_eq!(
+      message_style.display,
+      if show_input {
+        taffy::Display::Grid
+      } else {
+        taffy::Display::None
+      }
+    );
+
+    input_panel_style.display = if show_input {
+      taffy::Display::Grid
+    } else {
+      taffy::Display::None
+    };
+    message_style.display = if show_input {
+      taffy::Display::None
+    } else {
+      taffy::Display::Grid
+    };
+
+    context.set_style(input_panel_id, input_panel_style)?;
+    context.set_style(message_id, message_style)?;
+    context.compute_layout()
+  }
+
+  // Show message widget, hide indicator/input widgets.
+  pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
+    self.cmdline_toggle_input(false)
   }
 
   // Show indicator/input widgets, hide message widget.
-  pub fn cmdline_show_input(&mut self) {}
+  pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
+    self.cmdline_toggle_input(true)
+  }
 }
 // Widget }
 
