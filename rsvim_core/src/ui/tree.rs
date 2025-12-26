@@ -759,13 +759,13 @@ impl Tree {
   /// returns `None` if the node doesn't exist or doesn't have a parent.
   pub fn reserved_move_position_by(
     &self,
+    context: &TreeContext,
     id: TreeNodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    let ctx = self.context.borrow();
-    let parent_id = ctx.parent(id)?;
-    let shape = ctx.shape(id)?;
+    let parent_id = context.parent(id)?;
+    let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
     let new_pos = point!(pos.x() + x, pos.y() + y);
     let new_shape = rect!(
@@ -774,26 +774,26 @@ impl Tree {
       new_pos.x() + shape.width(),
       new_pos.y() + shape.height()
     );
-    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let parent_actual_shape = context.actual_shape(parent_id)?;
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    Some(Self::raw_move_position_by(&ctx, id, final_x, final_y))
+    Some(Self::raw_move_position_by(&context, id, final_x, final_y))
   }
 
   /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
   /// but moves with absolute position instead of relative.
   pub fn reserved_move_position_to(
     &self,
+    context: &TreeContext,
     id: TreeNodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    let ctx = self.context.borrow();
-    let parent_id = ctx.parent(id)?;
-    let shape = ctx.shape(id).unwrap();
+    let parent_id = context.parent(id)?;
+    let shape = context.shape(id).unwrap();
     let new_pos: IPos = point!(x, y);
     let new_shape = rect!(
       new_pos.x(),
@@ -802,17 +802,24 @@ impl Tree {
       new_pos.y() + shape.height()
     );
 
-    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let parent_actual_shape = context.actual_shape(parent_id)?;
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
 
     Some(Self::raw_move_position_to(
-      &ctx,
+      &context,
       id,
       final_pos.x(),
       final_pos.y(),
     ))
+  }
+
+  pub fn reserved_move_cursor_position_to(
+    &mut self,
+    x: isize,
+    y: isize,
+  ) -> TaffyResult<()> {
   }
 }
 // Movement }

@@ -155,7 +155,7 @@ impl NormalStateful {
     _data_access: &StateDataAccess,
   ) -> StateMachine {
     StateMachine::CommandLineSearchForwardMode(
-      super::CommandLineSearchForwardStateful::default(),
+      super::CmdlineForwardStateful::default(),
     )
   }
 }

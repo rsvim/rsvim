@@ -19,7 +19,7 @@ mod normal_tests;
 
 pub use cmdline_backward::CmdlineBackwardStateful;
 pub use cmdline_ex::CmdlineExStateful;
-pub use cmdline_forward::CommandLineSearchForwardStateful;
+pub use cmdline_forward::CmdlineForwardStateful;
 pub use insert::InsertStateful;
 pub use normal::NormalStateful;
 pub use operator_pending::OperatorPendingStateful;
