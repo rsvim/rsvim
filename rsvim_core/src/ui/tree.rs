@@ -596,9 +596,9 @@ impl Tree {
   /// returns `None` if the node doesn't exist or doesn't have a parent.
   ///
   /// NOTE: This motion uses the `RESERVED` policy just like
-  /// [TruncatePolicy](TruncatePolicy). If it hits the boundary of its parent
-  /// widget, it will simply stop moving to avoid its size been truncated by
-  /// its parent.
+  /// [TruncatePolicy](crate::ui::tree::TruncatePolicy). If it hits the
+  /// boundary of its parent widget, it will simply stop moving to avoid its
+  /// size been truncated by its parent.
   pub fn reserved_move_position_by(
     &self,
     id: TreeNodeId,
