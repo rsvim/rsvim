@@ -832,8 +832,9 @@ impl<'a> Iterator for TreeIter<'a> {
       // Visit all children nodes under a parent node by following Z-index,
       // from higher to lower.
       let children_ids_sorted_by_zindex = {
-        let ctx = self.tree.context().borrow();
+        let ctx = self.tree.context();
         ctx
+          .borrow()
           .children(id)
           .unwrap_or_default()
           .iter()
