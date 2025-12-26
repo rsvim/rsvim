@@ -601,24 +601,36 @@ impl Tree {
     );
     let input_viewport = cmdline.input_viewport();
     let message_viewport = cmdline.message_viewport();
+    let cmdline = TreeNode::Cmdline(cmdline);
+    self._insert_node(id, cmdline);
 
     let indicator = CmdlineIndicator::new(
       indicator_id,
       Rc::downgrade(&self.context()),
       indicator_symbol,
     );
+    let indicator = TreeNode::CmdlineIndicator(indicator);
+    self._insert_node(indicator_id, indicator);
+
     let input = CmdlineInput::new(
       input_id,
       Rc::downgrade(&self.context()),
       text_contents,
       Arc::downgrade(&input_viewport),
     );
+    let input = TreeNode::CmdlineInput(input);
+    self._insert_node(input_id, input);
+
     let message = CmdlineMessage::new(
       message_id,
       Rc::downgrade(&self.context()),
       text_contents,
       Arc::downgrade(&message_viewport),
     );
+    let message = TreeNode::CmdlineMessage(message);
+    self._insert_node(message_id, message);
+
+    Ok(id)
   }
 
   fn _remove_node(&mut self, id: TreeNodeId) {
