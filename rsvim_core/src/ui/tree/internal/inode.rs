@@ -1,9 +1,9 @@
 //! The node structure of the internal tree.
 
 use crate::prelude::*;
-use crate::ui::tree::TreeContextRc;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::TruncatePolicy;
+use crate::ui::tree::internal::context::TreeContextWk;
+use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
 
 pub trait Inodeable: Sized + Clone + Debug {
@@ -163,11 +163,11 @@ macro_rules! inode_dispatcher {
 #[derive(Debug, Clone)]
 pub struct InodeBase {
   id: TreeNodeId,
-  ctx: TreeContextRc,
+  ctx: TreeContextWk,
 }
 
 impl InodeBase {
-  pub fn new(id: TreeNodeId, ctx: TreeContextRc) -> Self {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
     Self { id, ctx }
   }
 }
@@ -178,22 +178,54 @@ impl Inodeable for InodeBase {
   }
 
   fn shape(&self) -> IRect {
-    self.ctx.borrow().shape(self.id).copied().unwrap()
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .shape(self.id)
+      .copied()
+      .unwrap()
   }
 
   fn actual_shape(&self) -> U16Rect {
-    self.ctx.borrow().actual_shape(self.id).copied().unwrap()
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .actual_shape(self.id)
+      .copied()
+      .unwrap()
   }
 
   fn zindex(&self) -> usize {
-    self.ctx.borrow().zindex(self.id).unwrap()
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .zindex(self.id)
+      .unwrap()
   }
 
   fn enabled(&self) -> bool {
-    self.ctx.borrow().enabled(self.id).unwrap()
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .enabled(self.id)
+      .unwrap()
   }
 
   fn truncate_policy(&self) -> TruncatePolicy {
-    self.ctx.borrow().truncate_policy(self.id).unwrap()
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .truncate_policy(self.id)
+      .unwrap()
   }
 }

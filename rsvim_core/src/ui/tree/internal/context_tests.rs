@@ -8,15 +8,15 @@ use crate::ui::tree::internal::Inodeable;
 
 #[derive(Copy, Clone, Debug)]
 struct TestValue {
-  value: i32,
   base: InodeBase,
+  value: i32,
 }
 
 impl TestValue {
-  pub fn new(value: i32, shape: IRect) -> Self {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: i32) -> Self {
     TestValue {
+      base: InodeBase::new(id, ctx),
       value,
-      base: InodeBase::new(shape),
     }
   }
 }
@@ -45,16 +45,16 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
-  let mut tree = Itree::new();
+  let mut ctx = TreeContext::new();
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
-  tree.new_root(n1);
+  ctx.new_root(n1);
 
-  assert_eq!(tree.len(), 1);
-  assert_eq!(tree.root_id(), nid1);
-  assert!(tree.parent_id(nid1).is_none());
-  assert!(tree.children_ids(nid1).is_empty());
+  assert_eq!(ctx.len(), 1);
+  assert_eq!(ctx.root_id(), nid1);
+  assert!(ctx.parent_id(nid1).is_none());
+  assert!(ctx.children_ids(nid1).is_empty());
 }
 
 #[test]
