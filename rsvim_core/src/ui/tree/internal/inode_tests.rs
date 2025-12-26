@@ -8,15 +8,15 @@ use std::cell::RefCell;
 // Test node
 #[derive(Copy, Clone, Debug)]
 struct TestNode {
+  pub __node: InodeBase,
   pub value: usize,
-  pub base: InodeBase,
 }
 
 impl TestNode {
-  pub fn new(value: usize, shape: IRect) -> Self {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: usize) -> Self {
     TestNode {
+      __node: InodeBase::new(id, ctx),
       value,
-      base: InodeBase::new(shape),
     }
   }
 }
