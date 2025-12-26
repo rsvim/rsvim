@@ -554,34 +554,16 @@ impl Tree {
         ..Default::default()
       };
 
-      let id = context.new_with_parent(
-        parent_id,
-        style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
-        "Cmdline",
-      )?;
-      let indicator_id = context.new_with_parent(
+      let id = context.new_with_parent_default(parent_id, style, "Cmdline")?;
+      let indicator_id = context.new_with_parent_default(
         id,
         indicator_style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
         "CmdlineIndicator",
       )?;
-      let input_id = context.new_with_parent(
-        id,
-        input_style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
-        "CmdlineInput",
-      )?;
-      let message_id = context.new_with_parent(
-        id,
-        message_style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
-        "CmdlineMessage",
-      )?;
+      let input_id =
+        context.new_with_parent_default(id, input_style, "CmdlineInput")?;
+      let message_id =
+        context.new_with_parent_default(id, message_style, "CmdlineMessage")?;
 
       context.compute_layout()?;
 
