@@ -596,31 +596,24 @@ impl Tree {
     };
   }
 
-  /// See [`Itree::bounded_insert`].
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
-    self._insert_node(&child_node);
-    self.base.bounded_insert(parent_id, child_node)
-  }
-
-  fn remove_guard(&mut self, id: TreeNodeId) {
+  fn _remove_node(&mut self, id: TreeNodeId) {
     if self.cmdline_id == Some(id) {
       self.cmdline_id = None;
     }
+
     self.window_ids.remove(&id);
-    if self.current_window_id == Some(id)
-      && let Some(last_window_id) = self.window_ids.last()
-    {
-      self.current_window_id = Some(*last_window_id);
+    if self.current_window_id == Some(id) {
+      self.current_window_id = self.window_ids.last().copied();
+    }
+
+    if self.cursor_id == Some(id) {
+      self.cursor_id = None;
     }
   }
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self.remove_guard(id);
+    self._remove_node(id);
     self.base.move_child(id)
   }
 }
