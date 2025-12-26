@@ -57,7 +57,7 @@ fn new() {
       },
       ..Default::default()
     },
-    name,
+    "Root",
   );
 
   let s1 = rect!(0, 0, 1, 1);
