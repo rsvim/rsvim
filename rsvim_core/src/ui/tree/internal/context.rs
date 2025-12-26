@@ -225,10 +225,11 @@ impl Ta {
 
   pub fn remove(&mut self, id: TreeNodeId) -> TaffyResult<TreeNodeId> {
     self._internal_check();
-    let taid = self.id2taid.get(&id).unwrap();
-    let removed_taid = self.ta.remove(*taid)?;
-    debug_assert_eq!(removed_taid, *taid);
+    let taid = self.id2taid.get(&id).copied().unwrap();
+    let removed_taid = self.ta.remove(taid)?;
+    debug_assert_eq!(removed_taid, taid);
     self.id2taid.remove(&id);
+    self.taid2id.remove(taid);
     Ok(id)
   }
 }
