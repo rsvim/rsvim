@@ -176,7 +176,7 @@ impl Tree {
     };
 
     let context = TreeContext::to_rc(context);
-    let root = Panel::new(id, context.clone());
+    let root = Panel::new(id, Rc::downgrade(&context));
     let root = TreeNode::Panel(root);
 
     let mut nodes = FoldMap::new();

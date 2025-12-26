@@ -118,13 +118,8 @@ impl Window {
   }
 
   /// Set viewport.
-  pub fn set_viewport(&mut self, viewport: ViewportArc) {
-    self.viewport = viewport.clone();
-    if let Some(WindowNode::Content(content)) =
-      self.base.node_mut(self.content_id)
-    {
-      content.set_viewport(Arc::downgrade(&viewport));
-    }
+  pub fn set_viewport(&mut self, viewport: Viewport) {
+    *lock!(self.viewport) = viewport;
   }
 
   /// Get cursor viewport.
