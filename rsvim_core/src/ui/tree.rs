@@ -833,8 +833,8 @@ impl<'a> Iterator for TreeIter<'a> {
       // from higher to lower.
       let children_ids_sorted_by_zindex = {
         let ctx = self.tree.context();
+        let ctx = ctx.borrow();
         ctx
-          .borrow()
           .children(id)
           .unwrap_or_default()
           .iter()
