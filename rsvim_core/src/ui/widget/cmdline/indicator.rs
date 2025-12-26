@@ -58,8 +58,6 @@ impl CmdlineIndicator {
   }
 }
 
-inode_impl!(CmdlineIndicator, base);
-
 impl Widgetable for CmdlineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
