@@ -128,8 +128,8 @@ impl Window {
   }
 
   /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
-    self.cursor_viewport = cursor_viewport;
+  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewport) {
+    *lock!(self.cursor_viewport) = cursor_viewport;
   }
 }
 // Viewport }
