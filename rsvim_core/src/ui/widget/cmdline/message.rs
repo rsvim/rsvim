@@ -19,11 +19,12 @@ pub struct CmdlineMessage {
 
 impl CmdlineMessage {
   pub fn new(
-    shape: IRect,
+    id: TreeNodeId,
+    ctx: TreeContextWk,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(shape);
+    let base = InodeBase::new(id, ctx);
     CmdlineMessage {
       base,
       text_contents,

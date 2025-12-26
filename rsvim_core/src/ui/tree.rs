@@ -32,6 +32,7 @@ use internal::context::DEFAULT_ZINDEX;
 pub use internal::*;
 use itertools::Itertools;
 use std::collections::VecDeque;
+use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
@@ -449,11 +450,11 @@ impl Tree {
     // window node
     let window = Window::new(
       id,
-      self.context(),
+      Rc::downgrade(&self.context()),
       opts,
       buffer.clone(),
       content_id,
-      content_actual_shape.size(),
+      &content_actual_shape.size(),
     );
     let viewport = window.viewport();
     let window = TreeNode::Window(window);
@@ -462,7 +463,7 @@ impl Tree {
     // window content node
     let content = WindowContent::new(
       content_id,
-      self.context(),
+      Rc::downgrade(&self.context()),
       buffer.clone(),
       Arc::downgrade(&viewport),
     );
@@ -527,7 +528,14 @@ impl Tree {
     indicator_symbol: CmdlineIndicatorSymbol,
     text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
-    let (id, indicator_id, input_id, message_id) = {
+    let (
+      id,
+      indicator_id,
+      input_id,
+      input_actual_shape,
+      message_id,
+      message_actual_shape,
+    ) = {
       let mut context = self.context.borrow_mut();
 
       let indicator_style = Style {
@@ -567,8 +575,50 @@ impl Tree {
 
       context.compute_layout()?;
 
-      (id, indicator_id, input_id, message_id)
+      let input_actual_shape = context.actual_shape(input_id).copied().unwrap();
+      let message_actual_shape =
+        context.actual_shape(message_id).copied().unwrap();
+
+      (
+        id,
+        indicator_id,
+        input_id,
+        input_actual_shape,
+        message_id,
+        message_actual_shape,
+      )
     };
+
+    let cmdline = Cmdline::new(
+      id,
+      Rc::downgrade(&self.context()),
+      text_contents,
+      indicator_id,
+      input_id,
+      &input_actual_shape.size(),
+      message_id,
+      &message_actual_shape.size(),
+    );
+    let input_viewport = cmdline.input_viewport();
+    let message_viewport = cmdline.message_viewport();
+
+    let indicator = CmdlineIndicator::new(
+      indicator_id,
+      Rc::downgrade(&self.context()),
+      indicator_symbol,
+    );
+    let input = CmdlineInput::new(
+      input_id,
+      Rc::downgrade(&self.context()),
+      text_contents,
+      Arc::downgrade(&input_viewport),
+    );
+    let message = CmdlineMessage::new(
+      message_id,
+      Rc::downgrade(&self.context()),
+      text_contents,
+      Arc::downgrade(&message_viewport),
+    );
   }
 
   fn _remove_node(&mut self, id: TreeNodeId) {

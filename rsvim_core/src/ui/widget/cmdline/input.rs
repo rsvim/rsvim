@@ -19,11 +19,12 @@ pub struct CmdlineInput {
 
 impl CmdlineInput {
   pub fn new(
-    shape: IRect,
+    id: TreeNodeId,
+    ctx: TreeContextWk,
     text_contents: TextContentsWk,
     viewport: ViewportWk,
   ) -> Self {
-    let base = InodeBase::new(shape);
+    let base = InodeBase::new(id, ctx);
     CmdlineInput {
       base,
       text_contents,
