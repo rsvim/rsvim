@@ -25,7 +25,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct Window {
-  base: InodeBase,
+  __node: InodeBase,
   options: WindowOptions,
 
   content_id: TreeNodeId,
@@ -35,7 +35,7 @@ pub struct Window {
   cursor_viewport: CursorViewportArc,
 }
 
-inode_impl!(Window, base);
+inode_impl!(Window);
 
 impl Window {
   pub fn new(
@@ -46,8 +46,6 @@ impl Window {
     content_id: TreeNodeId,
     content_size: &U16Size,
   ) -> Self {
-    let base = InodeBase::new(id, ctx);
-
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
@@ -62,7 +60,7 @@ impl Window {
     };
 
     Window {
-      base,
+      __node: InodeBase::new(id, ctx),
       options,
       content_id,
       buffer,
