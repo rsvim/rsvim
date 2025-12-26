@@ -592,7 +592,7 @@ impl Tree {
     let cmdline = Cmdline::new(
       id,
       Rc::downgrade(&self.context()),
-      text_contents,
+      text_contents.clone(),
       indicator_id,
       input_id,
       &input_actual_shape.size(),
@@ -615,7 +615,7 @@ impl Tree {
     let input = CmdlineInput::new(
       input_id,
       Rc::downgrade(&self.context()),
-      text_contents,
+      text_contents.clone(),
       Arc::downgrade(&input_viewport),
     );
     let input = TreeNode::CmdlineInput(input);
