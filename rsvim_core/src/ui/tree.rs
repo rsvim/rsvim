@@ -535,18 +535,10 @@ impl Tree {
 
       let indicator_style = Style {
         display: taffy::Display::None,
-        min_size: taffy::Size {
-          width: taffy::Dimension::from_length(1_u16),
-          height: taffy::Dimension::from_percent(1.0),
-        },
         ..Default::default()
       };
       let input_style = Style {
         display: taffy::Display::None,
-        size: taffy::Size {
-          width: taffy::Dimension::from_percent(1.0),
-          height: taffy::Dimension::from_percent(1.0),
-        },
         ..Default::default()
       };
       let message_style = Style {
