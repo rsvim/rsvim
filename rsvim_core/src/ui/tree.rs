@@ -451,7 +451,7 @@ impl Tree {
 // Insert/Remove {
 impl Tree {
   fn _insert_node(&mut self, id: TreeNodeId, node: TreeNode) {
-    match node {
+    match &node {
       TreeNode::Cursor(c) => {
         self.cursor_id = Some(c.id());
       }
