@@ -610,12 +610,6 @@ impl Tree {
       self.cursor_id = None;
     }
   }
-
-  /// See [`Itree::remove`].
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self._remove_node(id);
-    self.base.move_child(id)
-  }
 }
 // Insert/Remove }
 
