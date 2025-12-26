@@ -559,26 +559,102 @@ impl Tree {
 
 // Movement {
 impl Tree {
-  /// Bounded move by x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::bounded_move_by`].
-  pub fn bounded_move_by(
-    &mut self,
+  fn raw_move_position_by(
+    context: &TreeContext,
     id: TreeNodeId,
     x: isize,
     y: isize,
-  ) -> Option<IRect> {
-    self.base.bounded_move_by(id, x, y)
+  ) -> IRect {
+    let shape = context.shape(id).unwrap();
+    let pos: IPos = shape.min().into();
+    Self::raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
-  /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::bounded_move_to`].
-  pub fn bounded_move_to(
-    &mut self,
+  fn raw_move_position_to(
+    context: &TreeContext,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> IRect {
+    let shape = context.shape(id).unwrap();
+    let new_pos = point!(x, y);
+    rect!(
+      new_pos.x(),
+      new_pos.y(),
+      new_pos.x() + shape.width(),
+      new_pos.y() + shape.height()
+    )
+  }
+
+  /// Calculates a widget shape by relative motion on its parent:
+  /// - It moves to left when `x < 0`.
+  /// - It moves to right when `x > 0`.
+  /// - It moves to up when `y < 0`.
+  /// - It moves to down when `y > 0`.
+  ///
+  /// Returns the new shape after movement if successfully, otherwise
+  /// returns `None` if the node doesn't exist or doesn't have a parent.
+  ///
+  /// NOTE: This motion uses the `RESERVED` policy just like
+  /// [TruncatePolicy](TruncatePolicy). If it hits the boundary of its parent
+  /// widget, it will simply stop moving to avoid its size been truncated by
+  /// its parent.
+  pub fn reserved_move_position_by(
+    &self,
     id: TreeNodeId,
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    self.base.reserved_move_position_to(id, x, y)
+    let ctx = self.context.borrow();
+    let parent_id = ctx.parent(id)?;
+    let shape = ctx.shape(id)?;
+    let pos: IPos = shape.min().into();
+    let new_pos = point!(pos.x() + x, pos.y() + y);
+    let new_shape = rect!(
+      new_pos.x(),
+      new_pos.y(),
+      new_pos.x() + shape.width(),
+      new_pos.y() + shape.height()
+    );
+    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let final_shape =
+      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_pos: IPos = final_shape.min().into();
+    let final_x = final_pos.x() - pos.x();
+    let final_y = final_pos.y() - pos.y();
+    Some(Self::raw_move_position_by(&ctx, id, final_x, final_y))
+  }
+
+  /// Similar to `reserved_move_by`, but moves with absolute position instead
+  /// of relative one.
+  pub fn reserved_move_position_to(
+    &self,
+    id: TreeNodeId,
+    x: isize,
+    y: isize,
+  ) -> Option<IRect> {
+    let ctx = self.context.borrow();
+    let parent_id = ctx.parent(id)?;
+    let shape = ctx.shape(id).unwrap();
+    let new_pos: IPos = point!(x, y);
+    let new_shape = rect!(
+      new_pos.x(),
+      new_pos.y(),
+      new_pos.x() + shape.width(),
+      new_pos.y() + shape.height()
+    );
+
+    let parent_actual_shape = ctx.actual_shape(parent_id)?;
+    let final_shape =
+      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_pos: IPos = final_shape.min().into();
+
+    Some(Self::raw_move_position_to(
+      &ctx,
+      id,
+      final_pos.x(),
+      final_pos.y(),
+    ))
   }
 }
 // Movement }
