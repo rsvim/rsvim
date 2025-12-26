@@ -124,11 +124,6 @@ impl Cmdline {
     self.options = *options;
   }
 
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Command-line indicator widget ID.
   pub fn indicator_id(&self) -> TreeNodeId {
     self.indicator_id
