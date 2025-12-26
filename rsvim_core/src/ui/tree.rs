@@ -398,7 +398,8 @@ impl Tree {
       (cmdline.input_panel_id(), cmdline.message_id())
     };
     let mut context = self.context.borrow_mut();
-    let input_panel_style = context.style(input_panel_id)?.clone();
+    let mut input_panel_style = context.style(input_panel_id)?.clone();
+    input_panel_style.display = taffy::Display::None;
   }
 
   // Show indicator/input widgets, hide message widget.
