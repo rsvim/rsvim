@@ -162,18 +162,21 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let mut context = TreeContext::new();
-
-    let style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(canvas_size.width()),
-        height: taffy::Dimension::from_length(canvas_size.height()),
-      },
-      flex_direction: taffy::FlexDirection::Column,
-      ..Default::default()
+    let (id, context) = {
+      let mut context = TreeContext::new();
+      let style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(canvas_size.width()),
+          height: taffy::Dimension::from_length(canvas_size.height()),
+        },
+        flex_direction: taffy::FlexDirection::Column,
+        ..Default::default()
+      };
+      let id = context.new_root(style, "Panel")?;
+      context.compute_layout()?;
+      (id, context)
     };
 
-    let id = context.new_root(style, "Panel")?;
     let context = TreeContext::to_rc(context);
     let root = Panel::new(id, context.clone());
     let root = TreeNode::Root(root);
@@ -428,7 +431,6 @@ impl Tree {
         DEFAULT_TRUNCATE_POLICY,
         "Window",
       )?;
-
       // window content
       let content_style = Style {
         size: taffy::Size {
@@ -444,6 +446,9 @@ impl Tree {
         DEFAULT_TRUNCATE_POLICY,
         "WindowContent",
       )?;
+
+      context.compute_layout()?;
+
       let content_actual_shape =
         context.actual_shape(content_id).copied().unwrap();
 
@@ -501,13 +506,17 @@ impl Tree {
         },
         ..Default::default()
       };
-      context.new_with_parent(
+      let id = context.new_with_parent(
         parent_id,
         cursor_style,
         DEFAULT_ZINDEX,
         DEFAULT_TRUNCATE_POLICY,
         "Cursor",
-      )?
+      )?;
+
+      context.compute_layout()?;
+
+      id
     };
 
     let cursor = Cursor::new(id, self.context(), blinking, hidden, style);
