@@ -369,6 +369,7 @@ impl Debug for TreeContext {
             self.actual_shapes.get(&id).unwrap()
           )
         };
+        results.push(payload);
       }
       f.debug_list().entries(results.iter()).finish()
     } else {
