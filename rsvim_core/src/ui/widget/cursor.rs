@@ -19,12 +19,14 @@ pub const CURSOR_STYLE: CursorStyle = CursorStyle::SteadyBlock;
 #[derive(Debug, Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
-  base: InodeBase,
+  __node: InodeBase,
   // blinking=false
   // hidden=false
   flags: Flags,
   style: CursorStyle,
 }
+
+inode_impl!(Cursor);
 
 impl Cursor {
   pub fn new(
@@ -38,7 +40,7 @@ impl Cursor {
     flags.set(Flags::BLINKING, blinking);
     flags.set(Flags::HIDDEN, hidden);
     Cursor {
-      base: InodeBase::new(id, ctx),
+      __node: InodeBase::new(id, ctx),
       flags,
       style,
     }
@@ -72,8 +74,6 @@ impl Cursor {
     self.style = *value;
   }
 }
-
-inode_impl!(Cursor, base);
 
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {

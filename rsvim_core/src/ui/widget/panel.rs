@@ -12,6 +12,8 @@ pub struct Panel {
   __node: InodeBase,
 }
 
+inode_impl!(Panel);
+
 impl Panel {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
     Panel {
@@ -19,7 +21,5 @@ impl Panel {
     }
   }
 }
-
-inode_impl!(Panel);
 
 impl Widgetable for Panel {}

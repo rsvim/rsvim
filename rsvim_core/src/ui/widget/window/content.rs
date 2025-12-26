@@ -16,6 +16,8 @@ pub struct WindowContent {
   viewport: ViewportWk,
 }
 
+inode_impl!(WindowContent);
+
 impl WindowContent {
   /// Make window content.
   pub fn new(
@@ -35,8 +37,6 @@ impl WindowContent {
     self.viewport = viewport;
   }
 }
-
-inode_impl!(WindowContent);
 
 impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
