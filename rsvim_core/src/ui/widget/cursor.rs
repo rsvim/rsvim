@@ -16,7 +16,7 @@ pub const CURSOR_BLINKING: bool = false;
 pub const CURSOR_HIDDEN: bool = false;
 pub const CURSOR_STYLE: CursorStyle = CursorStyle::SteadyBlock;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Cursor widget.
 pub struct Cursor {
   __node: InodeBase,
@@ -34,7 +34,7 @@ impl Cursor {
     ctx: TreeContextRc,
     blinking: bool,
     hidden: bool,
-    style: CursorStyle,
+    cursor_style: CursorStyle,
   ) -> Self {
     let mut flags = Flags::empty();
     flags.set(Flags::BLINKING, blinking);
@@ -42,7 +42,7 @@ impl Cursor {
     Cursor {
       __node: InodeBase::new(id, ctx),
       flags,
-      style,
+      style: cursor_style,
     }
   }
 
@@ -66,11 +66,11 @@ impl Cursor {
     self.flags.set(Flags::HIDDEN, value);
   }
 
-  pub fn style(&self) -> &CursorStyle {
+  pub fn cursor_style(&self) -> &CursorStyle {
     &self.style
   }
 
-  pub fn set_style(&mut self, value: &CursorStyle) {
+  pub fn set_cursor_style(&mut self, value: &CursorStyle) {
     self.style = *value;
   }
 }
