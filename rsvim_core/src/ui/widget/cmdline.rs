@@ -33,7 +33,7 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct Cmdline {
-  base: InodeBase,
+  __node: InodeBase,
   options: WindowOptions,
 
   input_panel_id: TreeNodeId,
@@ -68,8 +68,6 @@ impl Cmdline {
       .build()
       .unwrap();
 
-    let base = InodeBase::new(id, ctx);
-
     let (input_viewport, input_cursor_viewport, message_viewport) = {
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
@@ -100,7 +98,7 @@ impl Cmdline {
     let message_viewport = Viewport::to_arc(message_viewport);
 
     Self {
-      base,
+      __node: InodeBase::new(id, ctx),
       options,
       input_panel_id,
       indicator_id,
@@ -240,13 +238,13 @@ impl Cmdline {
 impl Cmdline {
   /// Command-line input widget.
   pub fn input(&self) -> &CmdlineInput {
-    debug_assert!(self.base.node(self.input_id).is_some());
+    debug_assert!(self.__node.node(self.input_id).is_some());
     debug_assert!(matches!(
-      self.base.node(self.input_id).unwrap(),
+      self.__node.node(self.input_id).unwrap(),
       CommandLineNode::Input(_)
     ));
 
-    match self.base.node(self.input_id).unwrap() {
+    match self.__node.node(self.input_id).unwrap() {
       CommandLineNode::Input(w) => {
         debug_assert_eq!(w.id(), self.input_id);
         w
@@ -257,13 +255,13 @@ impl Cmdline {
 
   /// Mutable command-line input widget.
   pub fn input_mut(&mut self) -> &mut CmdlineInput {
-    debug_assert!(self.base.node_mut(self.input_id).is_some());
+    debug_assert!(self.__node.node_mut(self.input_id).is_some());
     debug_assert!(matches!(
-      self.base.node_mut(self.input_id).unwrap(),
+      self.__node.node_mut(self.input_id).unwrap(),
       CommandLineNode::Input(_)
     ));
 
-    match self.base.node_mut(self.input_id).unwrap() {
+    match self.__node.node_mut(self.input_id).unwrap() {
       CommandLineNode::Input(w) => {
         debug_assert_eq!(w.id(), self.input_id);
         w
@@ -274,13 +272,13 @@ impl Cmdline {
 
   /// Command-line message widget
   pub fn message(&self) -> &CmdlineMessage {
-    debug_assert!(self.base.node(self.message_id).is_some());
+    debug_assert!(self.__node.node(self.message_id).is_some());
     debug_assert!(matches!(
-      self.base.node(self.message_id).unwrap(),
+      self.__node.node(self.message_id).unwrap(),
       CommandLineNode::Message(_)
     ));
 
-    match self.base.node(self.message_id).unwrap() {
+    match self.__node.node(self.message_id).unwrap() {
       CommandLineNode::Message(w) => {
         debug_assert_eq!(w.id(), self.message_id);
         w
@@ -291,13 +289,13 @@ impl Cmdline {
 
   /// Mutable command-line message widget.
   pub fn message_mut(&mut self) -> &mut CmdlineMessage {
-    debug_assert!(self.base.node_mut(self.message_id).is_some());
+    debug_assert!(self.__node.node_mut(self.message_id).is_some());
     debug_assert!(matches!(
-      self.base.node_mut(self.message_id).unwrap(),
+      self.__node.node_mut(self.message_id).unwrap(),
       CommandLineNode::Message(_)
     ));
 
-    match self.base.node_mut(self.message_id).unwrap() {
+    match self.__node.node_mut(self.message_id).unwrap() {
       CommandLineNode::Message(w) => {
         debug_assert_eq!(w.id(), self.message_id);
         w
@@ -308,13 +306,13 @@ impl Cmdline {
 
   /// Command-line indicator widget.
   pub fn indicator(&self) -> &CmdlineIndicator {
-    debug_assert!(self.base.node(self.indicator_id).is_some());
+    debug_assert!(self.__node.node(self.indicator_id).is_some());
     debug_assert!(matches!(
-      self.base.node(self.indicator_id).unwrap(),
+      self.__node.node(self.indicator_id).unwrap(),
       CommandLineNode::Indicator(_)
     ));
 
-    match self.base.node(self.indicator_id).unwrap() {
+    match self.__node.node(self.indicator_id).unwrap() {
       CommandLineNode::Indicator(w) => {
         debug_assert_eq!(w.id(), self.indicator_id);
         w
@@ -325,13 +323,13 @@ impl Cmdline {
 
   /// Mutable command-line indicator widget.
   pub fn indicator_mut(&mut self) -> &mut CmdlineIndicator {
-    debug_assert!(self.base.node_mut(self.indicator_id).is_some());
+    debug_assert!(self.__node.node_mut(self.indicator_id).is_some());
     debug_assert!(matches!(
-      self.base.node_mut(self.indicator_id).unwrap(),
+      self.__node.node_mut(self.indicator_id).unwrap(),
       CommandLineNode::Indicator(_)
     ));
 
-    match self.base.node_mut(self.indicator_id).unwrap() {
+    match self.__node.node_mut(self.indicator_id).unwrap() {
       CommandLineNode::Indicator(w) => {
         debug_assert_eq!(w.id(), self.indicator_id);
         w
@@ -344,13 +342,13 @@ impl Cmdline {
   pub fn cursor(&self) -> Option<&Cursor> {
     match self.cursor_id {
       Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(self.__node.node(cursor_id).is_some());
         debug_assert!(matches!(
-          self.base.node(cursor_id).unwrap(),
+          self.__node.node(cursor_id).unwrap(),
           CommandLineNode::Cursor(_)
         ));
 
-        match self.base.node(cursor_id).unwrap() {
+        match self.__node.node(cursor_id).unwrap() {
           CommandLineNode::Cursor(w) => {
             debug_assert_eq!(w.id(), cursor_id);
             Some(w)
@@ -366,13 +364,13 @@ impl Cmdline {
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
     match self.cursor_id {
       Some(cursor_id) => {
-        debug_assert!(self.base.node_mut(cursor_id).is_some());
+        debug_assert!(self.__node.node_mut(cursor_id).is_some());
         debug_assert!(matches!(
-          self.base.node_mut(cursor_id).unwrap(),
+          self.__node.node_mut(cursor_id).unwrap(),
           CommandLineNode::Cursor(_)
         ));
 
-        match self.base.node_mut(cursor_id).unwrap() {
+        match self.__node.node_mut(cursor_id).unwrap() {
           CommandLineNode::Cursor(w) => {
             debug_assert_eq!(w.id(), cursor_id);
             Some(w)
@@ -396,7 +394,7 @@ impl Cmdline {
   pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<CommandLineNode> {
     self.cursor_id = Some(cursor.id());
     self
-      .base
+      .__node
       .bounded_insert(self.input_id, CommandLineNode::Cursor(cursor))
   }
 
@@ -408,14 +406,14 @@ impl Cmdline {
   pub fn remove_cursor(&mut self) -> Option<CommandLineNode> {
     match self.cursor_id {
       Some(cursor_id) => {
-        debug_assert!(self.base.node(cursor_id).is_some());
-        debug_assert!(self.base.parent_id(cursor_id).is_some());
+        debug_assert!(self.__node.node(cursor_id).is_some());
+        debug_assert!(self.__node.parent_id(cursor_id).is_some());
         debug_assert_eq!(
-          self.base.parent_id(cursor_id).unwrap(),
+          self.__node.parent_id(cursor_id).unwrap(),
           self.input_id
         );
         self.cursor_id = None;
-        let cursor_node = self.base.move_child(cursor_id);
+        let cursor_node = self.__node.move_child(cursor_id);
         debug_assert!(cursor_node.is_some());
         debug_assert!(matches!(
           cursor_node.as_ref().unwrap(),
@@ -425,8 +423,8 @@ impl Cmdline {
       }
       None => {
         debug_assert!(self.cursor_id.is_none());
-        debug_assert!(self.base.node(self.input_id).is_some());
-        debug_assert!(self.base.children_ids(self.input_id).is_empty());
+        debug_assert!(self.__node.node(self.input_id).is_some());
+        debug_assert!(self.__node.children_ids(self.input_id).is_empty());
         None
       }
     }
@@ -438,7 +436,7 @@ impl Cmdline {
   /// It panics if cursor not exist.
   pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
     let cursor_id = self.cursor_id.unwrap();
-    self.base.bounded_move_by(cursor_id, x, y)
+    self.__node.bounded_move_by(cursor_id, x, y)
   }
 
   /// Bounded move cursor to position x(columns) and y(rows).
@@ -447,7 +445,7 @@ impl Cmdline {
   /// It panics if cursor not exist.
   pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
     let cursor_id = self.cursor_id.unwrap();
-    self.base.reserved_move_position_to(cursor_id, x, y)
+    self.__node.reserved_move_position_to(cursor_id, x, y)
   }
 }
 // Cursor }
