@@ -348,7 +348,7 @@ rc_refcell_ptr!(TreeContext);
 impl Debug for TreeContext {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.root != INVALID_ROOT_ID {
-      f.write_str(format_args!("TreeContext({}):", self.ta.len()))?;
+      f.write_str(format!("TreeContext({}):", self.ta.len()).as_str())?;
       let mut results: Vec<String> = vec![];
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root);
