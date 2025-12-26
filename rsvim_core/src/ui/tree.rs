@@ -803,10 +803,9 @@ impl Tree {
     let mut canvas = lock!(canvas);
     for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
-      if !node.enabled() {
-        continue;
+      if node.enabled() {
+        node.draw(&mut canvas);
       }
-      node.draw(&mut canvas);
     }
   }
 }
