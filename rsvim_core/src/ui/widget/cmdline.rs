@@ -124,6 +124,11 @@ impl Cmdline {
     self.options = *options;
   }
 
+  /// Command-line input panel widget ID.
+  pub fn input_panel_id(&self) -> TreeNodeId {
+    self.input_panel_id
+  }
+
   /// Command-line indicator widget ID.
   pub fn indicator_id(&self) -> TreeNodeId {
     self.indicator_id
