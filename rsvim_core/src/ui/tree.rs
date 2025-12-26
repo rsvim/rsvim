@@ -393,13 +393,16 @@ impl Tree {
 
   // Show message widget, hide indicator/input widgets.
   pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
-    let (input_panel_id, message_id) = {
-      let cmdline = self.cmdline();
-      (cmdline.input_panel_id(), cmdline.message_id())
-    };
+    let cmdline = self.cmdline();
+    let input_panel_id = cmdline.input_panel_id();
+    let message_id = cmdline.message_id();
+
     let mut context = self.context.borrow_mut();
     let mut input_panel_style = context.style(input_panel_id)?.clone();
     input_panel_style.display = taffy::Display::None;
+    context.set_style(input_panel_id, input_panel_style)?;
+    let mut message_style = context.style(message_id)?.clone();
+    message_style.display = taffy::Display::Grid;
   }
 
   // Show indicator/input widgets, hide message widget.
