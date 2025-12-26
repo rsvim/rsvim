@@ -625,7 +625,7 @@ impl Tree {
   }
 
   /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
-  /// but moves with absolute position instead of relative one.
+  /// but moves with absolute position instead of relative.
   pub fn reserved_move_position_to(
     &self,
     id: TreeNodeId,
