@@ -389,6 +389,14 @@ impl Tree {
       _ => unreachable!(),
     }
   }
+
+  // Show message widget, hide indicator/input widgets.
+  pub fn cmdline_show_message(&mut self) {
+    let mut context = self.context.borrow_mut();
+  }
+
+  // Show indicator/input widgets, hide message widget.
+  pub fn cmdline_show_input(&mut self) {}
 }
 // Widget }
 

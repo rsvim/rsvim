@@ -35,6 +35,8 @@ pub struct CmdlineIndicator {
   symbol: CmdlineIndicatorSymbol,
 }
 
+inode_impl!(CmdlineIndicator);
+
 impl CmdlineIndicator {
   pub fn new(
     id: TreeNodeId,

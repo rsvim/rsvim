@@ -23,82 +23,30 @@ pub trait Inodeable: Sized + Clone + Debug {
 /// Generate getter/setter for `Inode`.
 #[macro_export]
 macro_rules! inode_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
+  ($name:ty) => {
+    impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.$base_name.id()
+        self.__node.id()
       }
 
       fn shape(&self) -> IRect {
-        self.$base_name.shape()
+        self.__node.shape()
       }
 
       fn actual_shape(&self) -> U16Rect {
-        self.$base_name.actual_shape()
+        self.__node.actual_shape()
       }
 
       fn zindex(&self) -> usize {
-        self.$base_name.zindex()
+        self.__node.zindex()
       }
 
       fn enabled(&self) -> bool {
-        self.$base_name.enabled()
+        self.__node.enabled()
       }
 
       fn truncate_policy(&self) -> TruncatePolicy {
-        self.$base_name.truncate_policy()
-      }
-    }
-  };
-}
-
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
-      fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
-      }
-
-      fn shape(&self) -> IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
-      }
-
-      fn actual_shape(&self) -> U16Rect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn zindex(&self) -> usize {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .zindex()
-      }
-
-      fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
-      }
-
-      fn truncate_policy(&self) -> TruncatePolicy {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .truncate_policy()
+        self.__node.truncate_policy()
       }
     }
   };
