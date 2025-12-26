@@ -170,6 +170,10 @@ impl InodeBase {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
     Self { id, ctx }
   }
+
+  pub fn context(&self) -> TreeContextWk {
+    self.ctx.clone()
+  }
 }
 
 impl Inodeable for InodeBase {
