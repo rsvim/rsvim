@@ -5,8 +5,10 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
+use taffy::Style;
+use taffy::prelude::FromLength;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct TestValue {
   base: InodeBase,
   value: i32,
@@ -46,6 +48,18 @@ fn new() {
   // test_log_init();
 
   let mut ctx = TreeContext::new();
+
+  let nid1 = ctx.new_root(
+    Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(10_u16),
+        height: taffy::Dimension::from_length(10_u16),
+      },
+      ..Default::default()
+    },
+    name,
+  );
+
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
