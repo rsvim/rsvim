@@ -11,20 +11,20 @@ use taffy::prelude::FromLength;
 
 #[derive(Clone, Debug)]
 struct TestValue {
-  base: InodeBase,
+  __node: InodeBase,
   value: i32,
 }
+
+inode_impl!(TestValue);
 
 impl TestValue {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: i32) -> Self {
     TestValue {
-      base: InodeBase::new(id, ctx),
+      __node: InodeBase::new(id, ctx),
       value,
     }
   }
 }
-
-inode_impl!(TestValue, base);
 
 macro_rules! print_node {
   ($node: ident, $name: expr) => {
