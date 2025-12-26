@@ -11,8 +11,8 @@ use taffy::prelude::FromLength;
 
 #[derive(Clone, Debug)]
 struct TestValue {
-  __node: InodeBase,
-  value: i32,
+  pub __node: InodeBase,
+  pub value: i32,
 }
 
 inode_impl!(TestValue);

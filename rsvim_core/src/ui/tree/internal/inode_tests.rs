@@ -13,6 +13,8 @@ struct TestNode {
   pub value: usize,
 }
 
+inode_impl!(TestNode);
+
 impl TestNode {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: usize) -> Self {
     TestNode {
@@ -21,8 +23,6 @@ impl TestNode {
     }
   }
 }
-
-inode_impl!(TestNode);
 
 #[test]
 fn new() {
