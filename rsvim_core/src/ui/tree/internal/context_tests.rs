@@ -70,6 +70,8 @@ fn new() {
 
   assert_eq!(ctx.borrow().len(), 1);
   assert_eq!(ctx.borrow().root(), nid1);
+  assert_eq!(ctx.borrow().shape(nid1), rect!(0, 0, 10, 10));
+  assert_eq!(ctx.borrow().actual_shape(nid1), rect!(0, 0, 10, 10));
   assert!(ctx.borrow().parent(nid1).is_none());
   assert!(ctx.borrow().children(nid1).unwrap().is_empty());
 }
