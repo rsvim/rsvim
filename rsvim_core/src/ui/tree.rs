@@ -510,7 +510,7 @@ impl Tree {
         parent_id,
         cursor_style,
         DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
+        TruncatePolicy::RESERVED,
         "Cursor",
       )?;
 
