@@ -61,6 +61,7 @@ inode_dispatcher!(
   CmdlineInput,
   CmdlineMessage
 );
+
 widget_dispatcher!(
   TreeNode,
   Panel,
