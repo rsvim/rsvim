@@ -1,6 +1,7 @@
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
+use crate::ui::tree::TreeContextWk;
 use crate::ui::tree::TreeNodeId;
 // use crate::tests::log::init as test_log_init;
 use std::cell::RefCell;
