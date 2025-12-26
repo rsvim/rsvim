@@ -592,13 +592,12 @@ impl Tree {
   /// - It moves to up when `y < 0`.
   /// - It moves to down when `y > 0`.
   ///
+  /// This motion uses the [TruncatePolicy::RESERVED] like policy, e.g. if it
+  /// hits the boundary of its parent, it simply stops moving to avoid its size
+  /// been truncated by its parent.
+  ///
   /// Returns the new shape after movement if successfully, otherwise
   /// returns `None` if the node doesn't exist or doesn't have a parent.
-  ///
-  /// NOTE: This motion uses the `RESERVED` policy just like
-  /// [TruncatePolicy](crate::ui::tree::TruncatePolicy). If it hits the
-  /// boundary of its parent widget, it will simply stop moving to avoid its
-  /// size been truncated by its parent.
   pub fn reserved_move_position_by(
     &self,
     id: TreeNodeId,
