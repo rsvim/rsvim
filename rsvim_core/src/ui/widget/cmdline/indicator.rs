@@ -36,8 +36,12 @@ pub struct CmdlineIndicator {
 }
 
 impl CmdlineIndicator {
-  pub fn new(shape: IRect, symbol: CmdlineIndicatorSymbol) -> Self {
-    let base = InodeBase::new(shape);
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextWk,
+    symbol: CmdlineIndicatorSymbol,
+  ) -> Self {
+    let base = InodeBase::new(id, ctx);
     CmdlineIndicator { base, symbol }
   }
 

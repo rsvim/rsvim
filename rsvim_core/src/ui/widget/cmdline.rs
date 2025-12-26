@@ -49,7 +49,7 @@ pub struct Cmdline {
 impl Cmdline {
   pub fn new(
     id: TreeNodeId,
-    ctx: TreeContextRc,
+    ctx: TreeContextWk,
     text_contents: TextContentsWk,
     indicator_id: TreeNodeId,
     input_id: TreeNodeId,
