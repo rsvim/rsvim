@@ -25,6 +25,8 @@ use crate::ui::widget::window::opt::WindowGlobalOptionsBuilder;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
+use internal::context::DEFAULT_ACTUAL_SHAPE;
+use internal::context::DEFAULT_SHAPE;
 use internal::context::DEFAULT_TRUNCATE_POLICY;
 use internal::context::DEFAULT_ZINDEX;
 pub use internal::*;
@@ -500,6 +502,8 @@ impl Tree {
         cursor_style,
         DEFAULT_ZINDEX,
         TruncatePolicy::RESERVED,
+        *DEFAULT_SHAPE,
+        *DEFAULT_ACTUAL_SHAPE,
         "Cursor",
       )?;
 
