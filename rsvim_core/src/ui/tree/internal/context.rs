@@ -323,7 +323,7 @@ pub enum TruncatePolicy {
   RESERVED,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TreeContext {
   ta: Ta,
 
@@ -344,6 +344,10 @@ pub struct TreeContext {
 }
 
 rc_refcell_ptr!(TreeContext);
+
+impl Debug for TreeContext {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {}
+}
 
 impl TreeContext {
   pub fn new() -> Self {

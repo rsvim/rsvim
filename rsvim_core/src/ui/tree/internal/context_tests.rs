@@ -52,7 +52,7 @@ fn new() {
 
   let nid1 = ctx
     .borrow_mut()
-    .new_root(
+    .new_leaf_default(
       Style {
         size: taffy::Size {
           width: taffy::Dimension::from_length(10_u16),
