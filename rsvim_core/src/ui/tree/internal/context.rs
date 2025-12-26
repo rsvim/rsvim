@@ -157,27 +157,27 @@ impl Ta {
   pub fn add_child(
     &mut self,
     parent_id: TreeNodeId,
-    child_id: TreeNodeId,
+    id: TreeNodeId,
   ) -> TaffyResult<()> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
-    let child_taid = self.id2taid.get(&child_id).unwrap();
-    let result = self.ta.add_child(*parent_taid, *child_taid)?;
+    let taid = self.id2taid.get(&id).unwrap();
+    let result = self.ta.add_child(*parent_taid, *taid)?;
     Ok(result)
   }
 
   pub fn remove_child(
     &mut self,
     parent_id: TreeNodeId,
-    child_id: TreeNodeId,
+    id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
-    let child_taid = self.id2taid.get(&child_id).unwrap();
-    let removed_taid = self.ta.remove_child(*parent_taid, *child_taid)?;
-    debug_assert_eq!(removed_taid, *child_taid);
+    let taid = self.id2taid.get(&id).unwrap();
+    let removed_taid = self.ta.remove_child(*parent_taid, *taid)?;
+    debug_assert_eq!(removed_taid, *taid);
     let removed_id = *self.taid2id.get(&removed_taid).unwrap();
-    debug_assert_eq!(removed_id, child_id);
+    debug_assert_eq!(removed_id, id);
     Ok(removed_id)
   }
 
@@ -220,6 +220,15 @@ impl Ta {
     self.id2taid.insert(id, taid);
     self.taid2id.insert(taid, id);
     self._internal_check();
+    Ok(id)
+  }
+
+  pub fn remove(&mut self, id: TreeNodeId) -> TaffyResult<TreeNodeId> {
+    self._internal_check();
+    let taid = self.id2taid.get(&id).unwrap();
+    let removed_taid = self.ta.remove(*taid)?;
+    debug_assert_eq!(removed_taid, *taid);
+    self.id2taid.remove(&id);
     Ok(id)
   }
 }
