@@ -81,8 +81,6 @@ impl Cmdline {
         &input_viewport,
         text_contents.command_line_input(),
       );
-      let input_viewport = Viewport::to_arc(input_viewport);
-      let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
 
       let message_viewport = Viewport::view(
         &options,
@@ -91,49 +89,12 @@ impl Cmdline {
         0,
         0,
       );
-      let message_viewport = Viewport::to_arc(message_viewport);
-
       (input_viewport, input_cursor_viewport, message_viewport)
     };
 
-    let input = CmdlineInput::new(
-      input_shape,
-      text_contents.clone(),
-      Arc::downgrade(&input_viewport),
-    );
-    let input_id = input.id();
-    let mut input_node = CommandLineNode::Input(input);
-    // Input by default is invisible
-    input_node.set_visible(false);
-    base.bounded_insert(root_id, input_node);
-
-    let message = CmdlineMessage::new(
-      message_shape,
-      text_contents.clone(),
-      Arc::downgrade(&message_viewport),
-    );
-    let message_id = message.id();
-    let message_node = CommandLineNode::Message(message);
-    base.bounded_insert(root_id, message_node);
-
-    trace!(
-      "parameter shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
-      shape, indicator_shape, input_shape, message_shape
-    );
-    trace!(
-      "command_line shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
-      base.node(root_id).unwrap().shape(),
-      base.node(indicator_id).unwrap().shape(),
-      base.node(input_id).unwrap().shape(),
-      base.node(message_id).unwrap().shape()
-    );
-    trace!(
-      "command_line actual_shape, root:{:?},indicator:{:?},input:{:?},message:{:?}",
-      base.node(root_id).unwrap().actual_shape(),
-      base.node(indicator_id).unwrap().actual_shape(),
-      base.node(input_id).unwrap().actual_shape(),
-      base.node(message_id).unwrap().actual_shape()
-    );
+    let input_viewport = Viewport::to_arc(input_viewport);
+    let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
+    let message_viewport = Viewport::to_arc(message_viewport);
 
     Self {
       base,
@@ -148,8 +109,6 @@ impl Cmdline {
     }
   }
 }
-
-inode_itree_impl!(Cmdline, base);
 
 impl Widgetable for Cmdline {
   fn draw(&self, canvas: &mut Canvas) {
