@@ -104,11 +104,6 @@ impl Window {
     self.buffer.clone()
   }
 
-  /// Cursor widget ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Content widget ID.
   pub fn content_id(&self) -> TreeNodeId {
     self.content_id
