@@ -534,11 +534,17 @@ impl Tree {
       let mut context = self.context.borrow_mut();
 
       let indicator_style = Style {
-        display: taffy::Display::None,
         ..Default::default()
       };
       let input_style = Style {
-        display: taffy::Display::None,
+        ..Default::default()
+      };
+      let input_panel_style = Style {
+        display: taffy::Display::None, // taffy::Display::Grid,
+        grid_template_columns: vec![
+          taffy::prelude::length(1_u16),
+          taffy::prelude::fr(1_u16),
+        ],
         ..Default::default()
       };
       let message_style = Style {
@@ -550,13 +556,21 @@ impl Tree {
       };
 
       let id = context.new_with_parent_default(parent_id, style, "Cmdline")?;
+      let input_panel_id = context.new_with_parent_default(
+        parent_id,
+        input_panel_style,
+        "CmdlinePanel",
+      )?;
       let indicator_id = context.new_with_parent_default(
-        id,
+        input_panel_id,
         indicator_style,
         "CmdlineIndicator",
       )?;
-      let input_id =
-        context.new_with_parent_default(id, input_style, "CmdlineInput")?;
+      let input_id = context.new_with_parent_default(
+        input_panel_id,
+        input_style,
+        "CmdlineInput",
+      )?;
       let message_id =
         context.new_with_parent_default(id, message_style, "CmdlineMessage")?;
 
