@@ -70,8 +70,14 @@ fn new() {
 
   assert_eq!(ctx.borrow().len(), 1);
   assert_eq!(ctx.borrow().root(), nid1);
-  assert_eq!(ctx.borrow().shape(nid1), rect!(0, 0, 10, 10));
-  assert_eq!(ctx.borrow().actual_shape(nid1), rect!(0, 0, 10, 10));
+  assert_eq!(
+    ctx.borrow().shape(nid1).copied().unwrap(),
+    rect!(0, 0, 10, 10)
+  );
+  assert_eq!(
+    ctx.borrow().actual_shape(nid1).copied().unwrap(),
+    rect!(0, 0, 10, 10)
+  );
   assert!(ctx.borrow().parent(nid1).is_none());
   assert!(ctx.borrow().children(nid1).unwrap().is_empty());
 }
@@ -80,7 +86,29 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let mut tree = Itree::new();
+  let ctx = TreeContext::to_rc(TreeContext::new());
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   * ```
+   */
+
+  let nid1 = ctx.borrow_mut().new_root(
+    Style {
+      size: taffy::Size {
+        width: taffy::Dimension::from_length(1_u16),
+        height: taffy::Dimension::from_length(1_u16),
+      },
+      ..Default::default()
+    },
+    "Root",
+  );
 
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
@@ -106,16 +134,6 @@ fn insert1() {
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *      /  \     \
-   *     n4  n5    n6
-   * ```
-   */
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
   tree.new_with_parent(nid1, n3);
