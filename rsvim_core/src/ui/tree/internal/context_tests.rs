@@ -61,7 +61,7 @@ fn new() {
         },
         ..Default::default()
       },
-      "Root",
+      "n1",
     )
     .unwrap();
 
@@ -99,20 +99,19 @@ fn insert1() {
    * ```
    */
 
-  let nid1 = ctx.borrow_mut().new_root(
-    Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_length(1_u16),
-      },
-      ..Default::default()
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(1_u16),
+      height: taffy::Dimension::from_length(1_u16),
     },
-    "Root",
-  );
+    ..Default::default()
+  };
+  let nid1 = ctx.borrow_mut().new_root(style.clone(), "n1");
 
-  let s1 = rect!(0, 0, 1, 1);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let nid2 = ctx
+    .borrow_mut()
+    .new_with_parent_default(nid1, style.clone(), "n2")
+    .unwrap();
 
   let s2 = rect!(0, 0, 1, 1);
   let n2 = TestValue::new(2, s2);
