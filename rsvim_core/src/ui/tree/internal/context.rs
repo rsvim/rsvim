@@ -378,13 +378,15 @@ impl TreeContext {
   }
 
   fn _set_root(&mut self, id: TreeNodeId) {
-    debug_assert_eq!(self.root, INVALID_ROOT_ID);
     debug_assert_ne!(id, INVALID_ROOT_ID);
-    debug_assert_eq!(self.root_changes, 0);
-    self.root = id;
-    if cfg!(debug_assertions) {
-      self.root_changes += 1;
-      debug_assert!(self.root_changes <= 1);
+    debug_assert!(self.root_changes <= 1);
+    if self.root == INVALID_ROOT_ID {
+      debug_assert_eq!(self.root_changes, 0);
+      self.root = id;
+      if cfg!(debug_assertions) {
+        self.root_changes += 1;
+        debug_assert!(self.root_changes <= 1);
+      }
     }
   }
 
@@ -539,13 +541,32 @@ impl TreeContext {
     }
   }
 
-  pub fn new_root(
+  pub fn new_leaf(
+    &mut self,
+    style: Style,
+    zindex: usize,
+    truncate_policy: TruncatePolicy,
+    shape: IRect,
+    actual_shape: U16Rect,
+    name: &'static str,
+  ) -> TaffyResult<TreeNodeId> {
+    let id = self.ta.new_leaf(style)?;
+
+    self._set_root(id);
+    self._set_name(id, name);
+    self.zindexes.insert(id, zindex);
+    self.truncate_policies.insert(id, truncate_policy);
+    self.shapes.insert(id, shape);
+    self.actual_shapes.insert(id, actual_shape);
+
+    Ok(id)
+  }
+
+  pub fn new_leaf_default(
     &mut self,
     style: Style,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    debug_assert!(self.ta.is_empty());
-
     let id = self.ta.new_leaf(style)?;
 
     self._set_root(id);
@@ -564,6 +585,8 @@ impl TreeContext {
     style: Style,
     zindex: usize,
     truncate_policy: TruncatePolicy,
+    shape: IRect,
+    actual_shape: U16Rect,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
     debug_assert!(self.ta.contains(parent_id));
@@ -573,32 +596,27 @@ impl TreeContext {
     self._set_name(id, name);
     self.zindexes.insert(id, zindex);
     self.truncate_policies.insert(id, truncate_policy);
-    self.shapes.insert(id, *DEFAULT_SHAPE);
-    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
+    self.shapes.insert(id, shape);
+    self.actual_shapes.insert(id, actual_shape);
 
     Ok(id)
   }
 
-  pub fn new_leaf(
+  pub fn new_with_parent_default(
     &mut self,
+    parent_id: TreeNodeId,
     style: Style,
-    zindex: usize,
-    truncate_policy: TruncatePolicy,
     name: &'static str,
   ) -> TaffyResult<TreeNodeId> {
-    let id = self.ta.new_leaf(style)?;
-
-    self._set_name(id, name);
-    self.zindexes.insert(id, zindex);
-    self.truncate_policies.insert(id, truncate_policy);
-    self.shapes.insert(id, *DEFAULT_SHAPE);
-    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
-
-    // We don't need to calculate & update the whole layout, because this newly
-    // created leaf node is not inserted to any parent node, thus it will not
-    // affect the UI tree.
-
-    Ok(id)
+    self.new_with_parent(
+      parent_id,
+      style,
+      DEFAULT_ZINDEX,
+      DEFAULT_TRUNCATE_POLICY,
+      *DEFAULT_SHAPE,
+      *DEFAULT_ACTUAL_SHAPE,
+      name,
+    )
   }
 
   pub fn add_child(
