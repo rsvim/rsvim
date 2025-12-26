@@ -7,6 +7,7 @@ use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::sync::LazyLock;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
@@ -17,6 +18,9 @@ use taffy::TaffyTree;
 use taffy::prelude::TaffyMaxContent;
 
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
+pub static DEFAULT_SHAPE: LazyLock<IRect> = LazyLock::new(|| rect!(0, 0, 0, 0));
+pub static DEFAULT_ACTUAL_SHAPE: LazyLock<U16Rect> =
+  LazyLock::new(|| rect!(0, 0, 0, 0));
 pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 
@@ -525,8 +529,6 @@ impl TreeContext {
     }
   }
 
-  pub fn compute_layout(&mut self) -> TaffyResult<()> {}
-
   pub fn new_root(
     &mut self,
     style: Style,
@@ -534,28 +536,14 @@ impl TreeContext {
   ) -> TaffyResult<TreeNodeId> {
     debug_assert!(self.ta.is_empty());
 
-    let height = style.size.height.value() as isize;
-    let width = style.size.width.value() as isize;
-
     let id = self.ta.new_leaf(style)?;
 
     self._set_root(id);
     self._set_name(id, name);
     self.zindexes.insert(id, DEFAULT_ZINDEX);
     self.truncate_policies.insert(id, DEFAULT_TRUNCATE_POLICY);
-
-    self.compute_layout()?;
-
-    debug_assert_eq!(height, self.shapes.get(&id).unwrap().height());
-    debug_assert_eq!(width, self.shapes.get(&id).unwrap().width());
-    debug_assert_eq!(
-      height,
-      self.actual_shapes.get(&id).unwrap().height() as isize
-    );
-    debug_assert_eq!(
-      width,
-      self.actual_shapes.get(&id).unwrap().width() as isize
-    );
+    self.shapes.insert(id, *DEFAULT_SHAPE);
+    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
 
     Ok(id)
   }
@@ -575,8 +563,8 @@ impl TreeContext {
     self._set_name(id, name);
     self.zindexes.insert(id, zindex);
     self.truncate_policies.insert(id, truncate_policy);
-
-    self.compute_layout()?;
+    self.shapes.insert(id, *DEFAULT_SHAPE);
+    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
 
     Ok(id)
   }
@@ -593,9 +581,8 @@ impl TreeContext {
     self._set_name(id, name);
     self.zindexes.insert(id, zindex);
     self.truncate_policies.insert(id, truncate_policy);
-    // Mock shape value
-    self.shapes.insert(id, rect!(0, 0, 0, 0));
-    self.actual_shapes.insert(id, rect!(0, 0, 0, 0));
+    self.shapes.insert(id, *DEFAULT_SHAPE);
+    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
 
     // We don't need to calculate & update the whole layout, because this newly
     // created leaf node is not inserted to any parent node, thus it will not
