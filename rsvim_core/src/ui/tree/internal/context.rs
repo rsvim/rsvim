@@ -346,7 +346,35 @@ pub struct TreeContext {
 rc_refcell_ptr!(TreeContext);
 
 impl Debug for TreeContext {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {}
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    if self.root != INVALID_ROOT_ID {
+      f.write_str("TreeContext:")?;
+      let mut results: Vec<String> = vec![];
+      let mut q: VecDeque<TreeNodeId> = VecDeque::new();
+      q.push_back(self.root);
+      while let Some(id) = q.pop_front() {
+        let payload = if cfg!(debug_assertions) {
+          format!(
+            "{}({}):{:?}({:?})",
+            id,
+            self.names.get(&id).unwrap(),
+            self.shapes.get(&id).unwrap(),
+            self.actual_shapes.get(&id).unwrap()
+          )
+        } else {
+          format!(
+            "{}:{:?}({:?})",
+            id,
+            self.shapes.get(&id).unwrap(),
+            self.actual_shapes.get(&id).unwrap()
+          )
+        };
+      }
+      f.debug_list().entries(results.iter()).finish()
+    } else {
+      f.write_str("TreeContext:empty")
+    }
+  }
 }
 
 impl TreeContext {
