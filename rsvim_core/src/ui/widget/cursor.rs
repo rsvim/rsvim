@@ -47,7 +47,7 @@ impl Cursor {
   }
 
   pub fn default(id: TreeNodeId, ctx: TreeContextWk) -> Self {
-    Self::new(shape, CURSOR_BLINKING, CURSOR_HIDDEN, CURSOR_STYLE)
+    Self::new(id, ctx, CURSOR_BLINKING, CURSOR_HIDDEN, CURSOR_STYLE)
   }
 
   pub fn blinking(&self) -> bool {
