@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use super::context::*;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -47,28 +49,29 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
-  let mut ctx = TreeContext::new();
+  let ctx = TreeContext::to_rc(TreeContext::new());
 
-  let nid1 = ctx.new_root(
-    Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_length(10_u16),
-        height: taffy::Dimension::from_length(10_u16),
+  let nid1 = ctx
+    .borrow_mut()
+    .new_root(
+      Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_length(10_u16),
+          height: taffy::Dimension::from_length(10_u16),
+        },
+        ..Default::default()
       },
-      ..Default::default()
-    },
-    "Root",
-  );
+      "Root",
+    )
+    .unwrap();
 
-  let s1 = rect!(0, 0, 1, 1);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
-  ctx.new_root(n1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&ctx), 1);
+  ctx.borrow_mut().compute_layout().unwrap();
 
-  assert_eq!(ctx.len(), 1);
-  assert_eq!(ctx.root_id(), nid1);
-  assert!(ctx.parent_id(nid1).is_none());
-  assert!(ctx.children_ids(nid1).is_empty());
+  assert_eq!(ctx.borrow().len(), 1);
+  assert_eq!(ctx.borrow().root(), nid1);
+  assert!(ctx.borrow().parent(nid1).is_none());
+  assert!(ctx.borrow().children(nid1).unwrap().is_empty());
 }
 
 #[test]
