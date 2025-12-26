@@ -40,7 +40,7 @@ pub type TreeNodeId = i32;
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
-  Root(Panel),
+  Panel(Panel),
   Cursor(Cursor),
   Window(Window),
   WindowContent(WindowContent),
@@ -52,7 +52,7 @@ pub enum TreeNode {
 
 inode_dispatcher!(
   TreeNode,
-  Root,
+  Panel,
   Cursor,
   Window,
   WindowContent,
@@ -63,7 +63,7 @@ inode_dispatcher!(
 );
 widget_dispatcher!(
   TreeNode,
-  Root,
+  Panel,
   Cursor,
   Window,
   WindowContent,
@@ -177,7 +177,7 @@ impl Tree {
 
     let context = TreeContext::to_rc(context);
     let root = Panel::new(id, context.clone());
-    let root = TreeNode::Root(root);
+    let root = TreeNode::Panel(root);
 
     let mut nodes = FoldMap::new();
     nodes.insert(id, root);
@@ -608,7 +608,11 @@ impl Tree {
     let cmdline = TreeNode::Cmdline(cmdline);
     self._insert_node(id, cmdline);
 
-    let input_panel = CmdlineIndicator
+    let input_panel =
+      Panel::new(input_panel_id, Rc::downgrade(&self.context()));
+    let input_panel = TreeNode::Panel(input_panel);
+    self._insert_node(input_panel_id, input_panel);
+
     let indicator = CmdlineIndicator::new(
       indicator_id,
       Rc::downgrade(&self.context()),
