@@ -158,23 +158,13 @@ impl Cmdline {
   }
 
   /// Set viewport for input.
-  pub fn set_input_viewport(&mut self, viewport: ViewportArc) {
-    self.input_viewport = viewport.clone();
-    if let Some(CommandLineNode::Input(input)) =
-      self.base.node_mut(self.input_id)
-    {
-      input.set_viewport(Arc::downgrade(&viewport));
-    }
+  pub fn set_input_viewport(&mut self, viewport: Viewport) {
+    *lock!(self.input_viewport) = viewport;
   }
 
   /// Set viewport for message.
-  pub fn set_message_viewport(&mut self, viewport: ViewportArc) {
-    self.message_viewport = viewport.clone();
-    if let Some(CommandLineNode::Message(message)) =
-      self.base.node_mut(self.message_id)
-    {
-      message.set_viewport(Arc::downgrade(&viewport));
-    }
+  pub fn set_message_viewport(&mut self, viewport: Viewport) {
+    *lock!(self.message_viewport) = viewport;
   }
 
   /// Get cursor viewport for input.
@@ -183,11 +173,8 @@ impl Cmdline {
   }
 
   /// Set cursor viewport for input.
-  pub fn set_input_cursor_viewport(
-    &mut self,
-    cursor_viewport: CursorViewportArc,
-  ) {
-    self.input_cursor_viewport = cursor_viewport;
+  pub fn set_input_cursor_viewport(&mut self, cursor_viewport: CursorViewport) {
+    *lock!(self.input_cursor_viewport) = cursor_viewport;
   }
 }
 // Viewport }
