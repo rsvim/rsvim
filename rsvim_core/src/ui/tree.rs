@@ -534,26 +534,65 @@ impl Tree {
     indicator_symbol: CmdlineIndicatorSymbol,
     text_contents: TextContentsWk,
   ) -> TaffyResult<TreeNodeId> {
-    let indicator_style = Style {
-      min_size: taffy::Size {
-        width: taffy::Dimension::from_length(1_u16),
-        height: taffy::Dimension::from_percent(1.0),
-      },
-      ..Default::default()
-    };
-    let input_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
-      },
-      ..Default::default()
-    };
-    let message_style = Style {
-      size: taffy::Size {
-        width: taffy::Dimension::from_percent(1.0),
-        height: taffy::Dimension::from_percent(1.0),
-      },
-      ..Default::default()
+    let (id, indicator_id, input_id, message_id) = {
+      let mut context = self.context.borrow_mut();
+
+      let indicator_style = Style {
+        display: taffy::Display::None,
+        min_size: taffy::Size {
+          width: taffy::Dimension::from_length(1_u16),
+          height: taffy::Dimension::from_percent(1.0),
+        },
+        ..Default::default()
+      };
+      let input_style = Style {
+        display: taffy::Display::None,
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(1.0),
+          height: taffy::Dimension::from_percent(1.0),
+        },
+        ..Default::default()
+      };
+      let message_style = Style {
+        size: taffy::Size {
+          width: taffy::Dimension::from_percent(1.0),
+          height: taffy::Dimension::from_percent(1.0),
+        },
+        ..Default::default()
+      };
+
+      let id = context.new_with_parent(
+        parent_id,
+        style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "Cmdline",
+      )?;
+      let indicator_id = context.new_with_parent(
+        id,
+        indicator_style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "CmdlineIndicator",
+      )?;
+      let input_id = context.new_with_parent(
+        id,
+        input_style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "CmdlineInput",
+      )?;
+      let message_id = context.new_with_parent(
+        id,
+        message_style,
+        DEFAULT_ZINDEX,
+        DEFAULT_TRUNCATE_POLICY,
+        "CmdlineMessage",
+      )?;
+
+      context.compute_layout()?;
+
+      (id, indicator_id, input_id, message_id)
     };
   }
 

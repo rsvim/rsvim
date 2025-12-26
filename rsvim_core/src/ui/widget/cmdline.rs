@@ -31,23 +31,9 @@ use message::CmdlineMessage;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum CommandLineNode {
-  Root(Panel),
-  Indicator(CmdlineIndicator),
-  Input(CmdlineInput),
-  Cursor(Cursor),
-  Message(CmdlineMessage),
-}
-
-inode_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
-
-widget_dispatcher!(CommandLineNode, Root, Indicator, Input, Cursor, Message);
-
-#[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct Cmdline {
-  base: Itree<CommandLineNode>,
+  base: InodeBase,
   options: WindowOptions,
 
   indicator_id: TreeNodeId,
@@ -61,7 +47,16 @@ pub struct Cmdline {
 }
 
 impl Cmdline {
-  pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextRc,
+    text_contents: TextContentsWk,
+    indicator_id: TreeNodeId,
+    input_id: TreeNodeId,
+    input_size: &U16Size,
+    message_id: TreeNodeId,
+    message_size: &U16Size,
+  ) -> Self {
     // Force cmdline window options.
     let options = WindowOptionsBuilder::default()
       .wrap(false)
@@ -70,36 +65,15 @@ impl Cmdline {
       .build()
       .unwrap();
 
-    let mut base = Itree::new();
-
-    let root = Panel::new(shape);
-    let root_id = root.id();
-    let root_node = CommandLineNode::Root(root);
-    base.new_root(root_node);
-
-    let cmdline_size = shape.size();
-
-    let indicator_shape = rect!(0, 0, 1, cmdline_size.height());
-    let indicator =
-      CmdlineIndicator::new(indicator_shape, CmdlineIndicatorSymbol::Empty);
-    let indicator_id = indicator.id();
-    let mut indicator_node = CommandLineNode::Indicator(indicator);
-    // Indicator by default is invisible
-    indicator_node.set_visible(false);
-    base.bounded_insert(root_id, indicator_node);
-
-    let input_shape = rect!(1, 0, cmdline_size.width(), cmdline_size.height());
-    let message_shape = rect_from_size!(cmdline_size);
-    let message_shape = rect_as!(message_shape, isize);
+    let base = InodeBase::new(id, ctx);
 
     let (input_viewport, input_cursor_viewport, message_viewport) = {
-      let input_actual_shape = rect_as!(input_shape, u16);
       let text_contents = text_contents.upgrade().unwrap();
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
         &options,
         text_contents.command_line_input(),
-        &input_actual_shape.size(),
+        input_size,
         0,
         0,
       );
@@ -107,22 +81,20 @@ impl Cmdline {
         &input_viewport,
         text_contents.command_line_input(),
       );
+      let input_viewport = Viewport::to_arc(input_viewport);
+      let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
 
-      let message_actual_shape = rect_from_size!(cmdline_size);
-      let message_actual_shape = rect_as!(message_actual_shape, u16);
       let message_viewport = Viewport::view(
         &options,
         text_contents.command_line_message(),
-        &message_actual_shape.size(),
+        message_size,
         0,
         0,
       );
+      let message_viewport = Viewport::to_arc(message_viewport);
+
       (input_viewport, input_cursor_viewport, message_viewport)
     };
-
-    let input_viewport = Viewport::to_arc(input_viewport);
-    let input_cursor_viewport = CursorViewport::to_arc(input_cursor_viewport);
-    let message_viewport = Viewport::to_arc(message_viewport);
 
     let input = CmdlineInput::new(
       input_shape,

@@ -43,7 +43,7 @@ impl Window {
     options: WindowOptions,
     buffer: BufferWk,
     content_id: TreeNodeId,
-    content_size: U16Size,
+    content_size: &U16Size,
   ) -> Self {
     let base = InodeBase::new(id, ctx);
 
@@ -51,7 +51,7 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport =
-        Viewport::view(&options, buffer.text(), &content_size, 0, 0);
+        Viewport::view(&options, buffer.text(), content_size, 0, 0);
       let cursor_viewport =
         CursorViewport::from_top_left(&viewport, buffer.text());
       (
