@@ -229,7 +229,7 @@ impl Ta {
     let removed_taid = self.ta.remove(taid)?;
     debug_assert_eq!(removed_taid, taid);
     self.id2taid.remove(&id);
-    self.taid2id.remove(taid);
+    self.taid2id.remove(&taid);
     Ok(id)
   }
 }
