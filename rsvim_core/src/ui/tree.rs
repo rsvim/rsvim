@@ -801,9 +801,9 @@ impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = lock!(canvas);
-    for node in self.base.iter() {
+    for node in self.iter() {
       // trace!("Draw tree:{:?}", node);
-      if !node.visible() {
+      if !node.enabled() {
         continue;
       }
       node.draw(&mut canvas);
