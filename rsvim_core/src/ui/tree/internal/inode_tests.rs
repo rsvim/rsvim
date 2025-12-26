@@ -22,7 +22,7 @@ impl TestNode {
   }
 }
 
-inode_impl!(TestNode, base);
+inode_impl!(TestNode);
 
 #[test]
 fn new() {
