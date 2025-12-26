@@ -23,7 +23,7 @@ pub struct Cursor {
   // blinking=false
   // hidden=false
   flags: Flags,
-  style: CursorStyle,
+  cursor_style: CursorStyle,
 }
 
 inode_impl!(Cursor);
@@ -42,7 +42,7 @@ impl Cursor {
     Cursor {
       __node: InodeBase::new(id, ctx),
       flags,
-      style: cursor_style,
+      cursor_style,
     }
   }
 
@@ -67,11 +67,11 @@ impl Cursor {
   }
 
   pub fn cursor_style(&self) -> &CursorStyle {
-    &self.style
+    &self.cursor_style
   }
 
   pub fn set_cursor_style(&mut self, value: &CursorStyle) {
-    self.style = *value;
+    self.cursor_style = *value;
   }
 }
 
@@ -88,7 +88,7 @@ impl Widgetable for Cursor {
       pos,
       self.blinking(),
       self.hidden(),
-      self.style,
+      self.cursor_style,
     ));
   }
 }
