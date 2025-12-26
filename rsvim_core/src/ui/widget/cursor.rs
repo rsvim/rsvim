@@ -31,7 +31,7 @@ inode_impl!(Cursor);
 impl Cursor {
   pub fn new(
     id: TreeNodeId,
-    ctx: TreeContextWc,
+    ctx: TreeContextWk,
     blinking: bool,
     hidden: bool,
     cursor_style: CursorStyle,
@@ -46,7 +46,7 @@ impl Cursor {
     }
   }
 
-  pub fn default(id: TreeNodeId, ctx: TreeContextWc) -> Self {
+  pub fn default(id: TreeNodeId, ctx: TreeContextWk) -> Self {
     Self::new(shape, CURSOR_BLINKING, CURSOR_HIDDEN, CURSOR_STYLE)
   }
 
