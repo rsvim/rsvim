@@ -10,7 +10,6 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
-use crate::ui::widget::window::WindowNode;
 use compact_str::CompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
@@ -146,7 +145,7 @@ impl NormalStateful {
       .indicator_mut()
       .set_symbol(CmdlineIndicatorSymbol::Ex);
 
-    StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
+    StateMachine::CommandLineExMode(super::CmdlineExStateful::default())
   }
 }
 
@@ -167,7 +166,7 @@ impl NormalStateful {
     _data_access: &StateDataAccess,
   ) -> StateMachine {
     StateMachine::CommandLineSearchBackwardMode(
-      super::CommandLineSearchBackwardStateful::default(),
+      super::CmdlineBackwardStateful::default(),
     )
   }
 }

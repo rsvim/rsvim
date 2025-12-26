@@ -8,16 +8,16 @@ use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line search backward mode.
-pub struct CommandLineSearchBackwardStateful {}
+pub struct CmdlineBackwardStateful {}
 
-impl Stateful for CommandLineSearchBackwardStateful {
+impl Stateful for CmdlineBackwardStateful {
   fn handle(
     &self,
     _data_access: StateDataAccess,
     _event: Event,
   ) -> StateMachine {
     StateMachine::CommandLineSearchBackwardMode(
-      CommandLineSearchBackwardStateful::default(),
+      CmdlineBackwardStateful::default(),
     )
   }
   fn handle_op(
@@ -26,7 +26,7 @@ impl Stateful for CommandLineSearchBackwardStateful {
     _op: Operation,
   ) -> StateMachine {
     StateMachine::CommandLineSearchBackwardMode(
-      CommandLineSearchBackwardStateful::default(),
+      CmdlineBackwardStateful::default(),
     )
   }
 }

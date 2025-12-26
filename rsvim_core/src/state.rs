@@ -24,7 +24,7 @@ use crate::msg::MasterMessage;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
-use fsm::CommandLineExStateful;
+use fsm::CmdlineExStateful;
 use fsm::CommandLineSearchBackwardStateful;
 use fsm::CommandLineSearchForwardStateful;
 use fsm::InsertStateful;
@@ -113,7 +113,7 @@ pub enum StateMachine {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CommandLineExMode(CommandLineExStateful),
+  CommandLineExMode(CmdlineExStateful),
   CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
   CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
   TerminalMode(TerminalStateful),
