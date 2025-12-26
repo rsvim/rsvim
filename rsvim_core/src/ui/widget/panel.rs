@@ -9,7 +9,7 @@ use crate::ui::widget::Widgetable;
 /// Logical node that renders nothing but give a cerntain shape for its
 /// descendant nodes.
 pub struct Panel {
-  base: InodeBase,
+  __node: InodeBase,
 }
 
 impl Panel {
