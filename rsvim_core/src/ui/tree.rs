@@ -172,7 +172,7 @@ impl Tree {
         flex_direction: taffy::FlexDirection::Column,
         ..Default::default()
       };
-      let id = context.new_root(style, "Panel")?;
+      let id = context.new_leaf_default(style, "Panel")?;
       context.compute_layout()?;
       (id, context)
     };
@@ -424,13 +424,7 @@ impl Tree {
       let mut context = self.context.borrow_mut();
 
       // window
-      let id = context.new_with_parent(
-        parent_id,
-        style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
-        "Window",
-      )?;
+      let id = context.new_with_parent_default(parent_id, style, "Window")?;
       // window content
       let content_style = Style {
         size: taffy::Size {
@@ -439,13 +433,8 @@ impl Tree {
         },
         ..Default::default()
       };
-      let content_id = context.new_with_parent(
-        id,
-        content_style,
-        DEFAULT_ZINDEX,
-        DEFAULT_TRUNCATE_POLICY,
-        "WindowContent",
-      )?;
+      let content_id =
+        context.new_with_parent_default(id, content_style, "WindowContent")?;
 
       context.compute_layout()?;
 
