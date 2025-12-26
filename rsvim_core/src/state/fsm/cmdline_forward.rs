@@ -16,13 +16,13 @@ impl Stateful for CmdlineForwardStateful {
     _data_access: StateDataAccess,
     _event: Event,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchForwardMode(CmdlineForwardStateful::default())
+    StateMachine::CmdlineForwardMode(CmdlineForwardStateful::default())
   }
   fn handle_op(
     &self,
     _data_access: StateDataAccess,
     _op: Operation,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchForwardMode(CmdlineForwardStateful::default())
+    StateMachine::CmdlineForwardMode(CmdlineForwardStateful::default())
   }
 }

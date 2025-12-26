@@ -113,9 +113,9 @@ pub enum StateMachine {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CommandLineExMode(CmdlineExStateful),
-  CommandLineSearchForwardMode(CmdlineForwardStateful),
-  CommandLineSearchBackwardMode(CmdlineBackwardStateful),
+  CmdlineExMode(CmdlineExStateful),
+  CmdlineForwardMode(CmdlineForwardStateful),
+  CmdlineBackwardMode(CmdlineBackwardStateful),
   TerminalMode(TerminalStateful),
 }
 
@@ -126,9 +126,9 @@ state_dispatcher!(
   SelectMode,
   OperatorPendingMode,
   InsertMode,
-  CommandLineExMode,
-  CommandLineSearchForwardMode,
-  CommandLineSearchBackwardMode,
+  CmdlineExMode,
+  CmdlineForwardMode,
+  CmdlineBackwardMode,
   TerminalMode
 );
 

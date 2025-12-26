@@ -16,17 +16,13 @@ impl Stateful for CmdlineBackwardStateful {
     _data_access: StateDataAccess,
     _event: Event,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchBackwardMode(
-      CmdlineBackwardStateful::default(),
-    )
+    StateMachine::CmdlineBackwardMode(CmdlineBackwardStateful::default())
   }
   fn handle_op(
     &self,
     _data_access: StateDataAccess,
     _op: Operation,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchBackwardMode(
-      CmdlineBackwardStateful::default(),
-    )
+    StateMachine::CmdlineBackwardMode(CmdlineBackwardStateful::default())
   }
 }

@@ -70,7 +70,7 @@ impl Stateful for CmdlineExStateful {
       return self.handle_op(data_access, op);
     }
 
-    StateMachine::CommandLineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CmdlineExStateful::default())
   }
 
   fn handle_op(
@@ -213,7 +213,7 @@ impl CmdlineExStateful {
       true,
     );
 
-    StateMachine::CommandLineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CmdlineExStateful::default())
   }
 }
 
@@ -243,7 +243,7 @@ impl CmdlineExStateful {
       payload,
     );
 
-    StateMachine::CommandLineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CmdlineExStateful::default())
   }
 }
 
@@ -271,6 +271,6 @@ impl CmdlineExStateful {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
-    StateMachine::CommandLineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CmdlineExStateful::default())
   }
 }

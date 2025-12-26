@@ -143,29 +143,25 @@ impl NormalStateful {
       .indicator_mut()
       .set_symbol(CmdlineIndicatorSymbol::Ex);
 
-    StateMachine::CommandLineExMode(super::CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(super::CmdlineExStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_forward_mode(
+  fn _goto_cmdline_forward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchForwardMode(
-      super::CmdlineForwardStateful::default(),
-    )
+    StateMachine::CmdlineForwardMode(super::CmdlineForwardStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn _goto_command_line_search_backward_mode(
+  fn _goto_cmdline_backward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
-    StateMachine::CommandLineSearchBackwardMode(
-      super::CmdlineBackwardStateful::default(),
-    )
+    StateMachine::CmdlineBackwardMode(super::CmdlineBackwardStateful::default())
   }
 }
 
