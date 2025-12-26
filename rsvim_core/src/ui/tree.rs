@@ -525,6 +525,7 @@ impl Tree {
   ) -> TaffyResult<TreeNodeId> {
     let (
       id,
+      input_panel_id,
       indicator_id,
       input_id,
       input_actual_shape,
@@ -582,6 +583,7 @@ impl Tree {
 
       (
         id,
+        input_panel_id,
         indicator_id,
         input_id,
         input_actual_shape,
@@ -594,6 +596,7 @@ impl Tree {
       id,
       Rc::downgrade(&self.context()),
       text_contents.clone(),
+      input_panel_id,
       indicator_id,
       input_id,
       &input_actual_shape.size(),

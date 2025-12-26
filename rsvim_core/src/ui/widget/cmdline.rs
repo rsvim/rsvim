@@ -36,6 +36,7 @@ pub struct Cmdline {
   base: InodeBase,
   options: WindowOptions,
 
+  input_panel_id: TreeNodeId,
   indicator_id: TreeNodeId,
   input_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
@@ -51,6 +52,7 @@ impl Cmdline {
     id: TreeNodeId,
     ctx: TreeContextWk,
     text_contents: TextContentsWk,
+    input_panel_id: TreeNodeId,
     indicator_id: TreeNodeId,
     input_id: TreeNodeId,
     input_size: &U16Size,
