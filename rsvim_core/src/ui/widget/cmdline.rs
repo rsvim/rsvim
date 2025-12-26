@@ -100,12 +100,10 @@ impl Cmdline {
     Self {
       base,
       options,
-
       input_panel_id,
       indicator_id,
       input_id,
       message_id,
-
       input_viewport,
       input_cursor_viewport,
       message_viewport,
@@ -113,17 +111,7 @@ impl Cmdline {
   }
 }
 
-impl Widgetable for Cmdline {
-  fn draw(&self, canvas: &mut Canvas) {
-    for node in self.base.iter() {
-      // trace!("Draw window:{:?}", node);
-      if !node.visible() {
-        continue;
-      }
-      node.draw(canvas);
-    }
-  }
-}
+impl Widgetable for Cmdline {}
 
 impl Cmdline {
   /// Get window local options.
