@@ -50,7 +50,7 @@ async fn create_snapshot1() -> IoResult<()> {
 
   // Run the event loop.
   let mocked_ops = vec![
-    MockOperation::Operation(Operation::GotoCommandLineExMode),
+    MockOperation::Operation(Operation::GotoCmdlineExMode),
     MockOperation::Operation(Operation::CursorInsert(
       CursorInsertPayload::Text("js Rsvim.cmd.echo(1);".to_compact_string()),
     )),

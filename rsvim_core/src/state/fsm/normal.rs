@@ -58,7 +58,7 @@ impl NormalStateful {
             KeyCode::Char('o') => {
               Some(Operation::GotoInsertMode(GotoInsertModeVariant::NewLine))
             }
-            KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
+            KeyCode::Char(':') => Some(Operation::GotoCmdlineExMode),
             // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
             // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
             _ => None,
@@ -92,7 +92,7 @@ impl Stateful for NormalStateful {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
       }
-      Operation::GotoCommandLineExMode => {
+      Operation::GotoCmdlineExMode => {
         self.goto_command_line_ex_mode(&data_access)
       }
       // Operation::GotoCommandLineSearchForwardMode => {

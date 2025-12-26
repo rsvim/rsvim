@@ -72,13 +72,13 @@ pub enum Operation {
   CursorDelete(/* N-chars */ isize),
 
   /// Goto command-line ex mode.
-  GotoCommandLineExMode,
+  GotoCmdlineExMode,
 
   /// Goto command-line search forward mode.
-  GotoCommandLineSearchForwardMode,
+  GotoCmdlineForwardMode,
 
   /// Goto command-line search backward mode.
-  GotoCommandLineSearchBackwardMode,
+  GotoCmdlineBackwardMode,
 
   /// Confirm ex command and goto normal mode.
   ConfirmExCommandAndGotoNormalMode,
