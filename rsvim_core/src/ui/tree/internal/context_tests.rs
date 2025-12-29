@@ -80,7 +80,7 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let ctx = TreeContext::to_rc(TreeContext::new());
+  let ctx = TreeContext::new();
 
   /*
    * The tree looks like:
@@ -100,36 +100,23 @@ fn insert1() {
     },
     ..Default::default()
   };
-  let nid1 = ctx
-    .borrow_mut()
-    .new_leaf_default(style.clone(), "n1")
-    .unwrap();
-
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
   let nid2 = ctx
-    .borrow_mut()
     .new_with_parent_default(nid1, style.clone(), "n2")
     .unwrap();
-
   let nid3 = ctx
-    .borrow_mut()
     .new_with_parent_default(nid1, style.clone(), "n3")
     .unwrap();
-
   let nid4 = ctx
-    .borrow_mut()
     .new_with_parent_default(nid2, style.clone(), "n4")
     .unwrap();
-
   let nid5 = ctx
-    .borrow_mut()
     .new_with_parent_default(nid2, style.clone(), "n5")
     .unwrap();
-
   let nid6 = ctx
-    .borrow_mut()
     .new_with_parent_default(nid3, style.clone(), "n6")
     .unwrap();
-  ctx.borrow_mut().compute_layout().unwrap();
+  ctx.compute_layout().unwrap();
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
