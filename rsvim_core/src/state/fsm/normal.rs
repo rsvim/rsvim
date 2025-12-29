@@ -299,7 +299,7 @@ impl NormalStateful {
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    tree.current_window_mut().unwrap().move_cursor_to(
+    tree.current_window_mut().move_cursor_to(
       new_cursor_viewport.column_idx() as isize,
       new_cursor_viewport.row_idx() as isize,
     );
