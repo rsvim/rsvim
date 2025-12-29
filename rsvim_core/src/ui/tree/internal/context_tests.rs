@@ -394,10 +394,23 @@ fn shape1() {
   let s6 = rect!(3, 6, 6, 10);
   let us6 = rect!(13, 16, 16, 19);
 
+  let style7 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(3_i16),
+      top: taffy::LengthPercentageAuto::from_length(6_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(12_u16),
+      height: taffy::Dimension::from_length(19_u16),
+    },
+    ..Default::default()
+  };
   let s7 = rect!(3, 6, 15, 25);
   let us7 = rect!(3, 6, 10, 15);
-  let n7 = TestValue::new(7, s7);
-  let nid7 = n7.id();
+  let nid7 = ctx.new_with_parent_default(nid5, style7, "n7").unwrap();
 
   let s8 = rect!(-1, -2, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
