@@ -349,7 +349,7 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(15_u16),
+      width: taffy::Dimension::from_length(12_u16),
       height: taffy::Dimension::from_length(9_u16),
     },
     ..Default::default()
@@ -469,7 +469,38 @@ fn shape1() {
 fn shape2() {
   // test_log_init();
 
-  let mut tree = Itree::new();
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *         \
+   *         n4
+   *        /
+   *       n5
+   *      /
+   *     n6
+   * ```
+   */
+
+  let style1 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(5_i16),
+      top: taffy::LengthPercentageAuto::from_length(6_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(4_u16),
+      height: taffy::Dimension::from_length(2_u16),
+    },
+    ..Default::default()
+  };
+
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
@@ -500,20 +531,6 @@ fn shape2() {
   let n6 = TestValue::new(6, s6);
   let nid6 = n6.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *         \
-   *         n4
-   *        /
-   *       n5
-   *      /
-   *     n6
-   * ```
-   */
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
   tree.new_with_parent(nid1, n3);
