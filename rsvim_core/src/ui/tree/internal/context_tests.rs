@@ -107,7 +107,10 @@ fn insert1() {
     },
     ..Default::default()
   };
-  let nid1 = ctx.borrow_mut().new_leaf_default(style.clone(), "n1");
+  let nid1 = ctx
+    .borrow_mut()
+    .new_leaf_default(style.clone(), "n1")
+    .unwrap();
 
   let nid2 = ctx
     .borrow_mut()
