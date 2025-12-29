@@ -487,6 +487,17 @@ fn shape2() {
    */
 
   let style1 = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(20_u16),
+      height: taffy::Dimension::from_length(20_u16),
+    },
+    ..Default::default()
+  };
+  let s1 = rect!(0, 0, 20, 20);
+  let us1 = rect!(0, 0, 20, 20);
+  let nid1 = ctx.new_leaf_default(style1, "n1").unwrap();
+
+  let style2 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
       left: taffy::LengthPercentageAuto::from_length(5_i16),
@@ -500,16 +511,9 @@ fn shape2() {
     },
     ..Default::default()
   };
-
-  let s1 = rect!(0, 0, 20, 20);
-  let us1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
-
+  let nid2 = ctx.new_with_parent_default(nid1, style2, "n2").unwrap();
   let s2 = rect!(0, 0, 20, 20);
   let us2 = rect!(0, 0, 20, 20);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
 
   let s3 = rect!(-2, -2, -1, 0);
   let us3 = rect!(0, 0, 0, 0);
