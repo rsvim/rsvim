@@ -114,14 +114,15 @@ fn insert1() {
     .new_with_parent_default(nid1, style.clone(), "n2")
     .unwrap();
 
-  let nid2 = ctx
+  let nid3 = ctx
     .borrow_mut()
     .new_with_parent_default(nid1, style.clone(), "n3")
     .unwrap();
 
-  let s3 = rect!(0, 0, 1, 1);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
+  let nid4 = ctx
+    .borrow_mut()
+    .new_with_parent_default(nid2, style.clone(), "n4")
+    .unwrap();
 
   let s4 = rect!(0, 0, 1, 1);
   let n4 = TestValue::new(4, s4);
