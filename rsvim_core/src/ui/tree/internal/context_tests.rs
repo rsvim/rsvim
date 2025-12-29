@@ -322,15 +322,41 @@ fn shape1() {
   let s2 = rect!(0, 0, 15, 15);
   let us2 = rect!(0, 0, 15, 15);
 
+  let style3 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(10_u16),
+      top: taffy::LengthPercentageAuto::from_length(10_u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(8_u16),
+      height: taffy::Dimension::from_length(9_u16),
+    },
+    ..Default::default()
+  };
+  let nid3 = ctx.new_with_parent_default(nid1, style3, "n3").unwrap();
   let s3 = rect!(10, 10, 18, 19);
   let us3 = rect!(10, 10, 18, 19);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
 
+  let style4 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(10_u16),
+      top: taffy::LengthPercentageAuto::from_length(10_u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(8_u16),
+      height: taffy::Dimension::from_length(9_u16),
+    },
+    ..Default::default()
+  };
   let s4 = rect!(3, 5, 20, 14);
   let us4 = rect!(3, 5, 15, 14);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
+  let nid4 = ctx.new_with_parent_default(nid2, style3, "n4").unwrap();
 
   let s5 = rect!(-3, -5, 10, 20);
   let us5 = rect!(0, 0, 10, 15);
