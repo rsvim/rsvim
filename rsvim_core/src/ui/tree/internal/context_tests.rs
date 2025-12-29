@@ -124,9 +124,10 @@ fn insert1() {
     .new_with_parent_default(nid2, style.clone(), "n4")
     .unwrap();
 
-  let s4 = rect!(0, 0, 1, 1);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
+  let nid5 = ctx
+    .borrow_mut()
+    .new_with_parent_default(nid2, style.clone(), "n5")
+    .unwrap();
 
   let s5 = rect!(0, 0, 1, 1);
   let n5 = TestValue::new(5, s5);
