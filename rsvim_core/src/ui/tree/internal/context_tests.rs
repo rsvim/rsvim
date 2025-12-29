@@ -80,7 +80,7 @@ fn new() {
 fn insert1() {
   // test_log_init();
 
-  let ctx = TreeContext::new();
+  let mut ctx = TreeContext::new();
 
   /*
    * The tree looks like:
@@ -118,28 +118,15 @@ fn insert1() {
     .unwrap();
   ctx.compute_layout().unwrap();
 
-  assert!(tree.root_id() == nid1);
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-
+  assert_eq!(ctx.root(), nid1);
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
   assert!(nid3 < nid4);
   assert!(nid4 < nid5);
   assert!(nid5 < nid6);
 
-  assert_eq!(tree.children_ids(nid1).len(), 2);
-  assert_eq!(tree.children_ids(nid2).len(), 2);
+  assert_eq!(ctx.children(nid1).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid2).unwrap().len(), 2);
   assert_eq!(tree.children_ids(nid3).len(), 1);
   assert_eq!(tree.children_ids(nid4).len(), 0);
   assert_eq!(tree.children_ids(nid5).len(), 0);
