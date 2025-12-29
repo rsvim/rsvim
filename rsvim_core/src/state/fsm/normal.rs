@@ -174,7 +174,7 @@ impl NormalStateful {
     match insert_motion {
       GotoInsertModeVariant::Keep => {}
       GotoInsertModeVariant::Append => {
-        let current_window = tree.current_window_mut().unwrap();
+        let current_window = tree.current_window_mut();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
@@ -188,7 +188,7 @@ impl NormalStateful {
         );
       }
       GotoInsertModeVariant::NewLine => {
-        let current_window = tree.current_window_mut().unwrap();
+        let current_window = tree.current_window_mut();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
