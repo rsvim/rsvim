@@ -234,8 +234,9 @@ fn insert2() {
   assert_eq!(ctx.children(nid9).unwrap().len(), 0);
 
   let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
-    let result = tree
-      .children_ids(parent_id)
+    let result = ctx
+      .children(parent_id)
+      .unwrap()
       .iter()
       .filter(|cid| **cid == child_id)
       .collect::<Vec<_>>()
@@ -245,7 +246,7 @@ fn insert2() {
       "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
       parent_id,
       child_id,
-      tree.children_ids(parent_id),
+      ctx.children(parent_id),
       result
     );
     result
