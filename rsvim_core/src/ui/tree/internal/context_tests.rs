@@ -5,6 +5,7 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
+use itertools::Itertools;
 use taffy::Style;
 use taffy::prelude::FromLength;
 use taffy::prelude::TaffyAuto;
@@ -608,13 +609,7 @@ fn shape2() {
 fn push1() {
   // test_log_init();
 
-  let shape = rect!(0, 0, 10, 10);
-  let node_values: Vec<i32> = [1, 2, 3, 4, 5].to_vec();
-  let nodes: Vec<TestValue> = node_values
-    .iter()
-    .map(|value| TestValue::new(*value, shape))
-    .collect();
-  let nodes_ids: Vec<TreeNodeId> = nodes.iter().map(|n| n.id()).collect();
+  let mut ctx = TreeContext::new();
 
   /*
    * The tree looks like:
@@ -624,38 +619,34 @@ fn push1() {
    *       n2, n3, n4, n5
    * ```
    */
-  let mut tree = Itree::new();
-  tree.new_root(nodes[0]);
-  for node in nodes.iter().skip(1) {
-    tree.new_with_parent(nodes_ids[0], *node);
-  }
 
-  assert!(tree.root_id() == nodes_ids[0]);
-  assert!(tree.children_ids(nodes_ids[0]).len() == 4);
-  assert!(!tree.children_ids(nodes_ids[0]).is_empty());
-  for nid in nodes_ids.iter().skip(1) {
-    assert!(tree.children_ids(*nid).is_empty());
-  }
+  let style1 = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(10_u16),
+      height: taffy::Dimension::from_length(10_u16),
+    },
+    ..Default::default()
+  };
 
-  for (i, nid) in nodes_ids.iter().enumerate() {
-    let node = tree.node(*nid).unwrap();
-    let expect = node_values[i];
-    assert_node_value_eq!(node, expect);
-  }
+  let nid1 = ctx.new_leaf_default(style1.clone(), "n1").unwrap();
+  let mut nids = [2, 3, 4, 5]
+    .iter()
+    .map(|i| {
+      ctx
+        .new_with_parent_default(
+          nid1,
+          style1.clone(),
+          format!("n{}", i).as_str(),
+        )
+        .unwrap()
+    })
+    .collect_vec();
+  nids.insert(0, nid1);
 
-  let first1 = tree.children_ids(nodes_ids[0]).first().cloned();
-  assert!(first1.is_some());
-  assert_eq!(first1.unwrap(), nodes_ids[1]);
-
-  let last1 = tree.children_ids(nodes_ids[0]).last().cloned();
-  assert!(last1.is_some());
-  assert_eq!(last1.unwrap(), nodes_ids[4]);
-
-  for nid in nodes_ids.iter().skip(1) {
-    let first = tree.children_ids(*nid).first().cloned();
-    let last = tree.children_ids(*nid).last().cloned();
-    assert!(first.is_none());
-    assert!(last.is_none());
+  assert!(ctx.root() == nids[0]);
+  assert_eq!(ctx.children(nids[0]).unwrap().len(), 4);
+  for nid in nids.iter().skip(1) {
+    assert!(ctx.children(*nid).unwrap().is_empty());
   }
 }
 
