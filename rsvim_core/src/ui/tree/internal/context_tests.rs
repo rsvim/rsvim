@@ -48,10 +48,9 @@ macro_rules! assert_node_value_eq {
 fn new() {
   // test_log_init();
 
-  let ctx = TreeContext::to_rc(TreeContext::new());
+  let mut ctx = TreeContext::new();
 
   let nid1 = ctx
-    .borrow_mut()
     .new_leaf_default(
       Style {
         size: taffy::Size {
@@ -64,23 +63,17 @@ fn new() {
     )
     .unwrap();
 
-  ctx.borrow_mut().compute_layout().unwrap();
+  ctx.compute_layout().unwrap();
 
-  let n1 = TestValue::new(nid1, Rc::downgrade(&ctx), 1);
-  assert_eq!(n1.id(), nid1);
-
-  assert_eq!(ctx.borrow().len(), 1);
-  assert_eq!(ctx.borrow().root(), nid1);
+  assert_eq!(ctx.len(), 1);
+  assert_eq!(ctx.root(), nid1);
+  assert_eq!(ctx.shape(nid1).copied().unwrap(), rect!(0, 0, 10, 10));
   assert_eq!(
-    ctx.borrow().shape(nid1).copied().unwrap(),
+    ctx.actual_shape(nid1).copied().unwrap(),
     rect!(0, 0, 10, 10)
   );
-  assert_eq!(
-    ctx.borrow().actual_shape(nid1).copied().unwrap(),
-    rect!(0, 0, 10, 10)
-  );
-  assert!(ctx.borrow().parent(nid1).is_none());
-  assert!(ctx.borrow().children(nid1).unwrap().is_empty());
+  assert!(ctx.parent(nid1).is_none());
+  assert!(ctx.children(nid1).unwrap().is_empty());
 }
 
 #[test]
@@ -136,13 +129,7 @@ fn insert1() {
     .borrow_mut()
     .new_with_parent_default(nid3, style.clone(), "n6")
     .unwrap();
-
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid2, n5);
-  tree.new_with_parent(nid3, n6);
+  ctx.borrow_mut().compute_layout().unwrap();
 
   assert!(tree.root_id() == nid1);
   let n1 = tree.node(nid1).unwrap();
