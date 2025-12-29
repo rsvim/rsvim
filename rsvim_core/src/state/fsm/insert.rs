@@ -177,7 +177,20 @@ impl InsertStateful {
       false,
     );
 
-    let current_window = tree.current_window_mut().unwrap();
+    debug_assert!(tree.cursor_id().is_some());
+    let cursor_id = tree.cursor_id().unwrap();
+    debug_assert!(tree.parent_id(cursor_id).is_some());
+    debug_assert!(matches!(
+      tree.node(tree.parent_id(cursor_id).unwrap()).unwrap(),
+      TreeNode::WindowContent(_)
+    ));
+    debug_assert!(tree.parent_id(tree.parent_id(cursor_id).unwrap()).is_some());
+    debug_assert_eq!(
+      tree.parent_id(tree.parent_id(cursor_id).unwrap()).unwrap(),
+      tree.current_window_id().unwrap()
+    );
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window = tree.current_window_mut();
     debug_assert!(current_window.cursor_id().is_some());
     let _cursor_id = current_window.cursor_id().unwrap();
     debug_assert!(current_window.cursor_mut().is_some());
@@ -197,7 +210,7 @@ impl InsertStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut().unwrap();
+    let current_window = tree.current_window_mut();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
