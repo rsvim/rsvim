@@ -597,8 +597,8 @@ fn shape2() {
   for (i, nid) in nids.iter().enumerate() {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
-    let actual_us = ctx.actual_shape(nid).copied().unwrap();
-    let actual_s = ctx.shape(nid).copied().unwrap();
+    let actual_us = ctx.actual_shape(*nid).copied().unwrap();
+    let actual_s = ctx.shape(*nid).copied().unwrap();
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
