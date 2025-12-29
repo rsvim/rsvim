@@ -187,61 +187,33 @@ fn insert2() {
    */
 
   let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
-  let nid2 = ctx.new_with_parent_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n2")
+    .unwrap();
+  let nid3 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n3")
+    .unwrap();
+  let nid4 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n4")
+    .unwrap();
+  let nid5 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n5")
+    .unwrap();
+  let nid6 = ctx
+    .new_with_parent_default(nid3, style.clone(), "n6")
+    .unwrap();
+  let nid7 = ctx
+    .new_with_parent_default(nid5, style.clone(), "n7")
+    .unwrap();
+  let nid8 = ctx
+    .new_with_parent_default(nid7, style.clone(), "n8")
+    .unwrap();
+  let nid9 = ctx
+    .new_with_parent_default(nid7, style.clone(), "n9")
+    .unwrap();
 
-  let s2 = rect!(0, 0, 15, 15);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
-
-  let s3 = rect!(10, 10, 18, 19);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
-
-  let s4 = rect!(3, 5, 20, 14);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
-
-  let s5 = rect!(-3, -5, 10, 20);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
-
-  let s6 = rect!(3, 6, 6, 10);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
-
-  let s7 = rect!(3, 6, 15, 25);
-  let n7 = TestValue::new(7, s7);
-  let nid7 = n7.id();
-
-  let s8 = rect!(-1, -2, 2, 1);
-  let n8 = TestValue::new(8, s8);
-  let nid8 = n8.id();
-
-  let s9 = rect!(5, 6, 9, 8);
-  let n9 = TestValue::new(9, s9);
-  let nid9 = n9.id();
-
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid2, n5);
-  tree.new_with_parent(nid3, n6);
-  tree.new_with_parent(nid5, n7);
-  tree.new_with_parent(nid7, n8);
-  tree.new_with_parent(nid7, n9);
-
-  assert!(tree.root_id() == nid1);
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  let n7 = tree.node(nid7).unwrap();
-  let n8 = tree.node(nid8).unwrap();
-  let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
+  assert_eq!(ctx.root(), nid1);
+  print_node!(ctx.name(), "n1");
   print_node!(n2, "n2");
   print_node!(n3, "n3");
   print_node!(n4, "n4");
