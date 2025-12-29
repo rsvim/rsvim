@@ -587,33 +587,20 @@ fn shape2() {
   let s6 = rect!(8, 13, 18, 25);
   let us6 = rect!(11, 18, 18, 20);
 
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid4, n5);
-  tree.new_with_parent(nid5, n6);
+  ctx.compute_layout().unwrap();
 
-  assert!(tree.root_id() == nid1);
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
+  assert_eq!(ctx.root(), nid1);
 
-  let expects = [us1, us2, us3, us4, us5, us6];
-  let nodes = [n1, n2, n3, n4, n5, n6];
-  for i in 0..6 {
-    let expect = expects[i];
-    let node = &nodes[i];
-    assert_node_actual_shape_eq!(node, expect, i);
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6];
+  for (i, nid) in nids.iter().enumerate() {
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
+    let actual_us = ctx.actual_shape(nid).copied().unwrap();
+    let actual_s = ctx.shape(nid).copied().unwrap();
+    assert_eq!(expect_us, actual_us);
+    assert_eq!(expect_s, actual_s);
   }
 }
 
