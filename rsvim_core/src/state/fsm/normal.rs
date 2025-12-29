@@ -9,7 +9,6 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
 use crossterm::event::Event;
@@ -226,7 +225,7 @@ impl NormalStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut().unwrap();
+    let current_window = tree.current_window_mut();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
@@ -280,7 +279,7 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     let (buffer, viewport, cursor_viewport, current_window_id) = {
-      let current_window = tree.current_window_mut().unwrap();
+      let current_window = tree.current_window_mut();
       let buffer = current_window.buffer().upgrade().unwrap();
       let viewport = current_window.viewport();
       let cursor_viewport = current_window.cursor_viewport();
