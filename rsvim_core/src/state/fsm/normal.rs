@@ -125,30 +125,20 @@ impl NormalStateful {
     cursor_ops::cursor_jump(&mut tree, cmdline_id);
     tree.reserved_move_cursor_position_to(0, 0).unwrap();
     tree.cmdline_show_input().unwrap();
-
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
-    let cursor = match current_window.remove_cursor().unwrap() {
-      WindowNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBar);
-        cursor
-      }
+    let indicator_id = match tree.node_mut(cmdline_id).unwrap() {
+      TreeNode::Cmdline(cmdline) => cmdline.indicator_id(),
       _ => unreachable!(),
     };
-    debug_assert!(current_window.cursor_id().is_none());
-
-    // Insert to command-line
-    debug_assert!(tree.cmdline_mut().is_some());
-    let cmdline = tree.cmdline_mut().unwrap();
-
-    cmdline.show_input();
-
-    let _previous_cursor = cmdline.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    cmdline.move_cursor_to(0, 0);
-    cmdline
-      .indicator_mut()
-      .set_symbol(CmdlineIndicatorSymbol::Ex);
+    debug_assert!(matches!(
+      tree.node(indicator_id).unwrap(),
+      TreeNode::CmdlineIndicator(_)
+    ));
+    match tree.node_mut(indicator_id).unwrap() {
+      TreeNode::CmdlineIndicator(indicator) => {
+        indicator.set_symbol(CmdlineIndicatorSymbol::Ex)
+      }
+      _ => unreachable!(),
+    }
 
     StateMachine::CmdlineExMode(super::CmdlineExStateful::default())
   }
