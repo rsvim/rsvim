@@ -455,7 +455,8 @@ fn shape1() {
   let nids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
   let expect_actual_shapes = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
   let expect_shapes = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
-  for i in 0..9 {
+  let n = nids.len();
+  for (i, nid) in nids.iter().enumerate() {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
     let actual_us = ctx.actual_shape(nids[i]).copied().unwrap();
