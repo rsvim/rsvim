@@ -629,15 +629,11 @@ fn push1() {
   };
 
   let nid1 = ctx.new_leaf_default(style1.clone(), "n1").unwrap();
-  let mut nids = [2, 3, 4, 5]
+  let mut nids = ["n2", "n3", "n4", "n5"]
     .iter()
-    .map(|i| {
+    .map(|name| {
       ctx
-        .new_with_parent_default(
-          nid1,
-          style1.clone(),
-          format!("n{}", i).as_str(),
-        )
+        .new_with_parent_default(nid1, style1.clone(), name)
         .unwrap()
     })
     .collect_vec();
@@ -650,7 +646,7 @@ fn push1() {
   }
 }
 
-fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
+fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
   let mut value = 1;
   let mut node_ids: Vec<TreeNodeId> = vec![];
 
@@ -678,8 +674,8 @@ fn remove1() {
   // test_log_init();
 
   let (node_ids, mut tree) = make_tree(5);
-  let remove2 = tree.move_child(node_ids[2]);
-  let remove4 = tree.move_child(node_ids[4]);
+  let remove2 = tree.remove_child(node_ids[2]);
+  let remove4 = tree.remove_child(node_ids[4]);
 
   assert!(remove2.is_some());
   let remove2 = &remove2.unwrap();
