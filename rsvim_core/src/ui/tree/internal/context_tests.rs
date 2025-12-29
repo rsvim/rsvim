@@ -500,14 +500,14 @@ fn shape2() {
   let style2 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(5_i16),
-      top: taffy::LengthPercentageAuto::from_length(6_i16),
+      left: taffy::LengthPercentageAuto::from_length(0_i16),
+      top: taffy::LengthPercentageAuto::from_length(0_i16),
       right: taffy::LengthPercentageAuto::AUTO,
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(4_u16),
-      height: taffy::Dimension::from_length(2_u16),
+      width: taffy::Dimension::from_length(20_u16),
+      height: taffy::Dimension::from_length(20_u16),
     },
     ..Default::default()
   };
@@ -515,15 +515,41 @@ fn shape2() {
   let s2 = rect!(0, 0, 20, 20);
   let us2 = rect!(0, 0, 20, 20);
 
+  let style3 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(-2_i16),
+      top: taffy::LengthPercentageAuto::from_length(-2_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(3_u16),
+      height: taffy::Dimension::from_length(2_u16),
+    },
+    ..Default::default()
+  };
+  let nid3 = ctx.new_with_parent_default(nid1, style3, "n3").unwrap();
   let s3 = rect!(-2, -2, -1, 0);
   let us3 = rect!(0, 0, 0, 0);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
 
+  let style4 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(-2_i16),
+      top: taffy::LengthPercentageAuto::from_length(-2_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(3_u16),
+      height: taffy::Dimension::from_length(2_u16),
+    },
+    ..Default::default()
+  };
+  let nid4 = ctx.new_with_parent_default(nid2, style4, "n4").unwrap();
   let s4 = rect!(3, 5, 20, 20);
   let us4 = rect!(3, 5, 20, 20);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
 
   let s5 = rect!(-3, -5, 15, 20);
   let us5 = rect!(3, 5, 18, 20);
