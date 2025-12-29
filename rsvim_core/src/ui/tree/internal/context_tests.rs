@@ -5,9 +5,11 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
+use crossterm::style::style;
 use std::rc::Rc;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::TaffyAuto;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -276,16 +278,51 @@ fn insert2() {
 fn shape1() {
   // test_log_init();
 
-  let mut tree = Itree::new();
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   *           \
+   *            n7
+   *           / \
+   *         n8   n9
+   * ```
+   */
+
+  let style1 = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(20_u16),
+      height: taffy::Dimension::from_length(20_u16),
+    },
+    ..Default::default()
+  };
+  let nid1 = ctx.new_leaf_default(style1, "n1").unwrap();
   let s1 = rect!(0, 0, 20, 20);
   let us1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
 
+  let style2 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(0_u16),
+      top: taffy::LengthPercentageAuto::from_length(0_u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(15_u16),
+      height: taffy::Dimension::from_length(15_u16),
+    },
+    ..Default::default()
+  };
+  let nid2 = ctx.new_with_parent_default(nid1, style2, "n2").unwrap();
   let s2 = rect!(0, 0, 15, 15);
   let us2 = rect!(0, 0, 15, 15);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
 
   let s3 = rect!(10, 10, 18, 19);
   let us3 = rect!(10, 10, 18, 19);
@@ -322,20 +359,6 @@ fn shape1() {
   let n9 = TestValue::new(9, s9);
   let nid9 = n9.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *      /  \     \
-   *     n4  n5    n6
-   *           \
-   *            n7
-   *           / \
-   *         n8   n9
-   * ```
-   */
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
   tree.new_with_parent(nid1, n3);
