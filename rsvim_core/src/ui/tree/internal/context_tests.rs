@@ -458,8 +458,8 @@ fn shape1() {
   for i in 0..9 {
     let expect_us = expect_actual_shapes[i];
     let expect_s = expect_shapes[i];
-    let actual_us = ctx.actual_shape(nids[i]).unwrap();
-    let actual_s = ctx.shape(nids[i]).unwrap();
+    let actual_us = ctx.actual_shape(nids[i]).copied().unwrap();
+    let actual_s = ctx.shape(nids[i]).copied().unwrap();
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
