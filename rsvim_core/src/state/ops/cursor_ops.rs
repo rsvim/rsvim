@@ -670,4 +670,14 @@ pub fn cursor_delete(
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
 
-pub fn cursor_jump() {}
+/// Cursor widget jumps from current parent widget to another parent widget.
+/// This API only changes its parent widget, without modifying cursor viewport.
+///
+/// For example, cursor moves from current window to command-line.
+pub fn cursor_jump(
+  tree: &mut Tree,
+  parent_id: TreeNodeId,
+) -> Option<TreeNodeId> {
+  let cursor_id = tree.cursor_id().unwrap();
+  let old_parent_id = tree.parent_id(cursor_id).unwrap();
+}
