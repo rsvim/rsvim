@@ -64,8 +64,10 @@ fn new() {
     )
     .unwrap();
 
-  let n1 = TestValue::new(nid1, Rc::downgrade(&ctx), 1);
   ctx.borrow_mut().compute_layout().unwrap();
+
+  let n1 = TestValue::new(nid1, Rc::downgrade(&ctx), 1);
+  assert_eq!(n1.id(), nid1);
 
   assert_eq!(ctx.borrow().len(), 1);
   assert_eq!(ctx.borrow().root(), nid1);
