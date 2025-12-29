@@ -343,30 +343,56 @@ fn shape1() {
   let style4 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(10_u16),
-      top: taffy::LengthPercentageAuto::from_length(10_u16),
+      left: taffy::LengthPercentageAuto::from_length(3_u16),
+      top: taffy::LengthPercentageAuto::from_length(5_u16),
       right: taffy::LengthPercentageAuto::AUTO,
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(8_u16),
+      width: taffy::Dimension::from_length(15_u16),
       height: taffy::Dimension::from_length(9_u16),
     },
     ..Default::default()
   };
+  let nid4 = ctx.new_with_parent_default(nid2, style4, "n4").unwrap();
   let s4 = rect!(3, 5, 20, 14);
   let us4 = rect!(3, 5, 15, 14);
-  let nid4 = ctx.new_with_parent_default(nid2, style3, "n4").unwrap();
 
+  let style5 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(-3_i16),
+      top: taffy::LengthPercentageAuto::from_length(-5_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(13_u16),
+      height: taffy::Dimension::from_length(25_u16),
+    },
+    ..Default::default()
+  };
+  let nid5 = ctx.new_with_parent_default(nid2, style5, "n5").unwrap();
   let s5 = rect!(-3, -5, 10, 20);
   let us5 = rect!(0, 0, 10, 15);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
 
+  let style6 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(3_i16),
+      top: taffy::LengthPercentageAuto::from_length(6_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(3_u16),
+      height: taffy::Dimension::from_length(4_u16),
+    },
+    ..Default::default()
+  };
+  let nid6 = ctx.new_with_parent_default(nid3, style6, "n6").unwrap();
   let s6 = rect!(3, 6, 6, 10);
   let us6 = rect!(13, 16, 16, 19);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
 
   let s7 = rect!(3, 6, 15, 25);
   let us7 = rect!(3, 6, 10, 15);
