@@ -430,47 +430,38 @@ fn shape1() {
   let s8 = rect!(-1, -2, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
 
+  let style9 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(5_i16),
+      top: taffy::LengthPercentageAuto::from_length(6_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(4_u16),
+      height: taffy::Dimension::from_length(2_u16),
+    },
+    ..Default::default()
+  };
   let s9 = rect!(5, 6, 9, 8);
   let us9 = rect!(8, 12, 10, 14);
-  let n9 = TestValue::new(9, s9);
-  let nid9 = n9.id();
+  let nid9 = ctx.new_with_parent_default(nid7, style9, "n9").unwrap();
 
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid2, n5);
-  tree.new_with_parent(nid3, n6);
-  tree.new_with_parent(nid5, n7);
-  tree.new_with_parent(nid7, n8);
-  tree.new_with_parent(nid7, n9);
+  ctx.compute_layout().unwrap();
 
-  assert!(tree.root_id() == nid1);
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  let n7 = tree.node(nid7).unwrap();
-  let n8 = tree.node(nid8).unwrap();
-  let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
+  assert_eq!(ctx.root(), nid1);
 
-  let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
-  let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
   for i in 0..9 {
-    let expect = expects[i];
-    let node = nodes[i];
-    assert_node_actual_shape_eq!(node, expect, i);
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
+    let actual_us = ctx.actual_shape(nids[i]).unwrap();
+    let actual_s = ctx.shape(nids[i]).unwrap();
+    assert_eq!(expect_us, actual_us);
+    assert_eq!(expect_s, actual_s);
   }
 }
 
