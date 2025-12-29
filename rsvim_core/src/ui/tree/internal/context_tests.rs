@@ -127,7 +127,7 @@ fn insert1() {
 
   assert_eq!(ctx.children(nid1).unwrap().len(), 2);
   assert_eq!(ctx.children(nid2).unwrap().len(), 2);
-  assert_eq!(tree.children_ids(nid3).len(), 1);
+  assert_eq!(ctx.children(nid3).unwrap().len(), 1);
   assert_eq!(tree.children_ids(nid4).len(), 0);
   assert_eq!(tree.children_ids(nid5).len(), 0);
   assert_eq!(tree.children_ids(nid6).len(), 0);
