@@ -669,3 +669,5 @@ pub fn cursor_delete(
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
+
+pub fn cursor_jump() {}

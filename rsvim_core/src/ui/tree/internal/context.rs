@@ -454,9 +454,7 @@ impl TreeContext {
   }
 
   pub fn set_style(&mut self, id: TreeNodeId, value: Style) -> TaffyResult<()> {
-    self.ta.set_style(id, value)?;
-    self.compute_layout()?;
-    Ok(())
+    self.ta.set_style(id, value)
   }
 
   pub fn shape(&self, id: TreeNodeId) -> Option<&IRect> {
