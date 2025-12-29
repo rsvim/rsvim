@@ -836,6 +836,28 @@ impl Tree {
     context.set_style(cursor_id, style)?;
     context.compute_layout()
   }
+
+  pub fn reserved_move_cursor_position_by(
+    &mut self,
+    x: isize,
+    y: isize,
+  ) -> TaffyResult<()> {
+    let mut context = self.context.borrow_mut();
+    let cursor_id = self.cursor_id.unwrap();
+    let new_shape = self
+      .reserved_move_position_by(&context, cursor_id, x, y)
+      .unwrap();
+    let new_pos: IPos = new_shape.min().into();
+    let mut style = context.style(cursor_id)?.clone();
+    style.inset = taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(new_pos.x() as u16),
+      top: taffy::LengthPercentageAuto::from_length(new_pos.y() as u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    };
+    context.set_style(cursor_id, style)?;
+    context.compute_layout()
+  }
 }
 // Movement }
 
