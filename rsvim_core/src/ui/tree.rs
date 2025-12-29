@@ -564,7 +564,8 @@ impl Tree {
       id
     };
 
-    let cursor = Cursor::new(id, self.context(), blinking, hidden, style);
+    let cursor =
+      Cursor::new(id, Rc::downgrade(&self.context()), blinking, hidden, style);
     let cursor = TreeNode::Cursor(cursor);
     self._insert_node(id, cursor);
 
