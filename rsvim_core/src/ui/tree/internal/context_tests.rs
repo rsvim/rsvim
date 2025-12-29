@@ -132,13 +132,10 @@ fn insert1() {
     .new_with_parent_default(nid2, style.clone(), "n5")
     .unwrap();
 
-  let s5 = rect!(0, 0, 1, 1);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
-
-  let s6 = rect!(0, 0, 1, 1);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
+  let nid6 = ctx
+    .borrow_mut()
+    .new_with_parent_default(nid3, style.clone(), "n6")
+    .unwrap();
 
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
