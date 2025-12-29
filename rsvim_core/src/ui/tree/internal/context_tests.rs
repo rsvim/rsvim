@@ -107,16 +107,17 @@ fn insert1() {
     },
     ..Default::default()
   };
-  let nid1 = ctx.borrow_mut().new_root(style.clone(), "n1");
+  let nid1 = ctx.borrow_mut().new_leaf_default(style.clone(), "n1");
 
   let nid2 = ctx
     .borrow_mut()
     .new_with_parent_default(nid1, style.clone(), "n2")
     .unwrap();
 
-  let s2 = rect!(0, 0, 1, 1);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
+  let nid2 = ctx
+    .borrow_mut()
+    .new_with_parent_default(nid1, style.clone(), "n3")
+    .unwrap();
 
   let s3 = rect!(0, 0, 1, 1);
   let n3 = TestValue::new(3, s3);
