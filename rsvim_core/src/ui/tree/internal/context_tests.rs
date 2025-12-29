@@ -162,10 +162,32 @@ fn insert1() {
 fn insert2() {
   // test_log_init();
 
-  let mut tree = Itree::new();
-  let s1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let mut ctx = TreeContext::new();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(1_u16),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    ..Default::default()
+  };
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   *           \
+   *            n7
+   *           / \
+   *         n8   n9
+   * ```
+   */
+
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx.new_with_parent_default(style.clone(), "n1").unwrap();
 
   let s2 = rect!(0, 0, 15, 15);
   let n2 = TestValue::new(2, s2);
@@ -199,20 +221,6 @@ fn insert2() {
   let n9 = TestValue::new(9, s9);
   let nid9 = n9.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *      /  \     \
-   *     n4  n5    n6
-   *           \
-   *            n7
-   *           / \
-   *         n8   n9
-   * ```
-   */
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
   tree.new_with_parent(nid1, n3);
