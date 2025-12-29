@@ -676,10 +676,19 @@ pub fn cursor_delete(
 /// changes its parent widget only.
 ///
 /// The `parent_id` must be either valid window ID or command-line ID.
+///
+/// Returns old parent ID if jumps successfully, otherwise returns `None` if
+/// didn't jump, mostly because the `parent_id` parameter is already cursor's
+/// current parent widget.
 pub fn cursor_jump(
   tree: &mut Tree,
   parent_id: TreeNodeId,
 ) -> Option<TreeNodeId> {
   let cursor_id = tree.cursor_id().unwrap();
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
+  match tree.node_mut(old_parent_id) {
+    TreeNode::WindowContent(content) => {}
+    TreeNode::CmdlineInput(input) => {}
+    _ => unreachable!(),
+  }
 }
