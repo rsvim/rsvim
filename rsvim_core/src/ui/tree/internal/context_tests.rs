@@ -656,7 +656,7 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
   node_ids.push(root_id);
   value += 1;
 
-  let mut tree = Itree::new();
+  let mut ctx = TreeContext::new();
   tree.new_root(root);
   for _ in 1..n {
     let node = TestValue::new(value, s);
@@ -672,6 +672,8 @@ fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
 #[test]
 fn remove1() {
   // test_log_init();
+
+  let mut ctx = TreeContext::new();
 
   let (node_ids, mut tree) = make_tree(5);
   let remove2 = tree.remove_child(node_ids[2]);
