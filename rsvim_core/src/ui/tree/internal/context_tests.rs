@@ -5,8 +5,6 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use crate::ui::tree::internal::InodeBase;
 use crate::ui::tree::internal::Inodeable;
-use crossterm::style::style;
-use std::rc::Rc;
 use taffy::Style;
 use taffy::prelude::FromLength;
 use taffy::prelude::TaffyAuto;
