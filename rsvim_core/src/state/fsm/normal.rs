@@ -9,6 +9,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use crate::ui::widget::cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
 use crossterm::event::Event;
@@ -119,6 +120,12 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Remove cursor from current window
+    tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBar);
+    let cmdline_id = tree.cmdline_id().unwrap();
+    cursor_ops::cursor_jump(&mut tree, cmdline_id);
+    tree.reserved_move_cursor_position_to(0, 0).unwrap();
+    tree.cmdline_show_input().unwrap();
+
     let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
     let cursor = match current_window.remove_cursor().unwrap() {
