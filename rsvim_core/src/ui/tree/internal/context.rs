@@ -436,11 +436,6 @@ impl TreeContext {
     }
   }
 
-  #[cfg(debug_assertions)]
-  pub fn name(&self, id: TreeNodeId) -> Option<&&str> {
-    self.names.get(&id)
-  }
-
   /// The first created node will be the root node.
   pub fn root(&self) -> TreeNodeId {
     self.root

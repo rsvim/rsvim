@@ -213,15 +213,6 @@ fn insert2() {
     .unwrap();
 
   assert_eq!(ctx.root(), nid1);
-  print_node!(ctx.name(), "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
 
   assert!(nid1 < nid2);
   assert!(nid2 < nid3);
@@ -232,11 +223,11 @@ fn insert2() {
   assert!(nid7 < nid8);
   assert!(nid8 < nid9);
 
-  assert_eq!(tree.children_ids(nid1).len(), 2);
-  assert_eq!(tree.children_ids(nid2).len(), 2);
-  assert_eq!(tree.children_ids(nid3).len(), 1);
-  assert_eq!(tree.children_ids(nid4).len(), 0);
-  assert_eq!(tree.children_ids(nid5).len(), 1);
+  assert_eq!(ctx.children(nid1).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid2).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid3).unwrap().len(), 1);
+  assert_eq!(ctx.children(nid4).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid5).unwrap().len(), 1);
   assert_eq!(tree.children_ids(nid6).len(), 0);
   assert_eq!(tree.children_ids(nid7).len(), 2);
   assert_eq!(tree.children_ids(nid8).len(), 0);
