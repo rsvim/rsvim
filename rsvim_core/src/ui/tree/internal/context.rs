@@ -665,12 +665,12 @@ impl TreeContext {
 
   pub fn remove_child(
     &mut self,
-    new_parent_id: TreeNodeId,
+    parent_id: TreeNodeId,
     id: TreeNodeId,
   ) -> TaffyResult<TreeNodeId> {
     debug_assert_ne!(id, self.root);
     debug_assert!(self.ta.contains(id));
-    debug_assert!(self.ta.contains(new_parent_id));
+    debug_assert!(self.ta.contains(parent_id));
     debug_assert!(self.ta.parent(id).is_some());
 
     let parent_id = self.ta.parent(id).unwrap();

@@ -11,6 +11,7 @@ use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::EditableWidgetable;
 use compact_str::CompactString;
+use taffy::TaffyResult;
 
 #[derive(Debug, Copy, Clone)]
 /// Cursor move direction.
@@ -683,12 +684,39 @@ pub fn cursor_delete(
 pub fn cursor_jump(
   tree: &mut Tree,
   parent_id: TreeNodeId,
-) -> Option<TreeNodeId> {
+) -> TaffyResult<Option<TreeNodeId>> {
   let cursor_id = tree.cursor_id().unwrap();
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
-  match tree.node_mut(old_parent_id) {
-    TreeNode::WindowContent(content) => {}
-    TreeNode::CmdlineInput(input) => {}
+  let removed_parent_id = match tree.node_mut(old_parent_id).unwrap() {
+    TreeNode::WindowContent(content) => {
+      debug_assert!(tree.parent_id(old_parent_id).is_some());
+      debug_assert!(tree.current_window_id().is_some());
+      let old_window_id = tree.parent_id(old_parent_id).unwrap();
+      debug_assert_eq!(old_window_id, tree.current_window_id().unwrap());
+      if old_window_id == parent_id {
+        return Ok(None);
+      }
+      tree
+        .context()
+        .borrow_mut()
+        .remove_child(old_parent_id, cursor_id)?;
+      old_window_id
+    }
+    TreeNode::CmdlineInput(input) => {
+      debug_assert!(tree.parent_id(old_parent_id).is_some());
+      let old_input_panel_id = tree.parent_id(old_parent_id).unwrap();
+      debug_assert!(tree.parent_id(old_input_panel_id).is_some());
+      let old_cmdline_id = tree.parent_id(old_input_panel_id).unwrap();
+      if old_cmdline_id == parent_id {
+        return Ok(None);
+      }
+      tree
+        .context()
+        .borrow_mut()
+        .remove_child(old_parent_id, cursor_id)?;
+      old_cmdline_id
+    }
     _ => unreachable!(),
-  }
+  };
+  Ok(Some(removed_parent_id))
 }
