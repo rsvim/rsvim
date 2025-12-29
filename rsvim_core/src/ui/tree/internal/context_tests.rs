@@ -412,10 +412,23 @@ fn shape1() {
   let us7 = rect!(3, 6, 10, 15);
   let nid7 = ctx.new_with_parent_default(nid5, style7, "n7").unwrap();
 
+  let style8 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(-1_i16),
+      top: taffy::LengthPercentageAuto::from_length(-2_i16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(3_u16),
+      height: taffy::Dimension::from_length(3_u16),
+    },
+    ..Default::default()
+  };
+  let nid8 = ctx.new_with_parent_default(nid7, style8, "n8").unwrap();
   let s8 = rect!(-1, -2, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
-  let n8 = TestValue::new(8, s8);
-  let nid8 = n8.id();
 
   let s9 = rect!(5, 6, 9, 8);
   let us9 = rect!(8, 12, 10, 14);
