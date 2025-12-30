@@ -158,7 +158,8 @@ impl Tree {
     let mut base = Itree::new();
 
     let id = {
-      let mut context = base.context().borrow_mut();
+      let context = base.context();
+      let mut context = context.borrow_mut();
       let style = Style {
         size: taffy::Size {
           width: taffy::Dimension::from_length(canvas_size.width()),
