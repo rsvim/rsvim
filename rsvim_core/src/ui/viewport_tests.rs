@@ -911,8 +911,9 @@ mod tests_view_nowrap_startcol {
       "",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 6);
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = update_viewport(buf.clone(), tree.window_mut(window_id), 0, 6);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -969,8 +970,10 @@ mod tests_view_nowrap_startcol {
       "",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 15);
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), &win_opts);
+    let actual =
+      update_viewport(buf.clone(), tree.window_mut(window_id), 0, 15);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
