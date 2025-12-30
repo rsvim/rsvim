@@ -72,7 +72,6 @@ pub fn make_canvas(
   terminal_size: U16Size,
   window_options: WindowOptions,
   buffer: BufferArc,
-  viewport: ViewportArc,
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);

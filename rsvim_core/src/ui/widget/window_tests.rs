@@ -10,6 +10,7 @@ use crate::tests::buf::make_buffer_from_lines;
 use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
+use crate::tests::viewport::make_canvas;
 use crate::tests::viewport::make_window;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
@@ -56,10 +57,8 @@ fn draw_after_init1() {
     "          ",
   ];
 
-  let window_local_options =
+  let win_opts =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let window = make_window(terminal_size, buf.clone(), &window_local_options);
-  let mut actual = Canvas::new(terminal_size);
-  window.draw(&mut actual);
+  let mut actual = make_canvas(terminal_size, win_opts, buf.clone())
   assert_canvas(&actual, &expect);
 }
