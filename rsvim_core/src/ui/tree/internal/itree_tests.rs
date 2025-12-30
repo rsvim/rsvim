@@ -360,7 +360,8 @@ fn reserved_move_position_by1() {
   for (i, m) in moves.iter().enumerate() {
     let x = m.0;
     let y = m.1;
-    let ctx = tree.context().borrow();
+    let ctx = tree.context();
+    let ctx = ctx.borrow();
     let actual = tree.reserved_move_position_by(&ctx, nid3, x, y);
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
@@ -464,7 +465,8 @@ fn reserved_move_position_to1() {
   for (i, m) in moves.iter().enumerate() {
     let x = m.0;
     let y = m.1;
-    let ctx = tree.context().borrow();
+    let ctx = tree.context();
+    let ctx = ctx.borrow();
     let actual = tree.reserved_move_position_to(&ctx, nid3, x, y);
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
