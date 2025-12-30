@@ -574,7 +574,8 @@ impl Tree {
       message_id,
       message_actual_shape,
     ) = {
-      let mut context = self.context.borrow_mut();
+      let context = self.base.context();
+      let mut context = context.borrow_mut();
 
       let indicator_style = Style {
         ..Default::default()
