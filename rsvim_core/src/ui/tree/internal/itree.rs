@@ -80,7 +80,7 @@ where
   }
 
   pub fn iter(&self) -> ItreeIter<'_, T> {
-    ItreeIter::new(self, Some(self.context.borrow().root()))
+    ItreeIter::new(self, Some(self.root_id()))
   }
 }
 
