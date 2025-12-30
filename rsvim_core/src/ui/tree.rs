@@ -203,20 +203,17 @@ impl Tree {
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
-    self._internal_check();
     self.base.root_id()
   }
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self._internal_check();
     self.base.parent_id(id)
   }
 
   /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self._internal_check();
-    self.context.borrow().children(id).unwrap_or_default()
+    self.base.children_ids(id).unwrap_or_default()
   }
 
   /// Get the node struct by its `id`.
