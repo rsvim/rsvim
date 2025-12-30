@@ -458,7 +458,8 @@ impl Tree {
     buffer: BufferWk,
   ) -> TaffyResult<TreeNodeId> {
     let (id, content_id, content_actual_shape) = {
-      let mut context = self.context.borrow_mut();
+      let context = self.base.context();
+      let mut context = context.borrow_mut();
 
       // window
       let id = context.new_with_parent_default(parent_id, style, "Window")?;
