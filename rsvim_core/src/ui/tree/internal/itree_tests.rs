@@ -2,21 +2,24 @@ use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
-use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::InodeBase;
-use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::*;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct TestValue {
-  value: i32,
-  base: InodeBase,
+  pub __node: InodeBase,
+  pub value: i32,
 }
 
 impl TestValue {
-  pub fn new(value: i32, shape: IRect) -> Self {
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextWk,
+    value: i32,
+    shape: IRect,
+  ) -> Self {
     TestValue {
+      __node: InodeBase::new(id, ctx),
       value,
-      base: InodeBase::new(shape),
     }
   }
 }
