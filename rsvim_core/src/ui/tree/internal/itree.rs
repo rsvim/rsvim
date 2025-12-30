@@ -4,6 +4,7 @@ use crate::ui::tree::internal::inode::*;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
+use taffy::TaffyResult;
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>
@@ -56,9 +57,9 @@ where
     self.context.borrow().parent(id)
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+  pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
     self._internal_check();
-    self.context.borrow().children(id).unwrap_or_default()
+    self.context.borrow().children(id)
   }
 
   /// Get nodes.
