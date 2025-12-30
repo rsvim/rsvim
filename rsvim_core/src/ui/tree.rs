@@ -147,6 +147,8 @@ pub struct Tree {
   global_local_options: WindowOptions,
 }
 
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+
 arc_mutex_ptr!(Tree);
 
 // Node {
@@ -227,7 +229,7 @@ impl Tree {
   }
 
   pub fn iter(&self) -> TreeIter<'_> {
-    TreeIter::new(self, Some(self.context.borrow().root()))
+    TreeIter::new(self, Some(self.root_id()))
   }
 
   /// Get cursor ID.
@@ -885,57 +887,3 @@ impl Tree {
   }
 }
 // Draw }
-
-// TreeIter {
-#[derive(Debug)]
-/// Iterate all the tree nodes in level-order.
-///
-/// For each node, it first visits the node itself, then visits all its
-/// children. This is also the order of rendering the whole UI tree to the
-/// terminal.
-pub struct TreeIter<'a> {
-  tree: &'a Tree,
-  que: VecDeque<TreeNodeId>,
-}
-
-impl<'a> Iterator for TreeIter<'a> {
-  type Item = &'a TreeNode;
-
-  fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.que.pop_front() {
-      // Visit all children nodes under a parent node by following Z-index,
-      // from higher to lower.
-      let children_ids_sorted_by_zindex = {
-        let ctx = self.tree.context();
-        let ctx = ctx.borrow();
-        ctx
-          .children(id)
-          .unwrap_or_default()
-          .iter()
-          .sorted_by_key(|i| ctx.zindex(**i).unwrap())
-          .rev()
-          .copied()
-          .collect_vec()
-      };
-      for child_id in children_ids_sorted_by_zindex {
-        if self.tree.node(child_id).is_some() {
-          self.que.push_back(child_id);
-        }
-      }
-      self.tree.node(id)
-    } else {
-      None
-    }
-  }
-}
-
-impl<'a> TreeIter<'a> {
-  pub fn new(tree: &'a Tree, start_id: Option<TreeNodeId>) -> Self {
-    let mut que = VecDeque::new();
-    if let Some(id) = start_id {
-      que.push_back(id);
-    }
-    Self { tree, que }
-  }
-}
-// TreeIter }
