@@ -61,7 +61,7 @@ pub fn update_viewport(
     start_line,
     start_column,
   );
-  window.set_viewport(Viewport::to_arc(viewport));
+  window.set_viewport(viewport);
   window.viewport()
 }
 
@@ -96,15 +96,13 @@ fn search_viewport(
     start_line,
     start_column,
   );
-  window.set_cursor_viewport(CursorViewport::to_arc(
-    CursorViewport::from_position(
-      &viewport,
-      buf.text(),
-      target_cursor_line,
-      target_cursor_char,
-    ),
+  window.set_cursor_viewport(CursorViewport::from_position(
+    &viewport,
+    buf.text(),
+    target_cursor_line,
+    target_cursor_char,
   ));
-  window.set_viewport(Viewport::to_arc(viewport));
+  window.set_viewport(viewport);
   window.viewport()
 }
 
