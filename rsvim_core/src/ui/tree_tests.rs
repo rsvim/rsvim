@@ -1,6 +1,7 @@
 use super::tree::*;
 use crate::inode_impl;
 use crate::prelude::*;
+use crate::tests::log::init as test_log_init;
 
 #[derive(Clone, Debug)]
 struct TestValue {
