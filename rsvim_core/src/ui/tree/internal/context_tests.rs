@@ -647,37 +647,38 @@ fn push1() {
 }
 
 fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
-  let mut value = 1;
-  let mut node_ids: Vec<TreeNodeId> = vec![];
-
-  let s = rect!(0, 0, 10, 10);
-  let root = TestValue::new(value, s);
-  let root_id = root.id();
-  node_ids.push(root_id);
-  value += 1;
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(10_u16),
+      height: taffy::Dimension::from_length(10_u16),
+    },
+    ..Default::default()
+  };
 
   let mut ctx = TreeContext::new();
-  tree.new_root(root);
+  let root_id = ctx.new_leaf_default(style.clone(), "root").unwrap();
+
+  let mut nids: Vec<TreeNodeId> = vec![];
+  nids.push(root_id);
+
   for _ in 1..n {
-    let node = TestValue::new(value, s);
-    let node_id = node.id();
-    value += 1;
-    tree.new_with_parent(root_id, node);
-    node_ids.push(node_id);
+    let nid = ctx
+      .new_with_parent_default(root_id, style.clone(), "node")
+      .unwrap();
+    nids.push(nid);
   }
 
-  (node_ids, tree)
+  (nids, ctx)
 }
 
 #[test]
 fn remove1() {
   // test_log_init();
 
-  let mut ctx = TreeContext::new();
-
-  let (node_ids, mut tree) = make_tree(5);
-  let remove2 = tree.remove_child(node_ids[2]);
-  let remove4 = tree.remove_child(node_ids[4]);
+  let (nids, mut ctx) = make_tree(5);
+  let root_id = nids[0];
+  let remove2 = ctx.remove_child(root_id, nids[2]).unwrap();
+  let remove4 = ctx.remove_child(root_id, nids[4]).unwrap();
 
   assert!(remove2.is_some());
   let remove2 = &remove2.unwrap();
@@ -688,8 +689,8 @@ fn remove1() {
   assert_node_value_eq!(remove4, 5);
   assert!(!tree.children_ids(tree.root_id()).contains(&remove4.id()));
 
-  let remove1 = tree.move_child(node_ids[1]);
-  let remove3 = tree.move_child(node_ids[3]);
+  let remove1 = tree.move_child(nids[1]);
+  let remove3 = tree.move_child(nids[3]);
 
   // 1,2,(3),4,(5)
   assert!(remove1.is_some());
