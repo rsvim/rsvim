@@ -151,7 +151,7 @@ fn raw_move_position_by1() {
     let x = m.0;
     let y = m.1;
     let ctx = tree.context().borrow();
-    let actual = Itree::raw_move_position_by(&ctx, nid3, x, y);
+    let actual = tree.raw_move_position_by(&ctx, nid3, x, y);
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
