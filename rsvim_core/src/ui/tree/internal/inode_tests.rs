@@ -38,6 +38,8 @@ fn new() {
   };
   let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
   let nid2 = ctx.new_leaf_default(style.clone(), "n2").unwrap();
+  ctx.compute_layout().unwrap();
+
   let ctx = TreeContext::to_rc(ctx);
 
   let n1 = TestNode::new(nid1, Rc::downgrade(&ctx), 1);
