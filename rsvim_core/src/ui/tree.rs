@@ -719,7 +719,7 @@ impl Tree {
 
 // Movement {
 impl Tree {
-  fn raw_move_position_by(
+  pub fn raw_move_position_by(
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
@@ -730,7 +730,7 @@ impl Tree {
     Self::raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
-  fn raw_move_position_to(
+  pub fn raw_move_position_to(
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
