@@ -12,12 +12,7 @@ struct TestValue {
 }
 
 impl TestValue {
-  pub fn new(
-    id: TreeNodeId,
-    ctx: TreeContextWk,
-    value: i32,
-    shape: IRect,
-  ) -> Self {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: i32) -> Self {
     TestValue {
       __node: InodeBase::new(id, ctx),
       value,
@@ -41,10 +36,13 @@ fn new() {
     ..Default::default()
   };
 
-  let s1 = rect!(0, 0, 1, 1);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
-  tree.insert_root(n1);
+  let nid1 = tree
+    .context()
+    .borrow_mut()
+    .new_leaf_default(style.clone, "n1")
+    .unwrap();
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  tree.nodes_mut().insert(nid1, n1).unwrap();
 
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.root_id(), nid1);
