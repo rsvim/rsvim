@@ -155,8 +155,10 @@ impl Tree {
   ///
   /// NOTE: The root node is created along with the tree.
   pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
-    let (id, context) = {
-      let mut context = TreeContext::new();
+    let mut base = Itree::new();
+
+    let id = {
+      let mut context = base.context().borrow_mut();
       let style = Style {
         size: taffy::Size {
           width: taffy::Dimension::from_length(canvas_size.width()),
@@ -167,19 +169,15 @@ impl Tree {
       };
       let id = context.new_leaf_default(style, "Panel")?;
       context.compute_layout()?;
-      (id, context)
+      id
     };
 
-    let context = TreeContext::to_rc(context);
-    let root = Panel::new(id, Rc::downgrade(&context));
+    let root = Panel::new(id, Rc::downgrade(&base.context()));
     let root = TreeNode::Panel(root);
-
-    let mut nodes = FoldMap::new();
-    nodes.insert(id, root);
+    base.nodes_mut().insert(id, root);
 
     Ok(Tree {
-      context,
-      nodes,
+      base,
       cursor_id: None,
       cmdline_id: None,
       window_ids: BTreeSet::new(),
