@@ -130,7 +130,7 @@ where
     id: TreeNodeId,
     x: isize,
     y: isize,
-  ) -> Option<IRect> {
+  ) -> IRect {
     let parent_id = context.parent(id)?;
     let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
@@ -147,7 +147,7 @@ where
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    Some(self.raw_move_position_by(&context, id, final_x, final_y))
+    self.raw_move_position_by(&context, id, final_x, final_y)
   }
 
   /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
@@ -158,7 +158,7 @@ where
     id: TreeNodeId,
     x: isize,
     y: isize,
-  ) -> Option<IRect> {
+  ) -> IRect {
     let parent_id = context.parent(id)?;
     let shape = context.shape(id).unwrap();
     let new_pos: IPos = point!(x, y);
@@ -173,8 +173,7 @@ where
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
-
-    Some(self.raw_move_position_to(&context, id, final_pos.x(), final_pos.y()))
+    self.raw_move_position_to(&context, id, final_pos.x(), final_pos.y())
   }
 }
 
