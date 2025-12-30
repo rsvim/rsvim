@@ -517,7 +517,8 @@ impl Tree {
     style: CursorStyle,
   ) -> TaffyResult<TreeNodeId> {
     let id = {
-      let mut context = self.context.borrow_mut();
+      let context = self.base.context();
+      let mut context = context.borrow_mut();
 
       let cursor_style = Style {
         position: taffy::Position::Absolute,
