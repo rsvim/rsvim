@@ -30,7 +30,7 @@ fn new() {
 
 #[test]
 fn raw_move_position_by1() {
-  // test_log_init();
+  test_log_init();
 
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
