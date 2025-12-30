@@ -8,6 +8,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeArc;
+use crate::ui::tree::TreeNode;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -15,6 +16,9 @@ use crate::ui::widget::window::Window;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
 
 pub fn make_window(
   terminal_size: U16Size,
@@ -59,17 +63,34 @@ pub fn make_canvas(
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size);
+  let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
   let shape = rect_from_size!(terminal_size);
   let shape = rect_as!(shape, isize);
-  let content = WindowContent::new(
-    shape,
-    Arc::downgrade(&buffer),
-    Arc::downgrade(&viewport),
-  );
+  let style = Style {
+    size: taffy::Size {
+      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::from_percent(1.0),
+    },
+    ..Default::default()
+  };
+  let window_id = tree
+    .new_window_with_parent(
+      tree.root_id(),
+      style,
+      *tree.global_local_options(),
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  let window_content_id = match tree.node(window_id).unwrap() {
+    TreeNode::Window(window) => window.content_id(),
+    _ => unreachable!(),
+  };
   let mut canvas = Canvas::new(terminal_size);
-  content.draw(&mut canvas);
+  match tree.node(window_content_id).unwrap() {
+    TreeNode::WindowContent(window_content) => content.draw(&mut canvas),
+    _ => unreachable!(),
+  }
   canvas
 }
 
