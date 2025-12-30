@@ -60,7 +60,7 @@ pub fn make_canvas(
   viewport: ViewportArc,
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(&window_options);
+  tree.set_global_local_options(window_options);
   let shape = rect_from_size!(terminal_size);
   let shape = rect_as!(shape, isize);
   let content = WindowContent::new(
