@@ -119,11 +119,7 @@ widget_dispatcher!(
 /// priority by set a bigger value to its Z-index, or mark it as disabled to
 /// not render it.
 pub struct Tree {
-  // The reference of all common tree node relationships & attributes.
-  context: TreeContextRc,
-
-  // Maps node ID => node.
-  nodes: FoldMap<TreeNodeId, TreeNode>,
+  base: Itree<TreeNode>,
 
   // Cursor node ID.
   cursor_id: Option<TreeNodeId>,

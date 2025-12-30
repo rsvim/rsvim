@@ -16,3 +16,4 @@ mod shapes_tests;
 
 pub use context::*;
 pub use inode::*;
+pub use itree::*;
