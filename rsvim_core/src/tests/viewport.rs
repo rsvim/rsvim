@@ -23,17 +23,30 @@ use taffy::prelude::FromPercent;
 pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &WindowOptions,
-) -> Window {
+  window_options: WindowOptions,
+) -> (&Window, Tree) {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size);
-  let window_shape = rect_as!(window_shape, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
+
+  let style = Style {
+    size: taffy::Size {
+      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::from_percent(1.0),
+    },
+    ..Default::default()
+  };
+  let window_id = tree
+    .new_window_with_parent(
+      tree.root_id(),
+      style,
+      *tree.global_local_options(),
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  match tree.node(window_id).unwrap() {
+    TreeNode::Window(window) => (window, tree),
+    _ => unreachable!(),
+  }
 }
 
 pub fn make_viewport(
@@ -65,8 +78,6 @@ pub fn make_canvas(
 ) -> Canvas {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
-  let shape = rect_from_size!(terminal_size);
-  let shape = rect_as!(shape, isize);
   let style = Style {
     size: taffy::Size {
       height: taffy::Dimension::from_percent(1.0),
@@ -82,13 +93,13 @@ pub fn make_canvas(
       Arc::downgrade(&buffer),
     )
     .unwrap();
-  let window_content_id = match tree.node(window_id).unwrap() {
+  let content_id = match tree.node(window_id).unwrap() {
     TreeNode::Window(window) => window.content_id(),
     _ => unreachable!(),
   };
   let mut canvas = Canvas::new(terminal_size);
-  match tree.node(window_content_id).unwrap() {
-    TreeNode::WindowContent(window_content) => window_content.draw(&mut canvas),
+  match tree.node(content_id).unwrap() {
+    TreeNode::WindowContent(content) => content.draw(&mut canvas),
     _ => unreachable!(),
   }
   canvas
