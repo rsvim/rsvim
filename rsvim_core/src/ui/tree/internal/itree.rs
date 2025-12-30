@@ -84,6 +84,7 @@ where
   T: Inodeable,
 {
   pub fn raw_move_position_by(
+    &self,
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
@@ -91,10 +92,11 @@ where
   ) -> IRect {
     let shape = context.shape(id).unwrap();
     let pos: IPos = shape.min().into();
-    Self::raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
+    self.raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
   pub fn raw_move_position_to(
+    &self,
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
@@ -145,7 +147,7 @@ where
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    Some(Self::raw_move_position_by(&context, id, final_x, final_y))
+    Some(self.raw_move_position_by(&context, id, final_x, final_y))
   }
 
   /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
@@ -172,12 +174,7 @@ where
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
 
-    Some(Self::raw_move_position_to(
-      &context,
-      id,
-      final_pos.x(),
-      final_pos.y(),
-    ))
+    Some(self.raw_move_position_to(&context, id, final_pos.x(), final_pos.y()))
   }
 }
 
