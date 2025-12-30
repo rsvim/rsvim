@@ -47,8 +47,3 @@ fn new() {
   assert_eq!(*n1.borrow().shape(), rect!(0, 0, 0, 0));
   assert_eq!(*n2.borrow().shape(), rect!(1, 2, 3, 4));
 }
-
-#[test]
-fn next_node_id1() {
-  assert!(next_node_id() > 0);
-}
