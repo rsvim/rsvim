@@ -168,7 +168,6 @@ where
       new_pos.x() + shape.width(),
       new_pos.y() + shape.height()
     );
-
     let parent_actual_shape = context.actual_shape(parent_id)?;
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
