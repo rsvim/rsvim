@@ -58,6 +58,16 @@ fn raw_move_position_by1() {
   // test_log_init();
 
   let mut tree = Itree::new();
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /
+   *        n2
+   *       /
+   *      n3
+   * ```
+   */
 
   let style1 = Style {
     size: taffy::Size {
@@ -113,28 +123,6 @@ fn raw_move_position_by1() {
 
   tree.context().borrow_mut().compute_layout().unwrap();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /
-   *        n2
-   *       /
-   *      n3
-   * ```
-   */
-  let mut tree = Itree::new();
-  tree.insert_root(n1);
-  tree.insert(nid1, n3);
-  tree.insert(nid3, n3);
-
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid3).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-
   // n3 Move: (x, y)
   let moves: Vec<(isize, isize)> = vec![
     (-10, -4),
@@ -162,11 +150,11 @@ fn raw_move_position_by1() {
   for (i, m) in moves.iter().enumerate() {
     let x = m.0;
     let y = m.1;
-    tree.move_by(nid3, x, y);
-    let actual = *tree.node(nid3).unwrap().shape();
+    let ctx = tree.context().borrow();
+    let actual = Itree::raw_move_position_by(&ctx, nid3, x, y);
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
-    assert!(actual == expect);
+    assert_eq!(actual, expect);
   }
 }
 
@@ -174,6 +162,17 @@ fn raw_move_position_by1() {
 fn raw_move_position_to1() {
   test_log_init();
 
+  let mut tree = Itree::new();
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /
+   *        n2
+   *       /
+   *      n3
+   * ```
+   */
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
@@ -186,16 +185,6 @@ fn raw_move_position_to1() {
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /
-   *        n2
-   *       /
-   *      n3
-   * ```
-   */
   let mut tree = Itree::new();
   tree.insert_root(n1);
   tree.insert(nid1, n2);
