@@ -2972,8 +2972,8 @@ mod tests_view_wrap_linebreak {
     let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -3019,8 +3019,8 @@ mod tests_view_wrap_linebreak {
       "word-wrap doesn't affect the ",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3070,8 +3070,8 @@ mod tests_view_wrap_linebreak {
       "单词的换行两个选项都不会影响",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3122,8 +3122,8 @@ mod tests_view_wrap_linebreak {
       "渲染的最终效果。\n",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3174,8 +3174,8 @@ mod tests_view_wrap_linebreak {
       "文本内容的长度足够短，短到可以",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3225,8 +3225,8 @@ mod tests_view_wrap_linebreak {
       "it ",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3276,8 +3276,8 @@ mod tests_view_wrap_linebreak {
       "it contai",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
