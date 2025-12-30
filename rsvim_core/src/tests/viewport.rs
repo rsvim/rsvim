@@ -25,7 +25,7 @@ pub fn make_window(
   buffer: BufferArc,
   window_options: &WindowOptions,
 ) -> Window {
-  let mut tree = Tree::new(terminal_size);
+  let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
   let window_shape = rect_from_size!(terminal_size);
   let window_shape = rect_as!(window_shape, isize);
