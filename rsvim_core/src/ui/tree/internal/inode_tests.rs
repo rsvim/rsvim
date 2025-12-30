@@ -3,7 +3,6 @@ use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 // use crate::tests::log::init as test_log_init;
-use std::cell::RefCell;
 use taffy::Style;
 
 // Test node
