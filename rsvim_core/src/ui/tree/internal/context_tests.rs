@@ -78,7 +78,7 @@ fn new() {
 }
 
 #[test]
-fn insert1() {
+fn new_child1() {
   // test_log_init();
 
   let mut ctx = TreeContext::new();
@@ -160,7 +160,7 @@ fn insert1() {
 }
 
 #[test]
-fn insert2() {
+fn new_child2() {
   // test_log_init();
 
   let mut ctx = TreeContext::new();
@@ -606,7 +606,7 @@ fn shape2() {
 }
 
 #[test]
-fn push1() {
+fn children1() {
   // test_log_init();
 
   let mut ctx = TreeContext::new();
@@ -689,172 +689,6 @@ fn remove1() {
   // 1,2,(3),4,(5)
   assert!(!ctx.children(root_id).unwrap().contains(&remove1_id));
   assert!(!ctx.children(root_id).unwrap().contains(&remove3_id));
-}
-
-#[test]
-fn get1() {
-  // test_log_init();
-
-  let mut ctx = TreeContext::new();
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *      /  \     \
-   *     n4  n5    n6
-   *           \
-   *            n7
-   *           / \
-   *         n8   n9
-   * ```
-   */
-
-  let style = Style {
-    size: taffy::Size {
-      width: taffy::Dimension::from_length(20_u16),
-      height: taffy::Dimension::from_length(20_u16),
-    },
-    ..Default::default()
-  };
-  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
-  let nid2 = ctx
-    .new_with_parent_default(nid1, style.clone(), "n2")
-    .unwrap();
-  let nid3 = ctx
-    .new_with_parent_default(nid1, style.clone(), "n3")
-    .unwrap();
-  let nid4 = ctx
-    .new_with_parent_default(nid2, style.clone(), "n4")
-    .unwrap();
-  let nid5 = ctx
-    .new_with_parent_default(nid2, style.clone(), "n5")
-    .unwrap();
-  let nid6 = ctx
-    .new_with_parent_default(nid3, style.clone(), "n6")
-    .unwrap();
-
-  let s7 = rect!(3, 6, 15, 25);
-  let n7 = TestValue::new(7, s7);
-  let nid7 = n7.id();
-
-  let s8 = rect!(-1, -2, 2, 1);
-  let n8 = TestValue::new(8, s8);
-  let nid8 = n8.id();
-
-  let s9 = rect!(5, 6, 9, 8);
-  let n9 = TestValue::new(9, s9);
-  let nid9 = n9.id();
-
-  let mut tree = Itree::new();
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid2, n5);
-  tree.new_with_parent(nid3, n6);
-  tree.new_with_parent(nid5, n7);
-  tree.new_with_parent(nid7, n8);
-  tree.new_with_parent(nid7, n9);
-
-  assert!(nid1 == tree.root_id());
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  let n7 = tree.node(nid7).unwrap();
-  let n8 = tree.node(nid8).unwrap();
-  let n9 = tree.node(nid9).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-  print_node!(n7, "n7");
-  print_node!(n8, "n8");
-  print_node!(n9, "n9");
-}
-
-#[test]
-fn get2() {
-  // test_log_init();
-
-  let s1 = rect!(0, 0, 20, 20);
-  let us1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
-
-  let s2 = rect!(0, 0, 20, 20);
-  let us2 = rect!(0, 0, 20, 20);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
-
-  let s3 = rect!(-2, -2, -1, 0);
-  let us3 = rect!(0, 0, 0, 0);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
-
-  let s4 = rect!(3, 5, 20, 20);
-  let us4 = rect!(3, 5, 20, 20);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
-
-  let s5 = rect!(-3, -5, 15, 20);
-  let us5 = rect!(3, 5, 18, 20);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
-
-  let s6 = rect!(8, 13, 18, 25);
-  let us6 = rect!(11, 18, 18, 20);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
-
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *         \
-   *         n4
-   *        /
-   *       n5
-   *      /
-   *     n6
-   * ```
-   */
-  let mut tree = Itree::new();
-  tree.new_root(n1);
-  tree.new_with_parent(nid1, n2);
-  tree.new_with_parent(nid1, n3);
-  tree.new_with_parent(nid2, n4);
-  tree.new_with_parent(nid4, n5);
-  tree.new_with_parent(nid5, n6);
-
-  let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
-  let n3 = tree.node(nid3).unwrap();
-  let n4 = tree.node(nid4).unwrap();
-  let n5 = tree.node(nid5).unwrap();
-  let n6 = tree.node(nid6).unwrap();
-  print_node!(n1, "n1");
-  print_node!(n2, "n2");
-  print_node!(n3, "n3");
-  print_node!(n4, "n4");
-  print_node!(n5, "n5");
-  print_node!(n6, "n6");
-
-  let expects = [us1, us2, us3, us4, us5, us6];
-  let nodes = [n1, n2, n3, n4, n5, n6];
-  for i in 0..6 {
-    let expect = expects[i];
-    let node = &nodes[i];
-    assert_node_actual_shape_eq!(node, expect, i);
-  }
 }
 
 #[test]
