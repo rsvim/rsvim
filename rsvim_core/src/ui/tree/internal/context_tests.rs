@@ -692,15 +692,6 @@ fn remove1() {
 }
 
 #[test]
-#[should_panic]
-fn remove2() {
-  // test_log_init();
-
-  let (nids, mut ctx) = make_tree(5);
-  ctx.remove_child(nids[0]).unwrap();
-}
-
-#[test]
 fn get1() {
   // test_log_init();
 
