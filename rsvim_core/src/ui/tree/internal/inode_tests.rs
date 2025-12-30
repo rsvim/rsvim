@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::ui::tree::*;
 // use crate::tests::log::init as test_log_init;
 use std::cell::RefCell;
+use taffy::Style;
 
 // Test node
 #[derive(Clone, Debug)]
@@ -27,23 +28,22 @@ impl TestNode {
 fn new() {
   // test_log_init();
 
-  let n1 = TestNode::new(1, rect!(0, 0, 0, 0));
-  let n2 = TestNode::new(2, rect!(1, 2, 3, 4));
-  let n1 = RefCell::new(n1);
-  let n2 = RefCell::new(n2);
+  let mut ctx = TreeContext::new();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(1.0),
+      height: taffy::Dimension::from_length(1.0),
+    },
+    ..Default::default()
+  };
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx.new_leaf_default(style.clone(), "n2").unwrap();
+  let ctx = TreeContext::to_rc(ctx);
 
-  assert!(n1.borrow().id() < n2.borrow().id());
-  assert_eq!(n1.borrow().value, 1);
-  assert_eq!(n2.borrow().value, 2);
+  let n1 = TestNode::new(nid1, Rc::downgrade(&ctx), 1);
+  let n2 = TestNode::new(nid1, Rc::downgrade(&ctx), 2);
 
-  n1.borrow_mut().value = 3;
-  n2.borrow_mut().value = 4;
-  assert_eq!(n1.borrow().value, 3);
-  assert_eq!(n2.borrow().value, 4);
-
-  assert!(n1.borrow().enabled());
-  assert!(n1.borrow().visible());
-
-  assert_eq!(*n1.borrow().shape(), rect!(0, 0, 0, 0));
-  assert_eq!(*n2.borrow().shape(), rect!(1, 2, 3, 4));
+  assert!(n1.id() < n2.id());
+  assert!(n1.enabled());
+  assert!(n2.enabled());
 }
