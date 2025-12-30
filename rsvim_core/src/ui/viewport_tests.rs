@@ -3350,8 +3350,8 @@ mod tests_view_wrap_linebreak {
       "渲染效果。\n",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3422,8 +3422,8 @@ mod tests_view_wrap_linebreak {
       "换行选项都不",
     ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3450,8 +3450,8 @@ mod tests_view_wrap_linebreak {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -3476,8 +3476,8 @@ mod tests_view_wrap_linebreak {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, vec![""]);
     let expect = vec![""];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = window.viewport();
+    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let actual = tree.window(window_id).viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     assert_viewport(
