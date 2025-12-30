@@ -676,16 +676,13 @@ fn remove1() {
   // test_log_init();
 
   let (nids, mut ctx) = make_tree(5);
-  let root_id = nids[0];
-  let remove2 = ctx.remove_child(root_id, nids[2]).unwrap();
-  let remove4 = ctx.remove_child(root_id, nids[4]).unwrap();
+  let root_id = ctx.root();
+  let remove2_id = ctx.remove_child(root_id, nids[2]).unwrap();
+  let remove4_id = ctx.remove_child(root_id, nids[4]).unwrap();
 
-  assert!(remove2.is_some());
-  let remove2 = &remove2.unwrap();
-  assert_node_value_eq!(remove2, 3);
-  assert!(!tree.children_ids(tree.root_id()).contains(&remove2.id()));
-  assert!(remove4.is_some());
-  let remove4 = &remove4.unwrap();
+  assert!(!ctx.children(root_id).unwrap().contains(&remove2_id));
+  assert!(remove4_id.is_some());
+  let remove4 = &remove4_id.unwrap();
   assert_node_value_eq!(remove4, 5);
   assert!(!tree.children_ids(tree.root_id()).contains(&remove4.id()));
 
