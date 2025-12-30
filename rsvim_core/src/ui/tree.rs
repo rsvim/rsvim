@@ -25,7 +25,6 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
-use itertools::Itertools;
 use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
