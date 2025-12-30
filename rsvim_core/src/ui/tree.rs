@@ -26,7 +26,6 @@ use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
 use itertools::Itertools;
-use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
@@ -446,7 +445,7 @@ impl Tree {
       }
       _ => {}
     }
-    self.nodes.insert(id, node);
+    self.base.nodes_mut().insert(id, node);
   }
 
   /// Create a window widget.
