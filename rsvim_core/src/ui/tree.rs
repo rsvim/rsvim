@@ -228,7 +228,7 @@ impl Tree {
   }
 
   pub fn iter(&self) -> TreeIter<'_> {
-    TreeIter::new(self, Some(self.root_id()))
+    TreeIter::new(&self.base, Some(self.root_id()))
   }
 
   /// Get cursor ID.
