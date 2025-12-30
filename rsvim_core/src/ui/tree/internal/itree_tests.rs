@@ -39,10 +39,10 @@ fn new() {
   let nid1 = tree
     .context()
     .borrow_mut()
-    .new_leaf_default(style.clone, "n1")
+    .new_leaf_default(style.clone(), "n1")
     .unwrap();
   let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
-  tree.nodes_mut().insert(nid1, n1).unwrap();
+  tree.nodes_mut().insert(nid1, n1);
 
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.root_id(), nid1);
