@@ -9,6 +9,7 @@ use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeArc;
 use crate::ui::tree::TreeNode;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
@@ -24,7 +25,7 @@ pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
   window_options: WindowOptions,
-) -> (&Window, Tree) {
+) -> (Tree, TreeNodeId) {
   let mut tree = Tree::new(terminal_size).unwrap();
   tree.set_global_local_options(window_options);
 
@@ -43,10 +44,7 @@ pub fn make_window(
       Arc::downgrade(&buffer),
     )
     .unwrap();
-  match tree.node(window_id).unwrap() {
-    TreeNode::Window(window) => (window, tree),
-    _ => unreachable!(),
-  }
+  (tree, window_id)
 }
 
 pub fn make_viewport(
