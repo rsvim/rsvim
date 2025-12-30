@@ -187,36 +187,30 @@ impl Tree {
     })
   }
 
-  fn _internal_check(&self) {
-    debug_assert_eq!(self.context.borrow().len(), self.nodes.len());
-  }
-
   /// Nodes count, include the root node.
   pub fn len(&self) -> usize {
-    self._internal_check();
-    self.nodes.len()
+    self.base.len()
   }
 
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
-    self._internal_check();
-    self.nodes.is_empty()
+    self.base.is_empty()
   }
 
   pub fn context(&self) -> TreeContextRc {
-    self.context.clone()
+    self.base.context()
   }
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self._internal_check();
-    self.context.borrow().root()
+    self.base.root_id()
   }
 
   /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
-    self.context.borrow().parent(id)
+    self.base.parent_id(id)
   }
 
   /// Get the children IDs by a node `id`.
