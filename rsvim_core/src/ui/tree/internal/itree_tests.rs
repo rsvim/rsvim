@@ -5,6 +5,8 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use taffy::Style;
 use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
+use taffy::prelude::TaffyAuto;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -69,18 +71,45 @@ fn raw_move_position_by1() {
     .borrow_mut()
     .new_leaf_default(style1, "n1")
     .unwrap();
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  tree.nodes_mut().insert(nid1, n1);
 
-  let s1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let style2 = Style {
+    size: taffy::Size {
+      height: taffy::Dimension::from_percent(1.0),
+      width: taffy::Dimension::from_percent(1.0),
+    },
+    ..Default::default()
+  };
+  let nid2 = tree
+    .context()
+    .borrow_mut()
+    .new_with_parent_default(nid1, style2, "n2")
+    .unwrap();
+  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()), 2);
+  tree.nodes_mut().insert(nid2, n2);
 
-  let s2 = rect!(0, 0, 20, 20);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
-
-  let s3 = rect!(0, 0, 1, 1);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
+  let style3 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::LengthPercentageAuto::from_length(0_u16),
+      top: taffy::LengthPercentageAuto::from_length(0_u16),
+      right: taffy::LengthPercentageAuto::AUTO,
+      bottom: taffy::LengthPercentageAuto::AUTO,
+    },
+    size: taffy::Size {
+      height: taffy::Dimension::from_length(1_u16),
+      width: taffy::Dimension::from_length(1_u16),
+    },
+    ..Default::default()
+  };
+  let nid3 = tree
+    .context()
+    .borrow_mut()
+    .new_with_parent_default(nid2, style3, "n3")
+    .unwrap();
+  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
+  tree.nodes_mut().insert(nid3, n3);
 
   /*
    * The tree looks like:
@@ -94,11 +123,11 @@ fn raw_move_position_by1() {
    */
   let mut tree = Itree::new();
   tree.insert_root(n1);
-  tree.insert(nid1, n2);
-  tree.insert(nid2, n3);
+  tree.insert(nid1, n3);
+  tree.insert(nid3, n3);
 
   let n1 = tree.node(nid1).unwrap();
-  let n2 = tree.node(nid2).unwrap();
+  let n2 = tree.node(nid3).unwrap();
   let n3 = tree.node(nid3).unwrap();
   print_node!(n1, "n1");
   print_node!(n2, "n2");
