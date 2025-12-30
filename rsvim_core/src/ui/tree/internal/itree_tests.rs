@@ -3,6 +3,7 @@ use crate::inode_impl;
 use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
+use taffy::Style;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -31,6 +32,15 @@ fn new() {
   // test_log_init();
 
   let mut tree = Itree::new();
+
+  let style = Style {
+    size: taffy::Size {
+      height: taffy::Dimension::from_length(10_u16),
+      width: taffy::Dimension::from_length(10_u16),
+    },
+    ..Default::default()
+  };
+
   let s1 = rect!(0, 0, 1, 1);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
