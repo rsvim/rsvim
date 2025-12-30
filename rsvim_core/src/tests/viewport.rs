@@ -88,7 +88,7 @@ pub fn make_canvas(
   };
   let mut canvas = Canvas::new(terminal_size);
   match tree.node(window_content_id).unwrap() {
-    TreeNode::WindowContent(window_content) => content.draw(&mut canvas),
+    TreeNode::WindowContent(window_content) => window_content.draw(&mut canvas),
     _ => unreachable!(),
   }
   canvas
