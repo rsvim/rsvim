@@ -32,6 +32,8 @@ fn new() {
 fn raw_move_position_by1() {
   test_log_init();
 
+  let mut ctx = TreeContext::new();
+
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
