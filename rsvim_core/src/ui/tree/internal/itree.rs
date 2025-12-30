@@ -4,13 +4,6 @@ use crate::ui::tree::internal::inode::*;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
-use std::rc::Rc;
-use std::sync::Arc;
-use taffy::Style;
-use taffy::TaffyResult;
-use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
-use taffy::prelude::TaffyAuto;
 
 #[derive(Debug, Clone)]
 pub struct Itree<T>
