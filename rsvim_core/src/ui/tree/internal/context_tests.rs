@@ -687,14 +687,8 @@ fn remove1() {
   let remove3_id = ctx.remove_child(root_id, nids[3]).unwrap();
 
   // 1,2,(3),4,(5)
-  assert!(remove1_id.is_some());
-  let remove1 = &remove1_id.unwrap();
-  assert_node_value_eq!(remove1, 2);
-  assert!(!tree.children_ids(tree.root_id()).contains(&remove1.id()));
-  assert!(remove3_id.is_some());
-  let remove3 = &remove3_id.unwrap();
-  assert_node_value_eq!(remove3, 4);
-  assert!(!tree.children_ids(tree.root_id()).contains(&remove3.id()));
+  assert!(!ctx.children(root_id).unwrap().contains(&remove1_id));
+  assert!(!ctx.children(root_id).unwrap().contains(&remove3_id));
 }
 
 #[test]
