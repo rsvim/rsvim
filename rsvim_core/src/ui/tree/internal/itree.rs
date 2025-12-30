@@ -68,16 +68,16 @@ where
     self.context.borrow().children(id).unwrap_or_default()
   }
 
-  /// Get node by its `id`.
-  pub fn node(&self, id: TreeNodeId) -> Option<&T> {
+  /// Get nodes.
+  pub fn nodes(&self) -> &FoldMap<TreeNodeId, T> {
     self._internal_check();
-    self.nodes.get(&id)
+    &self.nodes
   }
 
-  /// Get mutable node by its `id`.
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut T> {
+  /// Get mutable nodes.
+  pub fn nodes_mut(&mut self) -> &mut FoldMap<TreeNodeId, T> {
     self._internal_check();
-    self.nodes.get_mut(&id)
+    &mut self.nodes
   }
 
   pub fn iter(&self) -> ItreeIter<'_, T> {
