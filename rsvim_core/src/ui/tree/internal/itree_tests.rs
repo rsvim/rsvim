@@ -111,6 +111,8 @@ fn raw_move_position_by1() {
   let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
   tree.nodes_mut().insert(nid3, n3);
 
+  tree.context().borrow_mut().compute_layout().unwrap();
+
   /*
    * The tree looks like:
    * ```
