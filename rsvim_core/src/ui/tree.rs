@@ -381,7 +381,8 @@ impl Tree {
     let input_panel_id = cmdline.input_panel_id();
     let message_id = cmdline.message_id();
 
-    let mut context = self.context.borrow_mut();
+    let context = self.base.context();
+    let mut context = context.borrow_mut();
     let mut input_panel_style = context.style(input_panel_id)?.clone();
     let mut message_style = context.style(message_id)?.clone();
 
