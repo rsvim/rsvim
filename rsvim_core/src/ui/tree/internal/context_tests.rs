@@ -735,14 +735,6 @@ fn get1() {
     .new_with_parent_default(nid3, style.clone(), "n6")
     .unwrap();
 
-  let s5 = rect!(-3, -5, 10, 20);
-  let n5 = TestValue::new(5, s5);
-  let nid5 = n5.id();
-
-  let s6 = rect!(3, 6, 6, 10);
-  let n6 = TestValue::new(6, s6);
-  let nid6 = n6.id();
-
   let s7 = rect!(3, 6, 15, 25);
   let n7 = TestValue::new(7, s7);
   let nid7 = n7.id();
