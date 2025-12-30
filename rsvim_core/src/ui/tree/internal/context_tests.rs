@@ -696,8 +696,8 @@ fn remove1() {
 fn remove2() {
   // test_log_init();
 
-  let (node_ids, mut tree) = make_tree(5);
-  tree.move_child(node_ids[0]);
+  let (nids, mut ctx) = make_tree(5);
+  ctx.remove_child(nids[0]).unwrap();
 }
 
 #[test]
