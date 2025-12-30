@@ -807,7 +807,9 @@ impl Tree {
     x: isize,
     y: isize,
   ) -> TaffyResult<()> {
-    let mut context = self.context.borrow_mut();
+    let context = self.base.context();
+    let mut context = context.borrow_mut();
+
     let cursor_id = self.cursor_id.unwrap();
     let new_shape = self
       .reserved_move_position_to(&context, cursor_id, x, y)
