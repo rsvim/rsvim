@@ -266,6 +266,17 @@ fn raw_move_position_to1() {
 fn reserved_move_position_by1() {
   test_log_init();
 
+  let mut tree = Itree::new();
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /
+   *        n2
+   *       /
+   *      n3
+   * ```
+   */
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
   let nid1 = n1.id();
@@ -278,16 +289,6 @@ fn reserved_move_position_by1() {
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /
-   *        n2
-   *       /
-   *      n3
-   * ```
-   */
   let mut tree = Itree::new();
   tree.insert_root(n1);
   tree.insert(nid1, n2);
