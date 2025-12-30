@@ -220,11 +220,11 @@ where
           .collect_vec()
       };
       for child_id in children_ids_sorted_by_zindex {
-        if self.tree.node(child_id).is_some() {
+        if self.tree.nodes().get(&child_id).is_some() {
           self.que.push_back(child_id);
         }
       }
-      self.tree.node(id)
+      self.tree.nodes.get(&id)
     } else {
       None
     }
