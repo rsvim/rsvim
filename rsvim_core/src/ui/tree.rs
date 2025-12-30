@@ -223,8 +223,7 @@ impl Tree {
 
   /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
-    self._internal_check();
-    self.nodes.get_mut(&id)
+    self.base.nodes_mut().get_mut(&id)
   }
 
   pub fn iter(&self) -> TreeIter<'_> {
