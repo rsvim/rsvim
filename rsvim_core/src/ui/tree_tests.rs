@@ -32,7 +32,17 @@ fn new() {
 fn raw_move_position_by1() {
   test_log_init();
 
-  let mut ctx = TreeContext::new();
+  let mut tree = Tree::new(canvas_size);
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /
+   *        n2
+   *       /
+   *      n3
+   * ```
+   */
 
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
@@ -46,16 +56,6 @@ fn raw_move_position_by1() {
   let n3 = TestValue::new(3, s3);
   let nid3 = n3.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /
-   *        n2
-   *       /
-   *      n3
-   * ```
-   */
   let mut tree = Itree::new();
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);

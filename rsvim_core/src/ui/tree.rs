@@ -35,8 +35,6 @@ use taffy::prelude::FromLength;
 use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyAuto;
 
-pub type TreeNodeId = i32;
-
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
