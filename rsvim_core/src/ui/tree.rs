@@ -765,8 +765,8 @@ impl Tree {
     &mut self.global_options
   }
 
-  pub fn set_global_options(&mut self, options: &WindowGlobalOptions) {
-    self.global_options = *options;
+  pub fn set_global_options(&mut self, options: WindowGlobalOptions) {
+    self.global_options = options;
   }
 
   pub fn global_local_options(&self) -> &WindowOptions {
@@ -777,8 +777,8 @@ impl Tree {
     &mut self.global_local_options
   }
 
-  pub fn set_global_local_options(&mut self, options: &WindowOptions) {
-    self.global_local_options = *options;
+  pub fn set_global_local_options(&mut self, options: WindowOptions) {
+    self.global_local_options = options;
   }
 }
 // Global options }
