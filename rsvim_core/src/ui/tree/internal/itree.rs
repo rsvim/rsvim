@@ -79,7 +79,7 @@ where
     self.nodes.get_mut(&id)
   }
 
-  pub fn iter(&self) -> ItreeIter<'_> {
+  pub fn iter(&self) -> ItreeIter<'_, T> {
     ItreeIter::new(self, Some(self.context.borrow().root()))
   }
 }
