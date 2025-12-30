@@ -59,6 +59,6 @@ fn draw_after_init1() {
 
   let win_opts =
     WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let mut actual = make_canvas(terminal_size, win_opts, buf.clone())
+  let actual = make_canvas(terminal_size, win_opts, buf.clone())
   assert_canvas(&actual, &expect);
 }
