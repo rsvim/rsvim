@@ -24,25 +24,7 @@ impl TestValue {
   }
 }
 
-inode_impl!(TestValue, base);
-
-macro_rules! print_node {
-  ($node: ident, $name: expr) => {
-    info!("{}: {:?}", $name, $node.clone());
-  };
-}
-
-macro_rules! assert_node_actual_shape_eq {
-  ($node: ident, $expect: expr, $index: expr) => {
-    assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
-  };
-}
-
-macro_rules! assert_node_value_eq {
-  ($node: ident, $expect: expr) => {
-    assert_eq!($node.value, $expect);
-  };
-}
+inode_impl!(TestValue);
 
 #[test]
 fn new() {
