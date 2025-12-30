@@ -47,7 +47,7 @@ fn new() {
   assert_eq!(tree.len(), 1);
   assert_eq!(tree.root_id(), nid1);
   assert!(tree.parent_id(nid1).is_none());
-  assert!(tree.children_ids(nid1).is_empty());
+  assert!(tree.children_ids(nid1).unwrap().is_empty());
 }
 
 #[test]
