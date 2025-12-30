@@ -46,6 +46,8 @@ fn new() {
   let n2 = TestNode::new(nid1, Rc::downgrade(&ctx), 2);
 
   assert!(n1.id() < n2.id());
+  assert_eq!(n1.id(), nid1);
+  assert_eq!(n2.id(), nid2);
   assert!(n1.enabled());
   assert!(n2.enabled());
 }
