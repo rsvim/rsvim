@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use taffy::Style;
+use taffy::prelude::FromLength;
 
 #[derive(Clone, Debug)]
 struct TestValue {
@@ -53,6 +54,21 @@ fn new() {
 #[test]
 fn raw_move_position_by1() {
   // test_log_init();
+
+  let mut tree = Itree::new();
+
+  let style1 = Style {
+    size: taffy::Size {
+      height: taffy::Dimension::from_length(20_u16),
+      width: taffy::Dimension::from_length(20_u16),
+    },
+    ..Default::default()
+  };
+  let nid1 = tree
+    .context()
+    .borrow_mut()
+    .new_leaf_default(style1, "n1")
+    .unwrap();
 
   let s1 = rect!(0, 0, 20, 20);
   let n1 = TestValue::new(1, s1);
