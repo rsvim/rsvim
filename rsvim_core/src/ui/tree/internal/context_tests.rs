@@ -695,21 +695,45 @@ fn remove1() {
 fn get1() {
   // test_log_init();
 
-  let s1 = rect!(0, 0, 20, 20);
-  let n1 = TestValue::new(1, s1);
-  let nid1 = n1.id();
+  let mut ctx = TreeContext::new();
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   *           \
+   *            n7
+   *           / \
+   *         n8   n9
+   * ```
+   */
 
-  let s2 = rect!(0, 0, 15, 15);
-  let n2 = TestValue::new(2, s2);
-  let nid2 = n2.id();
-
-  let s3 = rect!(10, 10, 18, 19);
-  let n3 = TestValue::new(3, s3);
-  let nid3 = n3.id();
-
-  let s4 = rect!(3, 5, 20, 14);
-  let n4 = TestValue::new(4, s4);
-  let nid4 = n4.id();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::Dimension::from_length(20_u16),
+      height: taffy::Dimension::from_length(20_u16),
+    },
+    ..Default::default()
+  };
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n2")
+    .unwrap();
+  let nid3 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n3")
+    .unwrap();
+  let nid4 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n4")
+    .unwrap();
+  let nid5 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n5")
+    .unwrap();
+  let nid6 = ctx
+    .new_with_parent_default(nid3, style.clone(), "n6")
+    .unwrap();
 
   let s5 = rect!(-3, -5, 10, 20);
   let n5 = TestValue::new(5, s5);
@@ -731,20 +755,6 @@ fn get1() {
   let n9 = TestValue::new(9, s9);
   let nid9 = n9.id();
 
-  /*
-   * The tree looks like:
-   * ```
-   *           n1
-   *         /   \
-   *        n2   n3
-   *      /  \     \
-   *     n4  n5    n6
-   *           \
-   *            n7
-   *           / \
-   *         n8   n9
-   * ```
-   */
   let mut tree = Itree::new();
   tree.new_root(n1);
   tree.new_with_parent(nid1, n2);
