@@ -218,8 +218,7 @@ impl Tree {
 
   /// Get the node struct by its `id`.
   pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
-    self._internal_check();
-    self.nodes.get(&id)
+    self.base.nodes().get(&id)
   }
 
   /// Get mutable node struct by its `id`.
