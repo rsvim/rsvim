@@ -5177,8 +5177,14 @@ mod tests_search_anchor_downward_nowrap_eol {
     {
       let expect = vec!["", "", "inside.\r\n", "", "options\ta"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 80, 1, 120);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        5,
+        80,
+        1,
+        120,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 2), (4, 0), (5, 1)]
