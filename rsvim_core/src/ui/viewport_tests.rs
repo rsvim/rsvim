@@ -4877,8 +4877,14 @@ mod tests_search_anchor_downward_nowrap {
         " completely put:\n",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 22);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        4,
+        40,
+        1,
+        22,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
