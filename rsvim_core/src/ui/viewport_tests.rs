@@ -7325,8 +7325,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "options are set.\r\n",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 314, 5, 6);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        5,
+        314,
+        5,
+        6,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 0)].into_iter().collect();
@@ -7352,8 +7358,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "options are set.\r\n",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 314, 6, 29);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        6,
+        314,
+        6,
+        29,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 0)].into_iter().collect();
