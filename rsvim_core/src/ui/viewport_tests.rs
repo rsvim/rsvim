@@ -7502,8 +7502,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
     {
       let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\r"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 1, 58, 1, 66);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        1,
+        58,
+        1,
+        66,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 3)].into_iter().collect();
