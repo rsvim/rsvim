@@ -3791,8 +3791,10 @@ mod tests_view_wrap_linebreak_startcol {
       "短，短到可以完整的放入一个窗口",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 15);
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+    let actual =
+      update_viewport(buf.clone(), tree.window_mut(window_id), 0, 15);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3830,8 +3832,10 @@ mod tests_view_wrap_linebreak_startcol {
       "ogetmoresmoothbeh",
     ];
 
-    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = update_viewport(buf.clone(), &mut window, 0, 70);
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
+    let actual =
+      update_viewport(buf.clone(), tree.window_mut(window_id), 0, 70);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
