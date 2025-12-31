@@ -4951,8 +4951,14 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec!["", "", "", "too\tlong?\n"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 168, 3, 271);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        6,
+        168,
+        3,
+        271,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0)].into_iter().collect();
