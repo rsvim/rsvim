@@ -10687,12 +10687,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         " several things we   ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas = make_canvas(terminal_size, win_opts, buf.clone());
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
