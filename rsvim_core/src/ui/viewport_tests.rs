@@ -8175,8 +8175,14 @@ mod tests_search_anchor_downward_wrap_linebreak {
         "But still it ",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 1, 43, 0, 0);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        1,
+        43,
+        0,
+        0,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
