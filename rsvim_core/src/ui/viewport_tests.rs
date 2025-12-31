@@ -4213,8 +4213,14 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec!["", "", "", "", "not\tset.\n"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 100, 1, 146);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        5,
+        100,
+        1,
+        146,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 1)]
@@ -4239,8 +4245,14 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 50, 2, 85);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        6,
+        50,
+        2,
+        85,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
