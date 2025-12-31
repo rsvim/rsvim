@@ -5758,8 +5758,14 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect =
         vec!["", "s.\r\n", "nt to test:\r\n", "tely put inside.\r\n"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 60, 0, 42);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        3,
+        60,
+        0,
+        42,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -5785,8 +5791,14 @@ mod tests_search_anchor_downward_nowrap_eol {
         ":\r\n",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 40, 1, 37);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        4,
+        40,
+        1,
+        37,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
