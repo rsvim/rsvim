@@ -6251,8 +6251,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "s\tare",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 82, 5, 59);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        5,
+        82,
+        5,
+        59,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(5, 5)].into_iter().collect();
@@ -6279,8 +6285,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "\toptions",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 82, 6, 78);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        6,
+        82,
+        6,
+        78,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(6, 7)].into_iter().collect();
