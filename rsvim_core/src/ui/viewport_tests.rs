@@ -4467,8 +4467,14 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec!["", "", "inside.\n", "", "options\ta"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 5, 80, 1, 120);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        5,
+        80,
+        1,
+        120,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 2), (4, 0), (5, 1)]
@@ -4499,8 +4505,14 @@ mod tests_search_anchor_downward_nowrap {
         "\t4. The ex",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 6, 1, 2, 8);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        6,
+        1,
+        2,
+        8,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
