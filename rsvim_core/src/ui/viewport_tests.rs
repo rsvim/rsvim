@@ -6002,8 +6002,14 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect =
         vec!["", " lines.\r", "we want to test:\r", "ompletely put ins"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        2,
+        53,
+        0,
+        37,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
