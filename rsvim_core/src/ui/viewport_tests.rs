@@ -7259,8 +7259,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect =
         vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 3, 97, 3, 67);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        3,
+        97,
+        3,
+        67,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0)].into_iter().collect();
@@ -7286,8 +7292,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "s in the buffer.\r\n",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 4, 314, 4, 305);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        4,
+        314,
+        4,
+        305,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0)].into_iter().collect();
@@ -10852,12 +10864,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "options        are   ",
       ];
 
-      let actual_canvas = make_canvas(
-        terminal_size,
-        win_opts,
-        buf.clone(),
-        window.borrow().viewport(),
-      );
+      let actual_canvas = make_canvas(terminal_size, win_opts, buf.clone());
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
