@@ -1832,7 +1832,8 @@ mod tests_view_wrap_nolinebreak {
       "ndow content wi",
       "dget, then the ",
     ];
-    let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
     let actual = tree.window(window_id).viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -1863,7 +1864,7 @@ mod tests_view_wrap_nolinebreak {
       "n and again. Th",
       "is operation al",
     ];
-    let actual = update_viewport(buf.clone(), &mut window, 6, 0);
+    let actual = update_viewport(buf.clone(), tree.window_mut(window_id), 6, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -1915,7 +1916,7 @@ mod tests_view_wrap_nolinebreak {
 
     let expect =
       vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
-    let actual = update_viewport(buf.clone(), &mut window, 1, 0);
+    let actual = update_viewport(buf.clone(), tree.window_mut(window_id), 1, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -4021,8 +4022,14 @@ mod tests_search_anchor_downward_nowrap {
     {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 3, 3, 0);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        7,
+        3,
+        3,
+        0,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
@@ -4109,8 +4116,14 @@ mod tests_search_anchor_downward_nowrap {
         "t\t\t",
       ];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 2, 40, 0, 24);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        2,
+        40,
+        0,
+        24,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
