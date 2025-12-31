@@ -6559,8 +6559,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     {
       let expect = vec![""];
 
-      let actual =
-        search_down_viewport(window.clone(), buf.clone(), 7, 0, 7, 0);
+      let actual = search_down_viewport(
+        tree.window_mut(window_id),
+        buf.clone(),
+        7,
+        0,
+        7,
+        0,
+      );
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(7, 0)].into_iter().collect();
