@@ -161,14 +161,19 @@ impl Tree {
       let context = base.context();
       let mut context = context.borrow_mut();
       let style = Style {
+        display: taffy::Display::Grid,
+        grid_template_columns: vec![
+          taffy::prelude::fr(1_u16),
+          taffy::prelude::length(1_u16),
+        ],
         size: taffy::Size {
-          width: taffy::Dimension::from_length(canvas_size.width()),
-          height: taffy::Dimension::from_length(canvas_size.height()),
+          width: taffy::prelude::length(canvas_size.width()),
+          height: taffy::prelude::length(canvas_size.height()),
         },
         flex_direction: taffy::FlexDirection::Column,
         ..Default::default()
       };
-      let id = context.new_leaf_default(style, "Panel")?;
+      let id = context.new_leaf_default(style, "Root")?;
       context.compute_layout()?;
       id
     };

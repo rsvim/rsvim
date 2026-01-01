@@ -10,6 +10,11 @@ use crate::ui::tree::TreeNode;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
+use taffy::Style;
+use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
+use taffy::prelude::length;
+use taffy::prelude::percent;
 
 pub fn init_default_window(
   canvas_size: &U16Size,
@@ -21,6 +26,21 @@ pub fn init_default_window(
   cursor_style: CursorStyle,
 ) {
   let tree_root_id = tree.root_id();
+
+  let window_style = Style {
+    size: taffy::Size {
+      width: percent!(1.0),
+      height: percent!(1.0),
+    },
+    ..Default::default()
+  };
+  let cmdline_style = Style {
+    min_size: taffy::Size {
+      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::Dimension::from_length(1_u16),
+    },
+    ..Default::default()
+  };
 
   // Initialize default window.
   let window_shape = rect!(
