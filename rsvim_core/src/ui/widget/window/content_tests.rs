@@ -50,8 +50,7 @@ mod tests_nowrap {
       "          ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -87,7 +86,7 @@ mod tests_nowrap {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -127,7 +126,7 @@ mod tests_nowrap {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -177,7 +176,7 @@ mod tests_nowrap {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -213,8 +212,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -252,8 +250,7 @@ mod tests_nowrap {
       "             ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -293,8 +290,7 @@ mod tests_nowrap {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
 
     let expect = vec![
@@ -310,8 +306,7 @@ mod tests_nowrap {
       "                     ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -349,7 +344,7 @@ mod tests_nowrap_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -382,7 +377,7 @@ mod tests_nowrap_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -421,7 +416,7 @@ mod tests_nowrap_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -460,7 +455,7 @@ mod tests_nowrap_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -504,7 +499,7 @@ mod tests_nowrap_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 4);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -541,7 +536,7 @@ mod tests_nowrap_startcol {
 
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 1, 60);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -582,7 +577,7 @@ mod tests_nowrap_startcol {
 
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 0, 17);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -632,7 +627,7 @@ mod tests_nowrap_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -672,8 +667,7 @@ mod tests_nowrap_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
 
     let expect = vec![
@@ -689,8 +683,7 @@ mod tests_nowrap_startcol {
       "                     ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 5);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -734,7 +727,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -767,7 +760,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -793,7 +786,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -852,7 +845,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -908,7 +901,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -956,8 +949,7 @@ mod tests_wrap_nolinebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
 
     let expect = vec![
@@ -978,7 +970,7 @@ mod tests_wrap_nolinebreak {
       ", there're multiple",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 3, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1026,7 +1018,7 @@ mod tests_wrap_nolinebreak {
       "w, thus it may cont",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1074,7 +1066,7 @@ mod tests_wrap_nolinebreak {
       "                   ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -1121,7 +1113,7 @@ mod tests_wrap_nolinebreak_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1163,7 +1155,7 @@ mod tests_wrap_nolinebreak_eol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -1208,7 +1200,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 1, 31);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1242,7 +1234,7 @@ mod tests_wrap_nolinebreak_startcol {
 
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1268,7 +1260,7 @@ mod tests_wrap_nolinebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1327,7 +1319,7 @@ mod tests_wrap_nolinebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1375,8 +1367,7 @@ mod tests_wrap_nolinebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
 
     let expect = vec![
@@ -1397,7 +1388,7 @@ mod tests_wrap_nolinebreak_startcol {
       " there're multiple ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 3, 1);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1446,7 +1437,7 @@ mod tests_wrap_nolinebreak_startcol {
     ];
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 6, 19);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1494,7 +1485,7 @@ mod tests_wrap_nolinebreak_startcol {
       "                   ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 4);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -1542,7 +1533,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1590,7 +1581,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1619,7 +1610,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1683,7 +1674,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1726,7 +1717,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1769,8 +1760,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
 
     let expect = vec![
@@ -1786,8 +1776,7 @@ mod tests_wrap_linebreak {
       "is small  ",
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 2, 0);
-    let actual =
-      make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
@@ -1835,7 +1824,7 @@ mod tests_wrap_linebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1884,7 +1873,7 @@ mod tests_wrap_linebreak_startcol {
 
     let viewport =
       make_viewport(terminal_size, win_opts, buffer.clone(), 1, 17);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1913,7 +1902,7 @@ mod tests_wrap_linebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 5);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 
@@ -1977,7 +1966,7 @@ mod tests_wrap_linebreak_startcol {
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
     assert_canvas(&actual, &expect);
   }
 }
