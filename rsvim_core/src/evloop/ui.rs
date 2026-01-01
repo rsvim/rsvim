@@ -4,12 +4,10 @@ use crate::buf::BufferWk;
 use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
-use crate::ui::tree::Inodeable;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeNode;
 use crate::ui::widget::cmdline::Cmdline;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use taffy::Style;
 
 pub fn init_default_window(
@@ -38,36 +36,31 @@ pub fn init_default_window(
     ..Default::default()
   };
 
+  let window_opts = *tree.global_local_options();
+
   // Initialize default window.
-  let window_shape = rect!(
-    0,
-    0,
-    canvas_size.width(),
-    canvas_size.height().saturating_sub(1)
-  );
-  let window_shape = rect_as!(window_shape, isize);
-  let mut window =
-    { Window::new(tree.global_local_options(), window_shape, buf) };
-  let window_id = window.id();
+  let window_id = tree
+    .new_window_with_parent(tree_root_id, window_style, window_opts, buf)
+    .unwrap();
 
   // Initialize cursor inside the default window.
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor =
-    Cursor::new(cursor_shape, cursor_blinking, cursor_hidden, cursor_style);
-  let _previous_inserted_cursor = window.insert_cursor(cursor);
-  debug_assert!(_previous_inserted_cursor.is_none());
+  let window_content_id = tree.window(window_id).content_id();
+  let _cursor_id = tree
+    .new_cursor_with_parent(
+      window_content_id,
+      cursor_blinking,
+      cursor_hidden,
+      cursor_style,
+    )
+    .unwrap();
 
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
-  tree.set_current_window_id(Some(window_id));
-
-  // Initialize default command-line.
-  let cmdline_shape = rect!(
-    0,
-    canvas_size.height().saturating_sub(1) as isize,
-    canvas_size.width() as isize,
-    canvas_size.height() as isize
-  );
-  let cmdline = Cmdline::new(cmdline_shape, text_contents);
-
-  tree.bounded_insert(tree_root_id, TreeNode::Cmdline(cmdline));
+  // Initialize command-line.
+  let _cmdline_id = tree
+    .new_cmdline_with_parent(
+      tree_root_id,
+      cmdline_style,
+      CmdlineIndicatorSymbol::Empty,
+      text_contents,
+    )
+    .unwrap();
 }
