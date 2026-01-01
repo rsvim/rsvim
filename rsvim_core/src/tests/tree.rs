@@ -12,6 +12,7 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -19,7 +20,27 @@ pub fn make_tree_with_buffers(
   window_local_opts: WindowOptions,
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
-  // UI Tree
+  let style = Style {
+    display: taffy::Display::Grid,
+    grid_template_columns: vec![
+      taffy::prelude::fr(1_u16),
+      taffy::prelude::length(1_u16),
+    ],
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    flex_direction: taffy::FlexDirection::Column,
+    ..Default::default()
+  };
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0),
+    },
+    ..Default::default()
+  };
+
   let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
