@@ -54,7 +54,7 @@ pub fn make_tree_with_buffers(
   let window_content_id = tree.window(window_id).content_id();
 
   // Cursor.
-  let cursor_id = tree
+  let _cursor_id = tree
     .new_cursor_with_parent(
       window_content_id,
       false,
@@ -74,8 +74,19 @@ pub fn make_tree_with_buffers_cmdline(
   buffers_manager: BuffersManagerArc,
   text_contents: TextContentsArc,
 ) -> TreeArc {
-  // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let style = Style {
+    display: taffy::Display::Grid,
+    grid_template_rows: vec![
+      taffy::prelude::fr(1_u16),
+      taffy::prelude::length(1_u16),
+    ],
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    ..Default::default()
+  };
+  let tree_arc = Tree::to_arc(Tree::new(style).unwrap());
   let buffers = lock!(buffers_manager);
   let (_, buf) = buffers.first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
