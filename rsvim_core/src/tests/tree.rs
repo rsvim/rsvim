@@ -20,7 +20,7 @@ pub fn make_tree_with_buffers(
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
   // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
@@ -70,7 +70,6 @@ pub fn make_tree_with_buffers_cmdline(
   tree.set_global_local_options(&window_local_opts);
 
   evloop_ui::init_default_window(
-    &canvas_size,
     &mut tree,
     buf,
     text_contents,
