@@ -80,7 +80,14 @@ pub fn make_canvas(
   window_options: WindowOptions,
   buffer: BufferArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size).unwrap();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(terminal_size.width()),
+      height: taffy::prelude::length(terminal_size.height()),
+    },
+    ..Default::default()
+  };
+  let mut tree = Tree::new(style).unwrap();
   tree.set_global_local_options(window_options);
   let style = Style {
     size: taffy::Size {
