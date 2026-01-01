@@ -11,10 +11,6 @@ use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 use taffy::Style;
-use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
-use taffy::prelude::length;
-use taffy::prelude::percent;
 
 pub fn init_default_window(
   canvas_size: &U16Size,
@@ -29,8 +25,8 @@ pub fn init_default_window(
 
   let window_style = Style {
     size: taffy::Size {
-      width: percent!(1.0),
-      height: percent!(1.0),
+      width: taffy::prelude::length(1.0),
+      height: taffy::prelude::length(1.0),
     },
     ..Default::default()
   };
