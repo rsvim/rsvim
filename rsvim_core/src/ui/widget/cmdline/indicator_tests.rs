@@ -49,6 +49,10 @@ mod tests_nowrap {
       .borrow_mut()
       .new_leaf_default(
         Style {
+          size: taffy::Size {
+            height: taffy::prelude::length(1_u16),
+            width: taffy::prelude::length(1_u16),
+          },
           ..Default::default()
         },
         "CmdlineIndicator",
@@ -56,9 +60,6 @@ mod tests_nowrap {
       .unwrap();
 
     let terminal_size = size!(1, 1);
-    let terminal_shape = rect_from_size!(terminal_size);
-    let terminal_shape = rect_as!(terminal_shape, isize);
-
     let expect = vec![":"];
 
     let cmdline_indicator = CmdlineIndicator::new(
