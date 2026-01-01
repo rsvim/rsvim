@@ -28,8 +28,8 @@ pub fn make_window(
 ) -> (Tree, TreeNodeId) {
   let style = Style {
     size: taffy::Size {
-      width: taffy::prelude::length(canvas_size.width()),
-      height: taffy::prelude::length(canvas_size.height()),
+      width: taffy::prelude::length(terminal_size.width()),
+      height: taffy::prelude::length(terminal_size.height()),
     },
     ..Default::default()
   };
