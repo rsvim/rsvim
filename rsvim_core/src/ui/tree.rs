@@ -154,25 +154,12 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(canvas_size: U16Size) -> TaffyResult<Self> {
+  pub fn new(style: Style) -> TaffyResult<Self> {
     let mut base = Itree::new();
 
     let id = {
       let context = base.context();
       let mut context = context.borrow_mut();
-      let style = Style {
-        display: taffy::Display::Grid,
-        grid_template_columns: vec![
-          taffy::prelude::fr(1_u16),
-          taffy::prelude::length(1_u16),
-        ],
-        size: taffy::Size {
-          width: taffy::prelude::length(canvas_size.width()),
-          height: taffy::prelude::length(canvas_size.height()),
-        },
-        flex_direction: taffy::FlexDirection::Column,
-        ..Default::default()
-      };
       let id = context.new_leaf_default(style, "Root")?;
       context.compute_layout()?;
       id

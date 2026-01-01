@@ -35,6 +35,7 @@ use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
+use taffy::Style;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -176,7 +177,20 @@ impl EventLoop {
     let canvas = Canvas::to_arc(canvas);
 
     // UI Tree
-    let tree = Tree::to_arc(Tree::new(canvas_size).unwrap());
+    let style = Style {
+      display: taffy::Display::Grid,
+      grid_template_columns: vec![
+        taffy::prelude::fr(1_u16),
+        taffy::prelude::length(1_u16),
+      ],
+      size: taffy::Size {
+        width: taffy::prelude::length(canvas_size.width()),
+        height: taffy::prelude::length(canvas_size.height()),
+      },
+      flex_direction: taffy::FlexDirection::Column,
+      ..Default::default()
+    };
+    let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
