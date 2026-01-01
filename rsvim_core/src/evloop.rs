@@ -526,12 +526,10 @@ impl EventLoop {
   /// Initialize windows.
   pub fn _init_windows(&mut self) -> IoResult<()> {
     // Initialize default window, with default buffer.
-    let (canvas_size, cursor_blinking, cursor_hidden, cursor_style) = {
+    let (cursor_blinking, cursor_hidden, cursor_style) = {
       let canvas = lock!(self.canvas);
-      let canvas_size = canvas.size();
-      let canvas_cursor = *canvas.frame().cursor();
+      let canvas_cursor = canvas.frame().cursor();
       (
-        canvas_size,
         canvas_cursor.blinking(),
         canvas_cursor.hidden(),
         canvas_cursor.style(),
@@ -547,7 +545,6 @@ impl EventLoop {
     let text_contents = Arc::downgrade(&self.contents);
 
     ui::init_default_window(
-      &canvas_size,
       &mut tree,
       buf,
       text_contents,

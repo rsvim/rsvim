@@ -2,16 +2,12 @@
 
 use crate::buf::BufferWk;
 use crate::content::TextContentsWk;
-use crate::prelude::*;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::Tree;
-use crate::ui::tree::TreeNode;
-use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use taffy::Style;
 
 pub fn init_default_window(
-  canvas_size: &U16Size,
   tree: &mut Tree,
   buf: BufferWk,
   text_contents: TextContentsWk,
