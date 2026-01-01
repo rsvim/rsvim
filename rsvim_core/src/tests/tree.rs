@@ -20,17 +20,11 @@ pub fn make_tree_with_buffers(
   window_local_opts: WindowOptions,
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
-  let style = Style {
-    display: taffy::Display::Grid,
-    grid_template_columns: vec![
-      taffy::prelude::fr(1_u16),
-      taffy::prelude::length(1_u16),
-    ],
+  let tree_style = Style {
     size: taffy::Size {
       width: taffy::prelude::length(canvas_size.width()),
       height: taffy::prelude::length(canvas_size.height()),
     },
-    flex_direction: taffy::FlexDirection::Column,
     ..Default::default()
   };
   let window_style = Style {
@@ -41,7 +35,7 @@ pub fn make_tree_with_buffers(
     ..Default::default()
   };
 
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size).unwrap());
+  let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
