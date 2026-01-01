@@ -93,7 +93,7 @@ pub fn make_tree_with_buffers_cmdline(
   let text_contents = Arc::downgrade(&text_contents);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
 
   evloop_ui::init_default_window(
     &mut tree,
