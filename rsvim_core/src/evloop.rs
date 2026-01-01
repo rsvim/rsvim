@@ -187,7 +187,6 @@ impl EventLoop {
         width: taffy::prelude::length(canvas_size.width()),
         height: taffy::prelude::length(canvas_size.height()),
       },
-      flex_direction: taffy::FlexDirection::Column,
       ..Default::default()
     };
     let tree = Tree::to_arc(Tree::new(style).unwrap());
