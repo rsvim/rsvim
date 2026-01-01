@@ -19,15 +19,15 @@ pub fn init_default_window(
 
   let window_style = Style {
     size: taffy::Size {
-      width: taffy::prelude::length(1.0),
-      height: taffy::prelude::length(1.0),
+      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0),
     },
     ..Default::default()
   };
   let cmdline_style = Style {
     min_size: taffy::Size {
-      width: taffy::prelude::length(1.0),
-      height: taffy::prelude::length(1_u16),
+      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0),
     },
     ..Default::default()
   };
