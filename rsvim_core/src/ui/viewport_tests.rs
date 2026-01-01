@@ -8344,11 +8344,8 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -8516,11 +8513,8 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -8598,11 +8592,8 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -8882,11 +8873,8 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -9167,11 +9155,8 @@ mod tests_search_anchor_upward_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -9477,11 +9462,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -9738,11 +9720,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -9993,11 +9972,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -10288,11 +10264,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -10543,11 +10516,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -10799,11 +10769,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -11000,11 +10967,8 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -11503,11 +11467,8 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -11926,11 +11887,8 @@ mod tests_search_anchor_horizontally_nowrap {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -12362,11 +12320,8 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -12788,11 +12743,8 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -13214,11 +13166,8 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -13647,11 +13596,8 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -14080,11 +14026,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -14611,11 +14554,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -14997,11 +14937,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -15274,11 +15211,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -15634,11 +15568,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -16023,11 +15954,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -16412,11 +16340,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -16694,11 +16619,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -16974,11 +16896,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -17332,11 +17251,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -17689,11 +17605,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -17884,11 +17797,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -18219,11 +18129,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -18688,11 +18595,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
@@ -19114,11 +19018,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ],
     );
 
-    let window = Rc::new(RefCell::new(make_window(
-      terminal_size,
-      buf.clone(),
-      &win_opts,
-    )));
+    let (mut tree, window_id) =
+      make_window(terminal_size, buf.clone(), win_opts);
 
     // Initialize
     {
