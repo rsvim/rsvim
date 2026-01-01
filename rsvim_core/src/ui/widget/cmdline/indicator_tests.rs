@@ -58,6 +58,7 @@ mod tests_nowrap {
         "CmdlineIndicator",
       )
       .unwrap();
+    ctx.borrow_mut().compute_layout().unwrap();
 
     let terminal_size = size!(1, 1);
     let expect = vec![":"];
