@@ -36,8 +36,8 @@ pub fn init_default_window(
   };
   let cmdline_style = Style {
     min_size: taffy::Size {
-      width: taffy::Dimension::from_percent(1.0),
-      height: taffy::Dimension::from_length(1_u16),
+      width: taffy::prelude::length(1.0),
+      height: taffy::prelude::length(1_u16),
     },
     ..Default::default()
   };
