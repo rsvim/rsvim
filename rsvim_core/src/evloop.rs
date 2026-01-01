@@ -179,7 +179,7 @@ impl EventLoop {
     // UI Tree
     let style = Style {
       display: taffy::Display::Grid,
-      grid_template_columns: vec![
+      grid_template_rows: vec![
         taffy::prelude::fr(1_u16),
         taffy::prelude::length(1_u16),
       ],
