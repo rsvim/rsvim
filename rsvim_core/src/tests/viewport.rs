@@ -26,7 +26,14 @@ pub fn make_window(
   buffer: BufferArc,
   window_options: WindowOptions,
 ) -> (Tree, TreeNodeId) {
-  let mut tree = Tree::new(terminal_size).unwrap();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    ..Default::default()
+  };
+  let mut tree = Tree::new(style).unwrap();
   tree.set_global_local_options(window_options);
 
   let style = Style {
