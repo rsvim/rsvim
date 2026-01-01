@@ -594,6 +594,10 @@ impl Tree {
           taffy::prelude::length(1_u16),
           taffy::prelude::fr(1_u16),
         ],
+        size: taffy::Size {
+          width: taffy::prelude::percent(1.0),
+          height: taffy::prelude::percent(1.0),
+        },
         ..Default::default()
       };
       let message_style = Style {
