@@ -139,16 +139,13 @@ mod tests_goto_normal_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 3);
 
-      let viewport = lock!(tree.clone()).cmdline().unwrap().input_viewport();
+      let viewport = cmdline_viewport(tree.clone());
       let cmdline_eol =
         lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
