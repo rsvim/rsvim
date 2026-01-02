@@ -179,16 +179,13 @@ mod tests_goto_normal_mode {
       stateful.goto_normal_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 0);
 
-      let viewport = lock!(tree.clone()).cmdline().unwrap().input_viewport();
+      let viewport = cmdline_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -230,10 +227,7 @@ mod tests_goto_normal_mode {
     let (event, tree, bufs, _buf, contents, data_access) =
       make_fsm_with_cmdline(terminal_size, buf_opts, window_options, lines);
 
-    let prev_cursor_viewport = lock!(tree.clone())
-      .current_window()
-      .unwrap()
-      .cursor_viewport();
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -244,16 +238,13 @@ mod tests_goto_normal_mode {
       stateful.goto_cmdline_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 0);
 
-      let viewport = lock!(tree.clone()).cmdline().unwrap().input_viewport();
+      let viewport = cmdline_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -289,16 +280,13 @@ mod tests_goto_normal_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 3);
 
-      let viewport = lock!(tree.clone()).cmdline().unwrap().input_viewport();
+      let viewport = cmdline_viewport(tree.clone());
       let cmdline_eol =
         lock!(contents).command_line_input().options().end_of_line();
       let line0 = format!("Bye{cmdline_eol}");
