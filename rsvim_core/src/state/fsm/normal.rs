@@ -326,10 +326,9 @@ impl NormalStateful {
       viewport.start_line_idx(),
     );
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     cursor_ops::raw_viewport_scroll_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),
