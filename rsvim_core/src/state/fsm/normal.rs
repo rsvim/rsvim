@@ -290,16 +290,15 @@ impl NormalStateful {
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    tree.current_window_mut().move_cursor_to(
+    tree.reserved_move_cursor_position_to(
       new_cursor_viewport.column_idx() as isize,
       new_cursor_viewport.row_idx() as isize,
     );
