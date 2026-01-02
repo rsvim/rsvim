@@ -133,7 +133,7 @@ impl CmdlineExStateful {
     let mut tree = lock!(tree);
 
     debug_assert!(tree.cmdline_id().is_some());
-    let cmdline = tree.cmdline_mut().unwrap();
+    let cmdline = tree.cmdline_mut();
 
     // Show message, hide input/indicator.
     cmdline.show_message();
