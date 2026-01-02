@@ -247,13 +247,12 @@ impl CmdlineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.cmdline_mut();
-    let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
+    let cmdline_id = tree.cmdline_id().unwrap();
+    debug_assert_eq!(tree.cmdline().input_cursor_viewport().line_idx(), 0);
     debug_assert!(
       text
         .rope()
-        .get_line(cmdline.input_cursor_viewport().line_idx())
+        .get_line(tree.cmdline().input_cursor_viewport().line_idx())
         .is_some()
     );
 
