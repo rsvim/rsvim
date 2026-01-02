@@ -244,29 +244,31 @@ pub fn editable_tree_node_mut(
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
 fn _update_viewport(
-  vnode: &mut dyn EditableWidgetable,
+  tree: &mut Tree,
+  id: TreeNodeId,
   text: &Text,
   start_line: usize,
   start_column: usize,
 ) -> ViewportArc {
-  let new_viewport = Viewport::to_arc(Viewport::view(
-    vnode.editable_options(),
+  let new_viewport = Viewport::view(
+    tree.editable_options(id),
     text,
-    &vnode.editable_actual_shape().size(),
+    &tree.editable_actual_shape(id).size(),
     start_line,
     start_column,
-  ));
+  );
 
-  vnode.set_editable_viewport(new_viewport.clone());
+  tree.set_editable_viewport(id, new_viewport.clone());
 
-  new_viewport
+  Viewport::to_arc(new_viewport)
 }
 
 // NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
 // on "cmdline-message", since the formers have cursor inside and can be
 // editing, while the ladder doesn't.
 fn _update_cursor_viewport(
-  vnode: &mut dyn EditableWidgetable,
+  tree: &mut Tree,
+  id: TreeNodeId,
   viewport: &Viewport,
   text: &Text,
   cursor_line: usize,
@@ -275,11 +277,10 @@ fn _update_cursor_viewport(
   // New cursor position
   let new_cursor_viewport =
     CursorViewport::from_position(viewport, text, cursor_line, cursor_char);
-  let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
 
-  vnode.set_editable_cursor_viewport(new_cursor_viewport.clone());
+  tree.set_editable_cursor_viewport(id, new_cursor_viewport.clone());
 
-  new_cursor_viewport
+  CursorViewport::to_arc(new_cursor_viewport)
 }
 
 /// Calculate new cursor viewport by `Operation::CursorMove*` operations, as
@@ -297,7 +298,8 @@ fn _update_cursor_viewport(
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
 pub fn raw_cursor_viewport_move_to(
-  vnode: &mut dyn EditableWidgetable,
+  tree: &mut Tree,
+  id: TreeNodeId,
   viewport: &Viewport,
   text: &Text,
   cursor_move_to_op: Operation,
@@ -325,7 +327,7 @@ pub fn raw_cursor_viewport_move_to(
   }
 
   let new_cursor_viewport =
-    _update_cursor_viewport(vnode, viewport, text, line_idx, char_idx);
+    _update_cursor_viewport(tree, id, viewport, text, line_idx, char_idx);
   trace!(
     "after updated, new_cursor_viewport:{:?}",
     new_cursor_viewport
@@ -350,7 +352,8 @@ pub fn raw_cursor_viewport_move_to(
 ///
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_viewport_scroll_to(
-  vnode: &mut dyn EditableWidgetable,
+  tree: &mut Tree,
+  id: TreeNodeId,
   viewport: &Viewport,
   text: &Text,
   window_scroll_to_op: Operation,
@@ -381,7 +384,7 @@ pub fn raw_viewport_scroll_to(
   let max_len_chars = _max_len_chars_since_line(
     text,
     line_idx,
-    vnode.editable_actual_shape().height(),
+    tree.editable_actual_shape(id).height(),
   );
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
@@ -394,16 +397,16 @@ pub fn raw_viewport_scroll_to(
   }
 
   // Sync the viewport
-  let new_viewport = Viewport::to_arc(Viewport::view(
-    vnode.editable_options(),
+  let new_viewport = Viewport::view(
+    tree.editable_options(id),
     text,
-    &vnode.editable_actual_shape().size(),
+    &tree.editable_actual_shape(id).size(),
     line_idx,
     column_idx,
-  ));
-  vnode.set_editable_viewport(new_viewport.clone());
+  );
+  tree.set_editable_viewport(id, new_viewport.clone());
 
-  Some(new_viewport)
+  Some(Viewport::to_arc(new_viewport))
 }
 
 fn _max_len_chars_since_line(
@@ -430,15 +433,10 @@ fn _update_viewport_after_text_changed(
   id: TreeNodeId,
   text: &Text,
 ) {
-  let vnode = editable_tree_node_mut(tree, id);
-
-  let viewport = vnode.editable_viewport();
-  let cursor_viewport = vnode.editable_cursor_viewport();
-  trace!("before viewport:{:?}", vnode.editable_viewport());
-  trace!(
-    "before cursor_viewport:{:?}",
-    vnode.editable_cursor_viewport()
-  );
+  let viewport = tree.editable_viewport(id);
+  let cursor_viewport = tree.editable_cursor_viewport(id);
+  trace!("before viewport:{:?}", viewport);
+  trace!("before cursor_viewport:{:?}", cursor_viewport);
 
   let start_line = std::cmp::min(
     viewport.start_line_idx(),
@@ -452,11 +450,12 @@ fn _update_viewport_after_text_changed(
   );
 
   let updated_viewport =
-    _update_viewport(vnode, text, start_line, start_column);
+    _update_viewport(tree, id, text, start_line, start_column);
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   raw_cursor_viewport_move_to(
-    vnode,
+    tree,
+    id,
     &updated_viewport,
     text,
     Operation::CursorMoveTo((
@@ -483,9 +482,8 @@ pub fn cursor_move(
   op: Operation,
   include_eol: bool,
 ) {
-  let vnode = editable_tree_node_mut(tree, id);
-  let viewport = vnode.editable_viewport();
-  let cursor_viewport = vnode.editable_cursor_viewport();
+  let viewport = tree.editable_viewport(id);
+  let cursor_viewport = tree.editable_cursor_viewport(id);
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_eol
@@ -515,9 +513,9 @@ pub fn cursor_move(
   let new_viewport: Option<ViewportArc> = {
     let (start_line, start_column) = viewport.search_anchor(
       search_direction,
-      vnode.editable_options(),
+      tree.editable_options(id),
       text,
-      &vnode.editable_actual_shape().size(),
+      &tree.editable_actual_shape(id).size(),
       target_cursor_line,
       target_cursor_char,
     );
@@ -527,7 +525,8 @@ pub fn cursor_move(
       || start_column != viewport.start_column_idx()
     {
       raw_viewport_scroll_to(
-        vnode,
+        tree,
+        id,
         &viewport,
         text,
         Operation::WindowScrollTo((start_column, start_line)),
@@ -542,17 +541,20 @@ pub fn cursor_move(
     let current_viewport = new_viewport.unwrap_or(viewport);
 
     let new_cursor_viewport = raw_cursor_viewport_move_to(
-      vnode,
+      tree,
+      id,
       &current_viewport,
       text,
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    debug_assert!(vnode.editable_cursor_id().is_some());
-    vnode.move_editable_cursor_to(
-      new_cursor_viewport.column_idx() as isize,
-      new_cursor_viewport.row_idx() as isize,
-    );
+    debug_assert!(tree.cursor_id().is_some());
+    tree
+      .reserved_move_cursor_position_to(
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
   }
 }
 

@@ -796,6 +796,23 @@ impl Tree {
       _ => unreachable!(),
     }
   }
+
+  pub fn editable_options(&self, id: TreeNodeId) -> &WindowOptions {
+    match self.node(id).unwrap() {
+      TreeNode::Window(window) => window.options(),
+      TreeNode::Cmdline(cmdline) => cmdline.options(),
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn editable_actual_shape(&self, id: TreeNodeId) -> U16Rect {
+    let editable_id = match self.node(id).unwrap() {
+      TreeNode::Window(window) => window.content_id(),
+      TreeNode::Cmdline(cmdline) => cmdline.input_id(),
+      _ => unreachable!(),
+    };
+    self.node(editable_id).unwrap().actual_shape()
+  }
 }
 // Editable }
 
