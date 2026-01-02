@@ -669,7 +669,7 @@ pub fn cursor_delete(
 pub fn cursor_jump(
   tree: &mut Tree,
   parent_id: TreeNodeId,
-) -> TaffyResult<Option<TreeNodeId>> {
+) -> Option<TreeNodeId> {
   let cursor_id = tree.cursor_id().unwrap();
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
 
@@ -680,7 +680,7 @@ pub fn cursor_jump(
       let old_window_id = tree.parent_id(old_parent_id).unwrap();
       debug_assert_eq!(old_window_id, tree.current_window_id().unwrap());
       if old_window_id == parent_id {
-        return Ok(None);
+        return None;
       }
       old_window_id
     }
@@ -690,7 +690,7 @@ pub fn cursor_jump(
       debug_assert!(tree.parent_id(old_input_panel_id).is_some());
       let old_cmdline_id = tree.parent_id(old_input_panel_id).unwrap();
       if old_cmdline_id == parent_id {
-        return Ok(None);
+        return None;
       }
       old_cmdline_id
     }
@@ -700,7 +700,8 @@ pub fn cursor_jump(
   tree
     .context()
     .borrow_mut()
-    .remove_child(old_parent_id, cursor_id)?;
+    .remove_child(old_parent_id, cursor_id)
+    .unwrap();
 
   match tree.node_mut(parent_id).unwrap() {
     TreeNode::Window(window) => {
@@ -708,14 +709,19 @@ pub fn cursor_jump(
       tree
         .context()
         .borrow_mut()
-        .add_child(content_id, cursor_id)?;
+        .add_child(content_id, cursor_id)
+        .unwrap();
     }
     TreeNode::Cmdline(cmdline) => {
       let input_id = cmdline.input_id();
-      tree.context().borrow_mut().add_child(input_id, cursor_id)?;
+      tree
+        .context()
+        .borrow_mut()
+        .add_child(input_id, cursor_id)
+        .unwrap();
     }
     _ => unreachable!(),
   }
 
-  Ok(Some(removed_id))
+  Some(removed_id)
 }
