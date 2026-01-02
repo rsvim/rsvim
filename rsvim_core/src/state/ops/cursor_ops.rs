@@ -666,19 +666,23 @@ pub fn cursor_delete(
 /// changes its parent widget only.
 ///
 /// The `parent_id` must be either valid window ID or command-line ID.
-pub fn cursor_jump(tree: &mut Tree, parent_id: TreeNodeId) -> TaffyResult<()> {
+pub fn cursor_jump(
+  tree: &mut Tree,
+  parent_id: TreeNodeId,
+) -> TaffyResult<Option<TreeNodeId>> {
   let cursor_id = tree.cursor_id().unwrap();
   let old_parent_id = tree.parent_id(cursor_id).unwrap();
 
-  match tree.node(old_parent_id).unwrap() {
+  let removed_id = match tree.node(old_parent_id).unwrap() {
     TreeNode::WindowContent(_content) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
       debug_assert!(tree.current_window_id().is_some());
       let old_window_id = tree.parent_id(old_parent_id).unwrap();
       debug_assert_eq!(old_window_id, tree.current_window_id().unwrap());
       if old_window_id == parent_id {
-        return Ok(());
+        return Ok(None);
       }
+      old_window_id
     }
     TreeNode::CmdlineInput(_input) => {
       debug_assert!(tree.parent_id(old_parent_id).is_some());
@@ -686,11 +690,12 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: TreeNodeId) -> TaffyResult<()> {
       debug_assert!(tree.parent_id(old_input_panel_id).is_some());
       let old_cmdline_id = tree.parent_id(old_input_panel_id).unwrap();
       if old_cmdline_id == parent_id {
-        return Ok(());
+        return Ok(None);
       }
+      old_cmdline_id
     }
     _ => unreachable!(),
-  }
+  };
 
   tree
     .context()
@@ -712,5 +717,5 @@ pub fn cursor_jump(tree: &mut Tree, parent_id: TreeNodeId) -> TaffyResult<()> {
     _ => unreachable!(),
   }
 
-  Ok(())
+  Ok(Some(removed_id))
 }

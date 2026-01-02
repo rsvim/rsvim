@@ -133,35 +133,23 @@ impl CmdlineExStateful {
     let mut tree = lock!(tree);
 
     debug_assert!(tree.cmdline_id().is_some());
-    let cmdline = tree.cmdline_mut();
+    debug_assert!(tree.current_window_id().is_some());
+    let cmdline_id = tree.cmdline_id().unwrap();
+    let current_window_id = tree.current_window_id().unwrap();
 
-    // Show message, hide input/indicator.
-    cmdline.show_message();
+    let _old_widget_id =
+      cursor_ops::cursor_jump(&mut tree, current_window_id).unwrap();
+    debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
-    debug_assert!(cmdline.cursor_id().is_some());
-
-    // Remove from current parent
-    let cursor = match cmdline.remove_cursor().unwrap() {
-      CommandLineNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBlock);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(cmdline.cursor_id().is_none());
-
-    // Insert to new parent
-    let current_window = tree.current_window_mut().unwrap();
-    let cursor_viewport = current_window.cursor_viewport();
-    trace!("before viewport:{:?}", current_window.viewport());
-    trace!("before cursor_viewport:{:?}", cursor_viewport);
-    let _current_window_id = current_window.id();
-    let _previous_cursor = current_window.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    current_window.move_cursor_to(
+    let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
+    tree.reserved_move_cursor_position_to(
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
     );
+    tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBlock);
+
+    // Show message, hide input/indicator.
+    tree.cmdline_show_message();
 
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
@@ -172,14 +160,15 @@ impl CmdlineExStateful {
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
-    let cmdline_input_content = cmdline_input_content.trim();
-    tree
-      .cmdline_mut()
-      .unwrap()
-      .indicator_mut()
-      .set_symbol(CmdlineIndicatorSymbol::Empty);
+    let cmdline_indicator_id = tree.cmdline().indicator_id();
+    match tree.node_mut(cmdline_indicator_id).unwrap() {
+      TreeNode::CmdlineIndicator(indicator) => {
+        indicator.set_symbol(CmdlineIndicatorSymbol::Empty)
+      }
+      _ => unreachable!(),
+    }
 
-    cmdline_input_content.to_compact_string()
+    cmdline_input_content.trim().to_compact_string()
   }
 
   pub fn goto_normal_mode(
