@@ -716,7 +716,8 @@ impl Tree {
     let cursor_id = self.cursor_id.unwrap();
     let new_shape = self
       .base
-      .reserved_move_position_to(&context, cursor_id, x, y);
+      .reserved_move_position_to(&context, cursor_id, x, y)
+      .unwrap();
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();
     style.inset = taffy::Rect {
@@ -740,7 +741,8 @@ impl Tree {
     let cursor_id = self.cursor_id.unwrap();
     let new_shape = self
       .base
-      .reserved_move_position_by(&context, cursor_id, x, y);
+      .reserved_move_position_by(&context, cursor_id, x, y)
+      .unwrap();
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();
     style.inset = taffy::Rect {
