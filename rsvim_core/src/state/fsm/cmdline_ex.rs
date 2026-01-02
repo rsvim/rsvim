@@ -148,9 +148,6 @@ impl CmdlineExStateful {
     );
     tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBlock);
 
-    // Show message, hide input/indicator.
-    tree.cmdline_show_message();
-
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
@@ -167,6 +164,8 @@ impl CmdlineExStateful {
       }
       _ => unreachable!(),
     }
+    // Show message, hide input/indicator.
+    tree.cmdline_show_message();
 
     cmdline_input_content.trim().to_compact_string()
   }
