@@ -51,12 +51,12 @@ use tokio::sync::mpsc::unbounded_channel;
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
   let tree = lock!(tree);
-  tree.current_window().unwrap().viewport()
+  tree.current_window().viewport()
 }
 
 pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   let tree = lock!(tree);
-  tree.current_window().unwrap().cursor_viewport()
+  tree.current_window().cursor_viewport()
 }
 
 #[cfg(test)]
