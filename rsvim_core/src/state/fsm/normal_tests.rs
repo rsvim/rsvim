@@ -49,14 +49,16 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
-pub fn get_viewport(tree: TreeArc) -> ViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().viewport()
+pub fn curwin_viewport(tree: TreeArc) -> ViewportArc {
+  lock!(tree).current_window().viewport()
 }
 
-pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().cursor_viewport()
+pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  lock!(tree).current_window().cursor_viewport()
+}
+
+pub fn cmdline_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  lock!(tree).cmdline().input_cursor_viewport()
 }
 
 #[cfg(test)]
@@ -75,7 +77,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -84,7 +86,7 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -109,7 +111,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -118,7 +120,7 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -143,7 +145,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -152,14 +154,14 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 3);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 2);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -184,7 +186,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -193,14 +195,14 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -218,7 +220,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -227,7 +229,7 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -252,7 +254,7 @@ mod tests_raw_cursor_move_y_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -261,14 +263,14 @@ mod tests_raw_cursor_move_y_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful._test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -292,7 +294,7 @@ mod tests_raw_cursor_move_x_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -301,7 +303,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -328,7 +330,7 @@ mod tests_raw_cursor_move_x_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -337,7 +339,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 1);
   }
@@ -364,7 +366,7 @@ mod tests_raw_cursor_move_x_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -373,7 +375,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 12);
   }
@@ -400,7 +402,7 @@ mod tests_raw_cursor_move_x_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -409,7 +411,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
@@ -417,7 +419,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 0);
     assert_eq!(actual2.char_idx(), 2);
   }
@@ -444,7 +446,7 @@ mod tests_raw_cursor_move_x_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -453,7 +455,7 @@ mod tests_raw_cursor_move_x_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 5);
 
@@ -462,7 +464,7 @@ mod tests_raw_cursor_move_x_by {
         ._test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
 
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = curwin_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), i);
     }
@@ -495,7 +497,7 @@ mod tests_raw_cursor_move_by {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -505,7 +507,7 @@ mod tests_raw_cursor_move_by {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((5, 0)));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
@@ -513,7 +515,7 @@ mod tests_raw_cursor_move_by {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
@@ -521,7 +523,7 @@ mod tests_raw_cursor_move_by {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((-3, 0)));
     let tree = data_access.tree.clone();
-    let actual3 = get_cursor_viewport(tree);
+    let actual3 = curwin_cursor_viewport(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
@@ -529,7 +531,7 @@ mod tests_raw_cursor_move_by {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, -1)));
     let tree = data_access.tree.clone();
-    let actual4 = get_cursor_viewport(tree);
+    let actual4 = curwin_cursor_viewport(tree);
     assert_eq!(actual4.line_idx(), 0);
     assert_eq!(actual4.char_idx(), 2);
   }
@@ -557,7 +559,7 @@ mod tests_raw_cursor_move_by {
       );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -572,7 +574,7 @@ mod tests_raw_cursor_move_by {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = curwin_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -588,7 +590,7 @@ mod tests_raw_cursor_move_by {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = curwin_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -616,7 +618,7 @@ mod tests_raw_cursor_move_by {
       );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -625,7 +627,7 @@ mod tests_raw_cursor_move_by {
     stateful._test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree.clone());
+    let actual1 = curwin_cursor_viewport(tree.clone());
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 27);
 
@@ -634,7 +636,7 @@ mod tests_raw_cursor_move_by {
     stateful._test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 18);
   }
@@ -667,7 +669,7 @@ mod tests_raw_cursor_move_to {
       );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -676,7 +678,7 @@ mod tests_raw_cursor_move_to {
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 0)));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = curwin_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
@@ -684,7 +686,7 @@ mod tests_raw_cursor_move_to {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 1)));
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
@@ -692,7 +694,7 @@ mod tests_raw_cursor_move_to {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 1)));
     let tree = data_access.tree.clone();
-    let actual3 = get_cursor_viewport(tree);
+    let actual3 = curwin_cursor_viewport(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
@@ -700,7 +702,7 @@ mod tests_raw_cursor_move_to {
     stateful
       ._test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 0)));
     let tree = data_access.tree.clone();
-    let actual4 = get_cursor_viewport(tree);
+    let actual4 = curwin_cursor_viewport(tree);
     assert_eq!(actual4.line_idx(), 0);
     assert_eq!(actual4.char_idx(), 2);
   }
@@ -728,7 +730,7 @@ mod tests_raw_cursor_move_to {
       );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -743,7 +745,7 @@ mod tests_raw_cursor_move_to {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = curwin_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -759,7 +761,7 @@ mod tests_raw_cursor_move_to {
         stateful._test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = curwin_cursor_viewport(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -788,7 +790,7 @@ mod tests_raw_cursor_move_to {
       );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -800,7 +802,7 @@ mod tests_raw_cursor_move_to {
     stateful._test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree.clone());
+    let actual1 = curwin_cursor_viewport(tree.clone());
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 27);
 
@@ -809,7 +811,7 @@ mod tests_raw_cursor_move_to {
     stateful._test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = curwin_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 18);
   }
@@ -832,8 +834,8 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
-      let cursor_viewport = get_cursor_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
+      let cursor_viewport = curwin_cursor_viewport(tree.clone());
       assert_eq!(cursor_viewport.line_idx(), 0);
       assert_eq!(cursor_viewport.char_idx(), 0);
 
@@ -860,7 +862,7 @@ mod tests_raw_window_scroll_y_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -900,7 +902,7 @@ mod tests_raw_window_scroll_y_by {
     // Before cursor scroll
     {
       info!("before cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -943,7 +945,7 @@ mod tests_raw_window_scroll_y_by {
     // After cursor scroll
     {
       info!("after cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "This is a ",
         "But still ",
@@ -994,7 +996,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1028,7 +1030,7 @@ mod tests_raw_window_scroll_y_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "This is a ",
         "But still ",
@@ -1080,7 +1082,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1112,7 +1114,7 @@ mod tests_raw_window_scroll_y_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "  2. When ",
         "     * The",
@@ -1168,7 +1170,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1199,7 +1201,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When ",
         "     * The",
@@ -1230,7 +1232,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["     * The", "     * The", "", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
@@ -1253,7 +1255,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["  3. If a ", "     * The", "     * The", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
@@ -1276,7 +1278,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "  2. When ",
@@ -1307,7 +1309,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still ",
         "  1. When ",
@@ -1338,7 +1340,7 @@ mod tests_raw_window_scroll_y_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1388,7 +1390,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
@@ -1427,7 +1429,7 @@ mod tests_raw_window_scroll_y_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "  2. When the l",
         "ine is too long",
@@ -1490,7 +1492,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
@@ -1529,7 +1531,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Scroll-1
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The char",
         " exactly ends a",
@@ -1568,7 +1570,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Scroll-2
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The char",
         " is too long to",
@@ -1607,7 +1609,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Scroll-3
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(10, 0)].into_iter().collect();
@@ -1630,7 +1632,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Scroll-4
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The char",
         " exactly ends a",
@@ -1691,7 +1693,7 @@ mod tests_raw_window_scroll_y_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
@@ -1730,7 +1732,7 @@ mod tests_raw_window_scroll_y_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "  2. When the ",
         "line is too ",
@@ -1779,8 +1781,8 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
-      let cursor_viewport = get_cursor_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
+      let cursor_viewport = curwin_cursor_viewport(tree.clone());
       assert_eq!(cursor_viewport.line_idx(), 0);
       assert_eq!(cursor_viewport.char_idx(), 0);
 
@@ -1807,7 +1809,7 @@ mod tests_raw_window_scroll_x_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -1847,7 +1849,7 @@ mod tests_raw_window_scroll_x_by {
     // Before cursor scroll
     {
       info!("before cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1890,7 +1892,7 @@ mod tests_raw_window_scroll_x_by {
     // After cursor scroll
     {
       info!("after cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ello, RSVI",
         "his is a q",
@@ -1950,7 +1952,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1984,7 +1986,7 @@ mod tests_raw_window_scroll_x_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2036,7 +2038,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2070,7 +2072,7 @@ mod tests_raw_window_scroll_x_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "!\n",
         "ite simple",
@@ -2120,7 +2122,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2154,7 +2156,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-1
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "!\n",
         "ite simple",
@@ -2188,7 +2190,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-2
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect =
         vec!["", " and small", "several th", "small enou", "too long t"];
       let expect_fills: BTreeMap<usize, usize> =
@@ -2217,7 +2219,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-3
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "", "\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -2245,7 +2247,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-4
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "llo, RSVIM",
         "is is a qu",
@@ -2295,7 +2297,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2326,7 +2328,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "o, RSVIM!\n",
         " is a quit",
@@ -2357,7 +2359,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "SVIM!\n",
         "a quite si",
@@ -2388,7 +2390,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "RSVIM!\n",
         " a quite s",
@@ -2419,7 +2421,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "lo, RSVIM!",
         "s is a qui",
@@ -2450,7 +2452,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "llo, RSVIM",
         "is is a qu",
@@ -2481,7 +2483,7 @@ mod tests_raw_window_scroll_x_by {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2531,7 +2533,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
@@ -2570,7 +2572,7 @@ mod tests_raw_window_scroll_x_by {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "o, RSVIM!\n",
         " is a quite sim",
@@ -2627,7 +2629,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite",
@@ -2666,7 +2668,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-1
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "SVIM!\n",
         "a quite simple ",
@@ -2705,7 +2707,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-2
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "VIM!\n",
         " quite simple a",
@@ -2746,7 +2748,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-3
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "!\n",
         "ite simple and ",
@@ -2787,7 +2789,7 @@ mod tests_raw_window_scroll_x_by {
 
     // Scroll-4
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "M!\n",
         "uite simple and",
@@ -2848,7 +2850,7 @@ mod tests_raw_window_scroll_to {
     // Before cursor scroll
     {
       info!("before cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2891,7 +2893,7 @@ mod tests_raw_window_scroll_to {
     // After cursor scroll
     {
       info!("after cursor scroll");
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "This is a ",
         "But still ",
@@ -2942,7 +2944,7 @@ mod tests_raw_window_scroll_to {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -2973,7 +2975,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When ",
         "     * The",
@@ -3004,7 +3006,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["     * The", "     * The", "", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
@@ -3027,7 +3029,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["  3. If a ", "     * The", "     * The", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
@@ -3050,7 +3052,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "  2. When ",
@@ -3081,7 +3083,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still ",
         "  1. When ",
@@ -3112,7 +3114,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3162,7 +3164,7 @@ mod tests_raw_window_scroll_to {
 
     // Before cursor scroll
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3193,7 +3195,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "o, RSVIM!\n",
         " is a quit",
@@ -3224,7 +3226,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "SVIM!\n",
         "a quite si",
@@ -3255,7 +3257,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "RSVIM!\n",
         " a quite s",
@@ -3286,7 +3288,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "lo, RSVIM!",
         "s is a qui",
@@ -3317,7 +3319,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "llo, RSVIM",
         "is is a qu",
@@ -3348,7 +3350,7 @@ mod tests_raw_window_scroll_to {
 
     let tree = data_access.tree.clone();
     {
-      let viewport = get_viewport(tree);
+      let viewport = curwin_viewport(tree);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3388,7 +3390,7 @@ mod tests_cursor_move {
         vec![],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3396,7 +3398,7 @@ mod tests_cursor_move {
     state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -3421,7 +3423,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3429,7 +3431,7 @@ mod tests_cursor_move {
     state_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = curwin_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -3454,7 +3456,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3464,11 +3466,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3507,11 +3509,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3570,7 +3572,7 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3580,11 +3582,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3623,11 +3625,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3686,7 +3688,7 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3696,11 +3698,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3739,11 +3741,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3798,7 +3800,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -3808,11 +3810,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3840,11 +3842,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 5);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -3872,11 +3874,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 10);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ello, RSVI",
         "his is a q",
@@ -3905,11 +3907,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 15);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         " RSVIM!\n",
         "s a quite ",
@@ -3937,11 +3939,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 20);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "M!\n",
         "uite simpl",
@@ -3969,11 +3971,11 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 31);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect =
         vec!["", " and small", "several th", "small enou", "too long t"];
       let expect_fills: BTreeMap<usize, usize> =
@@ -3996,11 +3998,11 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 151);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "", "t the rend", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4022,11 +4024,11 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\n"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -4048,11 +4050,11 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\n", "are been s"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -4094,7 +4096,7 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4104,11 +4106,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -4136,11 +4138,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 5);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -4168,11 +4170,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 10);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ello, RSVI",
         "his is a q",
@@ -4201,11 +4203,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 15);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         " RSVIM!\r\n",
         "s a quite ",
@@ -4233,11 +4235,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 20);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "M!\r\n",
         "uite simpl",
@@ -4265,11 +4267,11 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 31);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect =
         vec!["", " and small", "several th", "small enou", "too long t"];
       let expect_fills: BTreeMap<usize, usize> =
@@ -4292,11 +4294,11 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "", "rendering.", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4318,11 +4320,11 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\r\n"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -4344,11 +4346,11 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\r\n", "are been s"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -4390,7 +4392,7 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4400,11 +4402,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -4432,11 +4434,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 5);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -4464,11 +4466,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 10);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ello, RSVI",
         "his is a q",
@@ -4497,11 +4499,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 15);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         " RSVIM!\r",
         "s a quite ",
@@ -4529,11 +4531,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 20);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "M!\r",
         "uite simpl",
@@ -4561,11 +4563,11 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 31);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect =
         vec!["", " and small", "several th", "small enou", "too long t"];
       let expect_fills: BTreeMap<usize, usize> =
@@ -4588,11 +4590,11 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "", "rendering.", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -4614,11 +4616,11 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\r"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -4640,11 +4642,11 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 93);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["", "t, then th", "ere're mul", ".\r", "are been s"];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -4681,7 +4683,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4691,13 +4693,13 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 21);
       assert_eq!(actual1.row_idx(), 3);
       assert_eq!(actual1.column_idx(), 28);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite simple and sm",
@@ -4740,13 +4742,13 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 22);
       assert_eq!(actual1.row_idx(), 3);
       assert_eq!(actual1.column_idx(), 28);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ello, RSVIM!\n",
         "his is a quite simple and sma",
@@ -4805,7 +4807,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4815,11 +4817,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -4850,11 +4852,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The",
         " extra par",
@@ -4885,11 +4887,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The",
         " extra par",
@@ -4920,11 +4922,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -4971,7 +4973,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4981,11 +4983,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -5016,11 +5018,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 2);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -5051,11 +5053,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 82);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -5086,11 +5088,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 122);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "mall enoug",
         "h to compl",
@@ -5121,11 +5123,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "e a row of",
         " the windo",
@@ -5156,11 +5158,11 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "e a row of",
         " the windo",
@@ -5191,11 +5193,11 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 149);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "e a row of",
         " the windo",
@@ -5226,11 +5228,11 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 49);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "put inside",
         " a row of ",
@@ -5261,11 +5263,11 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line i",
@@ -5312,13 +5314,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\n",
@@ -5348,11 +5350,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5380,11 +5382,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5412,11 +5414,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5444,11 +5446,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely pu",
@@ -5476,11 +5478,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When the line is sma",
         "ll enough to completely p",
@@ -5528,13 +5530,13 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\r\n",
@@ -5564,11 +5566,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5596,11 +5598,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5628,11 +5630,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5660,11 +5662,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely pu",
@@ -5692,11 +5694,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When the line is sma",
         "ll enough to completely p",
@@ -5744,13 +5746,13 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\r",
@@ -5780,11 +5782,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5812,11 +5814,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5844,11 +5846,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -5876,11 +5878,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely pu",
@@ -5908,11 +5910,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When the line is sma",
         "ll enough to completely p",
@@ -5956,13 +5958,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\n",
@@ -5992,11 +5994,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 50);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -6024,11 +6026,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 74);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely pu",
@@ -6056,11 +6058,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite simple an",
@@ -6108,13 +6110,13 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\r\n",
@@ -6144,11 +6146,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 25);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\r\n",
         "This is a quite",
@@ -6176,11 +6178,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 23);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it co",
         "ntains several:",
@@ -6209,11 +6211,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\r\n",
         "This is a quite",
@@ -6261,13 +6263,13 @@ mod tests_cursor_move {
       lines,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\r",
@@ -6297,11 +6299,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 25);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\r",
         "This is a quite",
@@ -6329,11 +6331,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 23);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it co",
         "ntains several:",
@@ -6362,11 +6364,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\r",
         "This is a quite",
@@ -6410,13 +6412,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\n",
@@ -6446,11 +6448,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 50);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains sev",
         "eral things we want to te",
@@ -6478,11 +6480,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 74);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely pu",
@@ -6510,11 +6512,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite simple an",
@@ -6562,7 +6564,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6572,11 +6574,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -6607,11 +6609,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The",
         " extra ",
@@ -6642,11 +6644,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "     * The",
         " extra ",
@@ -6677,11 +6679,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -6732,7 +6734,7 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6742,11 +6744,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -6777,11 +6779,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 2);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -6812,11 +6814,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 82);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -6847,11 +6849,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 122);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "completely",
         " put ",
@@ -6882,11 +6884,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ow content",
         " widget, ",
@@ -6917,11 +6919,11 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ow content",
         " widget, ",
@@ -6952,11 +6954,11 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 149);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ow content",
         " widget, ",
@@ -6987,11 +6989,11 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 49);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "put inside",
         " a row of ",
@@ -7022,11 +7024,11 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
         "the line ",
@@ -7077,13 +7079,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\n",
@@ -7113,11 +7115,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains ",
         "several things we want to",
@@ -7145,11 +7147,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains ",
         "several things we want to",
@@ -7177,11 +7179,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains ",
         "several things we want to",
@@ -7209,11 +7211,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely ",
@@ -7241,11 +7243,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  1. When the line is ",
         "small enough to ",
@@ -7293,13 +7295,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "Hello, RSVIM!\n",
@@ -7329,11 +7331,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 50);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "But still it contains ",
         "several things we want to",
@@ -7362,11 +7364,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 74);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "  2. When the line is too",
         " long to be completely ",
@@ -7394,11 +7396,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite simple ",
@@ -7440,13 +7442,13 @@ mod tests_cursor_move {
         lines,
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     // Before
     {
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
 
       let expect = vec![
         "1. When the line is small",
@@ -7476,11 +7478,11 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 300);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "widget, there're multiple",
         " cases: a)The extra parts",
@@ -7508,11 +7510,11 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 324);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ltiple cases: a)The extra",
         " parts are been truncated",
@@ -7540,11 +7542,11 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 328);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "ltiple cases: a)The extra",
         " parts are been truncated",
@@ -7572,11 +7574,11 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 158);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "e're multiple cases: a)",
         "The extra parts are been ",
@@ -7604,11 +7606,11 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 148);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec![
         "dget, there're multiple ",
         "cases: a)The extra parts ",
@@ -7648,7 +7650,7 @@ mod tests_goto_command_line_ex_mode {
         vec![],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -7656,7 +7658,7 @@ mod tests_goto_command_line_ex_mode {
     stateful.goto_cmdline_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
-    let actual_cursor = lock!(tree.clone()).cmdline().input_cursor_viewport();
+    let actual_cursor = cmdline_cursor_viewport(tree.clone());
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 0);
     assert_eq!(actual_cursor.row_idx(), 0);
@@ -7704,7 +7706,7 @@ mod tests_goto_command_line_ex_mode {
       );
     }
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -7739,10 +7741,7 @@ mod tests_goto_command_line_ex_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 4);
       assert_eq!(actual1.row_idx(), 0);
@@ -7783,7 +7782,7 @@ mod tests_goto_insert_mode {
         vec!["Should go to insert mode\n"],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -7802,7 +7801,7 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual_cursor = get_cursor_viewport(tree.clone());
+      let actual_cursor = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual_cursor.line_idx(), 0);
       assert_eq!(actual_cursor.char_idx(), 2);
       assert_eq!(actual_cursor.row_idx(), 0);
@@ -7827,13 +7826,13 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 7);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 7);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["ShBye, ould go to insert mode\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
@@ -7870,7 +7869,7 @@ mod tests_goto_insert_mode {
         vec!["Should go to insert mode\n"],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -7889,7 +7888,7 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual_cursor = get_cursor_viewport(tree.clone());
+      let actual_cursor = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual_cursor.line_idx(), 0);
       assert_eq!(actual_cursor.char_idx(), 3);
       assert_eq!(actual_cursor.row_idx(), 0);
@@ -7914,13 +7913,13 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 8);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 8);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["ShoBye, uld go to insert mode\n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
@@ -7957,7 +7956,7 @@ mod tests_goto_insert_mode {
         vec!["Should go to insert mode\n"],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -7976,7 +7975,7 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual_cursor = get_cursor_viewport(tree.clone());
+      let actual_cursor = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual_cursor.line_idx(), 0);
       assert_eq!(actual_cursor.char_idx(), 24);
       assert_eq!(actual_cursor.row_idx(), 0);
@@ -8001,13 +8000,13 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 29);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 29);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let expect = vec!["Should go to insert modeBye, \n", ""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0)].into_iter().collect();
@@ -8044,7 +8043,7 @@ mod tests_goto_insert_mode {
         vec!["Should go to insert mode\n"],
       );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -8062,7 +8061,7 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual_cursor = get_cursor_viewport(tree.clone());
+      let actual_cursor = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual_cursor.line_idx(), 1);
       assert_eq!(actual_cursor.char_idx(), 0);
       assert_eq!(actual_cursor.row_idx(), 1);
@@ -8087,13 +8086,13 @@ mod tests_goto_insert_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = curwin_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 1);
       assert_eq!(actual1.char_idx(), 5);
       assert_eq!(actual1.row_idx(), 1);
       assert_eq!(actual1.column_idx(), 5);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = curwin_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let line1 = format!("Should go to insert mode{buf_eol}");
       let expect = vec![line1.as_str(), "Bye, \n", ""];
@@ -8145,7 +8144,7 @@ mod tests_goto_insert_mode {
       );
     }
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
