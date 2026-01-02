@@ -51,6 +51,18 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
+pub fn curwin_viewport(tree: TreeArc) -> ViewportArc {
+  lock!(tree).current_window().viewport()
+}
+
+pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  lock!(tree).current_window().cursor_viewport()
+}
+
+pub fn cmdline_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  lock!(tree).cmdline().input_cursor_viewport()
+}
+
 #[cfg(test)]
 mod tests_goto_normal_mode {
   use super::*;
@@ -70,10 +82,7 @@ mod tests_goto_normal_mode {
         lines,
       );
 
-    let prev_cursor_viewport = lock!(tree.clone())
-      .current_window()
-      .unwrap()
-      .cursor_viewport();
+    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -84,10 +93,7 @@ mod tests_goto_normal_mode {
       stateful.goto_cmdline_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .cmdline()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
