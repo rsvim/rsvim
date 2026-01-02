@@ -11,7 +11,6 @@ mod opt_tests;
 use crate::buf::BufferWk;
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
@@ -19,10 +18,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::cursor::Cursor;
-use content::WindowContent;
 use opt::*;
-use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct Window {
@@ -131,7 +127,7 @@ impl EditableWidgetable for Window {
     self.viewport()
   }
 
-  fn set_editable_viewport(&mut self, viewport: ViewportArc) {
+  fn set_editable_viewport(&mut self, viewport: Viewport) {
     self.set_viewport(viewport);
   }
 
@@ -139,10 +135,7 @@ impl EditableWidgetable for Window {
     self.cursor_viewport()
   }
 
-  fn set_editable_cursor_viewport(
-    &mut self,
-    cursor_viewport: CursorViewportArc,
-  ) {
+  fn set_editable_cursor_viewport(&mut self, cursor_viewport: CursorViewport) {
     self.set_cursor_viewport(cursor_viewport);
   }
 

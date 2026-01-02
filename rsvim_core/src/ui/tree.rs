@@ -9,6 +9,10 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::canvas::CursorStyle;
+use crate::ui::viewport::CursorViewport;
+use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
+use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicator;
@@ -750,6 +754,50 @@ impl Tree {
   }
 }
 // Movement }
+
+// Editable {
+impl Tree {
+  /// Get viewport from editable widget.
+  /// NOTE: Only window and cmdline input component are *editable* widgets.
+  pub fn editable_viewport(&self, id: TreeNodeId) -> ViewportArc {
+    match self.node(id).unwrap() {
+      TreeNode::Window(window) => window.viewport(),
+      TreeNode::Cmdline(cmdline) => cmdline.input_viewport(),
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn set_editable_viewport(&mut self, id: TreeNodeId, viewport: Viewport) {
+    match self.node_mut(id).unwrap() {
+      TreeNode::Window(window) => window.set_viewport(viewport),
+      TreeNode::Cmdline(cmdline) => cmdline.set_input_viewport(viewport),
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn editable_cursor_viewport(&self, id: TreeNodeId) -> CursorViewportArc {
+    match self.node(id).unwrap() {
+      TreeNode::Window(window) => window.cursor_viewport(),
+      TreeNode::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn set_editable_cursor_viewport(
+    &mut self,
+    id: TreeNodeId,
+    cursor_viewport: CursorViewport,
+  ) {
+    match self.node_mut(id).unwrap() {
+      TreeNode::Window(window) => window.set_cursor_viewport(cursor_viewport),
+      TreeNode::Cmdline(cmdline) => {
+        cmdline.set_input_cursor_viewport(cursor_viewport)
+      }
+      _ => unreachable!(),
+    }
+  }
+}
+// Editable }
 
 // Global options {
 impl Tree {

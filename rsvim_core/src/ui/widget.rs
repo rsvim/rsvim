@@ -11,7 +11,9 @@ mod window_tests;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::TreeNodeId;
+use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
+use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::window::opt::WindowOptions;
 
@@ -43,14 +45,11 @@ macro_rules! widget_dispatcher {
 pub trait EditableWidgetable {
   fn editable_viewport(&self) -> ViewportArc;
 
-  fn set_editable_viewport(&mut self, viewport: ViewportArc);
+  fn set_editable_viewport(&mut self, viewport: Viewport);
 
   fn editable_cursor_viewport(&self) -> CursorViewportArc;
 
-  fn set_editable_cursor_viewport(
-    &mut self,
-    cursor_viewport: CursorViewportArc,
-  );
+  fn set_editable_cursor_viewport(&mut self, cursor_viewport: CursorViewport);
 
   fn editable_options(&self) -> &WindowOptions;
 
