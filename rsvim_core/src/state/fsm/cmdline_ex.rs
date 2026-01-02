@@ -137,8 +137,7 @@ impl CmdlineExStateful {
     let cmdline_id = tree.cmdline_id().unwrap();
     let current_window_id = tree.current_window_id().unwrap();
 
-    let _old_widget_id =
-      cursor_ops::cursor_jump(&mut tree, current_window_id).unwrap();
+    let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
     debug_assert_eq!(_old_widget_id, Some(cmdline_id));
 
     let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
