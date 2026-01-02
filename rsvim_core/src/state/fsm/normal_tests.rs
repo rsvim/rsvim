@@ -7656,10 +7656,7 @@ mod tests_goto_command_line_ex_mode {
     stateful.goto_cmdline_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
-    let actual_cursor = lock!(tree.clone())
-      .cmdline()
-      .unwrap()
-      .input_cursor_viewport();
+    let actual_cursor = lock!(tree.clone()).cmdline().input_cursor_viewport();
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 0);
     assert_eq!(actual_cursor.row_idx(), 0);
