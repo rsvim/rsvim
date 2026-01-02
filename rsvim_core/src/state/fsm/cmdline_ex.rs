@@ -247,7 +247,7 @@ impl CmdlineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.cmdline_mut().unwrap();
+    let cmdline = tree.cmdline_mut();
     let cmdline_id = cmdline.id();
     debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
     debug_assert!(
