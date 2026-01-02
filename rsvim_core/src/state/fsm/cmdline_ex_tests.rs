@@ -59,6 +59,10 @@ pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   lock!(tree).current_window().cursor_viewport()
 }
 
+pub fn cmdline_viewport(tree: TreeArc) -> ViewportArc {
+  lock!(tree).cmdline().input_viewport()
+}
+
 pub fn cmdline_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   lock!(tree).cmdline().input_cursor_viewport()
 }
@@ -99,7 +103,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 0);
 
-      let viewport = lock!(tree.clone()).cmdline().unwrap().input_viewport();
+      let viewport = cmdline_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0)].into_iter().collect();
@@ -125,7 +129,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CmdlineExStateful::default();
 
     // Insert-1
     {
@@ -278,7 +282,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CmdlineExStateful::default();
 
     // Insert-1
     {
@@ -436,7 +440,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CmdlineExStateful::default();
 
     // Insert-1
     {
