@@ -89,8 +89,8 @@ where
     id: TreeNodeId,
     x: isize,
     y: isize,
-  ) -> IRect {
-    let shape = context.shape(id).unwrap();
+  ) -> Option<IRect> {
+    let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
     self.raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
@@ -101,15 +101,15 @@ where
     id: TreeNodeId,
     x: isize,
     y: isize,
-  ) -> IRect {
-    let shape = context.shape(id).unwrap();
+  ) -> Option<IRect> {
+    let shape = context.shape(id)?;
     let new_pos = point!(x, y);
-    rect!(
+    Some(rect!(
       new_pos.x(),
       new_pos.y(),
       new_pos.x() + shape.width(),
       new_pos.y() + shape.height()
-    )
+    ))
   }
 
   /// Calculates a widget shape by relative motion on its parent:
