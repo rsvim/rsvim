@@ -10,24 +10,14 @@ pub mod indicator_tests;
 use crate::content::TextContentsWk;
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::panel::Panel;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
-use crate::widget_dispatcher;
-use indicator::CmdlineIndicator;
-use indicator::CmdlineIndicatorSymbol;
-use input::CmdlineInput;
-use message::CmdlineMessage;
-use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
