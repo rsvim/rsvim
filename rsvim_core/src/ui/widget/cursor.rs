@@ -71,7 +71,7 @@ impl Cursor {
   }
 
   pub fn set_cursor_style(&mut self, value: CursorStyle) {
-    self.cursor_style = *value;
+    self.cursor_style = value;
   }
 }
 
