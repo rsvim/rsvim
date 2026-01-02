@@ -9,7 +9,6 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
-use crate::ui::widget::EditableWidgetable;
 use compact_str::CompactString;
 use taffy::TaffyResult;
 
@@ -224,18 +223,6 @@ pub fn normalize_to_window_scroll_to(
       let y = viewport_start_line_idx.saturating_add_signed(by_y);
       (x, y)
     }
-    _ => unreachable!(),
-  }
-}
-
-pub fn editable_tree_node_mut(
-  tree: &mut Tree,
-  id: TreeNodeId,
-) -> &mut dyn EditableWidgetable {
-  debug_assert!(tree.node_mut(id).is_some());
-  match tree.node_mut(id).unwrap() {
-    TreeNode::Window(window) => window,
-    TreeNode::Cmdline(cmdline) => cmdline,
     _ => unreachable!(),
   }
 }

@@ -16,7 +16,6 @@ use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
-use crate::ui::widget::EditableWidgetable;
 use crate::ui::widget::Widgetable;
 use opt::*;
 
@@ -120,39 +119,3 @@ impl Window {
   }
 }
 // Viewport }
-
-// Editable Viewport {
-impl EditableWidgetable for Window {
-  fn editable_viewport(&self) -> ViewportArc {
-    self.viewport()
-  }
-
-  fn set_editable_viewport(&mut self, viewport: Viewport) {
-    self.set_viewport(viewport);
-  }
-
-  fn editable_cursor_viewport(&self) -> CursorViewportArc {
-    self.cursor_viewport()
-  }
-
-  fn set_editable_cursor_viewport(&mut self, cursor_viewport: CursorViewport) {
-    self.set_cursor_viewport(cursor_viewport);
-  }
-
-  fn editable_options(&self) -> &WindowOptions {
-    self.options()
-  }
-
-  fn editable_actual_shape(&self) -> &U16Rect {
-    self.content().actual_shape()
-  }
-
-  fn move_editable_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
-    self.move_cursor_to(x, y)
-  }
-
-  fn editable_cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id()
-  }
-}
-// Editable Viewport }
