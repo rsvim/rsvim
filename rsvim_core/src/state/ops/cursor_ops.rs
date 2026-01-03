@@ -383,16 +383,16 @@ pub fn raw_viewport_scroll_to(
   }
 
   // Sync the viewport
-  let new_viewport = Viewport::view(
+  let new_viewport = Viewport::to_arc(Viewport::view(
     tree.editable_options(id),
     text,
     &tree.editable_actual_shape(id).size(),
     line_idx,
     column_idx,
-  );
+  ));
   tree.set_editable_viewport(id, new_viewport.clone());
 
-  Some(Viewport::to_arc(new_viewport))
+  Some(new_viewport)
 }
 
 fn _max_len_chars_since_line(
