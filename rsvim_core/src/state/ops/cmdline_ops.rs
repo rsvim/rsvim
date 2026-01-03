@@ -86,7 +86,7 @@ pub fn cmdline_clear_message(
   message_text.clear();
 
   let (opts, message_actual_size) = {
-    let cmdline = tree.cmdline();
+    let cmdline = tree.cmdline().unwrap();
     let opts = *cmdline.options();
     let message_id = cmdline.message_id();
     let actual_size = match tree.node(message_id).unwrap() {
@@ -101,6 +101,7 @@ pub fn cmdline_clear_message(
 
   tree
     .cmdline_mut()
+    .unwrap()
     .set_message_viewport(new_message_viewport);
 }
 
@@ -111,7 +112,7 @@ pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
   input_text.clear();
 
   let (opts, input_actual_size) = {
-    let cmdline = tree.cmdline();
+    let cmdline = tree.cmdline().unwrap();
     let opts = *cmdline.options();
     let input_id = cmdline.input_id();
     let actual_size = match tree.node(input_id).unwrap() {
@@ -126,8 +127,12 @@ pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
   let new_input_cursor_viewport =
     CursorViewport::from_top_left(&new_input_viewport, input_text);
 
-  tree.cmdline_mut().set_input_viewport(new_input_viewport);
   tree
     .cmdline_mut()
+    .unwrap()
+    .set_input_viewport(new_input_viewport);
+  tree
+    .cmdline_mut()
+    .unwrap()
     .set_input_cursor_viewport(new_input_cursor_viewport);
 }
