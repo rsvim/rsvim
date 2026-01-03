@@ -51,7 +51,7 @@ pub fn make_tree_with_buffers(
       Arc::downgrade(&buf),
     )
     .unwrap();
-  let window_content_id = tree.window(window_id).content_id();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
 
   // Cursor.
   let _cursor_id = tree
