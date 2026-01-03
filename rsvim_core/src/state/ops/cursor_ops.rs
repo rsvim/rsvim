@@ -236,17 +236,17 @@ fn _update_viewport(
   start_line: usize,
   start_column: usize,
 ) -> ViewportArc {
-  let new_viewport = Viewport::view(
+  let new_viewport = Viewport::to_arc(Viewport::view(
     tree.editable_options(id),
     text,
     &tree.editable_actual_shape(id).size(),
     start_line,
     start_column,
-  );
+  ));
 
   tree.set_editable_viewport(id, new_viewport.clone());
 
-  Viewport::to_arc(new_viewport)
+  new_viewport
 }
 
 // NOTE: This API can be used on "window" and "cmdline-input" widgets, but not
