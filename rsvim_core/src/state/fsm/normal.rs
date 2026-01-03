@@ -119,7 +119,10 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Remove cursor from current window
-    tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBar);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
     let cmdline_id = tree.cmdline_id().unwrap();
     cursor_ops::cursor_jump(&mut tree, cmdline_id);
     tree.reserved_move_cursor_position_to(0, 0).unwrap();
@@ -173,7 +176,7 @@ impl NormalStateful {
     match insert_motion {
       GotoInsertModeVariant::Keep => {}
       GotoInsertModeVariant::Append => {
-        let current_window = tree.current_window_mut();
+        let current_window = tree.current_window_mut().unwrap();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
