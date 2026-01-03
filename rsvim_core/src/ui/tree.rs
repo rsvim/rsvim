@@ -341,14 +341,14 @@ impl Tree {
 
   /// Command-line widget.
   /// It panics if command-line doesn't exist.
-  pub fn cmdline(&self) -> &Cmdline {
-    let cmdline_id = self.cmdline_id.unwrap();
-    let n = self.node(cmdline_id).unwrap();
+  pub fn cmdline(&self) -> Option<&Cmdline> {
+    let cmdline_id = self.cmdline_id?;
+    let n = self.node(cmdline_id)?;
     debug_assert!(matches!(n, TreeNode::Cmdline(_)));
     match n {
       TreeNode::Cmdline(c) => {
         debug_assert_eq!(c.id(), cmdline_id);
-        c
+        Some(c)
       }
       _ => unreachable!(),
     }
@@ -356,14 +356,14 @@ impl Tree {
 
   // Mutable command-line widget.
   /// It panics if command-line doesn't exist.
-  pub fn cmdline_mut(&mut self) -> &mut Cmdline {
-    let cmdline_id = self.cmdline_id.unwrap();
-    let n = self.node_mut(cmdline_id).unwrap();
+  pub fn cmdline_mut(&mut self) -> Option<&mut Cmdline> {
+    let cmdline_id = self.cmdline_id?;
+    let n = self.node_mut(cmdline_id)?;
     debug_assert!(matches!(n, TreeNode::Cmdline(_)));
     match n {
       TreeNode::Cmdline(c) => {
         debug_assert_eq!(c.id(), cmdline_id);
-        c
+        Some(c)
       }
       _ => unreachable!(),
     }
