@@ -335,8 +335,8 @@ impl Tree {
 
   /// Mutable current window widget.
   /// It panics if current window doesn't exist.
-  pub fn current_window_mut(&mut self) -> &mut Window {
-    self.window_mut(self.current_window_id.unwrap())
+  pub fn current_window_mut(&mut self) -> Option<&mut Window> {
+    self.window_mut(self.current_window_id?)
   }
 
   /// Command-line widget.
