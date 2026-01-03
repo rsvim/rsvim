@@ -21,7 +21,7 @@ pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub static DEFAULT_SHAPE: LazyLock<IRect> = LazyLock::new(|| rect!(0, 0, 0, 0));
 pub static DEFAULT_ACTUAL_SHAPE: LazyLock<U16Rect> =
   LazyLock::new(|| rect!(0, 0, 0, 0));
-pub const DEFAULT_ZINDEX: isize = 0;
+pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
 
 /// Next unique UI widget ID.
@@ -469,7 +469,7 @@ impl TreeContext {
     self.zindexes.get(&id).copied()
   }
 
-  pub fn set_zindex(&mut self, id: TreeNodeId, value: isize) -> Option<isize> {
+  pub fn set_zindex(&mut self, id: TreeNodeId, value: usize) -> Option<usize> {
     self.zindexes.insert(id, value)
   }
 
@@ -575,7 +575,7 @@ impl TreeContext {
   pub fn new_leaf(
     &mut self,
     style: Style,
-    zindex: isize,
+    zindex: usize,
     truncate_policy: TruncatePolicy,
     shape: IRect,
     actual_shape: U16Rect,
