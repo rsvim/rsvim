@@ -319,7 +319,7 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let (buffer, viewport, current_window_id) = {
-      let current_window = tree.current_window_mut();
+      let current_window = tree.current_window_mut().unwrap();
       let buffer = current_window.buffer().upgrade().unwrap();
       let viewport = current_window.viewport();
       (buffer, viewport, current_window.id())
