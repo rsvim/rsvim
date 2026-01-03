@@ -276,9 +276,9 @@ impl Tree {
     let n = self.node(cursor_id)?;
     debug_assert!(matches!(n, TreeNode::Cursor(_)));
     match n {
-      TreeNode::Cursor(cur) => {
-        debug_assert_eq!(cur.id(), cursor_id);
-        Some(cur)
+      TreeNode::Cursor(c) => {
+        debug_assert_eq!(c.id(), cursor_id);
+        Some(c)
       }
       _ => unreachable!(),
     }
@@ -286,14 +286,14 @@ impl Tree {
 
   /// Mutable cursor widget.
   /// It panics if cursor doesn't exist.
-  pub fn cursor_mut(&mut self) -> &mut Cursor {
-    let cursor_id = self.cursor_id.unwrap();
-    let n = self.node_mut(cursor_id).unwrap();
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    let cursor_id = self.cursor_id?;
+    let n = self.node_mut(cursor_id)?;
     debug_assert!(matches!(n, TreeNode::Cursor(_)));
     match n {
       TreeNode::Cursor(c) => {
         debug_assert_eq!(c.id(), cursor_id);
-        c
+        Some(c)
       }
       _ => unreachable!(),
     }
@@ -301,13 +301,13 @@ impl Tree {
 
   /// Window widget.
   /// It panics if window doesn't exist.
-  pub fn window(&self, id: TreeNodeId) -> &Window {
-    let n = self.node(id).unwrap();
+  pub fn window(&self, id: TreeNodeId) -> Option<&Window> {
+    let n = self.node(id)?;
     debug_assert!(matches!(n, TreeNode::Window(_)));
     match n {
       TreeNode::Window(w) => {
         debug_assert_eq!(w.id(), id);
-        w
+        Some(w)
       }
       _ => unreachable!(),
     }
@@ -315,8 +315,8 @@ impl Tree {
 
   /// Mutable window widget.
   /// It panics if window doesn't exist.
-  pub fn window_mut(&mut self, id: TreeNodeId) -> &mut Window {
-    let n = self.node_mut(id).unwrap();
+  pub fn window_mut(&mut self, id: TreeNodeId) -> Option<&mut Window> {
+    let n = self.node_mut(id)?;
     debug_assert!(matches!(n, TreeNode::Window(_)));
     match n {
       TreeNode::Window(w) => {
