@@ -3933,7 +3933,7 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         15,
@@ -3970,7 +3970,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         1,
@@ -4002,7 +4002,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         3,
@@ -4033,7 +4033,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         3,
@@ -4127,7 +4127,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         40,
@@ -4159,7 +4159,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "t\tinside.\n", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         130,
@@ -4191,7 +4191,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "mpletely\tp", ":\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         100,
@@ -4223,7 +4223,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "", "not\tset.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         100,
@@ -4255,7 +4255,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         50,
@@ -4287,7 +4287,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -4381,7 +4381,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         40,
@@ -4413,7 +4413,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "t\tinside.\n", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         130,
@@ -4445,7 +4445,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "to\tcom", "etely\tput:"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -4477,7 +4477,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "inside.\n", "", "options\ta"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -4515,7 +4515,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -4547,7 +4547,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -4635,7 +4635,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         12,
@@ -4668,7 +4668,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         43,
@@ -4701,7 +4701,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         44,
@@ -4730,7 +4730,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["", "t lines.\n", " we want to test:", "completely put in"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         52,
@@ -4759,7 +4759,7 @@ mod tests_search_anchor_downward_nowrap {
         vec!["", " lines.\n", "we want to test:\n", "ompletely put ins"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         53,
@@ -4787,7 +4787,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "s.\n", "nt to test:\n", "tely put inside.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         60,
@@ -4820,7 +4820,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         40,
@@ -4905,7 +4905,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         40,
@@ -4933,7 +4933,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "not\tset.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         99,
@@ -4961,7 +4961,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["", "", "", "too\tlong?\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         168,
@@ -4994,7 +4994,7 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         25,
@@ -5091,7 +5091,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         40,
@@ -5123,7 +5123,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "t\tinside.\r\n", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         130,
@@ -5155,7 +5155,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "to\tcom", "etely\tput:"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -5187,7 +5187,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "inside.\r\n", "", "options\ta"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -5225,7 +5225,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -5257,7 +5257,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -5354,7 +5354,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         40,
@@ -5386,7 +5386,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "t\tinside.\r", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         130,
@@ -5418,7 +5418,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "", "to\tcom", "etely\tput:"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -5450,7 +5450,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "", "inside.\r", "", "options\ta"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -5488,7 +5488,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -5520,7 +5520,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -5611,7 +5611,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         12,
@@ -5644,7 +5644,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         43,
@@ -5677,7 +5677,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         44,
@@ -5706,7 +5706,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", "t lines.\r\n", " we want to test:", "completely put in"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         52,
@@ -5739,7 +5739,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         53,
@@ -5768,7 +5768,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", "s.\r\n", "nt to test:\r\n", "tely put inside.\r\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         60,
@@ -5801,7 +5801,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         40,
@@ -5888,7 +5888,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         12,
@@ -5921,7 +5921,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         43,
@@ -5954,7 +5954,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         44,
@@ -5983,7 +5983,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", "t lines.\r", " we want to test:", "completely put in"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         52,
@@ -6012,7 +6012,7 @@ mod tests_search_anchor_downward_nowrap_eol {
         vec!["", " lines.\r", "we want to test:\r", "ompletely put ins"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         53,
@@ -6040,7 +6040,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       let expect = vec!["", "s.\r", "nt to test:\r", "tely put inside.\r"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         60,
@@ -6073,7 +6073,7 @@ mod tests_search_anchor_downward_nowrap_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         40,
@@ -6163,7 +6163,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         15,
@@ -6197,7 +6197,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         60,
@@ -6227,7 +6227,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -6261,7 +6261,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         82,
@@ -6295,7 +6295,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         82,
@@ -6323,7 +6323,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -6409,7 +6409,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         43,
@@ -6443,7 +6443,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         58,
@@ -6473,7 +6473,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -6507,7 +6507,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         82,
@@ -6541,7 +6541,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         10,
@@ -6569,7 +6569,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -6648,7 +6648,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         37,
@@ -6677,7 +6677,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         37,
@@ -6762,7 +6762,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         53,
@@ -6790,7 +6790,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         58,
@@ -6818,7 +6818,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         58,
@@ -6847,7 +6847,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         97,
@@ -6880,7 +6880,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         314,
@@ -6913,7 +6913,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         314,
@@ -6946,7 +6946,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         314,
@@ -6974,7 +6974,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       let expect = vec!["7. The extra part", "s...", "", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         314,
@@ -7048,7 +7048,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         20,
@@ -7122,7 +7122,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         vec!["2nd.\n", "3rd.\n", "AAAAAAAAAA", "BBBBBBBBBB", "5th.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         20,
@@ -7214,7 +7214,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         53,
@@ -7242,7 +7242,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\r\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         58,
@@ -7270,7 +7270,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\r\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         58,
@@ -7299,7 +7299,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         97,
@@ -7332,7 +7332,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         314,
@@ -7365,7 +7365,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         314,
@@ -7398,7 +7398,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         314,
@@ -7426,7 +7426,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["7. The extra part", "s...", "", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         314,
@@ -7514,7 +7514,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         53,
@@ -7542,7 +7542,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\r"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         58,
@@ -7570,7 +7570,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\r"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         58,
@@ -7599,7 +7599,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         97,
@@ -7632,7 +7632,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         314,
@@ -7665,7 +7665,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         314,
@@ -7698,7 +7698,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         314,
@@ -7726,7 +7726,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       let expect = vec!["7. The extra part", "s...", "", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         314,
@@ -7813,7 +7813,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         20,
@@ -7890,7 +7890,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         vec!["1st.\r", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r", "4th.\r"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         20,
@@ -7980,7 +7980,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         15,
@@ -8009,7 +8009,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         vec!["enough\t", "to\t", "completely", "\tput", "\tinside.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         60,
@@ -8038,7 +8038,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -8072,7 +8072,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         82,
@@ -8101,7 +8101,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         vec!["if\t", "either\t", "line-wrap\t", "or\tword-", "wrap\t"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         82,
@@ -8129,7 +8129,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -8215,7 +8215,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         43,
@@ -8244,7 +8244,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         vec!["enough\t", "to\t", "completely", "\tput", "\tinside.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         58,
@@ -8273,7 +8273,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -8307,7 +8307,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         82,
@@ -8341,7 +8341,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         10,
@@ -8369,7 +8369,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -8447,7 +8447,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec!["is\t", "small\t", "enough\tto", "\t", "completely"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         37,
@@ -8475,7 +8475,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         37,
@@ -8511,7 +8511,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         30,
@@ -8540,7 +8540,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         vec!["are split into ", "the\tnext", "\trow,", "\tif", "\teither"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         30,
@@ -8568,7 +8568,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         82,
@@ -8647,7 +8647,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         vec!["enough\t", "to\t", "completely", "\tput", "\tinside.\n"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         70,
@@ -8735,7 +8735,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -8767,7 +8767,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["is\tsmall", "long", "runcated if", "into the\tn", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         40,
@@ -8799,7 +8799,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["to\tcom", "etely\tput:", "e-wrap\tand", "if\te", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         60,
@@ -8831,7 +8831,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["to\tcom", "etely\tput:", "e-wrap\tand", "if\te", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         38,
@@ -8863,7 +8863,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["put\tinsi", "", "wrap\toptio", "line-wrap\t", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         55,
@@ -8901,7 +8901,7 @@ mod tests_search_anchor_upward_nowrap {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         30,
@@ -8939,7 +8939,7 @@ mod tests_search_anchor_upward_nowrap {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         32,
@@ -9059,7 +9059,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -9091,7 +9091,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["put\tinsid", "", "rap\toption", "ine-wrap\to", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         70,
@@ -9123,7 +9123,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["inside.\n", "", "options\ta", "or\tw", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -9155,7 +9155,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["o\tcomplete", "\tput:\n", "p\tand", "if\teither", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -9187,7 +9187,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["o\tcomplete", "\tput:\n", "p\tand", "if\teither", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -9225,7 +9225,7 @@ mod tests_search_anchor_upward_nowrap {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         30,
@@ -9263,7 +9263,7 @@ mod tests_search_anchor_upward_nowrap {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         32,
@@ -9384,7 +9384,7 @@ mod tests_search_anchor_upward_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         24,
@@ -9439,7 +9439,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["", "", "s in the buffer.\n", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         318,
@@ -9467,7 +9467,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["", "", "es in the buffer.", ""];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         285,
@@ -9495,7 +9495,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["", ".\n", "are", ""];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         102,
@@ -9523,7 +9523,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["", "t.\n", "\tare", ""];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         90,
@@ -9551,7 +9551,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec![":\n", "d\tword-wra", "either\tlin", ""];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         48,
@@ -9579,7 +9579,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["mpletely\tp", ":\n", "d\tword-wra", "either\tlin"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         48,
@@ -9607,7 +9607,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["test:\n", "\tsmall", "long\tt", "cated if\tb"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         48,
@@ -9635,7 +9635,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec![".\n", "t to test:\n", "is\tsmal", "o\tlong"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         48,
@@ -9664,7 +9664,7 @@ mod tests_search_anchor_upward_nowrap {
         vec!["!\n", "ite simple and sm", " contains several", "hen\tthe"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         48,
@@ -9748,7 +9748,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -9782,7 +9782,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         280,
@@ -9811,7 +9811,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["and\t", "word-wrap\t", "options\tar", "e\tnot", "\tset.\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         60,
@@ -9841,7 +9841,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -9875,7 +9875,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         82,
@@ -9909,7 +9909,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         82,
@@ -10045,7 +10045,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -10074,7 +10074,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         70,
@@ -10108,7 +10108,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -10137,7 +10137,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -10166,7 +10166,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -10200,7 +10200,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         30,
@@ -10234,7 +10234,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         32,
@@ -10352,7 +10352,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -10478,7 +10478,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -10652,7 +10652,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -10686,7 +10686,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         295,
@@ -10715,7 +10715,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         vec!["and\t", "word-wrap\t", "options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         60,
@@ -10744,7 +10744,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -10773,7 +10773,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         vec!["enough\t", "to\t", "completely", "\tput", "\tinside.\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         82,
@@ -10807,7 +10807,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         82,
@@ -10943,7 +10943,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec![""];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         7,
         0,
@@ -10972,7 +10972,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         70,
@@ -11006,7 +11006,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -11034,7 +11034,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec!["too\t", "long\tto", "\t", "completely", "\tput:\n"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         35,
@@ -11062,7 +11062,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       let expect = vec!["ine\tis", "\tsmall", "\tenough", "\tto", "\t"];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -11096,7 +11096,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         30,
@@ -11130,7 +11130,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         32,
@@ -11261,7 +11261,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         10,
         0,
@@ -11308,7 +11308,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         70,
@@ -11355,7 +11355,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       ];
 
       let actual = search_up_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         5,
         80,
@@ -11461,7 +11461,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -11499,7 +11499,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -11532,7 +11532,7 @@ mod tests_search_anchor_horizontally_nowrap {
         vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         3,
@@ -11570,7 +11570,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         38,
@@ -11608,7 +11608,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         39,
@@ -11647,7 +11647,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         40,
@@ -11685,7 +11685,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         41,
@@ -11723,7 +11723,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         40,
@@ -11761,7 +11761,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         39,
@@ -11799,7 +11799,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         38,
@@ -11837,7 +11837,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         37,
@@ -11875,7 +11875,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         2,
@@ -11913,7 +11913,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -11951,7 +11951,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -12039,7 +12039,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -12071,7 +12071,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         29,
@@ -12103,7 +12103,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         28,
@@ -12135,7 +12135,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -12167,7 +12167,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "\tenough", "to\tcomp"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -12199,7 +12199,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "l\tenough", "to\tcom"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -12231,7 +12231,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "ll\tenough", "to\tco"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -12263,7 +12263,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         23,
@@ -12295,7 +12295,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         22,
@@ -12327,7 +12327,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         21,
@@ -12359,7 +12359,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "test:\n", "\tsmall", "long\tt"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -12391,7 +12391,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -12423,7 +12423,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -12455,7 +12455,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", " test:\n", "s\tsmall", "long\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -12549,7 +12549,7 @@ mod tests_search_anchor_horizontally_nowrap {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -12581,7 +12581,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "ines.\n", " want to test:\n", "is\t", "too\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -12613,7 +12613,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", ".\n", "t to test:\n", "is\tsmal", "o\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -12645,7 +12645,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "\n", " to test:\n", "is\tsmall", "\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -12677,7 +12677,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", ":\n", "small\t", "long\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -12709,7 +12709,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "\n", "small\te", "ong\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -12741,7 +12741,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         30,
@@ -12773,7 +12773,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         31,
@@ -12805,7 +12805,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -12837,7 +12837,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\t", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -12869,7 +12869,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tt", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -12901,7 +12901,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -12933,7 +12933,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "to\t", "mpletely\tp"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -12965,7 +12965,7 @@ mod tests_search_anchor_horizontally_nowrap {
       let expect = vec!["", "", "", "to\tc", "pletely\tpu"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         37,
@@ -13060,7 +13060,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -13092,7 +13092,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         29,
@@ -13124,7 +13124,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         28,
@@ -13156,7 +13156,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -13188,7 +13188,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "\tenough", "to\tcomp"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -13220,7 +13220,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "l\tenough", "to\tcom"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -13252,7 +13252,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "ll\tenough", "to\tco"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -13284,7 +13284,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         23,
@@ -13316,7 +13316,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         22,
@@ -13348,7 +13348,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         21,
@@ -13380,7 +13380,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "test:\r\n", "\tsmall", "long\tt"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -13412,7 +13412,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -13444,7 +13444,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -13476,7 +13476,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r\n", "s\tsmall", "long\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -13567,7 +13567,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -13599,7 +13599,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         29,
@@ -13631,7 +13631,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         28,
@@ -13663,7 +13663,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -13695,7 +13695,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "\tenough", "to\tcomp"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -13727,7 +13727,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "l\tenough", "to\tcom"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -13759,7 +13759,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "ll\tenough", "to\tco"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -13791,7 +13791,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         23,
@@ -13823,7 +13823,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         22,
@@ -13855,7 +13855,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         21,
@@ -13887,7 +13887,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "test:\r", "\tsmall", "long\tt"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -13919,7 +13919,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -13951,7 +13951,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -13983,7 +13983,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", " test:\r", "s\tsmall", "long\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -14080,7 +14080,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -14113,7 +14113,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
         vec!["", "ines.\r\n", " want to test:\r\n", "is\t", "too\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -14145,7 +14145,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", ".\r\n", "t to test:\r\n", "is\tsmal", "o\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -14177,7 +14177,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "\r\n", " to test:\r\n", "is\tsmall", "\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -14209,7 +14209,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", ":\r\n", "small\t", "long\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -14241,7 +14241,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "\r\n", "small\te", "ong\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -14273,7 +14273,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         30,
@@ -14305,7 +14305,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         31,
@@ -14337,7 +14337,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -14369,7 +14369,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\t", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -14401,7 +14401,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tt", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -14433,7 +14433,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -14465,7 +14465,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "to\t", "mpletely\tp"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -14497,7 +14497,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "to\tc", "pletely\tpu"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         37,
@@ -14594,7 +14594,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         19,
@@ -14626,7 +14626,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "ines.\r", " want to test:\r", "is\t", "too\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         20,
@@ -14658,7 +14658,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", ".\r", "t to test:\r", "is\tsmal", "o\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -14690,7 +14690,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "\r", " to test:\r", "is\tsmall", "\tlong"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -14722,7 +14722,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", ":\r", "small\t", "long\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -14754,7 +14754,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "\r", "small\te", "ong\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -14786,7 +14786,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "small\tenou", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         30,
@@ -14818,7 +14818,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         31,
@@ -14850,7 +14850,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "all\tenough", "to\tc"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -14882,7 +14882,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\t", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -14914,7 +14914,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tt", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -14946,7 +14946,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "enough\tto", "completely"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -14978,7 +14978,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "to\t", "mpletely\tp"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -15010,7 +15010,7 @@ mod tests_search_anchor_horizontally_nowrap_eol {
       let expect = vec!["", "", "", "to\tc", "pletely\tpu"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         37,
@@ -15104,7 +15104,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -15138,7 +15138,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -15172,7 +15172,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         3,
@@ -15206,7 +15206,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         46,
@@ -15240,7 +15240,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         47,
@@ -15274,7 +15274,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         48,
@@ -15308,7 +15308,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         49,
@@ -15342,7 +15342,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         50,
@@ -15376,7 +15376,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         51,
@@ -15410,7 +15410,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         50,
@@ -15444,7 +15444,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         49,
@@ -15478,7 +15478,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         48,
@@ -15512,7 +15512,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         4,
@@ -15546,7 +15546,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         3,
@@ -15580,7 +15580,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         2,
@@ -15614,7 +15614,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -15648,7 +15648,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -15728,7 +15728,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -15756,7 +15756,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         10,
@@ -15784,7 +15784,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         9,
@@ -15812,7 +15812,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         8,
@@ -15840,7 +15840,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["n\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         7,
@@ -15868,7 +15868,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -15896,7 +15896,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -15924,7 +15924,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["hen\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         5,
@@ -15952,7 +15952,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         4,
@@ -15980,7 +15980,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec![" When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         3,
@@ -16008,7 +16008,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec![". When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         2,
@@ -16037,7 +16037,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         vec!["1. When\tth", "e\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         1,
@@ -16065,7 +16065,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -16093,7 +16093,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -16121,7 +16121,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -16201,7 +16201,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -16229,7 +16229,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -16257,7 +16257,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -16286,7 +16286,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -16315,7 +16315,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -16344,7 +16344,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -16372,7 +16372,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -16400,7 +16400,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -16428,7 +16428,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -16457,7 +16457,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -16539,7 +16539,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         57,
@@ -16572,7 +16572,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         58,
@@ -16605,7 +16605,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         65,
@@ -16633,7 +16633,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         85,
@@ -16661,7 +16661,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         90,
@@ -16694,7 +16694,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         299,
@@ -16727,7 +16727,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         300,
@@ -16755,7 +16755,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["\tand word-", "wrap options", "\tare", "\tnot"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         55,
@@ -16783,7 +16783,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         85,
@@ -16811,7 +16811,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         96,
@@ -16844,7 +16844,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         96,
@@ -16877,7 +16877,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         4,
@@ -16964,7 +16964,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -16992,7 +16992,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         10,
@@ -17020,7 +17020,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         9,
@@ -17048,7 +17048,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         8,
@@ -17076,7 +17076,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["n\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         7,
@@ -17104,7 +17104,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -17132,7 +17132,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -17160,7 +17160,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["hen\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         5,
@@ -17188,7 +17188,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         4,
@@ -17216,7 +17216,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec![" When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         3,
@@ -17244,7 +17244,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec![". When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         2,
@@ -17273,7 +17273,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\tth", "e\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         1,
@@ -17301,7 +17301,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -17329,7 +17329,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -17357,7 +17357,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -17440,7 +17440,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -17468,7 +17468,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         10,
@@ -17496,7 +17496,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         9,
@@ -17524,7 +17524,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         8,
@@ -17552,7 +17552,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["n\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         7,
@@ -17580,7 +17580,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -17608,7 +17608,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["en\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         6,
@@ -17636,7 +17636,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["hen\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         5,
@@ -17664,7 +17664,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         4,
@@ -17692,7 +17692,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec![" When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         3,
@@ -17720,7 +17720,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec![". When\tthe", "\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         2,
@@ -17749,7 +17749,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\tth", "e\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         1,
@@ -17777,7 +17777,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -17805,7 +17805,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -17833,7 +17833,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -17916,7 +17916,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -17944,7 +17944,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -17972,7 +17972,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -18001,7 +18001,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -18030,7 +18030,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -18059,7 +18059,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -18087,7 +18087,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -18115,7 +18115,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -18143,7 +18143,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -18172,7 +18172,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -18255,7 +18255,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         0,
@@ -18283,7 +18283,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         24,
@@ -18311,7 +18311,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\t1. When", "\tthe", "\tline", "\tis", "\tsmall"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         25,
@@ -18340,7 +18340,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         26,
@@ -18369,7 +18369,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         27,
@@ -18398,7 +18398,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["1. When\t", "the\tline", "\tis", "\tsmall", "\tenough"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         32,
@@ -18426,7 +18426,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         33,
@@ -18454,7 +18454,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         34,
@@ -18482,7 +18482,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["the\t", "line\tis", "\tsmall", "\tenough", "\tto"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         35,
@@ -18511,7 +18511,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         36,
@@ -18596,7 +18596,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         57,
@@ -18629,7 +18629,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         58,
@@ -18662,7 +18662,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         65,
@@ -18691,7 +18691,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         85,
@@ -18720,7 +18720,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         90,
@@ -18753,7 +18753,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         299,
@@ -18786,7 +18786,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         300,
@@ -18814,7 +18814,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\tand word-", "wrap options", "\tare", "\tnot"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         55,
@@ -18843,7 +18843,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         85,
@@ -18872,7 +18872,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
         vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         96,
@@ -18905,7 +18905,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         96,
@@ -18938,7 +18938,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         4,
@@ -19023,7 +19023,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         57,
@@ -19056,7 +19056,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         58,
@@ -19089,7 +19089,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         65,
@@ -19117,7 +19117,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         85,
@@ -19145,7 +19145,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         90,
@@ -19178,7 +19178,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         299,
@@ -19211,7 +19211,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         2,
         300,
@@ -19239,7 +19239,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["\tand word-", "wrap options", "\tare", "\tnot"];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         55,
@@ -19267,7 +19267,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         85,
@@ -19295,7 +19295,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       let expect = vec!["and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         3,
         96,
@@ -19328,7 +19328,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         96,
@@ -19361,7 +19361,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak_eol {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         4,
         4,
@@ -19451,7 +19451,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         5,
@@ -19485,7 +19485,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         6,
@@ -19519,7 +19519,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         13,
@@ -19553,7 +19553,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         10,
@@ -19587,7 +19587,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         1,
         2,
@@ -19673,7 +19673,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -19707,7 +19707,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -19741,7 +19741,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         2,
@@ -19775,7 +19775,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         47,
@@ -19809,7 +19809,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         48,
@@ -19843,7 +19843,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         49,
@@ -19877,7 +19877,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         50,
@@ -19911,7 +19911,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         51,
@@ -19945,7 +19945,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         52,
@@ -19979,7 +19979,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         15,
@@ -20065,7 +20065,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_down_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -20099,7 +20099,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         52,
@@ -20133,7 +20133,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         15,
@@ -20167,7 +20167,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         14,
@@ -20201,7 +20201,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         13,
@@ -20235,7 +20235,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         9,
@@ -20269,7 +20269,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         8,
@@ -20303,7 +20303,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         7,
@@ -20337,7 +20337,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         6,
@@ -20371,7 +20371,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         5,
@@ -20405,7 +20405,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         4,
@@ -20439,7 +20439,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         3,
@@ -20473,7 +20473,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         2,
@@ -20507,7 +20507,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         1,
@@ -20541,7 +20541,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         6,
         0,
@@ -20619,7 +20619,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         63,
@@ -20652,7 +20652,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         68,
@@ -20685,7 +20685,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         69,
@@ -20718,7 +20718,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         85,
@@ -20751,7 +20751,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         86,
@@ -20784,7 +20784,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         102,
@@ -20817,7 +20817,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         103,
@@ -20850,7 +20850,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         119,
@@ -20883,7 +20883,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         120,
@@ -20916,7 +20916,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         136,
@@ -20949,7 +20949,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         142,
@@ -20982,7 +20982,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         143,
@@ -21015,7 +21015,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         144,
@@ -21048,7 +21048,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         80,
@@ -21126,7 +21126,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_right_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         144,
@@ -21159,7 +21159,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         80,
@@ -21192,7 +21192,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         79,
@@ -21225,7 +21225,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         78,
@@ -21258,7 +21258,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         69,
@@ -21291,7 +21291,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         68,
@@ -21324,7 +21324,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         67,
@@ -21357,7 +21357,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       ];
 
       let actual = search_left_viewport(
-        tree.window_mut(window_id),
+        tree.window_mut(window_id).unwrap(),
         buf.clone(),
         0,
         64,
