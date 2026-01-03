@@ -40,7 +40,7 @@ pub fn init_default_window(
     .unwrap();
 
   // Initialize cursor inside the default window.
-  let window_content_id = tree.window(window_id).content_id();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
   let _cursor_id = tree
     .new_cursor_with_parent(
       window_content_id,
