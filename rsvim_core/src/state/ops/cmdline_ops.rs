@@ -33,8 +33,13 @@ fn set_message(
     (opts, actual_size)
   };
 
-  let new_message_viewport =
-    Viewport::view(&opts, message_text, &message_actual_size, 0, 0);
+  let new_message_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    message_text,
+    &message_actual_size,
+    0,
+    0,
+  ));
 
   tree
     .cmdline_mut()
@@ -96,13 +101,15 @@ pub fn cmdline_clear_message(
     (opts, actual_size)
   };
 
-  let new_message_viewport =
-    Viewport::view(&opts, message_text, &message_actual_size, 0, 0);
+  let new_message_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    message_text,
+    &message_actual_size,
+    0,
+    0,
+  ));
 
-  tree
-    .cmdline_mut()
-    .unwrap()
-    .set_message_viewport(new_message_viewport);
+  tree.set_cmdline_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
@@ -126,13 +133,13 @@ pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
     Viewport::view(&opts, input_text, &input_actual_size, 0, 0);
   let new_input_cursor_viewport =
     CursorViewport::from_top_left(&new_input_viewport, input_text);
+  let new_input_viewport = Viewport::to_arc(new_input_viewport);
+  let new_input_cursor_viewport =
+    CursorViewport::to_arc(new_input_cursor_viewport);
 
-  tree
-    .cmdline_mut()
-    .unwrap()
-    .set_input_viewport(new_input_viewport);
-  tree
-    .cmdline_mut()
-    .unwrap()
-    .set_input_cursor_viewport(new_input_cursor_viewport);
+  tree.set_editable_viewport(tree.cmdline_id().unwrap(), new_input_viewport);
+  tree.set_editable_cursor_viewport(
+    tree.cmdline_id().unwrap(),
+    new_input_cursor_viewport,
+  );
 }

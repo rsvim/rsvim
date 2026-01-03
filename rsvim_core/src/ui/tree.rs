@@ -839,6 +839,23 @@ impl Tree {
     };
     self.node(editable_id).unwrap().actual_shape()
   }
+
+  pub fn set_cmdline_message_viewport(&mut self, viewport: ViewportArc) {
+    let cmdline_id = self.cmdline_id().unwrap();
+    match self.node_mut(cmdline_id).unwrap() {
+      TreeNode::Cmdline(cmdline) => {
+        cmdline.set_message_viewport(viewport.clone());
+        let message_id = cmdline.message_id();
+        match self.node_mut(message_id).unwrap() {
+          TreeNode::CmdlineMessage(message) => {
+            message.set_viewport(Arc::downgrade(&viewport))
+          }
+          _ => unreachable!(),
+        }
+      }
+      _ => unreachable!(),
+    }
+  }
 }
 // Editable }
 
