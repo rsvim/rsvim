@@ -211,7 +211,7 @@ impl InsertStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut();
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
