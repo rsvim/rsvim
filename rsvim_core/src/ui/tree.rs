@@ -810,10 +810,12 @@ impl Tree {
   pub fn set_editable_cursor_viewport(
     &mut self,
     id: TreeNodeId,
-    cursor_viewport: CursorViewport,
+    cursor_viewport: CursorViewportArc,
   ) {
     match self.node_mut(id).unwrap() {
-      TreeNode::Window(window) => window.set_cursor_viewport(cursor_viewport),
+      TreeNode::Window(window) => {
+        window.set_cursor_viewport(cursor_viewport.clone())
+      }
       TreeNode::Cmdline(cmdline) => {
         cmdline.set_input_cursor_viewport(cursor_viewport)
       }
