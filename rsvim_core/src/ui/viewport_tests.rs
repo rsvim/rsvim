@@ -111,7 +111,8 @@ fn search_viewport(
 }
 
 pub fn search_down_viewport(
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -120,7 +121,8 @@ pub fn search_down_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Down,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
