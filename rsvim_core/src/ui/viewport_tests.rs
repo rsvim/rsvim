@@ -68,21 +68,22 @@ pub fn update_viewport(
 
 fn search_viewport(
   direction: ViewportSearchDirection,
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
   expect_start_line: usize,
   expect_start_column: usize,
 ) -> ViewportArc {
-  let old = window.viewport();
+  let old = tree.window(window_id).unwrap().viewport();
   let buf = lock!(buf);
-  let opts = *window.options();
+  let opts = *tree.window(window_id).unwrap().options();
   let (start_line, start_column) = old.search_anchor(
     direction,
     &opts,
     buf.text(),
-    &window.actual_shape().size(),
+    &tree.window(window_id).unwrap().actual_shape().size(),
     target_cursor_line,
     target_cursor_char,
   );
@@ -92,18 +93,21 @@ fn search_viewport(
   let viewport = Viewport::view(
     &opts,
     buf.text(),
-    &window.actual_shape().size(),
+    &tree.window(window_id).unwrap().actual_shape().size(),
     start_line,
     start_column,
   );
-  window.set_cursor_viewport(CursorViewport::from_position(
-    &viewport,
-    buf.text(),
-    target_cursor_line,
-    target_cursor_char,
-  ));
-  window.set_viewport(viewport);
-  window.viewport()
+  tree.set_editable_cursor_viewport(
+    window_id,
+    CursorViewport::to_arc(CursorViewport::from_position(
+      &viewport,
+      buf.text(),
+      target_cursor_line,
+      target_cursor_char,
+    )),
+  );
+  tree.set_editable_viewport(window_id, viewport);
+  tree.window(window_id).unwrap().viewport()
 }
 
 pub fn search_down_viewport(
@@ -854,8 +858,7 @@ mod tests_view_nowrap_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 3);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -914,8 +917,7 @@ mod tests_view_nowrap_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 6);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 6);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -974,8 +976,7 @@ mod tests_view_nowrap_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 15);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 15);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1034,8 +1035,7 @@ mod tests_view_nowrap_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 60);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 60);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1085,8 +1085,7 @@ mod tests_view_nowrap_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 500);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 500);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1784,8 +1783,7 @@ mod tests_view_wrap_nolinebreak {
       "t affect the re",
       "ndering.\n",
     ];
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 2, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 2, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -1868,8 +1866,7 @@ mod tests_view_wrap_nolinebreak {
       "n and again. Th",
       "is operation al",
     ];
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 6, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 6, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -1922,8 +1919,7 @@ mod tests_view_wrap_nolinebreak {
 
     let expect =
       vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 1, 0);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 1, 0);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2589,8 +2585,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 3);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2640,8 +2635,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 3);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2696,8 +2690,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 15);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 15);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -2747,8 +2740,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 1, 60);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 1, 60);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -2788,8 +2780,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 13);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 13);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3594,8 +3585,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 3);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 3);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3647,8 +3637,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 6);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 6);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3700,8 +3689,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 20);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 20);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3753,8 +3741,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 60);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 60);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3807,8 +3794,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 15);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 15);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
@@ -3848,8 +3834,7 @@ mod tests_view_wrap_linebreak_startcol {
 
     let (mut tree, window_id) =
       make_window(terminal_size, buf.clone(), win_opts);
-    let actual =
-      update_viewport(buf.clone(), tree.window_mut(window_id).unwrap(), 0, 70);
+    let actual = update_viewport(buf.clone(), &mut tree, window_id, 0, 70);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
