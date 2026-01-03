@@ -22,17 +22,19 @@ fn set_message(
   message_text.clear();
   message_text.insert_at(0, 0, payload.to_compact_string());
 
-  let (cmdline_opts, cmdline_message_id) = {
+  let (opts, message_actual_size) = {
     let cmdline = tree.cmdline();
-    (*cmdline.options(), cmdline.message_id())
-  };
-  let actual_size = match tree.node(cmdline_message_id).unwrap() {
-    TreeNode::CmdlineMessage(message) => message.actual_shape().size(),
-    _ => unreachable!(),
+    let opts = *cmdline.options();
+    let message_id = cmdline.message_id();
+    let actual_size = match tree.node(message_id).unwrap() {
+      TreeNode::CmdlineMessage(message) => message.actual_shape().size(),
+      _ => unreachable!(),
+    };
+    (opts, actual_size)
   };
 
   let new_message_viewport =
-    Viewport::view(&cmdline_opts, message_text, &actual_size, 0, 0);
+    Viewport::view(&opts, message_text, &message_actual_size, 0, 0);
 
   tree
     .cmdline_mut()
@@ -82,33 +84,49 @@ pub fn cmdline_clear_message(
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
 
-  let cmdline = tree.cmdline_mut().unwrap();
-  let opts = *cmdline.options();
-  let actual_size = cmdline.message().actual_shape().size();
+  let (opts, message_actual_size) = {
+    let cmdline = tree.cmdline();
+    let opts = *cmdline.options();
+    let message_id = cmdline.message_id();
+    let actual_size = match tree.node(message_id).unwrap() {
+      TreeNode::CmdlineMessage(message) => message.actual_shape().size(),
+      _ => unreachable!(),
+    };
+    (opts, actual_size)
+  };
 
   let new_message_viewport =
-    Viewport::to_arc(Viewport::view(&opts, message_text, &actual_size, 0, 0));
+    Viewport::view(&opts, message_text, &message_actual_size, 0, 0);
 
-  cmdline.set_message_viewport(new_message_viewport);
+  tree
+    .cmdline_mut()
+    .set_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
-  debug_assert!(tree.cmdline().is_some());
+  debug_assert!(tree.cmdline_id().is_some());
 
   let input_text = text_contents.command_line_input_mut();
   input_text.clear();
 
-  let cmdline = tree.cmdline_mut().unwrap();
-  let opts = *cmdline.options();
-  let actual_size = cmdline.input().actual_shape().size();
+  let (opts, input_actual_size) = {
+    let cmdline = tree.cmdline();
+    let opts = *cmdline.options();
+    let input_id = cmdline.input_id();
+    let actual_size = match tree.node(input_id).unwrap() {
+      TreeNode::CmdlineInput(input) => input.actual_shape().size(),
+      _ => unreachable!(),
+    };
+    (opts, actual_size)
+  };
 
   let new_input_viewport =
-    Viewport::view(&opts, input_text, &actual_size, 0, 0);
-  let new_input_cursor_viewport = CursorViewport::to_arc(
-    CursorViewport::from_top_left(&new_input_viewport, input_text),
-  );
+    Viewport::view(&opts, input_text, &input_actual_size, 0, 0);
+  let new_input_cursor_viewport =
+    CursorViewport::from_top_left(&new_input_viewport, input_text);
 
-  let new_input_viewport = Viewport::to_arc(new_input_viewport);
-  cmdline.set_input_viewport(new_input_viewport);
-  cmdline.set_input_cursor_viewport(new_input_cursor_viewport);
+  tree.cmdline_mut().set_input_viewport(new_input_viewport);
+  tree
+    .cmdline_mut()
+    .set_input_cursor_viewport(new_input_cursor_viewport);
 }
