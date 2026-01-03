@@ -159,7 +159,7 @@ impl CmdlineExStateful {
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
-    let cmdline_indicator_id = tree.cmdline().indicator_id();
+    let cmdline_indicator_id = tree.cmdline().unwrap().indicator_id();
     match tree.node_mut(cmdline_indicator_id).unwrap() {
       TreeNode::CmdlineIndicator(indicator) => {
         indicator.set_symbol(CmdlineIndicatorSymbol::Empty)
@@ -250,11 +250,14 @@ impl CmdlineExStateful {
     let text = contents.command_line_input_mut();
 
     let cmdline_id = tree.cmdline_id().unwrap();
-    debug_assert_eq!(tree.cmdline().input_cursor_viewport().line_idx(), 0);
+    debug_assert_eq!(
+      tree.cmdline().unwrap().input_cursor_viewport().line_idx(),
+      0
+    );
     debug_assert!(
       text
         .rope()
-        .get_line(tree.cmdline().input_cursor_viewport().line_idx())
+        .get_line(tree.cmdline().unwrap().input_cursor_viewport().line_idx())
         .is_some()
     );
 
