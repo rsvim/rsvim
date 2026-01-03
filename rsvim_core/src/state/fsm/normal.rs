@@ -190,7 +190,7 @@ impl NormalStateful {
         );
       }
       GotoInsertModeVariant::NewLine => {
-        let current_window = tree.current_window_mut();
+        let current_window = tree.current_window_mut().unwrap();
         let current_window_id = current_window.id();
         let buffer = current_window.buffer().upgrade().unwrap();
         let mut buffer = lock!(buffer);
@@ -213,7 +213,10 @@ impl NormalStateful {
       }
     };
 
-    tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBar);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
 
     StateMachine::InsertMode(super::InsertStateful::default())
   }
@@ -228,7 +231,7 @@ impl NormalStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = tree.current_window_mut();
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
