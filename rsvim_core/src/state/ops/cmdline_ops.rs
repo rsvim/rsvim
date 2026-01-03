@@ -23,7 +23,7 @@ fn set_message(
   message_text.insert_at(0, 0, payload.to_compact_string());
 
   let (opts, message_actual_size) = {
-    let cmdline = tree.cmdline();
+    let cmdline = tree.cmdline().unwrap();
     let opts = *cmdline.options();
     let message_id = cmdline.message_id();
     let actual_size = match tree.node(message_id).unwrap() {
@@ -38,6 +38,7 @@ fn set_message(
 
   tree
     .cmdline_mut()
+    .unwrap()
     .set_message_viewport(new_message_viewport);
 }
 
