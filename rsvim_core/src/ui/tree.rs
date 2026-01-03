@@ -775,8 +775,26 @@ impl Tree {
     viewport: ViewportArc,
   ) {
     match self.node_mut(id).unwrap() {
-      TreeNode::Window(window) => window.set_viewport(viewport),
-      TreeNode::Cmdline(cmdline) => cmdline.set_input_viewport(viewport),
+      TreeNode::Window(window) => {
+        window.set_viewport(viewport.clone());
+        let content_id = window.content_id();
+        match self.node_mut(content_id).unwrap() {
+          TreeNode::WindowContent(content) => {
+            content.set_viewport(Arc::downgrade(&viewport))
+          }
+          _ => unreachable!(),
+        }
+      }
+      TreeNode::Cmdline(cmdline) => {
+        cmdline.set_input_viewport(viewport.clone());
+        let input_id = cmdline.input_id();
+        match self.node_mut(input_id).unwrap() {
+          TreeNode::CmdlineInput(input) => {
+            input.set_viewport(Arc::downgrade(&viewport))
+          }
+          _ => unreachable!(),
+        }
+      }
       _ => unreachable!(),
     }
   }
