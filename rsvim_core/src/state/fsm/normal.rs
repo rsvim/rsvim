@@ -285,7 +285,7 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     let (buffer, viewport, cursor_viewport, current_window_id) = {
-      let current_window = tree.current_window_mut();
+      let current_window = tree.current_window_mut().unwrap();
       let buffer = current_window.buffer().upgrade().unwrap();
       let viewport = current_window.viewport();
       let cursor_viewport = current_window.cursor_viewport();
