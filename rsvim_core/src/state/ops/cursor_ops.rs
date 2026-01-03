@@ -261,12 +261,13 @@ fn _update_cursor_viewport(
   cursor_char: usize,
 ) -> CursorViewportArc {
   // New cursor position
-  let new_cursor_viewport =
-    CursorViewport::from_position(viewport, text, cursor_line, cursor_char);
+  let new_cursor_viewport = CursorViewport::to_arc(
+    CursorViewport::from_position(viewport, text, cursor_line, cursor_char),
+  );
 
   tree.set_editable_cursor_viewport(id, new_cursor_viewport.clone());
 
-  CursorViewport::to_arc(new_cursor_viewport)
+  new_cursor_viewport
 }
 
 /// Calculate new cursor viewport by `Operation::CursorMove*` operations, as
