@@ -614,7 +614,7 @@ impl TreeContext {
     &mut self,
     parent_id: TreeNodeId,
     style: Style,
-    zindex: isize,
+    zindex: usize,
     truncate_policy: TruncatePolicy,
     shape: IRect,
     actual_shape: U16Rect,
