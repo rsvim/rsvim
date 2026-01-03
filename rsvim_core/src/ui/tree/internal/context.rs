@@ -330,7 +330,7 @@ pub struct TreeContext {
   // Properties
   shapes: FoldMap<TreeNodeId, IRect>,
   actual_shapes: FoldMap<TreeNodeId, U16Rect>,
-  zindexes: FoldMap<TreeNodeId, isize>,
+  zindexes: FoldMap<TreeNodeId, usize>,
   truncate_policies: FoldMap<TreeNodeId, TruncatePolicy>,
 
   // Root
@@ -465,7 +465,7 @@ impl TreeContext {
     self.actual_shapes.get(&id)
   }
 
-  pub fn zindex(&self, id: TreeNodeId) -> Option<isize> {
+  pub fn zindex(&self, id: TreeNodeId) -> Option<usize> {
     self.zindexes.get(&id).copied()
   }
 
