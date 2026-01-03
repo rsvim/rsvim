@@ -16,14 +16,17 @@ pub fn current(
   let state_rc = JsRuntime::state(scope);
   let tree = state_rc.borrow().tree.clone();
   let tree = lock!(tree);
-  if tree.current_window_id().is_some() {
-    let buf = tree.current_window().buffer().upgrade().unwrap();
-    let buf_id = lock!(buf).id();
-    trace!("Rsvim.buf.current: {:?}", buf_id);
-    rv.set_int32(buf_id);
-  } else {
-    trace!("Rsvim.buf.current: not exist");
-    rv.set_undefined();
+  match tree.current_window() {
+    Some(current_window) => {
+      let buf = current_window.buffer().upgrade().unwrap();
+      let buf_id = lock!(buf).id();
+      trace!("Rsvim.buf.current: {:?}", buf_id);
+      rv.set_int32(buf_id);
+    }
+    None => {
+      trace!("Rsvim.buf.current: not exist");
+      rv.set_undefined();
+    }
   }
 }
 
