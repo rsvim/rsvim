@@ -10,7 +10,6 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use compact_str::CompactString;
-use taffy::TaffyResult;
 
 #[derive(Debug, Copy, Clone)]
 /// Cursor move direction.
