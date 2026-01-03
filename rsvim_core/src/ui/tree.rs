@@ -271,14 +271,14 @@ impl Tree {
 impl Tree {
   /// Cursor widget.
   /// It panics if cursor doesn't exist.
-  pub fn cursor(&self) -> &Cursor {
-    let cursor_id = self.cursor_id.unwrap();
-    let n = self.node(cursor_id).unwrap();
+  pub fn cursor(&self) -> Option<&Cursor> {
+    let cursor_id = self.cursor_id?;
+    let n = self.node(cursor_id)?;
     debug_assert!(matches!(n, TreeNode::Cursor(_)));
     match n {
-      TreeNode::Cursor(c) => {
-        debug_assert_eq!(c.id(), cursor_id);
-        c
+      TreeNode::Cursor(cur) => {
+        debug_assert_eq!(cur.id(), cursor_id);
+        Some(cur)
       }
       _ => unreachable!(),
     }
