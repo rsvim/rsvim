@@ -77,7 +77,7 @@ pub fn cmdline_clear_message(
   tree: &mut Tree,
   text_contents: &mut TextContents,
 ) {
-  debug_assert!(tree.cmdline().is_some());
+  debug_assert!(tree.cmdline_id().is_some());
 
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
