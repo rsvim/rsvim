@@ -105,7 +105,7 @@ impl CmdlineExStateful {
 
     let tree = data_access.tree.clone();
     let tree = lock!(tree);
-    let current_window = tree.current_window();
+    let current_window = tree.current_window().unwrap();
     let current_win_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
@@ -145,7 +145,10 @@ impl CmdlineExStateful {
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
     );
-    tree.cursor_mut().set_cursor_style(CursorStyle::SteadyBlock);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
 
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
