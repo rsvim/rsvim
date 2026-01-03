@@ -321,7 +321,7 @@ impl Tree {
     match n {
       TreeNode::Window(w) => {
         debug_assert_eq!(w.id(), id);
-        w
+        Some(w)
       }
       _ => unreachable!(),
     }
@@ -329,8 +329,8 @@ impl Tree {
 
   /// Current window widget.
   /// It panics if current window doesn't exist.
-  pub fn current_window(&self) -> &Window {
-    self.window(self.current_window_id.unwrap())
+  pub fn current_window(&self) -> Option<&Window> {
+    self.window(self.current_window_id?)
   }
 
   /// Mutable current window widget.
