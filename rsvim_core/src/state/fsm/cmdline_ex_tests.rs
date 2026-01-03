@@ -52,19 +52,19 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub fn curwin_viewport(tree: TreeArc) -> ViewportArc {
-  lock!(tree).current_window().viewport()
+  lock!(tree).current_window().unwrap().viewport()
 }
 
 pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-  lock!(tree).current_window().cursor_viewport()
+  lock!(tree).current_window().unwrap().cursor_viewport()
 }
 
 pub fn cmdline_viewport(tree: TreeArc) -> ViewportArc {
-  lock!(tree).cmdline().input_viewport()
+  lock!(tree).cmdline().unwrap().input_viewport()
 }
 
 pub fn cmdline_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-  lock!(tree).cmdline().input_cursor_viewport()
+  lock!(tree).cmdline().unwrap().input_cursor_viewport()
 }
 
 #[cfg(test)]
