@@ -132,7 +132,8 @@ pub fn search_down_viewport(
 }
 
 pub fn search_up_viewport(
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -141,7 +142,8 @@ pub fn search_up_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Up,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -151,7 +153,8 @@ pub fn search_up_viewport(
 }
 
 pub fn search_left_viewport(
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -160,7 +163,8 @@ pub fn search_left_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Left,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
@@ -170,7 +174,8 @@ pub fn search_left_viewport(
 }
 
 pub fn search_right_viewport(
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   buf: BufferArc,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -179,7 +184,8 @@ pub fn search_right_viewport(
 ) -> ViewportArc {
   search_viewport(
     ViewportSearchDirection::Right,
-    window,
+    tree,
+    window_id,
     buf,
     target_cursor_line,
     target_cursor_char,
