@@ -49,20 +49,21 @@ pub fn make_wrap_linebreak() -> WindowOptions {
 
 pub fn update_viewport(
   buf: BufferArc,
-  window: &mut Window,
+  tree: &mut Tree,
+  window_id: TreeNodeId,
   start_line: usize,
   start_column: usize,
 ) -> ViewportArc {
   let buf = lock!(buf);
-  let viewport = Viewport::view(
-    window.options(),
+  let viewport = Viewport::to_arc(Viewport::view(
+    tree.window(window_id).unwrap().options(),
     buf.text(),
-    &window.actual_shape().size(),
+    &tree.window(window_id).unwrap().actual_shape().size(),
     start_line,
     start_column,
-  );
-  window.set_viewport(viewport);
-  window.viewport()
+  ));
+  tree.set_editable_viewport(window_id, viewport);
+  tree.window(window_id).unwrap().viewport()
 }
 
 fn search_viewport(
