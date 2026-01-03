@@ -106,7 +106,7 @@ fn search_viewport(
       target_cursor_char,
     )),
   );
-  tree.set_editable_viewport(window_id, viewport);
+  tree.set_editable_viewport(window_id, Viewport::to_arc(viewport));
   tree.window(window_id).unwrap().viewport()
 }
 
