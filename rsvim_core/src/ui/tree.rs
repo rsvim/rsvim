@@ -769,7 +769,11 @@ impl Tree {
     }
   }
 
-  pub fn set_editable_viewport(&mut self, id: TreeNodeId, viewport: Viewport) {
+  pub fn set_editable_viewport(
+    &mut self,
+    id: TreeNodeId,
+    viewport: ViewportArc,
+  ) {
     match self.node_mut(id).unwrap() {
       TreeNode::Window(window) => window.set_viewport(viewport),
       TreeNode::Cmdline(cmdline) => cmdline.set_input_viewport(viewport),
