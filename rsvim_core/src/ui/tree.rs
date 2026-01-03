@@ -373,7 +373,7 @@ impl Tree {
     &mut self,
     show_input: bool,
   ) -> TaffyResult<()> {
-    let cmdline = self.cmdline();
+    let cmdline = self.cmdline().unwrap();
     let input_panel_id = cmdline.input_panel_id();
     let message_id = cmdline.message_id();
 
