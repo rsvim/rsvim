@@ -144,6 +144,12 @@ impl CommandLineExStateful {
 
     let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
     debug_assert_eq!(_old_widget_id, tree.cmdline_id());
+    debug_assert!(matches!(
+      tree
+        .node(tree.parent_id(tree.cursor_id().unwrap()).unwrap())
+        .unwrap(),
+      TreeNode::WindowContent(_)
+    ));
 
     let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
     tree
