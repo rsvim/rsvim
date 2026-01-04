@@ -521,7 +521,7 @@ impl TreeContext {
 
       // Iterate all descendants, and update their shape/actual_shape.
       while let Some(id) = q.pop_front() {
-        let layout = self.ta.layout(id)?.clone();
+        let layout = *self.ta.layout(id)?;
         let policy = self.truncate_policies.get(&id).copied().unwrap();
         let shape = rect_from_layout!(layout);
         let shape = self._truncate_shape(id, &shape, policy);
