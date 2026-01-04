@@ -1,5 +1,3 @@
-#![allow(unused_imports, dead_code, unused_variables)]
-
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -17,10 +15,9 @@ struct TestNode {
 inode_impl!(TestNode);
 
 impl TestNode {
-  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: usize) -> Self {
-    TestNode {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+    Self {
       __node: InodeBase::new(id, ctx),
-      value,
     }
   }
 }

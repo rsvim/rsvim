@@ -1,5 +1,3 @@
-#![allow(unused_imports, dead_code, unused_variables)]
-
 use super::itree::*;
 use crate::inode_impl;
 use crate::prelude::*;
@@ -13,14 +11,12 @@ use taffy::prelude::TaffyAuto;
 #[derive(Clone, Debug)]
 struct TestValue {
   pub __node: InodeBase,
-  pub value: i32,
 }
 
 impl TestValue {
-  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: i32) -> Self {
-    TestValue {
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+    Self {
       __node: InodeBase::new(id, ctx),
-      value,
     }
   }
 }
@@ -46,7 +42,7 @@ fn new() {
     .borrow_mut()
     .new_leaf_default(style.clone(), "n1")
     .unwrap();
-  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid1, n1);
 
   assert_eq!(tree.len(), 1);
@@ -83,7 +79,7 @@ fn raw_move_position_by1() {
     .borrow_mut()
     .new_leaf_default(style1, "n1")
     .unwrap();
-  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid1, n1);
 
   let style2 = Style {
@@ -98,7 +94,7 @@ fn raw_move_position_by1() {
     .borrow_mut()
     .new_with_parent_default(nid1, style2, "n2")
     .unwrap();
-  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()), 2);
+  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid2, n2);
 
   let style3 = Style {
@@ -120,7 +116,7 @@ fn raw_move_position_by1() {
     .borrow_mut()
     .new_with_parent_default(nid2, style3, "n3")
     .unwrap();
-  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
+  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
   tree.context().borrow_mut().compute_layout().unwrap();
@@ -188,7 +184,7 @@ fn raw_move_position_to1() {
     .borrow_mut()
     .new_leaf_default(style1, "n1")
     .unwrap();
-  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid1, n1);
 
   let style2 = Style {
@@ -203,7 +199,7 @@ fn raw_move_position_to1() {
     .borrow_mut()
     .new_with_parent_default(nid1, style2, "n2")
     .unwrap();
-  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()), 2);
+  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid2, n2);
 
   let style3 = Style {
@@ -225,7 +221,7 @@ fn raw_move_position_to1() {
     .borrow_mut()
     .new_with_parent_default(nid2, style3, "n3")
     .unwrap();
-  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
+  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
   tree.context().borrow_mut().compute_layout().unwrap();
@@ -293,7 +289,7 @@ fn reserved_move_position_by1() {
     .borrow_mut()
     .new_leaf_default(style1, "n1")
     .unwrap();
-  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid1, n1);
 
   let style2 = Style {
@@ -308,7 +304,7 @@ fn reserved_move_position_by1() {
     .borrow_mut()
     .new_with_parent_default(nid1, style2, "n2")
     .unwrap();
-  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()), 2);
+  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid2, n2);
 
   let style3 = Style {
@@ -330,7 +326,7 @@ fn reserved_move_position_by1() {
     .borrow_mut()
     .new_with_parent_default(nid2, style3, "n3")
     .unwrap();
-  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
+  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
   tree.context().borrow_mut().compute_layout().unwrap();
@@ -398,7 +394,7 @@ fn reserved_move_position_to1() {
     .borrow_mut()
     .new_leaf_default(style1, "n1")
     .unwrap();
-  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()), 1);
+  let n1 = TestValue::new(nid1, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid1, n1);
 
   let style2 = Style {
@@ -413,7 +409,7 @@ fn reserved_move_position_to1() {
     .borrow_mut()
     .new_with_parent_default(nid1, style2, "n2")
     .unwrap();
-  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()), 2);
+  let n2 = TestValue::new(nid2, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid2, n2);
 
   let style3 = Style {
@@ -435,7 +431,7 @@ fn reserved_move_position_to1() {
     .borrow_mut()
     .new_with_parent_default(nid2, style3, "n3")
     .unwrap();
-  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()), 3);
+  let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
   tree.context().borrow_mut().compute_layout().unwrap();
