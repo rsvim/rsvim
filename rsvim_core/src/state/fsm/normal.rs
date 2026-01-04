@@ -141,12 +141,17 @@ impl NormalStateful {
       debug_assert!(matches!(cursor_parent, TreeNode::CmdlineInput(_)));
     }
 
-    tree.reserved_move_cursor_position_to(0, 0).unwrap();
+    let cursor_viewport = tree.editable_cursor_viewport(cmdline_id);
+    tree
+      .reserved_move_cursor_position_to(
+        cursor_viewport.column_idx() as isize,
+        cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
     tree
       .cursor_mut()
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
-
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())

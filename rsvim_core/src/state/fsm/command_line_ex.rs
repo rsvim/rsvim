@@ -172,6 +172,7 @@ impl CommandLineExStateful {
       .cursor_mut()
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBlock);
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
 
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
@@ -181,7 +182,6 @@ impl CommandLineExStateful {
 
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
-    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
 
     cmdline_input_content.trim().to_compact_string()
   }
