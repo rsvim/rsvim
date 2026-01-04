@@ -1,10 +1,7 @@
 use super::context::*;
-use crate::inode_impl;
 use crate::prelude::*;
 // use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
-use crate::ui::tree::internal::InodeBase;
-use crate::ui::tree::internal::Inodeable;
 use itertools::Itertools;
 use taffy::Style;
 use taffy::prelude::FromLength;
