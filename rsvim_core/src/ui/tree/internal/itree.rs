@@ -129,7 +129,6 @@ where
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    let parent_id = context.parent(id)?;
     let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
     let new_pos = point!(pos.x() + x, pos.y() + y);
@@ -139,6 +138,7 @@ where
       new_pos.x() + shape.width(),
       new_pos.y() + shape.height()
     );
+    let parent_id = context.parent(id)?;
     let parent_actual_shape = context.actual_shape(parent_id)?;
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
@@ -157,7 +157,6 @@ where
     x: isize,
     y: isize,
   ) -> Option<IRect> {
-    let parent_id = context.parent(id)?;
     let shape = context.shape(id)?;
     let new_pos: IPos = point!(x, y);
     let new_shape = rect!(
@@ -166,6 +165,7 @@ where
       new_pos.x() + shape.width(),
       new_pos.y() + shape.height()
     );
+    let parent_id = context.parent(id)?;
     let parent_actual_shape = context.actual_shape(parent_id)?;
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
