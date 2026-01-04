@@ -616,7 +616,7 @@ fn children1() {
   };
 
   let nid1 = ctx.new_leaf_default(style1.clone(), "n1").unwrap();
-  let mut nids = vec!["n2", "n3", "n4", "n5"]
+  let mut nids = ["n2", "n3", "n4", "n5"]
     .iter()
     .map(|name| {
       ctx
