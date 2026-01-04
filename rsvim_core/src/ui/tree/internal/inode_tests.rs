@@ -9,7 +9,6 @@ use taffy::Style;
 #[derive(Clone, Debug)]
 struct TestNode {
   pub __node: InodeBase,
-  pub value: usize,
 }
 
 inode_impl!(TestNode);
