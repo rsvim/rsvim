@@ -22,9 +22,9 @@ use crossterm::event::KeyEventKind;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line ex mode.
-pub struct CmdlineExStateful {}
+pub struct CommnandLineExStateful {}
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
@@ -64,13 +64,13 @@ impl CmdlineExStateful {
   }
 }
 
-impl Stateful for CmdlineExStateful {
+impl Stateful for CommnandLineExStateful {
   fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    StateMachine::CmdlineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CommnandLineExStateful::default())
   }
 
   fn handle_op(
@@ -96,7 +96,7 @@ impl Stateful for CmdlineExStateful {
   }
 }
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   pub fn confirm_ex_command_and_goto_normal_mode(
     &self,
     data_access: &StateDataAccess,
@@ -124,7 +124,7 @@ impl CmdlineExStateful {
   }
 }
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   pub fn _goto_normal_mode_impl(
     &self,
     data_access: &StateDataAccess,
@@ -184,7 +184,7 @@ impl CmdlineExStateful {
   }
 }
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   pub fn cursor_move(
     &self,
     data_access: &StateDataAccess,
@@ -205,11 +205,11 @@ impl CmdlineExStateful {
       true,
     );
 
-    StateMachine::CmdlineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CommnandLineExStateful::default())
   }
 }
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   pub fn cursor_insert(
     &self,
     data_access: &StateDataAccess,
@@ -235,11 +235,11 @@ impl CmdlineExStateful {
       payload,
     );
 
-    StateMachine::CmdlineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CommnandLineExStateful::default())
   }
 }
 
-impl CmdlineExStateful {
+impl CommnandLineExStateful {
   pub fn cursor_delete(
     &self,
     data_access: &StateDataAccess,
@@ -265,6 +265,6 @@ impl CmdlineExStateful {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
-    StateMachine::CmdlineExMode(CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(CommnandLineExStateful::default())
   }
 }
