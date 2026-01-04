@@ -887,19 +887,6 @@ impl Tree {
     };
     self.node(editable_id).unwrap().actual_shape()
   }
-
-  pub fn cursor_editable_parent_id(&self) -> Option<TreeNodeId> {
-    let cursor_id = self.cursor_id()?;
-    let parent_id = self.parent_id(cursor_id)?;
-    match self.node(parent_id)? {
-      TreeNode::WindowContent(_) => self.parent_id(parent_id),
-      TreeNode::CmdlineInput(_) => {
-        let input_panel_id = self.parent_id(parent_id)?;
-        self.parent_id(input_panel_id)
-      }
-      _ => unreachable!(),
-    }
-  }
 }
 
 // Editable }
