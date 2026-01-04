@@ -92,7 +92,9 @@ impl Stateful for NormalStateful {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
       }
-      Operation::GotoCmdlineExMode => self.goto_cmdline_ex_mode(&data_access),
+      Operation::GotoCmdlineExMode => {
+        self.goto_command_line_ex_mode(&data_access)
+      }
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
       // }
@@ -111,7 +113,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_cmdline_ex_mode(
+  pub fn goto_command_line_ex_mode(
     &self,
     data_access: &StateDataAccess,
   ) -> StateMachine {
