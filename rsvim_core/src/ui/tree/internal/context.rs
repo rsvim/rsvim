@@ -7,6 +7,7 @@ use itertools::Itertools;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::Iterator;
+use std::sync::LazyLock;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use taffy::AvailableSpace;
@@ -19,18 +20,9 @@ use taffy::prelude::TaffyMaxContent;
 pub const INVALID_ROOT_ID: TreeNodeId = -1;
 pub const DEFAULT_ZINDEX: usize = 0;
 pub const DEFAULT_TRUNCATE_POLICY: TruncatePolicy = TruncatePolicy::BRUTAL;
-
-macro_rules! DEFAULT_SHAPE {
-  () => {
-    rect!(0, 0, 0, 0)
-  };
-}
-
-macro_rules! DEFAULT_ACTUAL_SHAPE {
-  () => {
-    rect!(0, 0, 0, 0)
-  };
-}
+pub static DEFAULT_SHAPE: LazyLock<IRect> = LazyLock::new(|| rect!(0, 0, 0, 0));
+pub static DEFAULT_ACTUAL_SHAPE: LazyLock<U16Rect> =
+  LazyLock::new(|| rect!(0, 0, 0, 0));
 
 /// Next unique UI widget ID.
 ///
@@ -632,8 +624,8 @@ impl TreeContext {
     self._set_name(id, name);
     self.zindexes.insert(id, DEFAULT_ZINDEX);
     self.truncate_policies.insert(id, DEFAULT_TRUNCATE_POLICY);
-    self.shapes.insert(id, DEFAULT_SHAPE!());
-    self.actual_shapes.insert(id, DEFAULT_ACTUAL_SHAPE!());
+    self.shapes.insert(id, *DEFAULT_SHAPE);
+    self.actual_shapes.insert(id, *DEFAULT_ACTUAL_SHAPE);
 
     Ok(id)
   }
@@ -672,8 +664,8 @@ impl TreeContext {
       style,
       DEFAULT_ZINDEX,
       DEFAULT_TRUNCATE_POLICY,
-      DEFAULT_SHAPE!(),
-      DEFAULT_ACTUAL_SHAPE!(),
+      *DEFAULT_SHAPE,
+      *DEFAULT_ACTUAL_SHAPE,
       name,
     )
   }
