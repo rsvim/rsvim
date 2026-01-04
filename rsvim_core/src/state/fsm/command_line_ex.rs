@@ -134,6 +134,12 @@ impl CommandLineExStateful {
 
     debug_assert!(tree.cmdline_id().is_some());
     debug_assert!(tree.current_window_id().is_some());
+    debug_assert!(matches!(
+      tree
+        .node(tree.parent_id(tree.cursor_id().unwrap()).unwrap())
+        .unwrap(),
+      TreeNode::CmdlineInput(_)
+    ));
     let current_window_id = tree.current_window_id().unwrap();
 
     let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
