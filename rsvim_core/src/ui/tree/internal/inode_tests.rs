@@ -40,8 +40,8 @@ fn new() {
 
   let ctx = TreeContext::to_rc(ctx);
 
-  let n1 = TestNode::new(nid1, Rc::downgrade(&ctx), 1);
-  let n2 = TestNode::new(nid1, Rc::downgrade(&ctx), 2);
+  let n1 = TestNode::new(nid1, Rc::downgrade(&ctx));
+  let n2 = TestNode::new(nid1, Rc::downgrade(&ctx));
 
   assert!(n1.id() < n2.id());
   assert_eq!(n1.id(), nid1);
