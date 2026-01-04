@@ -326,13 +326,13 @@ fn reserved_move_position_by1() {
   let expects: Vec<IRect> = vec![
     rect!(0, 0, 1, 1),
     rect!(2, 0, 3, 1),
-    rect!(3, 19, 4, 20),
+    rect!(1, 19, 2, 20),
     rect!(0, 19, 1, 20),
-    rect!(19, 15, 20, 16),
     rect!(19, 0, 20, 1),
-    rect!(19, 3, 20, 4),
-    rect!(9, 0, 10, 1),
-    rect!(15, 8, 16, 9),
+    rect!(19, 0, 20, 1),
+    rect!(8, 3, 9, 4),
+    rect!(0, 0, 1, 1),
+    rect!(6, 8, 7, 9),
   ];
 
   for (i, m) in moves.iter().enumerate() {
