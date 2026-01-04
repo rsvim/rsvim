@@ -499,7 +499,14 @@ impl TreeContext {
   }
 
   pub fn disabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
-    self.ta.style(id).map(|s| s.display == taffy::Display::None)
+    let zero_size = self
+      .actual_shape(id)
+      .map(|s| s.size().is_zero())
+      .unwrap_or(true);
+    self
+      .ta
+      .style(id)
+      .map(|s| s.display == taffy::Display::None || zero_size)
   }
 
   pub fn enabled(&self, id: TreeNodeId) -> TaffyResult<bool> {
