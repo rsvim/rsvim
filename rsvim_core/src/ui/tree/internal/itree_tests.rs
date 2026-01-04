@@ -119,7 +119,7 @@ fn raw_move_position_by1() {
   let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
-  tree.context().borrow_mut().compute_layout().unwrap();
+  tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 Move: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -224,7 +224,7 @@ fn raw_move_position_to1() {
   let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
-  tree.context().borrow_mut().compute_layout().unwrap();
+  tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 Move: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -329,7 +329,7 @@ fn reserved_move_position_by1() {
   let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
-  tree.context().borrow_mut().compute_layout().unwrap();
+  tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 bounded move by: (x, y)
   let moves: Vec<(isize, isize)> = vec![
@@ -434,7 +434,7 @@ fn reserved_move_position_to1() {
   let n3 = TestValue::new(nid3, Rc::downgrade(&tree.context()));
   tree.nodes_mut().insert(nid3, n3);
 
-  tree.context().borrow_mut().compute_layout().unwrap();
+  tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 bounded move to: (x, y)
   let moves: Vec<(isize, isize)> = vec![
