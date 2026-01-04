@@ -31,7 +31,7 @@ fn new() {
     )
     .unwrap();
 
-  ctx.compute_layout().unwrap();
+  ctx.compute_layout(nid1).unwrap();
 
   assert_eq!(ctx.len(), 1);
   assert_eq!(ctx.root(), nid1);
@@ -84,7 +84,7 @@ fn new_child1() {
   let nid6 = ctx
     .new_with_parent_default(nid3, style.clone(), "n6")
     .unwrap();
-  ctx.compute_layout().unwrap();
+  ctx.compute_layout(nid1).unwrap();
 
   assert_eq!(ctx.root(), nid1);
   assert!(nid1 < nid2);
@@ -416,7 +416,7 @@ fn shape1() {
   let us9 = rect!(8, 12, 10, 14);
   let nid9 = ctx.new_with_parent_default(nid7, style9, "n9").unwrap();
 
-  ctx.compute_layout().unwrap();
+  ctx.compute_layout(nid1).unwrap();
 
   assert_eq!(ctx.root(), nid1);
 
@@ -563,7 +563,7 @@ fn shape2() {
   let s6 = rect!(8, 13, 15, 15);
   let us6 = rect!(11, 18, 18, 20);
 
-  ctx.compute_layout().unwrap();
+  ctx.compute_layout(nid1).unwrap();
 
   assert_eq!(ctx.root(), nid1);
 

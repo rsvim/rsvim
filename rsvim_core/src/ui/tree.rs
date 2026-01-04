@@ -163,7 +163,7 @@ impl Tree {
       let context = base.context();
       let mut context = context.borrow_mut();
       let id = context.new_leaf_default(style, "Root")?;
-      context.compute_layout(context.root())?;
+      context.compute_layout(id)?;
       id
     };
 
@@ -483,7 +483,8 @@ impl Tree {
       let content_id =
         context.new_with_parent_default(id, content_style, "WindowContent")?;
 
-      context.compute_layout(self.root_id())?;
+      let root_id = context.root();
+      context.compute_layout(root_id)?;
 
       let content_actual_shape =
         context.actual_shape(content_id).copied().unwrap();
@@ -553,7 +554,8 @@ impl Tree {
         "Cursor",
       )?;
 
-      context.compute_layout(self.root_id())?;
+      let root_id = context.root();
+      context.compute_layout(root_id)?;
 
       id
     };
@@ -631,7 +633,8 @@ impl Tree {
       let message_id =
         context.new_with_parent_default(id, message_style, "CmdlineMessage")?;
 
-      context.compute_layout(self.root_id())?;
+      let root_id = context.root();
+      context.compute_layout(root_id)?;
 
       let input_actual_shape = context.actual_shape(input_id).copied().unwrap();
       let message_actual_shape =
@@ -726,6 +729,7 @@ impl Tree {
     let mut context = context.borrow_mut();
 
     let cursor_id = self.cursor_id.unwrap();
+    let parent_id = self.parent_id(cursor_id).unwrap();
     let new_shape = self
       .base
       .reserved_move_position_to(&context, cursor_id, x, y)
@@ -739,7 +743,7 @@ impl Tree {
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
     context.set_style(cursor_id, style)?;
-    context.compute_layout()
+    context.compute_layout(parent_id)
   }
 
   pub fn reserved_move_cursor_position_by(
@@ -751,6 +755,7 @@ impl Tree {
     let mut context = context.borrow_mut();
 
     let cursor_id = self.cursor_id.unwrap();
+    let parent_id = self.parent_id(cursor_id).unwrap();
     let new_shape = self
       .base
       .reserved_move_position_by(&context, cursor_id, x, y)
@@ -764,7 +769,7 @@ impl Tree {
       bottom: taffy::LengthPercentageAuto::AUTO,
     };
     context.set_style(cursor_id, style)?;
-    context.compute_layout()
+    context.compute_layout(parent_id)
   }
 }
 // Movement }
