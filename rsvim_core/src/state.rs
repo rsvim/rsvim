@@ -46,7 +46,6 @@ pub struct StateDataAccess {
 }
 
 impl StateDataAccess {
-  #[allow(clippy::too_many_arguments)]
   pub fn new(
     tree: TreeArc,
     buffers: BuffersManagerArc,

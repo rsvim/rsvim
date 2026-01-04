@@ -1,5 +1,4 @@
 #![allow(unused_imports)]
-#![allow(clippy::too_many_arguments)]
 
 use crate::buf::BufferArc;
 use crate::buf::text::Text;

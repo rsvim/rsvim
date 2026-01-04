@@ -38,7 +38,6 @@ pub struct Cmdline {
 inode_impl!(Cmdline);
 
 impl Cmdline {
-  #[allow(clippy::too_many_arguments)]
   pub fn new(
     id: TreeNodeId,
     ctx: TreeContextWk,
