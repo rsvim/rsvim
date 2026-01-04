@@ -121,6 +121,21 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
+    debug_assert!(tree.cmdline_id().is_some());
+    debug_assert!(tree.current_window_id().is_some());
+    if cfg!(debug_assertions) {
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::WindowContent(_)));
+    }
+
     // Show input/hide message, and update layouts/shapes.
     tree.cmdline_show_input().unwrap();
 
