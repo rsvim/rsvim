@@ -304,10 +304,12 @@ impl NormalStateful {
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    tree.reserved_move_cursor_position_to(
-      new_cursor_viewport.column_idx() as isize,
-      new_cursor_viewport.row_idx() as isize,
-    );
+    tree
+      .reserved_move_cursor_position_to(
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
   }
 
   #[cfg(test)]
