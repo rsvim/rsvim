@@ -11,6 +11,7 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
@@ -153,6 +154,14 @@ impl NormalStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Ex);
+
+    if cfg!(debug_assertions) {
+      let contents = data_access.contents.clone();
+      let mut contents = lock!(contents);
+      let cmdline_input_content =
+        contents.command_line_input().rope().to_compact_string();
+      debug_assert!(cmdline_input_content.is_empty());
+    }
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
