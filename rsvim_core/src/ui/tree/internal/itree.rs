@@ -156,7 +156,7 @@ where
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    self.raw_move_position_by(&context, id, final_x, final_y)
+    self.raw_move_position_by(context, id, final_x, final_y)
   }
 
   /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
@@ -181,7 +181,7 @@ where
     let final_shape =
       shapes::bound_shape(&new_shape, &parent_actual_shape.size());
     let final_pos: IPos = final_shape.min().into();
-    self.raw_move_position_to(&context, id, final_pos.x(), final_pos.y())
+    self.raw_move_position_to(context, id, final_pos.x(), final_pos.y())
   }
 }
 
