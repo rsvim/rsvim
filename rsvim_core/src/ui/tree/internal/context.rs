@@ -385,6 +385,12 @@ impl Debug for TreeContext {
   }
 }
 
+impl Default for TreeContext {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl TreeContext {
   pub fn new() -> Self {
     Self {
