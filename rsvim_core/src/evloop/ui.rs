@@ -25,7 +25,7 @@ pub fn init_default_window(
     ..Default::default()
   };
   let cmdline_style = Style {
-    min_size: taffy::Size {
+    size: taffy::Size {
       width: taffy::prelude::percent(1.0),
       height: taffy::prelude::percent(1.0),
     },
