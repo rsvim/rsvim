@@ -14,6 +14,7 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
+use crate::ui::widget::cursor::CURSOR_HIDDEN;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
@@ -147,13 +148,20 @@ impl CommandLineExStateful {
     let current_window_id = tree.current_window_id().unwrap();
 
     let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
-    debug_assert_eq!(_old_widget_id, tree.cmdline_id());
-    debug_assert!(matches!(
-      tree
-        .node(tree.parent_id(tree.cursor_id().unwrap()).unwrap())
-        .unwrap(),
-      TreeNode::WindowContent(_)
-    ));
+
+    if cfg!(debug_assertions) {
+      debug_assert_eq!(_old_widget_id, tree.cmdline_id());
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::WindowContent(_)));
+    }
 
     let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
     tree
