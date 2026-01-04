@@ -17,9 +17,9 @@ mod insert_tests;
 #[cfg(test)]
 mod normal_tests;
 
-pub use command_line_ex::CommnandLineExStateful;
-pub use command_line_search_backward::CmdlineBackwardStateful;
-pub use command_line_search_forward::CmdlineForwardStateful;
+pub use command_line_ex::CommandLineExStateful;
+pub use command_line_search_backward::CommandLineSearchBackwardStateful;
+pub use command_line_search_forward::CommandLineSearchForwardStateful;
 pub use insert::InsertStateful;
 pub use normal::NormalStateful;
 pub use operator_pending::OperatorPendingStateful;

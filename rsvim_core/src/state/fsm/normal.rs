@@ -142,7 +142,7 @@ impl NormalStateful {
       _ => unreachable!(),
     }
 
-    StateMachine::CmdlineExMode(super::CommnandLineExStateful::default())
+    StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
@@ -151,7 +151,9 @@ impl NormalStateful {
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
-    StateMachine::CmdlineForwardMode(super::CmdlineForwardStateful::default())
+    StateMachine::CommandLineSearchForwardMode(
+      super::CommandLineSearchForwardStateful::default(),
+    )
   }
 }
 
@@ -160,7 +162,9 @@ impl NormalStateful {
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
-    StateMachine::CmdlineBackwardMode(super::CmdlineBackwardStateful::default())
+    StateMachine::CommandLineSearchBackwardMode(
+      super::CommandLineSearchBackwardStateful::default(),
+    )
   }
 }
 
