@@ -424,7 +424,7 @@ impl Tree {
 
     context.set_style(input_panel_id, input_panel_style)?;
     context.set_style(message_id, message_style)?;
-    context.compute_layout()
+    context.compute_layout(self.cmdline_id().unwrap())
   }
 
   // Show message widget, hide indicator/input widgets.
