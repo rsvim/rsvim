@@ -38,17 +38,11 @@ where
     }
   }
 
-  fn _internal_check(&self) {
-    debug_assert_eq!(self.context.borrow().len(), self.nodes.len());
-  }
-
   pub fn len(&self) -> usize {
-    self._internal_check();
     self.nodes.len()
   }
 
   pub fn is_empty(&self) -> bool {
-    self._internal_check();
     self.nodes.is_empty()
   }
 
@@ -57,29 +51,24 @@ where
   }
 
   pub fn root_id(&self) -> TreeNodeId {
-    self._internal_check();
     self.context.borrow().root()
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self._internal_check();
     self.context.borrow().parent(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> TaffyResult<Vec<TreeNodeId>> {
-    self._internal_check();
     self.context.borrow().children(id)
   }
 
   /// Get nodes.
   pub fn nodes(&self) -> &FoldMap<TreeNodeId, T> {
-    self._internal_check();
     &self.nodes
   }
 
   /// Get mutable nodes.
   pub fn nodes_mut(&mut self) -> &mut FoldMap<TreeNodeId, T> {
-    self._internal_check();
     &mut self.nodes
   }
 
