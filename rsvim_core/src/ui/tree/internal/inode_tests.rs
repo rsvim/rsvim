@@ -33,18 +33,24 @@ fn new() {
     },
     ..Default::default()
   };
+
+  // Root
   let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+
+  // Non-root
   let nid2 = ctx.new_leaf_default(style.clone(), "n2").unwrap();
+
   ctx.compute_layout().unwrap();
 
   let ctx = TreeContext::to_rc(ctx);
 
   let n1 = TestNode::new(nid1, Rc::downgrade(&ctx));
-  let n2 = TestNode::new(nid1, Rc::downgrade(&ctx));
+  let n2 = TestNode::new(nid2, Rc::downgrade(&ctx));
 
+  assert_eq!(nid1, ctx.borrow().root());
   assert!(n1.id() < n2.id());
   assert_eq!(n1.id(), nid1);
   assert_eq!(n2.id(), nid2);
   assert!(n1.enabled());
-  assert!(n2.enabled());
+  assert!(!n2.enabled());
 }
