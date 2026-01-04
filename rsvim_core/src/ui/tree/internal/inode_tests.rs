@@ -40,7 +40,7 @@ fn new() {
   // Non-root
   let nid2 = ctx.new_leaf_default(style.clone(), "n2").unwrap();
 
-  ctx.compute_layout().unwrap();
+  ctx.compute_layout(nid1).unwrap();
 
   let ctx = TreeContext::to_rc(ctx);
 
