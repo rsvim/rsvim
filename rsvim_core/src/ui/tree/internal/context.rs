@@ -576,7 +576,7 @@ impl TreeContext {
       Some(parent_id) => {
         let parent_actual_shape =
           self.actual_shapes.get(&parent_id).copied().unwrap();
-        shapes::convert_relative_to_absolute(&shape, &parent_actual_shape)
+        shapes::convert_relative_to_absolute(shape, &parent_actual_shape)
       }
       None => {
         let shape = shapes::clamp_shape(shape);
@@ -623,6 +623,7 @@ impl TreeContext {
     Ok(id)
   }
 
+#![allow(clippy::too_many_arguments)]
   pub fn new_with_parent(
     &mut self,
     parent_id: TreeNodeId,
