@@ -18,6 +18,15 @@ where
   nodes: FoldMap<TreeNodeId, T>,
 }
 
+impl<T> Default for Itree<T>
+where
+  T: Inodeable,
+{
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl<T> Itree<T>
 where
   T: Inodeable,

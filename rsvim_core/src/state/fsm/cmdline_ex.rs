@@ -169,7 +169,7 @@ impl CmdlineExStateful {
       _ => unreachable!(),
     }
     // Show message, hide input/indicator.
-    tree.cmdline_show_message();
+    tree.cmdline_show_message().unwrap();
 
     cmdline_input_content.trim().to_compact_string()
   }
