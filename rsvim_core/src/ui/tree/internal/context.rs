@@ -517,14 +517,23 @@ impl TreeContext {
 impl TreeContext {
   /// Calculate layout for the whole UI tree, and update shape/actual_shape for
   /// all nodes inside this tree.
-  pub fn compute_layout(&mut self) -> TaffyResult<()> {
+  ///
+  /// NOTE: The `start_id` indicates the root node that starting sync/update
+  /// shapes/actual_shapes of all the nodes.
+  /// For example, if we only modify a leaf node style/layout, and its most
+  /// ancestor nodes layout will not change. In such case, we only need to
+  /// update shapes for this leaf node, this will reduce unnecessary iteration
+  /// on the other tree nodes.
+  pub fn compute_layout(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
     if self.root != INVALID_ROOT_ID {
       self
         .ta
         .compute_layout(self.root, taffy::Size::MAX_CONTENT)?;
 
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
-      q.push_back(self.root);
+
+      debug_assert!(self.ta.contains(start_id));
+      q.push_back(start_id);
 
       // Iterate all descendants, and update their shape/actual_shape.
       while let Some(id) = q.pop_front() {
@@ -539,6 +548,31 @@ impl TreeContext {
         if let Ok(ta_children_ids) = self.ta.children(id) {
           for ta_child in ta_children_ids {
             q.push_back(ta_child);
+          }
+        }
+      }
+
+      if cfg!(debug_assertions) {
+        // Iterate from root node, and verify the layout are the same.
+        q.clear();
+        q.push_back(self.root);
+
+        // Iterate all descendants, and update their shape/actual_shape.
+        while let Some(id) = q.pop_front() {
+          let layout = *self.ta.layout(id)?;
+          let policy = self.truncate_policies.get(&id).copied().unwrap();
+          let shape = rect_from_layout!(layout);
+          let shape = self._truncate_shape(id, &shape, policy);
+          let actual_shape = self._calculate_actual_shape(id, &shape);
+          debug_assert!(self.shapes.contains_key(&id));
+          debug_assert_eq!(*self.shapes.get(&id).unwrap(), shape);
+          debug_assert!(self.actual_shapes.contains_key(&id));
+          debug_assert_eq!(*self.actual_shapes.get(&id).unwrap(), actual_shape);
+
+          if let Ok(ta_children_ids) = self.ta.children(id) {
+            for ta_child in ta_children_ids {
+              q.push_back(ta_child);
+            }
           }
         }
       }

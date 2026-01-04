@@ -163,7 +163,7 @@ impl Tree {
       let context = base.context();
       let mut context = context.borrow_mut();
       let id = context.new_leaf_default(style, "Root")?;
-      context.compute_layout()?;
+      context.compute_layout(id)?;
       id
     };
 
