@@ -359,7 +359,7 @@ fn shape1() {
     ..Default::default()
   };
   let nid6 = ctx.new_with_parent_default(nid3, style6, "n6").unwrap();
-  let s6 = rect!(3, 6, 6, 10);
+  let s6 = rect!(3, 6, 6, 9);
   let us6 = rect!(13, 16, 16, 19);
 
   let style7 = Style {
@@ -376,7 +376,7 @@ fn shape1() {
     },
     ..Default::default()
   };
-  let s7 = rect!(3, 6, 15, 25);
+  let s7 = rect!(3, 6, 10, 15);
   let us7 = rect!(3, 6, 10, 15);
   let nid7 = ctx.new_with_parent_default(nid5, style7, "n7").unwrap();
 
@@ -395,7 +395,7 @@ fn shape1() {
     ..Default::default()
   };
   let nid8 = ctx.new_with_parent_default(nid7, style8, "n8").unwrap();
-  let s8 = rect!(-1, -2, 2, 1);
+  let s8 = rect!(0, 0, 2, 1);
   let us8 = rect!(3, 6, 5, 7);
 
   let style9 = Style {
@@ -412,7 +412,7 @@ fn shape1() {
     },
     ..Default::default()
   };
-  let s9 = rect!(5, 6, 9, 8);
+  let s9 = rect!(5, 6, 7, 8);
   let us9 = rect!(8, 12, 10, 14);
   let nid9 = ctx.new_with_parent_default(nid7, style9, "n9").unwrap();
 
