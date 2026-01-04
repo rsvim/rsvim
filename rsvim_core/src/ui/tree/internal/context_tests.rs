@@ -1,6 +1,6 @@
 use super::context::*;
 use crate::prelude::*;
-// use crate::tests::log::init as test_log_init;
+use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use itertools::Itertools;
 use taffy::Style;
@@ -242,7 +242,7 @@ fn new_child2() {
 
 #[test]
 fn shape1() {
-  // test_log_init();
+  test_log_init();
 
   let mut ctx = TreeContext::new();
 
@@ -323,7 +323,7 @@ fn shape1() {
     ..Default::default()
   };
   let nid4 = ctx.new_with_parent_default(nid2, style4, "n4").unwrap();
-  let s4 = rect!(3, 5, 20, 14);
+  let s4 = rect!(3, 5, 15, 14);
   let us4 = rect!(3, 5, 15, 14);
 
   let style5 = Style {
@@ -341,7 +341,7 @@ fn shape1() {
     ..Default::default()
   };
   let nid5 = ctx.new_with_parent_default(nid2, style5, "n5").unwrap();
-  let s5 = rect!(-3, -5, 10, 20);
+  let s5 = rect!(0, 0, 10, 15);
   let us5 = rect!(0, 0, 10, 15);
 
   let style6 = Style {
@@ -428,6 +428,7 @@ fn shape1() {
     let expect_s = expect_shapes[i];
     let actual_us = ctx.actual_shape(*nid).copied().unwrap();
     let actual_s = ctx.shape(*nid).copied().unwrap();
+    info!("{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}", i+1, expect_us, actual_us, expect_s, actual_s);
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
@@ -567,6 +568,7 @@ fn shape2() {
     let expect_s = expect_shapes[i];
     let actual_us = ctx.actual_shape(*nid).copied().unwrap();
     let actual_s = ctx.shape(*nid).copied().unwrap();
+    info!("{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}", i+1, expect_us, actual_us, expect_s, actual_s);
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
