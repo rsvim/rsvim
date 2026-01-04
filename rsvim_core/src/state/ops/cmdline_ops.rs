@@ -41,10 +41,7 @@ fn set_message(
     0,
   ));
 
-  tree
-    .cmdline_mut()
-    .unwrap()
-    .set_message_viewport(new_message_viewport);
+  tree.set_cmdline_message_viewport(new_message_viewport);
 }
 
 pub fn cmdline_flush_pending_message(
