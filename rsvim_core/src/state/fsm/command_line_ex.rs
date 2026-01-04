@@ -141,7 +141,7 @@ impl CommandLineExStateful {
       TreeNode::CmdlineInput(_)
     ));
 
-    // Show message, hide input/indicator.
+    // Show message, hide input/indicator. Also update layouts/shapes.
     tree.cmdline_show_message().unwrap();
 
     let current_window_id = tree.current_window_id().unwrap();
