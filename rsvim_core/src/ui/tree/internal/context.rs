@@ -168,8 +168,7 @@ impl Ta {
     self._internal_check();
     let parent_taid = self.id2taid.get(&parent_id).unwrap();
     let taid = self.id2taid.get(&id).unwrap();
-    let result = self.ta.add_child(*parent_taid, *taid)?;
-    Ok(result)
+    self.ta.add_child(*parent_taid, *taid)
   }
 
   pub fn remove_child(
@@ -286,9 +285,11 @@ impl Ta {
 /// ## Reserved
 ///
 /// Reserve child shape as much as we can:
+///
 /// 1. Try to set the child size to be close to the size of its parent.
 /// 2. Move it inside its parent to avoid been cut off, but if there's
 ///    still some parts outside, cut them off then.
+///
 /// For example:
 ///
 /// ```
