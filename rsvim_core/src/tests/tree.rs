@@ -48,7 +48,7 @@ pub fn make_tree_with_buffers(
       tree_root_id,
       window_style,
       window_local_opts,
-      Arc::downgrade(&buf),
+      Arc::downgrade(buf),
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
