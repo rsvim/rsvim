@@ -129,7 +129,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CmdlineExStateful::default();
+    let stateful = CommandLineExStateful::default();
 
     // Insert-1
     {
@@ -270,7 +270,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CmdlineExStateful::default();
+    let stateful = CommandLineExStateful::default();
 
     // Insert-1
     {
@@ -416,7 +416,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CmdlineExStateful::default();
+    let stateful = CommandLineExStateful::default();
 
     // Insert-1
     {
