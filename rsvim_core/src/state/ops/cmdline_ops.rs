@@ -14,13 +14,15 @@ use ringbuf::traits::RingBuffer;
 fn _set_message_impl(
   tree: &mut Tree,
   text_contents: &mut TextContents,
-  payload: String,
+  payload: Option<String>,
 ) {
   debug_assert!(tree.cmdline_id().is_some());
 
   let message_text = text_contents.command_line_message_mut();
   message_text.clear();
-  message_text.insert_at(0, 0, payload.to_compact_string());
+  if let Some(payload) = payload {
+    message_text.insert_at(0, 0, payload.to_compact_string());
+  }
 
   let (opts, message_actual_size) = {
     let cmdline = tree.cmdline().unwrap();
@@ -58,7 +60,7 @@ pub fn cmdline_set_last_pending_message_on_initialize(
     //
     // FIXME: Fix me once our "command-line-message" widget support
     // multi-line messages.
-    _set_message_impl(tree, text_contents, last_msg);
+    _set_message_impl(tree, text_contents, Some(last_msg));
   }
 }
 
@@ -67,7 +69,7 @@ pub fn cmdline_set_message(
   text_contents: &mut TextContents,
   payload: String,
 ) {
-  _set_message_impl(tree, text_contents, payload.clone());
+  _set_message_impl(tree, text_contents, Some(payload.clone()));
 
   // Also append message history:
   let cmdline_hist = text_contents.command_line_message_history_mut();
@@ -79,30 +81,7 @@ pub fn cmdline_clear_message(
   text_contents: &mut TextContents,
 ) {
   debug_assert!(tree.cmdline_id().is_some());
-
-  let message_text = text_contents.command_line_message_mut();
-  message_text.clear();
-
-  let (opts, message_actual_size) = {
-    let cmdline = tree.cmdline().unwrap();
-    let opts = *cmdline.options();
-    let message_id = cmdline.message_id();
-    let actual_size = match tree.node(message_id).unwrap() {
-      TreeNode::CmdlineMessage(message) => message.actual_shape().size(),
-      _ => unreachable!(),
-    };
-    (opts, actual_size)
-  };
-
-  let new_message_viewport = Viewport::to_arc(Viewport::view(
-    &opts,
-    message_text,
-    &message_actual_size,
-    0,
-    0,
-  ));
-
-  tree.set_cmdline_message_viewport(new_message_viewport);
+  _set_message_impl(tree, text_contents, None);
 }
 
 pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
