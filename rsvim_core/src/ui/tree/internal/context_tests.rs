@@ -10,23 +10,6 @@ use taffy::Style;
 use taffy::prelude::FromLength;
 use taffy::prelude::TaffyAuto;
 
-#[derive(Clone, Debug)]
-struct TestValue {
-  pub __node: InodeBase,
-  pub value: i32,
-}
-
-inode_impl!(TestValue);
-
-impl TestValue {
-  pub fn new(id: TreeNodeId, ctx: TreeContextWk, value: i32) -> Self {
-    TestValue {
-      __node: InodeBase::new(id, ctx),
-      value,
-    }
-  }
-}
-
 #[test]
 fn next_node_id1() {
   assert!(next_node_id() > 0);
