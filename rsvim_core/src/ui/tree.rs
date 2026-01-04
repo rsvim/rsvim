@@ -163,7 +163,7 @@ impl Tree {
       let context = base.context();
       let mut context = context.borrow_mut();
       let id = context.new_leaf_default(style, "Root")?;
-      context.compute_layout(id)?;
+      context.compute_layout(context.root())?;
       id
     };
 
@@ -386,6 +386,7 @@ impl Tree {
     show_input: bool,
   ) -> TaffyResult<()> {
     let cmdline = self.cmdline().unwrap();
+    let cmdline_id = cmdline.id();
     let input_panel_id = cmdline.input_panel_id();
     let message_id = cmdline.message_id();
 
@@ -424,7 +425,7 @@ impl Tree {
 
     context.set_style(input_panel_id, input_panel_style)?;
     context.set_style(message_id, message_style)?;
-    context.compute_layout(self.cmdline_id().unwrap())
+    context.compute_layout(cmdline_id)
   }
 
   // Show message widget, hide indicator/input widgets.
@@ -482,7 +483,7 @@ impl Tree {
       let content_id =
         context.new_with_parent_default(id, content_style, "WindowContent")?;
 
-      context.compute_layout()?;
+      context.compute_layout(self.root_id())?;
 
       let content_actual_shape =
         context.actual_shape(content_id).copied().unwrap();
@@ -552,7 +553,7 @@ impl Tree {
         "Cursor",
       )?;
 
-      context.compute_layout()?;
+      context.compute_layout(self.root_id())?;
 
       id
     };
@@ -630,7 +631,7 @@ impl Tree {
       let message_id =
         context.new_with_parent_default(id, message_style, "CmdlineMessage")?;
 
-      context.compute_layout()?;
+      context.compute_layout(self.root_id())?;
 
       let input_actual_shape = context.actual_shape(input_id).copied().unwrap();
       let message_actual_shape =
