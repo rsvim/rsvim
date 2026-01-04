@@ -583,7 +583,10 @@ impl EventLoop {
   fn _init_pending_messages(&mut self) {
     let mut contents = lock!(self.contents);
     let mut tree = lock!(self.tree);
-    cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+    cmdline_ops::cmdline_set_last_pending_message_on_initialize(
+      &mut tree,
+      &mut contents,
+    );
   }
 
   /// Shutdown.

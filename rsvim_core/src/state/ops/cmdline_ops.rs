@@ -44,7 +44,7 @@ fn _set_message_impl(
   tree.set_cmdline_message_viewport(new_message_viewport);
 }
 
-pub fn cmdline_flush_pending_message(
+pub fn cmdline_set_last_pending_message_on_initialize(
   tree: &mut Tree,
   text_contents: &mut TextContents,
 ) {
