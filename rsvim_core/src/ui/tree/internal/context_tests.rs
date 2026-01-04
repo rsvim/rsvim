@@ -428,7 +428,14 @@ fn shape1() {
     let expect_s = expect_shapes[i];
     let actual_us = ctx.actual_shape(*nid).copied().unwrap();
     let actual_s = ctx.shape(*nid).copied().unwrap();
-    info!("{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}", i+1, expect_us, actual_us, expect_s, actual_s);
+    info!(
+      "{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}",
+      i + 1,
+      expect_us,
+      actual_us,
+      expect_s,
+      actual_s
+    );
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
@@ -568,7 +575,14 @@ fn shape2() {
     let expect_s = expect_shapes[i];
     let actual_us = ctx.actual_shape(*nid).copied().unwrap();
     let actual_s = ctx.shape(*nid).copied().unwrap();
-    info!("{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}", i+1, expect_us, actual_us, expect_s, actual_s);
+    info!(
+      "{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}",
+      i + 1,
+      expect_us,
+      actual_us,
+      expect_s,
+      actual_s
+    );
     assert_eq!(expect_us, actual_us);
     assert_eq!(expect_s, actual_s);
   }
