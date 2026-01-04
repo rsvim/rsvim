@@ -69,7 +69,7 @@ where
   T: geo::CoordNum,
 {
   fn size(&self) -> Size<T> {
-    Size::new(self.max().x - self.min().x, self.max().y - self.min().y)
+    Size::new(self.width(), self.height())
   }
 }
 
