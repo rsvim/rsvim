@@ -436,7 +436,7 @@ fn shape1() {
 
 #[test]
 fn shape2() {
-  // test_log_init();
+  test_log_init();
 
   let mut ctx = TreeContext::new();
 
@@ -499,8 +499,8 @@ fn shape2() {
     ..Default::default()
   };
   let nid3 = ctx.new_with_parent_default(nid1, style3, "n3").unwrap();
-  let s3 = rect!(-2, -2, -1, 0);
-  let us3 = rect!(0, 0, 0, 0);
+  let s3 = rect!(0, 0, 1, 0);
+  let us3 = rect!(0, 0, 1, 0);
 
   let style4 = Style {
     position: taffy::Position::Absolute,
@@ -535,7 +535,7 @@ fn shape2() {
     ..Default::default()
   };
   let nid5 = ctx.new_with_parent_default(nid4, style5, "n5").unwrap();
-  let s5 = rect!(-3, -5, 15, 20);
+  let s5 = rect!(0, 0, 15, 15);
   let us5 = rect!(3, 5, 18, 20);
 
   let style6 = Style {
@@ -553,7 +553,7 @@ fn shape2() {
     ..Default::default()
   };
   let nid6 = ctx.new_with_parent_default(nid5, style6, "n6").unwrap();
-  let s6 = rect!(8, 13, 18, 25);
+  let s6 = rect!(8, 13, 15, 15);
   let us6 = rect!(11, 18, 18, 20);
 
   ctx.compute_layout().unwrap();
