@@ -149,7 +149,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn _goto_cmdline_forward_mode(
+  fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
@@ -160,7 +160,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn _goto_cmdline_backward_mode(
+  fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> StateMachine {
