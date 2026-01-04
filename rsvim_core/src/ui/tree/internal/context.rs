@@ -40,6 +40,12 @@ pub struct Ta {
   taid2id: FoldMap<taffy::NodeId, TreeNodeId>,
 }
 
+impl Default for Ta {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl Ta {
   pub fn new() -> Self {
     let mut ta = TaffyTree::new();
