@@ -888,7 +888,6 @@ impl Tree {
     self.node(editable_id).unwrap().actual_shape()
   }
 }
-
 // Editable }
 
 // Global options {
