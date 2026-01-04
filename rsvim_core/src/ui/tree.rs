@@ -888,7 +888,7 @@ impl Tree {
     self.node(editable_id).unwrap().actual_shape()
   }
 
-  pub fn cursor_editable_widget_id(&self) -> Option<TreeNodeId> {
+  pub fn cursor_editable_parent_id(&self) -> Option<TreeNodeId> {
     let cursor_id = self.cursor_id()?;
     let parent_id = self.parent_id(cursor_id)?;
     match self.node(parent_id)? {
