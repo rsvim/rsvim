@@ -7655,7 +7655,7 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let stateful = NormalStateful::default();
-    stateful.goto_cmdline_ex_mode(&data_access);
+    stateful.goto_command_line_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
     let actual_cursor = cmdline_cursor_viewport(tree.clone());
@@ -7712,7 +7712,7 @@ mod tests_goto_command_line_ex_mode {
 
     let stateful = NormalStateful::default();
 
-    let next_stateful = stateful.goto_cmdline_ex_mode(&data_access);
+    let next_stateful = stateful.goto_command_line_ex_mode(&data_access);
 
     // Goto Command-Line-Ex-1
     {
