@@ -268,100 +268,114 @@ impl Tree {
 // Widget {
 impl Tree {
   /// Cursor widget.
-  /// It panics if cursor doesn't exist.
   pub fn cursor(&self) -> Option<&Cursor> {
     let cursor_id = self.cursor_id?;
-    let n = self.node(cursor_id)?;
-    debug_assert!(matches!(n, TreeNode::Cursor(_)));
-    match n {
-      TreeNode::Cursor(c) => {
-        debug_assert_eq!(c.id(), cursor_id);
-        Some(c)
+    match self.node(cursor_id)? {
+      TreeNode::Cursor(cursor) => {
+        debug_assert_eq!(cursor.id(), cursor_id);
+        Some(cursor)
       }
       _ => unreachable!(),
     }
   }
 
   /// Mutable cursor widget.
-  /// It panics if cursor doesn't exist.
   pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
     let cursor_id = self.cursor_id?;
-    let n = self.node_mut(cursor_id)?;
-    debug_assert!(matches!(n, TreeNode::Cursor(_)));
-    match n {
-      TreeNode::Cursor(c) => {
-        debug_assert_eq!(c.id(), cursor_id);
-        Some(c)
+    match self.node_mut(cursor_id)? {
+      TreeNode::Cursor(cursor) => {
+        debug_assert_eq!(cursor.id(), cursor_id);
+        Some(cursor)
       }
       _ => unreachable!(),
     }
   }
 
   /// Window widget.
-  /// It panics if window doesn't exist.
   pub fn window(&self, id: TreeNodeId) -> Option<&Window> {
-    let n = self.node(id)?;
-    debug_assert!(matches!(n, TreeNode::Window(_)));
-    match n {
-      TreeNode::Window(w) => {
-        debug_assert_eq!(w.id(), id);
-        Some(w)
+    match self.node(id)? {
+      TreeNode::Window(window) => {
+        debug_assert_eq!(window.id(), id);
+        Some(window)
       }
       _ => unreachable!(),
     }
   }
 
   /// Mutable window widget.
-  /// It panics if window doesn't exist.
   pub fn window_mut(&mut self, id: TreeNodeId) -> Option<&mut Window> {
-    let n = self.node_mut(id)?;
-    debug_assert!(matches!(n, TreeNode::Window(_)));
-    match n {
-      TreeNode::Window(w) => {
-        debug_assert_eq!(w.id(), id);
-        Some(w)
+    match self.node_mut(id)? {
+      TreeNode::Window(window) => {
+        debug_assert_eq!(window.id(), id);
+        Some(window)
       }
       _ => unreachable!(),
     }
   }
 
   /// Current window widget.
-  /// It panics if current window doesn't exist.
   pub fn current_window(&self) -> Option<&Window> {
-    self.window(self.current_window_id?)
+    let current_window_id = self.current_window_id?;
+    self.window(current_window_id)
   }
 
   /// Mutable current window widget.
-  /// It panics if current window doesn't exist.
   pub fn current_window_mut(&mut self) -> Option<&mut Window> {
-    self.window_mut(self.current_window_id?)
+    let current_window_id = self.current_window_id?;
+    self.window_mut(current_window_id)
   }
 
   /// Command-line widget.
-  /// It panics if command-line doesn't exist.
   pub fn cmdline(&self) -> Option<&Cmdline> {
     let cmdline_id = self.cmdline_id?;
-    let n = self.node(cmdline_id)?;
-    debug_assert!(matches!(n, TreeNode::Cmdline(_)));
-    match n {
-      TreeNode::Cmdline(c) => {
-        debug_assert_eq!(c.id(), cmdline_id);
-        Some(c)
+    match self.node(cmdline_id)? {
+      TreeNode::Cmdline(cursor) => {
+        debug_assert_eq!(cursor.id(), cmdline_id);
+        Some(cursor)
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  /// Command-line input widget.
+  pub fn cmdline_input(&self) -> Option<&CmdlineInput> {
+    let cmdline_id = self.cmdline_id?;
+    match self.node(cmdline_id)? {
+      TreeNode::Cmdline(cmdline) => {
+        debug_assert_eq!(cmdline.id(), cmdline_id);
+        let input_id = cmdline.input_id();
+        match self.node(input_id)? {
+          TreeNode::CmdlineInput(input) => Some(input),
+          _ => unreachable!(),
+        }
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  /// Command-line input widget.
+  pub fn cmdline_message(&self) -> Option<&CmdlineInput> {
+    let cmdline_id = self.cmdline_id?;
+    match self.node(cmdline_id)? {
+      TreeNode::Cmdline(cmdline) => {
+        debug_assert_eq!(cmdline.id(), cmdline_id);
+        let input_id = cmdline.input_id();
+        match self.node(input_id)? {
+          TreeNode::CmdlineInput(input) => Some(input),
+          _ => unreachable!(),
+        }
       }
       _ => unreachable!(),
     }
   }
 
   // Mutable command-line widget.
-  /// It panics if command-line doesn't exist.
   pub fn cmdline_mut(&mut self) -> Option<&mut Cmdline> {
     let cmdline_id = self.cmdline_id?;
-    let n = self.node_mut(cmdline_id)?;
-    debug_assert!(matches!(n, TreeNode::Cmdline(_)));
-    match n {
-      TreeNode::Cmdline(c) => {
-        debug_assert_eq!(c.id(), cmdline_id);
-        Some(c)
+    match self.node_mut(cmdline_id)? {
+      TreeNode::Cmdline(cmdline) => {
+        debug_assert_eq!(cmdline.id(), cmdline_id);
+        Some(cmdline)
       }
       _ => unreachable!(),
     }
