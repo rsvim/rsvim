@@ -755,6 +755,42 @@ impl Tree {
 }
 // Movement }
 
+// Command-line {
+impl Tree {
+  pub fn set_cmdline_message_viewport(&mut self, viewport: ViewportArc) {
+    let cmdline_id = self.cmdline_id().unwrap();
+    match self.node_mut(cmdline_id).unwrap() {
+      TreeNode::Cmdline(cmdline) => {
+        cmdline.set_message_viewport(viewport.clone());
+        let message_id = cmdline.message_id();
+        match self.node_mut(message_id).unwrap() {
+          TreeNode::CmdlineMessage(message) => {
+            message.set_viewport(Arc::downgrade(&viewport))
+          }
+          _ => unreachable!(),
+        }
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn set_cmdline_indicator_symbol(
+    &mut self,
+    symbol: CmdlineIndicatorSymbol,
+  ) -> CmdlineIndicatorSymbol {
+    let cmdline_indicator_id = self.cmdline().unwrap().indicator_id();
+    match self.node_mut(cmdline_indicator_id).unwrap() {
+      TreeNode::CmdlineIndicator(indicator) => {
+        let old = indicator.symbol();
+        indicator.set_symbol(symbol);
+        old
+      }
+      _ => unreachable!(),
+    }
+  }
+}
+// Command-line }
+
 // Editable {
 impl Tree {
   /// Get viewport from editable widget.
@@ -837,24 +873,8 @@ impl Tree {
     };
     self.node(editable_id).unwrap().actual_shape()
   }
-
-  pub fn set_cmdline_message_viewport(&mut self, viewport: ViewportArc) {
-    let cmdline_id = self.cmdline_id().unwrap();
-    match self.node_mut(cmdline_id).unwrap() {
-      TreeNode::Cmdline(cmdline) => {
-        cmdline.set_message_viewport(viewport.clone());
-        let message_id = cmdline.message_id();
-        match self.node_mut(message_id).unwrap() {
-          TreeNode::CmdlineMessage(message) => {
-            message.set_viewport(Arc::downgrade(&viewport))
-          }
-          _ => unreachable!(),
-        }
-      }
-      _ => unreachable!(),
-    }
-  }
 }
+
 // Editable }
 
 // Global options {

@@ -161,13 +161,7 @@ impl CommandLineExStateful {
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
-    let cmdline_indicator_id = tree.cmdline().unwrap().indicator_id();
-    match tree.node_mut(cmdline_indicator_id).unwrap() {
-      TreeNode::CmdlineIndicator(indicator) => {
-        indicator.set_symbol(CmdlineIndicatorSymbol::Empty)
-      }
-      _ => unreachable!(),
-    }
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
     // Show message, hide input/indicator.
     tree.cmdline_show_message().unwrap();
 
