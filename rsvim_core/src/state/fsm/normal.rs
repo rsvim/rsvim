@@ -157,7 +157,7 @@ impl NormalStateful {
 
     if cfg!(debug_assertions) {
       let contents = data_access.contents.clone();
-      let mut contents = lock!(contents);
+      let contents = lock!(contents);
       let cmdline_input_content =
         contents.command_line_input().rope().to_compact_string();
       debug_assert!(cmdline_input_content.is_empty());
