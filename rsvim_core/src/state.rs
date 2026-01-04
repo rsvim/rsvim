@@ -25,8 +25,8 @@ use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
 use fsm::CmdlineBackwardStateful;
-use fsm::CmdlineExStateful;
 use fsm::CmdlineForwardStateful;
+use fsm::CommnandLineExStateful;
 use fsm::InsertStateful;
 use fsm::NormalStateful;
 use fsm::OperatorPendingStateful;
@@ -112,7 +112,7 @@ pub enum StateMachine {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CmdlineExMode(CmdlineExStateful),
+  CmdlineExMode(CommnandLineExStateful),
   CmdlineForwardMode(CmdlineForwardStateful),
   CmdlineBackwardMode(CmdlineBackwardStateful),
   TerminalMode(TerminalStateful),

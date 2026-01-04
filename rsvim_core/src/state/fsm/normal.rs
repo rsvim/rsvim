@@ -142,7 +142,7 @@ impl NormalStateful {
       _ => unreachable!(),
     }
 
-    StateMachine::CmdlineExMode(super::CmdlineExStateful::default())
+    StateMachine::CmdlineExMode(super::CommnandLineExStateful::default())
   }
 }
 
