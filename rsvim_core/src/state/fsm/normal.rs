@@ -120,29 +120,34 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Remove cursor from current window
+    // Show input/hide message, and update layouts/shapes.
+    tree.cmdline_show_input().unwrap();
+
+    let cmdline_id = tree.cmdline_id().unwrap();
+    let _old_widget_id = cursor_ops::cursor_jump(&mut tree, cmdline_id);
+
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.current_window_id().is_some());
+      debug_assert_eq!(_old_widget_id, tree.current_window_id());
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::CmdlineInput(_)));
+    }
+
+    tree.reserved_move_cursor_position_to(0, 0).unwrap();
     tree
       .cursor_mut()
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
-    let cmdline_id = tree.cmdline_id().unwrap();
-    cursor_ops::cursor_jump(&mut tree, cmdline_id);
-    tree.reserved_move_cursor_position_to(0, 0).unwrap();
-    tree.cmdline_show_input().unwrap();
-    let indicator_id = match tree.node_mut(cmdline_id).unwrap() {
-      TreeNode::Cmdline(cmdline) => cmdline.indicator_id(),
-      _ => unreachable!(),
-    };
-    debug_assert!(matches!(
-      tree.node(indicator_id).unwrap(),
-      TreeNode::CmdlineIndicator(_)
-    ));
-    match tree.node_mut(indicator_id).unwrap() {
-      TreeNode::CmdlineIndicator(indicator) => {
-        indicator.set_symbol(CmdlineIndicatorSymbol::Ex)
-      }
-      _ => unreachable!(),
-    }
+
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Ex);
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }

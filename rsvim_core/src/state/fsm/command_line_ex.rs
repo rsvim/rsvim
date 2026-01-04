@@ -14,7 +14,6 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
-use crate::ui::widget::cursor::CURSOR_HIDDEN;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
@@ -142,7 +141,7 @@ impl CommandLineExStateful {
       TreeNode::CmdlineInput(_)
     ));
 
-    // Show message, hide input/indicator. Also update layouts/shapes.
+    // Show message/hide input, and update layouts/shapes.
     tree.cmdline_show_message().unwrap();
 
     let current_window_id = tree.current_window_id().unwrap();
