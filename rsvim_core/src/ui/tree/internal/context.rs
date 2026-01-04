@@ -554,10 +554,10 @@ impl TreeContext {
           self.actual_shapes.get(&parent_id).copied().unwrap();
         match policy {
           TruncatePolicy::BRUTAL => {
-            shapes::truncate_shape(&shape, &parent_actual_shape.size())
+            shapes::truncate_shape(shape, &parent_actual_shape.size())
           }
           TruncatePolicy::RESERVED => {
-            shapes::bound_shape(&shape, &parent_actual_shape.size())
+            shapes::bound_shape(shape, &parent_actual_shape.size())
           }
         }
       }
