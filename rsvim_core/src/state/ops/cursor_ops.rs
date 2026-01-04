@@ -612,13 +612,7 @@ pub fn cursor_delete(
   text: &mut Text,
   n: isize,
 ) -> Option<(usize, usize)> {
-  debug_assert!(tree.node_mut(id).is_some());
-  let node = tree.node_mut(id).unwrap();
-  let cursor_viewport = match node {
-    TreeNode::Window(window) => window.cursor_viewport(),
-    TreeNode::Cmdline(cmdline) => cmdline.input_cursor_viewport(),
-    _ => unreachable!(),
-  };
+  let cursor_viewport = tree.editable_cursor_viewport(id);
 
   // Delete N-chars.
   let cursor_line_idx = cursor_viewport.line_idx();
