@@ -11,7 +11,7 @@ use compact_str::ToCompactString;
 use ringbuf::traits::Consumer;
 use ringbuf::traits::RingBuffer;
 
-fn set_message(
+fn _set_message_impl(
   tree: &mut Tree,
   text_contents: &mut TextContents,
   payload: String,
@@ -62,7 +62,7 @@ pub fn cmdline_flush_pending_message(
     //
     // FIXME: Fix me once our "command-line-message" widget support
     // multi-line messages.
-    set_message(tree, text_contents, last_msg);
+    _set_message_impl(tree, text_contents, last_msg);
   }
 }
 
@@ -71,7 +71,7 @@ pub fn cmdline_set_message(
   text_contents: &mut TextContents,
   payload: String,
 ) {
-  set_message(tree, text_contents, payload.clone());
+  _set_message_impl(tree, text_contents, payload.clone());
 
   // Also append message history:
   let cmdline_hist = text_contents.command_line_message_history_mut();

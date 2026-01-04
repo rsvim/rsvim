@@ -140,6 +140,10 @@ impl CommandLineExStateful {
         .unwrap(),
       TreeNode::CmdlineInput(_)
     ));
+
+    // Show message, hide input/indicator.
+    tree.cmdline_show_message().unwrap();
+
     let current_window_id = tree.current_window_id().unwrap();
 
     let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
@@ -173,8 +177,6 @@ impl CommandLineExStateful {
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
     tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
-    // Show message, hide input/indicator.
-    tree.cmdline_show_message().unwrap();
 
     cmdline_input_content.trim().to_compact_string()
   }
