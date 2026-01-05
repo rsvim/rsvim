@@ -135,7 +135,7 @@ fn raw_move_position_by1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree._raw_move_position_by(&ctx, nid3, x, y).unwrap();
+    let actual = tree.raw_move_position_by(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
@@ -225,7 +225,7 @@ fn raw_move_position_to1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree._raw_move_position_to(&ctx, nid3, x, y).unwrap();
+    let actual = tree.raw_move_position_to(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);

@@ -81,7 +81,7 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn _raw_move_position_by(
+  pub fn raw_move_position_by(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
@@ -90,10 +90,10 @@ where
   ) -> Option<IRect> {
     let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
-    self._raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
+    self.raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
-  pub fn _raw_move_position_to(
+  pub fn raw_move_position_to(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
@@ -148,7 +148,7 @@ where
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    self._raw_move_position_by(context, id, final_x, final_y)
+    self.raw_move_position_by(context, id, final_x, final_y)
   }
 
   /// Similar to [move_position_by](Self::move_position_by), but moves with
@@ -180,7 +180,7 @@ where
       }
     };
     let final_pos: IPos = final_shape.min().into();
-    self._raw_move_position_to(context, id, final_pos.x(), final_pos.y())
+    self.raw_move_position_to(context, id, final_pos.x(), final_pos.y())
   }
 }
 
