@@ -9,6 +9,7 @@ use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::make_canvas;
+use crate::tests::viewport::make_viewport;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 
 #[cfg(test)]
@@ -49,7 +50,8 @@ mod tests_nowrap {
       "          ",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -84,7 +86,8 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -123,7 +126,8 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -172,7 +176,8 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 

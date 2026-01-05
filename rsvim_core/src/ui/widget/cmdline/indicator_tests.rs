@@ -58,9 +58,10 @@ mod tests_nowrap {
         "CmdlineIndicator",
       )
       .unwrap();
+    let root_id = ctx.borrow().root();
     ctx
       .borrow_mut()
-      .compute_layout(ctx.borrow().root())
+      .compute_layout(root_id)
       .unwrap();
 
     let terminal_size = size!(1, 1);

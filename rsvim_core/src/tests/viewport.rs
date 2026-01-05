@@ -78,6 +78,7 @@ pub fn make_canvas(
   terminal_size: U16Size,
   window_options: WindowOptions,
   buffer: BufferArc,
+  viewport: ViewportArc,
 ) -> Canvas {
   let style = Style {
     size: taffy::Size {
@@ -103,6 +104,7 @@ pub fn make_canvas(
       Arc::downgrade(&buffer),
     )
     .unwrap();
+  tree.set_editable_viewport(window_id, viewport);
   let content_id = match tree.node(window_id).unwrap() {
     TreeNode::Window(window) => window.content_id(),
     _ => unreachable!(),
