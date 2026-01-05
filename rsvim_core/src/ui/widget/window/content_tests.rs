@@ -419,7 +419,8 @@ mod tests_nowrap_eol {
       "     * The extra parts are been tru",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -457,7 +458,8 @@ mod tests_nowrap_eol {
       "     * The extra parts are been tru",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 }
@@ -500,7 +502,8 @@ mod tests_nowrap_startcol {
       "          ",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 4);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -535,7 +538,9 @@ mod tests_nowrap_startcol {
       "r line-wrap or word-wrap options ar",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport =
+      make_viewport(terminal_size, win_opts, buffer.clone(), 1, 60);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
