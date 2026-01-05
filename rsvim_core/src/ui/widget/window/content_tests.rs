@@ -684,7 +684,6 @@ mod tests_nowrap_startcol {
       "                     ",
       "                     ",
     ];
-
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 5);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
