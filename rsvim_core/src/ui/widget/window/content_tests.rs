@@ -953,7 +953,8 @@ mod tests_wrap_nolinebreak {
       "e-wrap and word-wra",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
 
     let expect = vec![
