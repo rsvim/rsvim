@@ -1257,8 +1257,7 @@ mod tests_wrap_nolinebreak_startcol {
       "                    ",
       "                    ",
     ];
-    let viewport =
-      make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
