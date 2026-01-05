@@ -353,15 +353,15 @@ impl Tree {
     }
   }
 
-  /// Command-line input widget.
-  pub fn cmdline_message(&self) -> Option<&CmdlineInput> {
+  /// Command-line message widget.
+  pub fn cmdline_message(&self) -> Option<&CmdlineMessage> {
     let cmdline_id = self.cmdline_id?;
     match self.node(cmdline_id)? {
       TreeNode::Cmdline(cmdline) => {
         debug_assert_eq!(cmdline.id(), cmdline_id);
-        let input_id = cmdline.input_id();
-        match self.node(input_id)? {
-          TreeNode::CmdlineInput(input) => Some(input),
+        let message_id = cmdline.message_id();
+        match self.node(message_id)? {
+          TreeNode::CmdlineMessage(message) => Some(message),
           _ => unreachable!(),
         }
       }
