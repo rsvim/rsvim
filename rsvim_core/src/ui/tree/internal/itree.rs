@@ -81,7 +81,7 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  pub fn raw_move_position_by(
+  pub fn _raw_move_position_by(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
@@ -90,10 +90,10 @@ where
   ) -> Option<IRect> {
     let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
-    self.raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
+    self._raw_move_position_to(context, id, pos.x() + x, pos.y() + y)
   }
 
-  pub fn raw_move_position_to(
+  pub fn _raw_move_position_to(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
@@ -116,18 +116,15 @@ where
   /// - It moves to up when `y < 0`.
   /// - It moves to down when `y > 0`.
   ///
-  /// This motion uses the [TruncatePolicy::RESERVED] like policy, e.g. if it
-  /// hits the boundary of its parent, it simply stops moving to avoid its size
-  /// been truncated by its parent.
-  ///
   /// Returns the new shape after movement if successfully, otherwise
   /// returns `None` if the node doesn't exist or doesn't have a parent.
-  pub fn reserved_move_position_by(
+  pub fn move_position_by(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
     y: isize,
+    truncate_policy: TruncatePolicy,
   ) -> Option<IRect> {
     let shape = context.shape(id)?;
     let pos: IPos = shape.min().into();
@@ -140,22 +137,29 @@ where
     );
     let parent_id = context.parent(id)?;
     let parent_actual_shape = context.actual_shape(parent_id)?;
-    let final_shape =
-      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_shape = match truncate_policy {
+      TruncatePolicy::BRUTAL => {
+        shapes::truncate_shape(&new_shape, &parent_actual_shape.size())
+      }
+      TruncatePolicy::RESERVED => {
+        shapes::bound_shape(&new_shape, &parent_actual_shape.size())
+      }
+    };
     let final_pos: IPos = final_shape.min().into();
     let final_x = final_pos.x() - pos.x();
     let final_y = final_pos.y() - pos.y();
-    self.raw_move_position_by(context, id, final_x, final_y)
+    self._raw_move_position_by(context, id, final_x, final_y)
   }
 
-  /// Similar to [reserved_move_position_by](Self::reserved_move_position_by),
-  /// but moves with absolute position instead of relative.
-  pub fn reserved_move_position_to(
+  /// Similar to [move_position_by](Self::move_position_by), but moves with
+  /// absolute position instead of relative.
+  pub fn move_position_to(
     &self,
     context: &TreeContext,
     id: TreeNodeId,
     x: isize,
     y: isize,
+    truncate_policy: TruncatePolicy,
   ) -> Option<IRect> {
     let shape = context.shape(id)?;
     let new_pos: IPos = point!(x, y);
@@ -167,10 +171,16 @@ where
     );
     let parent_id = context.parent(id)?;
     let parent_actual_shape = context.actual_shape(parent_id)?;
-    let final_shape =
-      shapes::bound_shape(&new_shape, &parent_actual_shape.size());
+    let final_shape = match truncate_policy {
+      TruncatePolicy::RESERVED => {
+        shapes::bound_shape(&new_shape, &parent_actual_shape.size())
+      }
+      TruncatePolicy::BRUTAL => {
+        shapes::truncate_shape(&new_shape, &parent_actual_shape.size())
+      }
+    };
     let final_pos: IPos = final_shape.min().into();
-    self.raw_move_position_to(context, id, final_pos.x(), final_pos.y())
+    self._raw_move_position_to(context, id, final_pos.x(), final_pos.y())
   }
 }
 

@@ -732,7 +732,7 @@ impl Tree {
     let parent_id = self.parent_id(cursor_id).unwrap();
     let new_shape = self
       .base
-      .reserved_move_position_to(&context, cursor_id, x, y)
+      .move_position_to(&context, cursor_id, x, y, TruncatePolicy::RESERVED)
       .unwrap();
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();
@@ -758,7 +758,7 @@ impl Tree {
     let parent_id = self.parent_id(cursor_id).unwrap();
     let new_shape = self
       .base
-      .reserved_move_position_by(&context, cursor_id, x, y)
+      .move_position_by(&context, cursor_id, x, y, TruncatePolicy::RESERVED)
       .unwrap();
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();

@@ -122,12 +122,7 @@ fn raw_move_position_by1() {
   tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 Move: (x, y)
-  let moves: Vec<(isize, isize)> = vec![
-    (-10, -4),
-    (2, -7),
-    (1, 90),
-    (-70, 41),
-  ];
+  let moves: Vec<(isize, isize)> = vec![(-10, -4), (2, -7), (1, 90), (-70, 41)];
   let expects: Vec<IRect> = vec![
     rect!(-10, -4, -9, -3),
     rect!(2, -7, 3, -6),
@@ -140,7 +135,7 @@ fn raw_move_position_by1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree.raw_move_position_by(&ctx, nid3, x, y).unwrap();
+    let actual = tree._raw_move_position_by(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
@@ -217,12 +212,7 @@ fn raw_move_position_to1() {
   tree.context().borrow_mut().compute_layout(nid1).unwrap();
 
   // n3 Move: (x, y)
-  let moves: Vec<(isize, isize)> = vec![
-    (-10, -4),
-    (2, -7),
-    (1, 90),
-    (-70, 41),
-  ];
+  let moves: Vec<(isize, isize)> = vec![(-10, -4), (2, -7), (1, 90), (-70, 41)];
   let expects: Vec<IRect> = vec![
     rect!(-10, -4, -9, -3),
     rect!(2, -7, 3, -6),
@@ -235,7 +225,7 @@ fn raw_move_position_to1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree.raw_move_position_to(&ctx, nid3, x, y).unwrap();
+    let actual = tree._raw_move_position_to(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
@@ -340,7 +330,7 @@ fn reserved_move_position_by1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree.reserved_move_position_by(&ctx, nid3, x, y).unwrap();
+    let actual = tree.move_position_by(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
@@ -445,7 +435,7 @@ fn reserved_move_position_to1() {
     let y = m.1;
     let ctx = tree.context();
     let ctx = ctx.borrow();
-    let actual = tree.reserved_move_position_to(&ctx, nid3, x, y).unwrap();
+    let actual = tree.move_position_to(&ctx, nid3, x, y).unwrap();
     let expect = expects[i];
     info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
     assert_eq!(actual, expect);
