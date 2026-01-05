@@ -974,7 +974,8 @@ mod tests_wrap_nolinebreak {
       "ndow content widget",
       ", there're multiple",
     ];
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 3, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -1021,7 +1022,8 @@ mod tests_wrap_nolinebreak {
       "e rows in the windo",
       "w, thus it may cont",
     ];
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -1068,7 +1070,8 @@ mod tests_wrap_nolinebreak {
       "                   ",
       "                   ",
     ];
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 }
@@ -1114,7 +1117,8 @@ mod tests_wrap_nolinebreak_eol {
       "s several ",
     ];
 
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -1154,8 +1158,8 @@ mod tests_wrap_nolinebreak_eol {
       "it contain",
       "s several ",
     ];
-
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 }
@@ -1197,8 +1201,9 @@ mod tests_wrap_nolinebreak_startcol {
       " row of th",
       "e window c",
     ];
-
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport =
+      make_viewport(terminal_size, win_opts, buffer.clone(), 1, 31);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -1229,8 +1234,9 @@ mod tests_wrap_nolinebreak_startcol {
       "的重复这样的操作。This oper",
       "ation also eats more rows i",
     ];
-
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport =
+      make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
@@ -1254,8 +1260,9 @@ mod tests_wrap_nolinebreak_startcol {
       "                    ",
       "                    ",
     ];
-
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport =
+      make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
