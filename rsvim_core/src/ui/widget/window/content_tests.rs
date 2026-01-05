@@ -1319,8 +1319,8 @@ mod tests_wrap_nolinebreak_startcol {
       "nto the next row, i",
       "f either line-wrap ",
     ];
-
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
