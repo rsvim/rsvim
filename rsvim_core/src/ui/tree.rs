@@ -551,7 +551,7 @@ impl Tree {
 
       let id = context.new_with_parent_default(parent_id, style, "Cmdline")?;
       let input_panel_id = context.new_with_parent_default(
-        parent_id,
+        id,
         input_panel_style,
         "CmdlinePanel",
       )?;
