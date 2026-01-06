@@ -543,7 +543,11 @@ impl Tree {
         ..Default::default()
       };
       let input_panel_style = Self::_cmdline_input_panel_style(false);
-      let message_style = Self::_cmdline_message_style(true);
+      let message_style = Self::_cmdline_message_style(false);
+      trace!(
+        "new input_panel_style.display:{:?}, message_style.display:{:?}",
+        input_panel_style.display, message_style.display
+      );
 
       let id = context.new_with_parent_default(parent_id, style, "Cmdline")?;
       let input_panel_id = context.new_with_parent_default(
@@ -667,6 +671,11 @@ impl Tree {
     let context = self.base.context();
     let mut context = context.borrow_mut();
 
+    trace!(
+      "before input_panel_style.display:{:?}, message_style.display:{:?}",
+      context.style(input_panel_id)?.display,
+      context.style(message_id)?.display
+    );
     debug_assert_eq!(
       context.style(input_panel_id)?.display,
       if show_input {
@@ -684,6 +693,11 @@ impl Tree {
       }
     );
 
+    trace!(
+      "after input_panel_style.display:{:?}, message_style.display:{:?}",
+      Self::_cmdline_input_panel_style(show_input).display,
+      Self::_cmdline_message_style(show_input).display
+    );
     context.set_style(
       input_panel_id,
       Self::_cmdline_input_panel_style(show_input),
