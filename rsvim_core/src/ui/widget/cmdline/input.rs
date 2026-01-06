@@ -40,11 +40,14 @@ impl CmdlineInput {
 
 impl Widgetable for CmdlineInput {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let contents = self.text_contents.upgrade().unwrap();
-    let contents = lock!(contents);
-    let viewport = self.viewport.upgrade().unwrap();
+    let enabled = self.enabled();
+    if (enabled) {
+      let actual_shape = self.actual_shape();
+      let contents = self.text_contents.upgrade().unwrap();
+      let contents = lock!(contents);
+      let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(contents.command_line_input(), &actual_shape, canvas);
+      viewport.draw(contents.command_line_input(), &actual_shape, canvas);
+    }
   }
 }

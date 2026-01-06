@@ -60,11 +60,14 @@ impl CmdlineIndicator {
 
 impl Widgetable for CmdlineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let upos: U16Pos = actual_shape.min().into();
-    let symbol = self.symbol;
-    let symbol = format!("{symbol}").to_compact_string();
-    let cell = Cell::with_symbol(symbol);
-    canvas.frame_mut().set_cell(upos, cell);
+    let enabled = self.enabled();
+    if (enabled) {
+      let actual_shape = self.actual_shape();
+      let upos: U16Pos = actual_shape.min().into();
+      let symbol = self.symbol;
+      let symbol = format!("{symbol}").to_compact_string();
+      let cell = Cell::with_symbol(symbol);
+      canvas.frame_mut().set_cell(upos, cell);
+    }
   }
 }
