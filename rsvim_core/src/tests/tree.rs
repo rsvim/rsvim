@@ -52,6 +52,7 @@ pub fn make_tree_with_buffers(
     )
     .unwrap();
   let window_content_id = tree.window(window_id).unwrap().content_id();
+  tree.set_current_window_id(window_id);
 
   // Cursor.
   let _cursor_id = tree
