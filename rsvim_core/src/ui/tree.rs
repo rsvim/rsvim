@@ -412,10 +412,7 @@ impl Tree {
     }
   }
 
-  fn _toggle_cmdline_input_or_message(
-    &mut self,
-    show_input: bool,
-  ) -> TaffyResult<()> {
+  fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let cmdline = self.cmdline().unwrap();
     let cmdline_id = cmdline.id();
     let input_panel_id = cmdline.input_panel_id();
@@ -455,12 +452,12 @@ impl Tree {
 
   // Show message widget, hide indicator/input widgets.
   pub fn cmdline_show_message(&mut self) -> TaffyResult<()> {
-    self._toggle_cmdline_input_or_message(false)
+    self._cmdline_toggle_input(false)
   }
 
   // Show indicator/input widgets, hide message widget.
   pub fn cmdline_show_input(&mut self) -> TaffyResult<()> {
-    self._toggle_cmdline_input_or_message(true)
+    self._cmdline_toggle_input(true)
   }
 }
 // Widget }
