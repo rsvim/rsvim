@@ -40,11 +40,14 @@ impl CmdlineMessage {
 
 impl Widgetable for CmdlineMessage {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let contents = self.text_contents.upgrade().unwrap();
-    let contents = lock!(contents);
-    let viewport = self.viewport.upgrade().unwrap();
+    let enabled = self.enabled();
+    if (enabled) {
+      let actual_shape = self.actual_shape();
+      let contents = self.text_contents.upgrade().unwrap();
+      let contents = lock!(contents);
+      let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(contents.command_line_message(), &actual_shape, canvas);
+      viewport.draw(contents.command_line_message(), &actual_shape, canvas);
+    }
   }
 }
