@@ -22,6 +22,7 @@ pub fn init_default_window(
     ..Default::default()
   };
   let cmdline_style = Style {
+    display: taffy::Display::Grid,
     ..Default::default()
   };
 
