@@ -18,17 +18,9 @@ pub fn init_default_window(
   let tree_root_id = tree.root_id();
 
   let window_style = Style {
-    size: taffy::Size {
-      width: taffy::prelude::percent(1.0),
-      height: taffy::prelude::percent(1.0),
-    },
     ..Default::default()
   };
   let cmdline_style = Style {
-    size: taffy::Size {
-      width: taffy::prelude::percent(1.0),
-      height: taffy::prelude::percent(1.0),
-    },
     ..Default::default()
   };
 

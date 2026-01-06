@@ -25,27 +25,27 @@ pub fn make_window(
   buffer: BufferArc,
   window_options: WindowOptions,
 ) -> (Tree, TreeNodeId) {
-  let style = Style {
+  let tree_style = Style {
     size: taffy::Size {
       width: taffy::prelude::length(terminal_size.width()),
       height: taffy::prelude::length(terminal_size.height()),
     },
     ..Default::default()
   };
-  let mut tree = Tree::new(style).unwrap();
+  let mut tree = Tree::new(tree_style).unwrap();
   tree.set_global_local_options(window_options);
 
-  let style = Style {
+  let window_style = Style {
     size: taffy::Size {
-      height: taffy::Dimension::from_percent(1.0),
-      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::prelude::percent(1.0),
+      width: taffy::prelude::percent(1.0),
     },
     ..Default::default()
   };
   let window_id = tree
     .new_window_with_parent(
       tree.root_id(),
-      style,
+      window_style,
       *tree.global_local_options(),
       Arc::downgrade(&buffer),
     )
