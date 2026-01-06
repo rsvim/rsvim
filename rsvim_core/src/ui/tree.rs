@@ -27,6 +27,8 @@ use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use crate::widget_dispatcher;
 pub use internal::*;
+use std::fmt::Debug;
+use std::fmt::Formatter;
 use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
@@ -72,7 +74,7 @@ widget_dispatcher!(
   CmdlineMessage
 );
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 /// The UI widget tree.
 ///
 /// This tree manages all UI components and renders them on the canvas, each
@@ -150,6 +152,12 @@ pub struct Tree {
 pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 
 arc_mutex_ptr!(Tree);
+
+impl Debug for Tree {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Tree").field("base", &self.base).finish()
+  }
+}
 
 // Node {
 impl Tree {

@@ -4,9 +4,11 @@ use crate::ui::tree::internal::inode::*;
 use crate::ui::tree::internal::shapes;
 use itertools::Itertools;
 use std::collections::VecDeque;
+use std::fmt::Debug;
+use std::fmt::Formatter;
 use taffy::TaffyResult;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Itree<T>
 where
   T: Inodeable,
@@ -16,6 +18,17 @@ where
 
   // Node collections.
   nodes: FoldMap<TreeNodeId, T>,
+}
+
+impl<T> Debug for Itree<T>
+where
+  T: Inodeable,
+{
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("Itree")
+      .field("context", &self.context.borrow())
+      .finish()
+  }
 }
 
 impl<T> Default for Itree<T>

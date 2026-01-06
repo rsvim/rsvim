@@ -7678,6 +7678,7 @@ mod tests_goto_command_line_ex_mode {
     ];
     let actual_canvas = make_tree_canvas(tree.clone(), terminal_size);
     let actual_canvas = lock!(actual_canvas);
+    info!("tree:{:?}", lock!(tree));
     assert_canvas(&actual_canvas, &expect_canvas);
   }
 

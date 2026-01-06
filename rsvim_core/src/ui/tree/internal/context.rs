@@ -355,14 +355,13 @@ rc_refcell_ptr!(TreeContext);
 impl Debug for TreeContext {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.root != INVALID_ROOT_ID {
-      f.write_str(format!("TreeContext({}):", self.ta.len()).as_str())?;
-      let mut results: Vec<String> = vec![];
+      f.write_str(format!("\nTreeContext({}):", self.ta.len()).as_str())?;
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
         let payload = if cfg!(debug_assertions) {
           format!(
-            "{}({}):{:?}({:?})",
+            "\n{}({}):{:?}({:?})",
             id,
             self.names.get(&id).unwrap(),
             self.shapes.get(&id).unwrap(),
@@ -370,15 +369,20 @@ impl Debug for TreeContext {
           )
         } else {
           format!(
-            "{}:{:?}({:?})",
+            "\n{}:{:?}({:?})",
             id,
             self.shapes.get(&id).unwrap(),
             self.actual_shapes.get(&id).unwrap()
           )
         };
-        results.push(payload);
+        f.write_str(&payload)?;
+        if let Ok(children) = self.children(id) {
+          for c in children {
+            q.push_back(c);
+          }
+        }
       }
-      f.debug_list().entries(results.iter()).finish()
+      Ok(())
     } else {
       f.write_str("TreeContext:empty")
     }
@@ -524,7 +528,7 @@ impl TreeContext {
   /// ancestor nodes layout will not change. In such case, we only need to
   /// update shapes for this leaf node, this will reduce unnecessary iteration
   /// on the other tree nodes.
-  pub fn compute_layout(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
+  pub fn compute_layout(&mut self, _start_id: TreeNodeId) -> TaffyResult<()> {
     if self.root != INVALID_ROOT_ID {
       self
         .ta
@@ -532,8 +536,8 @@ impl TreeContext {
 
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
 
-      debug_assert!(self.ta.contains(start_id));
-      q.push_back(start_id);
+      // debug_assert!(self.ta.contains(start_id));
+      q.push_back(self.root);
 
       // Iterate all descendants, and update their shape/actual_shape.
       while let Some(id) = q.pop_front() {
