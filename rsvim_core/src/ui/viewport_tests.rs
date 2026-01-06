@@ -10295,7 +10295,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "                     ",
       ];
 
-      let actual_canvas = make_canvas(terminal_size, win_opts, buf.clone());
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -10336,7 +10341,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
         "        or           ",
       ];
 
-      let actual_canvas = make_canvas(terminal_size, win_opts, buf.clone());
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        tree.window(window_id).unwrap().viewport(),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
