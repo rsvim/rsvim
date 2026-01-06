@@ -275,10 +275,10 @@ fn shape1() {
   let style2 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_u16),
-      top: taffy::LengthPercentageAuto::from_length(0_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(15_u16),
@@ -293,10 +293,10 @@ fn shape1() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(10_u16),
-      top: taffy::LengthPercentageAuto::from_length(10_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(10_u16),
+      top: taffy::prelude::length(10_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(8_u16),
@@ -311,10 +311,10 @@ fn shape1() {
   let style4 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(3_u16),
-      top: taffy::LengthPercentageAuto::from_length(5_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(3_u16),
+      top: taffy::prelude::length(5_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(12_u16),
@@ -329,10 +329,10 @@ fn shape1() {
   let style5 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(-3_i16),
-      top: taffy::LengthPercentageAuto::from_length(-5_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(-3_i16),
+      top: taffy::prelude::length(-5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(13_u16),
@@ -347,10 +347,10 @@ fn shape1() {
   let style6 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(3_i16),
-      top: taffy::LengthPercentageAuto::from_length(6_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(3_u16),
@@ -365,10 +365,10 @@ fn shape1() {
   let style7 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(3_i16),
-      top: taffy::LengthPercentageAuto::from_length(6_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(12_u16),
@@ -383,10 +383,10 @@ fn shape1() {
   let style8 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(-1_i16),
-      top: taffy::LengthPercentageAuto::from_length(-2_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(-1_i16),
+      top: taffy::prelude::length(-2_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(3_u16),
@@ -401,10 +401,10 @@ fn shape1() {
   let style9 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(5_i16),
-      top: taffy::LengthPercentageAuto::from_length(6_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(5_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(4_u16),
@@ -476,10 +476,10 @@ fn shape2() {
   let style2 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_i16),
-      top: taffy::LengthPercentageAuto::from_length(0_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_i16),
+      top: taffy::prelude::length(0_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(20_u16),
@@ -494,10 +494,10 @@ fn shape2() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(-2_i16),
-      top: taffy::LengthPercentageAuto::from_length(-2_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(-2_i16),
+      top: taffy::prelude::length(-2_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(3_u16),
@@ -512,10 +512,10 @@ fn shape2() {
   let style4 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(3_i16),
-      top: taffy::LengthPercentageAuto::from_length(5_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(17_u16),
@@ -530,10 +530,10 @@ fn shape2() {
   let style5 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(-3_i16),
-      top: taffy::LengthPercentageAuto::from_length(-5_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(-3_i16),
+      top: taffy::prelude::length(-5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(18_u16),
@@ -548,10 +548,10 @@ fn shape2() {
   let style6 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(8_i16),
-      top: taffy::LengthPercentageAuto::from_length(13_i16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(8_i16),
+      top: taffy::prelude::length(13_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       width: taffy::prelude::length(10_u16),
