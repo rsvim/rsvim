@@ -75,7 +75,7 @@ pub fn make_tree_with_buffers_cmdline(
   buffers_manager: BuffersManagerArc,
   text_contents: TextContentsArc,
 ) -> TreeArc {
-  let style = Style {
+  let tree_style = Style {
     display: taffy::Display::Grid,
     grid_template_rows: vec![
       taffy::prelude::fr(1_u16),
@@ -87,7 +87,7 @@ pub fn make_tree_with_buffers_cmdline(
     },
     ..Default::default()
   };
-  let tree_arc = Tree::to_arc(Tree::new(style).unwrap());
+  let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
   let buffers = lock!(buffers_manager);
   let (_, buf) = buffers.first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
