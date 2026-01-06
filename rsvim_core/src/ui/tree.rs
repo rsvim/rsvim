@@ -34,7 +34,6 @@ use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
 use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
 use taffy::prelude::TaffyAuto;
 
 #[derive(Debug, Clone)]
@@ -545,10 +544,10 @@ impl Tree {
           height: taffy::prelude::length(1_u16),
         },
         inset: taffy::Rect {
-          left: taffy::LengthPercentageAuto::from_length(0_u16),
-          top: taffy::LengthPercentageAuto::from_length(0_u16),
-          right: taffy::LengthPercentageAuto::AUTO,
-          bottom: taffy::LengthPercentageAuto::AUTO,
+          left: taffy::prelude::length(0_u16),
+          top: taffy::prelude::length(0_u16),
+          right: taffy::prelude::auto(),
+          bottom: taffy::prelude::auto(),
         },
         ..Default::default()
       };
