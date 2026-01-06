@@ -745,10 +745,10 @@ impl Tree {
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();
     style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_pos.x() as u16),
-      top: taffy::LengthPercentageAuto::from_length(new_pos.y() as u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(new_pos.x() as u16),
+      top: taffy::prelude::length(new_pos.y() as u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     };
     context.set_style(cursor_id, style)?;
     context.compute_layout(parent_id)
@@ -771,10 +771,10 @@ impl Tree {
     let new_pos: IPos = new_shape.min().into();
     let mut style = context.style(cursor_id)?.clone();
     style.inset = taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(new_pos.x() as u16),
-      top: taffy::LengthPercentageAuto::from_length(new_pos.y() as u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(new_pos.x() as u16),
+      top: taffy::prelude::length(new_pos.y() as u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     };
     context.set_style(cursor_id, style)?;
     context.compute_layout(parent_id)
