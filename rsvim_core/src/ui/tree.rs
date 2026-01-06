@@ -33,8 +33,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 use taffy::Style;
 use taffy::TaffyResult;
-use taffy::prelude::FromLength;
-use taffy::prelude::TaffyAuto;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.

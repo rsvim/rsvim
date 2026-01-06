@@ -4,9 +4,6 @@ use crate::prelude::*;
 use crate::tests::log::init as test_log_init;
 use crate::ui::tree::*;
 use taffy::Style;
-use taffy::prelude::FromLength;
-use taffy::prelude::FromPercent;
-use taffy::prelude::TaffyAuto;
 
 #[derive(Clone, Debug)]
 struct TestValue {

@@ -4,8 +4,6 @@ use crate::tests::log::init as test_log_init;
 use crate::ui::tree::TreeNodeId;
 use itertools::Itertools;
 use taffy::Style;
-use taffy::prelude::FromLength;
-use taffy::prelude::TaffyAuto;
 
 #[test]
 fn next_node_id1() {
