@@ -6,7 +6,6 @@ extend-ignore-re = [
 
 extend-ignore-words-re = [
   # Ignore specific words
-  "visibles",
 ]
 
 [files]
