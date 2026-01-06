@@ -18,6 +18,8 @@ pub fn init_default_window(
   let tree_root_id = tree.root_id();
 
   let window_style = Style {
+    display: taffy::Display::Grid,
+    grid_template_columns: vec![taffy::prelude::fr(1_u16)],
     ..Default::default()
   };
   let cmdline_style = Style {
