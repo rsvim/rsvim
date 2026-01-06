@@ -386,6 +386,32 @@ impl Tree {
     }
   }
 
+  fn _cmdline_input_panel_style(show_input: bool) -> Style {
+    Style {
+      display: if show_input {
+        taffy::Display::Grid
+      } else {
+        taffy::Display::None
+      },
+      grid_template_columns: vec![
+        taffy::prelude::length(1_u16),
+        taffy::prelude::fr(1_u16),
+      ],
+      ..Default::default()
+    }
+  }
+
+  fn _cmdline_message_style(show_input: bool) -> Style {
+    Style {
+      display: if show_input {
+        taffy::Display::None
+      } else {
+        taffy::Display::Grid
+      },
+      ..Default::default()
+    }
+  }
+
   fn _toggle_cmdline_input_or_message(
     &mut self,
     show_input: bool,
@@ -397,43 +423,33 @@ impl Tree {
 
     let context = self.base.context();
     let mut context = context.borrow_mut();
-    let mut input_panel_style = context.style(input_panel_id)?.clone();
-    let mut message_style = context.style(message_id)?.clone();
 
-    debug_assert_eq!(
-      input_panel_style.display,
-      if show_input {
-        taffy::Display::None
-      } else {
-        taffy::Display::Grid
-      }
-    );
-    debug_assert_eq!(
-      message_style.display,
-      if show_input {
-        taffy::Display::Grid
-      } else {
-        taffy::Display::None
-      }
-    );
+    if cfg!(debug_assertions) {
+      let input_panel_style = context.style(input_panel_id)?;
+      let message_style = context.style(message_id)?;
+      debug_assert_eq!(
+        input_panel_style.display,
+        if show_input {
+          taffy::Display::None
+        } else {
+          taffy::Display::Grid
+        }
+      );
+      debug_assert_eq!(
+        message_style.display,
+        if show_input {
+          taffy::Display::Grid
+        } else {
+          taffy::Display::None
+        }
+      );
+    }
 
-    input_panel_style.display = if show_input {
-      taffy::Display::Grid
-    } else {
-      taffy::Display::None
-    };
-    message_style.display = if show_input {
-      taffy::Display::None
-    } else {
-      taffy::Display::Grid
-    };
-
-    trace!(
-      "input_panel_style:{:?}, message_style:{:?}",
-      input_panel_style, message_style
-    );
-    context.set_style(input_panel_id, input_panel_style)?;
-    context.set_style(message_id, message_style)?;
+    context.set_style(
+      input_panel_id,
+      Self::_cmdline_input_panel_style(show_input),
+    )?;
+    context.set_style(message_id, Self::_cmdline_message_style(show_input))?;
     context.compute_layout(cmdline_id)
   }
 
@@ -603,18 +619,8 @@ impl Tree {
       let input_style = Style {
         ..Default::default()
       };
-      let input_panel_style = Style {
-        display: taffy::Display::None, // taffy::Display::Grid,
-        grid_template_columns: vec![
-          taffy::prelude::length(1_u16),
-          taffy::prelude::fr(1_u16),
-        ],
-        ..Default::default()
-      };
-      let message_style = Style {
-        display: taffy::Display::Grid,
-        ..Default::default()
-      };
+      let input_panel_style = Self::_cmdline_input_panel_style(false);
+      let message_style = Self::_cmdline_message_style(true);
 
       let id = context.new_with_parent_default(parent_id, style, "Cmdline")?;
       let input_panel_id = context.new_with_parent_default(
