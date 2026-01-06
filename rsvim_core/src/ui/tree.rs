@@ -428,6 +428,10 @@ impl Tree {
       taffy::Display::Grid
     };
 
+    trace!(
+      "input_panel_style:{:?}, message_style:{:?}",
+      input_panel_style, message_style
+    );
     context.set_style(input_panel_id, input_panel_style)?;
     context.set_style(message_id, message_style)?;
     context.compute_layout(cmdline_id)
