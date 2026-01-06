@@ -361,7 +361,7 @@ impl Debug for TreeContext {
       while let Some(id) = q.pop_front() {
         let payload = if cfg!(debug_assertions) {
           format!(
-            "\n{}({}):{:?}({:?})",
+            "\n{}({}), shape:{:?}, actual_shape:{:?}",
             id,
             self.names.get(&id).unwrap(),
             self.shapes.get(&id).unwrap(),
@@ -369,7 +369,7 @@ impl Debug for TreeContext {
           )
         } else {
           format!(
-            "\n{}:{:?}({:?})",
+            "\n{}, shape:{:?}, actual_shape:{:?}",
             id,
             self.shapes.get(&id).unwrap(),
             self.actual_shapes.get(&id).unwrap()
