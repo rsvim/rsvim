@@ -59,10 +59,7 @@ mod tests_nowrap {
       )
       .unwrap();
     let root_id = ctx.borrow().root();
-    ctx
-      .borrow_mut()
-      .compute_layout(root_id)
-      .unwrap();
+    ctx.borrow_mut().compute_layout(root_id).unwrap();
 
     let terminal_size = size!(1, 1);
     let expect = vec![":"];

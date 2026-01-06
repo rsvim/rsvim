@@ -654,7 +654,7 @@ impl Viewport {
       let mut last_row_idx: Option<u16> = None;
       for (line_idx, line_viewport) in self.lines.iter() {
         if cfg!(debug_assertions)
-            && let Some(last_line_idx1) = last_line_idx
+          && let Some(last_line_idx1) = last_line_idx
         {
           debug_assert_eq!(last_line_idx1 + 1, *line_idx);
         }
@@ -666,13 +666,13 @@ impl Viewport {
           //   line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
           // );
           if cfg!(debug_assertions)
-              && let Some(last_row_idx1) = last_row_idx
+            && let Some(last_row_idx1) = last_row_idx
           {
             debug_assert_eq!(last_row_idx1 + 1, *row_idx);
           }
           last_row_idx = Some(*row_idx);
           if cfg!(debug_assertions)
-              && let Some(last_row_viewport1) = last_row_viewport
+            && let Some(last_row_viewport1) = last_row_viewport
           {
             debug_assert_eq!(
               last_row_viewport1.end_char_idx(),
