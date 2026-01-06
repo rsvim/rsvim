@@ -359,18 +359,35 @@ impl Debug for TreeContext {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
+        let (x, y, width, height) = {
+          let layout = self.ta.layout(id).unwrap();
+          (
+            layout.location.x,
+            layout.location.y,
+            layout.size.width,
+            layout.size.height,
+          )
+        };
         let payload = if cfg!(debug_assertions) {
           format!(
-            "\n{}({}), shape:{:?}, actual_shape:{:?}",
+            "\n{}({}), location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
             id,
             self.names.get(&id).unwrap(),
+            x,
+            y,
+            width,
+            height,
             self.shapes.get(&id).unwrap(),
             self.actual_shapes.get(&id).unwrap()
           )
         } else {
           format!(
-            "\n{}, shape:{:?}, actual_shape:{:?}",
+            "\n{}, location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
             id,
+            x,
+            y,
+            width,
+            height,
             self.shapes.get(&id).unwrap(),
             self.actual_shapes.get(&id).unwrap()
           )
