@@ -370,9 +370,15 @@ impl Debug for TreeContext {
         };
         let payload = if cfg!(debug_assertions) {
           format!(
-            "\n{}({}), location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
+            "\n{}({}), parent:{}({}),location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
             id,
             self.names.get(&id).unwrap(),
+            self.ta.parent(id).unwrap_or(-1),
+            self
+              .ta
+              .parent(id)
+              .map(|p| self.names.get(&p).cloned().unwrap())
+              .unwrap_or("N/A"),
             x,
             y,
             width,
@@ -382,8 +388,14 @@ impl Debug for TreeContext {
           )
         } else {
           format!(
-            "\n{}, location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
+            "\n{}, parent:{}({}),location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
             id,
+            self.ta.parent(id).unwrap_or(-1),
+            self
+              .ta
+              .parent(id)
+              .map(|p| self.names.get(&p).cloned().unwrap())
+              .unwrap_or("N/A"),
             x,
             y,
             width,
