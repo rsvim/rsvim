@@ -557,7 +557,7 @@ impl TreeContext {
   /// ancestor nodes layout will not change. In such case, we only need to
   /// update shapes for this leaf node, this will reduce unnecessary iteration
   /// on the other tree nodes.
-  pub fn compute_layout(&mut self, _start_id: TreeNodeId) -> TaffyResult<()> {
+  pub fn compute_layout(&mut self, start_id: TreeNodeId) -> TaffyResult<()> {
     if self.root != INVALID_ROOT_ID {
       self
         .ta
@@ -565,8 +565,9 @@ impl TreeContext {
 
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
 
-      // debug_assert!(self.ta.contains(start_id));
-      q.push_back(self.root);
+      debug_assert!(self.ta.contains(start_id));
+      // q.push_back(self.root);
+      q.push_back(start_id);
 
       // Iterate all descendants, and update their shape/actual_shape.
       while let Some(id) = q.pop_front() {
