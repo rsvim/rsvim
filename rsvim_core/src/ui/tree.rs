@@ -607,6 +607,7 @@ impl Tree {
         ..Default::default()
       };
       let message_style = Style {
+        display: taffy::Display::Flex,
         size: taffy::Size {
           width: taffy::Dimension::from_percent(1.0),
           height: taffy::Dimension::from_percent(1.0),
