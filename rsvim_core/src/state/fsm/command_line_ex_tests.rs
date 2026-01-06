@@ -51,11 +51,11 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
-pub fn curwin_viewport(tree: TreeArc) -> ViewportArc {
+pub fn get_viewport(tree: TreeArc) -> ViewportArc {
   lock!(tree).current_window().unwrap().viewport()
 }
 
-pub fn curwin_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
   lock!(tree).current_window().unwrap().cursor_viewport()
 }
 
@@ -86,7 +86,7 @@ mod tests_goto_normal_mode {
         lines,
       );
 
-    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -227,7 +227,7 @@ mod tests_goto_normal_mode {
     let (event, tree, bufs, _buf, contents, data_access) =
       make_fsm_with_cmdline(terminal_size, buf_opts, window_options, lines);
 
-    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -373,7 +373,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         lines,
       );
 
-    let prev_cursor_viewport = curwin_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
