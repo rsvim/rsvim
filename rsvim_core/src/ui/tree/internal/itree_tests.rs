@@ -100,10 +100,10 @@ fn raw_move_position_by1() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_u16),
-      top: taffy::LengthPercentageAuto::from_length(0_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       height: taffy::prelude::length(1_u16),
@@ -190,10 +190,10 @@ fn raw_move_position_to1() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_u16),
-      top: taffy::LengthPercentageAuto::from_length(0_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       height: taffy::prelude::length(1_u16),
@@ -280,10 +280,10 @@ fn reserved_move_position_by1() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_u16),
-      top: taffy::LengthPercentageAuto::from_length(0_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       height: taffy::prelude::length(1_u16),
@@ -387,10 +387,10 @@ fn reserved_move_position_to1() {
   let style3 = Style {
     position: taffy::Position::Absolute,
     inset: taffy::Rect {
-      left: taffy::LengthPercentageAuto::from_length(0_u16),
-      top: taffy::LengthPercentageAuto::from_length(0_u16),
-      right: taffy::LengthPercentageAuto::AUTO,
-      bottom: taffy::LengthPercentageAuto::AUTO,
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
     },
     size: taffy::Size {
       height: taffy::prelude::length(1_u16),
