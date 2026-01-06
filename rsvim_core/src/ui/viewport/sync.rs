@@ -1,5 +1,7 @@
 //! Viewport internal algorithms.
 
+#![allow(clippy::too_many_arguments)]
+
 use super::Viewport;
 use crate::buf::text::Text;
 use crate::prelude::*;
