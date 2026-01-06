@@ -421,26 +421,22 @@ impl Tree {
     let context = self.base.context();
     let mut context = context.borrow_mut();
 
-    if cfg!(debug_assertions) {
-      let input_panel_style = context.style(input_panel_id)?;
-      let message_style = context.style(message_id)?;
-      debug_assert_eq!(
-        input_panel_style.display,
-        if show_input {
-          taffy::Display::None
-        } else {
-          taffy::Display::Grid
-        }
-      );
-      debug_assert_eq!(
-        message_style.display,
-        if show_input {
-          taffy::Display::Grid
-        } else {
-          taffy::Display::None
-        }
-      );
-    }
+    debug_assert_eq!(
+      context.style(input_panel_id)?.display,
+      if show_input {
+        taffy::Display::None
+      } else {
+        taffy::Display::Grid
+      }
+    );
+    debug_assert_eq!(
+      context.style(message_id)?.display,
+      if show_input {
+        taffy::Display::Grid
+      } else {
+        taffy::Display::None
+      }
+    );
 
     context.set_style(
       input_panel_id,
