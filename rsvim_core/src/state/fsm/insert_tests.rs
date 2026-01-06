@@ -2280,7 +2280,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2374,7 +2374,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2435,7 +2435,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2499,7 +2499,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2576,7 +2576,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2631,7 +2631,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -2701,7 +2701,7 @@ mod tests_insert_text {
         "  2. When ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2752,7 +2752,7 @@ mod tests_insert_text {
         "This is a ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2796,7 +2796,7 @@ mod tests_insert_text {
         "ine-breakl",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2842,7 +2842,7 @@ mod tests_insert_text {
         "er cases? ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2886,7 +2886,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -2934,7 +2934,7 @@ mod tests_insert_text {
         "nsert 4th ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3008,7 +3008,7 @@ mod tests_insert_text {
         "  2. When ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3059,7 +3059,7 @@ mod tests_insert_text {
         "This is a ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3103,7 +3103,7 @@ mod tests_insert_text {
         "ine-breakl",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3149,7 +3149,7 @@ mod tests_insert_text {
         "er cases? ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3198,7 +3198,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3246,7 +3246,7 @@ mod tests_insert_text {
         "nsert 4th ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3320,7 +3320,7 @@ mod tests_insert_text {
         "  2. When ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3371,7 +3371,7 @@ mod tests_insert_text {
         "This is a ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3415,7 +3415,7 @@ mod tests_insert_text {
         "ine-breakl",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3461,7 +3461,7 @@ mod tests_insert_text {
         "er cases? ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3505,7 +3505,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3553,7 +3553,7 @@ mod tests_insert_text {
         "nsert 4th ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3613,7 +3613,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3674,7 +3674,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3739,7 +3739,7 @@ mod tests_insert_text {
         "          ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_option, buf.clone());
+        make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -3823,7 +3823,7 @@ mod tests_insert_text {
         "4th.      ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
