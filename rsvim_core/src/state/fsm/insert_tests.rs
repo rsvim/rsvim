@@ -3869,7 +3869,7 @@ mod tests_insert_text {
         "4th.      ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -3918,7 +3918,7 @@ mod tests_insert_text {
         "4th.      ",
       ];
       let actual_canvas =
-        make_canvas(terminal_size, window_options, buf.clone());
+        make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
