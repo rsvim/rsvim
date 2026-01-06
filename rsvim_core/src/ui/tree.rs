@@ -632,6 +632,32 @@ impl Tree {
     Ok(id)
   }
 
+  fn _cmdline_input_panel_style(show_input: bool) -> Style {
+    Style {
+      display: if show_input {
+        taffy::Display::Grid
+      } else {
+        taffy::Display::None
+      },
+      grid_template_columns: vec![
+        taffy::prelude::length(1_u16),
+        taffy::prelude::fr(1_u16),
+      ],
+      ..Default::default()
+    }
+  }
+
+  fn _cmdline_message_style(show_input: bool) -> Style {
+    Style {
+      display: if show_input {
+        taffy::Display::None
+      } else {
+        taffy::Display::Grid
+      },
+      ..Default::default()
+    }
+  }
+
   fn _cmdline_toggle_input(&mut self, show_input: bool) -> TaffyResult<()> {
     let cmdline = self.cmdline().unwrap();
     let cmdline_id = cmdline.id();
@@ -664,32 +690,6 @@ impl Tree {
     )?;
     context.set_style(message_id, Self::_cmdline_message_style(show_input))?;
     context.compute_layout(cmdline_id)
-  }
-
-  fn _cmdline_input_panel_style(show_input: bool) -> Style {
-    Style {
-      display: if show_input {
-        taffy::Display::Grid
-      } else {
-        taffy::Display::None
-      },
-      grid_template_columns: vec![
-        taffy::prelude::length(1_u16),
-        taffy::prelude::fr(1_u16),
-      ],
-      ..Default::default()
-    }
-  }
-
-  fn _cmdline_message_style(show_input: bool) -> Style {
-    Style {
-      display: if show_input {
-        taffy::Display::None
-      } else {
-        taffy::Display::Grid
-      },
-      ..Default::default()
-    }
   }
 
   // Show message widget, hide indicator/input widgets.
