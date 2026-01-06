@@ -159,7 +159,7 @@ impl NormalStateful {
 
     let cursor_viewport = tree.editable_cursor_viewport(cmdline_id);
     tree
-      .reserved_move_cursor_position_to(
+      .cursor_move_position_to(
         cursor_viewport.column_idx() as isize,
         cursor_viewport.row_idx() as isize,
       )
@@ -345,7 +345,7 @@ impl NormalStateful {
     );
 
     tree
-      .reserved_move_cursor_position_to(
+      .cursor_move_position_to(
         new_cursor_viewport.column_idx() as isize,
         new_cursor_viewport.row_idx() as isize,
       )

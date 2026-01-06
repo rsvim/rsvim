@@ -169,7 +169,7 @@ impl CommandLineExStateful {
 
     let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
     tree
-      .reserved_move_cursor_position_to(
+      .cursor_move_position_to(
         cursor_viewport.column_idx() as isize,
         cursor_viewport.row_idx() as isize,
       )

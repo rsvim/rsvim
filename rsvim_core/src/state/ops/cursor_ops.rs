@@ -537,7 +537,7 @@ pub fn cursor_move(
 
     debug_assert!(tree.cursor_id().is_some());
     tree
-      .reserved_move_cursor_position_to(
+      .cursor_move_position_to(
         new_cursor_viewport.column_idx() as isize,
         new_cursor_viewport.row_idx() as isize,
       )

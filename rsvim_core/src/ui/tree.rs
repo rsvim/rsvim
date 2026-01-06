@@ -720,7 +720,7 @@ impl Tree {
 
 // Movement {
 impl Tree {
-  pub fn reserved_move_cursor_position_to(
+  pub fn cursor_move_position_to(
     &mut self,
     x: isize,
     y: isize,
@@ -746,7 +746,7 @@ impl Tree {
     context.compute_layout(parent_id)
   }
 
-  pub fn reserved_move_cursor_position_by(
+  pub fn cursor_move_position_by(
     &mut self,
     x: isize,
     y: isize,
