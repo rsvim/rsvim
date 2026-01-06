@@ -22,8 +22,8 @@ fn new() {
     .new_leaf_default(
       Style {
         size: taffy::Size {
-          width: taffy::Dimension::from_length(10_u16),
-          height: taffy::Dimension::from_length(10_u16),
+          width: taffy::prelude::length(10_u16),
+          height: taffy::prelude::length(10_u16),
         },
         ..Default::default()
       },
@@ -63,8 +63,8 @@ fn new_child1() {
 
   let style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(1_u16),
-      height: taffy::Dimension::from_length(1_u16),
+      width: taffy::prelude::length(1_u16),
+      height: taffy::prelude::length(1_u16),
     },
     ..Default::default()
   };
@@ -133,8 +133,8 @@ fn new_child2() {
   let mut ctx = TreeContext::new();
   let style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(1_u16),
-      height: taffy::Dimension::from_length(1_u16),
+      width: taffy::prelude::length(1_u16),
+      height: taffy::prelude::length(1_u16),
     },
     ..Default::default()
   };
@@ -263,8 +263,8 @@ fn shape1() {
 
   let style1 = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(20_u16),
-      height: taffy::Dimension::from_length(20_u16),
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
     },
     ..Default::default()
   };
@@ -281,8 +281,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(15_u16),
-      height: taffy::Dimension::from_length(15_u16),
+      width: taffy::prelude::length(15_u16),
+      height: taffy::prelude::length(15_u16),
     },
     ..Default::default()
   };
@@ -299,8 +299,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(8_u16),
-      height: taffy::Dimension::from_length(9_u16),
+      width: taffy::prelude::length(8_u16),
+      height: taffy::prelude::length(9_u16),
     },
     ..Default::default()
   };
@@ -317,8 +317,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(12_u16),
-      height: taffy::Dimension::from_length(9_u16),
+      width: taffy::prelude::length(12_u16),
+      height: taffy::prelude::length(9_u16),
     },
     ..Default::default()
   };
@@ -335,8 +335,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(13_u16),
-      height: taffy::Dimension::from_length(25_u16),
+      width: taffy::prelude::length(13_u16),
+      height: taffy::prelude::length(25_u16),
     },
     ..Default::default()
   };
@@ -353,8 +353,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(3_u16),
-      height: taffy::Dimension::from_length(4_u16),
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(4_u16),
     },
     ..Default::default()
   };
@@ -371,8 +371,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(12_u16),
-      height: taffy::Dimension::from_length(19_u16),
+      width: taffy::prelude::length(12_u16),
+      height: taffy::prelude::length(19_u16),
     },
     ..Default::default()
   };
@@ -389,8 +389,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(3_u16),
-      height: taffy::Dimension::from_length(3_u16),
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(3_u16),
     },
     ..Default::default()
   };
@@ -407,8 +407,8 @@ fn shape1() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(4_u16),
-      height: taffy::Dimension::from_length(2_u16),
+      width: taffy::prelude::length(4_u16),
+      height: taffy::prelude::length(2_u16),
     },
     ..Default::default()
   };
@@ -464,8 +464,8 @@ fn shape2() {
 
   let style1 = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(20_u16),
-      height: taffy::Dimension::from_length(20_u16),
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
     },
     ..Default::default()
   };
@@ -482,8 +482,8 @@ fn shape2() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(20_u16),
-      height: taffy::Dimension::from_length(20_u16),
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
     },
     ..Default::default()
   };
@@ -500,8 +500,8 @@ fn shape2() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(3_u16),
-      height: taffy::Dimension::from_length(2_u16),
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(2_u16),
     },
     ..Default::default()
   };
@@ -518,8 +518,8 @@ fn shape2() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(17_u16),
-      height: taffy::Dimension::from_length(15_u16),
+      width: taffy::prelude::length(17_u16),
+      height: taffy::prelude::length(15_u16),
     },
     ..Default::default()
   };
@@ -536,8 +536,8 @@ fn shape2() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(18_u16),
-      height: taffy::Dimension::from_length(25_u16),
+      width: taffy::prelude::length(18_u16),
+      height: taffy::prelude::length(25_u16),
     },
     ..Default::default()
   };
@@ -554,8 +554,8 @@ fn shape2() {
       bottom: taffy::LengthPercentageAuto::AUTO,
     },
     size: taffy::Size {
-      width: taffy::Dimension::from_length(10_u16),
-      height: taffy::Dimension::from_length(12_u16),
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(12_u16),
     },
     ..Default::default()
   };
@@ -605,8 +605,8 @@ fn children1() {
 
   let style1 = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(10_u16),
-      height: taffy::Dimension::from_length(10_u16),
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(10_u16),
     },
     ..Default::default()
   };
@@ -632,8 +632,8 @@ fn children1() {
 fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
   let style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(10_u16),
-      height: taffy::Dimension::from_length(10_u16),
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(10_u16),
     },
     ..Default::default()
   };

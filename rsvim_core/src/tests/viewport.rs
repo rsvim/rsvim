@@ -91,8 +91,8 @@ pub fn make_canvas(
   tree.set_global_local_options(window_options);
   let style = Style {
     size: taffy::Size {
-      height: taffy::Dimension::from_percent(1.0),
-      width: taffy::Dimension::from_percent(1.0),
+      height: taffy::prelude::percent(1.0),
+      width: taffy::prelude::percent(1.0),
     },
     ..Default::default()
   };

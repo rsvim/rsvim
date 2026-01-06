@@ -483,8 +483,8 @@ impl Tree {
       // window content
       let content_style = Style {
         size: taffy::Size {
-          width: taffy::Dimension::from_percent(1.0),
-          height: taffy::Dimension::from_percent(1.0),
+          width: taffy::prelude::percent(1.0),
+          height: taffy::prelude::percent(1.0),
         },
         ..Default::default()
       };
@@ -541,8 +541,8 @@ impl Tree {
       let cursor_style = Style {
         position: taffy::Position::Absolute,
         size: taffy::Size {
-          width: taffy::Dimension::from_length(1_u16),
-          height: taffy::Dimension::from_length(1_u16),
+          width: taffy::prelude::length(1_u16),
+          height: taffy::prelude::length(1_u16),
         },
         inset: taffy::Rect {
           left: taffy::LengthPercentageAuto::from_length(0_u16),

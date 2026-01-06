@@ -28,8 +28,8 @@ fn new() {
   let mut ctx = TreeContext::new();
   let style = Style {
     size: taffy::Size {
-      width: taffy::Dimension::from_length(1.0),
-      height: taffy::Dimension::from_length(1.0),
+      width: taffy::prelude::length(1.0),
+      height: taffy::prelude::length(1.0),
     },
     ..Default::default()
   };
