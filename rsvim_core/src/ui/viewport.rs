@@ -643,7 +643,7 @@ impl Viewport {
       self.lines.is_empty()
     );
     if self.lines.is_empty() {
-      trace!("");
+      trace!("nothing");
     } else {
       debug_assert!(self.lines.first().is_some());
       debug_assert_eq!(*self.lines.first().unwrap().0, self.start_line_idx);
