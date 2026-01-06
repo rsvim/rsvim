@@ -11,6 +11,7 @@ use crate::tests::buf::make_empty_buffer;
 use crate::tests::log::init as test_log_init;
 use crate::tests::viewport::assert_canvas;
 use crate::tests::viewport::make_canvas;
+use crate::tests::viewport::make_window;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::widget::Widgetable;
@@ -57,6 +58,12 @@ fn draw_after_init1() {
   ];
 
   let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-  let actual = make_canvas(terminal_size, win_opts, buf.clone());
+  let (tree, window_id) = make_window(terminal_size, buf.clone(), win_opts);
+  let actual = make_canvas(
+    terminal_size,
+    win_opts,
+    buf.clone(),
+    tree.window(window_id).unwrap().viewport(),
+  );
   assert_canvas(&actual, &expect);
 }
