@@ -399,7 +399,7 @@ impl Debug for TreeContext {
           }
         }
       }
-      Ok(())
+      f.write_str("\n")
     } else {
       f.write_str("TreeContext:empty")
     }
