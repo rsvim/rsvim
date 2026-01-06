@@ -60,8 +60,7 @@ impl CmdlineIndicator {
 
 impl Widgetable for CmdlineIndicator {
   fn draw(&self, canvas: &mut Canvas) {
-    let enabled = self.enabled();
-    if (enabled) {
+    if self.enabled() {
       let actual_shape = self.actual_shape();
       let upos: U16Pos = actual_shape.min().into();
       let symbol = self.symbol;
