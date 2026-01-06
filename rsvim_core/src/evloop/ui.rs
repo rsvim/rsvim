@@ -49,7 +49,7 @@ pub fn init_default_window(
       cursor_style,
     )
     .unwrap();
-  tree.set_current_window_id(window_id);
+  tree.set_current_window_id(Some(window_id));
 
   // Initialize command-line.
   let _cmdline_id = tree
