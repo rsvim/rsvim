@@ -38,12 +38,10 @@ mod sync_load {
         };
         Ok(source)
       }
-      Err(e) => {
-        return Err(TheErr::LoadModuleFailed(
-          path.to_string_lossy().to_string(),
-          e,
-        ));
-      }
+      Err(e) => Err(TheErr::LoadModuleFailed(
+        path.to_string_lossy().to_string(),
+        e,
+      )),
     }
   }
 
