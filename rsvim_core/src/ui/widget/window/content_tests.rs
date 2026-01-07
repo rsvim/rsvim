@@ -512,27 +512,16 @@ mod tests_nowrap_startcol {
 
   #[test]
   fn new3() {
-    test_log_init();
-
-    let terminal_size = size!(33, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello,  R\tS\tV\tI\tM!\n",
-        "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
-        "But still\tit\tcontains\tseveral things we want to test:\n",
-        "  第一，当一行文本内容足够短，以至于能够被完全的放入一个窗口中时，then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello,  R\tS\tV\tI\tM!\n",
+      "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
+      "But still\tit\tcontains\tseveral things we want to test:\n",
+      "  第一，当一行文本内容足够短，以至于能够被完全的放入一个窗口中时，then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_canvas = vec![
       "S        V        I        M!    ",
       ">且非常短的测试例子，只包含几行文",
       "it        contains        several",
@@ -545,10 +534,14 @@ mod tests_nowrap_startcol {
       "                                 ",
     ];
 
-    let viewport =
-      make_viewport(terminal_size, win_opts, buffer.clone(), 0, 17);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_buffer_lines(Arguments {
+      terminal_size: size!(33, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines,
+      expect_canvas: vec![expect_canvas],
+      viewport_start: vec![(0, 17)],
+    });
   }
 
   #[test]
