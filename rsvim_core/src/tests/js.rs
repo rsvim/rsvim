@@ -9,6 +9,7 @@ use crate::ui::tree::Tree;
 use std::time::Instant;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
+use taffy::Style;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub fn make_js_runtime() -> JsRuntime {
@@ -19,7 +20,14 @@ pub fn make_js_runtime() -> JsRuntime {
   let cli_opts =
     CliOptions::from_args::<&Vec<std::ffi::OsString>>(&vec![]).unwrap();
 
-  let tree = Tree::to_arc(Tree::new(canvas_size));
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    ..Default::default()
+  };
+  let tree = Tree::to_arc(Tree::new(style).unwrap());
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
   let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
   let ex_commands_manager = CommandsManager::to_arc(CommandsManager::default());

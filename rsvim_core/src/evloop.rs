@@ -34,6 +34,7 @@ use futures::StreamExt;
 use ringbuf::traits::RingBuffer;
 use std::sync::Arc;
 use std::time::Instant;
+use taffy::Style;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
@@ -175,7 +176,19 @@ impl EventLoop {
     let canvas = Canvas::to_arc(canvas);
 
     // UI Tree
-    let tree = Tree::to_arc(Tree::new(canvas_size));
+    let style = Style {
+      display: taffy::Display::Grid,
+      grid_template_rows: vec![
+        taffy::prelude::fr(1_u16),
+        taffy::prelude::length(1_u16),
+      ],
+      size: taffy::Size {
+        width: taffy::prelude::length(canvas_size.width()),
+        height: taffy::prelude::length(canvas_size.height()),
+      },
+      ..Default::default()
+    };
+    let tree = Tree::to_arc(Tree::new(style).unwrap());
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
@@ -525,12 +538,10 @@ impl EventLoop {
   /// Initialize windows.
   pub fn _init_windows(&mut self) -> IoResult<()> {
     // Initialize default window, with default buffer.
-    let (canvas_size, cursor_blinking, cursor_hidden, cursor_style) = {
+    let (cursor_blinking, cursor_hidden, cursor_style) = {
       let canvas = lock!(self.canvas);
-      let canvas_size = canvas.size();
-      let canvas_cursor = *canvas.frame().cursor();
+      let canvas_cursor = canvas.frame().cursor();
       (
-        canvas_size,
         canvas_cursor.blinking(),
         canvas_cursor.hidden(),
         canvas_cursor.style(),
@@ -546,7 +557,6 @@ impl EventLoop {
     let text_contents = Arc::downgrade(&self.contents);
 
     ui::init_default_window(
-      &canvas_size,
       &mut tree,
       buf,
       text_contents,
@@ -572,7 +582,10 @@ impl EventLoop {
   fn _init_pending_messages(&mut self) {
     let mut contents = lock!(self.contents);
     let mut tree = lock!(self.tree);
-    cmdline_ops::cmdline_flush_pending_message(&mut tree, &mut contents);
+    cmdline_ops::cmdline_set_last_pending_message_on_initialize(
+      &mut tree,
+      &mut contents,
+    );
   }
 
   /// Shutdown.

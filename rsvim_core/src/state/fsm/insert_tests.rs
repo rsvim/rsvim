@@ -31,7 +31,7 @@ use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::CompactString;
@@ -47,13 +47,11 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().unwrap().viewport()
+  lock!(tree).current_window().unwrap().viewport()
 }
 
 pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().unwrap().cursor_viewport()
+  lock!(tree).current_window().unwrap().cursor_viewport()
 }
 
 #[cfg(test)]

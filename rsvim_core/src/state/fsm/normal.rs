@@ -9,9 +9,9 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::indicator::IndicatorSymbol;
-use crate::ui::widget::window::WindowNode;
+use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use crossterm::event::Event;
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEventKind;
@@ -121,28 +121,62 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Remove cursor from current window
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
-    let cursor = match current_window.remove_cursor().unwrap() {
-      WindowNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBar);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(current_window.cursor_id().is_none());
+    debug_assert!(tree.cmdline_id().is_some());
+    debug_assert!(tree.current_window_id().is_some());
+    if cfg!(debug_assertions) {
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::WindowContent(_)));
+    }
 
-    // Insert to command-line
-    debug_assert!(tree.command_line_mut().is_some());
-    let cmdline = tree.command_line_mut().unwrap();
+    // Show input/hide message, and update layouts/shapes.
+    tree.cmdline_show_input().unwrap();
 
-    cmdline.show_input();
+    let cmdline_id = tree.cmdline_id().unwrap();
+    let _old_widget_id = cursor_ops::cursor_jump(&mut tree, cmdline_id);
 
-    let _previous_cursor = cmdline.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    cmdline.move_cursor_to(0, 0);
-    cmdline.indicator_mut().set_symbol(IndicatorSymbol::Ex);
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.current_window_id().is_some());
+      debug_assert_eq!(_old_widget_id, tree.current_window_id());
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::CmdlineInput(_)));
+    }
+
+    let cursor_viewport = tree.editable_cursor_viewport(cmdline_id);
+    tree
+      .cursor_move_position_to(
+        cursor_viewport.column_idx() as isize,
+        cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Ex);
+
+    if cfg!(debug_assertions) {
+      let contents = data_access.contents.clone();
+      let contents = lock!(contents);
+      let cmdline_input_content =
+        contents.command_line_input().rope().to_compact_string();
+      debug_assert!(cmdline_input_content.is_empty());
+    }
 
     StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
   }
@@ -219,9 +253,10 @@ impl NormalStateful {
       }
     };
 
-    let current_window = tree.current_window_mut().unwrap();
-    let cursor = current_window.cursor_mut().unwrap();
-    cursor.set_style(&CursorStyle::SteadyBar);
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBar);
 
     StateMachine::InsertMode(super::InsertStateful::default())
   }
@@ -301,19 +336,20 @@ impl NormalStateful {
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self._target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     let new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
     );
 
-    tree.current_window_mut().unwrap().move_cursor_to(
-      new_cursor_viewport.column_idx() as isize,
-      new_cursor_viewport.row_idx() as isize,
-    );
+    tree
+      .cursor_move_position_to(
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
   }
 
   #[cfg(test)]
@@ -338,10 +374,9 @@ impl NormalStateful {
       viewport.start_line_idx(),
     );
 
-    let vnode =
-      cursor_ops::editable_tree_node_mut(&mut tree, current_window_id);
     cursor_ops::raw_viewport_scroll_to(
-      vnode,
+      &mut tree,
+      current_window_id,
       &viewport,
       buffer.text(),
       Operation::WindowScrollTo((start_column, start_line)),

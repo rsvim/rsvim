@@ -10,22 +10,24 @@ use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
-pub struct Content {
-  base: InodeBase,
-
-  // Buffer.
+pub struct WindowContent {
+  __node: InodeBase,
   buffer: BufferWk,
-
-  // Viewport.
   viewport: ViewportWk,
 }
 
-impl Content {
+inode_impl!(WindowContent);
+
+impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
-    let base = InodeBase::new(shape);
-    Content {
-      base,
+  pub fn new(
+    id: TreeNodeId,
+    ctx: TreeContextWk,
+    buffer: BufferWk,
+    viewport: ViewportWk,
+  ) -> Self {
+    WindowContent {
+      __node: InodeBase::new(id, ctx),
       buffer,
       viewport,
     }
@@ -36,15 +38,13 @@ impl Content {
   }
 }
 
-inode_impl!(Content, base);
-
-impl Widgetable for Content {
+impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
     let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(buffer.text(), actual_shape, canvas);
+    viewport.draw(buffer.text(), &actual_shape, canvas);
   }
 }

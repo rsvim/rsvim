@@ -1,147 +1,53 @@
 //! The node structure of the internal tree.
 
-use crate::flags_impl;
 use crate::prelude::*;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::internal::context::TreeContextWk;
+use crate::ui::tree::internal::context::TruncatePolicy;
 use std::fmt::Debug;
-use std::sync::atomic::AtomicI32;
-use std::sync::atomic::Ordering;
+
+pub type TreeNodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
-  fn shape(&self) -> &IRect;
+  fn shape(&self) -> IRect;
 
-  fn set_shape(&mut self, shape: &IRect);
+  fn actual_shape(&self) -> U16Rect;
 
-  fn actual_shape(&self) -> &U16Rect;
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect);
+  fn zindex(&self) -> usize;
 
   fn enabled(&self) -> bool;
 
-  fn set_enabled(&mut self, enabled: bool);
-
-  fn visible(&self) -> bool;
-
-  fn set_visible(&mut self, visible: bool);
+  fn truncate_policy(&self) -> TruncatePolicy;
 }
 
 /// Generate getter/setter for `Inode`.
 #[macro_export]
 macro_rules! inode_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
+  ($name:ty) => {
+    impl Inodeable for $name {
       fn id(&self) -> TreeNodeId {
-        self.$base_name.id()
+        self.__node.id()
       }
 
-      fn shape(&self) -> &IRect {
-        self.$base_name.shape()
+      fn shape(&self) -> IRect {
+        self.__node.shape()
       }
 
-      fn set_shape(&mut self, shape: &IRect) {
-        self.$base_name.set_shape(shape);
+      fn actual_shape(&self) -> U16Rect {
+        self.__node.actual_shape()
       }
 
-      fn actual_shape(&self) -> &U16Rect {
-        self.$base_name.actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self.$base_name.set_actual_shape(actual_shape)
+      fn zindex(&self) -> usize {
+        self.__node.zindex()
       }
 
       fn enabled(&self) -> bool {
-        self.$base_name.enabled()
+        self.__node.enabled()
       }
 
-      fn set_enabled(&mut self, enabled: bool) {
-        self.$base_name.set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self.$base_name.visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self.$base_name.set_visible(visible);
-      }
-    }
-  };
-}
-
-/// Generate getter/setter for `Inode` with `Itree` base.
-#[macro_export]
-macro_rules! inode_itree_impl {
-  ($struct_name:ty,$base_name:ident) => {
-    impl Inodeable for $struct_name {
-      fn id(&self) -> TreeNodeId {
-        self.$base_name.root_id()
-      }
-
-      fn shape(&self) -> &IRect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .shape()
-      }
-
-      fn set_shape(&mut self, shape: &IRect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_shape(shape);
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .actual_shape()
-      }
-
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_actual_shape(actual_shape);
-      }
-
-      fn enabled(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .enabled()
-      }
-
-      fn set_enabled(&mut self, enabled: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_enabled(enabled);
-      }
-
-      fn visible(&self) -> bool {
-        self
-          .$base_name
-          .node(self.$base_name.root_id())
-          .unwrap()
-          .visible()
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        self
-          .$base_name
-          .node_mut(self.$base_name.root_id())
-          .unwrap()
-          .set_visible(visible);
+      fn truncate_policy(&self) -> TruncatePolicy {
+        self.__node.truncate_policy()
       }
     }
   };
@@ -160,8 +66,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-
-      fn shape(&self) -> &IRect {
+      fn shape(&self) -> IRect {
         match self {
           $(
             $enum::$variant(e) => e.shape(),
@@ -169,15 +74,7 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_shape(&mut self, shape: &IRect) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_shape(shape),
-          )*
-        }
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
+      fn actual_shape(&self) -> U16Rect {
         match self {
           $(
             $enum::$variant(e) => e.actual_shape(),
@@ -185,10 +82,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+      fn zindex(&self) -> usize {
         match self {
           $(
-            $enum::$variant(e) => e.set_actual_shape(actual_shape),
+            $enum::$variant(e) => e.zindex(),
           )*
         }
       }
@@ -201,26 +98,10 @@ macro_rules! inode_dispatcher {
         }
       }
 
-      fn set_enabled(&mut self, enabled: bool) {
+      fn truncate_policy(&self) -> TruncatePolicy {
         match self {
           $(
-            $enum::$variant(e) => e.set_enabled(enabled),
-          )*
-        }
-      }
-
-      fn visible(&self) -> bool {
-        match self {
-          $(
-            $enum::$variant(e) => e.visible(),
-          )*
-        }
-      }
-
-      fn set_visible(&mut self, visible: bool) {
-        match self {
-          $(
-            $enum::$variant(e) => e.set_visible(visible),
+            $enum::$variant(e) => e.truncate_policy(),
           )*
         }
       }
@@ -228,75 +109,76 @@ macro_rules! inode_dispatcher {
   }
 }
 
-/// Next unique UI widget ID.
-///
-/// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> TreeNodeId {
-  static VALUE: AtomicI32 = AtomicI32::new(100001);
-  VALUE.fetch_add(1, Ordering::Relaxed)
-}
-
-flags_impl!(Flags, u8, ENABLED, VISIBLE);
-
-// enabled=true
-// visible=true
-const FLAGS: Flags = Flags::all();
-
-#[derive(Debug, Clone, Copy)]
-/// The internal tree node, it's both a container for the widgets and common attributes.
+#[derive(Debug, Clone)]
 pub struct InodeBase {
   id: TreeNodeId,
-  shape: IRect,
-  actual_shape: U16Rect,
-  // enabled
-  // visible
-  flags: Flags,
+  ctx: TreeContextWk,
 }
 
 impl InodeBase {
-  pub fn new(shape: IRect) -> Self {
-    let actual_shape = rect_as!(shape, u16);
-    InodeBase {
-      id: next_node_id(),
-      shape,
-      actual_shape,
-      flags: FLAGS,
-    }
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+    Self { id, ctx }
   }
 
-  pub fn id(&self) -> TreeNodeId {
+  pub fn context(&self) -> TreeContextWk {
+    self.ctx.clone()
+  }
+}
+
+impl Inodeable for InodeBase {
+  fn id(&self) -> TreeNodeId {
     self.id
   }
 
-  pub fn shape(&self) -> &IRect {
-    &self.shape
+  fn shape(&self) -> IRect {
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .shape(self.id)
+      .copied()
+      .unwrap()
   }
 
-  pub fn set_shape(&mut self, shape: &IRect) {
-    self.shape = *shape;
+  fn actual_shape(&self) -> U16Rect {
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .actual_shape(self.id)
+      .copied()
+      .unwrap()
   }
 
-  pub fn actual_shape(&self) -> &U16Rect {
-    &self.actual_shape
+  fn zindex(&self) -> usize {
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .zindex(self.id)
+      .unwrap()
   }
 
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
+  fn enabled(&self) -> bool {
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .enabled(self.id)
+      .unwrap()
   }
 
-  pub fn enabled(&self) -> bool {
-    self.flags.contains(Flags::ENABLED)
-  }
-
-  pub fn set_enabled(&mut self, value: bool) {
-    self.flags.set(Flags::ENABLED, value);
-  }
-
-  pub fn visible(&self) -> bool {
-    self.flags.contains(Flags::VISIBLE)
-  }
-
-  pub fn set_visible(&mut self, value: bool) {
-    self.flags.set(Flags::VISIBLE, value);
+  fn truncate_policy(&self) -> TruncatePolicy {
+    self
+      .ctx
+      .upgrade()
+      .unwrap()
+      .borrow()
+      .truncate_policy(self.id)
+      .unwrap()
   }
 }

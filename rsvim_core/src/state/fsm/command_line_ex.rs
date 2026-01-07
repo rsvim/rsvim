@@ -13,8 +13,7 @@ use crate::state::ops::cmdline_ops;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLineNode;
-use crate::ui::widget::command_line::indicator::IndicatorSymbol;
+use crate::ui::widget::cmdline::indicator::CmdlineIndicatorSymbol;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use crossterm::event::Event;
@@ -133,36 +132,53 @@ impl CommandLineExStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline = tree.command_line_mut().unwrap();
+    debug_assert!(tree.cmdline_id().is_some());
+    debug_assert!(tree.current_window_id().is_some());
+    if cfg!(debug_assertions) {
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::CmdlineInput(_)));
+    }
 
-    // Show message, hide input/indicator.
-    cmdline.show_message();
+    // Show message/hide input, and update layouts/shapes.
+    tree.cmdline_show_message().unwrap();
 
-    debug_assert!(cmdline.cursor_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    let _old_widget_id = cursor_ops::cursor_jump(&mut tree, current_window_id);
 
-    // Remove from current parent
-    let cursor = match cmdline.remove_cursor().unwrap() {
-      CommandLineNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBlock);
-        cursor
-      }
-      _ => unreachable!(),
-    };
-    debug_assert!(cmdline.cursor_id().is_none());
+    if cfg!(debug_assertions) {
+      debug_assert_eq!(_old_widget_id, tree.cmdline_id());
+      let cursor_id = tree.cursor_id();
+      debug_assert!(cursor_id.is_some());
+      let cursor_id = cursor_id.unwrap();
+      let cursor_parent_id = tree.parent_id(cursor_id);
+      debug_assert!(cursor_parent_id.is_some());
+      let cursor_parent_id = cursor_parent_id.unwrap();
+      let cursor_parent = tree.node(cursor_parent_id);
+      debug_assert!(cursor_parent.is_some());
+      let cursor_parent = cursor_parent.unwrap();
+      debug_assert!(matches!(cursor_parent, TreeNode::WindowContent(_)));
+    }
 
-    // Insert to new parent
-    let current_window = tree.current_window_mut().unwrap();
-    let cursor_viewport = current_window.cursor_viewport();
-    trace!("before viewport:{:?}", current_window.viewport());
-    trace!("before cursor_viewport:{:?}", cursor_viewport);
-    let _current_window_id = current_window.id();
-    let _previous_cursor = current_window.insert_cursor(cursor);
-    debug_assert!(_previous_cursor.is_none());
-    current_window.move_cursor_to(
-      cursor_viewport.column_idx() as isize,
-      cursor_viewport.row_idx() as isize,
-    );
+    let cursor_viewport = tree.editable_cursor_viewport(current_window_id);
+    tree
+      .cursor_move_position_to(
+        cursor_viewport.column_idx() as isize,
+        cursor_viewport.row_idx() as isize,
+      )
+      .unwrap();
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
+    tree.set_cmdline_indicator_symbol(CmdlineIndicatorSymbol::Empty);
 
     // Clear command-line both input content and message.
     let contents = data_access.contents.clone();
@@ -173,14 +189,7 @@ impl CommandLineExStateful {
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
 
-    let cmdline_input_content = cmdline_input_content.trim();
-    tree
-      .command_line_mut()
-      .unwrap()
-      .indicator_mut()
-      .set_symbol(IndicatorSymbol::Empty);
-
-    cmdline_input_content.to_compact_string()
+    cmdline_input_content.trim().to_compact_string()
   }
 
   pub fn goto_normal_mode(
@@ -201,8 +210,8 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.cmdline_id().is_some());
+    let cmdline_id = tree.cmdline_id().unwrap();
     let contents = data_access.contents.clone();
     let contents = lock!(contents);
 
@@ -226,8 +235,8 @@ impl CommandLineExStateful {
   ) -> StateMachine {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.cmdline_id().is_some());
+    let cmdline_id = tree.cmdline_id().unwrap();
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
 
@@ -260,13 +269,15 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_input_mut();
 
-    let cmdline = tree.command_line_mut().unwrap();
-    let cmdline_id = cmdline.id();
-    debug_assert_eq!(cmdline.input_cursor_viewport().line_idx(), 0);
+    let cmdline_id = tree.cmdline_id().unwrap();
+    debug_assert_eq!(
+      tree.cmdline().unwrap().input_cursor_viewport().line_idx(),
+      0
+    );
     debug_assert!(
       text
         .rope()
-        .get_line(cmdline.input_cursor_viewport().line_idx())
+        .get_line(tree.cmdline().unwrap().input_cursor_viewport().line_idx())
         .is_some()
     );
 

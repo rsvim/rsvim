@@ -1,0 +1,673 @@
+use super::context::*;
+use crate::prelude::*;
+use crate::tests::log::init as test_log_init;
+use crate::ui::tree::TreeNodeId;
+use itertools::Itertools;
+use taffy::Style;
+
+#[test]
+fn next_node_id1() {
+  assert!(next_node_id() > 0);
+}
+
+#[test]
+fn new() {
+  // test_log_init();
+
+  let mut ctx = TreeContext::new();
+
+  let nid1 = ctx
+    .new_leaf_default(
+      Style {
+        size: taffy::Size {
+          width: taffy::prelude::length(10_u16),
+          height: taffy::prelude::length(10_u16),
+        },
+        ..Default::default()
+      },
+      "n1",
+    )
+    .unwrap();
+
+  ctx.compute_layout(nid1).unwrap();
+
+  assert_eq!(ctx.len(), 1);
+  assert_eq!(ctx.root(), nid1);
+  assert_eq!(ctx.shape(nid1).copied().unwrap(), rect!(0, 0, 10, 10));
+  assert_eq!(
+    ctx.actual_shape(nid1).copied().unwrap(),
+    rect!(0, 0, 10, 10)
+  );
+  assert!(ctx.parent(nid1).is_none());
+  assert!(ctx.children(nid1).unwrap().is_empty());
+}
+
+#[test]
+fn new_child1() {
+  // test_log_init();
+
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   * ```
+   */
+
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(1_u16),
+      height: taffy::prelude::length(1_u16),
+    },
+    ..Default::default()
+  };
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n2")
+    .unwrap();
+  let nid3 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n3")
+    .unwrap();
+  let nid4 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n4")
+    .unwrap();
+  let nid5 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n5")
+    .unwrap();
+  let nid6 = ctx
+    .new_with_parent_default(nid3, style.clone(), "n6")
+    .unwrap();
+  ctx.compute_layout(nid1).unwrap();
+
+  assert_eq!(ctx.root(), nid1);
+  assert!(nid1 < nid2);
+  assert!(nid2 < nid3);
+  assert!(nid3 < nid4);
+  assert!(nid4 < nid5);
+  assert!(nid5 < nid6);
+
+  assert_eq!(ctx.children(nid1).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid2).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid3).unwrap().len(), 1);
+  assert_eq!(ctx.children(nid4).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid5).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid6).unwrap().len(), 0);
+
+  let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+    ctx
+      .children(parent_id)
+      .unwrap()
+      .iter()
+      .filter(|cid| **cid == child_id)
+      .collect::<Vec<_>>()
+      .len()
+      == 1
+  };
+
+  assert!(contains_child(nid1, nid2));
+  assert!(contains_child(nid1, nid3));
+  assert!(!contains_child(nid1, nid4));
+  assert!(!contains_child(nid1, nid5));
+  assert!(!contains_child(nid1, nid6));
+
+  assert!(contains_child(nid2, nid4));
+  assert!(contains_child(nid2, nid5));
+  assert!(!contains_child(nid2, nid6));
+
+  assert!(contains_child(nid3, nid6));
+  assert!(!contains_child(nid3, nid4));
+  assert!(!contains_child(nid3, nid5));
+}
+
+#[test]
+fn new_child2() {
+  // test_log_init();
+
+  let mut ctx = TreeContext::new();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(1_u16),
+      height: taffy::prelude::length(1_u16),
+    },
+    ..Default::default()
+  };
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   *           \
+   *            n7
+   *           / \
+   *         n8   n9
+   * ```
+   */
+
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
+  let nid2 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n2")
+    .unwrap();
+  let nid3 = ctx
+    .new_with_parent_default(nid1, style.clone(), "n3")
+    .unwrap();
+  let nid4 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n4")
+    .unwrap();
+  let nid5 = ctx
+    .new_with_parent_default(nid2, style.clone(), "n5")
+    .unwrap();
+  let nid6 = ctx
+    .new_with_parent_default(nid3, style.clone(), "n6")
+    .unwrap();
+  let nid7 = ctx
+    .new_with_parent_default(nid5, style.clone(), "n7")
+    .unwrap();
+  let nid8 = ctx
+    .new_with_parent_default(nid7, style.clone(), "n8")
+    .unwrap();
+  let nid9 = ctx
+    .new_with_parent_default(nid7, style.clone(), "n9")
+    .unwrap();
+
+  assert_eq!(ctx.root(), nid1);
+
+  assert!(nid1 < nid2);
+  assert!(nid2 < nid3);
+  assert!(nid3 < nid4);
+  assert!(nid4 < nid5);
+  assert!(nid5 < nid6);
+  assert!(nid6 < nid7);
+  assert!(nid7 < nid8);
+  assert!(nid8 < nid9);
+
+  assert_eq!(ctx.children(nid1).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid2).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid3).unwrap().len(), 1);
+  assert_eq!(ctx.children(nid4).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid5).unwrap().len(), 1);
+  assert_eq!(ctx.children(nid6).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid7).unwrap().len(), 2);
+  assert_eq!(ctx.children(nid8).unwrap().len(), 0);
+  assert_eq!(ctx.children(nid9).unwrap().len(), 0);
+
+  let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+    let result = ctx
+      .children(parent_id)
+      .unwrap()
+      .iter()
+      .filter(|cid| **cid == child_id)
+      .collect::<Vec<_>>()
+      .len()
+      == 1;
+    info!(
+      "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
+      parent_id,
+      child_id,
+      ctx.children(parent_id),
+      result
+    );
+    result
+  };
+
+  assert!(contains_child(nid1, nid2));
+  assert!(contains_child(nid1, nid3));
+  assert!(!contains_child(nid1, nid4));
+  assert!(!contains_child(nid1, nid5));
+  assert!(!contains_child(nid1, nid7));
+
+  assert!(contains_child(nid2, nid4));
+  assert!(contains_child(nid2, nid5));
+  assert!(!contains_child(nid2, nid7));
+
+  assert!(contains_child(nid3, nid6));
+  assert!(!contains_child(nid3, nid7));
+  assert!(!contains_child(nid3, nid4));
+  assert!(!contains_child(nid3, nid5));
+
+  assert!(contains_child(nid5, nid7));
+  assert!(contains_child(nid7, nid8));
+  assert!(contains_child(nid7, nid9));
+}
+
+#[test]
+fn shape1() {
+  test_log_init();
+
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *      /  \     \
+   *     n4  n5    n6
+   *           \
+   *            n7
+   *           / \
+   *         n8   n9
+   * ```
+   */
+
+  let style1 = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
+    },
+    ..Default::default()
+  };
+  let nid1 = ctx.new_leaf_default(style1, "n1").unwrap();
+  let s1 = rect!(0, 0, 20, 20);
+  let us1 = rect!(0, 0, 20, 20);
+
+  let style2 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(0_u16),
+      top: taffy::prelude::length(0_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(15_u16),
+      height: taffy::prelude::length(15_u16),
+    },
+    ..Default::default()
+  };
+  let nid2 = ctx.new_with_parent_default(nid1, style2, "n2").unwrap();
+  let s2 = rect!(0, 0, 15, 15);
+  let us2 = rect!(0, 0, 15, 15);
+
+  let style3 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(10_u16),
+      top: taffy::prelude::length(10_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(8_u16),
+      height: taffy::prelude::length(9_u16),
+    },
+    ..Default::default()
+  };
+  let nid3 = ctx.new_with_parent_default(nid1, style3, "n3").unwrap();
+  let s3 = rect!(10, 10, 18, 19);
+  let us3 = rect!(10, 10, 18, 19);
+
+  let style4 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(3_u16),
+      top: taffy::prelude::length(5_u16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(12_u16),
+      height: taffy::prelude::length(9_u16),
+    },
+    ..Default::default()
+  };
+  let nid4 = ctx.new_with_parent_default(nid2, style4, "n4").unwrap();
+  let s4 = rect!(3, 5, 15, 14);
+  let us4 = rect!(3, 5, 15, 14);
+
+  let style5 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(-3_i16),
+      top: taffy::prelude::length(-5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(13_u16),
+      height: taffy::prelude::length(25_u16),
+    },
+    ..Default::default()
+  };
+  let nid5 = ctx.new_with_parent_default(nid2, style5, "n5").unwrap();
+  let s5 = rect!(0, 0, 10, 15);
+  let us5 = rect!(0, 0, 10, 15);
+
+  let style6 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(4_u16),
+    },
+    ..Default::default()
+  };
+  let nid6 = ctx.new_with_parent_default(nid3, style6, "n6").unwrap();
+  let s6 = rect!(3, 6, 6, 9);
+  let us6 = rect!(13, 16, 16, 19);
+
+  let style7 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(12_u16),
+      height: taffy::prelude::length(19_u16),
+    },
+    ..Default::default()
+  };
+  let s7 = rect!(3, 6, 10, 15);
+  let us7 = rect!(3, 6, 10, 15);
+  let nid7 = ctx.new_with_parent_default(nid5, style7, "n7").unwrap();
+
+  let style8 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(-1_i16),
+      top: taffy::prelude::length(-2_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(3_u16),
+    },
+    ..Default::default()
+  };
+  let nid8 = ctx.new_with_parent_default(nid7, style8, "n8").unwrap();
+  let s8 = rect!(0, 0, 2, 1);
+  let us8 = rect!(3, 6, 5, 7);
+
+  let style9 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(5_i16),
+      top: taffy::prelude::length(6_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(4_u16),
+      height: taffy::prelude::length(2_u16),
+    },
+    ..Default::default()
+  };
+  let s9 = rect!(5, 6, 7, 8);
+  let us9 = rect!(8, 12, 10, 14);
+  let nid9 = ctx.new_with_parent_default(nid7, style9, "n9").unwrap();
+
+  ctx.compute_layout(nid1).unwrap();
+
+  assert_eq!(ctx.root(), nid1);
+
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6, nid7, nid8, nid9];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
+  for (i, nid) in nids.iter().enumerate() {
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
+    let actual_us = ctx.actual_shape(*nid).copied().unwrap();
+    let actual_s = ctx.shape(*nid).copied().unwrap();
+    info!(
+      "{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}",
+      i + 1,
+      expect_us,
+      actual_us,
+      expect_s,
+      actual_s
+    );
+    assert_eq!(expect_us, actual_us);
+    assert_eq!(expect_s, actual_s);
+  }
+}
+
+#[test]
+fn shape2() {
+  test_log_init();
+
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *           n1
+   *         /   \
+   *        n2   n3
+   *         \
+   *         n4
+   *        /
+   *       n5
+   *      /
+   *     n6
+   * ```
+   */
+
+  let style1 = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
+    },
+    ..Default::default()
+  };
+  let s1 = rect!(0, 0, 20, 20);
+  let us1 = rect!(0, 0, 20, 20);
+  let nid1 = ctx.new_leaf_default(style1, "n1").unwrap();
+
+  let style2 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(0_i16),
+      top: taffy::prelude::length(0_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(20_u16),
+      height: taffy::prelude::length(20_u16),
+    },
+    ..Default::default()
+  };
+  let nid2 = ctx.new_with_parent_default(nid1, style2, "n2").unwrap();
+  let s2 = rect!(0, 0, 20, 20);
+  let us2 = rect!(0, 0, 20, 20);
+
+  let style3 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(-2_i16),
+      top: taffy::prelude::length(-2_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(3_u16),
+      height: taffy::prelude::length(2_u16),
+    },
+    ..Default::default()
+  };
+  let nid3 = ctx.new_with_parent_default(nid1, style3, "n3").unwrap();
+  let s3 = rect!(0, 0, 1, 0);
+  let us3 = rect!(0, 0, 1, 0);
+
+  let style4 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(3_i16),
+      top: taffy::prelude::length(5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(17_u16),
+      height: taffy::prelude::length(15_u16),
+    },
+    ..Default::default()
+  };
+  let nid4 = ctx.new_with_parent_default(nid2, style4, "n4").unwrap();
+  let s4 = rect!(3, 5, 20, 20);
+  let us4 = rect!(3, 5, 20, 20);
+
+  let style5 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(-3_i16),
+      top: taffy::prelude::length(-5_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(18_u16),
+      height: taffy::prelude::length(25_u16),
+    },
+    ..Default::default()
+  };
+  let nid5 = ctx.new_with_parent_default(nid4, style5, "n5").unwrap();
+  let s5 = rect!(0, 0, 15, 15);
+  let us5 = rect!(3, 5, 18, 20);
+
+  let style6 = Style {
+    position: taffy::Position::Absolute,
+    inset: taffy::Rect {
+      left: taffy::prelude::length(8_i16),
+      top: taffy::prelude::length(13_i16),
+      right: taffy::prelude::auto(),
+      bottom: taffy::prelude::auto(),
+    },
+    size: taffy::Size {
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(12_u16),
+    },
+    ..Default::default()
+  };
+  let nid6 = ctx.new_with_parent_default(nid5, style6, "n6").unwrap();
+  let s6 = rect!(8, 13, 15, 15);
+  let us6 = rect!(11, 18, 18, 20);
+
+  ctx.compute_layout(nid1).unwrap();
+
+  assert_eq!(ctx.root(), nid1);
+
+  let nids = [nid1, nid2, nid3, nid4, nid5, nid6];
+  let expect_actual_shapes = [us1, us2, us3, us4, us5, us6];
+  let expect_shapes = [s1, s2, s3, s4, s5, s6];
+  for (i, nid) in nids.iter().enumerate() {
+    let expect_us = expect_actual_shapes[i];
+    let expect_s = expect_shapes[i];
+    let actual_us = ctx.actual_shape(*nid).copied().unwrap();
+    let actual_s = ctx.shape(*nid).copied().unwrap();
+    info!(
+      "{}, actual_shape(expect/actual):{:?}/{:?}, shape(expect/actual):{:?}/{:?}",
+      i + 1,
+      expect_us,
+      actual_us,
+      expect_s,
+      actual_s
+    );
+    assert_eq!(expect_us, actual_us);
+    assert_eq!(expect_s, actual_s);
+  }
+}
+
+#[test]
+fn children1() {
+  // test_log_init();
+
+  let mut ctx = TreeContext::new();
+
+  /*
+   * The tree looks like:
+   * ```
+   *             n1
+   *         /        \
+   *       n2, n3, n4, n5
+   * ```
+   */
+
+  let style1 = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(10_u16),
+    },
+    ..Default::default()
+  };
+
+  let nid1 = ctx.new_leaf_default(style1.clone(), "n1").unwrap();
+  let mut nids = ["n2", "n3", "n4", "n5"]
+    .iter()
+    .map(|name| {
+      ctx
+        .new_with_parent_default(nid1, style1.clone(), name)
+        .unwrap()
+    })
+    .collect_vec();
+  nids.insert(0, nid1);
+
+  assert!(ctx.root() == nids[0]);
+  assert_eq!(ctx.children(nids[0]).unwrap().len(), 4);
+  for nid in nids.iter().skip(1) {
+    assert!(ctx.children(*nid).unwrap().is_empty());
+  }
+}
+
+fn make_tree(n: usize) -> (Vec<TreeNodeId>, TreeContext) {
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(10_u16),
+      height: taffy::prelude::length(10_u16),
+    },
+    ..Default::default()
+  };
+
+  let mut ctx = TreeContext::new();
+  let root_id = ctx.new_leaf_default(style.clone(), "root").unwrap();
+
+  let mut nids: Vec<TreeNodeId> = vec![];
+  nids.push(root_id);
+
+  for _ in 1..n {
+    let nid = ctx
+      .new_with_parent_default(root_id, style.clone(), "node")
+      .unwrap();
+    nids.push(nid);
+  }
+
+  (nids, ctx)
+}
+
+#[test]
+fn remove_child1() {
+  // test_log_init();
+
+  let (nids, mut ctx) = make_tree(5);
+  let root_id = ctx.root();
+  let remove2_id = ctx.remove_child(root_id, nids[2]).unwrap();
+  let remove4_id = ctx.remove_child(root_id, nids[4]).unwrap();
+
+  assert!(!ctx.children(root_id).unwrap().contains(&remove2_id));
+  assert!(!ctx.children(root_id).unwrap().contains(&remove4_id));
+
+  let remove1_id = ctx.remove_child(root_id, nids[1]).unwrap();
+  let remove3_id = ctx.remove_child(root_id, nids[3]).unwrap();
+
+  // 1,2,(3),4,(5)
+  assert!(!ctx.children(root_id).unwrap().contains(&remove1_id));
+  assert!(!ctx.children(root_id).unwrap().contains(&remove3_id));
+}

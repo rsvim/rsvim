@@ -4,14 +4,14 @@ use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::evloop::ui as evloop_ui;
 use crate::prelude::*;
+use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::CURSOR_BLINKING;
 use crate::ui::widget::cursor::CURSOR_HIDDEN;
 use crate::ui::widget::cursor::CURSOR_STYLE;
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
@@ -19,34 +19,50 @@ pub fn make_tree_with_buffers(
   window_local_opts: WindowOptions,
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
-  // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    ..Default::default()
+  };
+  let window_style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::percent(1.0),
+      height: taffy::prelude::percent(1.0),
+    },
+    ..Default::default()
+  };
+
+  let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
   let buffers = lock!(buffers_manager);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
   let tree_root_id = tree.root_id();
 
   // Window
-  let window_shape = rect_from_size!(canvas_size);
-  let window_shape = rect_as!(window_shape, isize);
-  let mut window = {
-    let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(
-      tree.global_local_options(),
-      window_shape,
+  let (_, buf) = buffers.first_key_value().unwrap();
+  let window_id = tree
+    .new_window_with_parent(
+      tree_root_id,
+      window_style,
+      window_local_opts,
       Arc::downgrade(buf),
     )
-  };
-  let window_id = window.id();
+    .unwrap();
+  let window_content_id = tree.window(window_id).unwrap().content_id();
+  tree.set_current_window_id(Some(window_id));
 
   // Cursor.
-  let cursor_shape = rect!(0, 0, 1, 1);
-  let cursor = Cursor::default(cursor_shape);
-  window.insert_cursor(cursor);
-
-  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
-  tree.set_current_window_id(Some(window_id));
+  let _cursor_id = tree
+    .new_cursor_with_parent(
+      window_content_id,
+      false,
+      false,
+      CursorStyle::SteadyBlock,
+    )
+    .unwrap();
 
   tree_arc.clone()
 }
@@ -59,18 +75,28 @@ pub fn make_tree_with_buffers_cmdline(
   buffers_manager: BuffersManagerArc,
   text_contents: TextContentsArc,
 ) -> TreeArc {
-  // UI Tree
-  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
+  let tree_style = Style {
+    display: taffy::Display::Grid,
+    grid_template_rows: vec![
+      taffy::prelude::fr(1_u16),
+      taffy::prelude::length(1_u16),
+    ],
+    size: taffy::Size {
+      width: taffy::prelude::length(canvas_size.width()),
+      height: taffy::prelude::length(canvas_size.height()),
+    },
+    ..Default::default()
+  };
+  let tree_arc = Tree::to_arc(Tree::new(tree_style).unwrap());
   let buffers = lock!(buffers_manager);
   let (_, buf) = buffers.first_key_value().unwrap();
   let buf = Arc::downgrade(buf);
   let text_contents = Arc::downgrade(&text_contents);
 
   let mut tree = lock!(tree_arc);
-  tree.set_global_local_options(&window_local_opts);
+  tree.set_global_local_options(window_local_opts);
 
   evloop_ui::init_default_window(
-    &canvas_size,
     &mut tree,
     buf,
     text_contents,
