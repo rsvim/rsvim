@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 use super::content::*;
 use crate::buf::opt::BufferOptions;
 use crate::buf::opt::BufferOptionsBuilder;
