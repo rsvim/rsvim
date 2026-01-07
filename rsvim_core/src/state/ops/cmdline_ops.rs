@@ -2,7 +2,7 @@
 
 use crate::content::TextContents;
 use crate::prelude::*;
-use crate::ui::tree::Inodeable;
+use crate::ui::tree::Inodify;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::CursorViewport;
 use crate::ui::viewport::Viewport;
