@@ -344,9 +344,7 @@ pub struct TreeContext {
   root: TreeNodeId,
 
   // For debugging
-  #[cfg(debug_assertions)]
   root_changes: usize,
-  #[cfg(debug_assertions)]
   names: FoldMap<TreeNodeId, &'static str>,
 }
 
@@ -360,19 +358,15 @@ impl Debug for TreeContext {
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
         let name = |i: TreeNodeId| {
-          if cfg!(debug_assertions) {
-            format!(
-              "{}({})",
-              i,
-              self
-                .names
-                .get(&i)
-                .map(|v| v.to_string())
-                .unwrap_or("N/A".to_string())
-            )
-          } else {
-            format!("{}", i)
-          }
+          format!(
+            "{}({})",
+            i,
+            self
+              .names
+              .get(&i)
+              .map(|v| v.to_string())
+              .unwrap_or("N/A".to_string())
+          )
         };
         let enabled = if self.enabled(id).unwrap_or(false) {
           ""
@@ -453,9 +447,7 @@ impl TreeContext {
       zindexes: FoldMap::new(),
       truncate_policies: FoldMap::new(),
       root: INVALID_ROOT_ID,
-      #[cfg(debug_assertions)]
       root_changes: 0,
-      #[cfg(debug_assertions)]
       names: FoldMap::new(),
     }
   }
@@ -482,24 +474,18 @@ impl TreeContext {
     if self.root == INVALID_ROOT_ID {
       debug_assert_eq!(self.root_changes, 0);
       self.root = id;
-      if cfg!(debug_assertions) {
-        self.root_changes += 1;
-        debug_assert!(self.root_changes <= 1);
-      }
+      self.root_changes += 1;
+      debug_assert!(self.root_changes <= 1);
     }
   }
 
   fn _set_name(&mut self, id: TreeNodeId, name: &'static str) {
-    if cfg!(debug_assertions) {
-      self.names.insert(id, name);
-    }
+    self.names.insert(id, name);
   }
 
   fn _unset_name(&mut self, id: TreeNodeId) {
-    if cfg!(debug_assertions) {
-      debug_assert!(self.names.contains_key(&id));
-      self.names.remove(&id);
-    }
+    debug_assert!(self.names.contains_key(&id));
+    self.names.remove(&id);
   }
 
   /// The first created node will be the root node.
