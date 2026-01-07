@@ -200,9 +200,9 @@ impl BuffersManager {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
         trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
-        bail!(TheErr::NormalizePathFailed(
+        return Err(TheErr::NormalizePathFailed(
           filename.to_string_lossy().to_compact_string(),
-          e
+          e,
         ));
       }
     };
@@ -217,9 +217,9 @@ impl BuffersManager {
       Ok(existed) => existed,
       Err(e) => {
         trace!("Failed to detect file {:?}:{:?}", filename, e);
-        bail!(TheErr::FileNotFound(
+        return Err(TheErr::FileNotFound(
           filename.to_string_lossy().to_compact_string(),
-          e
+          e,
         ));
       }
     };
@@ -288,13 +288,11 @@ impl BuffersManager {
       Some(buf) => {
         let mut buf = lock!(buf);
         if !buf.has_filename() {
-          bail!(TheErr::BufferNoName(buf_id));
+          return Err(TheErr::BufferNoName(buf_id));
         }
         self.write_file(&mut buf)
       }
-      None => {
-        bail!(TheErr::BufferNotExist(buf_id));
-      }
+      None => Err(TheErr::BufferNotExist(buf_id)),
     }
   }
 
@@ -345,19 +343,15 @@ impl BuffersManager {
             Some(Instant::now()),
           ))
         }
-        Err(e) => {
-          bail!(TheErr::OpenFileFailed(
-            filename.to_string_lossy().to_compact_string(),
-            e
-          ));
-        }
-      },
-      Err(e) => {
-        bail!(TheErr::OpenFileFailed(
+        Err(e) => Err(TheErr::OpenFileFailed(
           filename.to_string_lossy().to_compact_string(),
-          e
-        ));
-      }
+          e,
+        )),
+      },
+      Err(e) => Err(TheErr::OpenFileFailed(
+        filename.to_string_lossy().to_compact_string(),
+        e,
+      )),
     }
   }
 
@@ -387,9 +381,7 @@ impl BuffersManager {
         buf.set_last_sync_time(Some(Instant::now()));
         Ok(data.len())
       }
-      Err(e) => {
-        bail!(TheErr::SaveBufferFailed(buf_id, filename, e));
-      }
+      Err(e) => Err(TheErr::SaveBufferFailed(buf_id, filename, e)),
     }
   }
 }
