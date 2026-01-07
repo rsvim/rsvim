@@ -4,7 +4,6 @@ use crate::js;
 use crate::js::JsFuture;
 use crate::js::JsRuntime;
 use crate::js::JsRuntimeState;
-use crate::js::encdec::decode_bytes;
 use crate::js::err::JsError;
 use crate::js::err::report_js_error;
 use crate::js::module::ModulePath;
@@ -199,8 +198,8 @@ impl JsFuture for EsModuleFuture {
     // Extract module's source code.
     debug_assert!(self.maybe_result.is_some());
     let result = self.maybe_result.take().unwrap();
-    let (source, _source_len) = match result {
-      Ok(data) => decode_bytes::<String>(&data),
+    let source = match result {
+      Ok(data) => bincode::deserialize::<String>(&data).unwrap(),
       Err(e) => {
         self.handle_failure(&state, e);
         return;

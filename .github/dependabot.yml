@@ -12,6 +12,8 @@ updates:
       swc: # For SWC monorepo
         patterns:
           - "swc*"
+    ignore:
+      - dependency-name: "bincode"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

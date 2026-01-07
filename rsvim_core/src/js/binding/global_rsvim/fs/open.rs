@@ -7,7 +7,6 @@ use crate::js::JsFuture;
 use crate::js::binding;
 use crate::js::binding::global_rsvim::fs::handle;
 use crate::js::converter::*;
-use crate::js::encdec::decode_bytes;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
@@ -201,7 +200,7 @@ impl JsFuture for FsOpenFuture {
     let result = result.unwrap();
 
     // Deserialize bytes into a file-descriptor.
-    let (fd, _fd_len) = decode_bytes::<usize>(&result);
+    let fd = bincode::deserialize::<usize>(&result).unwrap();
     let file_wrapper = wrap_cppgc_handle!(scope, Some(fd), Option<usize>);
 
     self
