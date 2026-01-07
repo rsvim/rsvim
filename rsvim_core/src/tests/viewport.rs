@@ -1,5 +1,4 @@
 #![allow(unused_imports)]
-#![allow(clippy::too_many_arguments)]
 
 use crate::buf::BufferArc;
 use crate::buf::text::Text;
@@ -8,28 +7,50 @@ use crate::ui::canvas::Canvas;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::Tree;
 use crate::ui::tree::TreeArc;
+use crate::ui::tree::TreeNode;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::Window;
-use crate::ui::widget::window::content::Content;
+use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::opt::WindowOptions;
 use std::sync::Arc;
+use taffy::Style;
+use taffy::prelude::FromLength;
+use taffy::prelude::FromPercent;
 
 pub fn make_window(
   terminal_size: U16Size,
   buffer: BufferArc,
-  window_options: &WindowOptions,
-) -> Window {
-  let mut tree = Tree::new(terminal_size);
+  window_options: WindowOptions,
+) -> (Tree, TreeNodeId) {
+  let tree_style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(terminal_size.width()),
+      height: taffy::prelude::length(terminal_size.height()),
+    },
+    ..Default::default()
+  };
+  let mut tree = Tree::new(tree_style).unwrap();
   tree.set_global_local_options(window_options);
-  let window_shape = rect_from_size!(terminal_size);
-  let window_shape = rect_as!(window_shape, isize);
-  Window::new(
-    tree.global_local_options(),
-    window_shape,
-    Arc::downgrade(&buffer),
-  )
+
+  let window_style = Style {
+    size: taffy::Size {
+      height: taffy::prelude::percent(1.0),
+      width: taffy::prelude::percent(1.0),
+    },
+    ..Default::default()
+  };
+  let window_id = tree
+    .new_window_with_parent(
+      tree.root_id(),
+      window_style,
+      *tree.global_local_options(),
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  (tree, window_id)
 }
 
 pub fn make_viewport(
@@ -59,14 +80,40 @@ pub fn make_canvas(
   buffer: BufferArc,
   viewport: ViewportArc,
 ) -> Canvas {
-  let mut tree = Tree::new(terminal_size);
-  tree.set_global_local_options(&window_options);
-  let shape = rect_from_size!(terminal_size);
-  let shape = rect_as!(shape, isize);
-  let content =
-    Content::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(terminal_size.width()),
+      height: taffy::prelude::length(terminal_size.height()),
+    },
+    ..Default::default()
+  };
+  let mut tree = Tree::new(style).unwrap();
+  tree.set_global_local_options(window_options);
+  let style = Style {
+    size: taffy::Size {
+      height: taffy::prelude::percent(1.0),
+      width: taffy::prelude::percent(1.0),
+    },
+    ..Default::default()
+  };
+  let window_id = tree
+    .new_window_with_parent(
+      tree.root_id(),
+      style,
+      *tree.global_local_options(),
+      Arc::downgrade(&buffer),
+    )
+    .unwrap();
+  tree.set_editable_viewport(window_id, viewport);
+  let content_id = match tree.node(window_id).unwrap() {
+    TreeNode::Window(window) => window.content_id(),
+    _ => unreachable!(),
+  };
   let mut canvas = Canvas::new(terminal_size);
-  content.draw(&mut canvas);
+  match tree.node(content_id).unwrap() {
+    TreeNode::WindowContent(content) => content.draw(&mut canvas),
+    _ => unreachable!(),
+  }
   canvas
 }
 

@@ -35,7 +35,7 @@ use crate::ui::viewport::CursorViewportArc;
 use crate::ui::viewport::Viewport;
 use crate::ui::viewport::ViewportArc;
 use crate::ui::viewport::ViewportSearchDirection;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::window::opt::WindowOptions;
 use crate::ui::widget::window::opt::WindowOptionsBuilder;
 use compact_str::CompactString;
@@ -50,13 +50,15 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub fn get_viewport(tree: TreeArc) -> ViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().unwrap().viewport()
+  lock!(tree).current_window().unwrap().viewport()
 }
 
 pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-  let tree = lock!(tree);
-  tree.current_window().unwrap().cursor_viewport()
+  lock!(tree).current_window().unwrap().cursor_viewport()
+}
+
+pub fn cmdline_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  lock!(tree).cmdline().unwrap().input_cursor_viewport()
 }
 
 #[cfg(test)]
@@ -7656,10 +7658,7 @@ mod tests_goto_command_line_ex_mode {
     stateful.goto_command_line_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
-    let actual_cursor = lock!(tree.clone())
-      .command_line()
-      .unwrap()
-      .input_cursor_viewport();
+    let actual_cursor = cmdline_cursor_viewport(tree.clone());
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 0);
     assert_eq!(actual_cursor.row_idx(), 0);
@@ -7679,6 +7678,7 @@ mod tests_goto_command_line_ex_mode {
     ];
     let actual_canvas = make_tree_canvas(tree.clone(), terminal_size);
     let actual_canvas = lock!(actual_canvas);
+    info!("tree:{:?}", lock!(tree));
     assert_canvas(&actual_canvas, &expect_canvas);
   }
 
@@ -7742,10 +7742,7 @@ mod tests_goto_command_line_ex_mode {
       );
 
       let tree = data_access.tree.clone();
-      let actual1 = lock!(tree.clone())
-        .command_line()
-        .unwrap()
-        .input_cursor_viewport();
+      let actual1 = cmdline_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 4);
       assert_eq!(actual1.row_idx(), 0);

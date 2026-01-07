@@ -16,7 +16,7 @@ pub fn send_cmdline_message(state: &JsRuntimeState, payload: String) {
   trace!("|cmd| send_cmdline_message:{:?}", payload);
   let mut tree = lock!(state.tree);
   let mut contents = lock!(state.contents);
-  if tree.command_line_id().is_some() {
+  if tree.cmdline_id().is_some() {
     cmdline_ops::cmdline_set_message(&mut tree, &mut contents, payload);
   } else {
     // If `command_line` widget does not exist, it means the TUI is not

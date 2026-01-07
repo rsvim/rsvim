@@ -47,15 +47,21 @@ pub fn convert_relative_to_absolute(
 }
 
 /// Truncate relative shape by its parent size.
-pub fn truncate_shape(shape: &IRect, parent_actual_shape: &U16Rect) -> IRect {
-  let parent_size = parent_actual_shape.size();
-  let min_x = num_traits::clamp(shape.min().x, 0, parent_size.width() as isize);
+pub fn truncate_shape(shape: &IRect, parent_actual_size: &U16Size) -> IRect {
+  let min_x =
+    num_traits::clamp(shape.min().x, 0, parent_actual_size.width() as isize);
   let min_y =
-    num_traits::clamp(shape.min().y, 0, parent_size.height() as isize);
-  let max_x =
-    num_traits::clamp(shape.max().x, min_x, parent_size.width() as isize);
-  let max_y =
-    num_traits::clamp(shape.max().y, min_y, parent_size.height() as isize);
+    num_traits::clamp(shape.min().y, 0, parent_actual_size.height() as isize);
+  let max_x = num_traits::clamp(
+    shape.max().x,
+    min_x,
+    parent_actual_size.width() as isize,
+  );
+  let max_y = num_traits::clamp(
+    shape.max().y,
+    min_y,
+    parent_actual_size.height() as isize,
+  );
   rect!(min_x, min_y, max_x, max_y)
 }
 
@@ -138,4 +144,13 @@ pub fn _bound_pos(shape: &IRect, parent_actual_size: &U16Size) -> IRect {
 pub fn bound_shape(shape: &IRect, parent_actual_size: &U16Size) -> IRect {
   let bounded = _bound_size(shape, parent_actual_size);
   _bound_pos(&bounded, parent_actual_size)
+}
+
+/// Clamp shape to make it at least non-negative.
+pub fn clamp_shape(shape: &IRect) -> IRect {
+  let min_x = num_traits::clamp_min(shape.min().x, 0);
+  let min_y = num_traits::clamp_min(shape.min().y, 0);
+  let max_x = num_traits::clamp_min(shape.max().x, min_x);
+  let max_y = num_traits::clamp_min(shape.max().y, min_y);
+  rect!(min_x, min_y, max_x, max_y)
 }

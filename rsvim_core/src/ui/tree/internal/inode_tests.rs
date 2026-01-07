@@ -1,54 +1,56 @@
 use super::inode::*;
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::tree::TreeNodeId;
+use crate::ui::tree::*;
 // use crate::tests::log::init as test_log_init;
-use std::cell::RefCell;
+use taffy::Style;
 
 // Test node
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct TestNode {
-  pub value: usize,
-  pub base: InodeBase,
+  pub __node: InodeBase,
 }
 
+inode_impl!(TestNode);
+
 impl TestNode {
-  pub fn new(value: usize, shape: IRect) -> Self {
-    TestNode {
-      value,
-      base: InodeBase::new(shape),
+  pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {
+    Self {
+      __node: InodeBase::new(id, ctx),
     }
   }
 }
-
-inode_impl!(TestNode, base);
 
 #[test]
 fn new() {
   // test_log_init();
 
-  let n1 = TestNode::new(1, rect!(0, 0, 0, 0));
-  let n2 = TestNode::new(2, rect!(1, 2, 3, 4));
-  let n1 = RefCell::new(n1);
-  let n2 = RefCell::new(n2);
+  let mut ctx = TreeContext::new();
+  let style = Style {
+    size: taffy::Size {
+      width: taffy::prelude::length(1.0),
+      height: taffy::prelude::length(1.0),
+    },
+    ..Default::default()
+  };
 
-  assert!(n1.borrow().id() < n2.borrow().id());
-  assert_eq!(n1.borrow().value, 1);
-  assert_eq!(n2.borrow().value, 2);
+  // Root
+  let nid1 = ctx.new_leaf_default(style.clone(), "n1").unwrap();
 
-  n1.borrow_mut().value = 3;
-  n2.borrow_mut().value = 4;
-  assert_eq!(n1.borrow().value, 3);
-  assert_eq!(n2.borrow().value, 4);
+  // Non-root
+  let nid2 = ctx.new_leaf_default(style.clone(), "n2").unwrap();
 
-  assert!(n1.borrow().enabled());
-  assert!(n1.borrow().visible());
+  ctx.compute_layout(nid1).unwrap();
 
-  assert_eq!(*n1.borrow().shape(), rect!(0, 0, 0, 0));
-  assert_eq!(*n2.borrow().shape(), rect!(1, 2, 3, 4));
-}
+  let ctx = TreeContext::to_rc(ctx);
 
-#[test]
-fn next_node_id1() {
-  assert!(next_node_id() > 0);
+  let n1 = TestNode::new(nid1, Rc::downgrade(&ctx));
+  let n2 = TestNode::new(nid2, Rc::downgrade(&ctx));
+
+  assert_eq!(nid1, ctx.borrow().root());
+  assert!(n1.id() < n2.id());
+  assert_eq!(n1.id(), nid1);
+  assert_eq!(n2.id(), nid2);
+  assert!(n1.enabled());
+  assert!(!n2.enabled());
 }

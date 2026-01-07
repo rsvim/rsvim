@@ -642,40 +642,42 @@ impl Viewport {
       self.end_line_idx == self.start_line_idx,
       self.lines.is_empty()
     );
-    debug_assert!(self.lines.first().is_some());
-    debug_assert_eq!(*self.lines.first().unwrap().0, self.start_line_idx);
-    debug_assert!(self.lines.last().is_some());
-    debug_assert_eq!(*self.lines.last().unwrap().0, self.end_line_idx - 1);
-    let mut last_line_idx: Option<usize> = None;
-    let mut last_row_idx: Option<u16> = None;
-    for (line_idx, line_viewport) in self.lines.iter() {
-      if cfg!(debug_assertions)
-        && let Some(last_line_idx1) = last_line_idx
-      {
-        debug_assert_eq!(last_line_idx1 + 1, *line_idx);
-      }
-      last_line_idx = Some(*line_idx);
-      let mut last_row_viewport: Option<RowViewport> = None;
-      for (row_idx, row_viewport) in line_viewport.rows() {
-        // trace!(
-        //   "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
-        //   line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
-        // );
+    if !self.lines.is_empty() {
+      debug_assert!(self.lines.first().is_some());
+      debug_assert_eq!(*self.lines.first().unwrap().0, self.start_line_idx);
+      debug_assert!(self.lines.last().is_some());
+      debug_assert_eq!(*self.lines.last().unwrap().0, self.end_line_idx - 1);
+      let mut last_line_idx: Option<usize> = None;
+      let mut last_row_idx: Option<u16> = None;
+      for (line_idx, line_viewport) in self.lines.iter() {
         if cfg!(debug_assertions)
-          && let Some(last_row_idx1) = last_row_idx
+          && let Some(last_line_idx1) = last_line_idx
         {
-          debug_assert_eq!(last_row_idx1 + 1, *row_idx);
+          debug_assert_eq!(last_line_idx1 + 1, *line_idx);
         }
-        last_row_idx = Some(*row_idx);
-        if cfg!(debug_assertions)
-          && let Some(last_row_viewport1) = last_row_viewport
-        {
-          debug_assert_eq!(
-            last_row_viewport1.end_char_idx(),
-            row_viewport.start_char_idx()
-          );
+        last_line_idx = Some(*line_idx);
+        let mut last_row_viewport: Option<RowViewport> = None;
+        for (row_idx, row_viewport) in line_viewport.rows() {
+          // trace!(
+          //   "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
+          //   line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
+          // );
+          if cfg!(debug_assertions)
+            && let Some(last_row_idx1) = last_row_idx
+          {
+            debug_assert_eq!(last_row_idx1 + 1, *row_idx);
+          }
+          last_row_idx = Some(*row_idx);
+          if cfg!(debug_assertions)
+            && let Some(last_row_viewport1) = last_row_viewport
+          {
+            debug_assert_eq!(
+              last_row_viewport1.end_char_idx(),
+              row_viewport.start_char_idx()
+            );
+          }
+          last_row_viewport = Some(*row_viewport);
         }
-        last_row_viewport = Some(*row_viewport);
       }
     }
   }

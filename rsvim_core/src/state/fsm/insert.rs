@@ -177,13 +177,27 @@ impl InsertStateful {
       false,
     );
 
-    let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_id().is_some());
-    let _cursor_id = current_window.cursor_id().unwrap();
-    debug_assert!(current_window.cursor_mut().is_some());
-    let cursor = current_window.cursor_mut().unwrap();
-    debug_assert_eq!(_cursor_id, cursor.id());
-    cursor.set_style(&CursorStyle::SteadyBlock);
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.cursor_id().is_some());
+      let cursor_id = tree.cursor_id().unwrap();
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      let parent_id = tree.parent_id(cursor_id).unwrap();
+      debug_assert!(matches!(
+        tree.node(parent_id).unwrap(),
+        TreeNode::WindowContent(_)
+      ));
+      debug_assert!(
+        tree.parent_id(tree.parent_id(cursor_id).unwrap()).is_some()
+      );
+      let parent_parent_id = tree.parent_id(parent_id).unwrap();
+      debug_assert!(tree.current_window_id().is_some());
+      debug_assert_eq!(parent_parent_id, tree.current_window_id().unwrap());
+    }
+
+    tree
+      .cursor_mut()
+      .unwrap()
+      .set_cursor_style(CursorStyle::SteadyBlock);
 
     StateMachine::NormalMode(super::NormalStateful::default())
   }
