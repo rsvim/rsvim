@@ -59,15 +59,15 @@ pub enum Mode {
 
   #[strum(to_string = "command-line", serialize = "cmdline", serialize = "c")]
   /// Command-line mode, ex-command variant.
-  CommandLineEx,
+  CmdlineEx,
 
   #[strum(to_string = "command-line-search-forward")]
   /// Command-line mode, search forward variant.
-  CommandLineSearchForward,
+  CmdlineSearchForward,
 
   #[strum(to_string = "command-line-search-backward")]
   /// Command-line mode, search backward variant.
-  CommandLineSearchBackward,
+  CmdlineSearchBackward,
 }
 
 impl Mode {
@@ -78,9 +78,9 @@ impl Mode {
       Mode::Select => SELECT,
       Mode::OperatorPending => OPERATOR_PENDING,
       Mode::Insert => INSERT,
-      Mode::CommandLineEx => COMMAND_LINE,
-      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
-      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+      Mode::CmdlineEx => COMMAND_LINE,
+      Mode::CmdlineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CmdlineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
     }
   }
 
@@ -91,9 +91,9 @@ impl Mode {
       Mode::Select => S,
       Mode::OperatorPending => O,
       Mode::Insert => I,
-      Mode::CommandLineEx => C,
-      Mode::CommandLineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
-      Mode::CommandLineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+      Mode::CmdlineEx => C,
+      Mode::CmdlineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
+      Mode::CmdlineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
     }
   }
 }
@@ -107,9 +107,9 @@ impl Mode {
       Mode::Select,
       Mode::OperatorPending,
       Mode::Insert,
-      Mode::CommandLineEx,
-      Mode::CommandLineSearchForward,
-      Mode::CommandLineSearchBackward,
+      Mode::CmdlineEx,
+      Mode::CmdlineSearchForward,
+      Mode::CmdlineSearchBackward,
     ]
   }
 }
