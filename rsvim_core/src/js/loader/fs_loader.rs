@@ -4,7 +4,7 @@ use crate::js::loader::AsyncModuleLoader;
 use crate::js::loader::ModuleLoader;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
-use crate::js::transpiler::TypeScript;
+// use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
 use crate::prelude::*;
 use async_trait::async_trait;
