@@ -12,6 +12,9 @@ updates:
       swc: # For SWC monorepo
         patterns:
           - "swc*"
+      tokio: # For tokio monorepo
+        patterns:
+          - "tokio*"
     ignore:
       - dependency-name: "bincode"
   - package-ecosystem: "github-actions"
