@@ -411,7 +411,7 @@ impl Debug for TreeContext {
         };
 
         let payload = format!(
-          "\n{}, parent:{},{},{},{}",
+          "\n{},parent:{},{},{},{}",
           name(id),
           name(self.ta.parent(id).unwrap_or(-1)),
           attributes,
