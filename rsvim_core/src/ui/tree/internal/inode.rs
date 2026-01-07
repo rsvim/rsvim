@@ -21,7 +21,7 @@ pub trait Inodify: Sized + Clone + Debug {
   fn truncate_policy(&self) -> TruncatePolicy;
 }
 
-/// Generate getter/setter for `Inode`.
+/// Generate getter/setter for `Inodify`.
 #[macro_export]
 macro_rules! inode_impl {
   ($name:ty) => {
@@ -53,7 +53,7 @@ macro_rules! inode_impl {
   };
 }
 
-/// Generate enum dispatcher for `Inode`.
+/// Generate enum dispatcher for `Inodify`.
 #[macro_export]
 macro_rules! inode_dispatcher {
   ($enum:ident, $($variant:tt),*) => {
