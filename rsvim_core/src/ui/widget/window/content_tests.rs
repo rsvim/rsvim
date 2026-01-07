@@ -279,7 +279,7 @@ mod tests_nowrap {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let expect_canvas = vec![
+    let expect_canvas1 = vec![
       "Hello, RSVIM!        ",
       "This is a quite simpl",
       "But still it contains",
@@ -291,17 +291,7 @@ mod tests_nowrap {
       "                     ",
       "                     ",
     ];
-
-    test_buffer_lines(Arguments {
-      terminal_size: size!(21, 10),
-      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
-      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
-      buffer_lines,
-      expect_canvas: vec![expect_canvas],
-      viewport_start: vec![(0, 0)],
-    });
-
-    let expect = vec![
+    let expect_canvas2 = vec![
       "  2. When the line is",
       "     * The extra part",
       "     * The extra part",
@@ -313,9 +303,15 @@ mod tests_nowrap {
       "                     ",
       "                     ",
     ];
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+
+    test_buffer_lines(Arguments {
+      terminal_size: size!(21, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines,
+      expect_canvas: vec![expect_canvas1, expect_canvas2],
+      viewport_start: vec![(0, 0), (4, 0)],
+    });
   }
 }
 
