@@ -22,7 +22,7 @@ struct Arguments<'a> {
   pub viewport_start: (usize, usize),
 }
 
-fn run_test(args: Arguments) {
+fn test_buffer_lines(args: Arguments) {
   test_log_init();
   let buffer = make_buffer_from_lines(
     args.terminal_size,
@@ -73,7 +73,7 @@ mod tests_nowrap {
       "          ",
     ];
 
-    run_test(Arguments {
+    test_buffer_lines(Arguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -103,7 +103,7 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    run_test(Arguments {
+    test_buffer_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -137,7 +137,7 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    run_test(Arguments {
+    test_buffer_lines(Arguments {
       terminal_size: size!(33, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -181,7 +181,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    run_test(Arguments {
+    test_buffer_lines(Arguments {
       terminal_size: size!(31, 20),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -252,7 +252,7 @@ mod tests_nowrap {
       "             ",
     ];
 
-    run_test(Arguments {
+    test_buffer_lines(Arguments {
       terminal_size: size!(13, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
