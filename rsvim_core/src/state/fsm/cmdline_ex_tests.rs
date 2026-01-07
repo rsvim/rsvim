@@ -1,6 +1,6 @@
 #![allow(unused_imports, dead_code, unused_variables)]
 
-use super::command_line_ex::*;
+use super::cmdline_ex::*;
 use crate::buf::BufferArc;
 use crate::buf::BuffersManagerArc;
 use crate::buf::opt::BufferOptions;
