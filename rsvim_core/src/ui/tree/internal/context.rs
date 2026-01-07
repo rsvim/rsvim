@@ -402,11 +402,15 @@ impl Debug for TreeContext {
           let shape = self.shapes.get(&id).unwrap();
           let actual_shape = self.actual_shapes.get(&id).unwrap();
           format!(
-            "shape(min:{:?},max:{:?}), actual_shape(min:{:?},max:{:?})",
-            shape.min(),
-            shape.max(),
-            actual_shape.min(),
-            actual_shape.max(),
+            "shape(min:({:?},{:?}),max:({:?},{:?})), actual_shape(min:({:?},{:?}),max:({:?},{:?}))",
+            shape.min().x,
+            shape.min().y,
+            shape.max().x,
+            shape.max().y,
+            actual_shape.min().x,
+            actual_shape.min().y,
+            actual_shape.max().x,
+            actual_shape.max().y,
           )
         };
 
