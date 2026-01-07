@@ -33,20 +33,20 @@ fn test_mode1() {
   assert_eq!(Mode::from_str("c"), Ok(Mode::CmdlineEx));
 
   assert_eq!(
-    format!("{}", Mode::CommandLineSearchForward),
+    format!("{}", Mode::CmdlineSearchForward),
     "command-line-search-forward"
   );
   assert_eq!(
     Mode::from_str("command-line-search-forward"),
-    Ok(Mode::CommandLineSearchForward)
+    Ok(Mode::CmdlineSearchForward)
   );
 
   assert_eq!(
-    format!("{}", Mode::CommandLineSearchBackward),
+    format!("{}", Mode::CmdlineSearchBackward),
     "command-line-search-backward"
   );
   assert_eq!(
     Mode::from_str("command-line-search-backward"),
-    Ok(Mode::CommandLineSearchBackward)
+    Ok(Mode::CmdlineSearchBackward)
   );
 }
