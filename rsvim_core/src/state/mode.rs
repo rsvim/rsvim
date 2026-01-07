@@ -19,7 +19,7 @@ pub const C: &str = "c";
 pub const COMMAND_LINE_SEARCH_FORWARD: &str = "command-line-search-forward";
 pub const CMDLINE_SEARCH_FORWARD: &str = "cmdline-search-forward";
 pub const COMMAND_LINE_SEARCH_BACKWARD: &str = "command-line-search-backward";
-pub const CMDLINE_LINE_SEARCH_BACKWARD: &str = "cmdline-search-backward";
+pub const CMDLINE_SEARCH_BACKWARD: &str = "cmdline-search-backward";
 
 #[derive(
   Debug,
