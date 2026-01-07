@@ -8,18 +8,16 @@ pub const VISUAL: &str = "visual";
 pub const V: &str = "v";
 pub const SELECT: &str = "select";
 pub const S: &str = "s";
-pub const OPERATOR_PENDING: &str = "operator-pending";
 pub const OP_PENDING: &str = "op-pending";
 pub const O: &str = "o";
 pub const INSERT: &str = "insert";
 pub const I: &str = "i";
-pub const COMMAND_LINE: &str = "command-line";
 pub const CMDLINE: &str = "cmdline";
 pub const C: &str = "c";
-pub const COMMAND_LINE_SEARCH_FORWARD: &str = "command-line-search-forward";
 pub const CMDLINE_SEARCH_FORWARD: &str = "cmdline-search-forward";
-pub const COMMAND_LINE_SEARCH_BACKWARD: &str = "command-line-search-backward";
+pub const CF: &str = "cf";
 pub const CMDLINE_SEARCH_BACKWARD: &str = "cmdline-search-backward";
+pub const CB: &str = "cb";
 
 #[derive(
   Debug,
@@ -78,11 +76,11 @@ impl Mode {
       Mode::Normal => NORMAL,
       Mode::Visual => VISUAL,
       Mode::Select => SELECT,
-      Mode::OperatorPending => OPERATOR_PENDING,
+      Mode::OperatorPending => OP_PENDING,
       Mode::Insert => INSERT,
-      Mode::CmdlineEx => COMMAND_LINE,
-      Mode::CmdlineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
-      Mode::CmdlineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+      Mode::CmdlineEx => CMDLINE,
+      Mode::CmdlineSearchForward => CMDLINE_SEARCH_FORWARD,
+      Mode::CmdlineSearchBackward => CMDLINE_SEARCH_BACKWARD,
     }
   }
 
