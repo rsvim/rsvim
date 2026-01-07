@@ -1,6 +1,6 @@
 //! Root container is the root node in the widget tree.
 
-use crate::inode_impl;
+use crate::inodify;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
@@ -12,7 +12,7 @@ pub struct Panel {
   __node: InodeBase,
 }
 
-inode_impl!(Panel);
+inodify!(Panel);
 
 impl Panel {
   pub fn new(id: TreeNodeId, ctx: TreeContextWk) -> Self {

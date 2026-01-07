@@ -9,7 +9,7 @@ mod content_tests;
 mod opt_tests;
 
 use crate::buf::BufferWk;
-use crate::inode_impl;
+use crate::inodify;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::viewport::CursorViewport;
@@ -31,7 +31,7 @@ pub struct Window {
   cursor_viewport: CursorViewportArc,
 }
 
-inode_impl!(Window);
+inodify!(Window);
 
 impl Window {
   pub fn new(
