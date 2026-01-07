@@ -22,7 +22,36 @@ struct Arguments<'a> {
   pub viewport_start: Vec<(usize, usize)>,
 }
 
-fn run_buffer_lines(args: Arguments) {
+fn run_lines(args: Arguments) {
+  test_log_init();
+  let buffer = make_buffer_from_lines(
+    args.terminal_size,
+    args.buffer_opts,
+    args.buffer_lines,
+  );
+
+  assert_eq!(args.expect_canvas.len(), args.viewport_start.len());
+
+  for (i, expect) in args.expect_canvas.iter().enumerate() {
+    let viewport_start = args.viewport_start[i];
+    let viewport = make_viewport(
+      args.terminal_size,
+      args.window_opts,
+      buffer.clone(),
+      viewport_start.0,
+      viewport_start.1,
+    );
+    let actual = make_canvas(
+      args.terminal_size,
+      args.window_opts,
+      buffer.clone(),
+      viewport,
+    );
+    assert_canvas(&actual, expect);
+  }
+}
+
+fn run_empty(args: Arguments) {
   test_log_init();
   let buffer = make_buffer_from_lines(
     args.terminal_size,
@@ -79,7 +108,7 @@ mod tests_nowrap {
       "          ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -109,7 +138,7 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -143,7 +172,7 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(33, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -187,7 +216,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(31, 20),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -258,7 +287,7 @@ mod tests_nowrap {
       "             ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(13, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -304,7 +333,7 @@ mod tests_nowrap {
       "                     ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(21, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -334,7 +363,7 @@ mod tests_nowrap_eol {
       "                               ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(31, 5),
       buffer_opts: BufferOptionsBuilder::default()
         .file_format(FileFormatOption::Dos)
@@ -362,7 +391,7 @@ mod tests_nowrap_eol {
       "                               ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(31, 5),
       buffer_opts: BufferOptionsBuilder::default()
         .file_format(FileFormatOption::Mac)
@@ -395,7 +424,7 @@ mod tests_nowrap_eol {
       "     * The extra parts are been tru",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default()
         .file_format(FileFormatOption::Dos)
@@ -428,7 +457,7 @@ mod tests_nowrap_eol {
       "     * The extra parts are been tru",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default()
         .file_format(FileFormatOption::Mac)
@@ -470,7 +499,7 @@ mod tests_nowrap_startcol {
       "          ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -500,7 +529,7 @@ mod tests_nowrap_startcol {
       "r line-wrap or word-wrap options ar",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(35, 6),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -534,7 +563,7 @@ mod tests_nowrap_startcol {
       "                                 ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(33, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -578,7 +607,7 @@ mod tests_nowrap_startcol {
       "                               ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(31, 20),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -624,7 +653,7 @@ mod tests_nowrap_startcol {
       "                     ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(21, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
@@ -663,7 +692,7 @@ mod tests_wrap_nolinebreak {
       "s several ",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(10, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(true).build().unwrap(),
@@ -691,7 +720,7 @@ mod tests_wrap_nolinebreak {
       "操作。This operation also e",
     ];
 
-    run_buffer_lines(Arguments {
+    run_lines(Arguments {
       terminal_size: size!(27, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(true).build().unwrap(),
