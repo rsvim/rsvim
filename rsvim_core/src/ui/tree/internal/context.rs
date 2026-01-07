@@ -704,7 +704,6 @@ impl TreeContext {
     Ok(id)
   }
 
-  #[allow(clippy::too_many_arguments)]
   pub fn new_with_parent(
     &mut self,
     parent_id: TreeNodeId,

@@ -66,7 +66,6 @@ pub fn update_viewport(
   tree.window(window_id).unwrap().viewport()
 }
 
-#[allow(clippy::too_many_arguments)]
 fn search_viewport(
   direction: ViewportSearchDirection,
   tree: &mut Tree,
