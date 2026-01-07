@@ -10,6 +10,7 @@ use crate::js::converter::*;
 use crate::prelude::*;
 use crate::to_v8_prop;
 use crate::wrap_cppgc_handle;
+use compact_str::ToCompactString;
 
 // See: <https://doc.rust-lang.org/std/fs/struct.OpenOptions.html>.
 flags_impl!(
@@ -143,9 +144,9 @@ pub fn fs_open(path: &Path, opts: FsOpenOptions) -> TheResult<usize> {
     .open(path)
   {
     Ok(file) => Ok(handle::std_to_fd(file)),
-    Err(e) => bail!(TheErr::OpenFileFailed(
+    Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
-      e
+      e,
     )),
   }
 }
@@ -168,9 +169,9 @@ pub async fn async_fs_open(
       let fd = handle::tokio_to_fd(file).await;
       Ok(fd)
     }
-    Err(e) => bail!(TheErr::OpenFileFailed(
+    Err(e) => Err(TheErr::OpenFileFailed(
       path.to_string_lossy().to_compact_string(),
-      e
+      e,
     )),
   }
 }

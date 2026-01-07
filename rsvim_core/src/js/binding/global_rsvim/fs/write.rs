@@ -11,7 +11,7 @@ pub fn fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
   let mut file = handle::std_from_fd(fd);
   let n = match file.write(&buf) {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::WriteFileFailed(fd, e)),
+    Err(e) => return Err(TheErr::WriteFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.len());
   handle::std_to_fd(file);
@@ -26,7 +26,7 @@ pub async fn async_fs_write(fd: usize, buf: Vec<u8>) -> TheResult<usize> {
   let mut file = handle::tokio_from_fd(fd);
   let n = match file.write(&buf).await {
     Ok(n) => n,
-    Err(e) => bail!(TheErr::WriteFileFailed(fd, e)),
+    Err(e) => return Err(TheErr::WriteFileFailed(fd, e)),
   };
   debug_assert!(n <= buf.len());
   handle::tokio_to_fd(file).await;
