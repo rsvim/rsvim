@@ -24,9 +24,9 @@ use crate::msg::MasterMessage;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
+use fsm::CmdlineEx;
 use fsm::CmdlineSearchBackward;
 use fsm::CmdlineSearchForward;
-use fsm::CommandLineEx;
 use fsm::Insert;
 use fsm::Normal;
 use fsm::OperatorPending;
@@ -108,7 +108,7 @@ pub enum State {
   Select(Select),
   OperatorPending(OperatorPending),
   Insert(Insert),
-  CommandLineEx(CommandLineEx),
+  CmdlineEx(CmdlineEx),
   CmdlineSearchForward(CmdlineSearchForward),
   CmdlineSearchBackward(CmdlineSearchBackward),
   Terminal(Terminal),
@@ -121,7 +121,7 @@ stateful_enum_impl!(
   Select,
   OperatorPending,
   Insert,
-  CommandLineEx,
+  CmdlineEx,
   CmdlineSearchForward,
   CmdlineSearchBackward,
   Terminal

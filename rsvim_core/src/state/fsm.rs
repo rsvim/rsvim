@@ -17,7 +17,7 @@ mod insert_tests;
 #[cfg(test)]
 mod normal_tests;
 
-pub use command_line_ex::CommandLineEx;
+pub use command_line_ex::CmdlineEx;
 pub use command_line_search_backward::CmdlineSearchBackward;
 pub use command_line_search_forward::CmdlineSearchForward;
 pub use insert::Insert;

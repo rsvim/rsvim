@@ -22,9 +22,9 @@ use crossterm::event::KeyEventKind;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line ex mode.
-pub struct CommandLineEx {}
+pub struct CmdlineEx {}
 
-impl CommandLineEx {
+impl CmdlineEx {
   fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
@@ -64,13 +64,13 @@ impl CommandLineEx {
   }
 }
 
-impl Stateful for CommandLineEx {
+impl Stateful for CmdlineEx {
   fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    State::CommandLineEx(CommandLineEx::default())
+    State::CmdlineEx(CmdlineEx::default())
   }
 
   fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
@@ -92,7 +92,7 @@ impl Stateful for CommandLineEx {
   }
 }
 
-impl CommandLineEx {
+impl CmdlineEx {
   pub fn confirm_ex_command_and_goto_normal_mode(
     &self,
     data_access: &StateDataAccess,
@@ -120,7 +120,7 @@ impl CommandLineEx {
   }
 }
 
-impl CommandLineEx {
+impl CmdlineEx {
   pub fn _goto_normal_mode_impl(
     &self,
     data_access: &StateDataAccess,
@@ -195,7 +195,7 @@ impl CommandLineEx {
   }
 }
 
-impl CommandLineEx {
+impl CmdlineEx {
   pub fn cursor_move(
     &self,
     data_access: &StateDataAccess,
@@ -216,11 +216,11 @@ impl CommandLineEx {
       true,
     );
 
-    State::CommandLineEx(CommandLineEx::default())
+    State::CmdlineEx(CmdlineEx::default())
   }
 }
 
-impl CommandLineEx {
+impl CmdlineEx {
   pub fn cursor_insert(
     &self,
     data_access: &StateDataAccess,
@@ -246,11 +246,11 @@ impl CommandLineEx {
       payload,
     );
 
-    State::CommandLineEx(CommandLineEx::default())
+    State::CmdlineEx(CmdlineEx::default())
   }
 }
 
-impl CommandLineEx {
+impl CmdlineEx {
   pub fn cursor_delete(
     &self,
     data_access: &StateDataAccess,
@@ -276,6 +276,6 @@ impl CommandLineEx {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
-    State::CommandLineEx(CommandLineEx::default())
+    State::CmdlineEx(CmdlineEx::default())
   }
 }

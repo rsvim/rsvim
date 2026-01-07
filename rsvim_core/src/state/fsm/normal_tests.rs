@@ -7728,9 +7728,9 @@ mod tests_goto_command_line_ex_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    assert!(matches!(next_stateful, State::CommandLineEx(_)));
+    assert!(matches!(next_stateful, State::CmdlineEx(_)));
     let stateful = match next_stateful {
-      State::CommandLineEx(s) => s,
+      State::CmdlineEx(s) => s,
       _ => unreachable!(),
     };
 

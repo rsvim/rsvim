@@ -174,7 +174,7 @@ impl Normal {
       debug_assert!(cmdline_input_content.is_empty());
     }
 
-    State::CommandLineEx(super::CommandLineEx::default())
+    State::CmdlineEx(super::CmdlineEx::default())
   }
 }
 
