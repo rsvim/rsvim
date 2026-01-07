@@ -104,15 +104,14 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = cmdline_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0)].into_iter().collect();
+      let expect = vec![];
+      let expect_fills: BTreeMap<usize, usize> = vec![].into_iter().collect();
       assert_viewport(
         lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
-        1,
+        0,
         &expect_fills,
         &expect_fills,
       );
@@ -186,15 +185,14 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = cmdline_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0)].into_iter().collect();
+      let expect = vec![];
+      let expect_fills: BTreeMap<usize, usize> = vec![].into_iter().collect();
       assert_viewport(
         lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
-        1,
+        0,
         &expect_fills,
         &expect_fills,
       );
@@ -245,15 +243,14 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = cmdline_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0)].into_iter().collect();
+      let expect = vec![];
+      let expect_fills: BTreeMap<usize, usize> = vec![].into_iter().collect();
       assert_viewport(
         lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
-        1,
+        0,
         &expect_fills,
         &expect_fills,
       );
@@ -327,15 +324,14 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = cmdline_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0)].into_iter().collect();
+      let expect = vec![];
+      let expect_fills: BTreeMap<usize, usize> = vec![].into_iter().collect();
       assert_viewport(
         lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
-        1,
+        0,
         &expect_fills,
         &expect_fills,
       );
@@ -391,15 +387,14 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = cmdline_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0)].into_iter().collect();
+      let expect = vec![];
+      let expect_fills: BTreeMap<usize, usize> = vec![].into_iter().collect();
       assert_viewport(
         lock!(contents).command_line_input(),
         &viewport,
         &expect,
         0,
-        1,
+        0,
         &expect_fills,
         &expect_fills,
       );
