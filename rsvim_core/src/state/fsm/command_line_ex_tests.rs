@@ -13,7 +13,7 @@ use crate::prelude::*;
 use crate::state::State;
 use crate::state::StateDataAccess;
 use crate::state::Stateful;
-use crate::state::fsm::NormalStateful;
+use crate::state::fsm::Normal;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
@@ -90,7 +90,7 @@ mod tests_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Prepare
     {
@@ -128,7 +128,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CommandLineEx::default();
 
     // Insert-1
     {
@@ -229,7 +229,7 @@ mod tests_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Prepare
     {
@@ -267,7 +267,7 @@ mod tests_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CommandLineEx::default();
 
     // Insert-1
     {
@@ -373,7 +373,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let stateful = NormalStateful::default();
+    let stateful = Normal::default();
 
     // Prepare
     {
@@ -411,7 +411,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    let stateful = CommandLineExStateful::default();
+    let stateful = CommandLineEx::default();
 
     // Insert-1
     {

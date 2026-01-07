@@ -8,13 +8,13 @@ use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The visual editing mode.
-pub struct VisualStateful {}
+pub struct Visual {}
 
-impl Stateful for VisualStateful {
+impl Stateful for Visual {
   fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
-    State::VisualMode(VisualStateful::default())
+    State::Visual(Visual::default())
   }
   fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
-    State::VisualMode(VisualStateful::default())
+    State::Visual(Visual::default())
   }
 }

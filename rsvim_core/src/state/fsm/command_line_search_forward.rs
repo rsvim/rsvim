@@ -8,17 +8,13 @@ use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line search forward mode.
-pub struct CommandLineSearchForwardStateful {}
+pub struct CmdlineSearchForward {}
 
-impl Stateful for CommandLineSearchForwardStateful {
+impl Stateful for CmdlineSearchForward {
   fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
-    State::CommandLineSearchForwardMode(
-      CommandLineSearchForwardStateful::default(),
-    )
+    State::CmdlineSearchForward(CmdlineSearchForward::default())
   }
   fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
-    State::CommandLineSearchForwardMode(
-      CommandLineSearchForwardStateful::default(),
-    )
+    State::CmdlineSearchForward(CmdlineSearchForward::default())
   }
 }

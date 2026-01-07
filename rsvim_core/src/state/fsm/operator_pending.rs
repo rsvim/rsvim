@@ -8,13 +8,13 @@ use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The operator-pending editing mode.
-pub struct OperatorPendingStateful {}
+pub struct OperatorPending {}
 
-impl Stateful for OperatorPendingStateful {
+impl Stateful for OperatorPending {
   fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
-    State::OperatorPendingMode(OperatorPendingStateful::default())
+    State::OperatorPending(OperatorPending::default())
   }
   fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
-    State::OperatorPendingMode(OperatorPendingStateful::default())
+    State::OperatorPending(OperatorPending::default())
   }
 }

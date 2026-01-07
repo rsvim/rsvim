@@ -8,13 +8,13 @@ use crossterm::event::Event;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The terminal editing mode.
-pub struct TerminalStateful {}
+pub struct Terminal {}
 
-impl Stateful for TerminalStateful {
+impl Stateful for Terminal {
   fn handle(&self, _data_access: StateDataAccess, _event: Event) -> State {
-    State::TerminalMode(TerminalStateful::default())
+    State::Terminal(Terminal::default())
   }
   fn handle_op(&self, _data_access: StateDataAccess, _op: Operation) -> State {
-    State::TerminalMode(TerminalStateful::default())
+    State::Terminal(Terminal::default())
   }
 }

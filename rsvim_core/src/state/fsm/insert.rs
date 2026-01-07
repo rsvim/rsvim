@@ -16,9 +16,9 @@ use crossterm::event::KeyEventKind;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
-pub struct InsertStateful {}
+pub struct Insert {}
 
-impl InsertStateful {
+impl Insert {
   fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
@@ -58,13 +58,13 @@ impl InsertStateful {
   }
 }
 
-impl Stateful for InsertStateful {
+impl Stateful for Insert {
   fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    State::InsertMode(InsertStateful::default())
+    State::Insert(Insert::default())
   }
 
   fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
@@ -85,7 +85,7 @@ impl Stateful for InsertStateful {
   }
 }
 
-impl InsertStateful {
+impl Insert {
   pub fn cursor_delete(
     &self,
     data_access: &StateDataAccess,
@@ -105,11 +105,11 @@ impl InsertStateful {
       n,
     );
 
-    State::InsertMode(InsertStateful::default())
+    State::Insert(Insert::default())
   }
 }
 
-impl InsertStateful {
+impl Insert {
   pub fn cursor_insert(
     &self,
     data_access: &StateDataAccess,
@@ -148,11 +148,11 @@ impl InsertStateful {
       payload,
     );
 
-    State::InsertMode(InsertStateful::default())
+    State::Insert(Insert::default())
   }
 }
 
-impl InsertStateful {
+impl Insert {
   pub fn goto_normal_mode(&self, data_access: &StateDataAccess) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -192,11 +192,11 @@ impl InsertStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBlock);
 
-    State::NormalMode(super::NormalStateful::default())
+    State::Normal(super::Normal::default())
   }
 }
 
-impl InsertStateful {
+impl Insert {
   pub fn cursor_move(
     &self,
     data_access: &StateDataAccess,
@@ -217,6 +217,6 @@ impl InsertStateful {
       true,
     );
 
-    State::InsertMode(InsertStateful::default())
+    State::Insert(Insert::default())
   }
 }

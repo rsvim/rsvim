@@ -25,9 +25,9 @@ use crate::ui::viewport::ViewportSearchDirection;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
-pub struct NormalStateful {}
+pub struct Normal {}
 
-impl NormalStateful {
+impl Normal {
   fn get_operation(&self, event: &Event) -> Option<Operation> {
     match event {
       Event::FocusGained => None,
@@ -75,13 +75,13 @@ impl NormalStateful {
   }
 }
 
-impl Stateful for NormalStateful {
+impl Stateful for Normal {
   fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    State::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 
   fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
@@ -109,7 +109,7 @@ impl Stateful for NormalStateful {
   }
 }
 
-impl NormalStateful {
+impl Normal {
   pub fn goto_command_line_ex_mode(
     &self,
     data_access: &StateDataAccess,
@@ -174,33 +174,29 @@ impl NormalStateful {
       debug_assert!(cmdline_input_content.is_empty());
     }
 
-    State::CommandLineExMode(super::CommandLineExStateful::default())
+    State::CommandLineEx(super::CommandLineEx::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> State {
-    State::CommandLineSearchForwardMode(
-      super::CommandLineSearchForwardStateful::default(),
-    )
+    State::CmdlineSearchForward(super::CmdlineSearchForward::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
   ) -> State {
-    State::CommandLineSearchBackwardMode(
-      super::CommandLineSearchBackwardStateful::default(),
-    )
+    State::CmdlineSearchBackward(super::CmdlineSearchBackward::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   pub fn goto_insert_mode(
     &self,
     data_access: &StateDataAccess,
@@ -254,11 +250,11 @@ impl NormalStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
 
-    State::InsertMode(super::InsertStateful::default())
+    State::Insert(super::Insert::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   /// Cursor move in current window, with buffer scroll.
   pub fn cursor_move(
     &self,
@@ -279,11 +275,11 @@ impl NormalStateful {
       op,
       false,
     );
-    State::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 }
 
-impl NormalStateful {
+impl Normal {
   #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
   pub fn _target_cursor_exclude_eol(

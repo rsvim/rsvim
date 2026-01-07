@@ -24,15 +24,15 @@ use crate::msg::MasterMessage;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 use crossterm::event::Event;
-use fsm::CommandLineExStateful;
-use fsm::CommandLineSearchBackwardStateful;
-use fsm::CommandLineSearchForwardStateful;
-use fsm::InsertStateful;
-use fsm::NormalStateful;
-use fsm::OperatorPendingStateful;
-use fsm::SelectStateful;
-use fsm::TerminalStateful;
-use fsm::VisualStateful;
+use fsm::CmdlineSearchBackward;
+use fsm::CmdlineSearchForward;
+use fsm::CommandLineEx;
+use fsm::Insert;
+use fsm::Normal;
+use fsm::OperatorPending;
+use fsm::Select;
+use fsm::Terminal;
+use fsm::Visual;
 use tokio::sync::mpsc::UnboundedSender;
 
 #[derive(Debug)]
@@ -103,34 +103,34 @@ macro_rules! stateful_enum_impl {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
 pub enum State {
-  NormalMode(NormalStateful),
-  VisualMode(VisualStateful),
-  SelectMode(SelectStateful),
-  OperatorPendingMode(OperatorPendingStateful),
-  InsertMode(InsertStateful),
-  CommandLineExMode(CommandLineExStateful),
-  CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
-  CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
-  TerminalMode(TerminalStateful),
+  Normal(Normal),
+  Visual(Visual),
+  Select(Select),
+  OperatorPending(OperatorPending),
+  Insert(Insert),
+  CommandLineEx(CommandLineEx),
+  CmdlineSearchForward(CmdlineSearchForward),
+  CmdlineSearchBackward(CmdlineSearchBackward),
+  Terminal(Terminal),
 }
 
 stateful_enum_impl!(
   State,
-  NormalMode,
-  VisualMode,
-  SelectMode,
-  OperatorPendingMode,
-  InsertMode,
-  CommandLineExMode,
-  CommandLineSearchForwardMode,
-  CommandLineSearchBackwardMode,
-  TerminalMode
+  Normal,
+  Visual,
+  Select,
+  OperatorPending,
+  Insert,
+  CommandLineEx,
+  CmdlineSearchForward,
+  CmdlineSearchBackward,
+  Terminal
 );
 
 impl Default for State {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    State::NormalMode(NormalStateful::default())
+    State::Normal(Normal::default())
   }
 }
