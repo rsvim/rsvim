@@ -368,42 +368,52 @@ impl Debug for TreeContext {
             layout.size.height,
           )
         };
-        let payload = if cfg!(debug_assertions) {
+
+        let name = |i: TreeNodeId| {
+          if cfg!(debug_assertions) {
+            format!(
+              "{}({})",
+              i,
+              self
+                .names
+                .get(&i)
+                .map(|v| v.to_string())
+                .unwrap_or("N/A".to_string())
+            )
+          } else {
+            format!("{}", i)
+          }
+        };
+        let layout = |i: TreeNodeId| {
+          let layout = self.ta.layout(i).unwrap();
           format!(
-            "\n{}({}), parent:{}({}),location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
-            id,
-            self.names.get(&id).unwrap(),
-            self.ta.parent(id).unwrap_or(-1),
-            self
-              .ta
-              .parent(id)
-              .map(|p| self.names.get(&p).cloned().unwrap())
-              .unwrap_or("N/A"),
-            x,
-            y,
-            width,
-            height,
-            self.shapes.get(&id).unwrap(),
-            self.actual_shapes.get(&id).unwrap()
-          )
-        } else {
-          format!(
-            "\n{}, parent:{}({}),location:(x:{:?},y:{:?}),size:(w:{:?},h:{:?}),shape:{:?}, actual_shape:{:?}",
-            id,
-            self.ta.parent(id).unwrap_or(-1),
-            self
-              .ta
-              .parent(id)
-              .map(|p| self.names.get(&p).cloned().unwrap())
-              .unwrap_or("N/A"),
-            x,
-            y,
-            width,
-            height,
-            self.shapes.get(&id).unwrap(),
-            self.actual_shapes.get(&id).unwrap()
+            "layout(x:{:?},y:{:?},w:{:?},h:{:?})",
+            layout.location.x,
+            layout.location.y,
+            layout.size.width,
+            layout.size.height
           )
         };
+        let shape = |i: TreeNodeId| {
+          let shape = self.shapes.get(&i).unwrap();
+          let actual_shape = self.actual_shapes.get(&i).unwrap();
+          format!(
+            "shape(min:{:?},max:{:?}), actual_shape(min:{:?},max:{:?})",
+            shape.min(),
+            shape.max(),
+            actual_shape.min(),
+            actual_shape.max(),
+          )
+        };
+
+        let payload = format!(
+          "\n{}, parent:{},{},{}",
+          name(id),
+          name(self.ta.parent(id).unwrap_or(-1)),
+          layout(id),
+          shape(id)
+        );
+
         f.write_str(&payload)?;
         if let Ok(children) = self.children(id) {
           for c in children {
