@@ -359,16 +359,6 @@ impl Debug for TreeContext {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
-        let (x, y, width, height) = {
-          let layout = self.ta.layout(id).unwrap();
-          (
-            layout.location.x,
-            layout.location.y,
-            layout.size.width,
-            layout.size.height,
-          )
-        };
-
         let name = |i: TreeNodeId| {
           if cfg!(debug_assertions) {
             format!(
