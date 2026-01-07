@@ -148,7 +148,7 @@ mod tests_nowrap {
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
       window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
       buffer_lines,
-      expect_canvas: vec![epxect_canvas],
+      expect_canvas: vec![expect_canvas],
       viewport_start: vec![(0, 0)],
     });
   }
