@@ -38,10 +38,12 @@ mod sync_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheErr::LoadModuleFailed(
-        path.to_string_lossy().to_string(),
-        e
-      )),
+      Err(e) => {
+        return Err(TheErr::LoadModuleFailed(
+          path.to_string_lossy().to_string(),
+          e,
+        ));
+      }
     }
   }
 
@@ -55,7 +57,7 @@ mod sync_load {
       };
     }
 
-    bail!(TheErr::ModuleNotFound(path.to_string_lossy().to_string()));
+    Err(TheErr::ModuleNotFound(path.to_string_lossy().to_string()))
   }
 }
 
@@ -72,10 +74,12 @@ mod async_load {
         };
         Ok(source)
       }
-      Err(e) => bail!(TheErr::LoadModuleFailed(
-        path.to_string_lossy().to_string(),
-        e
-      )),
+      Err(e) => {
+        return Err(TheErr::LoadModuleFailed(
+          path.to_string_lossy().to_string(),
+          e,
+        ));
+      }
     }
   }
 
@@ -90,7 +94,7 @@ mod async_load {
       };
     }
 
-    bail!(TheErr::ModuleNotFound(path.to_string_lossy().to_string()));
+    Err(TheErr::ModuleNotFound(path.to_string_lossy().to_string()))
   }
 }
 
@@ -154,7 +158,7 @@ impl FsModuleLoader {
 
     match resolver.resolve(&base, specifier) {
       Ok(resolution) => Ok(resolution.path().to_string_lossy().to_string()),
-      Err(_) => bail!(TheErr::ModuleNotFound(specifier.to_string())),
+      Err(_) => Err(TheErr::ModuleNotFound(specifier.to_string())),
     }
   }
 }
