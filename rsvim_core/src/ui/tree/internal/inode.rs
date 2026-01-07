@@ -55,7 +55,7 @@ macro_rules! inodify_impl {
 
 /// Generate enum dispatcher for `Inodify`.
 #[macro_export]
-macro_rules! inodify_dispatch {
+macro_rules! inodify_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Inodify for $enum {
       fn id(&self) -> TreeNodeId {
