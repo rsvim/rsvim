@@ -359,21 +359,22 @@ impl Debug for TreeContext {
       let mut q: VecDeque<TreeNodeId> = VecDeque::new();
       q.push_back(self.root);
       while let Some(id) = q.pop_front() {
-        let name = |i: TreeNodeId| {
+        let name = {
           if cfg!(debug_assertions) {
             format!(
               "{}({})",
-              i,
+              id,
               self
                 .names
-                .get(&i)
+                .get(&id)
                 .map(|v| v.to_string())
                 .unwrap_or("N/A".to_string())
             )
           } else {
-            format!("{}", i)
+            format!("{}", id)
           }
         };
+        let parent = format!("parent:{}", self.ta.parent(id).unwrap_or(-1),);
         let enabled = if self.enabled(id).unwrap_or(false) {
           ""
         } else {
@@ -415,13 +416,8 @@ impl Debug for TreeContext {
         };
 
         let payload = format!(
-          "\n{}{},parent:{},{},{},{}",
-          enabled,
-          name(id),
-          name(self.ta.parent(id).unwrap_or(-1)),
-          attributes,
-          layout,
-          shape
+          "\n{}{},{},{},{},{}",
+          enabled, name, parent, attributes, layout, shape
         );
 
         f.write_str(&payload)?;
