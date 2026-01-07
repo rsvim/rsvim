@@ -374,19 +374,19 @@ impl Debug for TreeContext {
             format!("{}", i)
           }
         };
+        let enabled = if self.enabled(id).unwrap_or(false) {
+          ""
+        } else {
+          "disabled,"
+        };
         let attributes = {
-          let enabled = if self.enabled(id).unwrap_or(false) {
-            ""
-          } else {
-            "disabled,"
-          };
           let zindex = self.zindex(id).unwrap_or(0);
           let policy =
             match self.truncate_policy(id).unwrap_or(DEFAULT_TRUNCATE_POLICY) {
               TruncatePolicy::BRUTAL => "brutal",
               TruncatePolicy::RESERVED => "reserved",
             };
-          format!("attr({}z:{},{})", enabled, zindex, policy)
+          format!("z:{},{}", zindex, policy)
         };
         let layout = {
           let layout = self.ta.layout(id).unwrap();
@@ -402,7 +402,7 @@ impl Debug for TreeContext {
           let shape = self.shapes.get(&id).unwrap();
           let actual_shape = self.actual_shapes.get(&id).unwrap();
           format!(
-            "shape(min:({:?},{:?}),max:({:?},{:?})), actual_shape(min:({:?},{:?}),max:({:?},{:?}))",
+            "shape(({:?},{:?}),({:?},{:?})), actual_shape(({:?},{:?}),({:?},{:?}))",
             shape.min().x,
             shape.min().y,
             shape.max().x,
@@ -415,7 +415,8 @@ impl Debug for TreeContext {
         };
 
         let payload = format!(
-          "\n{},parent:{},{},{},{}",
+          "\n{}{},parent:{},{},{},{}",
+          enabled,
           name(id),
           name(self.ta.parent(id).unwrap_or(-1)),
           attributes,
