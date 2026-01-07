@@ -180,7 +180,7 @@ impl CmdlineEx {
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     let cmdline_input_content =
-      contents.command_line_input().rope().to_compact_string();
+      contents.cmdline_input().rope().to_compact_string();
 
     cmdline_ops::cmdline_clear_message(&mut tree, &mut contents);
     cmdline_ops::cmdline_clear_input(&mut tree, &mut contents);
@@ -211,7 +211,7 @@ impl CmdlineEx {
     cursor_ops::cursor_move(
       &mut tree,
       cmdline_id,
-      contents.command_line_input(),
+      contents.cmdline_input(),
       op,
       true,
     );
@@ -242,7 +242,7 @@ impl CmdlineEx {
     cursor_ops::cursor_insert(
       &mut tree,
       cmdline_id,
-      contents.command_line_input_mut(),
+      contents.cmdline_input_mut(),
       payload,
     );
 
@@ -260,7 +260,7 @@ impl CmdlineEx {
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    let text = contents.command_line_input_mut();
+    let text = contents.cmdline_input_mut();
 
     let cmdline_id = tree.cmdline_id().unwrap();
     debug_assert_eq!(

@@ -62,14 +62,14 @@ impl Cmdline {
       let text_contents = lock!(text_contents);
       let input_viewport = Viewport::view(
         &options,
-        text_contents.command_line_input(),
+        text_contents.cmdline_input(),
         input_size,
         0,
         0,
       );
       let input_cursor_viewport = CursorViewport::from_top_left(
         &input_viewport,
-        text_contents.command_line_input(),
+        text_contents.cmdline_input(),
       );
 
       let message_viewport = Viewport::view(

@@ -73,7 +73,7 @@ pub fn cmdline_clear_message(
 pub fn cmdline_clear_input(tree: &mut Tree, text_contents: &mut TextContents) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let input_text = text_contents.command_line_input_mut();
+  let input_text = text_contents.cmdline_input_mut();
   input_text.clear();
 
   let opts = *tree.cmdline().unwrap().options();

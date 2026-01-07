@@ -90,7 +90,7 @@ impl Stateful for Normal {
         self.goto_insert_mode(&data_access, insert_motion)
       }
       Operation::GotoCommandLineExMode => {
-        self.goto_command_line_ex_mode(&data_access)
+        self.goto_cmdline_ex_mode(&data_access)
       }
       // Operation::GotoCommandLineSearchForwardMode => {
       //   self.goto_command_line_search_forward_mode(&data_access)
@@ -110,10 +110,7 @@ impl Stateful for Normal {
 }
 
 impl Normal {
-  pub fn goto_command_line_ex_mode(
-    &self,
-    data_access: &StateDataAccess,
-  ) -> State {
+  pub fn goto_cmdline_ex_mode(&self, data_access: &StateDataAccess) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -170,7 +167,7 @@ impl Normal {
       let contents = data_access.contents.clone();
       let contents = lock!(contents);
       let cmdline_input_content =
-        contents.command_line_input().rope().to_compact_string();
+        contents.cmdline_input().rope().to_compact_string();
       debug_assert!(cmdline_input_content.is_empty());
     }
 
