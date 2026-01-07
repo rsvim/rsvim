@@ -25,10 +25,10 @@ pub fn draw(
   let width = actual_shape.width();
 
   // If viewport has no lines.
-  if viewport.end_line_idx() <= viewport.start_line_idx() {
-    trace!("Draw viewport, viewport is empty");
-    return;
-  }
+  // if viewport.end_line_idx() <= viewport.start_line_idx() {
+  //   trace!("Draw viewport, viewport is empty");
+  //   return;
+  // }
 
   let mut row_idx = 0_u16;
   let mut line_idx = viewport.start_line_idx();
@@ -189,7 +189,8 @@ pub fn draw(
     line_idx += 1;
   }
 
-  // If buffer has no more lines, render empty spaces to left parts of the window content.
+  // If buffer has no more lines, or even the buffer/viewport is empty. Render
+  // empty spaces to left parts of the window content.
   while row_idx < height {
     let cells = std::iter::repeat_n(' ', width as usize)
       .map(Cell::from)
