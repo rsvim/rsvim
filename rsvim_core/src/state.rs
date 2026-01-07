@@ -129,7 +129,7 @@ stateful_enum_impl!(
 
 impl Default for State {
   /// Returns the default FMS state, by default it's the
-  /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
+  /// [`Normal`](crate::state::fsm::normal::Normal) editing mode.
   fn default() -> Self {
     State::Normal(Normal::default())
   }
