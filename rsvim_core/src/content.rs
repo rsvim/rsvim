@@ -26,33 +26,33 @@ impl TextContents {
     }
   }
 
-  /// Get "command-line" input content
+  /// Command-line input content
   pub fn cmdline_input(&self) -> &Text {
     &self.cmdline_input
   }
 
-  /// Get mutable "command-line" input content
+  /// Mutable command-line input content
   pub fn cmdline_input_mut(&mut self) -> &mut Text {
     &mut self.cmdline_input
   }
 
-  /// Get "command line" message
-  pub fn command_line_message(&self) -> &Text {
+  /// Command-line message
+  pub fn cmdline_message(&self) -> &Text {
     &self.cmdline_message
   }
 
-  /// Get mutable "command line" message
+  /// Mutable command-line message
   pub fn command_line_message_mut(&mut self) -> &mut Text {
     &mut self.cmdline_message
   }
 
-  /// Get "command line" message history
-  pub fn command_line_message_history(&self) -> &HeapRb<String> {
+  /// Command-line message history
+  pub fn cmdline_message_history(&self) -> &HeapRb<String> {
     &self.cmdline_message_history
   }
 
-  /// Get mutable "command line" message history
-  pub fn command_line_message_history_mut(&mut self) -> &mut HeapRb<String> {
+  /// Mutable command-line message history
+  pub fn cmdline_message_history_mut(&mut self) -> &mut HeapRb<String> {
     &mut self.cmdline_message_history
   }
 }

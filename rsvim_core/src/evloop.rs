@@ -522,7 +522,7 @@ impl EventLoop {
             // print once TUI initialized.
             let mut contents = lock!(self.contents);
             contents
-              .command_line_message_history_mut()
+              .cmdline_message_history_mut()
               .push_overwrite(e.to_string());
           }
         }

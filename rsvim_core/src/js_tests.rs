@@ -67,10 +67,10 @@ async fn create_snapshot1() -> IoResult<()> {
   // After running
   {
     let mut contents = lock!(event_loop.contents);
-    let n = contents.command_line_message_history().occupied_len();
+    let n = contents.cmdline_message_history().occupied_len();
     assert_eq!(n, 1);
 
-    let actual = contents.command_line_message_history_mut().try_pop();
+    let actual = contents.cmdline_message_history_mut().try_pop();
     info!("actual:{:?}", actual);
     assert!(actual.is_some());
     let actual = actual.unwrap();

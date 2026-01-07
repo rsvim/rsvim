@@ -74,7 +74,7 @@ impl Cmdline {
 
       let message_viewport = Viewport::view(
         &options,
-        text_contents.command_line_message(),
+        text_contents.cmdline_message(),
         message_size,
         0,
         0,
