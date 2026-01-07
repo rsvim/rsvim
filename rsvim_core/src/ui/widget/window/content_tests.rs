@@ -690,6 +690,7 @@ mod tests_wrap_nolinebreak {
       "内，一遍又一遍的重复这样的 ",
       "操作。This operation also e",
     ];
+
     run_buffer_lines(Arguments {
       terminal_size: size!(27, 10),
       buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
