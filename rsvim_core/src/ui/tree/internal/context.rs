@@ -375,17 +375,18 @@ impl Debug for TreeContext {
           }
         };
         let attributes = {
-          let enabled = self.enabled(id).unwrap_or(false);
+          let enabled = if self.enabled(id).unwrap_or(false) {
+            ""
+          } else {
+            "disabled,"
+          };
           let zindex = self.zindex(id).unwrap_or(0);
           let policy =
             match self.truncate_policy(id).unwrap_or(DEFAULT_TRUNCATE_POLICY) {
               TruncatePolicy::BRUTAL => "brutal",
               TruncatePolicy::RESERVED => "reserved",
             };
-          format!(
-            "attr(enabled:{:?},zindex:{},policy:{})",
-            enabled, zindex, policy
-          )
+          format!("attr({}z:{},{})", enabled, zindex, policy)
         };
         let layout = {
           let layout = self.ta.layout(id).unwrap();
