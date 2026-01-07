@@ -92,8 +92,8 @@ impl Mode {
       Mode::OperatorPending => O,
       Mode::Insert => I,
       Mode::CmdlineEx => C,
-      Mode::CmdlineSearchForward => COMMAND_LINE_SEARCH_FORWARD,
-      Mode::CmdlineSearchBackward => COMMAND_LINE_SEARCH_BACKWARD,
+      Mode::CmdlineSearchForward => CF,
+      Mode::CmdlineSearchBackward => CB,
     }
   }
 }
