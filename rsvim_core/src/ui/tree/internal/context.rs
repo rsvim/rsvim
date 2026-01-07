@@ -374,7 +374,22 @@ impl Debug for TreeContext {
             format!("{}", id)
           }
         };
-        let parent = format!("parent:{}", self.ta.parent(id).unwrap_or(-1),);
+        let parent = {
+          let parent_id = self.ta.parent(id).unwrap_or(-1);
+          if cfg!(debug_assertions) {
+            format!(
+              "parent:{}({})",
+              parent_id,
+              self
+                .names
+                .get(&parent_id)
+                .map(|v| v.to_string())
+                .unwrap_or("N/A".to_string())
+            )
+          } else {
+            format!("parent:{}", parent_id)
+          }
+        };
         let enabled = if self.enabled(id).unwrap_or(false) {
           ""
         } else {
