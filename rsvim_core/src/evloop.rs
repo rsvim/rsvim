@@ -21,8 +21,8 @@ use crate::msg;
 use crate::msg::JsMessage;
 use crate::msg::MasterMessage;
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::cmdline_ops;
 use crate::ui::canvas::Canvas;
@@ -84,7 +84,7 @@ pub struct EventLoop {
   pub canvas: CanvasArc,
 
   /// Finite-state machine for editing state.
-  pub state_machine: StateMachine,
+  pub state_machine: State,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -149,7 +149,7 @@ impl EventLoop {
   ) -> IoResult<(
     /* canvas */ CanvasArc,
     /* tree */ TreeArc,
-    /* state_machine */ StateMachine,
+    /* state_machine */ State,
     /* buffers */ BuffersManagerArc,
     /* contents */ TextContentsArc,
     /* commands */ CommandsManagerArc,
@@ -197,7 +197,7 @@ impl EventLoop {
       CommandsManager::to_arc(CommandsManager::default());
 
     // State
-    let state_machine = StateMachine::default();
+    let state_machine = State::default();
 
     // When implements `Promise`, `async`/`await` APIs for javascript runtime,
     // we need to leverage tokio's async runtime. i.e. first we send js task

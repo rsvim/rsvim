@@ -4,8 +4,8 @@ use crate::msg;
 use crate::msg::ExCommandReq;
 use crate::msg::JsMessage;
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::CursorInsertPayload;
 use crate::state::ops::Operation;
@@ -65,19 +65,15 @@ impl CommandLineExStateful {
 }
 
 impl Stateful for CommandLineExStateful {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    StateMachine::CommandLineExMode(CommandLineExStateful::default())
+    State::CommandLineExMode(CommandLineExStateful::default())
   }
 
-  fn handle_op(
-    &self,
-    data_access: StateDataAccess,
-    op: Operation,
-  ) -> StateMachine {
+  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -100,7 +96,7 @@ impl CommandLineExStateful {
   pub fn confirm_ex_command_and_goto_normal_mode(
     &self,
     data_access: &StateDataAccess,
-  ) -> StateMachine {
+  ) -> State {
     let cmdline_input_content = self._goto_normal_mode_impl(data_access);
 
     let tree = data_access.tree.clone();
@@ -120,7 +116,7 @@ impl CommandLineExStateful {
       }),
     );
 
-    StateMachine::NormalMode(super::NormalStateful::default())
+    State::NormalMode(super::NormalStateful::default())
   }
 }
 
@@ -192,13 +188,10 @@ impl CommandLineExStateful {
     cmdline_input_content.trim().to_compact_string()
   }
 
-  pub fn goto_normal_mode(
-    &self,
-    data_access: &StateDataAccess,
-  ) -> StateMachine {
+  pub fn goto_normal_mode(&self, data_access: &StateDataAccess) -> State {
     self._goto_normal_mode_impl(data_access);
 
-    StateMachine::NormalMode(super::NormalStateful::default())
+    State::NormalMode(super::NormalStateful::default())
   }
 }
 
@@ -207,7 +200,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StateDataAccess,
     op: Operation,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
@@ -223,7 +216,7 @@ impl CommandLineExStateful {
       true,
     );
 
-    StateMachine::CommandLineExMode(CommandLineExStateful::default())
+    State::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
@@ -232,7 +225,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StateDataAccess,
     payload: CursorInsertPayload,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.cmdline_id().is_some());
@@ -253,7 +246,7 @@ impl CommandLineExStateful {
       payload,
     );
 
-    StateMachine::CommandLineExMode(CommandLineExStateful::default())
+    State::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
@@ -262,7 +255,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StateDataAccess,
     n: isize,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
@@ -283,6 +276,6 @@ impl CommandLineExStateful {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
-    StateMachine::CommandLineExMode(CommandLineExStateful::default())
+    State::CommandLineExMode(CommandLineExStateful::default())
   }
 }

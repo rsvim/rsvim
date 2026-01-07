@@ -68,24 +68,20 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine;
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> State;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(
-    &self,
-    data_access: StateDataAccess,
-    op: Operation,
-  ) -> StateMachine;
+  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State;
 }
 
 /// Generate enum dispatcher for `Stateful`.
 #[macro_export]
-macro_rules! state_dispatcher {
+macro_rules! stateful_enum_impl {
   ($enum:ident, $($variant:tt),*) => {
     impl Stateful for $enum {
-      fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+      fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle(data_access, event),
@@ -93,7 +89,7 @@ macro_rules! state_dispatcher {
         }
       }
 
-      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> StateMachine {
+      fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
         match self {
           $(
             $enum::$variant(e) => e.handle_op(data_access, op),
@@ -106,7 +102,7 @@ macro_rules! state_dispatcher {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
-pub enum StateMachine {
+pub enum State {
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
   SelectMode(SelectStateful),
@@ -118,8 +114,8 @@ pub enum StateMachine {
   TerminalMode(TerminalStateful),
 }
 
-state_dispatcher!(
-  StateMachine,
+stateful_enum_impl!(
+  State,
   NormalMode,
   VisualMode,
   SelectMode,
@@ -131,10 +127,10 @@ state_dispatcher!(
   TerminalMode
 );
 
-impl Default for StateMachine {
+impl Default for State {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    StateMachine::NormalMode(NormalStateful::default())
+    State::NormalMode(NormalStateful::default())
   }
 }

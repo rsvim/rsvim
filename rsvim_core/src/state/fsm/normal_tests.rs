@@ -9,8 +9,8 @@ use crate::buf::opt::FileFormatOption;
 use crate::content::TextContents;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::fsm::InsertStateful;
 use crate::state::ops::CursorInsertPayload;
@@ -7728,9 +7728,9 @@ mod tests_goto_command_line_ex_mode {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    assert!(matches!(next_stateful, StateMachine::CommandLineExMode(_)));
+    assert!(matches!(next_stateful, State::CommandLineExMode(_)));
     let stateful = match next_stateful {
-      StateMachine::CommandLineExMode(s) => s,
+      State::CommandLineExMode(s) => s,
       _ => unreachable!(),
     };
 
@@ -7796,10 +7796,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Keep,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::InsertMode(InsertStateful::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -7883,10 +7880,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Append,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::InsertMode(InsertStateful::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -7970,10 +7964,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::Append,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::InsertMode(InsertStateful::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -8056,10 +8047,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::NewLine,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::InsertMode(InsertStateful::default()));
 
       let tree = data_access.tree.clone();
       let actual_cursor = get_cursor_viewport(tree.clone());
@@ -8161,10 +8149,7 @@ mod tests_goto_insert_mode {
         &data_access,
         crate::state::ops::GotoInsertModeVariant::NewLine,
       );
-      assert_eq!(
-        insert_result,
-        StateMachine::InsertMode(InsertStateful::default())
-      );
+      assert_eq!(insert_result, State::InsertMode(InsertStateful::default()));
 
       let tree = data_access.tree.clone();
       let expect_canvas = vec![

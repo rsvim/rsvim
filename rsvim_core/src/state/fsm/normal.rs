@@ -1,8 +1,8 @@
 //! The normal mode.
 
 use crate::prelude::*;
+use crate::state::State;
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
 use crate::state::Stateful;
 use crate::state::ops::GotoInsertModeVariant;
 use crate::state::ops::Operation;
@@ -76,19 +76,15 @@ impl NormalStateful {
 }
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StateDataAccess, event: Event) -> StateMachine {
+  fn handle(&self, data_access: StateDataAccess, event: Event) -> State {
     if let Some(op) = self.get_operation(&event) {
       return self.handle_op(data_access, op);
     }
 
-    StateMachine::NormalMode(NormalStateful::default())
+    State::NormalMode(NormalStateful::default())
   }
 
-  fn handle_op(
-    &self,
-    data_access: StateDataAccess,
-    op: Operation,
-  ) -> StateMachine {
+  fn handle_op(&self, data_access: StateDataAccess, op: Operation) -> State {
     match op {
       Operation::GotoInsertMode(insert_motion) => {
         self.goto_insert_mode(&data_access, insert_motion)
@@ -117,7 +113,7 @@ impl NormalStateful {
   pub fn goto_command_line_ex_mode(
     &self,
     data_access: &StateDataAccess,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -178,7 +174,7 @@ impl NormalStateful {
       debug_assert!(cmdline_input_content.is_empty());
     }
 
-    StateMachine::CommandLineExMode(super::CommandLineExStateful::default())
+    State::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
@@ -186,8 +182,8 @@ impl NormalStateful {
   fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StateDataAccess,
-  ) -> StateMachine {
-    StateMachine::CommandLineSearchForwardMode(
+  ) -> State {
+    State::CommandLineSearchForwardMode(
       super::CommandLineSearchForwardStateful::default(),
     )
   }
@@ -197,8 +193,8 @@ impl NormalStateful {
   fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StateDataAccess,
-  ) -> StateMachine {
-    StateMachine::CommandLineSearchBackwardMode(
+  ) -> State {
+    State::CommandLineSearchBackwardMode(
       super::CommandLineSearchBackwardStateful::default(),
     )
   }
@@ -209,7 +205,7 @@ impl NormalStateful {
     &self,
     data_access: &StateDataAccess,
     insert_motion: GotoInsertModeVariant,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -258,7 +254,7 @@ impl NormalStateful {
       .unwrap()
       .set_cursor_style(CursorStyle::SteadyBar);
 
-    StateMachine::InsertMode(super::InsertStateful::default())
+    State::InsertMode(super::InsertStateful::default())
   }
 }
 
@@ -268,7 +264,7 @@ impl NormalStateful {
     &self,
     data_access: &StateDataAccess,
     op: Operation,
-  ) -> StateMachine {
+  ) -> State {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -283,7 +279,7 @@ impl NormalStateful {
       op,
       false,
     );
-    StateMachine::NormalMode(NormalStateful::default())
+    State::NormalMode(NormalStateful::default())
   }
 }
 

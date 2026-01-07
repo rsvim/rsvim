@@ -1,7 +1,7 @@
 //! The select mode.
 
 use crate::state::StateDataAccess;
-use crate::state::StateMachine;
+use crate::state::State;
 use crate::state::Stateful;
 use crate::state::ops::Operation;
 use crossterm::event::Event;
@@ -15,14 +15,14 @@ impl Stateful for SelectStateful {
     &self,
     _data_access: StateDataAccess,
     _event: Event,
-  ) -> StateMachine {
-    StateMachine::SelectMode(SelectStateful::default())
+  ) -> State {
+    State::SelectMode(SelectStateful::default())
   }
   fn handle_op(
     &self,
     _data_access: StateDataAccess,
     _op: Operation,
-  ) -> StateMachine {
-    StateMachine::SelectMode(SelectStateful::default())
+  ) -> State {
+    State::SelectMode(SelectStateful::default())
   }
 }
