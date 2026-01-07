@@ -91,7 +91,7 @@ fn fetch_tree3() {
   let src2: &str = r#"
   import { PI } from "./pi.js";
 
-  function addPI(a:number, b:number) :number {
+  function addPI(a, b) {
     return PI+a+b;
   }
 
@@ -198,7 +198,7 @@ fn fetch_tree4() {
   let src2: &str = r#"
   import { PI } from "./index.js";
 
-  function addPI(a:number, b:number) :number {
+  function addPI(a, b) {
     return PI+a+b;
   }
 
