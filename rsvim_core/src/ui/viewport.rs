@@ -642,9 +642,7 @@ impl Viewport {
       self.end_line_idx == self.start_line_idx,
       self.lines.is_empty()
     );
-    if self.lines.is_empty() {
-      trace!("do nothing");
-    } else {
+    if !self.lines.is_empty() {
       debug_assert!(self.lines.first().is_some());
       debug_assert_eq!(*self.lines.first().unwrap().0, self.start_line_idx);
       debug_assert!(self.lines.last().is_some());
