@@ -374,7 +374,7 @@ impl Debug for TreeContext {
             format!("{}", i)
           }
         };
-        let attributes = |i: TreeNodeId| {
+        let attributes = {
           let enabled = self.enabled(id).unwrap_or(false);
           let zindex = self.zindex(id).unwrap_or(0);
           let policy =
@@ -387,8 +387,8 @@ impl Debug for TreeContext {
             enabled, zindex, policy
           )
         };
-        let layout = |i: TreeNodeId| {
-          let layout = self.ta.layout(i).unwrap();
+        let layout = {
+          let layout = self.ta.layout(id).unwrap();
           format!(
             "layout(x:{:?},y:{:?},w:{:?},h:{:?})",
             layout.location.x,
@@ -397,9 +397,9 @@ impl Debug for TreeContext {
             layout.size.height
           )
         };
-        let shape = |i: TreeNodeId| {
-          let shape = self.shapes.get(&i).unwrap();
-          let actual_shape = self.actual_shapes.get(&i).unwrap();
+        let shape = {
+          let shape = self.shapes.get(&id).unwrap();
+          let actual_shape = self.actual_shapes.get(&id).unwrap();
           format!(
             "shape(min:{:?},max:{:?}), actual_shape(min:{:?},max:{:?})",
             shape.min(),
@@ -413,9 +413,9 @@ impl Debug for TreeContext {
           "\n{}, parent:{},{},{},{}",
           name(id),
           name(self.ta.parent(id).unwrap_or(-1)),
-          attributes(id),
-          layout(id),
-          shape(id)
+          attributes,
+          layout,
+          shape
         );
 
         f.write_str(&payload)?;
