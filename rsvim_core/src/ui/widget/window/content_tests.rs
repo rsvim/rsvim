@@ -24,7 +24,7 @@ struct Arguments<'a> {
 
 fn run_lines(args: Arguments) {
   test_log_init();
-  let buffer = make_buffer_from_lines(
+  let buf = make_buffer_from_lines(
     args.terminal_size,
     args.buffer_opts,
     args.buffer_lines,
@@ -37,27 +37,19 @@ fn run_lines(args: Arguments) {
     let viewport = make_viewport(
       args.terminal_size,
       args.window_opts,
-      buffer.clone(),
+      buf.clone(),
       viewport_start.0,
       viewport_start.1,
     );
-    let actual = make_canvas(
-      args.terminal_size,
-      args.window_opts,
-      buffer.clone(),
-      viewport,
-    );
+    let actual =
+      make_canvas(args.terminal_size, args.window_opts, buf.clone(), viewport);
     assert_canvas(&actual, expect);
   }
 }
 
 fn run_empty(args: Arguments) {
   test_log_init();
-  let buffer = make_buffer_from_lines(
-    args.terminal_size,
-    args.buffer_opts,
-    args.buffer_lines,
-  );
+  let buf = make_empty_buffer(args.terminal_size, args.buffer_opts);
 
   assert_eq!(args.expect_canvas.len(), args.viewport_start.len());
 
@@ -66,16 +58,12 @@ fn run_empty(args: Arguments) {
     let viewport = make_viewport(
       args.terminal_size,
       args.window_opts,
-      buffer.clone(),
+      buf.clone(),
       viewport_start.0,
       viewport_start.1,
     );
-    let actual = make_canvas(
-      args.terminal_size,
-      args.window_opts,
-      buffer.clone(),
-      viewport,
-    );
+    let actual =
+      make_canvas(args.terminal_size, args.window_opts, buf.clone(), viewport);
     assert_canvas(&actual, expect);
   }
 }
@@ -228,13 +216,6 @@ mod tests_nowrap {
 
   #[test]
   fn new5() {
-    test_log_init();
-
-    let terminal_size = size!(31, 20);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
-    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -258,9 +239,14 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_empty(Arguments {
+      terminal_size: size!(31, 20),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines: vec![],
+      expect_canvas: vec![expect],
+      viewport_start: vec![(0, 0)],
+    });
   }
 
   #[test]
@@ -732,13 +718,6 @@ mod tests_wrap_nolinebreak {
 
   #[test]
   fn new3() {
-    test_log_init();
-
-    let terminal_size = size!(20, 9);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(true).build().unwrap();
-
-    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -751,9 +730,14 @@ mod tests_wrap_nolinebreak {
       "                    ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_empty(Arguments {
+      terminal_size: size!(20, 9),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(true).build().unwrap(),
+      buffer_lines: vec![],
+      expect_canvas: vec![expect],
+      viewport_start: vec![(0, 0)],
+    });
   }
 
   #[test]
