@@ -42,7 +42,7 @@ impl TextContents {
   }
 
   /// Mutable command-line message
-  pub fn command_line_message_mut(&mut self) -> &mut Text {
+  pub fn cmdline_message_mut(&mut self) -> &mut Text {
     &mut self.cmdline_message
   }
 

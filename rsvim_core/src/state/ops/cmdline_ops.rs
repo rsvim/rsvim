@@ -17,7 +17,7 @@ fn _set_message_impl(
 ) {
   debug_assert!(tree.cmdline_id().is_some());
 
-  let message_text = text_contents.command_line_message_mut();
+  let message_text = text_contents.cmdline_message_mut();
   message_text.clear();
   if let Some(payload) = payload {
     message_text.insert_at(0, 0, payload.to_compact_string());
