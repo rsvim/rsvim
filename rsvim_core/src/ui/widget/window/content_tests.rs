@@ -51,8 +51,6 @@ mod tests_nowrap {
 
   #[test]
   fn new1() {
-    test_log_init();
-
     let buffer_lines: Vec<&str> = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -87,27 +85,16 @@ mod tests_nowrap {
 
   #[test]
   fn new2() {
-    test_log_init();
-
-    let terminal_size = size!(35, 6);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_canvas = vec![
       "Hello, RSVIM!                      ",
       "This is a quite simple and small te",
       "But still it contains several thing",
@@ -116,34 +103,28 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_test(Arguments {
+      terminal_size: size!(35, 6),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines,
+      expect_canvas,
+      viewport_start: (0, 0),
+    });
   }
 
   #[test]
   fn new3() {
-    test_log_init();
-
-    let terminal_size = size!(33, 10);
-    let buf_opts = BufferOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowOptionsBuilder::default().wrap(false).build().unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size,
-      buf_opts,
-      vec![
-        "Hello,  R\tS\tV\tI\tM!\n",
-        "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
-        "But still\tit\tcontains\tseveral things we want to test:\n",
-        "  第一，当一行文本内容足够短，以至于能够被完全的放入一个窗口中时，then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-
-    let expect = vec![
+    let buffer_lines = vec![
+      "Hello,  R\tS\tV\tI\tM!\n",
+      "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
+      "But still\tit\tcontains\tseveral things we want to test:\n",
+      "  第一，当一行文本内容足够短，以至于能够被完全的放入一个窗口中时，then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let expect_canvas = vec![
       "Hello,  R        S        V<<<<<<",
       "这是一个非常简单而且非常短的测试<",
       "But still        it        contai",
@@ -156,9 +137,14 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
+    run_test(Arguments {
+      terminal_size: size!(33, 10),
+      buffer_opts: BufferOptionsBuilder::default().build().unwrap(),
+      window_opts: WindowOptionsBuilder::default().wrap(false).build().unwrap(),
+      buffer_lines,
+      expect_canvas,
+      viewport_start: (0, 0),
+    });
   }
 
   #[test]
